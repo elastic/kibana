@@ -57,7 +57,7 @@ describe('CopyToClipboardAction', () => {
   });
 
   describe('when copy to clipboard is clicked', () => {
-    it('should copy the markdown comment to the clipboard and add success toast', () => {
+    it('should copy the markdown comment to the clipboard and add success toast', async () => {
       const addSuccessToast = jest.fn();
       render(
         <TestExternalProviders>
@@ -67,7 +67,7 @@ describe('CopyToClipboardAction', () => {
         </TestExternalProviders>
       );
 
-      userEvent.click(screen.getByTestId('copyToClipboard'));
+      await userEvent.click(screen.getByTestId('copyToClipboard'));
 
       expect(copyToClipboard).toHaveBeenCalledWith('test comment');
       expect(addSuccessToast).toHaveBeenCalledWith({ title: 'Copied results to the clipboard' });

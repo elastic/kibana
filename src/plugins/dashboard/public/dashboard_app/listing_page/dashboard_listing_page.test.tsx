@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper, ComponentType } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
@@ -51,7 +51,9 @@ function mountWith({ props: incomingProps }: { props?: DashboardListingPageProps
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardListingPage {...props} />, { wrappingComponent });
+  const component = mount(<DashboardListingPage {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 

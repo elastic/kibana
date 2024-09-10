@@ -19,7 +19,7 @@ jest.mock('../apis/fetch_alerts_index_names');
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -18,17 +17,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const dashboardAddPanel = getService('dashboardAddPanel');
-  const { common, dashboard, dashboardControls } = getPageObjects([
+  const { dashboard, dashboardControls } = getPageObjects([
     'dashboardControls',
     'dashboard',
     'console',
-    'common',
     'header',
   ]);
 
   describe('Dashboard control group with multiple data views', () => {
-    let controlIds: string[];
+    // Controls from flights data view
+    const carrierControlId = '265b6a28-9ccb-44ae-83c9-3d7a7cac1961';
+    const ticketPriceControlId = 'ed2b93e2-da37-482b-ae43-586a41cc2399';
+    // Controls from logstash-* data view
+    const osControlId = '5e1b146b-8a8b-4117-9218-c4aeaee7bc9a';
+    const bytesControlId = 'c4760951-e793-45d5-a6b7-c72c145af7f9';
+
+    async function waitForAllConrolsLoading() {
+      await Promise.all([
+        dashboardControls.optionsListWaitForLoading(carrierControlId),
+        dashboardControls.rangeSliderWaitForLoading(ticketPriceControlId),
+        dashboardControls.optionsListWaitForLoading(osControlId),
+        dashboardControls.rangeSliderWaitForLoading(bytesControlId),
+      ]);
+    }
 
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
@@ -40,50 +51,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/multi_data_view_kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-        'courier:ignoreFilterIfFieldNotInIndex': true,
       });
-
-      await common.setTime({
-        from: 'Apr 10, 2018 @ 00:00:00.000',
-        to: 'Nov 15, 2018 @ 00:00:00.000',
-      });
-
-      await dashboard.navigateToApp();
-      await dashboard.clickNewDashboard();
-
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'kibana_sample_data_flights',
-        fieldName: 'Carrier',
-        title: 'Carrier',
-      });
-
-      await dashboardControls.createControl({
-        controlType: RANGE_SLIDER_CONTROL,
-        dataViewTitle: 'kibana_sample_data_flights',
-        fieldName: 'AvgTicketPrice',
-        title: 'Average Ticket Price',
-      });
-
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'logstash-*',
-        fieldName: 'machine.os.raw',
-        title: 'Operating System',
-      });
-
-      await dashboardControls.createControl({
-        controlType: RANGE_SLIDER_CONTROL,
-        dataViewTitle: 'logstash-*',
-        fieldName: 'bytes',
-        title: 'Bytes',
-      });
-
-      await dashboardAddPanel.addSavedSearch('logstash hits');
-
-      controlIds = await dashboardControls.getAllControlIds();
     });
 
     after(async () => {
@@ -94,96 +67,169 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/multi_data_view_kibana'
+      );
       await security.testUser.restoreDefaults();
-      await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
       await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
-    it('ignores global filters on controls using a data view without the filter field', async () => {
-      await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
+    describe('courier:ignoreFilterIfFieldNotInIndex enabled', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.replace({
+          'courier:ignoreFilterIfFieldNotInIndex': true,
+        });
 
-      await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Test Control Group With Multiple Data Views');
+      });
 
-      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
+      after(async () => {
+        await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
+      });
 
-      await dashboardControls.optionsListOpenPopover(controlIds[2]);
-      expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+      describe('global filters', () => {
+        before(async () => {
+          await filterBar.addFilter({
+            field: 'Carrier',
+            operation: 'is',
+            value: 'Kibana Airlines',
+          });
+          await waitForAllConrolsLoading();
+        });
 
-      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
+        after(async () => {
+          await dashboard.clickDiscardChanges();
+        });
+
+        it('applies global filters to controls with data view of filter field', async () => {
+          await dashboardControls.optionsListOpenPopover(carrierControlId);
+          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('1');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(carrierControlId);
+
+          await dashboardControls.validateRange('placeholder', ticketPriceControlId, '100', '1196');
+        });
+
+        it('ignores global filters to controls without data view of filter field', async () => {
+          await dashboardControls.optionsListOpenPopover(osControlId);
+          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
+
+          await dashboardControls.validateRange('placeholder', bytesControlId, '0', '19979');
+        });
+      });
+
+      describe('control filters', () => {
+        before(async () => {
+          await dashboardControls.optionsListOpenPopover(carrierControlId);
+          await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(carrierControlId);
+          await waitForAllConrolsLoading();
+        });
+
+        after(async () => {
+          await dashboard.clickDiscardChanges();
+        });
+
+        it('applies control filters to controls with data view of control filter', async () => {
+          await dashboardControls.validateRange('placeholder', ticketPriceControlId, '100', '1196');
+        });
+
+        it('ignores control filters on controls without data view of control filter', async () => {
+          await dashboardControls.optionsListOpenPopover(osControlId);
+          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
+
+          await dashboardControls.validateRange('placeholder', bytesControlId, '0', '19979');
+        });
+
+        it('ignores control filters on panels without data view of control filter', async () => {
+          const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
+          expect(
+            await (
+              await logstashSavedSearchPanel.findByCssSelector('[data-document-number]')
+            ).getAttribute('data-document-number')
+          ).to.not.be('0');
+        });
+      });
     });
 
-    it('ignores controls on other controls and panels using a data view without the control field by default', async () => {
-      await filterBar.removeFilter('Carrier');
-      await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+    describe('courier:ignoreFilterIfFieldNotInIndex disabled', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.replace({
+          'courier:ignoreFilterIfFieldNotInIndex': false,
+        });
 
-      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Test Control Group With Multiple Data Views');
+      });
 
-      await dashboardControls.optionsListOpenPopover(controlIds[2]);
-      expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+      after(async () => {
+        await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
+      });
 
-      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
+      describe('global filters', () => {
+        before(async () => {
+          await filterBar.addFilter({
+            field: 'Carrier',
+            operation: 'is',
+            value: 'Kibana Airlines',
+          });
+          await waitForAllConrolsLoading();
+        });
 
-      const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
-      expect(
-        await (
-          await logstashSavedSearchPanel.findByCssSelector('[data-document-number]')
-        ).getAttribute('data-document-number')
-      ).to.not.be('0');
-    });
+        after(async () => {
+          await dashboard.clickDiscardChanges();
+        });
 
-    it('applies global filters on controls using data view a without the filter field', async () => {
-      await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': false });
-      await common.navigateToApp('dashboard');
-      await testSubjects.click('edit-unsaved-New-Dashboard');
-      await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
+        it('applies global filters to controls without data view of filter field', async () => {
+          await dashboardControls.optionsListOpenPopover(osControlId);
+          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
 
-      await Promise.all([
-        dashboardControls.optionsListWaitForLoading(controlIds[0]),
-        dashboardControls.rangeSliderWaitForLoading(controlIds[1]),
-        dashboardControls.optionsListWaitForLoading(controlIds[2]),
-        dashboardControls.rangeSliderWaitForLoading(controlIds[3]),
-      ]);
+          await dashboardControls.validateRange(
+            'placeholder',
+            bytesControlId,
+            '-Infinity',
+            'Infinity'
+          );
+        });
+      });
 
-      await dashboardControls.clearControlSelections(controlIds[0]);
-      await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+      describe('control filters', () => {
+        before(async () => {
+          await dashboardControls.optionsListOpenPopover(carrierControlId);
+          await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(carrierControlId);
+          await waitForAllConrolsLoading();
+        });
 
-      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
+        after(async () => {
+          await dashboard.clickDiscardChanges();
+        });
 
-      await dashboardControls.optionsListOpenPopover(controlIds[2]);
-      expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+        it('applies control filters on controls without data view of control filter', async () => {
+          await dashboardControls.optionsListOpenPopover(osControlId);
+          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
+          await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
 
-      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
-    });
+          await dashboardControls.validateRange(
+            'placeholder',
+            bytesControlId,
+            '-Infinity',
+            'Infinity'
+          );
+        });
 
-    it('applies global filters on controls using a data view without the filter field', async () => {
-      await filterBar.removeFilter('Carrier');
-      await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-
-      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
-
-      await dashboardControls.optionsListOpenPopover(controlIds[2]);
-      expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
-
-      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
-
-      const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
-      expect(
-        await (
-          await logstashSavedSearchPanel.findByCssSelector('[data-document-number]')
-        ).getAttribute('data-document-number')
-      ).to.be('0');
+        it('applies control filters on panels without data view of control filter', async () => {
+          const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
+          expect(
+            await (
+              await logstashSavedSearchPanel.findByCssSelector('[data-document-number]')
+            ).getAttribute('data-document-number')
+          ).to.be('0');
+        });
+      });
     });
   });
 }

@@ -68,7 +68,7 @@ describe('IndexCheckFlyout', () => {
   });
 
   describe('when flyout close is clicked', () => {
-    it('should call onClose', () => {
+    it('should call onClose', async () => {
       const onClose = jest.fn();
       render(
         <TestExternalProviders>
@@ -86,14 +86,14 @@ describe('IndexCheckFlyout', () => {
       );
 
       const closeButton = screen.getByRole('button', { name: 'Close this dialog' });
-      userEvent.click(closeButton);
+      await userEvent.click(closeButton);
 
       expect(onClose).toHaveBeenCalled();
     });
   });
 
   describe('when check now button is clicked', () => {
-    it('should call checkIndex', () => {
+    it('should call checkIndex', async () => {
       const checkIndex = jest.fn();
       render(
         <TestExternalProviders>
@@ -115,7 +115,7 @@ describe('IndexCheckFlyout', () => {
       );
 
       const checkNowButton = screen.getByRole('button', { name: 'Check now' });
-      userEvent.click(checkNowButton);
+      await userEvent.click(checkNowButton);
 
       expect(checkIndex).toHaveBeenCalledWith({
         abortController: expect.any(AbortController),

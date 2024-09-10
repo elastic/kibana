@@ -986,7 +986,7 @@ describe('SavedObjectsFinder', () => {
 
     const assertTooltip = async (linkTitle: string, show: boolean) => {
       const elem = await screen.findByText(linkTitle);
-      userEvent.hover(elem);
+      await userEvent.hover(elem);
 
       const tooltip = screen.queryByText(tooltipText);
       if (show) {

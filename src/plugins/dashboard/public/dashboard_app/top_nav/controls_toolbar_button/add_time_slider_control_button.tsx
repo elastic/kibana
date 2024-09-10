@@ -8,8 +8,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ControlGroupContainer, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+
+import { apiHasType } from '@kbn/presentation-publishing';
 import {
   getAddTimeSliderControlButtonTitle,
   getOnlyOneTimeSliderControlMsg,
@@ -18,40 +22,47 @@ import { useDashboardAPI } from '../../dashboard_app';
 
 interface Props {
   closePopover: () => void;
-  controlGroup: ControlGroupContainer;
+  controlGroupApi?: ControlGroupApi;
 }
 
-export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
+export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
   const dashboard = useDashboardAPI();
 
   useEffect(() => {
-    const subscription = controlGroup.getInput$().subscribe(() => {
-      const childIds = controlGroup.getChildIds();
-      const nextHasTimeSliderControl = childIds.some((id: string) => {
-        const child = controlGroup.getChild(id);
-        return child.type === TIME_SLIDER_CONTROL;
+    if (!controlGroupApi) {
+      return;
+    }
+
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      const nextHasTimeSliderControl = Object.values(children).some((controlApi) => {
+        return apiHasType(controlApi) && controlApi.type === TIME_SLIDER_CONTROL;
       });
-      if (nextHasTimeSliderControl !== hasTimeSliderControl) {
-        setHasTimeSliderControl(nextHasTimeSliderControl);
-      }
+      setHasTimeSliderControl(nextHasTimeSliderControl);
     });
     return () => {
       subscription.unsubscribe();
     };
-  }, [controlGroup, hasTimeSliderControl, setHasTimeSliderControl]);
+  }, [controlGroupApi]);
 
   return (
     <EuiContextMenuItem
       {...rest}
       icon="timeslider"
       onClick={async () => {
-        await controlGroup.addTimeSliderControl();
+        controlGroupApi?.addNewPanel({
+          panelType: TIME_SLIDER_CONTROL,
+          initialState: {
+            grow: true,
+            width: 'large',
+            id: uuidv4(),
+          },
+        });
         dashboard.scrollToTop();
         closePopover();
       }}
       data-test-subj="controls-create-timeslider-button"
-      disabled={hasTimeSliderControl}
+      disabled={!controlGroupApi || hasTimeSliderControl}
       toolTipContent={hasTimeSliderControl ? getOnlyOneTimeSliderControlMsg() : null}
     >
       {getAddTimeSliderControlButtonTitle()}
