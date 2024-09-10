@@ -52,7 +52,7 @@ export const reportingScreenshotShareProvider = ({
   usesUiCapabilities,
   startServices$,
 }: ExportPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({
+  const getShareMenuItemsLegacy = ({
     objectType,
     objectId,
     isDirty,
@@ -187,7 +187,7 @@ export const reportingScreenshotShareProvider = ({
 
   return {
     id: 'screenCaptureReports',
-    getShareMenuItems,
+    getShareMenuItemsLegacy,
   };
 };
 

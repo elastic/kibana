@@ -95,11 +95,11 @@ export type SupportedExportTypes =
  * Definition of a menu item rendered in the share menu. In the redesign, the
  * `shareMenuItem` is shown in a modal. However, Canvas
  * uses the legacy panel implementation.
- * */
-
+ **/
 interface ShareMenuItemBase {
   shareMenuItem?: ShareContextMenuPanelItem;
 }
+
 interface ShareMenuItemLegacy extends ShareMenuItemBase {
   panel?: EuiContextMenuPanelDescriptor;
 }
@@ -124,9 +124,10 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   renderCopyURLButton?: boolean;
 }
 
-export type ShareMenuItem = ShareMenuItemLegacy | ShareMenuItemV2;
+export type ShareMenuItem = ShareMenuItemLegacy;
 
-type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
+type ShareMenuItemType = Omit<ShareMenuItemV2, 'intl'>;
+
 /**
  * @public
  * A source for additional menu items shown in the share context menu. Any provider
@@ -136,7 +137,8 @@ type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-  getShareMenuItems: (context: ShareContext) => ShareMenuItemType[];
+  getShareMenuItems?: (context: ShareContext) => ShareMenuItemType[];
+  getShareMenuItemsLegacy?: (context: ShareContext) => ShareMenuItemLegacy[];
 }
 
 interface UrlParamExtensionProps {
