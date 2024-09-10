@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { EuiThemeComputed } from '@elastic/eui';
 
 export const EDITOR_INITIAL_HEIGHT = 80;
@@ -59,7 +61,7 @@ export const textBasedLanguageEditorStyles = (
           ? `2px solid ${euiTheme.colors.danger}`
           : `2px solid ${euiTheme.colors.lightestShade}`
         : `2px solid ${bottomContainerBorderColor}`,
-      backgroundColor: euiTheme.colors.lightestShade,
+      backgroundColor: euiTheme.colors.body,
       paddingLeft: euiTheme.size.xs,
       paddingRight: euiTheme.size.xs,
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,

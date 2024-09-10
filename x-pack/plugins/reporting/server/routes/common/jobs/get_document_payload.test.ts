@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
-import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import { ReportingCore } from '../../..';
@@ -54,7 +54,7 @@ describe('getDocumentPayload', () => {
           id: 'id1',
           index: '.reporting-12345',
           status: JOB_STATUS.COMPLETED,
-          jobtype: PDF_JOB_TYPE,
+          jobtype: PDF_JOB_TYPE_V2,
           output: {
             content_type: 'application/pdf',
             size: 1024,

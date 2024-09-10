@@ -77,7 +77,7 @@ export class FilterManager {
     ]);
 
     // Build a map of filter_ids against jobs and detectors using that filter.
-    let filtersInUse: FiltersInUse = {};
+    let filtersInUse: FiltersInUse = Object.create(null);
     if (results[JOBS] && (results[JOBS] as estypes.MlGetJobsResponse).jobs) {
       filtersInUse = this.buildFiltersInUse((results[JOBS] as estypes.MlGetJobsResponse).jobs);
     }
@@ -136,7 +136,7 @@ export class FilterManager {
 
   buildFiltersInUse(jobsList: Job[]) {
     // Build a map of filter_ids against jobs and detectors using that filter.
-    const filtersInUse: FiltersInUse = {};
+    const filtersInUse: FiltersInUse = Object.create(null);
     jobsList.forEach((job) => {
       const detectors = job.analysis_config.detectors;
       detectors.forEach((detector) => {

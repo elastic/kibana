@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -13,6 +14,7 @@ import {
   DataLoadingState,
   type SortOrder,
   renderCustomToolbar,
+  UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
@@ -67,7 +69,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback((columns) => {
+  const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
 
@@ -146,7 +148,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.share?.url.locators]);
 
   const renderToolbar = useCallback(
-    (customToolbarProps) => {
+    (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
       const discoverLink = discoverLocator?.getRedirectUrl({
         dataViewSpec: props.dataView.toSpec(),
         timeRange: props.data.query.timefilter.timefilter.getTime(),

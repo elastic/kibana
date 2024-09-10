@@ -78,6 +78,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-kibana-mount",
     "@kbn/deeplinks-observability",
+    "@kbn/ebt-tools",
   ],
   "exclude": ["target/**/*"]
 }
