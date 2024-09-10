@@ -46,14 +46,14 @@ export function useFetchInvestigationItems({ investigationId, initialItems }: Pa
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetchItems({ investigationId }),
+      queryKey: investigationKeys.detailItems(investigationId),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationItemsResponse>(
           `/api/observability/investigations/${investigationId}/items`,
           { version: '2023-10-31', signal }
         );
       },
-      initialData: initialItems,
+      // initialData: initialItems,
       refetchOnWindowFocus: false,
       refetchInterval: 10 * 1000,
       refetchIntervalInBackground: true,

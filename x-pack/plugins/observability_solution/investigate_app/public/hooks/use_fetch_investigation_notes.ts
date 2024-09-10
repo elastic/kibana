@@ -46,7 +46,7 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetchNotes({ investigationId }),
+      queryKey: investigationKeys.detailNotes(investigationId),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationNotesResponse>(
           `/api/observability/investigations/${investigationId}/notes`,
@@ -56,7 +56,6 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
       initialData: initialNotes,
       refetchOnWindowFocus: false,
       refetchInterval: 10 * 1000,
-      refetchIntervalInBackground: true,
       onError: (error: Error) => {
         toasts.addError(error, {
           title: i18n.translate('xpack.investigateApp.useFetchInvestigationList.errorTitle', {

@@ -45,7 +45,7 @@ export function useUpdateInvestigationNote() {
           })
         );
         queryClient.invalidateQueries({
-          queryKey: investigationKeys.fetchNotes({ investigationId }),
+          queryKey: investigationKeys.detailNotes(investigationId),
           exact: false,
           refetchType: 'all',
         });

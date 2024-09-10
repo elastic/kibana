@@ -45,7 +45,7 @@ export function useUpdateInvestigation() {
           })
         );
         queryClient.invalidateQueries({
-          queryKey: investigationKeys.fetch({ id: investigationId }),
+          queryKey: investigationKeys.all,
           exact: false,
           refetchType: 'all',
         });

@@ -46,7 +46,7 @@ export function useFetchInvestigation({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetch({ id: id! }),
+      queryKey: investigationKeys.detail(id!),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationResponse>(`/api/observability/investigations/${id}`, {
           version: '2023-10-31',
@@ -57,7 +57,6 @@ export function useFetchInvestigation({
       initialData: initialInvestigation,
       refetchOnWindowFocus: false,
       refetchInterval: 15 * 1000,
-      refetchIntervalInBackground: false,
       onError: (error: Error) => {
         toasts.addError(error, {
           title: i18n.translate('xpack.investigateApp.useFetchInvestigation.errorTitle', {

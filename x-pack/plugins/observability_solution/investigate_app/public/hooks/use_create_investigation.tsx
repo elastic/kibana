@@ -49,11 +49,7 @@ export function useCreateInvestigation() {
             defaultMessage: 'Investigation created',
           })
         );
-        queryClient.invalidateQueries({
-          queryKey: investigationKeys.list(),
-          exact: false,
-          refetchType: 'all',
-        });
+        queryClient.invalidateQueries({ queryKey: investigationKeys.lists() });
       },
       onError: (error, investigation, context) => {
         toasts.addError(
