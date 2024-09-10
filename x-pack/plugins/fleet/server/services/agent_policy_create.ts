@@ -171,11 +171,10 @@ export async function createAgentPolicyWithPackages({
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
-  // Temporarily disable to test SO object error
   // Create the agentless agent
-  // if (agentPolicy.supports_agentless) {
-  //   await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
-  // }
+  if (agentPolicy.supports_agentless) {
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+  }
 
   return agentPolicy;
 }
