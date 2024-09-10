@@ -39,12 +39,6 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
 
-  async findContextMenuByTitle(title = '') {
-    this.log.debug(`findContextMenuByTitle(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    return this.findContextMenu(header);
-  }
-
   async findContextMenu(parent?: WebElementWrapper) {
     this.log.debug('findContextMenu');
     return parent
@@ -67,8 +61,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async toggleContextMenuByTitle(title = '') {
     this.log.debug(`toggleContextMenu(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.toggleContextMenu(header);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.toggleContextMenu(wrapper);
   }
 
   async expectContextMenuToBeOpen() {
@@ -87,8 +81,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openContextMenuByTitle(title = '') {
     this.log.debug(`openContextMenuByTitle(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.openContextMenu(header);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.openContextMenu(wrapper);
   }
 
   async clickPanelAction(testSubject: string, parent?: WebElementWrapper) {
@@ -168,8 +162,8 @@ export class DashboardPanelActionsService extends FtrService {
    */
   async editPanelByTitle(title = '') {
     this.log.debug(`editPanelByTitle(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickEdit(header);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.clickEdit(wrapper);
   }
 
   async clickExpandPanelToggle() {
@@ -185,8 +179,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async removePanelByTitle(title = '') {
     this.log.debug(`removePanel(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.removePanel(header);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.removePanel(wrapper);
   }
 
   async customizePanel(title = '') {
@@ -207,8 +201,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openInspectorByTitle(title = '') {
     this.log.debug(`openInspector(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.openInspector(header);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.openInspector(wrapper);
   }
 
   async getSearchSessionIdByTitle(title = '') {
@@ -275,7 +269,7 @@ export class DashboardPanelActionsService extends FtrService {
   async expectExistsPanelAction(testSubject: string, title = '') {
     this.log.debug('expectExistsPanelAction', testSubject, title);
 
-    const panelWrapper = title ? await this.getPanelHoverActions(title) : undefined;
+    const panelWrapper = title ? await this.getPanelWrapper(title) : undefined;
 
     const exists = panelWrapper
       ? await this.testSubjects.descendantExists(testSubject, panelWrapper)
@@ -314,7 +308,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
-    const panelWrapper = title ? await this.getPanelHoverActions(title) : undefined;
+    const panelWrapper = title ? await this.getPanelWrapper(title) : undefined;
     const exists = panelWrapper
       ? await panelWrapper?.findAllByTestSubject(testSubject)
       : await this.testSubjects.exists(testSubject, { allowHidden: true });
@@ -343,12 +337,12 @@ export class DashboardPanelActionsService extends FtrService {
 
   async getPanelHeading(title = '') {
     this.log.debug(`getPanelHeading(${title})`);
-    if (!title) return await this.find.byClassName('embPanel__header');
+    if (!title) return await this.find.byClassName('embPanel__wrapper');
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
   }
 
-  async getPanelHoverActions(title = '') {
-    this.log.debug(`getPanelHoverActions(${title})`);
+  async getPanelWrapper(title = '') {
+    this.log.debug(`getPanelWrapper(${title})`);
     if (!title) return await this.find.byClassName('embPanel__hoverActionsAnchor');
     return await this.testSubjects.find(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
   }
@@ -375,8 +369,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async canConvertToLensByTitle(title = '') {
     this.log.debug(`canConvertToLens(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    return await this.canConvertToLens(header);
+    const wrapper = await this.getPanelWrapper(title);
+    return await this.canConvertToLens(wrapper);
   }
 
   async convertToLens(parent?: WebElementWrapper) {
@@ -393,8 +387,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async convertToLensByTitle(title = '') {
     this.log.debug(`convertToLens(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    return await this.convertToLens(header);
+    const wrapper = await this.getPanelWrapper(title);
+    return await this.convertToLens(wrapper);
   }
 
   public async expectLinkedToLibrary(title = '', legacy?: boolean) {

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -45,14 +46,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res.text;
   };
 
-  const clickActionsMenu = async (headingTestSubj: string) => {
-    const savedSearchPanel = await testSubjects.find('embeddablePanelHeading-' + headingTestSubj);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-  };
-
-  const clickDownloadCsv = async () => {
-    log.debug('click "Generate CSV"');
-    await dashboardPanelActions.clickPanelAction('embeddablePanelAction-generateCsvReport');
+  const clickDownloadCsv = async (wrapper?: WebElementWrapper) => {
+    log.debug(`click "Generate CSV" on "${title}"`);
+    await dashboardPanelActions.clickPanelAction(
+      'embeddablePanelAction-generateCsvReport',
+      wrapper
+    );
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 
@@ -83,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Generate CSV export of a saved search panel', async function () {
         await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
         await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await clickDownloadCsv('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(76137);
