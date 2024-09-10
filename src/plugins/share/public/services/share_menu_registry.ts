@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ShareContext, ShareMenuProvider } from '../types';
+import { ShareContext, ShareMenuProvider, ShareMenuProviderV2 } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
@@ -36,7 +36,7 @@ export class ShareMenuRegistry {
     return {
       getShareMenuItems: (context: ShareContext) =>
         Array.from(this.shareMenuProviders.values()).flatMap((shareActionProvider) =>
-          shareActionProvider.getShareMenuItems?.(context)
+          (shareActionProvider as ShareMenuProviderV2).getShareMenuItems(context)
         ),
     };
   }

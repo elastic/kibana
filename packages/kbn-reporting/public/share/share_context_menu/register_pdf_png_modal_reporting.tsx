@@ -12,7 +12,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   ShareContext,
-  ShareMenuItem,
+  ShareMenuItemLegacy,
   ShareMenuItemV2,
   ShareMenuProvider,
 } from '@kbn/share-plugin/public';
@@ -106,7 +106,7 @@ export const reportingScreenshotShareProvider = ({
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions: ShareMenuItem[] = [];
+    const shareActions: ShareMenuItemLegacy[] = [];
 
     const pngPanelTitle = i18n.translate('reporting.share.contextMenu.pngReportsButtonLabel', {
       defaultMessage: 'PNG Reports',

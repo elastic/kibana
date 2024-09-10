@@ -100,7 +100,7 @@ interface ShareMenuItemBase {
   shareMenuItem?: ShareContextMenuPanelItem;
 }
 
-interface ShareMenuItemLegacy extends ShareMenuItemBase {
+export interface ShareMenuItemLegacy extends ShareMenuItemBase {
   panel?: EuiContextMenuPanelDescriptor;
 }
 
@@ -126,9 +126,14 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   renderCopyURLButton?: boolean;
 }
 
-export type ShareMenuItem = ShareMenuItemLegacy;
-
-type ShareMenuItemType = Omit<ShareMenuItemV2, 'intl'>;
+export interface ShareMenuProviderV2 {
+  readonly id: string;
+  getShareMenuItems: (context: ShareContext) => Array<Omit<ShareMenuItemV2, 'intl'>>;
+}
+interface ShareMenuProviderLegacy {
+  readonly id: string;
+  getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
+}
 
 /**
  * @public
@@ -137,11 +142,7 @@ type ShareMenuItemType = Omit<ShareMenuItemV2, 'intl'>;
  * menu. Returned `ShareMenuItem`s will be shown in the context menu together with the
  * default built-in share options. Each share provider needs a globally unique id.
  * */
-export interface ShareMenuProvider {
-  readonly id: string;
-  getShareMenuItems?: (context: ShareContext) => ShareMenuItemType[];
-  getShareMenuItemsLegacy?: (context: ShareContext) => ShareMenuItemLegacy[];
-}
+export type ShareMenuProvider = ShareMenuProviderV2 | ShareMenuProviderLegacy;
 
 interface UrlParamExtensionProps {
   setParamValue: (values: {}) => void;
