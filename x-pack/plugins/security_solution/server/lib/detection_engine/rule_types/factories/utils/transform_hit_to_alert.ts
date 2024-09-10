@@ -24,7 +24,7 @@ import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score
 import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { traverseDoc } from './strip_non_ecs_fields';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
-import { robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
+import { robustGet, robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
 
 const isSourceDoc = (hit: SignalSourceHit): hit is BaseHit<SignalSource> => {
   return hit._source != null && hit._id != null;
@@ -118,7 +118,9 @@ export const transformHitToAlert = ({
       fieldsToAdd,
     } = traverseDoc(mergedDoc._source);
 
-    robustSet({ key: EVENT_KIND, document: validatedSource, valueToSet: undefined });
+    if (robustGet({ key: EVENT_KIND, document: validatedSource }) != null) {
+      robustSet({ key: EVENT_KIND, document: validatedSource, valueToSet: undefined });
+    }
 
     if (removedSourceFields.length) {
       ruleExecutionLogger?.debug(

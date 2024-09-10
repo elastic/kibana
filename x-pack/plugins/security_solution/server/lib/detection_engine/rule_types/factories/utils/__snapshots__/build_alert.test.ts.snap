@@ -2,7 +2,7 @@
 
 exports[`buildAlertFields it creates the expected alert fields 1`] = `
 Object {
-  "@timestamp": "2024-09-09T13:12:13.645Z",
+  "@timestamp": "2020-01-01T00:00:00.000Z",
   "event.kind": "signal",
   "host.asset.criticality": undefined,
   "host.risk.calculated_level": undefined,
@@ -207,7 +207,7 @@ Object {
   "kibana.alert.rule.version": 1,
   "kibana.alert.severity": "high",
   "kibana.alert.status": "active",
-  "kibana.alert.url": "test/url/app/security/alerts/redirect/test-uuid?index=.alerts-security.alerts-default&timestamp=2024-09-09T13:12:13.645Z",
+  "kibana.alert.url": "test/url/app/security/alerts/redirect/test-uuid?index=.alerts-security.alerts-default&timestamp=2020-01-01T00:00:00.000Z",
   "kibana.alert.user.criticality_level": undefined,
   "kibana.alert.uuid": "test-uuid",
   "kibana.alert.workflow_assignee_ids": Array [],

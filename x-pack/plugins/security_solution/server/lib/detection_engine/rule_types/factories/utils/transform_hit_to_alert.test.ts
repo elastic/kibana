@@ -148,6 +148,36 @@ describe('transformHitToAlert', () => {
     expect(alert['event.kind']).toEqual('signal');
   });
 
+  it('should not add an empty event object if event.kind does not exist', () => {
+    const doc = {
+      _index: 'testindex',
+      _id: 'myId',
+      _source: {
+        testField: 'testValue',
+      },
+    };
+    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const alert = transformHitToAlert({
+      spaceId: SPACE_ID,
+      completeRule,
+      doc,
+      mergeStrategy: 'missingFields',
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageStub,
+      indicesToQuery: [],
+      alertTimestampOverride: undefined,
+      ruleExecutionLogger,
+      alertUuid,
+      publicBaseUrl,
+    });
+
+    expect(alert.event).toEqual(undefined);
+    expect(alert['event.kind']).toEqual('signal');
+  });
+
   it('should only copy ECS compatible array elements from event subfields to kibana.alert.original_event', () => {
     const doc = {
       _index: 'testindex',

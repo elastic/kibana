@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @serverlessQA @ess Rule exception operators for data type text', () => {
+  describe('@serverless @serverlessQA @ess Rule exception operators for data type text array', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text_as_array');
     });
@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.text).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.text).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
