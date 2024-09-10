@@ -100,7 +100,7 @@ paths:
       summary: Get action details
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}':
+  /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       description: Get information for the specified file using the file ID.
       operationId: EndpointFileInfo
@@ -125,7 +125,7 @@ paths:
       summary: Get file information
       tags:
         - Security Solution Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}/download':
+  /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: Download a file from an endpoint.
       operationId: EndpointFileDownload
@@ -310,7 +310,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: 'Release an isolated endpoint, allowing it to rejoin a network.'
+      description: Release an isolated endpoint, allowing it to rejoin a network.
       operationId: EndpointUnisolateAction
       requestBody:
         content:
