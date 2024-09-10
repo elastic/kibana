@@ -16,6 +16,7 @@ import {
   DocumentDetailsRightPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
+  DocumentDetailsAnalyzerPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
@@ -39,6 +40,8 @@ import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/h
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 import { NetworkPanel, NetworkPanelKey } from './network_details';
+import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
+import { AnalyzerPanel } from './document_details/analyzer_panels';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -93,6 +96,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
         <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
       </IsolateHostPanelProvider>
+    ),
+  },
+  {
+    key: DocumentDetailsAnalyzerPanelKey,
+    component: (props) => (
+      <AnalyzerPanel {...(props as AnalyzerPanelExpandableFlyoutProps).params} />
     ),
   },
   {
