@@ -21,20 +21,20 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
+import React, { useRef, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getIlmPhase } from '../../../../utils/get_ilm_phase';
-import { getDocsCount, getSizeInBytes } from '../../../../utils/stats';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
-import { EMPTY_STAT } from '../../../../constants';
 import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
-import { IndexProperties } from './index_properties';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
 import { CHECK_NOW, HISTORY, LATEST_CHECK } from './translations';
+import { LatestResults } from './latest_results';
+import { HistoricalResults } from './historical_results';
+import { HistoricalResultsContext } from './contexts/historical_results_context';
+import { useHistoricalResults } from './hooks/use_historical_results';
+import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -53,7 +53,6 @@ const tabs = [
   {
     id: HISTORY,
     name: HISTORY,
-    disabled: true,
   },
 ];
 
@@ -65,10 +64,11 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   stats,
   onClose,
 }) => {
+  const { fetchHistoricalResults, historicalResultsState } = useHistoricalResults();
   const currentWindowWidth = useCurrentWindowWidth();
   const isLargeScreen = currentWindowWidth > 1720;
   const isMediumScreen = currentWindowWidth > 1200;
-  const { httpFetch, formatBytes, formatNumber, isILMAvailable } = useDataQualityContext();
+  const { httpFetch, formatBytes, formatNumber } = useDataQualityContext();
   const { checkState, checkIndex } = useIndicesCheckContext();
   const indexCheckState = checkState[indexName];
   const isChecking = indexCheckState?.isChecking ?? false;
@@ -78,11 +78,12 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     prefix: 'indexCheckFlyoutTitle',
   });
   const [selectedTabId, setSelectedTabId] = useState(LATEST_CHECK);
-  const abortControllerRef = React.useRef(new AbortController());
+  const checkIndexAbortControllerRef = useRef(new AbortController());
+  const fetchHistoricalResultsAbortControllerRef = useRef(new AbortController());
 
   const handleCheckNow = useCallback(() => {
     checkIndex({
-      abortController: abortControllerRef.current,
+      abortController: checkIndexAbortControllerRef.current,
       indexName,
       pattern,
       httpFetch,
@@ -92,9 +93,11 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   }, [checkIndex, formatBytes, formatNumber, httpFetch, indexName, pattern]);
 
   useEffect(() => {
-    const abortController = abortControllerRef.current;
+    const checkIndexAbortController = checkIndexAbortControllerRef.current;
+    const fetchHistoricalResultsAbortController = fetchHistoricalResultsAbortControllerRef.current;
     return () => {
-      abortController.abort();
+      checkIndexAbortController.abort();
+      fetchHistoricalResultsAbortController.abort();
     };
   }, []);
 
@@ -102,15 +105,20 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
     () =>
       tabs.map((tab, index) => (
         <EuiTab
-          onClick={() => setSelectedTabId(tab.id)}
+          onClick={() => {
+            fetchHistoricalResults({
+              abortController: fetchHistoricalResultsAbortControllerRef.current,
+              indexName,
+            });
+            setSelectedTabId(tab.id);
+          }}
           isSelected={tab.id === selectedTabId}
           key={index}
-          disabled={tab.disabled}
         >
           {tab.name}
         </EuiTab>
       )),
-    [selectedTabId]
+    [fetchHistoricalResults, indexName, selectedTabId]
   );
 
   return (
@@ -134,9 +142,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
             <>
               <EuiSpacer size="xs" />
               <EuiText size="s" data-test-subj="latestCheckedAt">
-                {moment(indexResult.checkedAt).isValid()
-                  ? moment(indexResult.checkedAt).format('MMM DD, YYYY @ HH:mm:ss.SSS')
-                  : EMPTY_STAT}
+                {getFormattedCheckTime(indexResult.checkedAt)}
               </EuiText>
             </>
           )}
@@ -144,18 +150,24 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
           <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <IndexProperties
-            docsCount={getDocsCount({ stats, indexName })}
-            sizeInBytes={getSizeInBytes({ stats, indexName })}
-            ilmPhase={
-              isILMAvailable && ilmExplain != null
-                ? getIlmPhase(ilmExplain?.[indexName], isILMAvailable)
-                : undefined
-            }
-            indexName={indexName}
-            pattern={pattern}
-            patternRollup={patternRollup}
-          />
+          <HistoricalResultsContext.Provider
+            value={{
+              fetchHistoricalResults,
+              historicalResultsState,
+            }}
+          >
+            {selectedTabId === LATEST_CHECK ? (
+              <LatestResults
+                indexName={indexName}
+                stats={stats}
+                ilmExplain={ilmExplain}
+                pattern={pattern}
+                patternRollup={patternRollup}
+              />
+            ) : (
+              <HistoricalResults indexName={indexName} />
+            )}
+          </HistoricalResultsContext.Provider>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getIndexResultBadgeColor } from './get_index_result_badge_color';
+import { getCheckTextColor } from './get_check_text_color';
 
-describe('getIndexResultBadgeColor', () => {
+describe('getCheckTextColor', () => {
   test('it returns `ghost` when `incompatible` is undefined', () => {
-    expect(getIndexResultBadgeColor(undefined)).toEqual('ghost');
+    expect(getCheckTextColor(undefined)).toEqual('ghost');
   });
 
   test('it returns `success` when `incompatible` is zero', () => {
-    expect(getIndexResultBadgeColor(0)).toEqual('#6dcbb1');
+    expect(getCheckTextColor(0)).toEqual('#6dcbb1');
   });
 
   test('it returns `danger` when `incompatible` is NOT zero', () => {
-    expect(getIndexResultBadgeColor(1)).toEqual('danger');
+    expect(getCheckTextColor(1)).toEqual('danger');
   });
 });

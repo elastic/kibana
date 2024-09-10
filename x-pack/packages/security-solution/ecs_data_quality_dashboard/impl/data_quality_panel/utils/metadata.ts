@@ -18,7 +18,7 @@ import {
   PartitionedFieldMetadata,
   UnallowedValueCount,
 } from '../types';
-import { getIsInSameFamily } from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/utils/get_is_in_same_family';
+import { getIsInSameFamily } from '../data_quality_details/indices_details/pattern/index_check_flyout/latest_results/utils/get_is_in_same_family';
 
 export const getPartitionedFieldMetadata = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]

@@ -9,12 +9,12 @@ import React, { useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { EMPTY_METADATA } from '../../../../../../constants';
-import { useDataQualityContext } from '../../../../../../data_quality_context';
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
-import { INCOMPATIBLE_TAB_ID } from './constants';
 import { IlmPhase, PatternRollup } from '../../../../../../types';
+import { INCOMPATIBLE_TAB_ID } from './constants';
 import { getTabs } from './tabs/helpers';
+import { useDataQualityContext } from '../../../../../../data_quality_context';
+import { EMPTY_METADATA } from '../../../../../../constants';
 
 const StyledTabFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -36,23 +36,21 @@ const StyledButtonGroup = styled(EuiButtonGroup)`
 `;
 
 export interface Props {
-  docsCount: number;
-  ilmPhase: IlmPhase | undefined;
   indexName: string;
   patternRollup: PatternRollup | undefined;
+  ilmPhase: IlmPhase | undefined;
+  docsCount: number;
 }
 
 const IndexCheckFieldsComponent: React.FC<Props> = ({
   indexName,
-  ilmPhase,
   patternRollup,
+  ilmPhase,
   docsCount,
 }) => {
   const { formatBytes, formatNumber } = useDataQualityContext();
   const { checkState } = useIndicesCheckContext();
   const partitionedFieldMetadata = checkState[indexName]?.partitionedFieldMetadata ?? null;
-
-  const [selectedTabId, setSelectedTabId] = useState<string>(INCOMPATIBLE_TAB_ID);
 
   const tabs = useMemo(
     () =>
@@ -77,6 +75,8 @@ const IndexCheckFieldsComponent: React.FC<Props> = ({
       patternRollup?.stats,
     ]
   );
+
+  const [selectedTabId, setSelectedTabId] = useState<string>(INCOMPATIBLE_TAB_ID);
 
   const tabSelections = tabs.map((tab) => ({
     id: tab.id,

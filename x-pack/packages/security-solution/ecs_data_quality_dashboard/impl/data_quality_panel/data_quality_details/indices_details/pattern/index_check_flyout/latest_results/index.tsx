@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
+import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import { getDocsCount, getSizeInBytes } from '../../../../../utils/stats';
+import { getIlmPhase } from '../../../../../utils/get_ilm_phase';
 import { ErrorEmptyPrompt } from '../../error_empty_prompt';
 import { LoadingEmptyPrompt } from '../../loading_empty_prompt';
 import * as i18n from './translations';
-import type { IlmPhase, PatternRollup } from '../../../../../types';
+import type { MeteringStatsIndex, PatternRollup } from '../../../../../types';
 import { useIndicesCheckContext } from '../../../../../contexts/indices_check_context';
 import { IndexCheckFields } from './index_check_fields';
 import { IndexStatsPanel } from './index_stats_panel';
@@ -19,24 +22,30 @@ import { useDataQualityContext } from '../../../../../data_quality_context';
 import { getIndexPropertiesContainerId } from './utils/get_index_properties_container_id';
 
 export interface Props {
-  docsCount: number;
-  ilmPhase: IlmPhase | undefined;
+  ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexName: string;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  sizeInBytes?: number;
+  stats: Record<string, MeteringStatsIndex> | null;
 }
 
-const IndexPropertiesComponent: React.FC<Props> = ({
-  docsCount,
-  ilmPhase,
+const LatestResultsComponent: React.FC<Props> = ({
   indexName,
   pattern,
   patternRollup,
-  sizeInBytes,
+  stats,
+  ilmExplain,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
+  const docsCount = useMemo(() => getDocsCount({ stats, indexName }), [stats, indexName]);
+  const sizeInBytes = useMemo(() => getSizeInBytes({ stats, indexName }), [indexName, stats]);
+  const ilmPhase = useMemo(() => {
+    return isILMAvailable && ilmExplain != null
+      ? getIlmPhase(ilmExplain?.[indexName], isILMAvailable)
+      : undefined;
+  }, [ilmExplain, indexName, isILMAvailable]);
+
   const { checkState } = useIndicesCheckContext();
-  const { formatBytes, formatNumber } = useDataQualityContext();
   const indexCheckState = checkState[indexName];
   const isChecking = indexCheckState?.isChecking ?? false;
   const isLoadingMappings = indexCheckState?.isLoadingMappings ?? false;
@@ -65,23 +74,19 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   return isCheckComplete ? (
     <div data-index-properties-container={getIndexPropertiesContainerId({ indexName, pattern })}>
       {ilmPhase && (
-        <IndexStatsPanel
-          docsCount={formatNumber(docsCount)}
-          sizeInBytes={formatBytes(sizeInBytes ?? 0)}
-          ilmPhase={ilmPhase}
-        />
+        <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
       )}
       <EuiSpacer />
       <IndexCheckFields
-        ilmPhase={ilmPhase}
         docsCount={docsCount}
-        patternRollup={patternRollup}
+        ilmPhase={ilmPhase}
         indexName={indexName}
+        patternRollup={patternRollup}
       />
     </div>
   ) : null;
 };
 
-IndexPropertiesComponent.displayName = 'IndexPropertiesComponent';
+LatestResultsComponent.displayName = 'LatestResultsComponent';
 
-export const IndexProperties = React.memo(IndexPropertiesComponent);
+export const LatestResults = React.memo(LatestResultsComponent);

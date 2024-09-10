@@ -16,7 +16,7 @@ import {
   TestExternalProviders,
 } from '../../../../../mock/test_providers/test_providers';
 import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from './translations';
-import { IndexProperties, Props } from '.';
+import { LatestResults, Props } from '.';
 import { getCheckState } from '../../../../../stub/get_check_state';
 
 const indexName = 'auditbeat-custom-index-1';
@@ -32,14 +32,14 @@ const pattern = 'auditbeat-*';
 const patternRollup = auditbeatWithAllResults;
 
 const defaultProps: Props = {
-  docsCount: auditbeatWithAllResults.docsCount ?? 0,
-  ilmPhase: 'hot',
+  stats: auditbeatWithAllResults.stats,
+  ilmExplain: auditbeatWithAllResults.ilmExplain,
   indexName: 'auditbeat-custom-index-1',
   pattern,
   patternRollup,
 };
 
-describe('IndexProperties', () => {
+describe('LatestResults', () => {
   test('it renders the tab content', async () => {
     render(
       <TestExternalProviders>
@@ -54,7 +54,7 @@ describe('IndexProperties', () => {
             },
           }}
         >
-          <IndexProperties {...defaultProps} />
+          <LatestResults {...defaultProps} />
         </TestDataQualityProviders>
       </TestExternalProviders>
     );
@@ -90,7 +90,7 @@ describe('IndexProperties', () => {
               },
             }}
           >
-            <IndexProperties {...defaultProps} />
+            <LatestResults {...defaultProps} />
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
@@ -131,7 +131,7 @@ describe('IndexProperties', () => {
               },
             }}
           >
-            <IndexProperties {...defaultProps} />
+            <LatestResults {...defaultProps} />
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
@@ -167,7 +167,7 @@ describe('IndexProperties', () => {
               },
             }}
           >
-            <IndexProperties {...defaultProps} />
+            <LatestResults {...defaultProps} />
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
@@ -201,7 +201,7 @@ describe('IndexProperties', () => {
               },
             }}
           >
-            <IndexProperties {...defaultProps} />
+            <LatestResults {...defaultProps} />
           </TestDataQualityProviders>
         </TestExternalProviders>
       );
