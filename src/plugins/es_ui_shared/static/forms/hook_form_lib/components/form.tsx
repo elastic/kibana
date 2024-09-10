@@ -16,7 +16,7 @@ import { FormHook } from '../types';
 
 export interface Props {
   form: FormHook<any>;
-  FormWrapper?: React.ComponentType;
+  FormWrapper?: React.ComponentType<React.PropsWithChildren<any>>;
   children: ReactNode | ReactNode[];
   [key: string]: any;
 }
