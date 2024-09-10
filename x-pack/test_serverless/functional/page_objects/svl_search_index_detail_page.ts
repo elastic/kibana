@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     async expectToBeIndexDetailPage() {
@@ -54,9 +55,17 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
       await testSubjects.click('confirmModalConfirmButton');
     },
     async expectPageLoadErrorExists() {
-      await testSubjects.existOrFail('pageLoadError');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('pageLoadError');
+      });
+
       await testSubjects.existOrFail('loadingErrorBackToIndicesButton');
       await testSubjects.existOrFail('reloadButton');
+    },
+    async clickPageReload() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.click('reloadButton', 2000);
+      });
     },
   };
 }

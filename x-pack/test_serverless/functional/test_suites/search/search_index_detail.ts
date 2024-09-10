@@ -46,6 +46,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();
         await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonRedirectsToListPage();
       });
+      describe('page loading error', () => {
+        before(async () => {
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          await esDeleteAllIndices(indexName);
+        });
+        it('has page load error section', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
+        });
+        it('reload button shows details page again', async () => {
+          await es.indices.create({ index: indexName });
+          await pageObjects.svlSearchIndexDetailPage.clickPageReload();
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+        });
+      });
       describe('Index more options menu', () => {
         before(async () => {
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
@@ -60,15 +74,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.clickDeleteIndexButton();
           await pageObjects.svlSearchIndexDetailPage.clickConfirmingDeleteIndex();
         });
-      });
-    });
-
-    describe('page loading error', () => {
-      before(async () => {
-        await svlSearchNavigation.navigateToIndexDetailPage(indexName);
-      });
-      it('has page load error section', async () => {
-        await pageObjects.svlSearchIndexDetailPage.expectPageLoadErrorExists();
       });
     });
   });
