@@ -9,11 +9,6 @@ import { CreateInvestigationParams, CreateInvestigationResponse } from '@kbn/inv
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 
-enum InvestigationStatus {
-  ongoing = 'ongoing',
-  closed = 'closed',
-}
-
 export async function createInvestigation(
   params: CreateInvestigationParams,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
@@ -26,7 +21,7 @@ export async function createInvestigation(
     ...params,
     createdAt: Date.now(),
     createdBy: user.username,
-    status: InvestigationStatus.ongoing,
+    status: 'triage' as const,
     notes: [],
     items: [],
   };

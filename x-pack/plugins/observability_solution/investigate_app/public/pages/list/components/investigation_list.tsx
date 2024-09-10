@@ -18,6 +18,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';
 import { InvestigationNotFound } from '../../../components/investigation_not_found/investigation_not_found';
+import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
@@ -93,8 +94,7 @@ export function InvestigationList() {
       field: 'status',
       name: 'Status',
       render: (status: InvestigationResponse['status']) => {
-        const color = status === 'ongoing' ? 'danger' : 'success';
-        return <EuiBadge color={color}>{status}</EuiBadge>;
+        return <InvestigationStatusBadge status={status} />;
       },
     },
     {

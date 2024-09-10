@@ -9,6 +9,7 @@
 
 import * as t from 'io-ts';
 import { investigationResponseSchema } from './investigation';
+import { statusSchema } from '../schema';
 
 const updateInvestigationParamsSchema = t.type({
   path: t.type({
@@ -16,7 +17,7 @@ const updateInvestigationParamsSchema = t.type({
   }),
   body: t.partial({
     title: t.string,
-    status: t.union([t.literal('ongoing'), t.literal('closed')]),
+    status: statusSchema,
     params: t.type({
       timeRange: t.type({ from: t.number, to: t.number }),
     }),

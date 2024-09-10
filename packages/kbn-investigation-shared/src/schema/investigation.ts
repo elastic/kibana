@@ -12,6 +12,14 @@ import { alertOriginSchema, blankOriginSchema } from './origin';
 import { investigationNoteSchema } from './investigation_note';
 import { investigationItemSchema } from './investigation_item';
 
+const statusSchema = t.union([
+  t.literal('triage'),
+  t.literal('active'),
+  t.literal('mitigated'),
+  t.literal('resolved'),
+  t.literal('cancelled'),
+]);
+
 const investigationSchema = t.type({
   id: t.string,
   title: t.string,
@@ -21,10 +29,10 @@ const investigationSchema = t.type({
     timeRange: t.type({ from: t.number, to: t.number }),
   }),
   origin: t.union([alertOriginSchema, blankOriginSchema]),
-  status: t.union([t.literal('ongoing'), t.literal('closed')]),
+  status: statusSchema,
   tags: t.array(t.string),
   notes: t.array(investigationNoteSchema),
   items: t.array(investigationItemSchema),
 });
 
-export { investigationSchema };
+export { investigationSchema, statusSchema };

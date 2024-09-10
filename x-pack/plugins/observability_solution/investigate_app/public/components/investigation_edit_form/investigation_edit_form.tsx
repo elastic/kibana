@@ -20,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { InvestigationResponse } from '@kbn/investigation-shared';
 import { pick } from 'lodash';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -35,7 +36,7 @@ import { TagsField } from './fields/tags_field';
 
 export interface InvestigationForm {
   title: string;
-  status: 'ongoing' | 'closed';
+  status: InvestigationResponse['status'];
   tags: string[];
 }
 
@@ -63,7 +64,7 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
   const { mutateAsync: createInvestigation } = useCreateInvestigation();
 
   const methods = useForm<InvestigationForm>({
-    defaultValues: { title: 'New investigation', status: 'ongoing', tags: [] },
+    defaultValues: { title: 'New investigation', status: 'triage', tags: [] },
     values: investigation ? pick(investigation, ['title', 'status', 'tags']) : undefined,
     mode: 'all',
   });
@@ -148,9 +149,11 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem grow>
-                <StatusField />
-              </EuiFlexItem>
+              {isEditing && (
+                <EuiFlexItem grow>
+                  <StatusField />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow>
                 <TagsField />
               </EuiFlexItem>
