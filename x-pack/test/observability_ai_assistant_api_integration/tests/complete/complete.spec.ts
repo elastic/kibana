@@ -44,6 +44,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
+        // make sure it doesn't 400 on `data` being set
+        data: '{}',
       },
     },
   ];
