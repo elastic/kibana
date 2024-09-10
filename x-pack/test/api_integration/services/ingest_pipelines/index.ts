@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-import {
-  IngestPipelinesAPIProvider,
-  IngestPipelinesFixturesProvider,
-} from '../apis/management/ingest_pipelines/lib';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { IngestPipelinesAPIProvider, IngestPipelinesFixturesProvider } from './lib';
 
 export function IngestPipelinesProvider(context: FtrProviderContext) {
   const api = IngestPipelinesAPIProvider(context);
