@@ -581,7 +581,7 @@ export function getUiSettings(
     },
     [UI_SETTINGS.SEARCH_EXCLUDED_DATA_TIERS]: {
       name: i18n.translate('data.advancedSettings.searchExcludedDataTiers', {
-        defaultMessage: 'Excluded Data Tiers From Search',
+        defaultMessage: 'Excluded data tiers from search',
       }),
       value: [],
       description: i18n.translate('data.advancedSettings.searchExcludedDataTiersDesc', {
