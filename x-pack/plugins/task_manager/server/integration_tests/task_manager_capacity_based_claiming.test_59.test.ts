@@ -207,122 +207,122 @@ describe('capacity based claiming', () => {
     }
   });
 
-  // it('should claim tasks until the next task will exceed capacity', async () => {
-  //   const backgroundTaskLoads: number[] = [];
-  //   createMonitoringStatsOpts.taskPollingLifecycle?.events
-  //     .pipe(
-  //       filter(isTaskManagerWorkerUtilizationStatEvent),
-  //       map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
-  //         return (taskEvent.event as unknown as Ok<number>).value;
-  //       })
-  //     )
-  //     .subscribe((load: number) => {
-  //       backgroundTaskLoads.push(load);
-  //     });
-  //   const now = new Date();
-  //   const taskRunAtDates: Array<{ runAt: Date; type: string }> = [];
-  //   mockTaskTypeNormalCostRunFn.mockImplementation(() => {
-  //     taskRunAtDates.push({ type: 'normal', runAt: new Date() });
-  //     return { state: { foo: 'test' } };
-  //   });
-  //   mockTaskTypeXLCostRunFn.mockImplementation(() => {
-  //     taskRunAtDates.push({ type: 'xl', runAt: new Date() });
-  //     return { state: { foo: 'test' } };
-  //   });
+  it('should claim tasks until the next task will exceed capacity', async () => {
+    const backgroundTaskLoads: number[] = [];
+    createMonitoringStatsOpts.taskPollingLifecycle?.events
+      .pipe(
+        filter(isTaskManagerWorkerUtilizationStatEvent),
+        map<TaskLifecycleEvent, number>((taskEvent: TaskLifecycleEvent) => {
+          return (taskEvent.event as unknown as Ok<number>).value;
+        })
+      )
+      .subscribe((load: number) => {
+        backgroundTaskLoads.push(load);
+      });
+    const now = new Date();
+    const taskRunAtDates: Array<{ runAt: Date; type: string }> = [];
+    mockTaskTypeNormalCostRunFn.mockImplementation(() => {
+      taskRunAtDates.push({ type: 'normal', runAt: new Date() });
+      return { state: { foo: 'test' } };
+    });
+    mockTaskTypeXLCostRunFn.mockImplementation(() => {
+      taskRunAtDates.push({ type: 'xl', runAt: new Date() });
+      return { state: { foo: 'test' } };
+    });
 
-  //   // inject 6 normal cost tasks for total cost of 12
-  //   const ids: string[] = [];
-  //   times(6, () => ids.push(uuidV4()));
-  //   const runAt1 = new Date(now.valueOf() - 5);
-  //   for (const id of ids) {
-  //     await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-  //       id,
-  //       taskType: '_normalCostType',
-  //       params: {},
-  //       state: { foo: 'test' },
-  //       stateVersion: 1,
-  //       runAt: runAt1,
-  //       enabled: true,
-  //       scheduledAt: new Date(),
-  //       attempts: 0,
-  //       status: TaskStatus.Idle,
-  //       startedAt: null,
-  //       retryAt: null,
-  //       ownerId: null,
-  //     });
-  //     taskIdsToRemove.push(id);
-  //   }
+    // inject 6 normal cost tasks for total cost of 12
+    const ids: string[] = [];
+    times(6, () => ids.push(uuidV4()));
+    const runAt1 = new Date(now.valueOf() - 5);
+    for (const id of ids) {
+      await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+        id,
+        taskType: '_normalCostType',
+        params: {},
+        state: { foo: 'test' },
+        stateVersion: 1,
+        runAt: runAt1,
+        enabled: true,
+        scheduledAt: new Date(),
+        attempts: 0,
+        status: TaskStatus.Idle,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      });
+      taskIdsToRemove.push(id);
+    }
 
-  //   // inject 1 XL cost task that will put us over the max cost capacity of 20
-  //   const xlid = uuidV4();
-  //   const runAt2 = now;
-  //   await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-  //     id: xlid,
-  //     taskType: '_xlCostType',
-  //     params: {},
-  //     state: { foo: 'test' },
-  //     stateVersion: 1,
-  //     runAt: runAt2,
-  //     enabled: true,
-  //     scheduledAt: new Date(),
-  //     attempts: 0,
-  //     status: TaskStatus.Idle,
-  //     startedAt: null,
-  //     retryAt: null,
-  //     ownerId: null,
-  //   });
-  //   taskIdsToRemove.push(xlid);
+    // inject 1 XL cost task that will put us over the max cost capacity of 20
+    const xlid = uuidV4();
+    const runAt2 = now;
+    await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      id: xlid,
+      taskType: '_xlCostType',
+      params: {},
+      state: { foo: 'test' },
+      stateVersion: 1,
+      runAt: runAt2,
+      enabled: true,
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: TaskStatus.Idle,
+      startedAt: null,
+      retryAt: null,
+      ownerId: null,
+    });
+    taskIdsToRemove.push(xlid);
 
-  //   // inject one more normal cost task
-  //   const runAt3 = new Date(now.valueOf() + 5);
-  //   const lastid = uuidV4();
-  //   await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-  //     id: lastid,
-  //     taskType: '_normalCostType',
-  //     params: {},
-  //     state: { foo: 'test' },
-  //     stateVersion: 1,
-  //     runAt: runAt3,
-  //     enabled: true,
-  //     scheduledAt: new Date(),
-  //     attempts: 0,
-  //     status: TaskStatus.Idle,
-  //     startedAt: null,
-  //     retryAt: null,
-  //     ownerId: null,
-  //   });
-  //   taskIdsToRemove.push(lastid);
+    // inject one more normal cost task
+    const runAt3 = new Date(now.valueOf() + 5);
+    const lastid = uuidV4();
+    await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
+      id: lastid,
+      taskType: '_normalCostType',
+      params: {},
+      state: { foo: 'test' },
+      stateVersion: 1,
+      runAt: runAt3,
+      enabled: true,
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: TaskStatus.Idle,
+      startedAt: null,
+      retryAt: null,
+      ownerId: null,
+    });
+    taskIdsToRemove.push(lastid);
 
-  //   // retry until all tasks have been run
-  //   await retry(async () => {
-  //     expect(mockTaskTypeNormalCostRunFn).toHaveBeenCalledTimes(7);
-  //     expect(mockTaskTypeXLCostRunFn).toHaveBeenCalledTimes(1);
-  //   });
+    // retry until all tasks have been run
+    await retry(async () => {
+      expect(mockTaskTypeNormalCostRunFn).toHaveBeenCalledTimes(7);
+      expect(mockTaskTypeXLCostRunFn).toHaveBeenCalledTimes(1);
+    });
 
-  //   expect(taskRunAtDates.length).toBe(8);
+    expect(taskRunAtDates.length).toBe(8);
 
-  //   const firstRunAt = taskRunAtDates[0].runAt.getTime();
+    const firstRunAt = taskRunAtDates[0].runAt.getTime();
 
-  //   // the first 6 tasks should have been run at the same time (adding some fudge factor)
-  //   // and they should all be normal cost tasks
-  //   for (let i = 0; i < 6; i++) {
-  //     expect(taskRunAtDates[i].type).toBe('normal');
-  //     expect(taskRunAtDates[i].runAt.getTime() - firstRunAt).toBeLessThanOrEqual(500);
-  //   }
+    // the first 6 tasks should have been run at the same time (adding some fudge factor)
+    // and they should all be normal cost tasks
+    for (let i = 0; i < 6; i++) {
+      expect(taskRunAtDates[i].type).toBe('normal');
+      expect(taskRunAtDates[i].runAt.getTime() - firstRunAt).toBeLessThanOrEqual(500);
+    }
 
-  //   // the next task should be XL cost task and be run after one polling interval has passed (with some fudge factor)
-  //   expect(taskRunAtDates[6].type).toBe('xl');
-  //   expect(taskRunAtDates[6].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
+    // the next task should be XL cost task and be run after one polling interval has passed (with some fudge factor)
+    expect(taskRunAtDates[6].type).toBe('xl');
+    expect(taskRunAtDates[6].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
 
-  //   // last task should be normal cost and be run after one polling interval has passed
-  //   expect(taskRunAtDates[7].type).toBe('normal');
-  //   expect(taskRunAtDates[7].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
+    // last task should be normal cost and be run after one polling interval has passed
+    expect(taskRunAtDates[7].type).toBe('normal');
+    expect(taskRunAtDates[7].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
 
-  //   // background task load should be 0 or 60 or 100 since we're only running these tasks
-  //   // should be 100 during the claim cycle where we claimed 6 normal tasks but left the large capacity task in the queue
-  //   // should be 60 during the next claim cycle where we claimed the large capacity task and the normal capacity: 10 + 2 / 20 = 60%
-  //   for (const load of backgroundTaskLoads) {
-  //     expect(load === 0 || load === 60 || load === 100).toBe(true);
-  //   }
-  // });
+    // background task load should be 0 or 60 or 100 since we're only running these tasks
+    // should be 100 during the claim cycle where we claimed 6 normal tasks but left the large capacity task in the queue
+    // should be 60 during the next claim cycle where we claimed the large capacity task and the normal capacity: 10 + 2 / 20 = 60%
+    for (const load of backgroundTaskLoads) {
+      expect(load === 0 || load === 60 || load === 100).toBe(true);
+    }
+  });
 });
