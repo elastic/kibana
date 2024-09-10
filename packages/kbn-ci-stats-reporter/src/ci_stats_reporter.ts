@@ -170,7 +170,7 @@ export class CiStatsReporter {
       const { stdout } = await execa('git', ['config', 'user.email']);
       email = stdout;
     } catch (e) {
-      email = process.env.CI ? 'anonymous-ci@elastic.co' : 'anonymous-user@elastic.co';
+      // no-op - we're ok with email being undefined
     }
 
     try {
@@ -207,7 +207,9 @@ export class CiStatsReporter {
       totalMem: Os.totalmem(),
     };
 
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+    if (defaultMeta.committerHash) {
+      this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+    }
 
     return !!(await this.req({
       auth: !!buildId,
