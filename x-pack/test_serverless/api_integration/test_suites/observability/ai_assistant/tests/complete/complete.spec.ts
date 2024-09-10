@@ -90,8 +90,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             persist: true,
             screenContexts: params.screenContexts || [],
           })
-          .then((response) => resolve(response))
-          .catch((err) => reject(err));
+          .then((response: Response) => resolve(response))
+          .catch((err: Error) => reject(err));
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.all([
