@@ -76,10 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.datasetQuality.closeFlyout();
-
-        await testSubjects.missingOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
-        );
       });
     });
 

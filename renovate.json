@@ -285,8 +285,7 @@
         "@testing-library/jest-dom",
         "@testing-library/react",
         "@testing-library/react-hooks",
-        "@testing-library/user-event",
-        "@types/testing-library__jest-dom"
+        "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -467,7 +466,8 @@
       "matchPackageNames": ["msw"],
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team: Cloud Security", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
