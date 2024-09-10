@@ -215,6 +215,9 @@ export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
 export type DiffableRule = z.infer<typeof DiffableRule>;
 export const DiffableRule = z.intersection(DiffableCommonFields, DiffableFieldsByTypeUnion);
 
+/**
+ * Union of all possible rule types
+ */
 export type DiffableRuleTypes = z.infer<typeof DiffableRuleTypes>;
 export const DiffableRuleTypes = z.union([
   DiffableCustomQueryFields.shape.type,
