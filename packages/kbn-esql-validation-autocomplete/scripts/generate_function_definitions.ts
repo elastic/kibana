@@ -215,7 +215,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   },
   mv_sort: {
     signatures: new Array(9).fill({
-      params: [{}, { literalOptions: ['asc', 'desc'] }],
+      params: [{}, { acceptedValues: ['asc', 'desc'] }],
     }),
   },
   percentile: {
@@ -225,8 +225,11 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   },
   top: {
     signatures: new Array(6).fill({
-      params: [{}, { constantOnly: true }, { constantOnly: true, literalOptions: ['asc', 'desc'] }],
+      params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
     }),
+  },
+  count: {
+    signatures: [{ params: [{ supportsWildcard: true }] }],
   },
 };
 
