@@ -7,11 +7,10 @@
 
 import React, { useState } from 'react';
 import { useLocalStorage } from 'react-use';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { Card } from '../card';
 import { DataIngestionHubVideoModal } from './video_modal';
 import * as i18n from '../../translations';
-import { useCardStyles } from '../card.styles';
 
 interface VideoCardProps {
   icon: string;
@@ -31,8 +30,6 @@ const IS_ONBOARDING_HUB_VISITED_LOCAL_STORAGE_KEY = 'secutirySolution.isOnboardi
 
 export const VideoCard: React.FC<VideoCardProps> = React.memo((props) => {
   const { icon, title, description, spaceId } = props;
-
-  const { cardButtonStyle } = useCardStyles();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const isOnboardingHubVisitedStorageKey = getStorageKeyBySpace(
@@ -59,9 +56,11 @@ export const VideoCard: React.FC<VideoCardProps> = React.memo((props) => {
   return (
     <>
       <Card onClick={showVideoModal} icon={icon} title={title} description={description}>
-        <EuiButtonEmpty color="primary" onClick={showVideoModal} className={cardButtonStyle}>
-          {i18n.DATA_INGESTION_HUB_HEADER_VIDEO_LINK_TITLE}
-        </EuiButtonEmpty>
+        <EuiText size="xs">
+          <EuiLink onClick={showVideoModal}>
+            {i18n.DATA_INGESTION_HUB_HEADER_VIDEO_LINK_TITLE}
+          </EuiLink>
+        </EuiText>
       </Card>
       {isModalVisible && (
         <DataIngestionHubVideoModal

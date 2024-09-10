@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import type { EuiCardProps } from '@elastic/eui';
 import { EuiCard, EuiTitle } from '@elastic/eui';
+import classNames from 'classnames';
 import { useCardStyles } from './card.styles';
 
 interface CardProps {
@@ -21,16 +22,15 @@ interface CardProps {
   target?: EuiCardProps['target'];
 }
 
-const IMAGE_WIDTH = 64;
-
 export const Card: React.FC<CardProps> = React.memo((props) => {
   const { icon, title, description, children, onClick, href, target } = props;
 
-  const { cardBodyStyle, cardTitleStyle, cardDescriptionStyle } = useCardStyles();
+  const cardStyles = useCardStyles();
+  const cardClassName = classNames(cardStyles, 'headerCard');
 
   return (
     <EuiCard
-      className={cardBodyStyle}
+      className={cardClassName}
       onClick={onClick}
       href={href}
       target={target}
@@ -40,20 +40,19 @@ export const Card: React.FC<CardProps> = React.memo((props) => {
       icon={
         <img
           data-test-subj="data-ingestion-header-card-icon"
+          className="headerCardImage"
           src={icon}
           alt={title}
-          height={IMAGE_WIDTH}
-          width={IMAGE_WIDTH}
         />
       }
       title={
-        <EuiTitle>
-          <h3 className={cardTitleStyle}>{title}</h3>
+        <EuiTitle className="headerCardTitle">
+          <h3>{title}</h3>
         </EuiTitle>
       }
-      description={<p className={cardDescriptionStyle}>{description}</p>}
+      description={<p className="headerCardDescription">{description}</p>}
     >
-      {children}
+      <div className="headerCardContent">{children}</div>
     </EuiCard>
   );
 });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
@@ -13,70 +12,45 @@ export const useCardStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
 
-  const cardBodyStyle = useMemo(() => {
-    const cardBaseStyle = {
-      minWidth: '315px',
-      ':hover': {
-        '.css-g3povl-euiCard__text-left-interactive': {
-          textDecoration: 'none',
-        },
-        '.euiButtonEmpty': {
-          textDecoration: 'underline',
-        },
-        '.euiLink': {
-          textDecoration: 'underline',
-        },
-      },
-    };
-    return isDarkMode
-      ? css({
-          ...cardBaseStyle,
-          backgroundColor: `${euiTheme.colors.lightestShade}`,
-          boxShadow: 'none',
-          border: `1px solid ${euiTheme.colors.mediumShade}`,
-        })
-      : css(cardBaseStyle);
-  }, [isDarkMode, euiTheme]);
+  return css`
+    min-width: 315px;
+    &.headerCard:hover {
+      *:not(.headerCardContent) {
+        text-decoration: none;
+      }
+      .headerCardContent,
+      .headerCardContent * {
+        text-decoration: underline;
+        text-decoration-color: ${euiTheme.colors.primaryText};
+      }
+    }
 
-  const cardStyles = useMemo(() => {
-    return {
-      cardBodyStyle,
-      cardTitleStyle: css({
-        fontSize: `${euiTheme.base * 0.875}px`,
-        fontWeight: euiTheme.font.weight.semiBold,
-        lineHeight: euiTheme.size.l,
-        color: euiTheme.colors.title,
-        textDecoration: 'none',
-      }),
-      cardDescriptionStyle: css({
-        fontSize: '12.25px',
-        fontWeight: euiTheme.font.weight.regular,
-        lineHeight: `${euiTheme.base * 1.25}px`,
-        color: euiTheme.colors.darkestShade,
-      }),
-      cardButtonStyle: css({
-        padding: '0px',
-        height: 'auto',
-        fontSize: euiTheme.size.m,
-        fontWeight: euiTheme.font.weight.medium,
-        lineHeight: euiTheme.size.base,
-        ':focus': {
-          backgroundColor: 'transparent',
-        },
-      }),
-    };
-  }, [
-    cardBodyStyle,
-    euiTheme.base,
-    euiTheme.colors.darkestShade,
-    euiTheme.colors.title,
-    euiTheme.font.weight.medium,
-    euiTheme.font.weight.regular,
-    euiTheme.font.weight.semiBold,
-    euiTheme.size.base,
-    euiTheme.size.l,
-    euiTheme.size.m,
-  ]);
+    ${isDarkMode
+      ? `
+          background-color: ${euiTheme.colors.lightestShade};
+          box-shadow: none;
+          border: 1px solid ${euiTheme.colors.mediumShade};
+        `
+      : ''}
 
-  return cardStyles;
+    .headerCardTitle {
+      font-size: ${euiTheme.base * 0.875}px;
+      font-weight: ${euiTheme.font.weight.semiBold};
+      line-height: ${euiTheme.size.l};
+      color: ${euiTheme.colors.title};
+      text-decoration: none;
+    }
+
+    .headerCardImage {
+      width: 64px;
+      height: 64px;
+    }
+
+    .headerCardDescription {
+      font-size: 12.25px;
+      font-weight: ${euiTheme.font.weight.regular};
+      line-height: ${euiTheme.base * 1.25}px;
+      color: ${euiTheme.colors.darkestShade};
+    }
+  `;
 };
