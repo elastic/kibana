@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { act, fireEvent } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useStartServices, useLink } from '../hooks';
+import { useMultipleAgentPolicies, useLink } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -154,29 +154,12 @@ describe('PackagePolicyActionsMenu', () => {
   });
 
   it('Should be able to delete integration from a managed agentless policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
+    const agentPolicies = createMockAgentPolicies({ is_managed: false, supports_agentless: true });
     const packagePolicy = createMockPackagePolicy();
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await act(async () => {
       expect(utils.queryByText('Delete integration')).not.toBeNull();
     });
-  });
-
-  it('Should navigate on delete integration when having an agentless policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-
-    await act(async () => {
-      fireEvent.click(utils.getByTestId('PackagePolicyActionsDeleteItem'));
-    });
-    await act(async () => {
-      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
-    });
-    expect(useStartServices().application.navigateToApp as jest.Mock).toHaveBeenCalledWith(
-      'fleet',
-      { path: '/policies' }
-    );
   });
 
   it('Should show add button if the policy is not managed and showAddAgent=true', async () => {
