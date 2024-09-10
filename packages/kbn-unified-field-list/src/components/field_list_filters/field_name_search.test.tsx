@@ -8,19 +8,27 @@
  */
 
 import React, { useState } from 'react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
 
 describe('UnifiedFieldList <FieldNameSearch />', () => {
+  let user: UserEvent;
+
   beforeAll(() => {
     jest.useFakeTimers();
   });
+
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  it('should render correctly', () => {
+  beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  });
+
+  it('should render correctly', async () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
       onChange: jest.fn(),
@@ -30,13 +38,13 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     render(<FieldNameSearch {...props} />);
     const input = screen.getByRole('searchbox', { name: 'Search field names' });
     expect(input).toHaveAttribute('aria-describedby', 'htmlId');
-    userEvent.type(input, 'hey');
+    await user.type(input, 'hey');
     jest.advanceTimersByTime(256);
     expect(props.onChange).toHaveBeenCalledWith('hey');
     expect(props.onChange).toBeCalledTimes(1);
   });
 
-  it('should accept the updates from the top', () => {
+  it('should accept the updates from the top', async () => {
     const FieldNameSearchWithWrapper = ({ defaultNameFilter = '' }) => {
       const [nameFilter, setNameFilter] = useState(defaultNameFilter);
       const props: FieldNameSearchProps = {
@@ -55,7 +63,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     render(<FieldNameSearchWithWrapper defaultNameFilter="this" />);
     expect(screen.getByRole('searchbox')).toHaveValue('this');
     const button = screen.getByRole('button', { name: 'update nameFilter' });
-    userEvent.click(button);
+    await user.click(button);
     expect(screen.getByRole('searchbox')).toHaveValue('that');
   });
 });

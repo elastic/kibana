@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
@@ -46,9 +46,20 @@ describe('ResilientParamsFields renders', () => {
     incidentTypes: ['19'],
   };
 
+  let user: UserEvent;
   let appMockRenderer: AppMockRenderer;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     appMockRenderer = createAppMockRenderer();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
@@ -104,7 +115,7 @@ describe('ResilientParamsFields renders', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Denial of Service{enter}');
+    await user.type(checkbox, 'Denial of Service{enter}');
 
     expect(screen.getByText('Denial of Service')).toBeInTheDocument();
   });
@@ -116,7 +127,7 @@ describe('ResilientParamsFields renders', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), 'Low');
+    await user.selectOptions(screen.getByTestId('severitySelect'), 'Low');
     expect(screen.getByText('Low')).toBeInTheDocument();
   });
 
@@ -136,9 +147,9 @@ describe('ResilientParamsFields renders', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Denial of Service{enter}');
+    await user.type(checkbox, 'Denial of Service{enter}');
 
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+    await user.selectOptions(screen.getByTestId('severitySelect'), ['4']);
 
     expect(screen.getByText('Denial of Service')).toBeInTheDocument();
     expect(screen.getByText('Low')).toBeInTheDocument();

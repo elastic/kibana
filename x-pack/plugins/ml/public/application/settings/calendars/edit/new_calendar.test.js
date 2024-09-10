@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom/extend-expect';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../contexts/kibana/use_create_url', () => ({

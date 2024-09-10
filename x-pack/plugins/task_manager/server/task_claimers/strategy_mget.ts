@@ -13,8 +13,6 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
 import apm, { Logger } from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
@@ -223,18 +221,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       updatedTasks.push(updateResult.value);
     } else {
       const { id, type, error } = updateResult.error;
-
-      // this check is needed so error will be typed correctly for isConflictError
-      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-        if (SavedObjectsErrorHelpers.isConflictError(error)) {
-          conflicts++;
-        } else {
-          logger.error(
-            `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
-            logMeta
-          );
-          bulkUpdateErrors++;
-        }
+      if (error.statusCode === 409) {
+        conflicts++;
       } else {
         logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
         bulkUpdateErrors++;
