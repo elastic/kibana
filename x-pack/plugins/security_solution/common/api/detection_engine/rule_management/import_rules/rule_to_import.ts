@@ -12,7 +12,6 @@ import {
   RequiredFieldInput,
   RuleSignatureId,
   TypeSpecificCreateProps,
-  RuleVersion,
 } from '../../model/rule_schema';
 
 /**
@@ -31,7 +30,6 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    version: RuleVersion,
     /*
       Overriding `required_fields` from ResponseFields because
       in ResponseFields `required_fields` has the output type,

@@ -120,6 +120,25 @@ export const importRules = async ({
             }
 
             if (allowPrebuiltRules) {
+              if (!parsedRule.version) {
+                resolve(
+                  createBulkErrorObject({
+                    statusCode: 400,
+                    message: i18n.translate(
+                      'xpack.securitySolution.detectionEngine.rules.cannotImportRuleWithoutVersion',
+                      {
+                        defaultMessage:
+                          'Rules must specify a "version" to be imported. [rule_id: {ruleId}]',
+                        values: { ruleId: parsedRule.rule_id },
+                      }
+                    ),
+                    ruleId: parsedRule.rule_id,
+                  })
+                );
+
+                return null;
+              }
+
               const { immutable, ruleSource } = calculateRuleSourceForImport({
                 rule: parsedRule,
                 prebuiltRuleAssets,
