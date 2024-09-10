@@ -22875,7 +22875,7 @@
             "label": "install_status",
             "description": [],
             "signature": [
-              "\"installed\" | \"installing\" | \"install_failed\""
+              "\"installing\" | \"installed\" | \"install_failed\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,

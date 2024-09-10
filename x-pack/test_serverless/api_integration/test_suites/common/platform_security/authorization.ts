@@ -32,6 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('security/authorization', function () {
+    // see details: https://github.com/elastic/kibana/issues/192282
+    this.tags(['failsOnMKI']);
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();

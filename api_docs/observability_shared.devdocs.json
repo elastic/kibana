@@ -5916,6 +5916,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SupportedAssetTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "SupportedAssetTypes",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
