@@ -113,6 +113,10 @@ export async function fetchServicePathsFromTraceIds({
 
   const numDocsPerShardAllowed = calculatedDocs > terminateAfter ? terminateAfter : calculatedDocs;
 
+  /*
+   * Any changes to init_script, map_script, combine_script and reduce_script
+   * must be replicated on https://github.com/elastic/elasticsearch-serverless/blob/main/distribution/archives/src/serverless-default-settings.yml
+   */
   const serviceMapAggs = {
     service_map: {
       scripted_metric: {
