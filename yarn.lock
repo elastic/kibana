@@ -28897,6 +28897,13 @@ slash@^3.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-3.0.0.tgz#6539be870c165adbd5240220dbe361f1bc4d4634"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
 
+slate-history@^0.109.0:
+  version "0.109.0"
+  resolved "https://registry.yarnpkg.com/slate-history/-/slate-history-0.109.0.tgz#4e93e090a565bbb06b2f9914927705ad46080f64"
+  integrity sha512-DHavPwrTTAEAV66eAocB3iQHEj65N6IVtbRK98ZuqGT0S44T3zXlhzY+5SZ7EPxRcoOYVt1dioRxXYM/+PmCiQ==
+  dependencies:
+    is-plain-object "^5.0.0"
+
 slate-react@^0.110.0:
   version "0.110.0"
   resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.110.0.tgz#f2dda9cd53f1c3447e57bd51ee0e4689fe9b491f"
