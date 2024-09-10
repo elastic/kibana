@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { uniq, uniqBy } from 'lodash';
@@ -18,7 +19,7 @@ import type {
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
-import type { EditorContext, SuggestionRawDefinition } from './types';
+import type { EditorContext, ItemKind, SuggestionRawDefinition } from './types';
 import {
   getColumnForASTNode,
   getCommandDefinition,
@@ -110,6 +111,7 @@ import {
   isParameterType,
   isReturnType,
 } from '../definitions/types';
+import { comparisonFunctions } from '../definitions/builtin';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -716,6 +718,9 @@ async function getExpressionSuggestionsByType(
           // check if lastWord is an existing field
           const column = getColumnByName(lastWord, references);
           if (column) {
+            if (['grok', 'dissect'].includes(command.name)) {
+              return [];
+            }
             // now we know that the user has already entered a column,
             // so suggest comma and pipe
             // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
@@ -735,6 +740,7 @@ async function getExpressionSuggestionsByType(
             suggestions.push(
               ...fieldSuggestions.map((suggestion) => ({
                 ...suggestion,
+                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
                 command: TRIGGER_SUGGESTION_COMMAND,
                 rangeToReplace,
               }))
@@ -745,6 +751,7 @@ async function getExpressionSuggestionsByType(
           suggestions.push(
             ...fieldSuggestions.map((suggestion) => ({
               ...suggestion,
+              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
               command: TRIGGER_SUGGESTION_COMMAND,
             }))
           );
@@ -1301,6 +1308,7 @@ async function getFunctionArgsSuggestions(
     fieldsMap,
     innerText
   );
+
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
   let argIndex = Math.max(node.args.length, 0);
@@ -1328,12 +1336,22 @@ async function getFunctionArgsSuggestions(
   // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const canBeBooleanCondition =
+    // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
+    fnDefinition.name === 'case' ||
+    // If the type is explicitly a boolean condition
+    typesToSuggestNext.some((t) => t && t.type === 'boolean' && t.name === 'condition');
+
   const shouldAddComma =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== 'builtin' &&
+    !alreadyHasComma &&
+    !canBeBooleanCondition;
+  const shouldAdvanceCursor = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
 
   const suggestedConstants = uniq(
     typesToSuggestNext
-      .map((d) => d.literalSuggestions || d.literalOptions)
+      .map((d) => d.literalSuggestions || d.acceptedValues)
       .filter((d) => d)
       .flat()
   ) as string[];
@@ -1414,27 +1432,35 @@ async function getFunctionArgsSuggestions(
     );
 
     // Fields
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
-          // @TODO: have a way to better suggest constant only params
-          getTypesFromParamDefs(typesToSuggestNext.filter((d) => !d.constantOnly)) as string[],
+          // For example, in case() where we are expecting a boolean condition
+          // we can accept any field types (field1 !== field2)
+          canBeBooleanCondition
+            ? ['any']
+            : // @TODO: have a way to better suggest constant only params
+              (getTypesFromParamDefs(
+                typesToSuggestNext.filter((d) => !d.constantOnly)
+              ) as string[]),
           [],
           {
             addComma: shouldAddComma,
-            advanceCursor: shouldAddComma,
-            openSuggestions: shouldAddComma,
+            advanceCursor: shouldAdvanceCursor,
+            openSuggestions: shouldAdvanceCursor,
           }
         ),
         true
       )
     );
+
     // Functions
     suggestions.push(
       ...getCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        getTypesFromParamDefs(typesToSuggestNext) as string[],
+        canBeBooleanCondition ? ['any'] : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
         fnToIgnore
       ).map((suggestion) => ({
         ...suggestion,
@@ -1469,9 +1495,20 @@ async function getFunctionArgsSuggestions(
         );
       }
     }
-
+    // Suggest comparison functions for boolean conditions
+    if (canBeBooleanCondition) {
+      suggestions.push(
+        ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
+          label: name,
+          text: name + ' ',
+          kind: 'Function' as ItemKind,
+          detail: description,
+          command: TRIGGER_SUGGESTION_COMMAND,
+        }))
+      );
+    }
     if (hasMoreMandatoryArgs) {
-      // suggest a comma if there's another argument for the function
+      // Suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
     }
   }
@@ -1657,6 +1694,7 @@ async function getOptionArgsSuggestions(
             suggestions.push(...buildFieldsDefinitions(policyMetadata.enrichFields));
           }
         }
+
         if (
           assignFn &&
           hasSameArgBothSides(assignFn) &&

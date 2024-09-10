@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker']);
+  const { common, header, discover } = getPageObjects(['common', 'header', 'discover']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -36,16 +37,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should create a data view when there are no data views', async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('management');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('management');
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.click('dataViews');
       await testSubjects.click('checkboxSelectAll');
 
       await testSubjects.click('delete-data-views-button');
       await testSubjects.click('confirmModalConfirmButton');
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
 
       await dataViews.createFromPrompt({ name: 'logs', hasTimeField: true });
       expect(await dataViews.isAdHoc()).to.be(false);
@@ -53,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataViews.createFromSearchBar({ name: 'log', adHoc: true, hasTimeField: true });
       expect(await dataViews.isAdHoc()).to.be(true);
 
-      expect(await PageObjects.discover.getIndexPatterns()).to.eql(['log*\nTemporary', 'logs*']);
+      expect(await discover.getIndexPatterns()).to.eql(['log*\nTemporary', 'logs*']);
     });
   });
 }
