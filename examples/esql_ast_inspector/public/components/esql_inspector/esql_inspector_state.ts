@@ -17,7 +17,7 @@ export class EsqlInspectorState {
   constructor() {
     this.src$.subscribe((src) => {
       try {
-        this.query$.next(EsqlQuery.fromSrc(src));
+        this.query$.next(EsqlQuery.fromSrc(src, { withFormatting: true }));
       } catch (e) {
         this.query$.next(null);
       }

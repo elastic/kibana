@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { EuiCode, EuiDataGrid, EuiPanel, EuiLink } from '@elastic/eui';
+import { EuiDataGrid, EuiPanel } from '@elastic/eui';
 import { createParser } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
@@ -23,7 +23,7 @@ const columns = [
   },
   {
     id: 'type',
-    display: 'Symbol type',
+    display: 'Type',
   },
   {
     id: 'channel',

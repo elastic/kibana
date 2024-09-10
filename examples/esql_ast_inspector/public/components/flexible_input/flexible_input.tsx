@@ -14,7 +14,6 @@ const blockCss = css({
   display: 'inline-block',
   position: 'relative',
   width: '100%',
-  border: '1px solid red',
 });
 
 const inputCss = css({

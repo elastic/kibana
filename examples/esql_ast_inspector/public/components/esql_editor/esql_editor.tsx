@@ -17,5 +17,5 @@ export interface EsqlEditorProps {
 }
 
 export const EsqlEditor: React.FC<EsqlEditorProps> = ({ src, highlight, onChange }) => {
-  return <FlexibleInput value={src} onChange={(e) => onChange(e.target.value)} />;
+  return <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />;
 };

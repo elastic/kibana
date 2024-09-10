@@ -7,7 +7,7 @@
  */
 
 import type { Token } from 'antlr4';
-import { parse } from '../parser';
+import { ParseOptions, parse } from '../parser';
 import type { ESQLAstQueryExpression } from '../types';
 import {
   WrappingPrettyPrinter,
@@ -15,8 +15,8 @@ import {
 } from '../pretty_print/wrapping_pretty_printer';
 
 export class EsqlQuery {
-  public static readonly fromSrc = (src: string): EsqlQuery => {
-    const { root, tokens } = parse(src);
+  public static readonly fromSrc = (src: string, opts?: ParseOptions): EsqlQuery => {
+    const { root, tokens } = parse(src, opts);
     return new EsqlQuery(root, src, tokens);
   };
 

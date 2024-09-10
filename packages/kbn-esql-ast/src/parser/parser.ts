@@ -113,7 +113,12 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
     return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
   });
   const { ast: commands } = parseListener.getAst();
-  const root = Builder.expression.query(commands);
+  const root = Builder.expression.query(commands, {
+    location: {
+      min: 0,
+      max: text.length - 1,
+    },
+  });
 
   if (options.withFormatting) {
     const decorations = collectDecorations(tokens);
