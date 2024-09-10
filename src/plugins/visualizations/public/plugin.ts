@@ -127,6 +127,7 @@ import {
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
 import type { VisualizeSerializedState } from './embeddable/types';
+import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -409,7 +410,7 @@ export class VisualizationsPlugin
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable');
+      const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({

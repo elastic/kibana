@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getVisualizeEmbeddableFactoryLazy } from './get_visualize_embeddable_factory_lazy';
-export { VIS_EVENT_TO_TRIGGER } from './events';
+export const getVisualizeEmbeddableFactoryLazy = async () => {
+  const { getVisualizeEmbeddableFactory } = await import('./visualize_embeddable');
+  return getVisualizeEmbeddableFactory;
+};
