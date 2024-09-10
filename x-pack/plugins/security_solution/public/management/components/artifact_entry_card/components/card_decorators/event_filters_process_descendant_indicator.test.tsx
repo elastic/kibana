@@ -75,7 +75,7 @@ describe('EventFiltersProcessDescendantIndicator', () => {
 
     expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
 
-    userEvent.hover(renderResult.getByTestId(`${prefix}-tooltipIcon`));
+    await userEvent.hover(renderResult.getByTestId(`${prefix}-tooltipIcon`));
     expect(await renderResult.findByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
   });
 });

@@ -20,7 +20,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -35,9 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover filter editor');
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     describe('filter editor', function () {
@@ -66,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be('1');
+          expect(await discover.getHitCount()).to.be('1');
         });
       });
 
@@ -111,8 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await indexPatterns.create({ title: indexTitle }, { override: true });
 
-          await PageObjects.common.navigateToApp('discover');
-          await PageObjects.discover.selectIndexPattern(indexTitle);
+          await common.navigateToApp('discover');
+          await discover.selectIndexPattern(indexTitle);
         });
 
         it('should support range filter on version fields', async () => {
@@ -123,18 +128,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           expect(await filterBar.hasFilter('version', '2.0.0 to 3.0.0')).to.be(true);
           await retry.try(async function () {
-            expect(await PageObjects.discover.getHitCount()).to.be('1');
+            expect(await discover.getHitCount()).to.be('1');
           });
         });
       });
 
       const runFilterTest = async (pinned = false) => {
         await filterBar.removeAllFilters();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+        await unifiedFieldList.clickFieldListItemAdd('extension');
         await retry.try(async function () {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           expect(await cell.getVisibleText()).to.be('jpg');
-          expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+          expect(await discover.getHitCount()).to.be('14,004');
         });
         await filterBar.addFilter({
           field: 'extension.raw',
@@ -148,12 +153,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await filterBar.hasFilter('extension.raw', 'css', true, pinned)).to.be(true);
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           expect(await cell.getVisibleText()).to.be('css');
-          expect(await PageObjects.discover.getHitCount()).to.be('2,159');
+          expect(await discover.getHitCount()).to.be('2,159');
         });
         await browser.refresh();
         await retry.try(async function () {
           expect(await filterBar.hasFilter('extension.raw', 'css', true, pinned)).to.be(true);
-          expect(await PageObjects.discover.getHitCount()).to.be('2,159');
+          expect(await discover.getHitCount()).to.be('2,159');
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           expect(await cell.getVisibleText()).to.be('css');
         });
@@ -170,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
   });
 }

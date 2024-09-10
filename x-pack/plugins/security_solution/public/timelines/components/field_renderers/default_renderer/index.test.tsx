@@ -107,7 +107,7 @@ describe('Field Renderers', () => {
       expect(screen.queryByTestId('more-container')).not.toBeInTheDocument();
     });
 
-    test('it should render the items after overflowIndexStart in the popover', () => {
+    test('it should render the items after overflowIndexStart in the popover', async () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
@@ -120,7 +120,7 @@ describe('Field Renderers', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
+      await userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
     });
