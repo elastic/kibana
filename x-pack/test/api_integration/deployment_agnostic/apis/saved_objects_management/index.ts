@@ -8,11 +8,8 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('apis', () => {
-    // load new platform deployment-agnostic test here
-    loadTestFile(require.resolve('../../apis/console'));
-    loadTestFile(require.resolve('../../apis/core'));
-    loadTestFile(require.resolve('../../apis/painless_lab'));
-    loadTestFile(require.resolve('../../apis/saved_objects_management'));
+  describe('saved objects management apis', () => {
+    loadTestFile(require.resolve('./bulk_get'));
+    loadTestFile(require.resolve('./bulk_delete'));
   });
 }
