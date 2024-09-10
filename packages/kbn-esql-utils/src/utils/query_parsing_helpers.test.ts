@@ -15,7 +15,7 @@ import {
   getTimeFieldFromESQLQuery,
   prettifyQuery,
   isQueryWrappedByPipes,
-  retrieveMetadataColumns
+  retrieveMetadataColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
