@@ -8,11 +8,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { ADD_PANEL_TRIGGER, Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableApiContext, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { SAVED_BOOK_ID } from '../../../react_embeddables/saved_book/constants';
+import {
+  ADD_SAVED_BOOK_ACTION_ID,
+  SAVED_BOOK_ID,
+} from '../../../react_embeddables/saved_book/constants';
 import {
   BookApi,
   BookRuntimeState,
@@ -33,16 +36,6 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
         <p>
           Each embeddable manages its own state. The page is only responsible for persisting and
           providing the last persisted state to the embeddable.
-        </p>
-
-        <p>
-          When the example is first run, there is no embeddable state from a previous session. The
-          page displays a button to add a <em>book</em> embeddable that when clicked executes{' '}
-          <EuiLink href="https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/react_embeddables/saved_book/create_saved_book_action.tsx#L35">
-            ADD_SAVED_BOOK_ACTION_ID action
-          </EuiLink>
-          . The action provides the page with unsaved book state by calling{' '}
-          <strong>pageApi.addNewPanel</strong>.
         </p>
 
         <p>
@@ -70,6 +63,39 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
       </EuiCallOut>
 
       <EuiSpacer size="m" />
+
+      {!hasEmbeddableState && (
+        <EuiEmptyPrompt
+          title={<h2>There is no embeddable state from a previous session.</h2>}
+          body={
+            <p>
+              Click the button to add a <em>book</em> embeddable. Unsaved book state is provided to
+              the page by calling <strong>pageApi.addNewPanel</strong>.
+            </p>
+          }
+          actions={
+            <EuiButton
+              color="primary"
+              fill
+              onClick={() => {
+                const createBookAction = uiActions.getAction(
+                  ADD_SAVED_BOOK_ACTION_ID
+                ) as Action<EmbeddableApiContext>;
+                if (createBookAction) {
+                  createBookAction.execute({
+                    embeddable: pageApi,
+                    trigger: {
+                      id: ADD_PANEL_TRIGGER,
+                    },
+                  });
+                }
+              }}
+            >
+              Create book embeddable
+            </EuiButton>
+          }
+        />
+      )}
 
       {hasEmbeddableState && (
         <ReactEmbeddableRenderer<BookSerializedState, BookRuntimeState, BookApi>
