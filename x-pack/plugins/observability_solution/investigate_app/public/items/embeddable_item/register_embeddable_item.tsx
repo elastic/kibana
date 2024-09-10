@@ -188,7 +188,7 @@ export function registerEmbeddableItem({
           grow={true}
           className={css`
             > div {
-              height: 128px;
+              height: 196px;
             }
           `}
         >
