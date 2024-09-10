@@ -116,9 +116,8 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
 
 export const isQueryWrappedByPipes = (query: string): boolean => {
   const { ast } = getAstAndSyntaxErrors(query);
-  const trimmedCode = query.trim().replaceAll('\n  |', '\n|');
   const numberOfCommands = ast.length;
-  const pipesWithNewLine = trimmedCode?.split('\n|');
+  const pipesWithNewLine = query.split('\n  |');
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
