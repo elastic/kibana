@@ -1196,6 +1196,43 @@ components:
         credentialsJSON:
           type: string
           description: The service account credentials JSON file. The service account should have Vertex AI user IAM role assigned to it.
+    auth_type:
+      title: Authentication type
+      type: string
+      nullable: true
+      enum:
+        - webhook-authentication-basic
+        - webhook-authentication-ssl
+      description: |
+        The type of authentication to use: basic, SSL, or none.
+    ca:
+      title: Certificate authority
+      type: string
+      description: |
+        A base64 encoded version of the certificate authority file that the connector can trust to sign and validate certificates. This option is available for all authentication types.
+    cert_type:
+      title: Certificate type
+      type: string
+      description: |
+        If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.
+      enum:
+        - ssl-crt-key
+        - ssl-pfx
+    has_auth:
+      title: Has authentication
+      type: boolean
+      description: If true, a username and password for login type authentication must be provided.
+      default: true
+    verification_mode:
+      title: Verification mode
+      type: string
+      enum:
+        - certificate
+        - full
+        - none
+      default: full
+      description: |
+        Controls the verification of certificates. Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use `certificate` to validate the certificate and verify that it is signed by a trusted authority; this option does not check the certificate hostname. Use `none` to skip certificate validation.
     config_properties_cases_webhook:
       title: Connector request properties for Webhook - Case Management connector
       required:
@@ -1210,6 +1247,12 @@ components:
       description: Defines properties for connectors when type is `.cases-webhook`.
       type: object
       properties:
+        authType:
+          $ref: '#/components/schemas/auth_type'
+        ca:
+          $ref: '#/components/schemas/ca'
+        certType:
+          $ref: '#/components/schemas/cert_type'
         createCommentJson:
           type: string
           description: |
@@ -1259,9 +1302,7 @@ components:
             The REST API URL to get the case by ID from the third-party system. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts. You can use a variable to add the external system ID to the URL. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
           example: https://example.com/issue/{{{external.system.id}}}
         hasAuth:
-          type: boolean
-          description: If true, a username and password for login type authentication must be provided.
-          default: true
+          $ref: '#/components/schemas/has_auth'
         headers:
           type: string
           description: |
@@ -1285,21 +1326,43 @@ components:
           description: |
             The REST API URL to update the case by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
           example: https://example.com/issue/{{{external.system.ID}}}
+        verificationMode:
+          $ref: '#/components/schemas/verification_mode'
         viewIncidentUrl:
           type: string
           description: |
             The URL to view the case in the external system. You can use variables to add the external system ID or external system title to the URL.
           example: https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
+    crt:
+      title: Certificate
+      type: string
+      description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT file.
+    key:
+      title: Certificate key
+      type: string
+      description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the KEY file.
+    pfx:
+      title: Personal information exchange
+      type: string
+      description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
     secrets_properties_cases_webhook:
       title: Connector secrets properties for Webhook - Case Management connector
       type: object
       properties:
+        crt:
+          $ref: '#/components/schemas/crt'
+        key:
+          $ref: '#/components/schemas/key'
+        pfx:
+          $ref: '#/components/schemas/pfx'
         password:
           type: string
-          description: The password for HTTP basic authentication. If `hasAuth` is set to `true`, this property is required.
+          description: |
+            The password for HTTP basic authentication. If `hasAuth` is set to `true` and and `authType` is `webhook-authentication-basic`, this property is required.
         user:
           type: string
-          description: The username for HTTP basic authentication. If `hasAuth` is set to `true`, this property is required.
+          description: |
+            The username for HTTP basic authentication. If `hasAuth` is set to `true` and `authType` is `webhook-authentication-basic`, this property is required.
     config_properties_d3security:
       title: Connector request properties for a D3 Security connector
       description: Defines properties for connectors when type is `.d3security`.
@@ -1959,28 +2022,13 @@ components:
       type: object
       properties:
         authType:
-          type: string
-          nullable: true
-          enum:
-            - webhook-authentication-basic
-            - webhook-authentication-ssl
-          description: |
-            The type of authentication to use: basic, SSL, or none.
+          $ref: '#/components/schemas/auth_type'
         ca:
-          type: string
-          description: |
-            A base64 encoded version of the certificate authority file that the connector can trust to sign and validate certificates. This option is available for all authentication types.
+          $ref: '#/components/schemas/ca'
         certType:
-          type: string
-          description: |
-            If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.
-          enum:
-            - ssl-crt-key
-            - ssl-pfx
+          $ref: '#/components/schemas/cert_type'
         hasAuth:
-          type: boolean
-          description: |
-            If `true`, a user name and password must be provided for login type authentication.
+          $ref: '#/components/schemas/has_auth'
         headers:
           type: object
           nullable: true
@@ -1998,28 +2046,18 @@ components:
           description: |
             The request URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
         verificationMode:
-          type: string
-          enum:
-            - certificate
-            - full
-            - none
-          default: full
-          description: |
-            Controls the verification of certificates. Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use `certificate` to validate the certificate and verify that it is signed by a trusted authority; this option does not check the certificate hostname. Use `none` to skip certificate validation.
+          $ref: '#/components/schemas/verification_mode'
     secrets_properties_webhook:
       title: Connector secrets properties for a Webhook connector
       description: Defines secrets for connectors when type is `.webhook`.
       type: object
       properties:
         crt:
-          type: string
-          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the CRT or CERT file.
+          $ref: '#/components/schemas/crt'
         key:
-          type: string
-          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-crt-key`, it is a base64 encoded version of the KEY file.
+          $ref: '#/components/schemas/key'
         pfx:
-          type: string
-          description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.
+          $ref: '#/components/schemas/pfx'
         password:
           type: string
           description: |

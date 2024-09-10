@@ -25,7 +25,13 @@ export function mergeTags(
 
   // To streamline API endpoints categorization it's expected that
   // tags are sorted alphabetically by name
-  merged.sort((a, b) => a.name.localeCompare(b.name));
+  merged.sort((a, b) => getTagName(a).localeCompare(getTagName(b)));
 
   return merged;
+}
+
+function getTagName(tag: OpenAPIV3.TagObject): string {
+  return 'x-displayName' in tag && typeof tag['x-displayName'] === 'string'
+    ? tag['x-displayName']
+    : tag.name;
 }

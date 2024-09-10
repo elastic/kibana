@@ -179,4 +179,77 @@ describe('OpenAPI Bundler - assign a tag', () => {
       { name: 'Global tag', description: 'Global tag description' },
     ]);
   });
+
+  it('supports x-displayName', async () => {
+    const spec1 = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    const spec2 = createOASDocument({
+      paths: {
+        '/api/another_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const [bundledSpec] = Object.values(
+      await bundleSpecs(
+        {
+          1: spec1,
+          2: spec2,
+        },
+        {
+          prototypeDocument: {
+            tags: [
+              {
+                name: 'Some Tag',
+                description: 'Some tag description',
+                'x-displayName': 'Custom name',
+              },
+            ],
+          },
+        }
+      )
+    );
+
+    expect(bundledSpec.paths['/api/some_api']?.get?.tags).toEqual(['Some Tag']);
+    expect(bundledSpec.paths['/api/another_api']?.get?.tags).toEqual(['Some Tag']);
+    expect(bundledSpec.tags).toEqual([
+      {
+        name: 'Some Tag',
+        description: 'Some tag description',
+        'x-displayName': 'Custom name',
+      },
+    ]);
+  });
 });

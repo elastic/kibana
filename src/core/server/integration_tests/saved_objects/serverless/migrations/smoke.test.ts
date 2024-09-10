@@ -13,7 +13,8 @@ import {
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
 
-describe('Basic smoke test', () => {
+// Disabled, only runs off main branch
+describe.skip('Basic smoke test', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let root: TestServerlessKibanaUtils['root'];

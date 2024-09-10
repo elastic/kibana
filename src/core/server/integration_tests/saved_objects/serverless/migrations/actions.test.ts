@@ -13,7 +13,8 @@ const { startES } = createTestServerlessInstances({
   adjustTimeout: jest.setTimeout,
 });
 
-describe('Migration actions - serverless environment', () => {
+// Disabled, only runs off main branch
+describe.skip('Migration actions - serverless environment', () => {
   runActionTestSuite({
     startEs: async () => {
       const serverlessEs = await startES();

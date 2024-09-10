@@ -14,6 +14,7 @@ import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies
 import { registerExistingIndicesPath } from './rest_api_routes/internal/existing_indices';
 import { registerFieldForWildcard } from './rest_api_routes/internal/fields_for';
 import { registerHasDataViewsRoute } from './rest_api_routes/internal/has_data_views';
+import { registerHasEsDataRoute } from './rest_api_routes/internal/has_es_data';
 import { registerFields } from './rest_api_routes/internal/fields';
 
 interface RegisterRoutesArgs {
@@ -40,4 +41,5 @@ export function registerRoutes({
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
   registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
+  registerHasEsDataRoute(router);
 }

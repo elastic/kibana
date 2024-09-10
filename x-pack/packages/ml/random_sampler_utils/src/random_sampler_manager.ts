@@ -157,7 +157,7 @@ export class RandomSampler {
     const mode = this.getMode();
     const probability = this.getProbability();
 
-    let prob = {};
+    let prob = Object.create(null);
     if (mode === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
       prob = { probability };
     } else if (mode === RANDOM_SAMPLER_OPTION.OFF) {

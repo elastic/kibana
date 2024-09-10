@@ -72,7 +72,12 @@ describe('useTableData', () => {
 
   beforeEach(() => {
     queryClient.setQueryData([TRAINED_MODEL_STATS_QUERY_KEY], {
-      trained_model_stats: [{ model_id: '.elser_model_2', deployment_stats: { state: 'started' } }],
+      trained_model_stats: [
+        {
+          model_id: '.elser_model_2',
+          deployment_stats: { deployment_id: 'my-elser-model-01', state: 'started' },
+        },
+      ],
     });
   });
   it('should return correct pagination', () => {
@@ -160,6 +165,7 @@ describe('useTableData', () => {
     );
 
     const updatedData = result.current.sortedTableData;
-    expect(updatedData[0].deployment).toEqual('deployed');
+
+    expect(updatedData[2].deployment).toEqual('started');
   });
 });
