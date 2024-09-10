@@ -37,7 +37,7 @@ export function getConnectorType(): InferenceConnector {
         subAction: [],
       };
 
-      if (subAction === SUB_ACTION.TEST || subAction === SUB_ACTION.INVOKE) {
+      if (subAction === SUB_ACTION.TEST || subAction === SUB_ACTION.CHAT_COMPLETE) {
         if (!subActionParams.input?.length) {
           errors.body.push(translations.BODY_REQUIRED);
         } else {
@@ -53,7 +53,7 @@ export function getConnectorType(): InferenceConnector {
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (subAction !== SUB_ACTION.INVOKE && subAction !== SUB_ACTION.TEST) {
+      } else if (subAction !== SUB_ACTION.CHAT_COMPLETE && subAction !== SUB_ACTION.TEST) {
         errors.subAction.push(translations.INVALID_ACTION);
       }
       return { errors };

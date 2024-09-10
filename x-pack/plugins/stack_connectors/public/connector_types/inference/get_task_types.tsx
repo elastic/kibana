@@ -6,13 +6,12 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { ConfigProperties, DisplayType, FieldType } from '../lib/dynamic_config/types';
-
-export type ProviderConfiguration = Record<string, ConfigProperties | null>;
+import { DisplayType, FieldType } from '../lib/dynamic_config/types';
+import { FieldsConfiguration } from './types';
 
 export interface InferenceTaskType {
   task_type: string;
-  configuration: ProviderConfiguration;
+  configuration: FieldsConfiguration;
 }
 
 export const getTaskTypes = (http: HttpSetup, provider: string): Promise<InferenceTaskType[]> => {
@@ -27,7 +26,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies the user issuing the request.',
             type: FieldType.STRING,
             validations: [],
             value: '',
@@ -46,7 +45,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies the user issuing the request.',
             type: FieldType.STRING,
             validations: [],
             value: '',
@@ -79,7 +78,8 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip:
+              'Specifies if the API truncates inputs longer than the maximum token length automatically.',
             type: FieldType.BOOLEAN,
             validations: [],
             value: false,
@@ -98,7 +98,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies the number of the top n documents, which should be returned.',
             type: FieldType.BOOLEAN,
             validations: [],
             value: false,
@@ -132,13 +132,14 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
           return_documents: {
             display: DisplayType.TOGGLE,
             label: 'Return documents',
+            options: [],
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Returns the document instead of only the index.',
             type: FieldType.BOOLEAN,
             validations: [],
-            value: false,
+            value: true,
             ui_restrictions: [],
             default_value: null,
             depends_on: [],
@@ -161,10 +162,10 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
           input_type: {
             display: DisplayType.DROPDOWN,
             label: 'Input type',
-            order: 2,
+            order: 1,
             required: false,
             sensitive: false,
-            tooltip: ``,
+            tooltip: 'Specifies the type of input passed to the model.',
             type: FieldType.STRING,
             validations: [],
             options: [
@@ -210,7 +211,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 2,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies how the API handles inputs longer than the maximum token length.',
             type: FieldType.STRING,
             validations: [],
             value: '',
@@ -229,7 +230,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specify whether to return doc text within the results.',
             type: FieldType.BOOLEAN,
             validations: [],
             value: false,
@@ -238,13 +239,14 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             depends_on: [],
           },
           top_n: {
-            display: DisplayType.TOGGLE,
+            display: DisplayType.NUMERIC,
             label: 'Top N',
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
-            type: FieldType.BOOLEAN,
+            tooltip:
+              'The number of most relevant documents to return, defaults to the number of the documents.',
+            type: FieldType.INTEGER,
             validations: [],
             value: false,
             ui_restrictions: [],
@@ -264,7 +266,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies the user issuing the request.',
             type: FieldType.STRING,
             validations: [],
             value: '',
@@ -283,7 +285,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies the user issuing the request.',
             type: FieldType.STRING,
             validations: [],
             value: '',
@@ -304,7 +306,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: '',
+            tooltip: 'Specifies the user issuing the request.',
             type: FieldType.STRING,
             validations: [],
             value: '',
@@ -392,7 +394,7 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
             validations: [],
             value: null,
             ui_restrictions: [],
-            default_value: 64,
+            default_value: null,
             depends_on: [],
           },
           temperature: {
@@ -445,6 +447,69 @@ export const getTaskTypes = (http: HttpSetup, provider: string): Promise<Inferen
       {
         task_type: 'text_embedding',
         configuration: {},
+      },
+    ],
+    anthropic: [
+      {
+        task_type: 'completion',
+        configuration: {
+          max_tokens: {
+            display: DisplayType.NUMERIC,
+            label: 'Max tokens',
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: 'The maximum number of tokens to generate before stopping.',
+            type: FieldType.INTEGER,
+            validations: [],
+            value: null,
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+          temperature: {
+            display: DisplayType.TEXTBOX,
+            label: 'Temperature',
+            order: 2,
+            required: false,
+            sensitive: false,
+            tooltip: 'The amount of randomness injected into the response.',
+            type: FieldType.STRING,
+            validations: [],
+            value: null,
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+          top_p: {
+            display: DisplayType.NUMERIC,
+            label: 'Top P',
+            order: 4,
+            required: false,
+            sensitive: false,
+            tooltip: 'Specifies to use Anthropic’s nucleus sampling.',
+            type: FieldType.INTEGER,
+            validations: [],
+            value: null,
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+          top_k: {
+            display: DisplayType.NUMERIC,
+            label: 'Top K',
+            order: 3,
+            required: false,
+            sensitive: false,
+            tooltip: 'Specifies to only sample from the top K options for each subsequent token.',
+            type: FieldType.INTEGER,
+            validations: [],
+            value: null,
+            ui_restrictions: [],
+            default_value: null,
+            depends_on: [],
+          },
+        },
       },
     ],
   };

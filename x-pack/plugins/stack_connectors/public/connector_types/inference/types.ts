@@ -9,7 +9,7 @@ import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/p
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { ChatCompleteParams } from '../../../common/inference/types';
-import { ConfigEntryView } from '../lib/dynamic_config/types';
+import { ConfigEntryView, ConfigProperties } from '../lib/dynamic_config/types';
 
 export interface InferenceActionParams {
   subAction: SUB_ACTION.CHAT_COMPLETE | SUB_ACTION.TEST;
@@ -30,6 +30,8 @@ export enum ServiceProviderKeys {
   openai = 'openai',
   anthropic = 'anthropic',
 }
+
+export type FieldsConfiguration = Record<string, ConfigProperties>;
 
 export interface Config {
   taskType: string;

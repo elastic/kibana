@@ -9,15 +9,14 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { ConfigProperties, DisplayType, FieldType } from '../../lib/dynamic_config/types';
-
-export type ProviderConfiguration = Record<string, ConfigProperties | null>;
+import { DisplayType, FieldType } from '../../lib/dynamic_config/types';
+import { FieldsConfiguration } from '../types';
 
 export interface InferenceProvider {
   provider: string;
   taskTypes: string[];
   logo?: string;
-  configuration: ProviderConfiguration;
+  configuration: FieldsConfiguration;
 }
 
 export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
@@ -47,10 +46,10 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 2,
           required: true,
           sensitive: false,
-          tooltip: `ID of the LLM you're using`,
+          tooltip: 'The name of the model to use for the inference task.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -64,7 +63,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: 'The unique identifier of your organization.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -79,9 +78,9 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
             'The OpenAI API endpoint URL. For more information on the URL, refer to the https://platform.openai.com/docs/api-reference.',
           type: FieldType.STRING,
           validations: [],
-          value: 'https://api.openai.com/v1/embeddings',
+          value: '',
           ui_restrictions: [],
-          default_value: null,
+          default_value: 'https://api.openai.com/v1/embeddings',
           depends_on: [],
         },
         'rate_limit.requests_per_minute': {
@@ -399,7 +398,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 3,
           required: false,
           sensitive: false,
-          tooltip: '',
+          tooltip: 'Allows you to specify the maximum number of tokens per input.',
           type: FieldType.INTEGER,
           validations: [],
           value: '',
@@ -434,7 +433,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 1,
           required: true,
           sensitive: false,
-          tooltip: '',
+          tooltip: 'The URL endpoint to use for the requests.',
           type: FieldType.STRING,
           validations: [],
           value: 'https://api.openai.com/v1/embeddings',
@@ -466,13 +465,14 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
         num_allocations: {
           display: DisplayType.NUMERIC,
           label: 'Number allocations',
-          order: 2,
+          order: 1,
           required: true,
           sensitive: false,
-          tooltip: ``,
+          tooltip:
+            'The total number of allocations this model is assigned across machine learning nodes.',
           type: FieldType.INTEGER,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -483,10 +483,10 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 2,
           required: true,
           sensitive: false,
-          tooltip: ``,
+          tooltip: 'Sets the number of threads used by each model allocation during inference.',
           type: FieldType.INTEGER,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -517,7 +517,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
               value: '.multilingual-e5-small_linux-x86_64',
             },
           ],
-          value: null,
+          value: '.multilingual-e5-small',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -528,10 +528,11 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 2,
           required: true,
           sensitive: false,
-          tooltip: ``,
+          tooltip:
+            'The total number of allocations this model is assigned across machine learning nodes.',
           type: FieldType.INTEGER,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -542,10 +543,10 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 3,
           required: true,
           sensitive: false,
-          tooltip: ``,
+          tooltip: 'Sets the number of threads used by each model allocation during inference.',
           type: FieldType.INTEGER,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -615,7 +616,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: `The name of your Azure OpenAI resource`,
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -626,10 +627,10 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 3,
           required: true,
           sensitive: false,
-          tooltip: '',
+          tooltip: 'The Azure API version ID to use.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -643,7 +644,7 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           tooltip: 'The deployment name of your deployed models.',
           type: FieldType.STRING,
           validations: [],
-          value: null,
+          value: '',
           ui_restrictions: [],
           default_value: null,
           depends_on: [],
@@ -654,7 +655,8 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           order: 5,
           required: false,
           sensitive: false,
-          tooltip: 'Minimize the number of rate limit errors.',
+          tooltip:
+            'The azureopenai service sets a default number of requests allowed per minute depending on the task type.',
           type: FieldType.INTEGER,
           validations: [],
           value: '',

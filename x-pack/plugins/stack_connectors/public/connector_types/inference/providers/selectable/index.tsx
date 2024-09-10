@@ -28,14 +28,12 @@ import { ServiceProviderKeys } from '../../types';
 
 export interface GetSelectableOptions {
   providers: InferenceProvider[];
-  taskType?: string;
   searchProviderValue: string;
 }
 
 export interface SelectableProviderProps {
   getSelectableOptions: ({
     providers,
-    taskType,
     searchProviderValue,
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;

@@ -105,7 +105,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [taskTypes, setTaskTypes] = useState<InferenceTaskType[]>([]);
-  const [selectedTaskType, setSelectedTaskType] = useState<string>();
+  const [selectedTaskType, setSelectedTaskType] = useState<string>(config?.taskType);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -127,21 +127,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     }
   }, [isEdit, setFieldValue, config]);
 
-  useEffect(() => {
-    const loadTaskTypesFunction = async () => {
-      const currentTaskTypes = await getTaskTypes(http!, selectedProvider?.provider ?? '');
-      if (Array.isArray(currentTaskTypes)) {
-        setTaskTypes(currentTaskTypes);
-      }
-    };
-    loadTaskTypesFunction();
-  }, [http, selectedProvider]);
-
   const providerForm: ConfigEntryView[] = useMemo(() => {
     // Set values from the provider secrets and config to the schema
     const existingConfiguration = config?.providerSchema
       ? config.providerSchema.map((item: ConfigEntryView) => {
           const itemValue = item;
+          itemValue.isValid = true;
+          itemValue.validationErrors = [];
           if (item.sensitive && secrets?.providerSecrets) {
             itemValue.value = secrets?.providerSecrets[item.key] as any;
           } else if (config?.providerConfig) {
@@ -151,22 +143,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         })
       : [];
 
-    const result: ConfigEntryView[] = (
+    return (
       (config?.providerConfig && Object.keys(config?.providerConfig).length > 0) ||
       (secrets?.providerSecrets && Object.keys(secrets?.providerSecrets).length > 0)
         ? existingConfiguration
-        : Object.keys(selectedProvider?.configuration ?? []).map((k: string) => ({
+        : Object.keys(selectedProvider?.configuration ?? {}).map((k: string) => ({
             key: k,
             isValid: true,
             validationErrors: [],
             ...(selectedProvider?.configuration[k] as ConfigProperties),
           }))
     ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-
-    if (config) {
-      config.providerSchema = result;
-    }
-    return result;
   }, [config, secrets?.providerSecrets, selectedProvider]);
 
   const requiredProviderForm: ConfigEntryView[] = useMemo(() => {
@@ -179,44 +166,39 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
   const taskTypeForm: ConfigEntryView[] = useMemo(() => {
     // Set values from the task type config to the schema
-    const existingConfiguration = config?.taskTypeSchema
+    const existingTaskTypeConfiguration = config?.taskTypeSchema
       ? config.taskTypeSchema.map((item: ConfigEntryView) => {
+          const itemValue = item;
+          itemValue.isValid = true;
+          itemValue.validationErrors = [];
           if (config?.taskTypeConfig) {
-            item.value = config?.taskTypeConfig[item.key] as any;
+            itemValue.value = config?.taskTypeConfig[item.key] as any;
           }
-          return item;
+          return itemValue;
         })
       : [];
 
-    const selectedTaskTypeConfig = taskTypes.find((t) => t.task_type === selectedTaskType);
+    const selectedTaskTypeConfig = taskTypes?.find((t) => t.task_type === config?.taskType);
 
-    const result: ConfigEntryView[] = (
-      config?.taskTypeConfig && Object.keys(config?.taskTypeConfig).length > 0
-        ? existingConfiguration
-        : Object.keys(selectedTaskTypeConfig?.configuration ?? []).map((k: string) => ({
+    return (
+      Object.keys(config?.taskTypeConfig ?? {}).length > 0
+        ? existingTaskTypeConfiguration
+        : Object.keys(selectedTaskTypeConfig?.configuration ?? {}).map((k: string) => ({
             key: k,
             isValid: true,
             validationErrors: [],
             ...(selectedTaskTypeConfig?.configuration[k] as ConfigProperties),
           }))
     ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [config, taskTypes]);
 
-    if (config) {
-      config.taskTypeSchema = result;
-    }
-    return result;
-  }, [config, selectedTaskType, taskTypes]);
-
-  const onProviderOptionsSelect = useCallback(
-    (options: {
-      providers: InferenceProvider[];
-      taskType?: string;
-      searchProviderValue: string;
-    }) => {
+  const getProviderOptions = useCallback(
+    (options: { providers: InferenceProvider[]; searchProviderValue: string }) => {
       return options.providers.map(
         (p) =>
           ({
             label: p.provider,
+            key: p.provider,
           } as EuiSelectableOption)
       );
     },
@@ -224,29 +206,29 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   );
 
   const onTaskTypeOptionsSelect = useCallback(
-    (taskType) => {
+    async (taskType) => {
       // Get task type settings
-      const newTaskType = taskTypes.find((p) => p.task_type === taskType);
+      const currentTaskTypes = await getTaskTypes(http!, config?.provider ?? '');
+      setTaskTypes(currentTaskTypes);
+      const newTaskType = currentTaskTypes?.find((p) => p.task_type === taskType);
 
       setSelectedTaskType(taskType);
-      config.taskType = taskType;
       generateInferenceEndpointId(config, setFieldValue);
-      const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? []).map((k) => ({
+      const newTaskTypeSchema = Object.keys(newTaskType?.configuration ?? {}).map((k) => ({
         key: k,
         isValid: true,
         ...newTaskType?.configuration[k],
       })) as ConfigEntryView[];
 
-      config.taskTypeSchema = newTaskTypeSchema;
       updateFieldValues({
         config: {
-          taskType: config.taskType,
+          taskType,
           taskTypeSchema: newTaskTypeSchema,
           taskTypeConfig: {},
         },
       });
     },
-    [config, setFieldValue, taskTypes, updateFieldValues]
+    [config, http, setFieldValue, updateFieldValues]
   );
 
   const onSetProviderConfigEntry = useCallback(
@@ -299,7 +281,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   `;
 
   const onProviderChange = useCallback(
-    (newProvider?: InferenceProvider) => {
+    async (newProvider?: InferenceProvider) => {
       setSelectedProvider(newProvider);
       config.provider = newProvider?.provider ?? DEFAULT_PROVIDER;
 
@@ -307,13 +289,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       const providerTaskTypes = newProvider?.taskTypes ?? [];
       setTaskTypeOptions(getTaskTypeOptions(providerTaskTypes));
       if (providerTaskTypes.length > 0) {
-        onTaskTypeOptionsSelect(providerTaskTypes[0]);
+        await onTaskTypeOptionsSelect(providerTaskTypes[0]);
       }
 
       generateInferenceEndpointId(config, setFieldValue);
 
       // Update connector providerSchema
-      config.providerSchema = Object.keys(newProvider?.configuration ?? []).map((k) => ({
+      config.providerSchema = Object.keys(newProvider?.configuration ?? {}).map((k) => ({
         key: k,
         isValid: true,
         ...newProvider?.configuration[k],
@@ -337,18 +319,16 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         isDropdown
         fullWidth
         icon={
-          !selectedProvider
+          !config?.provider
             ? { type: 'sparkles', side: 'left' }
-            : SERVICE_PROVIDERS[selectedProvider?.provider as ServiceProviderKeys].icon
+            : SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
         }
       >
         <EuiFieldText
           onClick={handlePopover}
           onKeyDown={handleKeyboardOpen}
           value={
-            selectedProvider?.provider
-              ? SERVICE_PROVIDERS[selectedProvider?.provider as ServiceProviderKeys].name
-              : ''
+            config?.provider ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name : ''
           }
           fullWidth
           placeholder={i18n.SELECT_PROVIDER}
@@ -358,68 +338,89 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         />
       </EuiFormControlLayout>
     ),
-    [selectedProvider, handlePopover, handleKeyboardOpen, isPopoverOpen, onProviderChange]
+    [config?.provider, handlePopover, handleKeyboardOpen, isPopoverOpen, onProviderChange]
+  );
+
+  const taskTypeSettings = useMemo(
+    () =>
+      selectedTaskType ? (
+        <>
+          <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+            <h4>
+              <FormattedMessage
+                id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
+                defaultMessage="Task settings"
+              />
+            </h4>
+          </EuiTitle>
+          <div className="euiFormHelpText euiFormRow__text">
+            <FormattedMessage
+              id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
+              defaultMessage="Configure the inference task. These settings are specific to the task type you specified."
+            />
+          </div>
+          <EuiSpacer size="m" />
+          <UseField path="config.taskType">
+            {(field) => {
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+              return (
+                <EuiFormRow
+                  id="taskType"
+                  label={
+                    <FormattedMessage
+                      id="xpack.stackConnectors.components.inference.taskTypeLabel"
+                      defaultMessage="Task type"
+                    />
+                  }
+                  isInvalid={isInvalid}
+                  error={errorMessage}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.stackConnectors.components.inference.taskTypeSelectHelpLabel"
+                      defaultMessage="Configuration of AI Assistants requires a 'completion' task type."
+                    />
+                  }
+                >
+                  <EuiButtonGroup
+                    data-test-subj="taskTypeSelect"
+                    legend="Task type"
+                    defaultValue={DEFAULT_TASK_TYPE}
+                    // isDisabled={readOnly || isEdit}
+                    idSelected={selectedTaskType}
+                    onChange={onTaskTypeOptionsSelect}
+                    options={taskTypeOptions}
+                    color="text"
+                    type="single"
+                  />
+                </EuiFormRow>
+              );
+            }}
+          </UseField>
+          <EuiSpacer size="s" />
+          <ConnectorConfigurationFormItems
+            itemsGrow={false}
+            isLoading={false}
+            direction="column"
+            items={taskTypeForm}
+            setConfigEntry={onSetTaskTypeConfigEntry}
+          />
+        </>
+      ) : null,
+    [
+      selectedTaskType,
+      taskTypeForm,
+      onSetTaskTypeConfigEntry,
+      onTaskTypeOptionsSelect,
+      taskTypeOptions,
+    ]
   );
 
   const inferenceUri = useMemo(() => `_inference/${selectedTaskType}/`, [selectedTaskType]);
-  const providerSecrets = <UseField path="secrets.providerSecrets" component={HiddenField} />;
-  const providerConfig = <UseField path="config.providerConfig" component={HiddenField} />;
-  const providerSchema = <UseField path="config.providerSchema" component={HiddenField} />;
-  const taskTypeSchema = <UseField path="config.taskTypeSchema" component={HiddenField} />;
-  const taskTypeConfig = <UseField path="config.taskTypeConfig" component={HiddenField} />;
 
-  return (
-    <>
-      <UseField path="config.provider">
-        {(field) => {
-          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-          return (
-            <EuiFormRow
-              id="providerSelectBox"
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.stackConnectors.components.inference.providerLabel"
-                  defaultMessage="Provider"
-                />
-              }
-              isInvalid={isInvalid}
-              error={errorMessage}
-            >
-              <EuiInputPopover
-                id={'popoverId'}
-                fullWidth
-                input={providerSuperSelect}
-                isOpen={isPopoverOpen}
-                closePopover={handleClosePopover}
-                className="rightArrowIcon"
-              >
-                <SelectableProvider
-                  getSelectableOptions={onProviderOptionsSelect}
-                  onClosePopover={handleClosePopover}
-                  onProviderChange={onProviderChange}
-                />
-              </EuiInputPopover>
-            </EuiFormRow>
-          );
-        }}
-      </UseField>
-      <EuiSpacer size="m" />
-      <ConnectorConfigurationFormItems
-        itemsGrow={false}
-        isLoading={false}
-        direction="column"
-        items={requiredProviderForm}
-        setConfigEntry={onSetProviderConfigEntry}
-      />
-      <EuiSpacer size="m" />
-      {providerSecrets}
-      {providerConfig}
-      {providerSchema}
-      {taskTypeSchema}
-      {taskTypeConfig}
-      {selectedProvider ? (
+  const providerSettings = useMemo(
+    () =>
+      config?.provider ? (
         <EuiAccordion
           id="inferenceAdditionalOptions"
           buttonProps={{ css: buttonCss }}
@@ -475,70 +476,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
               </>
             ) : null}
 
-            {selectedTaskType ? (
-              <>
-                <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
-                      defaultMessage="Task settings"
-                    />
-                  </h4>
-                </EuiTitle>
-                <div className="euiFormHelpText euiFormRow__text">
-                  <FormattedMessage
-                    id="xpack.stackConnectors.components.inference.taskTypeHelpLabel"
-                    defaultMessage="Configure the inference task. These settings are specific to the task type you specified."
-                  />
-                </div>
-                <EuiSpacer size="m" />
-                <UseField path="config.taskType">
-                  {(field) => {
-                    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-                    return (
-                      <EuiFormRow
-                        id="taskTypeSelect"
-                        label={
-                          <FormattedMessage
-                            id="xpack.stackConnectors.components.inference.taskTypeLabel"
-                            defaultMessage="Task type"
-                          />
-                        }
-                        isInvalid={isInvalid}
-                        error={errorMessage}
-                        helpText={
-                          <FormattedMessage
-                            id="xpack.stackConnectors.components.inference.taskTypeSelectHelpLabel"
-                            defaultMessage="Configuration of AI Assistants requires a 'completion' task type."
-                          />
-                        }
-                      >
-                        <EuiButtonGroup
-                          data-test-subj="taskTypeSelect"
-                          legend="Task type"
-                          defaultValue={DEFAULT_TASK_TYPE}
-                          isDisabled={readOnly || isEdit}
-                          idSelected={selectedTaskType}
-                          onChange={onTaskTypeOptionsSelect}
-                          options={taskTypeOptions}
-                          color="text"
-                          type="single"
-                        />
-                      </EuiFormRow>
-                    );
-                  }}
-                </UseField>
-                <EuiSpacer size="s" />
-                <ConnectorConfigurationFormItems
-                  itemsGrow={false}
-                  isLoading={false}
-                  direction="column"
-                  items={taskTypeForm}
-                  setConfigEntry={onSetTaskTypeConfigEntry}
-                />
-              </>
-            ) : null}
+            {taskTypeSettings}
             <EuiHorizontalRule />
             <EuiTitle size="xxs" data-test-subj="task-type-details-label">
               <h4>
@@ -575,7 +513,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                   >
                     <EuiFieldText
                       fullWidth
-                      readOnly={isEdit}
+                      // readOnly={isEdit}
                       value={config.inferenceId}
                       onChange={() => {}}
                       prepend={inferenceUri}
@@ -608,7 +546,76 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             </UseField>
           </EuiPanel>
         </EuiAccordion>
-      ) : null}
+      ) : null,
+    [
+      buttonCss,
+      config,
+      euiTheme.colors.primary,
+      inferenceUri,
+      // isEdit,
+      onSetProviderConfigEntry,
+      optionalProviderForm,
+      taskTypeSettings,
+    ]
+  );
+  const providerSecrets = <UseField path="secrets.providerSecrets" component={HiddenField} />;
+  const providerConfig = <UseField path="config.providerConfig" component={HiddenField} />;
+  const providerSchema = <UseField path="config.providerSchema" component={HiddenField} />;
+  const taskTypeSchema = <UseField path="config.taskTypeSchema" component={HiddenField} />;
+  const taskTypeConfig = <UseField path="config.taskTypeConfig" component={HiddenField} />;
+
+  return (
+    <>
+      <UseField path="config.provider">
+        {(field) => {
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+          return (
+            <EuiFormRow
+              id="providerSelectBox"
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.stackConnectors.components.inference.providerLabel"
+                  defaultMessage="Provider"
+                />
+              }
+              isInvalid={isInvalid}
+              error={errorMessage}
+            >
+              <EuiInputPopover
+                id={'popoverId'}
+                fullWidth
+                input={providerSuperSelect}
+                isOpen={isPopoverOpen}
+                closePopover={handleClosePopover}
+                className="rightArrowIcon"
+              >
+                <SelectableProvider
+                  getSelectableOptions={getProviderOptions}
+                  onClosePopover={handleClosePopover}
+                  onProviderChange={onProviderChange}
+                />
+              </EuiInputPopover>
+            </EuiFormRow>
+          );
+        }}
+      </UseField>
+      <EuiSpacer size="m" />
+      <ConnectorConfigurationFormItems
+        itemsGrow={false}
+        isLoading={false}
+        direction="column"
+        items={requiredProviderForm}
+        setConfigEntry={onSetProviderConfigEntry}
+      />
+      <EuiSpacer size="m" />
+      {providerSecrets}
+      {providerConfig}
+      {providerSchema}
+      {taskTypeSchema}
+      {taskTypeConfig}
+      {providerSettings}
       <EuiSpacer size="l" />
       <EuiHorizontalRule />
     </>

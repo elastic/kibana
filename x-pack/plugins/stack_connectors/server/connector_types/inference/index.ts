@@ -48,18 +48,18 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       const taskSettings = config?.taskTypeConfig
         ? {
             task_settings: {
-              ...config?.taskTypeConfig,
+              ...unflattenObject(config?.taskTypeConfig),
             },
           }
         : {};
-      const settings = unflattenObject({
+      const settings = {
         service: config?.provider,
         service_settings: {
-          ...config?.providerConfig,
-          ...secrets?.providerSecrets,
+          ...unflattenObject(config?.providerConfig ?? {}),
+          ...unflattenObject(secrets?.providerSecrets ?? {}),
         },
         ...taskSettings,
-      });
+      };
       if (isUpdate) {
         // TODO: replace, when update API for inference endpoint exists
         await esClient?.transport.request({

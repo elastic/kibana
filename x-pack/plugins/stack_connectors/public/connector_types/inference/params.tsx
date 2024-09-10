@@ -27,7 +27,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.INVOKE, index);
+      editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.CHAT_COMPLETE, index);
     }
   }, [editAction, index, isTest, subAction]);
 

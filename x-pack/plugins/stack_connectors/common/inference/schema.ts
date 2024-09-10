@@ -12,9 +12,73 @@ export const ConfigSchema = schema.object({
   provider: schema.string({ defaultValue: DEFAULT_PROVIDER }),
   taskType: schema.string({ defaultValue: DEFAULT_TASK_TYPE }),
   inferenceId: schema.string(),
-  providerSchema: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { defaultValue: [] }),
+  providerSchema: schema.arrayOf(
+    schema.object(
+      {
+        key: schema.string(),
+        category: schema.maybe(schema.string()),
+        default_value: schema.maybe(
+          schema.nullable(schema.oneOf([schema.string(), schema.number(), schema.boolean()]))
+        ),
+        depends_on: schema.maybe(schema.arrayOf(schema.object({}))),
+        display: schema.string(), // DisplayType;
+        label: schema.string(),
+        options: schema.maybe(
+          schema.arrayOf(schema.object({}, { unknowns: 'allow', defaultValue: {} }), {
+            defaultValue: [],
+          })
+        ), // SelectOption[];
+        order: schema.maybe(schema.number()),
+        placeholder: schema.maybe(schema.string()),
+        required: schema.boolean(),
+        sensitive: schema.boolean(),
+        tooltip: schema.maybe(schema.string()),
+        type: schema.string(),
+        ui_restrictions: schema.maybe(schema.arrayOf(schema.object({}), { defaultValue: [] })),
+        validations: schema.maybe(schema.arrayOf(schema.object({}), { defaultValue: [] })),
+        value: schema.maybe(
+          schema.nullable(schema.oneOf([schema.string(), schema.number(), schema.boolean()]))
+        ),
+      },
+      { unknowns: 'ignore' }
+    ),
+    { defaultValue: [] }
+  ),
   providerConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
-  taskTypeSchema: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  taskTypeSchema: schema.maybe(
+    schema.arrayOf(
+      schema.object(
+        {
+          key: schema.string(),
+          category: schema.maybe(schema.string()),
+          default_value: schema.maybe(
+            schema.nullable(schema.oneOf([schema.string(), schema.number(), schema.boolean()]))
+          ),
+          depends_on: schema.maybe(schema.arrayOf(schema.object({}))),
+          display: schema.string(), // DisplayType;
+          label: schema.string(),
+          options: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow', defaultValue: {} }), {
+              defaultValue: [],
+            })
+          ), // SelectOption[];
+          order: schema.maybe(schema.number()),
+          placeholder: schema.maybe(schema.string()),
+          required: schema.boolean(),
+          sensitive: schema.boolean(),
+          tooltip: schema.maybe(schema.string()),
+          type: schema.string(),
+          ui_restrictions: schema.maybe(schema.arrayOf(schema.object({}), { defaultValue: [] })),
+          validations: schema.maybe(schema.arrayOf(schema.object({}), { defaultValue: [] })),
+          value: schema.maybe(
+            schema.nullable(schema.oneOf([schema.string(), schema.number(), schema.boolean()]))
+          ),
+        },
+        { unknowns: 'ignore' }
+      ),
+      { defaultValue: [] }
+    )
+  ),
   taskTypeConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
 });
 
