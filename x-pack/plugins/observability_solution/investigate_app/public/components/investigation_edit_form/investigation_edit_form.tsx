@@ -31,10 +31,12 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../hooks/use_update_investigation';
 import { InvestigationNotFound } from '../investigation_not_found/investigation_not_found';
 import { StatusField } from './fields/status_field';
+import { TagsField } from './fields/tags_field';
 
 export interface InvestigationForm {
   title: string;
   status: 'ongoing' | 'closed';
+  tags: string[];
 }
 
 interface Props {
@@ -61,8 +63,8 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
   const { mutateAsync: createInvestigation } = useCreateInvestigation();
 
   const methods = useForm<InvestigationForm>({
-    defaultValues: { title: 'New investigation', status: 'ongoing' },
-    values: investigation ? pick(investigation, ['title', 'status']) : undefined,
+    defaultValues: { title: 'New investigation', status: 'ongoing', tags: [] },
+    values: investigation ? pick(investigation, ['title', 'status', 'tags']) : undefined,
     mode: 'all',
   });
 
@@ -78,7 +80,7 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
     if (isEditing) {
       await updateInvestigation({
         investigationId: investigationId!,
-        payload: { title: data.title, status: data.status },
+        payload: { title: data.title, status: data.status, tags: data.tags },
       });
       onClose();
     } else {
@@ -91,6 +93,7 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
             to: new Date().getTime(),
           },
         },
+        tags: data.tags,
         origin: {
           type: 'blank',
         },
@@ -147,6 +150,9 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
               </EuiFlexItem>
               <EuiFlexItem grow>
                 <StatusField />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <TagsField />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>

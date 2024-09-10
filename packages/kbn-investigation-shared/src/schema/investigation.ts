@@ -22,6 +22,7 @@ const investigationSchema = t.type({
   }),
   origin: t.union([alertOriginSchema, blankOriginSchema]),
   status: t.union([t.literal('ongoing'), t.literal('closed')]),
+  tags: t.array(t.string),
   notes: t.array(investigationNoteSchema),
   items: t.array(investigationItemSchema),
 });

@@ -20,6 +20,7 @@ const updateInvestigationParamsSchema = t.type({
     params: t.type({
       timeRange: t.type({ from: t.number, to: t.number }),
     }),
+    tags: t.array(t.string),
   }),
 });
 
