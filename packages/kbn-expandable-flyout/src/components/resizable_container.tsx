@@ -8,21 +8,19 @@
  */
 
 import { EuiResizableContainer } from '@elastic/eui';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useExpandableFlyoutContext } from '../context';
-import { changeInternalPercentagesAction } from '../actions';
-import { selectWidthsById, useDispatch, useSelector } from '../redux';
+import { changeInternalPercentagesAction } from '../store/internal_percentages_actions';
+import { selectInternalPercentagesById, useDispatch, useSelector } from '../store/redux';
 import {
   RESIZABLE_BUTTON_TEST_ID,
   RESIZABLE_LEFT_SECTION_TEST_ID,
   RESIZABLE_RIGHT_SECTION_TEST_ID,
 } from './test_ids';
-import type { Panel } from '../types';
 import { LeftSection } from './left_section';
-import { FlyoutPanelProps, useExpandableFlyoutState } from '../..';
+import { FlyoutPanelProps } from '../..';
 import { RightSection } from './right_section';
-import { useSections } from '../hooks/use_sections';
 
 const RIGHT_SECTION_MIN_WIDTH = '380px';
 const LEFT_SECTION_MIN_WIDTH = '380px';
@@ -31,13 +29,25 @@ const RIGHT_PANEL_ID = 'right';
 
 interface ResizableContainerProps {
   /**
-   * List of all registered panels available for render
-   */
-  registeredPanels: Panel[];
-  /**
    *
    */
   showPreview: boolean;
+  /**
+   *
+   */
+  leftSection: any;
+  /**
+   *
+   */
+  rightSection: any;
+  /**
+   *
+   */
+  left: any;
+  /**
+   *
+   */
+  right: any;
 }
 
 /**
@@ -45,18 +55,23 @@ interface ResizableContainerProps {
  * It allows the resizing of the sections, saving the percentages in local storage.
  */
 export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
-  ({ registeredPanels, showPreview }: ResizableContainerProps) => {
+  ({ leftSection, rightSection, left, right, showPreview }: ResizableContainerProps) => {
+    console.log('render ResizableContainer');
+
     const { urlKey } = useExpandableFlyoutContext();
     const dispatch = useDispatch();
-    const { left, right } = useExpandableFlyoutState();
     const { internalLeftPercentage, internalRightPercentage } = useSelector(
-      selectWidthsById(urlKey)
+      selectInternalPercentagesById(urlKey)
     );
 
-    // retrieves the sections to be displayed
-    const { leftSection, rightSection } = useSections({
-      registeredPanels,
-    });
+    const leftComponent = useMemo(
+      () => (leftSection ? leftSection.component({ ...(left as FlyoutPanelProps) }) : null),
+      [leftSection, left]
+    );
+    const rightComponent = useMemo(
+      () => (rightSection ? rightSection.component({ ...(right as FlyoutPanelProps) }) : null),
+      [rightSection, right]
+    );
 
     return (
       <EuiResizableContainer
@@ -69,6 +84,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
               changeInternalPercentagesAction({
                 ...(newSizes as { left: number; right: number }),
                 id: urlKey,
+                savedToLocalStorage: true,
               })
             );
           }
@@ -84,9 +100,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
               paddingSize="none"
               data-test-subj={RESIZABLE_LEFT_SECTION_TEST_ID}
             >
-              <LeftSection
-                component={(leftSection as Panel).component({ ...(left as FlyoutPanelProps) })}
-              />
+              <LeftSection component={leftComponent} />
             </EuiResizablePanel>
             <EuiResizableButton disabled={showPreview} data-test-subj={RESIZABLE_BUTTON_TEST_ID} />
             <EuiResizablePanel
@@ -97,9 +111,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
               paddingSize="none"
               data-test-subj={RESIZABLE_RIGHT_SECTION_TEST_ID}
             >
-              <RightSection
-                component={(rightSection as Panel).component({ ...(right as FlyoutPanelProps) })}
-              />
+              <RightSection component={rightComponent} />
             </EuiResizablePanel>
           </>
         )}

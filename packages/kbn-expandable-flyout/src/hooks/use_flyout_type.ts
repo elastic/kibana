@@ -30,6 +30,7 @@ export interface UseFlyoutTypeResult {
  * The key is generated based on the current URL key.
  */
 export const useFlyoutType = (): UseFlyoutTypeResult => {
+  console.log('useFlyoutType');
   const { urlKey } = useExpandableFlyoutContext();
   const pushVsOverlayLocalStorageKey = useMemo(
     () => `${expandableFlyoutLocalStorageKey}${pushVsOverlayModeLocalStorageKey}${urlKey}`,

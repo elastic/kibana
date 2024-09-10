@@ -20,22 +20,10 @@ import {
   previousPreviewPanelAction,
   openPreviewPanelAction,
   urlChangedAction,
-  changeCollapsedWidthAction,
-  changeExpandedWidthAction,
-  resetCollapsedWidthAction,
-  resetExpandedWidthAction,
-  changeInternalPercentagesAction,
-  resetInternalPercentagesAction,
-  setDefaultWidthsAction,
-} from './actions';
-import { initialState } from './state';
+} from './panels_actions';
+import { initialState } from './panels_state';
 
-const expandableFlyoutLocalStorageKey = 'expandableFlyout';
-const collapsedLocalStorage = 'collapsedResizedWidth';
-const expandedLocalStorage = 'expandedResizedWidth';
-const internalPercentagesLocalStorage = 'internalPercentage';
-
-export const reducer = createReducer(initialState, (builder) => {
+export const panelsReducer = createReducer(initialState, (builder) => {
   builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
     if (id in state.panelsById) {
       state.panelsById[id].right = right;
@@ -159,101 +147,5 @@ export const reducer = createReducer(initialState, (builder) => {
     }
 
     state.needsSync = false;
-  });
-
-  builder.addCase(changeCollapsedWidthAction, (state, { payload: { width, id } }) => {
-    localStorage.setItem(
-      `${expandableFlyoutLocalStorageKey}.${collapsedLocalStorage}.${id}`,
-      width.toString()
-    );
-
-    if (id in state.widthsById) {
-      state.widthsById[id].collapsedWidth = width;
-    } else {
-      state.widthsById[id] = {
-        collapsedWidth: width,
-      };
-    }
-  });
-
-  builder.addCase(resetCollapsedWidthAction, (state, { payload: { id } }) => {
-    localStorage.removeItem(`${expandableFlyoutLocalStorageKey}.${collapsedLocalStorage}.${id}`);
-
-    if (id in state.widthsById) {
-      state.widthsById[id].collapsedWidth = undefined;
-    } else {
-      state.widthsById[id] = {
-        collapsedWidth: undefined,
-      };
-    }
-  });
-
-  builder.addCase(changeExpandedWidthAction, (state, { payload: { width, id } }) => {
-    localStorage.setItem(
-      `${expandableFlyoutLocalStorageKey}.${expandedLocalStorage}.${id}`,
-      width.toString()
-    );
-
-    if (id in state.widthsById) {
-      state.widthsById[id].expandedWidth = width;
-    } else {
-      state.widthsById[id] = {
-        expandedWidth: width,
-      };
-    }
-  });
-
-  builder.addCase(resetExpandedWidthAction, (state, { payload: { id } }) => {
-    localStorage.removeItem(`${expandableFlyoutLocalStorageKey}.${expandedLocalStorage}.${id}`);
-
-    if (id in state.widthsById) {
-      state.widthsById[id].expandedWidth = undefined;
-    } else {
-      state.widthsById[id] = {
-        expandedWidth: undefined,
-      };
-    }
-  });
-
-  builder.addCase(setDefaultWidthsAction, (state, { payload: { right, left, preview } }) => {
-    state.defaultWidths.rightWidth = right;
-    state.defaultWidths.leftWidth = left;
-    state.defaultWidths.previewWidth = preview;
-    state.defaultWidths.rightPercentage = (right / (right + left)) * 100;
-    state.defaultWidths.leftPercentage = (left / (right + left)) * 100;
-    state.defaultWidths.previewPercentage = (right / (right + left)) * 100;
-  });
-
-  builder.addCase(changeInternalPercentagesAction, (state, { payload: { right, left, id } }) => {
-    localStorage.setItem(
-      `${expandableFlyoutLocalStorageKey}.${internalPercentagesLocalStorage}.${id}`,
-      JSON.stringify({ left, right })
-    );
-
-    if (id in state.widthsById) {
-      state.widthsById[id].internalLeftPercentage = left;
-      state.widthsById[id].internalRightPercentage = right;
-    } else {
-      state.widthsById[id] = {
-        internalLeftPercentage: left,
-        internalRightPercentage: right,
-      };
-    }
-  });
-
-  builder.addCase(resetInternalPercentagesAction, (state, { payload: { id } }) => {
-    localStorage.removeItem(
-      `${expandableFlyoutLocalStorageKey}.${internalPercentagesLocalStorage}.${id}`
-    );
-
-    if (id in state.widthsById) {
-      state.widthsById[id].internalLeftPercentage = undefined;
-      state.widthsById[id].internalRightPercentage = undefined;
-    } else {
-      state.widthsById[id] = {
-        internalLeftPercentage: undefined,
-        internalRightPercentage: undefined,
-      };
-    }
   });
 });

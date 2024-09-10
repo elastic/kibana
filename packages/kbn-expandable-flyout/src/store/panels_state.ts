@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FlyoutPanelProps } from './types';
+import { FlyoutPanelProps } from '../types';
 
 export interface FlyoutPanelsState {
   /**
@@ -24,52 +24,6 @@ export interface FlyoutPanelsState {
   preview: FlyoutPanelProps[] | undefined;
 }
 
-export interface FlyoutWidthState {
-  /**
-   *
-   */
-  collapsedWidth?: number;
-  /**
-   *
-   */
-  expandedWidth?: number;
-  /**
-   *
-   */
-  internalLeftPercentage?: number;
-  /**
-   *
-   */
-  internalRightPercentage?: number;
-}
-
-export interface DefaultWidths {
-  /**
-   *
-   */
-  rightWidth: number;
-  /**
-   *
-   */
-  leftWidth: number;
-  /**
-   *
-   */
-  previewWidth: number;
-  /**
-   *
-   */
-  rightPercentage: number;
-  /**
-   *
-   */
-  leftPercentage: number;
-  /**
-   *
-   */
-  previewPercentage: number;
-}
-
 export interface State {
   /**
    * Store the panels for multiple flyouts
@@ -83,21 +37,9 @@ export interface State {
    * call an external state sync method.
    */
   needsSync?: boolean;
-  /**
-   * Store the panels for multiple flyouts
-   */
-  widthsById: {
-    [id: string]: FlyoutWidthState;
-  };
-  /**
-   *
-   */
-  defaultWidths: DefaultWidths;
 }
 
 export const initialState: State = {
   panelsById: {},
   needsSync: false,
-  widthsById: {},
-  defaultWidths: {} as DefaultWidths,
 };

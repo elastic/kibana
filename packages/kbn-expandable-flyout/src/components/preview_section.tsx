@@ -20,7 +20,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
-import { selectWidthsById, useSelector } from '../redux';
+import { selectInternalPercentagesById, useSelector } from '../store/redux';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
@@ -73,9 +73,9 @@ interface PreviewSectionProps {
    */
   banner?: PreviewBanner;
   /**
-   * True if the left section is visible, false otherwise
+   *
    */
-  showLeft: boolean;
+  showExpanded: boolean;
 }
 
 /**
@@ -83,19 +83,20 @@ interface PreviewSectionProps {
  * Will display a back and close button in the header for the previous and close feature respectively.
  */
 export const PreviewSection: React.FC<PreviewSectionProps> = memo(
-  ({ component, banner, showLeft }: PreviewSectionProps) => {
+  ({ component, banner, showExpanded }: PreviewSectionProps) => {
+    console.log('PreviewSection');
     const { euiTheme } = useEuiTheme();
     const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutApi();
 
     const { urlKey } = useExpandableFlyoutContext();
-    const { internalRightPercentage } = useSelector(selectWidthsById(urlKey));
+    const { internalRightPercentage } = useSelector(selectInternalPercentagesById(urlKey));
 
     // Calculate the width of the preview section based on the following
     // - if only the right section is visible, then we use 100% of the width (minus some padding)
     // - if both the right and left sections are visible, we use the width of the right section (minus the same padding)
     const width = useMemo(() => {
-      return showLeft ? `calc(${internalRightPercentage}% - 8px)` : `calc(100% - 8px)`;
-    }, [internalRightPercentage, showLeft]);
+      return showExpanded ? `calc(${internalRightPercentage}% - 8px)` : `calc(100% - 8px)`;
+    }, [internalRightPercentage, showExpanded]);
 
     const closeButton = (
       <EuiFlexItem grow={false}>

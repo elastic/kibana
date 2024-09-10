@@ -8,7 +8,7 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
-import { FlyoutPanelProps } from './types';
+import { FlyoutPanelProps } from '../types';
 
 export enum ActionType {
   openFlyout = 'open_flyout',
@@ -21,13 +21,9 @@ export enum ActionType {
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
   urlChanged = 'urlChanged',
-  changeCollapsedWidth = 'changeCollapsedWidth',
-  resetCollapsedWidth = 'resetCollapsedWidth',
-  changeExpandedWidth = 'changeExpandedWidth',
-  resetExpandedWidth = 'resetExpandedWidth',
-  setDefaultWidths = 'setDefaultWidths',
-  changeInternalPercentagesWidth = 'changeInternalPercentagesWidth',
-  resetInternalPercentagesWidth = 'resetInternalPercentagesWidth',
+  setDefaultWidths = 'set_default_widths',
+  changeInternalPercentagesWidth = 'change_internal_percentages_width',
+  resetInternalPercentagesWidth = 'reset_internal_percentages_width',
 }
 
 export const openPanelsAction = createAction<{
@@ -127,42 +123,6 @@ export const urlChangedAction = createAction<{
    */
   id: string;
 }>(ActionType.urlChanged);
-
-export const changeCollapsedWidthAction = createAction<{
-  /**
-   *
-   */
-  width: number;
-  /**
-   * Unique identifier for the flyout (either the urlKey or 'memory')
-   */
-  id: string;
-}>(ActionType.changeCollapsedWidth);
-
-export const resetCollapsedWidthAction = createAction<{
-  /**
-   * Unique identifier for the flyout (either the urlKey or 'memory')
-   */
-  id: string;
-}>(ActionType.resetCollapsedWidth);
-
-export const changeExpandedWidthAction = createAction<{
-  /**
-   *
-   */
-  width: number;
-  /**
-   * Unique identifier for the flyout (either the urlKey or 'memory')
-   */
-  id: string;
-}>(ActionType.changeExpandedWidth);
-
-export const resetExpandedWidthAction = createAction<{
-  /**
-   * Unique identifier for the flyout (either the urlKey or 'memory')
-   */
-  id: string;
-}>(ActionType.resetExpandedWidth);
 
 export const setDefaultWidthsAction = createAction<{
   /**

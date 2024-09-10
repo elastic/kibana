@@ -22,11 +22,14 @@ interface RightSectionProps {
  * Right section of the expanded flyout rendering a panel
  */
 export const RightSection: React.FC<RightSectionProps> = memo(
-  ({ component }: RightSectionProps) => (
-    <EuiFlexItem grow={false} style={{ height: '100%' }} data-test-subj={RIGHT_SECTION_TEST_ID}>
-      {component}
-    </EuiFlexItem>
-  )
+  ({ component }: RightSectionProps) => {
+    console.log('RightSection');
+    return (
+      <EuiFlexItem grow={false} style={{ height: '100%' }} data-test-subj={RIGHT_SECTION_TEST_ID}>
+        {component}
+      </EuiFlexItem>
+    );
+  }
 );
 
 RightSection.displayName = 'RightSection';

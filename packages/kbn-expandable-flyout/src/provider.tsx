@@ -12,10 +12,10 @@ import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
-import { FlyoutPanelsState } from './state';
+import { FlyoutPanelsState } from './store/panels_state';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
-import { Context, selectNeedsSync, store, useDispatch, useSelector } from './redux';
-import { urlChangedAction } from './actions';
+import { Context, selectNeedsSync, store, useDispatch, useSelector } from './store/redux';
+import { urlChangedAction } from './store/panels_actions';
 
 /**
  * Dispatches actions when url state changes and initializes the state when the app is loaded with flyout url parameters

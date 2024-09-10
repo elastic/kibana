@@ -46,6 +46,7 @@ export interface UseSectionsResult {
  * Hook that retrieves the left, right, and preview sections to be displayed in the flyout.
  */
 export const useSections = ({ registeredPanels }: UseSectionsParams): UseSectionsResult => {
+  console.log('useSections');
   const { left, preview, right } = useExpandableFlyoutState();
 
   const rightSection = useMemo(
@@ -57,14 +58,21 @@ export const useSections = ({ registeredPanels }: UseSectionsParams): UseSection
     [left, registeredPanels]
   );
   // retrieve the last preview panel (most recent)
-  const mostRecentPreview = preview ? preview[preview.length - 1] : undefined;
+  const mostRecentPreview = useMemo(
+    () => (preview ? preview[preview.length - 1] : undefined),
+    [preview]
+  );
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
   );
-  const previewBanner = isPreviewBanner(mostRecentPreview?.params?.banner)
-    ? mostRecentPreview?.params?.banner
-    : undefined;
+  const previewBanner = useMemo(
+    () =>
+      isPreviewBanner(mostRecentPreview?.params?.banner)
+        ? mostRecentPreview?.params?.banner
+        : undefined,
+    [mostRecentPreview?.params?.banner]
+  );
 
   return useMemo(
     () => ({

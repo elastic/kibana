@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { selectDefaultWidths, selectWidthsById, useSelector } from '../redux';
+import { selectDefaultWidths, selectWidthsById, useSelector } from '../store/redux';
 
 export interface UseFlyoutWidthParams {
   /**
@@ -17,15 +17,11 @@ export interface UseFlyoutWidthParams {
   /**
    *
    */
-  windowWidth: number;
+  showCollapsed: boolean;
   /**
-   * True if the right section is visible, false otherwise
+   *
    */
-  showRight: boolean;
-  /**
-   * True if the left section is visible, false otherwise
-   */
-  showLeft: boolean;
+  showExpanded: boolean;
 }
 
 /**
@@ -34,10 +30,10 @@ export interface UseFlyoutWidthParams {
  */
 export const useFlyoutWidth = ({
   urlKey,
-  windowWidth,
-  showRight,
-  showLeft,
+  showCollapsed,
+  showExpanded,
 }: UseFlyoutWidthParams): string => {
+  console.log('render useFlyoutWidth');
   const { collapsedWidth: collapsedResizedWidth, expandedWidth: expandedResizedWidth } =
     useSelector(selectWidthsById(urlKey));
   const { leftWidth: defaultLeftSectionWidth, rightWidth: defaultRightSectionWidth } =
@@ -45,13 +41,13 @@ export const useFlyoutWidth = ({
 
   let flyoutWidth: number = 0;
 
-  if (showRight && !showLeft) {
+  if (showCollapsed) {
     flyoutWidth = collapsedResizedWidth || defaultRightSectionWidth;
   }
 
-  if (showRight && showLeft) {
+  if (showExpanded) {
     flyoutWidth = expandedResizedWidth || defaultRightSectionWidth + defaultLeftSectionWidth;
   }
 
-  return `${(flyoutWidth / windowWidth) * 100}%`;
+  return `${flyoutWidth}px`;
 };

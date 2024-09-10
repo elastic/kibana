@@ -21,10 +21,13 @@ interface LeftSectionProps {
 /**
  * Left section of the expanded flyout rendering a panel
  */
-export const LeftSection: React.FC<LeftSectionProps> = memo(({ component }: LeftSectionProps) => (
-  <EuiFlexItem grow data-test-subj={LEFT_SECTION_TEST_ID} style={{ height: '100%' }}>
-    {component}
-  </EuiFlexItem>
-));
+export const LeftSection: React.FC<LeftSectionProps> = memo(({ component }: LeftSectionProps) => {
+  console.log('LeftSection');
+  return (
+    <EuiFlexItem grow data-test-subj={LEFT_SECTION_TEST_ID} style={{ height: '100%' }}>
+      {component}
+    </EuiFlexItem>
+  );
+});
 
 LeftSection.displayName = 'LeftSection';

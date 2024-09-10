@@ -23,6 +23,11 @@ import {
 import { css } from '@emotion/css';
 import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { changePushVsOverlayAction } from '../store/push_vs_overlay_actions';
+import { resetCollapsedWidthAction, resetExpandedWidthAction } from '../store/widths_actions';
+import { resetInternalPercentagesAction } from '../store/internal_percentages_actions';
+
+import { selectPushVsOverlayById, useDispatch, useSelector } from '../store/redux';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
   SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID,
@@ -71,39 +76,43 @@ const FLYOUT_RESIZE_BUTTON = i18n.translate('expandableFlyout.renderMenu.flyoutR
 
 interface SettingsMenuProps {
   /**
+   *
+   */
+  urlKey: string | undefined;
+  /**
    * Current flyout type
    */
-  flyoutTypeProps: {
+  flyoutCustomProps?: {
     /**
-     * 'push' or 'overlay'
+     * Hide the gear icon and settings menu if true
      */
-    type: EuiFlyoutProps['type'];
+    hideSettings?: boolean;
     /**
-     * Callback to change the flyout type
+     * Control if the option to render in overlay or push mode is enabled or not
      */
-    onChange: (type: EuiFlyoutProps['type']) => void;
+    pushVsOverlay?: {
+      /**
+       * Disables the option
+       */
+      disabled: boolean;
+      /**
+       * Tooltip to display
+       */
+      tooltip: string;
+    };
     /**
-     * Disables the button group for flyout where the option shouldn't be available
+     * Control if the option to resize the flyout is enabled or not
      */
-    disabled: boolean;
-    /**
-     * Allows to show a tooltip to explain why the option is disabled
-     */
-    tooltip: string;
-  };
-  flyoutResizeProps: {
-    /**
-     *
-     */
-    onReset: () => void;
-    /**
-     * Disables the button group for flyout where the option shouldn't be available
-     */
-    disabled: boolean;
-    /**
-     * Allows to show a tooltip to explain why the option is disabled
-     */
-    tooltip: string;
+    resize?: {
+      /**
+       * Disables the option
+       */
+      disabled: boolean;
+      /**
+       * Tooltip to display
+       */
+      tooltip: string;
+    };
   };
 }
 
@@ -113,24 +122,38 @@ interface SettingsMenuProps {
  * - Flyout type: overlay or push
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
-  ({ flyoutTypeProps, flyoutResizeProps }: SettingsMenuProps) => {
+  ({ urlKey, flyoutCustomProps }: SettingsMenuProps) => {
+    console.log('SettingsMenu');
+    const dispatch = useDispatch();
+
+    const flyoutType = useSelector(selectPushVsOverlayById(urlKey));
+
     const [isPopoverOpen, setPopover] = useState(false);
     const togglePopover = () => {
       setPopover(!isPopoverOpen);
     };
 
-    const pushVsOverlayOnChange = useCallback(
-      (id: string) => {
-        flyoutTypeProps.onChange(id as EuiFlyoutProps['type']);
-        setPopover(false);
-      },
-      [flyoutTypeProps]
-    );
+    const pushVsOverlayOnChange = useCallback((id: string) => {
+      if (urlKey) {
+        dispatch(
+          changePushVsOverlayAction({
+            type: id as EuiFlyoutProps['type'],
+            id: urlKey,
+            savedToLocalStorage: true,
+          })
+        );
+      }
+      setPopover(false);
+    }, []);
 
     const resetSizeOnClick = useCallback(() => {
-      flyoutResizeProps.onReset();
+      if (urlKey) {
+        dispatch(resetCollapsedWidthAction({ id: urlKey }));
+        dispatch(resetExpandedWidthAction({ id: urlKey }));
+        dispatch(resetInternalPercentagesAction({ id: urlKey }));
+      }
       setPopover(false);
-    }, [flyoutResizeProps]);
+    }, []);
 
     const panels = [
       {
@@ -141,8 +164,8 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
             <EuiTitle size="xxs" data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_TITLE_TEST_ID}>
               <h3>
                 {FLYOUT_TYPE_TITLE}{' '}
-                {flyoutTypeProps.tooltip && (
-                  <EuiToolTip position="top" content={flyoutTypeProps.tooltip}>
+                {flyoutCustomProps?.pushVsOverlay?.tooltip && (
+                  <EuiToolTip position="top" content={flyoutCustomProps?.pushVsOverlay?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
                       type="iInCircle"
@@ -171,17 +194,17 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   toolTipContent: FLYOUT_TYPE_PUSH_TOOLTIP,
                 },
               ]}
-              idSelected={flyoutTypeProps.type as string}
+              idSelected={flyoutType || 'overlay'}
               onChange={pushVsOverlayOnChange}
-              isDisabled={flyoutTypeProps.disabled}
+              isDisabled={flyoutCustomProps?.pushVsOverlay?.disabled}
               data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}
             />
             <EuiSpacer size="m" />
             <EuiTitle size="xxs" data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID}>
               <h3>
                 {FLYOUT_RESIZE_TITLE}{' '}
-                {flyoutResizeProps.tooltip && (
-                  <EuiToolTip position="top" content={flyoutResizeProps.tooltip}>
+                {flyoutCustomProps?.resize?.tooltip && (
+                  <EuiToolTip position="top" content={flyoutCustomProps?.resize?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
                       type="iInCircle"
@@ -196,7 +219,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
             <EuiSpacer size="s" />
             <EuiButtonEmpty
               onClick={resetSizeOnClick}
-              disabled={flyoutResizeProps.disabled}
+              disabled={flyoutCustomProps?.resize?.disabled}
               data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID}
             >
               {FLYOUT_RESIZE_BUTTON}

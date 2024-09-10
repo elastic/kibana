@@ -8,9 +8,8 @@
  */
 
 import { useLayoutEffect, useState } from 'react';
-import { useExpandableFlyoutContext } from '../context';
-import { useDispatch } from '../redux';
-import { setDefaultWidthsAction } from '../actions';
+import { useDispatch } from '../store/redux';
+import { setDefaultWidthsAction } from '../store/default_widths_actions';
 
 const RIGHT_SECTION_MIN_WIDTH = 380;
 const MIN_RESOLUTION_BREAKPOINT = 992;
@@ -26,8 +25,8 @@ const FULL_WIDTH_PADDING = 48;
  * Hook that returns the browser window width
  */
 export const useWindowWidth = (): number => {
+  console.log('useFlyoutWidth');
   const dispatch = useDispatch();
-  const { urlKey } = useExpandableFlyoutContext();
 
   const [width, setWidth] = useState(0);
 
@@ -36,7 +35,7 @@ export const useWindowWidth = (): number => {
       setWidth(window.innerWidth);
 
       const windowWidth = window.innerWidth;
-      if (windowWidth !== 0 && urlKey) {
+      if (windowWidth !== 0) {
         let rightSectionWidth: number;
         if (windowWidth < MIN_RESOLUTION_BREAKPOINT) {
           // the right section's width will grow from 380px (at 992px resolution) while handling tiny screens by not going smaller than the window width
@@ -80,7 +79,7 @@ export const useWindowWidth = (): number => {
     window.addEventListener('resize', updateSize);
     updateSize();
     return () => window.removeEventListener('resize', updateSize);
-  }, [dispatch, urlKey]);
+  }, [dispatch]);
 
   return width;
 };

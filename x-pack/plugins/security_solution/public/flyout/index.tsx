@@ -143,6 +143,7 @@ export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.tim
  * This flyout support push/overlay mode. The value is saved in local storage.
  */
 export const SecuritySolutionFlyout = memo(() => {
+  console.log('SecuritySolutionFlyout');
   const onClose = useCallback(
     () =>
       window.dispatchEvent(
@@ -171,6 +172,7 @@ SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
  * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
  */
 export const TimelineFlyout = memo(() => {
+  console.log('TimelineFlyout');
   const { euiTheme } = useEuiTheme();
 
   const onClose = useCallback(
