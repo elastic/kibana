@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import React, { useMemo, useRef } from 'react';
 import { Item } from '@kbn/investigation-shared';
-
+import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigateTextButton } from '../investigate_text_button';
@@ -22,6 +22,7 @@ interface AddFromLibraryButtonProps {
 }
 
 export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
+  const children$ = useMemo(() => new BehaviorSubject({}), []);
   const {
     dependencies: {
       start: { contentManagement },
@@ -31,7 +32,7 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
   const panelRef = useRef<OverlayRef>();
 
   const container = useMemo<
-    Pick<PresentationContainer, 'addNewPanel'> & {
+    PresentationContainer & {
       addNewEmbeddable: (
         type: string,
         explicitInput: { savedObjectId: string },
@@ -92,8 +93,18 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
         });
         return { id: v4() };
       },
+      removePanel: async (...args) => {
+        throw new Error('removePanel not supported in this context');
+      },
+      replacePanel: async (...args) => {
+        throw new Error('replacePanel not supported in this context');
+      },
+      getPanelCount() {
+        return 0;
+      },
+      children$,
     };
-  }, [contentManagement.client, onItemAdd]);
+  }, [children$, contentManagement.client, onItemAdd]);
 
   return (
     <InvestigateTextButton
