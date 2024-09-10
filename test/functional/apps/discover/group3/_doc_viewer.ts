@@ -235,19 +235,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('show only selected fields in ES|QL mode', function () {
       beforeEach(async () => {
-        await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
       });
 
       it('should disable the switch when no fields are selected', async function () {
         const testQuery = 'from logstash-* | sort @timestamp | limit 10';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
 
         const showOnlySelectedFieldsSwitch = await testSubjects.find(
           'unifiedDocViewerShowOnlySelectedFieldsSwitch'
@@ -266,17 +266,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testQuery = 'from logstash-* | sort @timestamp | limit 10';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('agent.raw');
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('agent');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
 
         const showOnlySelectedFieldsSwitch = await testSubjects.find(
           'unifiedDocViewerShowOnlySelectedFieldsSwitch'
@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('show only selected fields in data view mode', function () {
       it('should disable the switch when no fields are selected', async function () {
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
 
         const showOnlySelectedFieldsSwitch = await testSubjects.find(
           'unifiedDocViewerShowOnlySelectedFieldsSwitch'
@@ -333,14 +333,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow toggling the switch', async function () {
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('@tags');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('@tags');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
 
         const showOnlySelectedFieldsSwitch = await testSubjects.find(
           'unifiedDocViewerShowOnlySelectedFieldsSwitch'
