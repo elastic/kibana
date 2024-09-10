@@ -41,3 +41,7 @@
     border-radius: $euiBorderRadius;
   }
 }
+
+.TextBasedLangEditor .monaco-editor .parameter-hints-widget > .phwrapper {
+  max-width: 800px !important;
+}

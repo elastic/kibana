@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import type { AstProviderFn } from '@kbn/esql-ast';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -18,123 +18,9 @@ import {
   getCommandDefinition,
   type ESQLCallbacks,
   getPolicyHelper,
-  collectVariables,
-  ESQLRealField,
 } from '@kbn/esql-validation-autocomplete';
-import { correctQuerySyntax } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
-import type { EditorContext } from '@kbn/esql-validation-autocomplete/src/autocomplete/types';
-import {
-  getQueryForFields,
-  getValidSignaturesAndTypesToSuggestNext,
-} from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
-import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
-import {
-  TIME_SYSTEM_DESCRIPTIONS,
-  TIME_SYSTEM_PARAMS,
-} from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
-import { isESQLFunction, isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
+import type { monaco } from '../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
-import { monaco } from '../../../monaco_imports';
-
-const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
-  defaultMessage: 'Acceptable types',
-});
-
-async function getHoverItemForFunction(
-  model: monaco.editor.ITextModel,
-  position: monaco.Position,
-  token: monaco.CancellationToken,
-  astProvider: AstProviderFn,
-  resourceRetriever?: ESQLCallbacks
-) {
-  const context: EditorContext = {
-    triggerCharacter: ' ',
-    triggerKind: 1,
-  };
-
-  const fullText = model.getValue();
-  const offset = monacoPositionToOffset(fullText, position);
-  const innerText = fullText.substring(0, offset);
-
-  const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
-  const astContext = getAstContext(innerText, ast, offset);
-
-  const { node } = astContext;
-  const commands = ast;
-
-  if (isESQLFunction(node) && astContext.type === 'function') {
-    const queryForFields = getQueryForFields(
-      buildQueryUntilPreviousCommand(ast, correctedQuery),
-      ast
-    );
-    const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
-
-    const fnDefinition = getFunctionDefinition(node.name);
-    // early exit on no hit
-    if (!fnDefinition) {
-      return undefined;
-    }
-    const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-    const anyVariables = collectVariables(commands, fieldsMap, innerText);
-
-    const references = {
-      fields: fieldsMap,
-      variables: anyVariables,
-    };
-
-    const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
-      node,
-      references,
-      fnDefinition,
-      fullText,
-      offset
-    );
-
-    const hoveredArg: ESQLAstItem & {
-      dataType: string;
-    } = enrichedArgs[enrichedArgs.length - 1];
-    const contents = [];
-    if (hoveredArg && isESQLNamedParamLiteral(hoveredArg)) {
-      const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
-      // We only know if it's start or end after first 3 characters (?t_s or ?t_e)
-      if (hoveredArg.text.length > 3 && bestMatch) {
-        contents.push({
-          value: `**${bestMatch}**: ${
-            TIME_SYSTEM_DESCRIPTIONS[bestMatch as keyof typeof TIME_SYSTEM_DESCRIPTIONS]
-          }`,
-        });
-      }
-    }
-
-    if (typesToSuggestNext.length > 0) {
-      contents.push({
-        value: `**${ACCEPTABLE_TYPES_HOVER}**: ${typesToSuggestNext
-          .map(
-            ({ type, constantOnly }) =>
-              `${constantOnly ? '_constant_ ' : ''}**${type}**` +
-              // If function arg is a constant date, helpfully suggest named time system params
-              (constantOnly && type === 'date' ? ` | ${TIME_SYSTEM_PARAMS.join(' | ')}` : '')
-          )
-          .join(' | ')}`,
-      });
-    }
-    const hints =
-      contents.length > 0
-        ? {
-            range: new monaco.Range(
-              1,
-              1,
-              model.getLineCount(),
-              model.getLineMaxColumn(model.getLineCount())
-            ),
-            contents,
-          }
-        : undefined;
-    return hints;
-  }
-}
 
 export async function getHoverItem(
   model: monaco.editor.ITextModel,
@@ -143,27 +29,12 @@ export async function getHoverItem(
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const fullText = model.getValue();
-  const offset = monacoPositionToOffset(fullText, position);
+  const innerText = model.getValue();
+  const offset = monacoPositionToOffset(innerText, position);
 
-  const { ast } = await astProvider(fullText);
-  const astContext = getAstContext(fullText, ast, offset);
-
+  const { ast } = await astProvider(innerText);
+  const astContext = getAstContext(innerText, ast, offset);
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
-
-  let hoverContent: monaco.languages.Hover = {
-    contents: [],
-  };
-  const hoverItemsForFunction = await getHoverItemForFunction(
-    model,
-    position,
-    token,
-    astProvider,
-    resourceRetriever
-  );
-  if (hoverItemsForFunction) {
-    hoverContent = hoverItemsForFunction;
-  }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
     return { contents: [] };
@@ -173,12 +44,12 @@ export async function getHoverItem(
     const fnDefinition = getFunctionDefinition(astContext.node.name);
 
     if (fnDefinition) {
-      hoverContent.contents.push(
-        ...[
+      return {
+        contents: [
           { value: getFunctionSignatures(fnDefinition)[0].declaration },
           { value: fnDefinition.description },
-        ]
-      );
+        ],
+      };
     }
   }
 
@@ -187,8 +58,8 @@ export async function getHoverItem(
       if (isSourceItem(astContext.node) && astContext.node.sourceType === 'policy') {
         const policyMetadata = await getPolicyMetadata(astContext.node.name);
         if (policyMetadata) {
-          hoverContent.contents.push(
-            ...[
+          return {
+            contents: [
               {
                 value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
                   defaultMessage: '**Indexes**',
@@ -204,8 +75,8 @@ export async function getHoverItem(
                   defaultMessage: '**Fields**',
                 })}: ${policyMetadata.enrichFields.join(', ')}`,
               },
-            ]
-          );
+            ],
+          };
         }
       }
       if (isSettingItem(astContext.node)) {
@@ -215,17 +86,18 @@ export async function getHoverItem(
         );
         if (settingDef) {
           const mode = settingDef.values.find(({ name }) => name === astContext.node!.name)!;
-          hoverContent.contents.push(
-            ...[
+          return {
+            contents: [
               { value: settingDef.description },
               {
                 value: `**${mode.name}**: ${mode.description}`,
               },
-            ]
-          );
+            ],
+          };
         }
       }
     }
   }
-  return hoverContent;
+
+  return { contents: [] };
 }

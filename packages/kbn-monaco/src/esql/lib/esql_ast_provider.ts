@@ -53,7 +53,7 @@ export class ESQLAstAdapter {
     context: monaco.languages.SignatureHelpContext
   ) {
     const getAstFn = await this.getAstWorker(model);
-    return getSignatureHelp(model, position, context, getAstFn);
+    return getSignatureHelp(model, position, context, getAstFn, this.callbacks);
   }
 
   async getHover(

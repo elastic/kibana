@@ -524,6 +524,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
 
+  const signatureProvider = useMemo(
+    () => ESQLLang.getSignatureProvider?.(esqlCallbacks),
+    [esqlCallbacks]
+  );
+
   const codeActionProvider = useMemo(
     () => ESQLLang.getCodeActionProvider?.(esqlCallbacks),
     [esqlCallbacks]
@@ -667,6 +672,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  signatureProvider={signatureProvider}
                   codeActions={codeActionProvider}
                   onChange={onQueryUpdate}
                   editorDidMount={(editor) => {
