@@ -626,7 +626,7 @@ describe('function validation', () => {
           supportedCommands: ['stats'],
           signatures: [
             {
-              params: [{ name: 'arg1', type: 'keyword', noNestingFunctions: true }],
+              params: [{ name: 'arg1', type: 'keyword' }],
               returnType: 'keyword',
             },
           ],
