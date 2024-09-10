@@ -6,27 +6,33 @@
  */
 
 import expect from '@kbn/expect';
-
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const log = getService('log');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
 
-  describe('Pipelines', function () {
+  describe('Ingest Pipelines', function () {
+    before(async () => {
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
+    });
+
     after(async () => {
       await ingestPipelines.api.deletePipelines();
+      await supertestWithAdminScope.destroy();
     });
 
     describe('Create', () => {
       it('should create a pipeline', async () => {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBody();
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
           .send(pipelineRequestBody)
           .expect(200);
 
@@ -37,10 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should create a pipeline with only required fields', async () => {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields(); // Includes name and processors[] only
-
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
           .send(pipelineRequestBody)
           .expect(200);
 
@@ -51,16 +55,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not allow creation of an existing pipeline', async () => {
         const pipelineRequestBody = ingestPipelines.fixtures.createPipelineBodyWithRequiredFields(); // Includes name and processors[] only
-
         const { name, ...esPipelineRequestBody } = pipelineRequestBody;
-
         // First, create a pipeline using the ES API
         await ingestPipelines.api.createPipeline({ id: name, ...esPipelineRequestBody });
-
         // Then, create a pipeline with our internal API
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
           .send(pipelineRequestBody)
           .expect(409);
 
@@ -75,9 +75,8 @@ export default function ({ getService }: FtrProviderContext) {
         const pipelineRequestBody = {
           name: 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest1',
         };
-        await supertest
+        await supertestWithAdminScope
           .post(ingestPipelines.fixtures.apiBasePath)
-          .set('kbn-xsrf', 'xxx')
           .send(pipelineRequestBody)
           .expect(400);
       });
@@ -105,10 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow an existing pipeline to be updated', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
-
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .put(uri)
-          .set('kbn-xsrf', 'xxx')
           .send({
             ...pipeline,
             description: 'updated test pipeline description',
@@ -126,10 +123,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow optional fields to be removed', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
-
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .put(uri)
-          .set('kbn-xsrf', 'xxx')
           .send({
             // removes description, version, on_failure, and _meta
             processors: pipeline.processors,
@@ -143,10 +138,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should not allow a non-existing pipeline to be updated', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/pipeline_does_not_exist`;
-
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .put(uri)
-          .set('kbn-xsrf', 'xxx')
           .send({
             ...pipeline,
             description: 'updated test pipeline description',
@@ -188,9 +181,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('all pipelines', () => {
         it('should return an array of pipelines', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithAdminScope
             .get(ingestPipelines.fixtures.apiBasePath)
-            .set('kbn-xsrf', 'xxx')
             .expect(200);
 
           expect(Array.isArray(body)).to.be(true);
@@ -210,8 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe('one pipeline', () => {
         it('should return a single pipeline', async () => {
           const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineName}`;
-
-          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+          const { body } = await supertestWithAdminScope.get(uri).expect(200);
 
           expect(body).to.eql({
             ...pipeline,
@@ -246,10 +237,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should delete a pipeline', async () => {
         const pipelineA = pipelineIds[0];
-
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineA}`;
-
-        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertestWithAdminScope.delete(uri).expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [pipelineA],
@@ -260,11 +249,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should delete multiple pipelines', async () => {
         const pipelineB = pipelineIds[1];
         const pipelineC = pipelineIds[2];
-        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineIds[1]},${pipelineIds[2]}`;
-
+        const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineB},${pipelineC}`;
         const {
           body: { itemsDeleted, errors },
-        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        } = await supertestWithAdminScope.delete(uri).expect(200);
 
         expect(errors).to.eql([]);
 
@@ -277,10 +265,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return an error for any pipelines not sucessfully deleted', async () => {
         const PIPELINE_DOES_NOT_EXIST = 'pipeline_does_not_exist';
         const pipelineD = pipelineIds[3];
-
         const uri = `${ingestPipelines.fixtures.apiBasePath}/${pipelineD},${PIPELINE_DOES_NOT_EXIST}`;
-
-        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertestWithAdminScope.delete(uri).expect(200);
 
         expect(body).to.eql({
           itemsDeleted: [pipelineD],
@@ -308,9 +294,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('should successfully simulate a pipeline', async () => {
         const { name, ...pipeline } = ingestPipelines.fixtures.createPipelineBody();
         const documents = ingestPipelines.fixtures.createDocuments();
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
-          .set('kbn-xsrf', 'xxx')
           .send({
             pipeline,
             documents,
@@ -326,9 +311,8 @@ export default function ({ getService }: FtrProviderContext) {
         const { name, ...pipeline } =
           ingestPipelines.fixtures.createPipelineBodyWithRequiredFields();
         const documents = ingestPipelines.fixtures.createDocuments();
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .post(`${ingestPipelines.fixtures.apiBasePath}/simulate`)
-          .set('kbn-xsrf', 'xxx')
           .send({
             pipeline,
             documents,
@@ -370,8 +354,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a document', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/${DOCUMENT_ID}`;
-
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+        const { body } = await supertestWithAdminScope.get(uri).expect(200);
 
         expect(body).to.eql({
           _index: INDEX,
@@ -382,8 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return an error if the document does not exist', async () => {
         const uri = `${ingestPipelines.fixtures.apiBasePath}/documents/${INDEX}/2`; // Document 2 does not exist
-
-        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(404);
+        const { body } = await supertestWithAdminScope.get(uri).expect(404);
 
         expect(body).to.eql({
           error: 'Not Found',
@@ -398,9 +380,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('should map to a pipeline', async () => {
         const validCsv =
           'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
-        const { body } = await supertest
+        const { body } = await supertestWithAdminScope
           .post(`${ingestPipelines.fixtures.apiBasePath}/parse_csv`)
-          .set('kbn-xsrf', 'xxx')
           .send({
             copyAction: 'copy',
             file: validCsv,
