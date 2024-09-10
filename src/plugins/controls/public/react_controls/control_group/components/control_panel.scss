@@ -66,6 +66,6 @@
 
 .controlFrame__formControlLayout:not(.controlFrame__formControlLayout--twoLine).controlFrame__formControlLayout--edit {
   .euiFormControlLayout__prepend {
-    padding-inline-start: $euiSizeXS * 0.5; // skinny icon
+    padding-inline-start: $euiSizeXS * .5; // skinny icon
   }
 }
