@@ -63,7 +63,7 @@ describe('Diffable rule schema', () => {
           {
             references: {
               pick_version: 'RESOLVED',
-              resolved_value: ['www.link1.com', 'www.link2.com'],
+              resolved_value: ['www.example.com'],
             },
           },
         ];
@@ -79,7 +79,7 @@ describe('Diffable rule schema', () => {
         const input = {
           references: {
             pick_version: 'MERGED',
-            resolved_value: ['www.link1.com', 'www.link2.com'],
+            resolved_value: ['www.example.com'],
           },
         };
         const result = RuleFieldsToUpgrade.safeParse(input);
@@ -93,15 +93,11 @@ describe('Diffable rule schema', () => {
         const input = {
           references: {
             pick_version: 'RESOLVED',
-            resolved_value: 'www.link1.com',
+            resolved_value: 'www.example.com',
           },
           tags: {
             pick_version: 'RESOLVED',
             resolved_value: 4,
-          },
-          name: {
-            pick_version: 'RESOLVED',
-            resolved_value: 'Valid type name',
           },
         };
         const result = RuleFieldsToUpgrade.safeParse(input);
