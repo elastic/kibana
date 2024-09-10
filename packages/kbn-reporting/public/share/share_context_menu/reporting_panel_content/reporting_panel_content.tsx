@@ -120,7 +120,6 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return this.props.objectId === undefined || this.props.objectId === '';
   };
 
-  // FIXME: is this not used?
   private renderCopyURLButton({
     isUnsaved,
     exceedsMaxLength,

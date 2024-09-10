@@ -394,6 +394,7 @@ export const reportingExportModalProvider = ({
       label: 'PDF' as const,
       generateExport: generateReportPDF,
       generateExportUrl: ({ optimizedForPrinting }) => {
+        // FIXME: use optimizedForPrinting option
         const relativePathPDF = apiClient.getReportingPublicJobPath(
           'printablePdfV2',
           apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'printablePdfV2')())
