@@ -224,10 +224,9 @@ export async function fetchServicePathsFromTraceIds({
       
                   // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
                   if (parent['span.destination.service.resource'] != null
-                    && !parent['span.destination.service.resource'].equals("")
-                    && (!parent['service.name'].equals(event['service.name'])
-                      || !parent['service.environment'].equals(event['service.environment'])
-                    )
+                    && parent['span.destination.service.resource'] != ""
+                    && (parent['service.name'] != event['service.name']
+                      || parent['service.environment'] != event['service.environment'])
                   ) {
                     def parentDestination = getDestination(parent);
                     context.externalToServiceMap.put(parentDestination, service);
