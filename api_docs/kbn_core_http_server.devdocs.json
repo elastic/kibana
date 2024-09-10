@@ -4783,14 +4783,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/check.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/apm.ts"
               },
@@ -7361,14 +7353,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/create.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/reset.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
@@ -8539,6 +8523,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
@@ -8887,10 +8875,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9021,6 +9005,10 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9275,10 +9263,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack",
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/update.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -9821,14 +9805,6 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/delete.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",
@@ -14300,6 +14276,10 @@
               },
               {
                 "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_es_data.ts"
+              },
+              {
+                "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
               },
               {
@@ -16463,6 +16443,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
               },
               {
                 "plugin": "securitySolution",

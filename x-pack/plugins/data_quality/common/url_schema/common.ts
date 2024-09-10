@@ -45,9 +45,9 @@ export const degradedFieldRT = rt.exact(
 export const dataStreamRT = new rt.Type<string, string, unknown>(
   'dataStreamRT',
   (input: unknown): input is string =>
-    typeof input === 'string' && (input.match(/-/g) || []).length === 2,
+    typeof input === 'string' && (input.match(/-/g) || []).length >= 2,
   (input, context) =>
-    typeof input === 'string' && (input.match(/-/g) || []).length === 2
+    typeof input === 'string' && (input.match(/-/g) || []).length >= 2
       ? rt.success(input)
       : rt.failure(input, context),
   rt.identity

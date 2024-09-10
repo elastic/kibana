@@ -12,26 +12,24 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/security/cypress/security_config.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
 
+  # Playwright
+  - x-pack/test/security_solution_playwright/serverless_config.ts
+
   # Serverless base config files
   - x-pack/test_serverless/api_integration/config.base.ts
   - x-pack/test_serverless/functional/config.base.ts
   - x-pack/test_serverless/shared/config.base.ts
 
-  # Serverless feature flag config files (move to enabled after tests are added)
-  - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
-  - x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
-  - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless.ts

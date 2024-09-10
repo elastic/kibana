@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should carry over palette to the pie chart', async () => {
-      await PageObjects.lens.switchToVisualization('donut');
+      await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.openDimensionEditor(
         'lnsPie_sliceByDimensionPanel > lns-dimensionTrigger'
       );

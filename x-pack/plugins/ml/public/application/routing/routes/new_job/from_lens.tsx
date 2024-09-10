@@ -40,7 +40,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       },
       dashboard: dashboardService,
       uiSettings: kibanaConfig,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
       lens,
     },
   } = useMlKibana();
@@ -52,7 +52,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
         {
           dataViews,
           lens,
-          mlApiServices,
+          mlApi,
           mlJobService,
           timeFilter,
           kibanaConfig,

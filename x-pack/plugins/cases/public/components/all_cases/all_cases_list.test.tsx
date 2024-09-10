@@ -262,12 +262,12 @@ describe('AllCasesListGeneric', () => {
       expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
-      () => useCasesColumns(defaultColumnArgs),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
+    const { result } = renderHook<
+      React.PropsWithChildren<GetCasesColumn>,
+      UseCasesColumnsReturnValue
+    >(() => useCasesColumns(defaultColumnArgs), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
 
     await waitFor(() => {
       result.current.columns.map(

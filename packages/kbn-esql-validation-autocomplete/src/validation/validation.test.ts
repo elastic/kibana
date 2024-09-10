@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { join } from 'path';
@@ -274,7 +275,7 @@ describe('validation logic', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
           ])
       );
     });
@@ -530,16 +531,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -16159,6 +16160,7 @@ describe('validation logic', () => {
         getSources: /Unknown index/,
         getPolicies: /Unknown policy/,
         getFieldsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
+        getPreferences: /Unknown/,
       };
       return excludedCallback.map((callback) => contentByCallback[callback]) || [];
     }

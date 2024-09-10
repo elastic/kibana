@@ -58,9 +58,6 @@ const isSupportedDynamicMetric = (op: OperationMetadata) =>
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
-const metricGroupLabel = i18n.translate('xpack.lens.metric.groupLabel', {
-  defaultMessage: 'Goal and single value',
-});
 
 const getMetricLayerConfiguration = (
   props: VisualizationConfigProps<MetricVisualizationState>
@@ -304,20 +301,21 @@ export const getMetricVisualization = ({
 }): Visualization<MetricVisualizationState> => ({
   id: LENS_METRIC_ID,
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
       icon: IconChartMetric,
       label: metricLabel,
-      groupLabel: metricGroupLabel,
       showExperimentalBadge: true,
-      sortPriority: 3,
+      sortPriority: 4,
+      description: i18n.translate('xpack.lens.metric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
+      }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return LENS_METRIC_ID;
-  },
 
   clearLayer(state) {
     const newState = { ...state };

@@ -58,7 +58,7 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
 import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../contexts/kibana';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
@@ -110,7 +110,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     },
   } = kibana;
   const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const mlJobService = useMlJobService();
 
   const job = useMemo(() => {
@@ -510,7 +510,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       // - use first value (will only ever be more than one if influenced by category other than by/partition/over).
       const categoryId = record.mlcategory[0];
 
-      ml.results
+      mlApi.results
         .getCategoryDefinition(jobId, categoryId)
         .then((resp) => {
           // Prefix each of the terms with '+' so that the Elasticsearch Query String query
@@ -647,7 +647,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       // Get the definition of the category and use the terms or regex to view the
       // matching events in the Kibana Discover tab depending on whether the
       // categorization field is of mapping type text (preferred) or keyword.
-      ml.results
+      mlApi.results
         .getCategoryDefinition(record.job_id, categoryId)
         .then(async (resp) => {
           // We should not redirect to Discover if data view doesn't exist
@@ -819,7 +819,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key="view_series"
-            icon="visLine"
+            icon="singleMetricViewer"
             onClick={() => {
               closePopover();
               viewSeries();

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -173,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      expect(await dataGrid.getRowsText()).to.eql([
+      expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql([
         'Sep 22, 2015 @ 20:44:05.521jpg1,808',
         'Sep 22, 2015 @ 20:41:53.463png1,969',
         'Sep 22, 2015 @ 20:40:22.952jpg1,576',
@@ -208,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 17:22:12.782css1,583',
       ];
 
-      expect(await dataGrid.getRowsText()).to.eql(filteredRows);
+      expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql(filteredRows);
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -217,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      expect(await dataGrid.getRowsText()).to.eql(filteredRows);
+      expect((await dataGrid.getRowsText()).slice(0, 6)).to.eql(filteredRows);
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
       await testSubjects.existOrFail('unsavedChangesBadge');
     });

@@ -19,9 +19,9 @@ import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 
-export function loadFullJob(mlApiServices, jobId) {
+export function loadFullJob(mlApi, jobId) {
   return new Promise((resolve, reject) => {
-    mlApiServices.jobs
+    mlApi.jobs
       .jobs([jobId])
       .then((jobs) => {
         if (jobs.length) {
@@ -36,9 +36,9 @@ export function loadFullJob(mlApiServices, jobId) {
   });
 }
 
-export function loadJobForCloning(mlApiServices, jobId) {
+export function loadJobForCloning(mlApi, jobId) {
   return new Promise((resolve, reject) => {
-    mlApiServices.jobs
+    mlApi.jobs
       .jobForCloning(jobId)
       .then((resp) => {
         if (resp) {
@@ -214,17 +214,11 @@ function showResults(toastNotifications, resp, action) {
   }
 }
 
-export async function cloneJob(
-  toastNotifications,
-  application,
-  mlApiServices,
-  mlJobService,
-  jobId
-) {
+export async function cloneJob(toastNotifications, application, mlApi, mlJobService, jobId) {
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
-      loadJobForCloning(mlApiServices, jobId),
-      loadFullJob(mlApiServices, jobId),
+      loadJobForCloning(mlApi, jobId),
+      loadFullJob(mlApi, jobId),
     ]);
 
     const createdBy = originalJob?.custom_settings?.created_by;
@@ -277,7 +271,7 @@ export async function cloneJob(
 
     if (originalJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
-        mlApiServices,
+        mlApi,
         originalJob.calendars
       );
     }

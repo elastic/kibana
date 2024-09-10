@@ -31,7 +31,7 @@ export interface ExceptionListItem {
   namespace_type: 'single' | 'agnostic';
   tags: string[];
   type: 'simple';
-  entries: Array<{ field: string; operator: string; type: string; value: string[] }>;
+  entries: Array<{ field: string; operator: string; type: string; value: string[] | string }>;
   expire_time?: string;
 }
 

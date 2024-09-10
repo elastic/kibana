@@ -2378,6 +2378,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:navLinks/maps",
                 "ui:maps/show",
               ],
+              "scan_operations_all": Array [
+                "login:",
+                "api:securitySolution-writeScanOperations",
+                "ui:siem/writeScanOperations",
+              ],
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",

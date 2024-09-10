@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
-      await PageObjects.lens.switchToVisualization('donut');
+      await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();
 

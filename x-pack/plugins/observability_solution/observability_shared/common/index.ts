@@ -161,6 +161,8 @@ export type {
   HostsLocatorParams,
   InventoryLocator,
   InventoryLocatorParams,
+  MetricsExplorerLocator,
+  MetricsExplorerLocatorParams,
   FlamegraphLocatorParams,
   FlamegraphLocator,
   StacktracesLocatorParams,
@@ -179,7 +181,12 @@ export {
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
+  METRICS_EXPLORER_LOCATOR_ID,
+  MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
+  HOSTS_LOCATOR_ID,
 } from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';

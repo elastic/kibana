@@ -101,7 +101,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
   const {
     services: {
       mlServices: {
-        mlApiServices: { results: mlResultsService },
+        mlApi: { results: mlResultsService },
       },
     },
   } = useMlKibana();

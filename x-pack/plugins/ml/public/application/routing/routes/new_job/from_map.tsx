@@ -47,7 +47,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       },
       dashboard: dashboardService,
       uiSettings: kibanaConfig,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
   const mlJobService = useMlJobService();
@@ -55,7 +55,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
-        { dataViews, mlApiServices, mlJobService, timeFilter, kibanaConfig, dashboardService },
+        { dataViews, mlApi, mlJobService, timeFilter, kibanaConfig, dashboardService },
         dashboard,
         dataViewId,
         embeddable,

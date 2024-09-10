@@ -332,6 +332,8 @@ export const postEvaluateRoute = (
               evaluators: [], // Evals to be managed in LangSmith for now
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
+              // prevent rate limiting and unexpected multiple experiment runs
+              maxConcurrency: 5,
             });
             logger.debug(`runResp:\n ${JSON.stringify(evalOutput, null, 2)}`);
           });

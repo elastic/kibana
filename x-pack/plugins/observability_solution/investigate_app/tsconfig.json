@@ -56,5 +56,7 @@
     "@kbn/shared-ux-router",
     "@kbn/investigation-shared",
     "@kbn/core-security-common",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/i18n-react",
   ],
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -53,6 +54,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
       expect(input.prop('value')).toBe(10);
+      expect(input.prop('step')).toBe(10);
 
       await act(async () => {
         input.simulate('change', {
@@ -175,6 +177,84 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       expect(
         findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
       ).toBe(validIntegerValue);
+    });
+
+    it('should not fail if sample size is not step of 10', async () => {
+      const onChangeSampleSizeMock = jest.fn();
+
+      const customSampleSize = 9995;
+      const newSampleSize = 9990;
+
+      const component = mountWithIntl(
+        <UnifiedDataTableAdditionalDisplaySettings
+          sampleSize={customSampleSize}
+          maxAllowedSampleSize={customSampleSize}
+          onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight={RowHeightMode.custom}
+          rowHeightLines={10}
+          headerRowHeight={RowHeightMode.custom}
+          headerRowHeightLines={5}
+        />
+      );
+
+      let input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(customSampleSize);
+      expect(input.prop('step')).toBe(1);
+
+      await act(async () => {
+        input.simulate('change', {
+          target: {
+            value: newSampleSize,
+          },
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      component.update();
+
+      input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(newSampleSize);
+      expect(input.prop('step')).toBe(1);
+
+      expect(onChangeSampleSizeMock).toHaveBeenCalledWith(newSampleSize);
+    });
+
+    it('should not fail if sample size is less than 10', async () => {
+      const onChangeSampleSizeMock = jest.fn();
+
+      const customSampleSize = 5;
+      const newSampleSize = 10;
+
+      const component = mountWithIntl(
+        <UnifiedDataTableAdditionalDisplaySettings
+          sampleSize={customSampleSize}
+          onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight={RowHeightMode.custom}
+          rowHeightLines={10}
+          headerRowHeight={RowHeightMode.custom}
+          headerRowHeightLines={5}
+        />
+      );
+      let input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(customSampleSize);
+      expect(input.prop('step')).toBe(1);
+
+      await act(async () => {
+        input.simulate('change', {
+          target: {
+            value: newSampleSize,
+          },
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      component.update();
+
+      input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(newSampleSize);
+      expect(input.prop('step')).toBe(1);
+
+      expect(onChangeSampleSizeMock).toHaveBeenCalledWith(newSampleSize);
     });
   });
 
