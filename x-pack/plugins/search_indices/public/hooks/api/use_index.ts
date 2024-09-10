@@ -7,12 +7,13 @@
 
 import type { Index } from '@kbn/index-management';
 import { useQuery } from '@tanstack/react-query';
+import { QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 
 const POLLING_INTERVAL = 15 * 1000;
 export const useIndex = (indexName: string) => {
   const { http } = useKibana().services;
-  const queryKey = ['fetchIndex', indexName];
+  const queryKey = [QueryKeys.FetchIndex, indexName];
   const result = useQuery({
     queryKey,
     refetchInterval: POLLING_INTERVAL,

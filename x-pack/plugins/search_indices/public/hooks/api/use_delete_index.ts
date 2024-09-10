@@ -7,8 +7,8 @@
 
 import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
-import { useIndex } from './use_index';
 
 export const useDeleteIndex = (indexName: string) => {
   const { http } = useKibana().services;
@@ -17,7 +17,6 @@ export const useDeleteIndex = (indexName: string) => {
     indices,
   });
   const queryClient = useQueryClient();
-  const { queryKey } = useIndex(indexName);
 
   const result = useMutation({
     mutationFn: async () => {
@@ -30,7 +29,7 @@ export const useDeleteIndex = (indexName: string) => {
       return response.acknowledged;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(queryKey);
+      queryClient.invalidateQueries([QueryKeys.FetchIndex, indexName]);
     },
   });
   return { ...result };
