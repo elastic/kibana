@@ -36,11 +36,11 @@ The result of a query is the table produced by the final processing command.
 );
 
 export const sourceCommands = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.sourceCommands', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.sourceCommands', {
     defaultMessage: 'Source commands',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.commandsDescription',
+    'languageDocumentationPopover.documentationESQL.commandsDescription',
     {
       defaultMessage: `A source command produces a table, typically with data from Elasticsearch. ES|QL supports the following source commands.`,
     }
@@ -173,11 +173,11 @@ The \`SHOW <item>\` source command returns information about the deployment and 
 };
 
 export const processingCommands = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.processingCommands', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.processingCommands', {
     defaultMessage: 'Processing commands',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription',
+    'languageDocumentationPopover.documentationESQL.processingCommandsDescription',
     {
       defaultMessage: `Processing commands change an input table by adding, removing, or changing rows and columns. ES|QL supports the following processing commands.`,
     }
@@ -661,11 +661,11 @@ Refer to **Operators** for an overview of the supported operators.
 // DO NOT RENAME!
 // managed by scripts/generate_esql_docs.ts
 export const functions = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.functions', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.functions', {
     defaultMessage: 'Functions',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.functionsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.functionsDocumentationESQLDescription',
     {
       defaultMessage: `Functions are supported by ROW, EVAL and WHERE.`,
     }
@@ -3576,11 +3576,11 @@ export const functions = {
 };
 
 export const aggregationFunctions = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.aggregationFunctions', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.aggregationFunctions', {
     defaultMessage: 'Aggregation functions',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.aggregationFunctionsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.aggregationFunctionsDocumentationESQLDescription',
     {
       defaultMessage: `These functions can by used with STATS...BY:`,
     }
@@ -3976,11 +3976,11 @@ Example:
 };
 
 export const groupingFunctions = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.groupingFunctions', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.groupingFunctions', {
     defaultMessage: 'Grouping functions',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.groupingFunctionsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.groupingFunctionsDocumentationESQLDescription',
     {
       defaultMessage: `These grouping functions can be used with \`STATS...BY\`:`,
     }
@@ -4109,11 +4109,11 @@ FROM employees
 };
 
 export const operators = {
-  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.operators', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.operators', {
     defaultMessage: 'Operators',
   }),
   description: i18n.translate(
-    'textBasedEditor.query.textBasedLanguagesEditor.operatorsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.operatorsDocumentationESQLDescription',
     {
       defaultMessage: `ES|QL supports the following operators:`,
     }
