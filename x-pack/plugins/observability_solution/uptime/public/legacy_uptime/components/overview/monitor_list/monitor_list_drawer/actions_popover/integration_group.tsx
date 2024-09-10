@@ -9,6 +9,12 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { IntegrationLink } from './integration_link';
 import {
   getLegacyApmHref,
@@ -54,6 +60,11 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
   } = useContext(UptimeSettingsContext);
 
   const { domain, podUid, containerId, ip } = extractSummaryValues(summary);
+
+  const { services } = useKibana<{ share?: SharePluginStart }>();
+
+  const assetDetailsLocator =
+    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
@@ -127,7 +138,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
                   description: 'This value is shown as the aria label value for screen readers.',
                 }
               )}
-              href={getInfraKubernetesHref(summary, basePath)}
+              href={getInfraKubernetesHref(summary, assetDetailsLocator)}
               iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
@@ -156,7 +167,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
                   defaultMessage: `Check Infrastructure UI for this monitor's container ID`,
                 }
               )}
-              href={getInfraContainerHref(summary, basePath)}
+              href={getInfraContainerHref(summary, assetDetailsLocator)}
               iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.container.message',

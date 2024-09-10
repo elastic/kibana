@@ -12,7 +12,6 @@ import { render } from '@testing-library/react';
 import { ImageInput, ImageInputProps } from './image_input';
 import { wrap } from '../mocks';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
-import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
 
 const name = 'Some image field';
@@ -49,9 +48,7 @@ describe('ImageInput', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`) as HTMLInputElement;
     const file = new File(['(⌐□_□)'], 'test.png', { type: 'image/png' });
 
-    act(() => {
-      userEvent.upload(input, [file]);
-    });
+    await userEvent.upload(input, [file]);
 
     expect(input.files?.length).toBe(1);
 
