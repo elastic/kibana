@@ -426,17 +426,144 @@ describe('function validation', () => {
   });
 
   describe('command/option support', () => {
-    it('does not allow aggregations outside of STATS', () => {
-      // SORT
-      // WHERE
-      // EVAL
+    it('validates command support', async () => {
+      setTestFunctions([
+        {
+          name: 'eval_fn',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'stats_fn',
+          type: 'agg',
+          description: '',
+          supportedCommands: ['stats'],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'row_fn',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['row'],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'where_fn',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['where'],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'sort_fn',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['sort'],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
+      await expectErrors('FROM a_index | SORT SORT_FN()', []);
+      await expectErrors('FROM a_index | STATS STATS_FN()', []);
+      await expectErrors('ROW ROW_FN()', []);
+      await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
+
+      await expectErrors('FROM a_index | EVAL SORT_FN()', [
+        'EVAL does not support function sort_fn',
+      ]);
+      await expectErrors('FROM a_index | SORT STATS_FN()', [
+        'SORT does not support function stats_fn',
+      ]);
+      await expectErrors('FROM a_index | STATS ROW_FN()', [
+        'At least one aggregation function required in [STATS], found [ROW_FN()]',
+        'STATS does not support function row_fn',
+      ]);
+      await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
+      await expectErrors('FROM a_index | WHERE EVAL_FN()', [
+        'WHERE does not support function eval_fn',
+      ]);
     });
-    it('allows scalar functions in all contexts', () => {
-      // SORT
-      // WHERE
-      // EVAL
-      // STATS
-      // ROW
+
+    it('validates option support', async () => {
+      setTestFunctions([
+        {
+          name: 'supports_by_option',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          supportedOptions: ['by'],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'does_not_support_by_option',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          supportedOptions: [],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+
+        {
+          name: 'agg_fn',
+          type: 'agg',
+          description: '',
+          supportedCommands: ['stats'],
+          supportedOptions: [],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
+      await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
+        'STATS BY does not support function does_not_support_by_option',
+      ]);
     });
   });
 
