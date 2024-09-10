@@ -41,3 +41,34 @@ export interface AppUsageTracker {
   count: (eventName: string | string[]) => void;
   load: (eventName: string | string[]) => void;
 }
+
+export interface CodeSnippetParameters {
+  indexName?: string;
+  apiKey?: string;
+  elasticsearchURL: string;
+}
+export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
+
+export interface CodeLanguage {
+  id: string;
+  title: string;
+  icon: string;
+  codeBlockLanguage: string;
+}
+
+export interface CreateIndexCodeDefinition {
+  installCommand?: string | CodeSnippetFunction;
+  createIndex: CodeSnippetFunction;
+}
+
+export interface CreateIndexCodeExamples {
+  sense: CreateIndexCodeDefinition;
+  curl: CreateIndexCodeDefinition;
+  python: CreateIndexCodeDefinition;
+  javascript: CreateIndexCodeDefinition;
+}
+
+export interface CreateIndexLanguageExamples {
+  default: CreateIndexCodeDefinition;
+  dense_vector: CreateIndexCodeDefinition;
+}
