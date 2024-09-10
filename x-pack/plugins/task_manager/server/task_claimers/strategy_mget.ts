@@ -263,7 +263,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     for (const task of tasksToRemove) {
       tasksToRemoveUpdates.push({
         id: task.id,
-        version: task.version,
         status: TaskStatus.Unrecognized,
       });
     }

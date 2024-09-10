@@ -16,7 +16,7 @@ import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
 export interface Params {
-  id: string;
+  id?: string;
   initialInvestigation?: GetInvestigationResponse;
 }
 
@@ -45,13 +45,14 @@ export function useFetchInvestigation({
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetch({ id }),
+      queryKey: investigationKeys.fetch({ id: id! }),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationResponse>(`/api/observability/investigations/${id}`, {
           version: '2023-10-31',
           signal,
         });
       },
+      enabled: Boolean(id),
       initialData: initialInvestigation,
       refetchOnWindowFocus: false,
       refetchInterval: 15 * 1000,
