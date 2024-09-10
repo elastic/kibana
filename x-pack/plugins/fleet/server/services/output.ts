@@ -153,6 +153,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const directAgentPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
@@ -162,6 +163,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: packagePoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
@@ -234,6 +236,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
       internalSoClientWithoutSpaceExtension,
       {
         fields: ['policy_ids', 'package.name'],
+        spaceId: '*',
         kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
           .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
           .join(' or '),
@@ -297,7 +300,7 @@ async function validateTypeChanges(
   const { policiesWithFleetServer, policiesWithSynthetics } =
     await findPoliciesWithFleetServerOrSynthetics(id, mergedIsDefault);
 
-  if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
+  if (true || data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(id, mergedIsDefault);
   }
   // prevent changing an ES output to logstash or kafka if it's used by fleet server or synthetics policies

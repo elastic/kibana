@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -538,6 +539,7 @@ class AgentPolicyService {
       fields?: string[];
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
+      spaceId?: string;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -555,9 +557,10 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
+      spaceId,
     } = options;
 
-    const baseFindParams = {
+    const baseFindParams: SavedObjectsFindOptions = {
       type: savedObjectType,
       sortField,
       sortOrder,
@@ -565,6 +568,11 @@ class AgentPolicyService {
       perPage,
       ...(fields ? { fields } : {}),
     };
+
+    if (spaceId) {
+      baseFindParams.namespaces = [spaceId];
+    }
+
     const filter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
     let agentPoliciesSO;
     try {
