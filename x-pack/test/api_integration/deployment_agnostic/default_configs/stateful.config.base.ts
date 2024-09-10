@@ -43,6 +43,9 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       );
     }
 
+    // if config is executed on CI or locally
+    const isRunOnCI = process.env.CI;
+
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
@@ -102,8 +105,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-          // explicitly enable mock-idp-plugin for UI role selector
-          '--mockIdpPlugin.enabled=true',
+          // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
+          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,
