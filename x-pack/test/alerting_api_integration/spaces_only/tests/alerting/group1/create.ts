@@ -636,7 +636,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           await resetRulesSettings(supertest, 'space1');
         });
 
-        it('should allow flapping to be updated', async () => {
+        it('should allow flapping to be created', async () => {
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

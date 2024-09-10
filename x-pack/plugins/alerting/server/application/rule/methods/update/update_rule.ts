@@ -51,6 +51,11 @@ const validateCanUpdateFlapping = (
     return;
   }
 
+  // If updated flapping is undefined then don't do anything, it's not being updated
+  if (updateFlapping === undefined) {
+    return;
+  }
+
   // If both versions are falsy, allow it even if its changing between undefined and null
   if (!originalFlapping && !updateFlapping) {
     return;
@@ -153,12 +158,6 @@ async function updateWithOCC<Params extends RuleParams = never>(
   } = originalRuleSavedObject.attributes;
 
   validateCanUpdateFlapping(isFlappingEnabled, originalFlapping, initialData.flapping);
-
-  if (!isFlappingEnabled && !isEqual(originalFlapping, initialData.flapping)) {
-    throw Boom.badRequest(
-      `Error updating rule: can not update rule flapping if global flapping is disabled`
-    );
-  }
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {

@@ -294,13 +294,37 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
           })
           .expect(400);
+      });
 
-        // Can still update when global flapping is off if not updating flapping
+      it('should allow rule to be updated when global flapping is off if not updating flapping', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              flapping: {
+                look_back_window: 5,
+                status_change_threshold: 5,
+              },
+            })
+          );
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            enabled: false,
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
+
         await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'bcd',
+            name: 'updated name 1',
             tags: ['foo'],
             params: {
               foo: true,
@@ -309,6 +333,26 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+          })
+          .expect(200);
+
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'updated name 2',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 5,
+              status_change_threshold: 5,
+            },
           })
           .expect(200);
       });

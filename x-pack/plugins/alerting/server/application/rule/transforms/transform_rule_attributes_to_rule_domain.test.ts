@@ -92,6 +92,10 @@ describe('transformRuleAttributesToRuleDomain', () => {
     updatedBy: 'user',
     apiKey: MOCK_API_KEY,
     apiKeyOwner: 'user',
+    flapping: {
+      lookBackWindow: 20,
+      statusChangeThreshold: 20,
+    },
   };
 
   it('transforms the actions correctly', () => {
@@ -105,6 +109,13 @@ describe('transformRuleAttributesToRuleDomain', () => {
       },
       isSystemAction
     );
+
+    expect(res.flapping).toMatchInlineSnapshot(`
+      Object {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 20,
+      }
+    `);
 
     expect(res.actions).toMatchInlineSnapshot(`
       Array [
