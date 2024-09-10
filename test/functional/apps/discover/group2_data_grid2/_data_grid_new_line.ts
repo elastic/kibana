@@ -21,11 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects([
-    'settings',
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
-    'header',
     'timePicker',
     'unifiedFieldList',
   ]);
@@ -60,12 +58,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
       await dataViews.createFromSearchBar({ name: INDEX_NAME, adHoc: true, hasTimeField: false });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not show new lines for Document column', async () => {
@@ -79,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show new lines for "message" column except for Single row height setting', async () => {
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('message');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('message');
+      await discover.waitUntilSearchingHasFinished();
 
       let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       let content = await cell.findByCssSelector('.unifiedDataTable__cellValue');
