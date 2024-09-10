@@ -7,34 +7,44 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { ConnectionDetails } from '../connection_details/connection_details';
-import { QuickStats } from '../quick_stats/quick_stats';
+import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
+
+import { useIndicesRedirect } from './hooks/use_indices_redirect';
+import { ElasticsearchStart } from './elasticsearch_start';
+import { StartPageError } from './status_error';
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin } = useKibana().services;
+  const {
+    data: indicesData,
+    isInitialLoading,
+    isError: hasIndicesStatusFetchError,
+    error: indicesFetchError,
+  } = useIndicesStatusQuery();
+  const { data: userPrivileges } = useUserPrivilegesQuery();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  useIndicesRedirect(indicesData);
 
   return (
     <EuiPageTemplate
       offset={0}
       restrictWidth={false}
-      data-test-subj="search-startpage"
+      data-test-subj="elasticsearchStartPage"
       grow={false}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
-        <div css={{ width: "1200px" }}>
-          <ConnectionDetails elasticsearchUrl="http://localhost:9200" />
-
-          <QuickStats />
-        </div>
+        {isInitialLoading && <EuiLoadingLogo />}
+        {hasIndicesStatusFetchError && <StartPageError error={indicesFetchError} />}
+        <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
