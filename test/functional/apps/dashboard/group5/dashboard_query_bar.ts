@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const retry = getService('retry');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
+  const { dashboard, discover } = getPageObjects(['dashboard', 'discover']);
 
   describe('dashboard query bar', () => {
     before(async () => {
@@ -30,9 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('dashboard with filter');
     });
 
     after(async () => {
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
       await queryBar.clickQuerySubmitButton();
       await retry.tryForTime(5000, async () => {
-        const headers = await PageObjects.discover.getColumnHeaders();
+        const headers = await discover.getColumnHeaders();
         expect(headers.length).to.be(0);
         await pieChart.expectEmptyPieChart();
       });
