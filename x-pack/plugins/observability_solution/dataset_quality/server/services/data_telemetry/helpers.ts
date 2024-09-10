@@ -69,7 +69,7 @@ export function getAllIndices({
         }),
         map((indicesAndDataStreams) => {
           return indicesAndDataStreams.filter(
-            // Exclude streams starting with known signals
+            // Exclude streams starting with non log known signals
             (dataStream) =>
               !excludeStreamsStartingWith.some((excludeStream) =>
                 dataStream.name.startsWith(excludeStream)
@@ -147,7 +147,9 @@ export function addNamespace({
   );
 }
 
-export function groupStatsByPatternName(dataStreamsStats: DataStreamFieldStatsPerNamespace[]) {
+export function groupStatsByPatternName(
+  dataStreamsStats: DataStreamFieldStatsPerNamespace[]
+): DataStreamStats[] {
   const uniqueNamespaces = new Set<string>();
   const uniqueFields = new Set<string>();
   const statsByStream = dataStreamsStats.reduce<Map<string, DataStreamStats>>((acc, stats) => {
@@ -158,6 +160,7 @@ export function groupStatsByPatternName(dataStreamsStats: DataStreamFieldStatsPe
     if (!acc.get(stats.patternName)) {
       acc.set(stats.patternName, {
         streamName: stats.patternName,
+        shipper: stats.shipper,
         totalNamespaces: 0,
         totalDocuments: 0,
         failureStoreDocuments: 0,
@@ -262,6 +265,7 @@ export function getIndexFieldStats({
 export function indexStatsToTelemetryEvents(stats: DataStreamStats[]): DataTelemetryEvent[] {
   return stats.map((stat) => ({
     pattern_name: stat.streamName,
+    shipper: stat.shipper,
     doc_count: stat.totalDocuments,
     structure_level: stat.structureLevel,
     index_count: stat.totalIndices,
@@ -415,6 +419,7 @@ export function getIndexStats(
 
   return {
     patternName: info.patternName,
+    shipper: info.shipper,
     namespace: info.namespace,
     totalDocuments: totalDocs,
     totalSize,
@@ -446,20 +451,21 @@ function getFieldStatsAndStructureLevels(
     }
 
     // Get all fields from the mapping
-    const indexFields = getFieldsListFromMapping(indexMapping);
-    indexFields.forEach((field) => uniqueFields.add(field));
+    const indexFieldsMap = getFieldPathsMapFromMapping(indexMapping);
+    const indexFieldsList = Object.keys(indexFieldsMap);
+    indexFieldsList.forEach((field) => uniqueFields.add(field));
 
     const indexDocCount = indexStats?.primaries?.docs?.count ?? 0;
     if (!indexDocCount) {
       continue;
     }
 
-    const indexStructureLevel = getStructureLevelForFieldsList(stats, indexFields);
+    const indexStructureLevel = getStructureLevelForFieldsList(stats, indexFieldsMap);
     structureLevel[indexStructureLevel] =
       (structureLevel[indexStructureLevel] ?? 0) + indexDocCount;
 
     for (const field of fieldsToCheck) {
-      if (doesFieldExistInMapping(field, indexMapping)) {
+      if (indexFieldsMap[field]) {
         resourceFieldCounts[field] = (resourceFieldCounts[field] ?? 0) + indexDocCount;
       }
     }
@@ -487,33 +493,28 @@ function getFieldStatsAndStructureLevels(
  * - Level 6: Part of an integration, managed by a known entity.
  *
  * @param stats - Container pattern, shipper and meta info
- * @param fieldsList - The list of fields to check for structure level.
+ * @param fieldsMap - Dictionary/Map of fields present in the index with full path as key.
  * @returns {number} - The structure level of the index.
  */
 function getStructureLevelForFieldsList(
   stats: DataStreamStatsPerNamespace,
-  fieldsList: string[]
+  fieldsMap: Record<string, boolean>
 ): number {
-  const fieldsListHash = fieldsList.reduce((acc, field) => {
-    acc[field] = true;
-    return acc;
-  }, {} as Record<string, boolean>);
-
   // Check level 1, if @timestamp or timestamp exists
-  if (!fieldsListHash['@timestamp'] && !fieldsListHash.timestamp) {
+  if (!fieldsMap['@timestamp'] && !fieldsMap.timestamp) {
     return 0;
   }
 
   // Check level 2, if resource fields exist
-  if (!LEVEL_2_RESOURCE_FIELDS.some((field) => fieldsListHash[field])) {
+  if (!LEVEL_2_RESOURCE_FIELDS.some((field) => fieldsMap[field])) {
     return 1;
   }
 
   // Check level 3, if basic structure of log message exist
   if (
-    !fieldsListHash['@timestamp'] ||
-    !fieldsListHash.message ||
-    (!fieldsListHash['host.name'] && !fieldsListHash['service.name'])
+    !fieldsMap['@timestamp'] ||
+    !fieldsMap.message ||
+    (!fieldsMap['host.name'] && !fieldsMap['service.name'])
   ) {
     return 2;
   }
@@ -525,13 +526,14 @@ function getStructureLevelForFieldsList(
 
   // Check level 5a (Data stream scheme exists)
   if (
-    !fieldsListHash['data_stream.dataset'] ||
-    !fieldsListHash['data_stream.type'] ||
-    !fieldsListHash['data_stream.namespace']
+    !fieldsMap['data_stream.dataset'] ||
+    !fieldsMap['data_stream.type'] ||
+    !fieldsMap['data_stream.namespace']
   ) {
     // Check level 5b (ECS fields exist)
+    const fieldsList = Object.keys(fieldsMap);
     if (
-      !fieldsListHash['ecs.version'] &&
+      !fieldsMap['ecs.version'] &&
       intersection(PROMINENT_LOG_ECS_FIELDS, fieldsList).length < 3
     ) {
       return 4;
@@ -547,33 +549,27 @@ function getStructureLevelForFieldsList(
   return 6;
 }
 
-function getFieldsListFromMapping(mapping: MappingPropertyBase): string[] {
-  const fields: string[] = [];
+/**
+ * Recursively traverses a mapping and returns a dictionary of field paths.
+ * Each key in the dictionary represents a full field path in dot notation.
+ *
+ * @param {MappingPropertyBase} mapping - The mapping to traverse.
+ * @returns {Record<string, boolean>} - A dictionary of field paths.
+ */
+function getFieldPathsMapFromMapping(mapping: MappingPropertyBase): Record<string, boolean> {
+  const fieldPathsMap: Record<string, boolean> = {};
 
-  for (const [fieldName, field] of Object.entries(mapping.properties ?? {})) {
-    if ((field as MappingPropertyBase).properties) {
-      fields.push(...getFieldsListFromMapping(field).map((subField) => `${fieldName}.${subField}`));
-    } else {
-      fields.push(fieldName);
+  function traverseMapping(nestedMapping: MappingPropertyBase, parentField: string = ''): void {
+    for (const [fieldName, field] of Object.entries(nestedMapping.properties ?? {})) {
+      const fullFieldName = parentField ? `${parentField}.${fieldName}` : fieldName;
+      if ((field as MappingPropertyBase).properties) {
+        traverseMapping(field as MappingPropertyBase, fullFieldName);
+      } else {
+        fieldPathsMap[fullFieldName] = true;
+      }
     }
   }
 
-  return fields;
-}
-
-/**
- * Splits the field path and recursively checks if the field exists in the mapping.
- */
-function doesFieldExistInMapping(fieldPath: string, mapping: MappingPropertyBase): boolean {
-  const [field, ...rest] = fieldPath.split('.');
-
-  if (!mapping?.properties) {
-    return false;
-  }
-
-  if (rest.length === 0) {
-    return !!mapping.properties[field];
-  }
-
-  return doesFieldExistInMapping(rest.join('.'), mapping.properties[field]);
+  traverseMapping(mapping);
+  return fieldPathsMap;
 }

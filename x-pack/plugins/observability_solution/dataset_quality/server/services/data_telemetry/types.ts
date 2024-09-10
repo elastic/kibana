@@ -55,6 +55,7 @@ export interface DataStreamFieldStatsPerNamespace extends DataStreamStatsWithLev
 
 export interface DataStreamStats {
   streamName: string;
+  shipper?: string;
   totalNamespaces: number;
   totalDocuments: number;
   structureLevel: Record<number, number>;
@@ -71,6 +72,7 @@ export interface DataStreamStats {
 
 export interface DataTelemetryEvent {
   pattern_name: string;
+  shipper?: string;
   doc_count: number;
   structure_level: Record<string, number>;
   failure_store_doc_count: number;
