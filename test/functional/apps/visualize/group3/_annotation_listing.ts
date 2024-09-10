@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'annotationEditor']);
+  const { visualize, annotationEditor } = getPageObjects(['visualize', 'annotationEditor']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -32,8 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: `/api/data_views/data_view/data-view-to-delete`,
       });
 
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await PageObjects.visualize.selectAnnotationsTab();
+      await visualize.gotoVisualizationLandingPage();
+      await visualize.selectAnnotationsTab();
       await listingTable.waitUntilTableIsLoaded();
     });
 
@@ -111,11 +111,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('edit', function () {
       it('edits group metadata', async function () {
         await listingTable.clickItemLink('eventAnnotation', 'group 3');
-        await PageObjects.annotationEditor.editGroupMetadata({
+        await annotationEditor.editGroupMetadata({
           title: 'edited title',
           description: 'edited description',
         });
-        await PageObjects.annotationEditor.saveGroup();
+        await annotationEditor.saveGroup();
 
         await listingTable.searchForItemWithName('edited title');
         await listingTable.expectItemsCount('eventAnnotation', 1);
@@ -127,10 +127,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('individual annotations', () => {
         it('edits an existing annotation', async function () {
           await listingTable.clickItemLink('eventAnnotation', 'edited title');
-          expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);
+          expect(await annotationEditor.getAnnotationCount()).to.be(1);
 
-          await PageObjects.annotationEditor.openAnnotation();
-          await PageObjects.annotationEditor.configureAnnotation({
+          await annotationEditor.openAnnotation();
+          await annotationEditor.configureAnnotation({
             query: 'my query',
             lineThickness: 5,
             color: '#FF0000',
@@ -138,25 +138,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('adds a new annotation', async function () {
-          await PageObjects.annotationEditor.addAnnotation({
+          await annotationEditor.addAnnotation({
             query: 'other query',
             lineThickness: 3,
             color: '#00FF00',
           });
 
           await retry.try(async () => {
-            expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(2);
+            expect(await annotationEditor.getAnnotationCount()).to.be(2);
           });
         });
 
         it('removes an annotation', async function () {
-          await PageObjects.annotationEditor.removeAnnotation();
+          await annotationEditor.removeAnnotation();
 
           await retry.try(async () => {
-            expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);
+            expect(await annotationEditor.getAnnotationCount()).to.be(1);
           });
 
-          await PageObjects.annotationEditor.saveGroup();
+          await annotationEditor.saveGroup();
         });
       });
 
@@ -169,18 +169,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await listingTable.clickItemLink('eventAnnotation', 'missing data view');
 
           await retry.try(async () => {
-            expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(true);
+            expect(await annotationEditor.showingMissingDataViewPrompt()).to.be(true);
           });
 
           await retry.try(async () => {
-            await PageObjects.annotationEditor.editGroupMetadata({
+            await annotationEditor.editGroupMetadata({
               dataView: 'logs*',
             });
-            expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(false);
+            expect(await annotationEditor.showingMissingDataViewPrompt()).to.be(false);
             expect(await find.byCssSelector('canvas')).to.be.ok();
           });
 
-          await PageObjects.annotationEditor.saveGroup();
+          await annotationEditor.saveGroup();
         });
 
         it('recovers from missing field in data view', async () => {
@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await assertShowingMissingFieldError(false);
 
           await retry.try(async () => {
-            await PageObjects.annotationEditor.editGroupMetadata({
+            await annotationEditor.editGroupMetadata({
               dataView: 'Data view without fields',
             });
 
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await retry.try(async () => {
-            await PageObjects.annotationEditor.editGroupMetadata({
+            await annotationEditor.editGroupMetadata({
               dataView: 'logs*',
             });
 

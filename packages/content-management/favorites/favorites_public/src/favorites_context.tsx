@@ -18,7 +18,7 @@ interface FavoritesContextValue {
 
 const FavoritesContext = React.createContext<FavoritesContextValue | null>(null);
 
-export const FavoritesContextProvider: React.FC<FavoritesContextValue> = ({
+export const FavoritesContextProvider: React.FC<React.PropsWithChildren<FavoritesContextValue>> = ({
   favoritesClient,
   notifyError,
   children,

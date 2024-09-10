@@ -28,6 +28,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { estypes } from '@elastic/elasticsearch';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -192,7 +193,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
-  const esTime = useRef<number>(0);
+  const esTookTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -204,11 +205,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           eventName: 'lensVisualizationRenderTime',
           duration: currentTime - visualizationRenderStartTime.current,
           key1: 'time_to_data',
-          value1: dataReceivedTime.current - visualizationRenderStartTime.current - esTime.current,
+          value1:
+            dataReceivedTime.current - visualizationRenderStartTime.current - esTookTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
-          key3: 'es_time',
-          value3: esTime.current,
+          key3: 'es_took',
+          value3: esTookTime.current,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -266,6 +268,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
+          esTookTime.current = adapters.requests.getRequests().reduce((maxTime, { response }) => {
+            const took =
+              (response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
+                ?.rawResponse?.took ?? 0;
+
+            return Math.max(maxTime, took);
+          }, 0);
         }
 
         if (requestWarnings.length) {
