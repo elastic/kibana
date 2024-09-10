@@ -194,6 +194,12 @@ export const EventSchema = schema.maybe(
                         es_search_duration_ms: ecsStringOrNumber(),
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
+                        gap_range: schema.maybe(
+                          schema.object({
+                            from: ecsDate(),
+                            to: ecsDate(),
+                          })
+                        ),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
                         trigger_actions_duration_ms: ecsStringOrNumber(),

@@ -196,6 +196,16 @@ exports.EcsCustomPropertyMappings = {
                       execution_gap_duration_s: {
                         type: 'long',
                       },
+                      gap_range: {
+                        properties: {
+                          from: {
+                            type: 'date',
+                          },
+                          to: {
+                            type: 'date',
+                          },
+                        },
+                      },
                       rule_type_run_duration_ms: {
                         type: 'long',
                       },

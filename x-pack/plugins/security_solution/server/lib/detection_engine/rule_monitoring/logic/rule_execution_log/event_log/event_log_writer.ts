@@ -57,13 +57,6 @@ export interface ExecutionMetricsArgs extends BaseArgs {
   metrics: RuleExecutionMetrics;
 }
 
-export interface GapArgs extends BaseArgs {
-  gap: {
-    from: Date;
-    to: Date;
-  };
-}
-
 export const createEventLogWriter = (eventLogService: IEventLogService): IEventLogWriter => {
   const eventLogger = eventLogService.getLogger({
     event: { provider: RULE_EXECUTION_LOG_PROVIDER },
