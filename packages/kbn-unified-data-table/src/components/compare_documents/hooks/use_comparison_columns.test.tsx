@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -110,7 +111,7 @@ const renderColumns = ({
 };
 
 describe('useComparisonColumns', () => {
-  it('should return comparison columns', () => {
+  it('should return comparison columns', async () => {
     const { columns, replaceSelectedDocs } = renderColumns();
     expect(columns).toEqual([
       {
@@ -191,11 +192,11 @@ describe('useComparisonColumns', () => {
     const pinAction = actions.additional?.[0].onClick;
     const removeAction = actions.additional?.[1].onClick;
     render(<button onClick={pinAction} data-test-subj="pin" />);
-    userEvent.click(screen.getByTestId('pin'));
+    await userEvent.click(screen.getByTestId('pin'));
     expect(replaceSelectedDocs).toHaveBeenCalledTimes(1);
     expect(replaceSelectedDocs).toHaveBeenLastCalledWith(['1', '0', '2', '3']);
     render(<button onClick={removeAction} data-test-subj="remove" />);
-    userEvent.click(screen.getByTestId('remove'));
+    await userEvent.click(screen.getByTestId('remove'));
     expect(replaceSelectedDocs).toHaveBeenCalledTimes(2);
     expect(replaceSelectedDocs).toHaveBeenLastCalledWith(['0', '2', '3']);
   });

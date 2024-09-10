@@ -17,10 +17,10 @@ describe('legend_stats_telemetry_helpers', () => {
     expect(
       getLegendStatsTelemetryEvents([LegendValue.CurrentAndLastValue, LegendValue.Average])
     ).toEqual([
-      'lens_legend_stats',
-      'lens_legend_stats_currentAndLastValue',
-      'lens_legend_stats_average',
-      'lens_legend_stats_amount_2',
+      'legend_stats',
+      'legend_stats_currentAndLastValue',
+      'legend_stats_average',
+      'legend_stats_amount_2',
     ]);
   });
 
@@ -36,17 +36,17 @@ describe('legend_stats_telemetry_helpers', () => {
   describe('calculates counter events properly', () => {
     it('returns single count event', () => {
       expect(getLegendStatsTelemetryEvents([LegendValue.Average])).toEqual([
-        'lens_legend_stats',
-        'lens_legend_stats_average',
-        'lens_legend_stats_amount_1',
+        'legend_stats',
+        'legend_stats_average',
+        'legend_stats_amount_1',
       ]);
     });
     it('returns 2 count event', () => {
       expect(getLegendStatsTelemetryEvents([LegendValue.Average, LegendValue.Count])).toEqual([
-        'lens_legend_stats',
-        'lens_legend_stats_average',
-        'lens_legend_stats_count',
-        'lens_legend_stats_amount_2',
+        'legend_stats',
+        'legend_stats_average',
+        'legend_stats_count',
+        'legend_stats_amount_2',
       ]);
     });
     it('returns 3 count event', () => {
@@ -57,11 +57,11 @@ describe('legend_stats_telemetry_helpers', () => {
           LegendValue.CurrentAndLastValue,
         ])
       ).toEqual([
-        'lens_legend_stats',
-        'lens_legend_stats_average',
-        'lens_legend_stats_count',
-        'lens_legend_stats_currentAndLastValue',
-        'lens_legend_stats_amount_3',
+        'legend_stats',
+        'legend_stats_average',
+        'legend_stats_count',
+        'legend_stats_currentAndLastValue',
+        'legend_stats_amount_3',
       ]);
     });
     it('returns 4 count event', () => {
@@ -73,12 +73,12 @@ describe('legend_stats_telemetry_helpers', () => {
           LegendValue.Average,
         ])
       ).toEqual([
-        'lens_legend_stats',
-        'lens_legend_stats_currentAndLastValue',
-        'lens_legend_stats_max',
-        'lens_legend_stats_min',
-        'lens_legend_stats_average',
-        'lens_legend_stats_amount_4_to_7',
+        'legend_stats',
+        'legend_stats_currentAndLastValue',
+        'legend_stats_max',
+        'legend_stats_min',
+        'legend_stats_average',
+        'legend_stats_amount_4_to_7',
       ]);
     });
 
@@ -96,17 +96,17 @@ describe('legend_stats_telemetry_helpers', () => {
           LegendValue.Median,
         ])
       ).toEqual([
-        'lens_legend_stats',
-        'lens_legend_stats_currentAndLastValue',
-        'lens_legend_stats_max',
-        'lens_legend_stats_min',
-        'lens_legend_stats_average',
-        'lens_legend_stats_count',
-        'lens_legend_stats_total',
-        'lens_legend_stats_lastValue',
-        'lens_legend_stats_firstValue',
-        'lens_legend_stats_median',
-        'lens_legend_stats_amount_above_8',
+        'legend_stats',
+        'legend_stats_currentAndLastValue',
+        'legend_stats_max',
+        'legend_stats_min',
+        'legend_stats_average',
+        'legend_stats_count',
+        'legend_stats_total',
+        'legend_stats_lastValue',
+        'legend_stats_firstValue',
+        'legend_stats_median',
+        'legend_stats_amount_above_8',
       ]);
     });
   });

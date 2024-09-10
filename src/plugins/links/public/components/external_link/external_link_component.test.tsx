@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -40,7 +41,7 @@ describe('external link component', () => {
     expect(link).toBeInTheDocument();
     const externalIcon = within(link).getByText('External link');
     expect(externalIcon.getAttribute('data-euiicon-type')).toBe('popout');
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
   });
 
@@ -78,7 +79,7 @@ describe('external link component', () => {
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
     const link = await screen.findByTestId('externalLink--foo');
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
     expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
   });
