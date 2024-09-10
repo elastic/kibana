@@ -61,9 +61,9 @@ export const exactMatchDoc = {
 
 export function makeAttributeService(doc: LensDocument): LensAttributesService {
   const attributeServiceMock = {
-    loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
+    loadFromLibrary: jest.fn().mockResolvedValue((exactMatchDoc)),
     saveToLibrary: jest.fn().mockResolvedValue(
-      doc.savedObjectId,
+      (doc.savedObjectId),
     ),
     checkForDuplicateTitle: jest.fn(),
   };

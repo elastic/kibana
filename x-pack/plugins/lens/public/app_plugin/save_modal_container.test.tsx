@@ -2,41 +2,37 @@
 import { SaveProps } from "./app";
 import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container'; import { defaultDoc, makeDefaultServices } from "../mocks";
 import faker from 'faker';
-import { createEmbeddableStateTransferMock } from "@kbn/embeddable-plugin/public/mocks";
-import { EmbeddableStateTransfer } from "@kbn/embeddable-plugin/public";
 import { makeAttributeService } from "../mocks/services_mock";
 
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
     checkForDuplicateTitle: jest.fn(async () => false),
 }));
 
-function createStateTransferMock(
-    propOverrides: Partial<EmbeddableStateTransfer> = {}
-): EmbeddableStateTransfer {
-    const stateTransferMock = createEmbeddableStateTransferMock();
-    return { ...stateTransferMock, ...propOverrides } as EmbeddableStateTransfer;
-}
-
 describe('runSaveLensVisualization', () => {
+
+        // Need to call reset here as makeDefaultServices() reuses some mocks from core
+    const resetMocks = () => beforeEach(() => {
+        jest.resetAllMocks();
+    });
 
     function getDefaultArgs(
         servicesOverrides: Partial<SaveVisualizationProps> = {},
         { saveToLibrary, ...propsOverrides }: Partial<SaveProps & { saveToLibrary: boolean }> = {}
     ) {
 
-        // Need to call reset here as makeDefaultServices() reuses some mocks from core
-        jest.resetAllMocks();
         const redirectToOrigin = jest.fn();
+        const redirectTo = jest.fn();
         const onAppLeave = jest.fn();
-        const stateTransferMock = createStateTransferMock({ navigateToWithEmbeddablePackage: jest.fn() })
+        const switchDatasource = jest.fn();
         const props: SaveVisualizationProps = {
             ...makeDefaultServices(),
             // start with both the initial input and lastKnownDoc synced
             lastKnownDoc: defaultDoc,
             initialInput: { attributes: defaultDoc, savedObjectId: defaultDoc.savedObjectId },
             redirectToOrigin,
+            redirectTo,
             onAppLeave,
-            stateTransfer: stateTransferMock,
+            switchDatasource,
             ...servicesOverrides
         };
         const saveProps: SaveProps = {
@@ -51,7 +47,9 @@ describe('runSaveLensVisualization', () => {
         };
         const options = {
             saveToLibrary: Boolean(saveToLibrary)
-        }
+        };
+
+
 
         return {
             props,
@@ -64,6 +62,10 @@ describe('runSaveLensVisualization', () => {
              *  This is used to test indirectly the redirectToDashboard call
              */
             redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackage,
+            /**
+             * This function will be called before reloading the editor after saving a a new document/new copy of the document
+             */
+            cleanupEditor: props.stateTransfer.clearEditorState,
             saveToLibraryFn: props.attributeService.saveToLibrary,
             toasts: props.notifications.toasts
         }
@@ -76,6 +78,8 @@ describe('runSaveLensVisualization', () => {
 
             describe('Save and return', () => {
 
+                resetMocks();
+
                 // Test the "Save and return" button
                 it("should get back to dashboard", async () => {
                     const { props, saveProps, options, redirectToDashboardFn, saveToLibraryFn } = getDefaultArgs(
@@ -86,8 +90,12 @@ describe('runSaveLensVisualization', () => {
                         { returnToOrigin: true }
                     );
                     await runSaveLensVisualization(props, saveProps, options);
+
+                    // callback called
                     expect(props.onAppLeave).toHaveBeenCalled();
                     expect(props.redirectToOrigin).toHaveBeenCalled();
+
+                    // callback not called
                     expect(redirectToDashboardFn).not.toHaveBeenCalled();
                     expect(saveToLibraryFn).not.toHaveBeenCalled();
                     expect(props.notifications.toasts.addSuccess).not.toHaveBeenCalled();
@@ -95,6 +103,8 @@ describe('runSaveLensVisualization', () => {
             });
 
             describe('Save to library', () => {
+
+                resetMocks();
 
                 // Test the "Save to library" flow
                 it('should save to library without redirect', async () => {
@@ -112,11 +122,15 @@ describe('runSaveLensVisualization', () => {
                     );
                     await runSaveLensVisualization(props, saveProps, options);
 
+
+                    // callback called
+                    expect(saveToLibraryFn).toHaveBeenCalled();
+                    expect(props.notifications.toasts.addSuccess).toHaveBeenCalled();
+
+                    // not called
                     expect(props.onAppLeave).not.toHaveBeenCalled();
                     expect(props.redirectToOrigin).not.toHaveBeenCalled();
                     expect(redirectToDashboardFn).not.toHaveBeenCalled();
-                    expect(saveToLibraryFn).toHaveBeenCalled();
-                    expect(props.notifications.toasts.addSuccess).toHaveBeenCalled();
                 });
 
                 it('should save to library and redirect', async () => {
@@ -133,16 +147,21 @@ describe('runSaveLensVisualization', () => {
                     );
                     await runSaveLensVisualization(props, saveProps, options);
 
+                    // callback called
                     expect(props.onAppLeave).toHaveBeenCalled();
                     expect(props.redirectToOrigin).toHaveBeenCalled();
-                    expect(redirectToDashboardFn).not.toHaveBeenCalled();
                     expect(saveToLibraryFn).toHaveBeenCalled();
+
+                    // not called
+                    expect(redirectToDashboardFn).not.toHaveBeenCalled();
                     expect(props.notifications.toasts.addSuccess).not.toHaveBeenCalled();
                 });
             });
         });
 
         describe('as by reference', () => {
+
+            resetMocks();
             // There are 4 possibilities here:
             // save the current document overwriting the existing one
             it("should overwrite and show a success toast", async () => {
@@ -154,11 +173,14 @@ describe('runSaveLensVisualization', () => {
                 );
                 await runSaveLensVisualization(props, saveProps, options);
 
+                // callback called
+                expect(saveToLibraryFn).toHaveBeenCalledWith(expect.anything(), expect.anything(), defaultDoc.savedObjectId);
+                expect(toasts.addSuccess).toHaveBeenCalled();
+
+                // not called
                 expect(props.onAppLeave).not.toHaveBeenCalled();
                 expect(props.redirectToOrigin).not.toHaveBeenCalled();
                 expect(redirectToDashboardFn).not.toHaveBeenCalled();
-                expect(saveToLibraryFn).toHaveBeenCalledWith(expect.anything(), expect.anything(), defaultDoc.savedObjectId);
-                expect(toasts.addSuccess).toHaveBeenCalled();
             });
 
             // save the current document as a new by-ref copy in the library
@@ -171,11 +193,14 @@ describe('runSaveLensVisualization', () => {
                 );
                 await runSaveLensVisualization(props, saveProps, options);
 
+                // callback called
+                expect(saveToLibraryFn).toHaveBeenCalledWith(expect.anything(), expect.anything(), undefined);
+                expect(toasts.addSuccess).toHaveBeenCalled();
+
+                // not called
                 expect(props.onAppLeave).not.toHaveBeenCalled();
                 expect(props.redirectToOrigin).not.toHaveBeenCalled();
                 expect(redirectToDashboardFn).not.toHaveBeenCalled();
-                expect(saveToLibraryFn).toHaveBeenCalledWith(expect.anything(), expect.anything(), undefined);
-                expect(toasts.addSuccess).toHaveBeenCalled();
             });
             // save the current document as a new by-value copy and add it to a dashboard
             it("should save as a new by-value copy and redirect to the dashboard", async () => {
@@ -187,11 +212,14 @@ describe('runSaveLensVisualization', () => {
                 );
                 await runSaveLensVisualization(props, saveProps, options);
 
-                expect(props.onAppLeave).not.toHaveBeenCalled();
+                // callback called
+                expect(props.onAppLeave).toHaveBeenCalled();
+
+                // not called
                 expect(props.redirectToOrigin).not.toHaveBeenCalled();
                 expect(redirectToDashboardFn).toHaveBeenCalled();
                 expect(saveToLibraryFn).not.toHaveBeenCalled();
-                expect(toasts.addSuccess).toHaveBeenCalled();
+                expect(toasts.addSuccess).not.toHaveBeenCalled();
             });
             // save the current document as a new by-ref copy and add it to a dashboard
             it("should save as a new by-ref copy and redirect to the dashboard", async () => {
@@ -203,90 +231,106 @@ describe('runSaveLensVisualization', () => {
                 );
                 await runSaveLensVisualization(props, saveProps, options);
 
-                expect(props.onAppLeave).not.toHaveBeenCalled();
-                expect(props.redirectToOrigin).not.toHaveBeenCalled();
+                // callback called
+                expect(props.onAppLeave).toHaveBeenCalled();
                 expect(redirectToDashboardFn).toHaveBeenCalled();
                 expect(saveToLibraryFn).toHaveBeenCalled();
-                expect(toasts.addSuccess).toHaveBeenCalled();
+
+                // not called
+                expect(props.redirectToOrigin).not.toHaveBeenCalled();
+                expect(toasts.addSuccess).not.toHaveBeenCalled();
             });
-
-
         });
     });
 
     describe('fresh editor start', () => {
+
+        resetMocks();
+
         it("should reload the editor if it has been saved as new copy", async () => {
-            const { props, saveProps, options, saveToLibraryFn, toasts } = getDefaultArgs(
+            const { props, saveProps, options, saveToLibraryFn, cleanupEditor, toasts } = getDefaultArgs(
+                {},
                 {
-                }, {
-                saveToLibrary: true,
-                newCopyOnSave: true
-            }
+                    saveToLibrary: true,
+                    newCopyOnSave: true
+                }
             );
-            await runSaveLensVisualization(props, saveProps, options);
-            expect(props.stateTransfer.clearEditorState).toHaveBeenCalled();
-            expect(props.redirectTo).toHaveBeenCalledWith(defaultDoc.savedObjectId);
+            const result = await runSaveLensVisualization(props, saveProps, options);
+
+            // callback called
             expect(saveToLibraryFn).toHaveBeenCalled();
-            expect(toasts.addSuccess).not.toHaveBeenCalled();
+            expect(toasts.addSuccess).toHaveBeenCalled();
+            expect(cleanupEditor).toHaveBeenCalled();
+            expect(props.redirectTo).toHaveBeenCalledWith(defaultDoc.savedObjectId);
+            expect(result?.isLinkedToOriginatingApp).toBeFalsy();
+
+            // not called
+            expect(props.onAppLeave).not.toHaveBeenCalled();
         });
 
 
-        it('should show a notification toast and not reload as first save of the document', async () => {
+        it('should show a notification toast and reload as first save of the document', async () => {
             const { props, saveProps, options, saveToLibraryFn, toasts } = getDefaultArgs(
-                { lastKnownDoc: { ...defaultDoc, savedObjectId: undefined }, persistedDoc: undefined },
+                { lastKnownDoc: { ...defaultDoc, savedObjectId: undefined }, persistedDoc: undefined, initialInput: undefined }, {saveToLibrary: true}
             );
             await runSaveLensVisualization(props, saveProps, options);
-            expect(toasts.addSuccess).toHaveBeenCalled();
-            expect(props.application.navigateToApp).not.toHaveBeenCalledWith('lens', { path: '/' });
+
+            // callback called
             expect(saveToLibraryFn).toHaveBeenCalled();
-            expect(props.redirectTo).not.toHaveBeenCalled();
+            expect(toasts.addSuccess).toHaveBeenCalled();
+            expect(props.redirectTo).toHaveBeenCalled();
+
+            // not called
+            expect(props.application.navigateToApp).not.toHaveBeenCalledWith('lens', { path: '/' });
+            expect(props.redirectToOrigin).not.toHaveBeenCalled();
         });
 
         it("should throw if something goes wrong when saving", async () => {
             const attributeServiceMock = { ...makeAttributeService(defaultDoc), saveToLibrary: jest.fn().mockImplementation(() => Promise.reject('failed to save')) };
-            const { props, saveProps, options } = getDefaultArgs(
+            const { props, saveProps, options, toasts } = getDefaultArgs(
                 { lastKnownDoc: { ...defaultDoc, savedObjectId: undefined }, attributeService: attributeServiceMock },
                 { saveToLibrary: true }
             );
             try {
                 await runSaveLensVisualization(props, saveProps, options);
             } catch (error) {
-                expect(props.notifications.toasts.addDanger).toHaveBeenCalled();
-                expect(props.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+                expect(toasts.addDanger).toHaveBeenCalled();
+                expect(toasts.addSuccess).not.toHaveBeenCalled();
                 expect(error.message).toEqual('failed to save')
             }
         });
     });
 
-    describe('ES|QL', () => {
-        it("should have a dedicated flow for textbased saving", async () => {
-            const redirectTo = jest.fn();
-            const switchDatasource = jest.fn();
-            const stateTransferMock = createStateTransferMock({ clearEditorState: jest.fn() });
-            // simulate a new save
-            const attributeServiceMock = { ...makeAttributeService(defaultDoc), saveToLibrary: jest.fn().mockImplementation(async () => faker.random.uuid()) };
+    // While this is technically a virtual option as for now, it's still worth testing to not break it in the future
+    describe('Textbased version', () => {
 
-            const { props, saveProps, options } = getDefaultArgs(
+        resetMocks();
+
+        it("should have a dedicated flow for textbased saving by-ref", async () => {
+            // simulate a new save
+            const attributeServiceMock = makeAttributeService({...defaultDoc, savedObjectId: faker.random.uuid()});
+
+            const { props, saveProps, options, saveToLibraryFn, cleanupEditor } = getDefaultArgs(
                 {
-                    redirectTo,
-                    switchDatasource,
-                    stateTransfer: stateTransferMock,
                     textBasedLanguageSave: true,
                     attributeService: attributeServiceMock,
                     // give a document without a savedObjectId
                     lastKnownDoc: { ...defaultDoc, savedObjectId: undefined },
+                    persistedDoc: undefined,
                     // simulate a fresh start in the editor
                     initialInput: undefined
-                },
-                {
-                    newCopyOnSave: false,
+                }, {
                     saveToLibrary: true
                 }
             );
+
             await runSaveLensVisualization(props, saveProps, options);
-            expect(stateTransferMock.clearEditorState).toHaveBeenCalled();
-            expect(switchDatasource).toHaveBeenCalled();
-            expect(redirectTo).not.toHaveBeenCalled();
+
+            // callback called
+            expect(saveToLibraryFn).toHaveBeenCalled();
+            expect(cleanupEditor).toHaveBeenCalled();
+            expect(props.switchDatasource).toHaveBeenCalled();
+            expect(props.redirectTo).not.toHaveBeenCalled();
             expect(props.application.navigateToApp).toHaveBeenCalledWith('lens', { path: '/' })
         });
     });

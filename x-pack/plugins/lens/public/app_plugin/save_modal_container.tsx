@@ -325,7 +325,7 @@ export const runSaveLensVisualization = async (
           ? await attributeService.saveToLibrary(
               newDoc.attributes,
               newDoc.attributes.references || [],
-              newDoc.savedObjectId
+              originalSavedObjectId
             )
           : undefined;
     } catch (error) {

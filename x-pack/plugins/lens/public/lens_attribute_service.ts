@@ -87,13 +87,13 @@ export function getLensAttributeService(
       references: Reference[],
       savedObjectId?: string
     ) => {
-      const { savedObjectId: newId } = await savedObjectStore.save({
+      const result = await savedObjectStore.save({
         ...attributes,
         state: attributes.state as LensSavedObjectAttributes['state'],
         references,
         savedObjectId,
       });
-      return newId;
+      return result.savedObjectId;
     },
     checkForDuplicateTitle: async ({
       newTitle,
