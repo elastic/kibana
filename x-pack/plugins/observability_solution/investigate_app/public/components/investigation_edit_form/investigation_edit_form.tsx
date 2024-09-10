@@ -24,13 +24,13 @@ import { pick } from 'lodash';
 import React from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { v4 as uuidv4 } from 'uuid';
+import { paths } from '../../../common/paths';
 import { useCreateInvestigation } from '../../hooks/use_create_investigation';
 import { useFetchInvestigation } from '../../hooks/use_fetch_investigation';
+import { useKibana } from '../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../hooks/use_update_investigation';
 import { InvestigationNotFound } from '../investigation_not_found/investigation_not_found';
 import { StatusField } from './fields/status_field';
-import { useKibana } from '../../hooks/use_kibana';
-import { paths } from '../../../common/paths';
 
 export interface InvestigationForm {
   title: string;
@@ -55,7 +55,6 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
     data: investigation,
     isLoading,
     isError,
-    refetch,
   } = useFetchInvestigation({ id: investigationId });
 
   const { mutateAsync: updateInvestigation } = useUpdateInvestigation();
@@ -81,7 +80,6 @@ export function InvestigationEditForm({ investigationId, onClose }: Props) {
         investigationId: investigationId!,
         payload: { title: data.title, status: data.status },
       });
-      refetch();
       onClose();
     } else {
       const resp = await createInvestigation({

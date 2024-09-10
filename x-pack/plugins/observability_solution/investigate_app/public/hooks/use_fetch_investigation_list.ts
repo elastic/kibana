@@ -53,7 +53,7 @@ export function useFetchInvestigationList({
         signal,
       });
     },
-    cacheTime: 0,
+    refetchInterval: 60 * 1000,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {
