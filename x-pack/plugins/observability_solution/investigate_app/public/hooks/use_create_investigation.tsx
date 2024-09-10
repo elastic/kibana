@@ -11,12 +11,14 @@ import {
   CreateInvestigationResponse,
   FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
-import { QueryKey, useMutation } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
+import { investigationKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateInvestigation() {
+  const queryClient = useQueryClient();
   const {
     core: {
       http,
@@ -42,6 +44,11 @@ export function useCreateInvestigation() {
     {
       onSuccess: (response, investigation, context) => {
         toasts.addSuccess('Investigation created');
+        queryClient.invalidateQueries({
+          queryKey: investigationKeys.list(),
+          exact: false,
+          refetchType: 'all',
+        });
       },
       onError: (error, investigation, context) => {
         toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });

@@ -26,7 +26,7 @@ export function useUpdateInvestigationNote() {
     { investigationId: string; noteId: string; note: UpdateInvestigationNoteParams },
     { investigationId: string }
   >(
-    ['deleteInvestigationNote'],
+    ['updateInvestigationNote'],
     ({ investigationId, noteId, note }) => {
       const body = JSON.stringify(note);
       return http.put<void>(

@@ -7,12 +7,14 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
+import { investigationKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useUpdateInvestigation() {
+  const queryClient = useQueryClient();
   const {
     core: {
       http,
@@ -35,8 +37,13 @@ export function useUpdateInvestigation() {
       );
     },
     {
-      onSuccess: (response, {}) => {
+      onSuccess: (response, { investigationId }) => {
         toasts.addSuccess('Investigation updated');
+        queryClient.invalidateQueries({
+          queryKey: investigationKeys.fetch({ id: investigationId }),
+          exact: false,
+          refetchType: 'all',
+        });
       },
       onError: (error, {}, context) => {
         toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });
