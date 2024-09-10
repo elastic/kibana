@@ -143,7 +143,7 @@ describe('helpers', () => {
         expect(screen.getByLabelText(CHECK_INDEX)).toBeInTheDocument();
       });
 
-      test('it invokes the `onCheckNowAction` with the index name when the check index button is clicked', () => {
+      test('it invokes the `onCheckNowAction` with the index name when the check index button is clicked', async () => {
         const onCheckNowAction = jest.fn();
 
         const columns = getSummaryTableColumns({
@@ -167,7 +167,7 @@ describe('helpers', () => {
         );
 
         const button = screen.getByLabelText(CHECK_INDEX);
-        userEvent.click(button);
+        await userEvent.click(button);
 
         expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
       });
@@ -198,7 +198,7 @@ describe('helpers', () => {
         expect(screen.getByLabelText('Loading')).toBeInTheDocument();
       });
 
-      test('it invokes the `onExpandAction` with the index name when the view check details button is clicked', () => {
+      test('it invokes the `onExpandAction` with the index name when the view check details button is clicked', async () => {
         const onExpandAction = jest.fn();
 
         const columns = getSummaryTableColumns({
@@ -223,7 +223,7 @@ describe('helpers', () => {
         );
 
         const button = screen.getByLabelText(VIEW_CHECK_DETAILS);
-        userEvent.click(button);
+        await userEvent.click(button);
 
         expect(onExpandAction).toBeCalledWith(indexSummaryTableItem.indexName);
       });

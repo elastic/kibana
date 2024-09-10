@@ -59,13 +59,26 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       kbResource: ESQL_RESOURCE,
     }) as Array<Document<Metadata>>;
 
+    // And make sure remaining docs have `kbResource:esql`
+    const docsWithMetadata = addRequiredKbResourceMetadata({
+      docs,
+      kbResource: ESQL_RESOURCE,
+      required: false,
+    }) as Array<Document<Metadata>>;
+
+    const languageDocsWithMetadata = addRequiredKbResourceMetadata({
+      docs: languageDocs,
+      kbResource: ESQL_RESOURCE,
+      required: false,
+    }) as Array<Document<Metadata>>;
+
     logger.info(
-      `Loading ${docs.length} ES|QL docs, ${languageDocs.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
+      `Loading ${docsWithMetadata.length} ES|QL docs, ${languageDocsWithMetadata.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`
     );
 
     const response = await esStore.addDocuments([
-      ...docs,
-      ...languageDocs,
+      ...docsWithMetadata,
+      ...languageDocsWithMetadata,
       ...requiredExampleQueries,
     ]);
 

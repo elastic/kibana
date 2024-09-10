@@ -1,32 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { helpers } from './helpers';
 
 export default ({ getService }: FtrProviderContext) => {
-  const {
-    createIndex,
-    createAlias,
-    createLegacyTemplate,
-    createIndexTemplate,
-    createComponentTemplate,
-    createDataStream,
-    deleteIndex,
-    deleteAlias,
-    deleteLegacyTemplate,
-    deleteIndexTemplate,
-    deleteComponentTemplate,
-    deleteDataStream,
-  } = helpers(getService);
-
+  const console = getService('console');
   const supertest = getService('supertest');
+
   const sendRequest = (query: object) =>
     supertest.get('/api/console/autocomplete_entities').query(query);
 
@@ -40,22 +27,26 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       // Setup indices, aliases, templates, and data streams
-      await createIndex(indexName);
-      await createAlias(indexName, aliasName);
-      await createComponentTemplate(componentTemplateName);
-      await createIndexTemplate(indexTemplateName, [dataStreamName], [componentTemplateName]);
-      await createDataStream(dataStreamName);
-      await createLegacyTemplate(legacyTemplateName);
+      await console.createIndex(indexName);
+      await console.createAlias(indexName, aliasName);
+      await console.createComponentTemplate(componentTemplateName);
+      await console.createIndexTemplate(
+        indexTemplateName,
+        [dataStreamName],
+        [componentTemplateName]
+      );
+      await console.createDataStream(dataStreamName);
+      await console.createLegacyTemplate(legacyTemplateName);
     });
 
     after(async () => {
       // Cleanup indices, aliases, templates, and data streams
-      await deleteAlias(indexName, aliasName);
-      await deleteIndex(indexName);
-      await deleteDataStream(dataStreamName);
-      await deleteIndexTemplate(indexTemplateName);
-      await deleteComponentTemplate(componentTemplateName);
-      await deleteLegacyTemplate(legacyTemplateName);
+      await console.deleteAlias(indexName, aliasName);
+      await console.deleteIndex(indexName);
+      await console.deleteDataStream(dataStreamName);
+      await console.deleteIndexTemplate(indexTemplateName);
+      await console.deleteComponentTemplate(componentTemplateName);
+      await console.deleteLegacyTemplate(legacyTemplateName);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {

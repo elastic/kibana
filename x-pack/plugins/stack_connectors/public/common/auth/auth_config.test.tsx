@@ -66,7 +66,7 @@ describe('AuthConfig renders', () => {
 
     expect(headersToggle).toBeInTheDocument();
 
-    userEvent.click(headersToggle);
+    await userEvent.click(headersToggle);
 
     expect(await screen.findByTestId('webhookHeaderText')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookHeadersKeyInput')).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('AuthConfig renders', () => {
 
     expect(caToggle).toBeInTheDocument();
 
-    userEvent.click(caToggle);
+    await userEvent.click(caToggle);
 
     expect(await screen.findByTestId('webhookViewCASwitch')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookCAInput')).toBeInTheDocument();
@@ -225,7 +225,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -262,7 +262,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -300,7 +300,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -339,7 +339,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -384,7 +384,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -413,7 +413,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -456,7 +456,7 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({

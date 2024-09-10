@@ -13,13 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { switchMap, takeWhile, tap } from 'rxjs';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { useMlApiContext } from '../../../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
 
 const NUMBER_OF_PREVIEW = 5;
 export const CategoryStoppedPartitions: FC = () => {
-  const ml = useMlApiContext();
+  const mlApi = useMlApi();
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);
@@ -47,7 +47,7 @@ export const CategoryStoppedPartitions: FC = () => {
 
   const loadCategoryStoppedPartitions = useCallback(async () => {
     try {
-      const { jobs } = await ml.results.getCategoryStoppedPartitions([jobCreator.jobId]);
+      const { jobs } = await mlApi.results.getCategoryStoppedPartitions([jobCreator.jobId]);
 
       if (
         !Array.isArray(jobs) && // if jobs is object of jobId: [partitions]

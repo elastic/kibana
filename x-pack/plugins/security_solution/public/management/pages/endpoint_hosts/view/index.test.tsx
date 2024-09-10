@@ -725,7 +725,7 @@ describe('when on the endpoint list page', () => {
             'endpoint-details-flyout-tab-activity_log'
           );
 
-          userEvent.click(activityLogTab);
+          await userEvent.click(activityLogTab);
           expect(detailsTab).toHaveAttribute('aria-selected', 'false');
           expect(activityLogTab).toHaveAttribute('aria-selected', 'true');
           expect(renderResult.getByTestId('endpointActivityLogFlyoutBody')).not.toBeNull();
