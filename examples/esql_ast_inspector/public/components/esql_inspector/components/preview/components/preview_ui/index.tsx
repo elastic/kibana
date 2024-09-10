@@ -7,9 +7,11 @@
  */
 
 import * as React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
 import { FromCommand } from './components/from_command';
+import { LimitCommand } from './components/limit_command';
 
 export const PreviewUi: React.FC = (props) => {
   const state = useEsqlInspector();
@@ -20,8 +22,11 @@ export const PreviewUi: React.FC = (props) => {
   }
 
   return (
-    <div style={{ paddingTop: 16 }}>
+    <>
+      <EuiSpacer />
       <FromCommand />
-    </div>
+      <EuiSpacer />
+      <LimitCommand />
+    </>
   );
 };

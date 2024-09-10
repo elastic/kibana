@@ -14,6 +14,7 @@ export class EsqlInspectorState {
   public readonly query$ = new BehaviorSubject<EsqlQuery | null>(null);
   public readonly queryLastValid$ = new BehaviorSubject<EsqlQuery | null>(EsqlQuery.fromSrc(''));
   public readonly from$ = new BehaviorSubject<ESQLCommand | null>(null);
+  public readonly limit$ = new BehaviorSubject<ESQLCommand | null>(null);
 
   constructor() {
     this.src$.subscribe((src) => {
@@ -35,6 +36,15 @@ export class EsqlInspectorState {
 
         if (from) {
           this.from$.next(from as ESQLCommand);
+        }
+
+        const limit = Walker.match(query?.ast, {
+          type: 'command',
+          name: 'limit',
+        });
+
+        if (limit) {
+          this.limit$.next(limit as ESQLCommand);
         }
       }
     });
