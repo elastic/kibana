@@ -24,7 +24,7 @@ interface CreateRuleOptions {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
-  rule: RuleCreateProps;
+  rule: RuleCreateProps & { immutable: boolean };
   id?: string;
   allowMissingConnectorSecrets?: boolean;
 }
