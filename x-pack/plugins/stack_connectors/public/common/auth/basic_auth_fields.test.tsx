@@ -52,7 +52,7 @@ describe('BasicAuthFields', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -81,7 +81,7 @@ describe('BasicAuthFields', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -102,7 +102,7 @@ describe('BasicAuthFields', () => {
         </AuthFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

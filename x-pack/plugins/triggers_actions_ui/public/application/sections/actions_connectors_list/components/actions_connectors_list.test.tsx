@@ -18,28 +18,27 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
+import { times } from 'lodash';
+import { useHistory, useParams } from 'react-router-dom';
 
 jest.mock('../../../../common/lib/kibana');
-import { ActionConnector, GenericValidationResult } from '../../../../types';
-import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({}),
+  useLocation: jest.fn().mockReturnValue({ search: '' }),
+  useHistory: jest.fn().mockReturnValue({ push: jest.fn(), createHref: jest.fn() }),
+}));
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mocks = coreMock.createSetup();
 const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
-const mockGetParams = jest.fn().mockReturnValue({});
-const mockGetLocation = jest.fn().mockReturnValue({ search: '' });
-const mockGetHistory = jest.fn().mockReturnValue({ push: jest.fn(), createHref: jest.fn() });
-
-jest.mock('react-router-dom', () => ({
-  useParams: () => mockGetParams(),
-  useLocation: () => mockGetLocation(),
-  useHistory: () => mockGetHistory(),
-}));
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {
@@ -112,7 +111,7 @@ describe('actions_connectors_list', () => {
         </IntlProvider>
       );
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
-      userEvent.click(createFirstActionButton);
+      await userEvent.click(createFirstActionButton);
       await waitFor(() => {
         expect(setAddFlyoutVisibility).toBeCalled();
       });
@@ -173,6 +172,15 @@ describe('actions_connectors_list', () => {
         config: {},
       },
     ] as ActionConnector[];
+    let mockedEditItem: jest.Mock;
+
+    afterEach(() => {
+      mockedEditItem.mockReset();
+    });
+
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
 
     async function setup(actionConnectors = mockedActions) {
       loadActionTypes.mockResolvedValueOnce([
@@ -237,13 +245,13 @@ describe('actions_connectors_list', () => {
         },
       };
 
-      const editItem = jest.fn();
+      mockedEditItem = jest.fn();
 
       wrapper = mountWithIntl(
         <ActionsConnectorsList
           setAddFlyoutVisibility={() => {}}
           loadActions={async () => {}}
-          editItem={editItem}
+          editItem={mockedEditItem}
           isLoadingActions={false}
           actions={actionConnectors}
           setActions={() => {}}
@@ -378,6 +386,21 @@ describe('actions_connectors_list', () => {
           .text()
           .includes('This connector is used in a rule')
       );
+    });
+
+    it('call editItem when connectorId presented in url', async () => {
+      const selectedConnector = mockedActions[3];
+      const mockedCreateHref = jest.fn(({ pathname }) => pathname);
+      const replaceStateSpy = jest.spyOn(window.history, 'replaceState');
+      (useParams as jest.Mock).mockReturnValue({ connectorId: selectedConnector.id });
+      (useHistory as jest.Mock).mockReturnValue({ createHref: mockedCreateHref });
+
+      await setup();
+
+      expect(mockedEditItem).toBeCalledWith(selectedConnector, EditConnectorTabs.Configuration);
+      expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
+      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
+      replaceStateSpy.mockRestore();
     });
   });
 
