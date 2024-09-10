@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const security = getService('security');
 
   const VECTOR_SOURCE_ID = '67c1de2c-2fc5-4425-8983-094b589afe61';
@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }) {
   describe('point to point source', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_all', 'geoconnections_data_reader']);
-      await PageObjects.maps.loadSavedMap('pew pew demo');
+      await maps.loadSavedMap('pew pew demo');
     });
 
     after(async () => {
@@ -24,12 +24,12 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should request source clusters for destination locations', async () => {
-      const { rawResponse: response } = await PageObjects.maps.getResponse();
+      const { rawResponse: response } = await maps.getResponse();
       expect(response.aggregations.destSplit.buckets.length).to.equal(2);
     });
 
     it('should render lines', async () => {
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      const mapboxStyle = await maps.getMapboxStyle();
       const features = mapboxStyle.sources[VECTOR_SOURCE_ID].data.features;
       expect(features.length).to.equal(4);
       expect(features[0].geometry.type).to.equal('LineString');
@@ -37,9 +37,9 @@ export default function ({ getPageObjects, getService }) {
 
     it('should fit to bounds', async () => {
       // Set view to other side of world so no matching results
-      await PageObjects.maps.setView(-70, 0, 6);
-      await PageObjects.maps.clickFitToBounds('connections');
-      const { lat, lon } = await PageObjects.maps.getView();
+      await maps.setView(-70, 0, 6);
+      await maps.clickFitToBounds('connections');
+      const { lat, lon } = await maps.getView();
       expect(Math.round(lat)).to.equal(41);
       expect(Math.round(lon)).to.equal(-70);
     });
