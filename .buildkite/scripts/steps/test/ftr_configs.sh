@@ -60,6 +60,10 @@ while read -r config; do
   if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
     echo "USE_CHROME_BETA was set - using google-chrome-beta"
     export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
+
+    # download the beta version of chromedriver
+    BETA_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
+    node node_modules/chromedriver/install.js --chromedriver-force-download --chromedriver-version="$BETA_VERSION"
   fi
 
   # prevent non-zero exit code from breaking the loop
