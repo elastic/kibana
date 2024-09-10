@@ -7,14 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import {
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { SAVED_BOOK_ID } from '../../../react_embeddables/saved_book/constants';
+import {
+  BookApi,
+  BookRuntimeState,
+  BookSerializedState,
+} from '../../../react_embeddables/saved_book/types';
+import { getPageApi } from '../page_api';
 
 export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
+  const { componentApi, pageApi } = useMemo(() => {
+    return getPageApi();
+  }, []);
+
+  const hasEmbeddableState = useStateFromPublishingSubject(componentApi.hasEmbeddableState$);
+
   return (
     <div>
       <EuiCallOut>
@@ -24,31 +36,50 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
         </p>
 
         <p>
-          When the example is first run, there is no embeddable state from a previous session.
-          The page displays a button to add a 'book' embeddable that when clicked executes <EuiLink href="https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/react_embeddables/saved_book/create_saved_book_action.tsx#L35">ADD_SAVED_BOOK_ACTION_ID action</EuiLink>.
-          The action provides the page with unsaved book state by calling <strong>pageApi.addNewPanel</strong>.
+          When the example is first run, there is no embeddable state from a previous session. The
+          page displays a button to add a <em>book</em> embeddable that when clicked executes{' '}
+          <EuiLink href="https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/react_embeddables/saved_book/create_saved_book_action.tsx#L35">
+            ADD_SAVED_BOOK_ACTION_ID action
+          </EuiLink>
+          . The action provides the page with unsaved book state by calling{' '}
+          <strong>pageApi.addNewPanel</strong>.
         </p>
 
         <p>
           The page renders the embeddable with <strong>ReactEmbeddableRenderer</strong> component.
-          On mount, ReactEmbeddableRenderer component calls <strong>pageApi.getSerializedStateForChild</strong> to get the last saved state.
-          ReactEmbeddableRenderer component then calls <strong>pageApi.getRuntimeStateForChild</strong> to get the last session&apos;s unsaved changes.
-          ReactEmbeddableRenderer merges last saved state with unsaved changes and passes the merged state to the embeddable factory.
-          ReactEmbeddableRender passes the embeddableApi to the page by calling <strong>onApiAvailable</strong>.
+          On mount, ReactEmbeddableRenderer component calls{' '}
+          <strong>pageApi.getSerializedStateForChild</strong> to get the last saved state.
+          ReactEmbeddableRenderer component then calls{' '}
+          <strong>pageApi.getRuntimeStateForChild</strong> to get the last session&apos;s unsaved
+          changes. ReactEmbeddableRenderer merges last saved state with unsaved changes and passes
+          the merged state to the embeddable factory. ReactEmbeddableRender passes the embeddableApi
+          to the page by calling <strong>onApiAvailable</strong>.
         </p>
 
         <p>
-          The page subscribes to <strong>embeddableApi.unsavedChanges</strong> to receive embeddable unsaved changes.
-          The page persists unsaved changes in session storage.
-          The page provides unsaved changes to the embeddable with <strong>pageApi.getRuntimeStateForChild</strong>.
+          The page subscribes to <strong>embeddableApi.unsavedChanges</strong> to receive embeddable
+          unsaved changes. The page persists unsaved changes in session storage. The page provides
+          unsaved changes to the embeddable with <strong>pageApi.getRuntimeStateForChild</strong>.
         </p>
 
         <p>
           The page gets embeddable state by calling <strong>embeddableApi.serializeState</strong>.
-          The page persists embeddable state in session storage.
-          The page provides last saved state to the embeddable with <strong>getSerializedStateForChild</strong>.
+          The page persists embeddable state in session storage. The page provides last saved state
+          to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
         </p>
       </EuiCallOut>
+
+      <EuiSpacer size="m" />
+
+      {hasEmbeddableState && (
+        <ReactEmbeddableRenderer<BookSerializedState, BookRuntimeState, BookApi>
+          type={SAVED_BOOK_ID}
+          getParentApi={() => pageApi}
+          onApiAvailable={(api) => {
+            componentApi.setBookApi(api);
+          }}
+        />
+      )}
     </div>
   );
 };

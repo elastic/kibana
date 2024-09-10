@@ -51,7 +51,7 @@ const App = ({
       {
         id: 'stateManagement',
         title: 'Embeddable state management',
-        component: <StateManagementExample uiActions={deps.uiActions} />
+        component: <StateManagementExample uiActions={deps.uiActions} />,
       },
       {
         id: 'presentationContainer',
