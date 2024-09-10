@@ -46,7 +46,7 @@ const readServerlessRoles = (projectType: string) => {
   }
 };
 
-const readStatefulRoles = (projectType: string) => {
+const readStatefulRoles = () => {
   const rolesResourcePath = resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
   return readRolesFromResource(rolesResourcePath);
 };
@@ -85,12 +85,7 @@ export const plugin: PluginInitializer<
         try {
           if (roles.length === 0) {
             const projectType = plugins.cloud?.serverless?.projectType;
-            if (projectType) {
-              roles.push(...readServerlessRoles(projectType));
-            } else {
-              // then it is a stateful deployment
-              roles.push(...readStatefulRoles());
-            }
+            roles.push(...(projectType ? readServerlessRoles(projectType) : readStatefulRoles()));
           }
           return response.ok({
             body: {
