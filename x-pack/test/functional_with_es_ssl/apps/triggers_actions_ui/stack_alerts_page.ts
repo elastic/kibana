@@ -102,8 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/184882
-    describe.skip('Loads the page', () => {
+    describe('Loads the page', () => {
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await pageObjects.common.navigateToUrl(
@@ -145,10 +144,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           firstSolutionFilter = quickFilters
             .filter((_: number, f: any) => f.attribs['data-test-subj'].endsWith('rule types'))
             .first();
-          expect(firstSolutionFilter).to.not.be(null);
+
+          expect(typeof firstSolutionFilter?.attr('data-test-subj')).to.be('string');
         });
 
-        await testSubjects.click(firstSolutionFilter!.attr('data-test-subj'));
+        await testSubjects.click(firstSolutionFilter.attr('data-test-subj'));
 
         await retry.try(async () => {
           const appliedFilters = await pageObjects.triggersActionsUI.getAlertsPageAppliedFilters();
@@ -169,9 +169,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               f.attribs['data-test-subj'].includes('Security rule types')
             )
             .first();
-          expect(filter).to.not.be(null);
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
-        await testSubjects.click(filter!.attr('data-test-subj'));
+
+        await testSubjects.click(filter.attr('data-test-subj'));
 
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
@@ -200,10 +202,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               return testSubj.includes('rule types') && !testSubj.includes('Security');
             })
             .first();
-          expect(filter).to.not.be(null);
+
+          expect(typeof filter?.attr('data-test-subj')).to.be('string');
         });
 
-        await testSubjects.click(filter!.attr('data-test-subj'));
+        await testSubjects.click(filter.attr('data-test-subj'));
 
         await retry.try(async () => {
           quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
