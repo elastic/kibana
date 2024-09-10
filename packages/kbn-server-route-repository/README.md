@@ -88,9 +88,7 @@ The client can be created either in `setup` or `start`.
 
 > browser/plugin.ts
 ```javascript
-import { isHttpFetchError } from '@kbn/core-http-browser';
-import { DefaultClientOptions } from '@kbn/server-route-repository-utils';
-import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import { createRepositoryClient, isHttpFetchError, DefaultClientOptions } from '@kbn/server-route-repository-client';
 import type { MyPluginRouteRepository } from '../server/plugin';
 
 export type MyPluginRepositoryClient = 
@@ -127,22 +125,22 @@ The client translates the endpoint and the options (including request parameters
 
 ## Request parameter validation
 
-When creating your routes, you can also provide an `io-ts` codec to be used when validating incoming requests.
+When creating your routes, you can provide either a `zod` schema or an `io-ts` codec to be used when validating incoming requests.
 
 ```javascript
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
 const myRoute = createMyPluginServerRoute({
-  endpoint: 'GET /internal/my_plugin/route/{my_path_param}',
-  params: t.type({
-    path: t.type({
-      my_path_param: t.string,
+  endpoint: 'POST /internal/my_plugin/route/{my_path_param}',
+  params: z.object({
+    path: z.object({
+      my_path_param: z.string(),
     }),
-    query: t.type({
-      my_query_param: t.string,
+    query: z.object({
+      my_query_param: z.string(),
     }),
-    body: t.type({
-      my_body_param: t.string,
+    body: z.object({
+      my_body_param: z.string(),
     }),
   }),
   handler: async (resources) => {
@@ -162,7 +160,7 @@ The `params` object is added to the route resources.
 
 When calling this endpoint, it will look like this:
 ```javascript
-client('GET /internal/my_plugin/route/{my_path_param}', {
+client('POST /internal/my_plugin/route/{my_path_param}', {
     params: {
         path: {
             my_path_param: 'some_path_value',
@@ -178,6 +176,9 @@ client('GET /internal/my_plugin/route/{my_path_param}', {
 ```
 
 Where the shape of `params` is typed to match the expected shape, meaning you don't need to manually use the codec when calling the route.
+
+> When using `zod` you also opt into the Kibana platforms automatic OpenAPI specification generation tooling.  
+> By adding `server.oas.enabled: true` to your `kibana.yml` and visiting `/api/oas?pluginId=yourPluginId` you can see the generated specification.
 
 ## Public routes
 

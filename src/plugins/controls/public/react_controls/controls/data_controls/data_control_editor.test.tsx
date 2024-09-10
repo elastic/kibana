@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -25,7 +26,6 @@ jest.mock('../../control_factory_registry', () => ({
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DataControlEditorState } from './open_data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
@@ -57,19 +57,25 @@ mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-  lastUsedDataViewId$: new BehaviorSubject<string>(mockDataView.id!),
 };
 const controlGroupApi = {
   parentApi: dashboardApi,
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
+  getEditorConfig: () => undefined,
 } as unknown as ControlGroupApi;
 
 describe('Data control editor', () => {
   const mountComponent = async ({
     initialState,
+    controlId,
+    controlType,
+    initialDefaultPanelTitle,
   }: {
-    initialState?: Partial<DataControlEditorState>;
+    initialState?: Partial<DefaultDataControlState>;
+    controlId?: string;
+    controlType?: string;
+    initialDefaultPanelTitle?: string;
   }) => {
     mockDataViews.get = jest.fn().mockResolvedValue(mockDataView);
 
@@ -78,11 +84,14 @@ describe('Data control editor', () => {
         <DataControlEditor
           onCancel={() => {}}
           onSave={() => {}}
-          parentApi={controlGroupApi}
+          controlGroupApi={controlGroupApi}
           initialState={{
-            dataViewId: dashboardApi.lastUsedDataViewId$.getValue(),
+            dataViewId: mockDataView.id,
             ...initialState,
           }}
+          controlId={controlId}
+          controlType={controlType}
+          initialDefaultPanelTitle={initialDefaultPanelTitle}
           services={{ dataViews: mockDataViews }}
         />
       </I18nProvider>
@@ -238,11 +247,11 @@ describe('Data control editor', () => {
       test('auto-fills input with the default title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            controlType: 'optionsList',
-            controlId: 'testId',
             fieldName: 'machine.os.raw',
-            defaultPanelTitle: 'OS',
           },
+          controlType: 'optionsList',
+          controlId: 'testId',
+          initialDefaultPanelTitle: 'OS',
         });
         const titleInput = await controlEditor.findByTestId('control-editor-title-input');
         expect(titleInput.getAttribute('value')).toBe('OS');
@@ -252,11 +261,11 @@ describe('Data control editor', () => {
       test('auto-fills input with the custom title', async () => {
         const controlEditor = await mountComponent({
           initialState: {
-            controlType: 'optionsList',
-            controlId: 'testId',
             fieldName: 'machine.os.raw',
             title: 'Custom title',
           },
+          controlType: 'optionsList',
+          controlId: 'testId',
         });
         const titleInput = await controlEditor.findByTestId('control-editor-title-input');
         expect(titleInput.getAttribute('value')).toBe('Custom title');
@@ -267,10 +276,10 @@ describe('Data control editor', () => {
     test('selects the provided control type', async () => {
       const controlEditor = await mountComponent({
         initialState: {
-          controlType: 'rangeSlider',
-          controlId: 'testId',
           fieldName: 'bytes',
         },
+        controlType: 'rangeSlider',
+        controlId: 'testId',
       });
 
       expect(controlEditor.getByTestId('create__optionsList')).toBeEnabled();
@@ -280,6 +289,56 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('false');
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
+    });
+  });
+
+  describe('control editor config', () => {
+    const getEditorConfig = jest.fn().mockImplementation(() => undefined);
+
+    beforeAll(() => {
+      controlGroupApi.getEditorConfig = getEditorConfig;
+    });
+
+    test('all elements are visible when no editor config', async () => {
+      const controlEditor = await mountComponent({
+        initialState: {
+          fieldName: 'machine.os.raw',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+        initialDefaultPanelTitle: 'OS',
+      });
+
+      const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
+      expect(dataViewPicker).toBeInTheDocument();
+      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
+      expect(widthSettings).toBeInTheDocument();
+      const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
+      expect(customSettings).toBeInTheDocument();
+    });
+
+    test('can hide elements with the editor config', async () => {
+      getEditorConfig.mockImplementationOnce(() => ({
+        hideDataViewSelector: true,
+        hideWidthSettings: true,
+        hideAdditionalSettings: true,
+      }));
+
+      const controlEditor = await mountComponent({
+        initialState: {
+          fieldName: 'machine.os.raw',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+        initialDefaultPanelTitle: 'OS',
+      });
+
+      const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
+      expect(dataViewPicker).not.toBeInTheDocument();
+      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
+      expect(widthSettings).not.toBeInTheDocument();
+      const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
+      expect(customSettings).not.toBeInTheDocument();
     });
   });
 });

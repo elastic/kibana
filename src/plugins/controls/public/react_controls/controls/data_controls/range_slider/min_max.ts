@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
@@ -11,24 +12,35 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { combineLatest, lastValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { combineLatest, lastValueFrom, Observable, of, startWith, switchMap, tap } from 'rxjs';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
+import { ControlGroupApi } from '../../../control_group/types';
 
 export function minMax$({
   controlFetch$,
+  controlGroupApi,
   data,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
   controlFetch$: Observable<ControlFetchContext>;
+  controlGroupApi: ControlGroupApi;
   data: DataPublicPluginStart;
   dataViews$: PublishesDataViews['dataViews'];
   fieldName$: PublishingSubject<string>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, dataViews$, fieldName$]).pipe(
+  return combineLatest([
+    controlFetch$,
+    dataViews$,
+    fieldName$,
+    apiPublishesReload(controlGroupApi)
+      ? controlGroupApi.reload$.pipe(startWith(undefined))
+      : of(undefined),
+  ]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();

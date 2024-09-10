@@ -199,4 +199,14 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     expect(apiMocks.responseProvider.fileInfo).not.toHaveBeenCalled();
     expect(renderResult.container.children.length).toBe(0);
   });
+
+  it('should not display the passcode text if `showPasscode` prop is `false`', async () => {
+    renderProps.showPasscode = false;
+    render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
+
+    expect(renderResult.queryByTestId('test-passcodeMessage')).toBeNull();
+  });
 });

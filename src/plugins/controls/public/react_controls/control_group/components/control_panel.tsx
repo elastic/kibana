@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import classNames from 'classnames';
@@ -27,7 +28,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
-import { DEFAULT_CONTROL_WIDTH } from '../../../../common';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 
 import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
@@ -100,6 +101,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     grow,
     width,
     labelPosition,
+    disabledActionIds,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
@@ -109,6 +111,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     api?.grow,
     api?.width,
     api?.parentApi?.labelPosition,
+    api?.parentApi?.disabledActionIds,
     viewModeSubject
   );
   const usingTwoLineLayout = labelPosition === 'twoLine';
@@ -121,17 +124,18 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
   const isEditable = viewMode === ViewMode.EDIT;
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
+  const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
 
   return (
     <EuiFlexItem
       ref={setNodeRef}
       style={style}
-      grow={grow}
+      grow={controlGrow}
       data-control-id={uuid}
-      data-test-subj={`control-frame`}
+      data-test-subj="control-frame"
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
-        'controlFrameWrapper--grow': grow,
+        'controlFrameWrapper--grow': controlGrow,
         'controlFrameWrapper--small': controlWidth === 'small',
         'controlFrameWrapper--medium': controlWidth === 'medium',
         'controlFrameWrapper--large': controlWidth === 'large',
@@ -147,17 +151,19 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
         })}
         viewMode={viewMode}
-        disabledActions={[]}
+        disabledActions={disabledActionIds}
         isEnabled={true}
       >
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
           label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
+          display="rowCompressed"
         >
           <EuiFormControlLayout
             fullWidth
             isLoading={Boolean(dataLoading)}
+            compressed
             className="controlFrame__formControlLayout"
             prepend={
               <>

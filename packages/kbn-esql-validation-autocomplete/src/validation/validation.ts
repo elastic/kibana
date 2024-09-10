@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import uniqBy from 'lodash/uniqBy';
@@ -30,7 +31,7 @@ import {
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  lookupColumn,
+  getColumnForASTNode,
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
@@ -89,7 +90,7 @@ function validateFunctionLiteralArg(
   if (isLiteralItem(actualArg)) {
     if (
       actualArg.literalType === 'string' &&
-      argDef.literalOptions &&
+      argDef.acceptedValues &&
       isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
@@ -98,7 +99,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })
@@ -295,7 +296,7 @@ function validateFunctionColumnArg(
   if (
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
-    const columnHit = lookupColumn(actualArg, references);
+    const columnHit = getColumnForASTNode(actualArg, references);
     messages.push(
       getMessageFromId({
         messageId: 'wrongArgumentType',
@@ -873,18 +874,21 @@ function validateColumnForCommand(
     if (getColumnExists(column, references)) {
       const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerType }) => type === 'column' && innerType
+        ({ type, innerTypes }) => type === 'column' && innerTypes
       );
       // this should be guaranteed by the columnCheck above
-      const columnRef = lookupColumn(column, references)!;
+      const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
-          if (innerType === 'string' && isStringType(columnRef.type)) return false;
-          return innerType !== 'any' && innerType !== columnRef.type;
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {
+          if (innerTypes?.includes('string') && isStringType(columnRef.type)) return false;
+          return innerTypes && !innerTypes.includes('any') && !innerTypes.includes(columnRef.type);
         });
         if (hasSomeWrongInnerTypes) {
-          const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
+          const supportedTypes: string[] = columnParamsWithInnerTypes
+            .map(({ innerTypes }) => innerTypes)
+            .flat()
+            .filter((type) => type !== undefined) as string[];
 
           messages.push(
             getMessageFromId({
@@ -1096,6 +1100,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
+  getPreferences: [],
 };
 
 /**

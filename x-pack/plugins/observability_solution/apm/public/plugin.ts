@@ -69,6 +69,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -134,6 +135,7 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;

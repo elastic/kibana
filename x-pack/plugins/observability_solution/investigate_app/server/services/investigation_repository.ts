@@ -6,16 +6,17 @@
  */
 
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { investigationSchema } from '@kbn/investigation-shared';
 import { isLeft } from 'fp-ts/lib/Either';
-import { Investigation, StoredInvestigation, investigationSchema } from '../models/investigation';
-import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
+import { Investigation, StoredInvestigation } from '../models/investigation';
 import { Paginated, Pagination } from '../models/pagination';
+import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
 
 export interface InvestigationRepository {
   save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
   deleteById(id: string): Promise<void>;
-  search(pagination: Pagination): Promise<Paginated<Investigation>>;
+  search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>>;
 }
 
 export function investigationRepositoryFactory({
@@ -89,11 +90,12 @@ export function investigationRepositoryFactory({
       await soClient.delete(SO_INVESTIGATION_TYPE, response.saved_objects[0].id);
     },
 
-    async search(pagination: Pagination): Promise<Paginated<Investigation>> {
+    async search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
         page: pagination.page,
         perPage: pagination.perPage,
+        filter,
       });
 
       return {

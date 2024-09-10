@@ -924,9 +924,9 @@
                             "signature": [
                               {
                                 "pluginId": "@kbn/content-management-utils",
-                                "scope": "common",
+                                "scope": "server",
                                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                                "section": "def-common.SOWithMetadata",
+                                "section": "def-server.SOWithMetadata",
                                 "text": "SOWithMetadata"
                               },
                               "<",

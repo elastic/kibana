@@ -12,9 +12,10 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   type AssetDetailsLocatorParams,
+  SupportedAssetTypes,
 } from '@kbn/observability-shared-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AssetDetailsUrlState } from '../../components/asset_details/types';
+import { type AssetDetailsUrlState } from '../../components/asset_details/types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
@@ -22,7 +23,7 @@ export const REDIRECT_NODE_DETAILS_FROM_KEY = 'from';
 export const REDIRECT_NODE_DETAILS_TO_KEY = 'to';
 export const REDIRECT_ASSET_DETAILS_KEY = 'assetDetails';
 
-const getHostDetailSearch = (queryParams: URLSearchParams) => {
+const getAssetDetailsQueryParams = (queryParams: URLSearchParams) => {
   const from = queryParams.get(REDIRECT_NODE_DETAILS_FROM_KEY);
   const to = queryParams.get(REDIRECT_NODE_DETAILS_TO_KEY);
   const assetDetailsParam = queryParams.get(REDIRECT_ASSET_DETAILS_KEY);
@@ -59,7 +60,9 @@ const getNodeDetailSearch = (queryParams: URLSearchParams) => {
 };
 
 export const getSearchParams = (nodeType: InventoryItemType, queryParams: URLSearchParams) =>
-  nodeType === 'host' ? getHostDetailSearch(queryParams) : getNodeDetailSearch(queryParams);
+  Object.values(SupportedAssetTypes).includes(nodeType as SupportedAssetTypes)
+    ? getAssetDetailsQueryParams(queryParams)
+    : getNodeDetailSearch(queryParams);
 
 export const RedirectToNodeDetail = () => {
   const {

@@ -4,10 +4,11 @@ parameters:
     name: agentPolicyId
     in: path
     required: true
+  - $ref: ../components/parameters/format.yaml
 post:
   summary: Copy agent policy by ID
   tags:
-    - Agent policies
+    - Elastic Agent policies
   operationId: agent-policy-copy
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

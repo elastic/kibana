@@ -7,9 +7,9 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
+import { Actions } from '@kbn/security-authorization-core';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
-import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationMock } from './index.mock';
 import type { AuthenticatedUser } from '../../common';

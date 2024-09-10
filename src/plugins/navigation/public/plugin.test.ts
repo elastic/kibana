@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, of } from 'rxjs';
@@ -67,6 +68,31 @@ describe('Navigation Plugin', () => {
     await new Promise((resolve) => setTimeout(resolve));
 
     expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith('es');
+  });
+
+  it('should not load the active space on non authenticated pages', async () => {
+    const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+    coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+    const activeSpace$ = of({ solution: 'es' } as Pick<Space, 'solution'>);
+    activeSpace$.pipe = jest.fn().mockReturnValue(activeSpace$);
+    activeSpace$.subscribe = jest.fn().mockReturnValue(activeSpace$);
+    spaces.getActiveSpace$ = jest.fn().mockReturnValue(activeSpace$);
+
+    plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(activeSpace$.pipe).not.toHaveBeenCalled();
+    expect(activeSpace$.subscribe).not.toHaveBeenCalled();
+
+    // Test that the activeSpace$ observable is accessed when not an anonymous path
+    coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+    plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(activeSpace$.pipe).toHaveBeenCalled();
+    expect(activeSpace$.subscribe).toHaveBeenCalled();
   });
 
   describe('addSolutionNavigation()', () => {

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 
 export const sharedOas = {
@@ -33,7 +34,7 @@ export const sharedOas = {
     '/bar': {
       get: {
         deprecated: true,
-        operationId: '/bar#0',
+        operationId: '%2Fbar#0',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -152,7 +153,7 @@ export const sharedOas = {
     '/foo/{id}/{path*}': {
       get: {
         description: 'route description',
-        operationId: '/foo/{id}/{path*}#0',
+        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0',
         parameters: [
           {
             description: 'The version of the API to use',
@@ -276,7 +277,7 @@ export const sharedOas = {
       },
       post: {
         description: 'route description',
-        operationId: '/foo/{id}/{path*}#1',
+        operationId: '%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1',
         parameters: [
           {
             description: 'The version of the API to use',

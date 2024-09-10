@@ -37,38 +37,36 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Convert to Lens" menu item for a count aggregation', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Basic');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Top N - Basic')).to.eql(true);
     });
 
     it('should not allow converting of invalid panel', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Invalid panel');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Top N - Invalid panel')).to.eql(false);
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Unsupported agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Top N - Unsupported agg')).to.eql(false);
     });
 
     it('should hide the "Convert to Lens" menu item for a sibling pipeline aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Sibling pipeline agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Top N - Sibling pipeline agg')).to.eql(
+        false
+      );
     });
 
     it('should hide the "Convert to Lens" menu item for a parent pipeline aggregations', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Parent pipeline agg');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Top N - Parent pipeline agg')).to.eql(
+        false
+      );
     });
 
     it('should convert to horizontal bar', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Horizontal bar');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Horizontal bar');
       await lens.waitForVisualization('xyVisChart');
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Bar horizontal');
+      expect(type).to.be('Bar');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);
@@ -79,8 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert group by to vertical axis', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Group by');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Group by');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -95,8 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert last value mode to reduced time range', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Last value');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Last value');
       await lens.waitForVisualization('xyVisChart');
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
@@ -114,8 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert static value to the separate layer with y dimension', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Static value');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Static value');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -129,8 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Basic');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Basic');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -140,31 +134,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - With filter');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - With filter');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
     });
 
     it('should preserve query in lens', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - With query');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - With query');
       await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
     });
 
     it('should bring the ignore global filters configured at series level over', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Ignore global filters series');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Ignore global filters series');
       await lens.waitForVisualization('xyVisChart');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
-      const visPanel = await panelActions.getPanelHeading('Top N - Ignore global filters panel');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Top N - Ignore global filters panel');
       await lens.waitForVisualization('xyVisChart');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });

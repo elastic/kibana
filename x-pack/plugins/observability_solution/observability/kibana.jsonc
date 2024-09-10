@@ -39,6 +39,7 @@
       "dashboard",
       "expressions",
       "logsExplorer",
+      "logsShared",
       "licensing",
       "navigation"
     ],
@@ -51,6 +52,7 @@
       "serverless",
       "guidedOnboarding",
       "observabilityAIAssistant",
+      "investigate"
     ],
     "requiredBundles": [
       "data",

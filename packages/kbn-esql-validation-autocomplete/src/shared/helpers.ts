@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -23,6 +24,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
@@ -40,6 +42,7 @@ import {
   FunctionDefinition,
   FunctionParameterType,
   FunctionReturnType,
+  ArrayType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -134,12 +137,14 @@ let fnLookups: Map<string, FunctionDefinition> | undefined;
 let commandLookups: Map<string, CommandDefinition> | undefined;
 
 function buildFunctionLookup() {
-  if (!fnLookups) {
+  // we always refresh if we have test functions
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
         evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        groupingFunctionDefinitions,
+        getTestFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);
@@ -248,28 +253,36 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
 /**
  * This function returns the variable or field matching a column
  */
-export function lookupColumn(
+export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
   const columnName = getQuotedColumnName(column);
   return (
-    fields.get(columnName) ||
-    variables.get(columnName)?.[0] ||
+    getColumnByName(columnName, { fields, variables }) ||
     // It's possible columnName has backticks "`fieldName`"
     // so we need to access the original name as well
-    fields.get(column.name) ||
-    variables.get(column.name)?.[0]
+    getColumnByName(column.name, { fields, variables })
   );
+}
+
+/**
+ * This function returns the variable or field matching a column
+ */
+export function getColumnByName(
+  columnName: string,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+): ESQLRealField | ESQLVariable | undefined {
+  return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
 
-export function isArrayType(type: string) {
+export function isArrayType(type: string): type is ArrayType {
   return ARRAY_REGEXP.test(type);
 }
 
-const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
+const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
   ['double[]', 'double'],
   ['unsigned_long[]', 'unsigned_long'],
   ['long[]', 'long'],
@@ -279,7 +292,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
   ['counter_double[]', 'counter_double'],
   ['keyword[]', 'keyword'],
   ['text[]', 'text'],
-  ['datetime[]', 'date'],
+  ['date[]', 'date'],
   ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
   ['any[]', 'any'],
@@ -289,7 +302,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
  * Given an array type for example `string[]` it will return `string`
  */
 export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return arrayToSingularMap.get(type) ?? type;
+  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -378,7 +391,7 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = lookupColumn(subArg, references);
+        const hit = getColumnForASTNode(subArg, references);
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -408,8 +421,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
@@ -445,7 +458,7 @@ export function checkFunctionArgMatchesDefinition(
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
   if (arg.type === 'column') {
-    const hit = lookupColumn(arg, references);
+    const hit = getColumnForASTNode(arg, references);
     const validHit = hit;
     if (!validHit) {
       return false;

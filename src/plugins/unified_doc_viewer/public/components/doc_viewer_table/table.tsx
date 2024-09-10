@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './table.scss';
@@ -24,6 +25,7 @@ import {
   useResizeObserver,
   EuiSwitch,
   useEuiTheme,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -53,6 +55,7 @@ import {
 } from '../doc_viewer_source/get_height';
 import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
 import { TableCell } from './table_cell';
+import { getPinColumnControl } from './get_pin_control';
 
 export type FieldRecord = TableRow;
 
@@ -295,6 +298,10 @@ export const DocViewerTable = ({
 
   const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
 
+  const leadingControlColumns = useMemo(() => {
+    return [getPinColumnControl({ rows })];
+  }, [rows]);
+
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
     totalItems: rows.length,
@@ -362,7 +369,7 @@ export const DocViewerTable = ({
   );
 
   const onHideNullValuesChange = useCallback(
-    (e) => {
+    (e: EuiSwitchEvent) => {
       setAreNullValuesHidden(e.target.checked);
     },
     [setAreNullValuesHidden]
@@ -492,6 +499,7 @@ export const DocViewerTable = ({
               renderCellValue={renderCellValue}
               renderCellPopover={renderCellPopover}
               pagination={pagination}
+              leadingControlColumns={leadingControlColumns}
             />
           </EuiFlexItem>
         </>

@@ -1173,7 +1173,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => ({ start: string; end?: undefined; } | { end: string; start?: undefined; })[]"
+          " | undefined) => ({ t_start: string; t_end?: undefined; } | { t_end: string; t_start?: undefined; })[]"
         ],
         "path": "packages/kbn-esql-utils/src/utils/run_query.ts",
         "deprecated": false,
@@ -1227,7 +1227,7 @@
         "tags": [],
         "label": "getTimeFieldFromESQLQuery",
         "description": [
-          "\nWhen the ?start and ?end params are used, we want to retrieve the timefield from the query."
+          "\nWhen the ?t_start and ?t_end params are used, we want to retrieve the timefield from the query."
         ],
         "signature": [
           "(esql: string) => string | undefined"
@@ -1353,6 +1353,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.retieveMetadataColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "retieveMetadataColumns",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.retieveMetadataColumns.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

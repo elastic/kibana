@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -41,6 +42,21 @@ describe('ui settings', () => {
         await expect(defaultRoute.getValue!()).resolves.toBe(DEFAULT_ROUTES.classic);
       });
 
+      it('should return classic when accessing a non authenticated route', async () => {
+        const spaces = spacesMock.createStart();
+        const mockSpace: Pick<Space, 'solution'> = { solution: 'es' };
+        spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
+        core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
+
+        const { defaultRoute } = getUiSettings(core, logger);
+        const requestMock = {
+          auth: { isAuthenticated: false },
+        };
+        await expect(defaultRoute.getValue!({ request: requestMock as any })).resolves.toBe(
+          DEFAULT_ROUTES.classic
+        );
+      });
+
       it('should return the route based on the active space', async () => {
         const spaces = spacesMock.createStart();
 
@@ -50,7 +66,10 @@ describe('ui settings', () => {
           core.getStartServices.mockResolvedValue([{} as any, { spaces }, {} as any]);
           const { defaultRoute } = getUiSettings(core, logger);
 
-          await expect(defaultRoute.getValue!({ request: {} as any })).resolves.toBe(
+          const requestMock = {
+            auth: { isAuthenticated: true },
+          };
+          await expect(defaultRoute.getValue!({ request: requestMock as any })).resolves.toBe(
             DEFAULT_ROUTES[solution]
           );
         }

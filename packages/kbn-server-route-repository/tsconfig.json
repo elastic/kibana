@@ -12,7 +12,6 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/io-ts-utils",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server",
@@ -21,6 +20,7 @@
     "@kbn/core",
     "@kbn/logging-mocks",
     "@kbn/server-route-repository-utils",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

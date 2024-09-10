@@ -13,11 +13,11 @@ import React, {
   useMemo,
   useState,
   FC,
-  PropsWithChildren,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useEvent } from 'react-use';
 import moment from 'moment';
+import { Subject } from 'rxjs';
 import { selectRefreshInterval, selectRefreshPaused } from '../state';
 
 interface SyntheticsRefreshContext {
@@ -34,7 +34,11 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
+export const SyntheticsRefreshContextProvider: FC<
+  React.PropsWithChildren<{
+    reload$?: Subject<boolean>;
+  }>
+> = ({ children, reload$ }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshPaused = useSelector(selectRefreshPaused);
@@ -50,6 +54,13 @@ export const SyntheticsRefreshContextProvider: FC<PropsWithChildren<unknown>> = 
       refreshApp();
     }
   }, [refreshApp, refreshPaused]);
+
+  useEffect(() => {
+    const subscription = reload$?.subscribe(() => {
+      refreshApp();
+    });
+    return () => subscription?.unsubscribe();
+  }, [reload$, refreshApp]);
 
   const value = useMemo(() => {
     return {

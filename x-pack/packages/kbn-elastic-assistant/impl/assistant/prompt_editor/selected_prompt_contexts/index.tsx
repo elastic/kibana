@@ -8,7 +8,6 @@
 import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Conversation } from '../../../assistant_context/types';
@@ -24,14 +23,6 @@ export interface Props {
   >;
   currentReplacements: Conversation['replacements'] | undefined;
 }
-
-export const EditorContainer = styled.div<{
-  $accordionState: 'closed' | 'open';
-}>`
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'height: 0px;' : '')}
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'overflow: hidden;' : '')}
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'position: absolute;' : '')}
-`;
 
 const SelectedPromptContextsComponent: React.FC<Props> = ({
   promptContexts,
@@ -54,10 +45,13 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
     <EuiFlexGroup data-test-subj="selectedPromptContexts" direction="column" gutterSize={'s'}>
       {Object.keys(selectedPromptContexts)
         .sort()
-        .map((id) => (
+        .map((id, i) => (
           <EuiFlexItem data-test-subj={`selectedPromptContext-${id}`} grow={false} key={id}>
             <EuiAccordion
               buttonContent={promptContexts[id]?.description}
+              buttonProps={{
+                'data-test-subj': `selectedPromptContext-${i}-button`,
+              }}
               extraAction={
                 <EuiToolTip content={i18n.REMOVE_CONTEXT}>
                   <EuiButtonIcon

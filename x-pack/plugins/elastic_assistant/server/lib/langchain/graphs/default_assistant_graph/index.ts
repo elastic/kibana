@@ -24,6 +24,7 @@ import {
   openAIFunctionAgentPrompt,
   structuredChatAgentPrompt,
 } from './prompts';
+import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -125,6 +126,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
   );
 
+  // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
+  if (isEnabledKnowledgeBase && dataClients?.kbDataClient?.isV2KnowledgeBaseEnabled) {
+    const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
+      assistantToolParams,
+      esClient,
+    });
+    if (kbTools) {
+      tools.push(...kbTools);
+    }
+  }
+
   const agentRunnable = isOpenAI
     ? await createOpenAIFunctionsAgent({
         llm: createLlmInstance(),
@@ -151,26 +163,26 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
-    conversationId,
     dataClients,
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
     tools,
-    responseLanguage,
     replacements,
-    llmType,
-    bedrockChatEnabled,
-    isStreaming: isStream,
   });
-  const inputs = { input: latestMessage[0]?.content as string };
+  const inputs: GraphInputs = {
+    bedrockChatEnabled,
+    responseLanguage,
+    conversationId,
+    llmType,
+    isStream,
+    input: latestMessage[0]?.content as string,
+  };
 
   if (isStream) {
     return streamGraph({
       apmTracer,
       assistantGraph,
-      llmType,
-      bedrockChatEnabled,
       inputs,
       logger,
       onLlmResponse,

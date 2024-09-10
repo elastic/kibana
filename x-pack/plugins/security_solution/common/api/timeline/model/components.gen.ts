@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
  * The type of timeline to create. Valid values are `default` and `template`.

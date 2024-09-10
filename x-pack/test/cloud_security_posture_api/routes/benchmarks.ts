@@ -15,7 +15,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 

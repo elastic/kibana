@@ -5,54 +5,44 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { paths } from '../../../common/paths';
+import { useParams } from 'react-router-dom';
+import useAsync from 'react-use/lib/useAsync';
+import { InvestigationNotFound } from '../../components/investigation_not_found/investigation_not_found';
+import { useFetchInvestigation } from '../../hooks/use_fetch_investigation';
 import { useKibana } from '../../hooks/use_kibana';
-import { InvestigationDetails } from './components/investigation_details';
+import { InvestigationDetails } from './components/investigation_details/investigation_details';
+import { InvestigationDetailsPathParams } from './types';
+import { InvestigationProvider } from './contexts/investigation_context';
 
 export function InvestigationDetailsPage() {
   const {
-    core: {
-      http: { basePath },
-    },
-    dependencies: {
-      start: { observabilityShared },
-    },
+    core: { security },
   } = useKibana();
+  const { investigationId } = useParams<InvestigationDetailsPathParams>();
 
-  const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
+  const user = useAsync(() => {
+    return security.authc.getCurrentUser();
+  }, [security]);
+
+  const {
+    data: investigation,
+    isLoading: isFetchInvestigationLoading,
+    isError: isFetchInvestigationError,
+  } = useFetchInvestigation({ id: investigationId });
+
+  if (isFetchInvestigationLoading || user.loading) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+
+  if (isFetchInvestigationError || !investigation || !user.value) {
+    return <InvestigationNotFound />;
+  }
 
   return (
-    <ObservabilityPageTemplate
-      pageHeader={{
-        breadcrumbs: [
-          {
-            href: basePath.prepend(paths.investigations),
-            text: i18n.translate('xpack.investigateApp.detailsPage.breadcrumb.list', {
-              defaultMessage: 'Investigations',
-            }),
-          },
-          {
-            text: i18n.translate('xpack.investigateApp.detailsPage.breadcrumb.details', {
-              defaultMessage: 'Investigation details',
-            }),
-          },
-        ],
-        pageTitle: i18n.translate('xpack.investigateApp.detailsPage.title', {
-          defaultMessage: 'New investigation',
-        }),
-        rightSideItems: [
-          <EuiButton fill data-test-subj="investigateAppInvestigateDetailsPageEscalateButton">
-            {i18n.translate('xpack.investigateApp.investigateDetailsPage.escalateButtonLabel', {
-              defaultMessage: 'Escalate',
-            })}
-          </EuiButton>,
-        ],
-      }}
-    >
-      <InvestigationDetails />
-    </ObservabilityPageTemplate>
+    <InvestigationProvider initialInvestigation={investigation}>
+      <InvestigationDetails user={user.value} />
+    </InvestigationProvider>
   );
 }

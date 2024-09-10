@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SamlSessionManager } from '@kbn/test';
@@ -20,14 +21,13 @@ export interface RoleCredentials {
   cookieHeader: { Cookie: string };
 }
 
-export async function SamlAuthProvider({ getService }: FtrProviderContext) {
+export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
 
-  const authRoleProvider = await getAuthProvider({ config, kibanaServer, log });
+  const authRoleProvider = getAuthProvider({ config });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 

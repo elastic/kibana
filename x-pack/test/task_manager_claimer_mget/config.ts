@@ -28,7 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...integrationConfig.get('kbnTestServer.serverArgs'),
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
-        '--xpack.task_manager.claim_strategy="unsafe_mget"',
+        '--xpack.task_manager.claim_strategy="mget"',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         '--xpack.task_manager.ephemeral_tasks.enabled=false',
         '--xpack.task_manager.ephemeral_tasks.request_capacity=100',

@@ -125,7 +125,7 @@ const trustedApplicationsSubFeature: SubFeatureConfig = {
     },
   ],
 };
-const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
+const hostIsolationExceptionsBasicSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
@@ -664,7 +664,7 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
-    [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],
+    [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature],
@@ -673,11 +673,13 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature],
+    [SecuritySubFeatureId.scanAction, scanActionSubFeature],
   ];
 
-  if (experimentalFeatures.responseActionScanEnabled) {
-    securitySubFeaturesList.push([SecuritySubFeatureId.scanAction, scanActionSubFeature]);
-  }
+  // Use the following code to add feature based on feature flag
+  // if (experimentalFeatures.featureFlagName) {
+  //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
+  // }
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
     securitySubFeaturesList

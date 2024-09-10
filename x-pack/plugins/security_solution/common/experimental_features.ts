@@ -72,21 +72,16 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: false,
+  responseActionsSentinelOneKillProcessEnabled: true,
 
   /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: false,
+  responseActionsSentinelOneProcessesEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
-   * Enables scan response action on Endpoint
-   */
-  responseActionScanEnabled: true,
 
   /**
    * Enables new notes
@@ -170,7 +165,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: false,
+  jamfDataInAnalyzerEnabled: true,
 
   /*
    * Disables discover esql tab within timeline

@@ -511,6 +511,29 @@
             "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.density",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "density",
+            "description": [
+              "\nDensity of table"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

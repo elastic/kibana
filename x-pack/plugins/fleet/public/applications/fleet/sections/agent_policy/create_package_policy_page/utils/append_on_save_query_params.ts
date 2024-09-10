@@ -33,7 +33,7 @@ export function appendOnSaveQueryParamsToPath({
       const [paramKey, paramValue] = createQueryParam(
         paramName,
         paramOptions,
-        policy.policy_ids[0] // TODO handle multiple
+        (policy.policy_ids && policy.policy_ids[0]) || undefined // TODO handle multiple
       );
       if (paramKey && paramValue) {
         queryParams[paramKey] = paramValue;
@@ -49,7 +49,7 @@ export function appendOnSaveQueryParamsToPath({
 function createQueryParam(
   name: string,
   opts: OnSaveQueryParamOpts,
-  policyId: string
+  policyId?: string
 ): [string?, string?] {
   if (!opts) {
     return [];
@@ -59,7 +59,7 @@ function createQueryParam(
   }
 
   const paramKey = opts.renameKey ? opts.renameKey : name;
-  const paramValue = opts.policyIdAsValue ? policyId : 'true';
+  const paramValue = opts.policyIdAsValue && policyId ? policyId : 'true';
 
   return [paramKey, paramValue];
 }

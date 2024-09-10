@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,

@@ -49,12 +49,12 @@ import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
-import { useOpenInDiscover } from './category_table/use_open_in_discover';
+import { useActions } from './category_table/use_actions';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -70,11 +70,12 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
   const [stateFromUrl, setUrlState] = usePageUrlState<LogCategorizationPageUrlState>(
@@ -159,13 +160,12 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     BAR_TARGET
   );
 
-  const openInDiscover = useOpenInDiscover(
+  const { getActions, openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategories,
     stateFromUrl,
     timefilter,
-    true,
     undefined,
     undefined
   );
@@ -336,6 +336,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     setUrlState({ field });
   };
 
+  const actions = getActions(true);
+
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -435,14 +437,16 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           <CategoryTable
             categories={data.categories}
             eventRate={eventRate}
-            pinnedCategory={pinnedCategory}
-            setPinnedCategory={setPinnedCategory}
-            highlightedCategory={highlightedCategory}
-            setHighlightedCategory={setHighlightedCategory}
+            mouseOver={{
+              pinnedCategory,
+              setPinnedCategory,
+              highlightedCategory,
+              setHighlightedCategory,
+            }}
             displayExamples={data.displayExamples}
             setSelectedCategories={setSelectedCategories}
-            openInDiscover={openInDiscover}
             tableState={tableState}
+            actions={actions}
           />
         </>
       ) : null}

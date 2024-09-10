@@ -281,6 +281,56 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.calcFieldCounts",
+        "type": "Function",
+        "tags": [],
+        "label": "calcFieldCounts",
+        "description": [
+          "\nThis function is calculating stats of the available fields, for usage in sidebar and sharing\nNote that this values aren't displayed, but used for internal calculations"
+        ],
+        "signature": [
+          "(rows: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          "[] | undefined) => Record<string, number>"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/calc_field_counts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.calcFieldCounts.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/calc_field_counts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.createLogsContextService",
         "type": "Function",
         "tags": [],
@@ -759,6 +809,68 @@
               " & { _routing?: string | undefined; }"
             ],
             "path": "packages/kbn-discover-utils/src/utils/get_doc_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldValue",
+        "description": [],
+        "signature": [
+          "(record: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", field: string) => any"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getFieldValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "record",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getFieldValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

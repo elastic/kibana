@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
       await asyncForEach(
         [automatedConfig, multiMetricConfig],
         // @ts-expect-error not full interface
-        async (config) => await ml.api.createAnomalyDetectionJob(config)
+        async (config) => ml.api.createAnomalyDetectionJob(config)
       );
     }
   });
