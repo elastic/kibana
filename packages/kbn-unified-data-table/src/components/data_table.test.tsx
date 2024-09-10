@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
@@ -383,7 +385,7 @@ describe('UnifiedDataTable', () => {
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
-        userEvent.click(screen.getByRole('button', { name: 'message' }));
+        await userEvent.click(screen.getByRole('button', { name: 'message' }));
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
         expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
       },
@@ -397,7 +399,7 @@ describe('UnifiedDataTable', () => {
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
-        userEvent.click(screen.getByRole('button', { name: 'message' }));
+        await userEvent.click(screen.getByRole('button', { name: 'message' }));
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
         expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
       },
@@ -495,11 +497,11 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        userEvent.click(getButton('message'));
+        await userEvent.click(getButton('message'));
         // Column sort button incorrectly renders as "Sort " instead
         // of "Sort Z-A" in Jest tests, so we need to find it by index
-        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
-          skipPointerEventsCheck: true,
+        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], {
+          pointerEventsCheck: 0,
         });
         await waitFor(() => {
           values = getCellValuesByColumn();
@@ -542,11 +544,11 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        userEvent.click(getButton('message'));
+        await userEvent.click(getButton('message'));
         // Column sort button incorrectly renders as "Sort " instead
         // of "Sort Z-A" in Jest tests, so we need to find it by index
-        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
-          skipPointerEventsCheck: true,
+        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], {
+          pointerEventsCheck: 0,
         });
         await waitFor(() => {
           values = getCellValuesByColumn();
@@ -1079,26 +1081,28 @@ describe('UnifiedDataTable', () => {
   describe('document comparison', () => {
     const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
 
-    const selectDocument = (document: EsHitRecord) =>
-      userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
+    const selectDocument = async (document: EsHitRecord) =>
+      await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
 
     const openSelectedRowsMenu = async () => {
-      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
       await screen.findAllByText('Clear selection');
     };
 
     const closeSelectedRowsMenu = async () => {
-      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
     };
 
     const getCompareDocumentsButton = () =>
       screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
 
     const goToComparisonMode = async () => {
-      selectDocument(esHitsMock[0]);
-      selectDocument(esHitsMock[1]);
+      await selectDocument(esHitsMock[0]);
+      await selectDocument(esHitsMock[1]);
       await openSelectedRowsMenu();
-      userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
+      await userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'), {
+        pointerEventsCheck: 0,
+      });
       await screen.findByText('Comparing 2 documents');
       // EuiDataGrid makes state updates after calling requestAnimationFrame, which can lead
       // to "Can't perform a React state update on an unmounted component." warnings in tests,
@@ -1127,15 +1131,17 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderDataTable({ enableComparisonMode: true });
         expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
-        selectDocument(esHitsMock[0]);
+        await selectDocument(esHitsMock[0]);
         expect(getSelectedDocumentsButton()).toBeInTheDocument();
         await openSelectedRowsMenu();
         expect(getCompareDocumentsButton()).not.toBeInTheDocument();
         await closeSelectedRowsMenu();
-        selectDocument(esHitsMock[1]);
+        await selectDocument(esHitsMock[1]);
         expect(getSelectedDocumentsButton()).toBeInTheDocument();
         await openSelectedRowsMenu();
-        expect(getCompareDocumentsButton()).toBeInTheDocument();
+        waitFor(() => {
+          expect(getCompareDocumentsButton()).toBeInTheDocument();
+        });
         await closeSelectedRowsMenu();
       },
       EXTENDED_JEST_TIMEOUT
@@ -1145,8 +1151,8 @@ describe('UnifiedDataTable', () => {
       'should not allow comparison if comparison mode is disabled',
       async () => {
         await renderDataTable({ enableComparisonMode: false });
-        selectDocument(esHitsMock[0]);
-        selectDocument(esHitsMock[1]);
+        await selectDocument(esHitsMock[0]);
+        await selectDocument(esHitsMock[1]);
         await openSelectedRowsMenu();
         expect(getCompareDocumentsButton()).not.toBeInTheDocument();
         await closeSelectedRowsMenu();
@@ -1271,8 +1277,8 @@ describe('UnifiedDataTable', () => {
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-        userEvent.click(getButton('message'));
-        userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+        await userEvent.click(getButton('message'));
+        await userEvent.click(getButton('Remove column'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
@@ -1296,8 +1302,8 @@ describe('UnifiedDataTable', () => {
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-        userEvent.click(getButton('message'));
-        userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+        await userEvent.click(getButton('message'));
+        await userEvent.click(getButton('Remove column'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
@@ -1320,21 +1326,21 @@ describe('UnifiedDataTable', () => {
           },
         });
         expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
-        userEvent.click(getButton('@timestamp'));
-        userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+        await userEvent.click(getButton('@timestamp'));
+        await userEvent.click(getButton('Reset width'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(getColumnHeader('@timestamp')).toHaveStyle({
             width: `${defaultTimeColumnWidth}px`,
           });
         });
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-        userEvent.click(getButton('message'));
+        await userEvent.click(getButton('message'));
         expect(queryButton('Reset width')).not.toBeInTheDocument();
         await waitFor(() => {
           expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         });
-        userEvent.click(getButton('extension'));
-        userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+        await userEvent.click(getButton('extension'));
+        await userEvent.click(getButton('Reset width'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         });

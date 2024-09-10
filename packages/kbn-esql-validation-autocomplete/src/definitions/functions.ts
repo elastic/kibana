@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -1154,7 +1155,7 @@ const dateDiffDefinition: FunctionDefinition = {
           name: 'unit',
           type: 'keyword',
           optional: false,
-          literalOptions: [
+          acceptedValues: [
             'year',
             'years',
             'yy',
@@ -1273,7 +1274,7 @@ const dateExtractDefinition: FunctionDefinition = {
           name: 'datePart',
           type: 'keyword',
           optional: false,
-          literalOptions: [
+          acceptedValues: [
             'ALIGNED_DAY_OF_WEEK_IN_MONTH',
             'ALIGNED_DAY_OF_WEEK_IN_YEAR',
             'ALIGNED_WEEK_OF_MONTH',
@@ -4636,7 +4637,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'boolean',
@@ -4652,7 +4653,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'date',
@@ -4668,7 +4669,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'double',
@@ -4684,7 +4685,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'integer',
@@ -4700,7 +4701,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'ip',
@@ -4716,7 +4717,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'keyword',
@@ -4732,7 +4733,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -4748,7 +4749,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'text',
@@ -4764,7 +4765,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
+          acceptedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'version',

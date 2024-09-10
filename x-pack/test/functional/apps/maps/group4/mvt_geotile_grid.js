@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 const MB_VECTOR_SOURCE_ID = 'g1xkv';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from ES)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from ES)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from ES)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const tileUrl = new URL(
         mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0],
@@ -99,8 +99,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from local - count)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -144,8 +144,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from local - metric)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -189,8 +189,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render heatmap layer', async () => {
-      await PageObjects.maps.loadSavedMap('geo grid heatmap example');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('geo grid heatmap example');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const heatmapLayer = mapboxStyle.layers.find((layer) => layer.id === '3xlvm_heatmap');
 
