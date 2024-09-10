@@ -18,7 +18,7 @@ History and summary transforms will output their data to indices where history w
 
 **Entity definition example**:
 
-One can create a definition with a `POST kbn:/internal/entities/definition` request, or through the [entity client](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/entity_manager/server/lib/entity_client.ts).
+One can create a definition with a `POST kbn:/internal/entities/definition` request, or through the [entity client](../server/lib/entity_client.ts).
 
 Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate`, `logErrorRatio` metrics and `data_stream.type`, `sourceIndex` metadata aggregated over one minute.
 
@@ -184,6 +184,14 @@ __services_from_logs summary entity__
 The index templates and ingest pipelines created for a given definition are managed by the Entity manager and should not be directly updated. These components still offer extension points that allow customization of each transform through optional components labelled `<component-name>@platform` and `<component-name>@custom` where the former is targeted towards Elastic solution teams and the latter for end users. `@custom` will take precedence when both are defined.
 The extension points allow defining a global component (ie applied to both transforms) with `<definition-id>@custom`, or transform specific components with `<definition-id>-(latest|history)@custom`.
 
-#### Builtin Definitions
+#### Managed definitions
 
-Entity discovery is an aggregation of _builtin_ definitions (stored in [builtin directory](../server/lib/entities/built_in)) that Elastic defines and maintains. Because we want to provide updates to existing definitions but also install new ones with future releases, we need a way to perform these actions automatically on behalf of users. To achieve that we ask for an initial _enablement_ step that creates an API key stored as an encrypted saved object. The API key is generated through a REST endpoint and is created with the credentials of the user calling that endpoint. The key requires specific privileges to install/kickoff the transforms (see privileges [here](../server/lib/auth/privileges.ts)). Once a valid key is stored, any actions performed on builtin definitions are made through that key.
+Entity manager stores _builtin_ definitions (in [builtin directory](../server/lib/entities/built_in)) that powers Observability features. These definitions are managed by Elastic. To activate these definitions we currently require an _enablement_ step that will 1. create and store an API key that captures the calling user credentials and 2. install and start all builtin definitions bundled with Kibana. The first step is necessary to manage these definitions on behalf of users: with an API key handy we're able to automatically install new definitions or apply updates to existing definitions shipped with future Kibana versions. Note that this is only required because the system user does not have the read/write index privileges required by the transforms.
+
+Functionally, builtin definitions are similar to custom definitions and share the same schema but one should follow these rules when defining one:
+- the definition id [should start with a special prefix](../server/lib/entities/built_in/constants.ts#L8)
+- the definition should be `managed: true`
+- the definition can only look for data in [these index patterns](../server/lib/entities/built_in/constants.ts#L9)
+
+Once added to [this list](../server/lib/entities/built_in/index.ts#L13), new builtin definitions will be automatically managed when Entity discovery is enabled.
+When updating a builtin definition, for example by adding metadata fields or updating metrics, one should increment the definition `version` according to semantic versioning. Entity manager will automatically update existing or install new builtin definitions at startup if Entity discovery is enabled.
