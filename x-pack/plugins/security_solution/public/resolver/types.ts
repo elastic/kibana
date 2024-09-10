@@ -846,6 +846,12 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
+
+  /**
+   * If true, the details panel is not shown in the graph and a view button is shown to manage the panel visibility.
+   */
+  isSplitPanel?: boolean;
+  showPanelOnClick?: () => void;
 }
 
 /**
