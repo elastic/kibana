@@ -9,6 +9,7 @@
 export {
   getLexer,
   getParser,
+  createParser,
   parse,
   type ParseOptions,
   type ParseResult,

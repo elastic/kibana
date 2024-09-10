@@ -31,6 +31,7 @@ export type {
 
 export {
   getParser,
+  createParser,
   getLexer,
   parse,
   type ParseOptions,
