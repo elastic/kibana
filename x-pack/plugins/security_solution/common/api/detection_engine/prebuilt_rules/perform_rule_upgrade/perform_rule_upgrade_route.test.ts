@@ -11,8 +11,10 @@ import {
   UpgradeAllRulesRequest,
   PerformRuleUpgradeResponseBody,
   PerformRuleUpgradeRequestBody,
+  RuleFieldsToUpgrade,
+  DiffableUpgradableFields,
+  PickVersionValues,
 } from './perform_rule_upgrade_route';
-import { PickVersionValues } from '../model';
 
 describe('Perform Rule Upgrade Route Schemas', () => {
   describe('PickVersionValues', () => {
@@ -32,6 +34,130 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
           `"Invalid enum value. Expected 'BASE' | 'CURRENT' | 'TARGET' | 'MERGED', received '${value}'"`
+        );
+      });
+    });
+  });
+
+  describe('RuleFieldsToUpgrade', () => {
+    it('contains only upgradable fields defined in the diffable rule schemas', () => {
+      expect(Object.keys(RuleFieldsToUpgrade.shape)).toStrictEqual(
+        Object.keys(DiffableUpgradableFields.shape)
+      );
+    });
+
+    describe('correctly validates valid and invalid inputs', () => {
+      it('validates 5 valid cases: BASE, CURRENT, TARGET, MERGED, RESOLVED', () => {
+        const validInputs = [
+          {
+            name: {
+              pick_version: 'BASE',
+            },
+          },
+          {
+            description: {
+              pick_version: 'CURRENT',
+            },
+          },
+          {
+            risk_score: {
+              pick_version: 'TARGET',
+            },
+          },
+          {
+            note: {
+              pick_version: 'MERGED',
+            },
+          },
+          {
+            references: {
+              pick_version: 'RESOLVED',
+              resolved_value: ['www.example.com'],
+            },
+          },
+        ];
+
+        validInputs.forEach((input) => {
+          const result = RuleFieldsToUpgrade.safeParse(input);
+          expectParseSuccess(result);
+          expect(result.data).toEqual(input);
+        });
+      });
+
+      it('does not validate invalid combination of pick_version and resolved_value', () => {
+        const input = {
+          references: {
+            pick_version: 'MERGED',
+            resolved_value: ['www.example.com'],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"references: Unrecognized key(s) in object: 'resolved_value'"`
+        );
+      });
+
+      it('invalidates incorrect types of resolved_values provided to multiple fields', () => {
+        const input = {
+          references: {
+            pick_version: 'RESOLVED',
+            resolved_value: 'www.example.com',
+          },
+          tags: {
+            pick_version: 'RESOLVED',
+            resolved_value: 4,
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"tags.resolved_value: Expected array, received number, references.resolved_value: Expected array, received string"`
+        );
+      });
+
+      it('invalidates unknown fields', () => {
+        const input = {
+          unknown_field: {
+            pick_version: 'CURRENT',
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"Unrecognized key(s) in object: 'unknown_field'"`
+        );
+      });
+
+      it('invalidates rule fields not part of RuleFieldsToUpgrade', () => {
+        const input = {
+          type: {
+            pick_version: 'BASE',
+          },
+          rule_id: {
+            pick_version: 'CURRENT',
+          },
+          version: {
+            pick_version: 'TARGET',
+          },
+          author: {
+            pick_version: 'MERGED',
+          },
+          license: {
+            pick_version: 'RESOLVED',
+            resolved_value: 'Elastic License',
+          },
+          concurrent_searches: {
+            pick_version: 'TARGET',
+          },
+          items_per_search: {
+            pick_version: 'TARGET',
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"Unrecognized key(s) in object: 'type', 'rule_id', 'version', 'author', 'license', 'concurrent_searches', 'items_per_search'"`
         );
       });
     });
@@ -199,38 +325,38 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       );
     });
   });
-});
 
-describe('PerformRuleUpgradeResponseBody', () => {
-  const validResponse = {
-    summary: {
-      total: 1,
-      succeeded: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    results: {
-      updated: [],
-      skipped: [],
-    },
-    errors: [],
-  };
+  describe('PerformRuleUpgradeResponseBody', () => {
+    const validResponse = {
+      summary: {
+        total: 1,
+        succeeded: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      results: {
+        updated: [],
+        skipped: [],
+      },
+      errors: [],
+    };
 
-  test('validates a correct perform rule upgrade response', () => {
-    const result = PerformRuleUpgradeResponseBody.safeParse(validResponse);
-    expectParseSuccess(result);
-    expect(result.data).toEqual(validResponse);
-  });
+    test('validates a correct perform rule upgrade response', () => {
+      const result = PerformRuleUpgradeResponseBody.safeParse(validResponse);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(validResponse);
+    });
 
-  test('rejects missing required fields', () => {
-    const propsToDelete = Object.keys(validResponse);
-    propsToDelete.forEach((deletedProp) => {
-      const invalidResponse = Object.fromEntries(
-        Object.entries(validResponse).filter(([key]) => key !== deletedProp)
-      );
-      const result = PerformRuleUpgradeResponseBody.safeParse(invalidResponse);
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"${deletedProp}: Required"`);
+    test('rejects missing required fields', () => {
+      const propsToDelete = Object.keys(validResponse);
+      propsToDelete.forEach((deletedProp) => {
+        const invalidResponse = Object.fromEntries(
+          Object.entries(validResponse).filter(([key]) => key !== deletedProp)
+        );
+        const result = PerformRuleUpgradeResponseBody.safeParse(invalidResponse);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"${deletedProp}: Required"`);
+      });
     });
   });
 });

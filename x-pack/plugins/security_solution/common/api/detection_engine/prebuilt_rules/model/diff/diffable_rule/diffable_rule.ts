@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { mapValues } from 'lodash';
 import {
   AlertSuppression,
   AnomalyThreshold,
@@ -202,20 +201,19 @@ export const DiffableNewTermsFields = z.object({
  * top-level fields.
  */
 
+export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
+  DiffableCustomQueryFields,
+  DiffableSavedQueryFields,
+  DiffableEqlFields,
+  DiffableEsqlFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
+  DiffableMachineLearningFields,
+  DiffableNewTermsFields,
+]);
+
 export type DiffableRule = z.infer<typeof DiffableRule>;
-export const DiffableRule = z.intersection(
-  DiffableCommonFields,
-  z.discriminatedUnion('type', [
-    DiffableCustomQueryFields,
-    DiffableSavedQueryFields,
-    DiffableEqlFields,
-    DiffableEsqlFields,
-    DiffableThreatMatchFields,
-    DiffableThresholdFields,
-    DiffableMachineLearningFields,
-    DiffableNewTermsFields,
-  ])
-);
+export const DiffableRule = z.intersection(DiffableCommonFields, DiffableFieldsByTypeUnion);
 
 export type DiffableRuleTypes = z.infer<typeof DiffableRuleTypes>;
 export const DiffableRuleTypes = z.union([
@@ -245,54 +243,3 @@ export const DiffableAllFields = DiffableCommonFields.merge(
   .merge(DiffableMachineLearningFields.omit({ type: true }))
   .merge(DiffableNewTermsFields.omit({ type: true }))
   .merge(z.object({ type: DiffableRuleTypes }));
-
-/**
- * Fields upgradable by the /upgrade/_perform endpoint.
- * Specific fields are omitted because they are not upgradeable, and
- * handled under the hood by endpoint logic.
- * See: https://github.com/elastic/kibana/issues/186544
- */
-export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
-export const DiffableUpgradableFields = DiffableAllFields.omit({
-  type: true,
-  rule_id: true,
-  version: true,
-  author: true,
-  license: true,
-});
-
-export type PickVersionValues = z.infer<typeof PickVersionValues>;
-export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
-export type PickVersionValuesEnum = typeof PickVersionValues.enum;
-export const PickVersionValuesEnum = PickVersionValues.enum;
-
-export type FieldUpgradeSpecifier<T> = z.infer<
-  ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
->;
-const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
-  z.discriminatedUnion('pick_version', [
-    z
-      .object({
-        pick_version: PickVersionValues,
-      })
-      .strict(),
-    z
-      .object({
-        pick_version: z.literal('RESOLVED'),
-        resolved_value: fieldSchema,
-      })
-      .strict(),
-  ]);
-
-type FieldUpgradeSpecifiers<TFields> = {
-  [Field in keyof TFields]?: FieldUpgradeSpecifier<TFields[Field]>;
-};
-
-export type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableFields>;
-export const RuleFieldsToUpgrade = z
-  .object(
-    mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
-      return fieldUpgradeSpecifier(fieldSchema).optional();
-    })
-  )
-  .strict();

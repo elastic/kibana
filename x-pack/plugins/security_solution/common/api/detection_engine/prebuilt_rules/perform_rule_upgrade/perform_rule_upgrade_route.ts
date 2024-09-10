@@ -6,10 +6,61 @@
  */
 
 import { z } from '@kbn/zod';
-
+import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
-import { AggregatedPrebuiltRuleError, PickVersionValues, RuleFieldsToUpgrade } from '../model';
+import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
+
+export type PickVersionValues = z.infer<typeof PickVersionValues>;
+export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+export type PickVersionValuesEnum = typeof PickVersionValues.enum;
+export const PickVersionValuesEnum = PickVersionValues.enum;
+
+/**
+ * Fields upgradable by the /upgrade/_perform endpoint.
+ * Specific fields are omitted because they are not upgradeable, and
+ * handled under the hood by endpoint logic.
+ * See: https://github.com/elastic/kibana/issues/186544
+ */
+export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
+export const DiffableUpgradableFields = DiffableAllFields.omit({
+  type: true,
+  rule_id: true,
+  version: true,
+  author: true,
+  license: true,
+});
+
+export type FieldUpgradeSpecifier<T> = z.infer<
+  ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
+>;
+const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
+  z.discriminatedUnion('pick_version', [
+    z
+      .object({
+        pick_version: PickVersionValues,
+      })
+      .strict(),
+    z
+      .object({
+        pick_version: z.literal('RESOLVED'),
+        resolved_value: fieldSchema,
+      })
+      .strict(),
+  ]);
+
+type FieldUpgradeSpecifiers<TFields> = {
+  [Field in keyof TFields]?: FieldUpgradeSpecifier<TFields[Field]>;
+};
+
+export type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableFields>;
+export const RuleFieldsToUpgrade = z
+  .object(
+    mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
+      return fieldUpgradeSpecifier(fieldSchema).optional();
+    })
+  )
+  .strict();
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
