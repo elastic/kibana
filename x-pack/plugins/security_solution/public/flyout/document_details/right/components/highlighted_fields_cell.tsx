@@ -25,7 +25,6 @@ import {
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -50,8 +49,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   field,
   originalField = '',
 }) => {
-  const { scopeId, eventId, indexName, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { scopeId, eventId, indexName } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
@@ -86,7 +84,6 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
                   field={field}
                   value={value}
                   scopeId={scopeId}
-                  ruleId={ruleId}
                   data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
                 />
               ) : hasPreview(field) ? (

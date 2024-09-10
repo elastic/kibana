@@ -35,6 +35,20 @@ describe('useRuleDetails', () => {
     expect(hookResult.result.current.rule).toBe(null);
   });
 
+  it('should return empty rule when no rule is found', () => {
+    mockUseRuleWithFallback.mockReturnValue({
+      rule: null,
+      loading: false,
+      isExistingRule: false,
+    });
+    hookResult = renderHook((props: UseRuleDetailsParams) => useRuleDetails(props), {
+      initialProps,
+    });
+    expect(hookResult.result.current.loading).toBe(false);
+    expect(hookResult.result.current.isExistingRule).toBe(false);
+    expect(hookResult.result.current.rule).toBe(null);
+  });
+
   it('should return rule data when rule is loaded', () => {
     mockUseRuleWithFallback.mockReturnValue({
       rule: { id: 'ruleId' },

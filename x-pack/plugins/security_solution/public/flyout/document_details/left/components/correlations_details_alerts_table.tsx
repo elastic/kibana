@@ -26,7 +26,6 @@ import { getDataProvider } from '../../../../common/components/event_details/use
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -85,8 +84,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   } = usePaginatedAlerts(alertIds || []);
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
-  const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { isPreview } = useDocumentDetailsContext();
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -166,7 +164,6 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
       {
-        field: ALERT_RULE_NAME,
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
@@ -174,17 +171,28 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           />
         ),
         truncateText: true,
-        render: (value: string) => (
-          <CellTooltipWrapper tooltip={value}>
-            {isPreviewEnabled ? (
-              <PreviewLink field={ALERT_RULE_NAME} value={value} scopeId={scopeId} ruleId={ruleId}>
-                <span>{value}</span>
-              </PreviewLink>
-            ) : (
-              <span>{value}</span>
-            )}
-          </CellTooltipWrapper>
-        ),
+        render: (row: Record<string, unknown>) => {
+          const ruleName = row[ALERT_RULE_NAME] as string;
+          const ruleId = row['kibana.alert.rule.uuid'] as string;
+          return (
+            <CellTooltipWrapper tooltip={ruleName}>
+              {isPreviewEnabled ? (
+                <PreviewLink
+                  field={ALERT_RULE_NAME}
+                  value={ruleName}
+                  scopeId={scopeId}
+                  ruleId={ruleId}
+                  isPreview={isPreview}
+                  data-test-subj={`${dataTestSubj}RulePreview`}
+                >
+                  <span>{ruleName}</span>
+                </PreviewLink>
+              ) : (
+                <span>{ruleName}</span>
+              )}
+            </CellTooltipWrapper>
+          );
+        },
       },
       {
         field: ALERT_REASON,
@@ -221,7 +229,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [isPreviewEnabled, scopeId, dataTestSubj, ruleId]
+    [isPreviewEnabled, scopeId, dataTestSubj, isPreview]
   );
 
   return (

@@ -39,6 +39,10 @@ export interface FieldValueCellProps {
    */
   ruleId: string;
   /**
+   * Whether the preview link is in rule preview
+   */
+  isPreview: boolean;
+  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue?: (field: string) => string | null;
@@ -60,6 +64,7 @@ export const TableFieldValueCell = memo(
     ruleId,
     getLinkValue,
     values,
+    isPreview,
   }: FieldValueCellProps) => {
     const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
     if (values == null) {
@@ -93,6 +98,7 @@ export const TableFieldValueCell = memo(
                   value={value}
                   scopeId={scopeId}
                   ruleId={ruleId}
+                  isPreview={isPreview}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
                 />
               ) : (

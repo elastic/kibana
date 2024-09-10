@@ -22,7 +22,7 @@ describe('<RulePreviewFooter />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
-  it('renders rule details link correctly when ruleId is available', () => {
+  it('should render rule details link correctly when ruleId is available', () => {
     const { getByTestId } = renderRulePreviewFooter();
 
     expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();

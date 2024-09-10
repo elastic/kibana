@@ -132,6 +132,35 @@ describe('<PreviewLink />', () => {
       },
     });
   });
+
+  it('should not render a link when ruleId is not provided', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <PreviewLink
+          field={'kibana.alert.rule.name'}
+          value={'rule'}
+          data-test-subj={'rule-link'}
+          scopeId={'scopeId'}
+        />
+      </TestProviders>
+    );
+    expect(queryByTestId('rule-link')).not.toBeInTheDocument();
+  });
+
+  it('should not render a link when rule name is rendered in rule preview', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <PreviewLink
+          field={'kibana.alert.rule.name'}
+          value={'rule'}
+          data-test-subj={'rule-link'}
+          scopeId={'scopeId'}
+          isPreview={true}
+        />
+      </TestProviders>
+    );
+    expect(queryByTestId('rule-link')).not.toBeInTheDocument();
+  });
 });
 
 describe('hasPreview', () => {

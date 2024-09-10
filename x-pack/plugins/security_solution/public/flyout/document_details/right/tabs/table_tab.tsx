@@ -82,6 +82,10 @@ export type ColumnsProvider = (providerOptions: {
    */
   ruleId: string;
   /**
+   * Whether the preview link is in preview mode
+   */
+  isPreview: boolean;
+  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue: (field: string) => string | null;
@@ -93,6 +97,7 @@ export const getColumns: ColumnsProvider = ({
   scopeId,
   getLinkValue,
   ruleId,
+  isPreview,
 }) => [
   {
     field: 'field',
@@ -125,6 +130,7 @@ export const getColumns: ColumnsProvider = ({
             fieldFromBrowserField={fieldFromBrowserField}
             getLinkValue={getLinkValue}
             ruleId={ruleId}
+            isPreview={isPreview}
             values={values}
           />
         </CellActions>
@@ -139,7 +145,7 @@ export const getColumns: ColumnsProvider = ({
 export const TableTab = memo(() => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
 
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, isPreview } =
     useDocumentDetailsContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
@@ -213,8 +219,9 @@ export const TableTab = memo(() => {
         scopeId,
         getLinkValue,
         ruleId,
+        isPreview,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview]
   );
 
   return (
