@@ -55,7 +55,7 @@ describe('SyncAlertsToggle', () => {
 
     const synAlerts = await screen.findByTestId('caseSyncAlerts');
 
-    userEvent.click(within(synAlerts).getByRole('switch'));
+    await userEvent.click(within(synAlerts).getByRole('switch'));
 
     expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'false');
     expect(await screen.findByText('Off')).toBeInTheDocument();
@@ -70,9 +70,9 @@ describe('SyncAlertsToggle', () => {
 
     const synAlerts = await screen.findByTestId('caseSyncAlerts');
 
-    userEvent.click(within(synAlerts).getByRole('switch'));
+    await userEvent.click(within(synAlerts).getByRole('switch'));
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

@@ -183,6 +183,7 @@
     "@kbn/management-settings-ids",
     "@kbn/mock-idp-utils",
     "@kbn/cloud-security-posture-common",
+    "@kbn/saved-objects-management-plugin",
     "@kbn/alerting-types"
   ]
 }

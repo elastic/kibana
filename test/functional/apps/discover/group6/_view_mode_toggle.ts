@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList, header } = getPageObjects([
     'common',
     'discover',
     'timePicker',
-    'dashboard',
     'unifiedFieldList',
     'header',
   ]);
@@ -44,13 +44,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     [true, false].forEach((useLegacyTable) => {
       describe(`isLegacy: ${useLegacyTable}`, function () {
         before(async function () {
-          await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+          await timePicker.setDefaultAbsoluteRangeViaUiSettings();
           await kibanaServer.uiSettings.update({
             ...defaultSettings,
             'doc_table:legacy': useLegacyTable,
           });
-          await PageObjects.common.navigateToApp('discover');
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await common.navigateToApp('discover');
+          await discover.waitUntilSearchingHasFinished();
         });
 
         after(async () => {
@@ -77,13 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should show an error callout', async () => {
           await queryBar.setQuery('@message::'); // invalid
           await queryBar.submitQuery();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
 
-          await PageObjects.discover.showsErrorCallout();
+          await discover.showsErrorCallout();
 
           await queryBar.clearQuery();
           await queryBar.submitQuery();
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
 
           await testSubjects.missingOrFail('discoverErrorCalloutTitle');
         });
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await testSubjects.existOrFail('dscViewModeToggle');
 
-          await PageObjects.discover.selectTextBaseLang();
+          await discover.selectTextBaseLang();
 
           await testSubjects.existOrFail('dscViewModeToggle');
 
@@ -128,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show ES|QL columns callout', async () => {
           await testSubjects.missingOrFail('dscSelectedColumnsCallout');
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('extension');
+          await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('dscSelectedColumnsCallout');
         });
       });
