@@ -718,7 +718,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getDashboardPanels() {
-    return await this.testSubjects.findAll('embeddablePanel');
+    return await this.testSubjects.findAll('dashboardPanel');
   }
 
   public async addVisualizations(visualizations: string[]) {
@@ -848,20 +848,6 @@ export class DashboardPageObject extends FtrService {
     }
 
     return checkList.filter((viz) => viz.isPresent === false).map((viz) => viz.name);
-  }
-
-  public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
-    this.log.debug('getPanelDrilldownCount');
-    const panel = (await this.getDashboardPanels())[panelIndex];
-    try {
-      const count = await panel.findByTestSubject(
-        'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
-      );
-      return Number.parseInt(await count.getVisibleText(), 10);
-    } catch (e) {
-      // if not found then this is 0 (we don't show badge with 0)
-      return 0;
-    }
   }
 
   public async getPanelChartDebugState(panelIndex: number) {
