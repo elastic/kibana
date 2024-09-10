@@ -19,6 +19,11 @@ export const genericErrorResponse = () =>
     }
   );
 
+export const notFoundResponse = () =>
+  schema.object({
+    message: schema.string(),
+  });
+
 export const internalErrorResponse = () =>
   schema.object(
     {
