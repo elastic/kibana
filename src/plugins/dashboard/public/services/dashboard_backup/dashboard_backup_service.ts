@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom } from 'rxjs';
@@ -23,7 +24,6 @@ import { backupServiceStrings } from '../../dashboard_container/_dashboard_conta
 import { UnsavedPanelState } from '../../dashboard_container/types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
-export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardPanels';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
@@ -113,7 +113,6 @@ class DashboardBackupService implements DashboardBackupServiceType {
       const panels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[
         id
       ] as UnsavedPanelState | undefined;
-
       return { dashboardState, panels };
     } catch (e) {
       this.notifications.toasts.addDanger({

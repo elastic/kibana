@@ -178,6 +178,7 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
+  SupportedAssetTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
@@ -188,3 +189,5 @@ export {
   TopNFunctionsLocatorDefinition,
   HOSTS_LOCATOR_ID,
 } from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
