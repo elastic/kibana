@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.openSection('observability_project_nav.aiMl'); // open AI & ML subsection
         await solutionNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
         await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI & ML' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Anomaly Detection' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'ml:anomalyDetection',
         });

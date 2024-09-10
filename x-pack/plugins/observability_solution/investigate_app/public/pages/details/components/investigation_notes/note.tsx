@@ -18,8 +18,8 @@ import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import { formatDistance } from 'date-fns';
 import React, { useState } from 'react';
 import { useTheme } from '../../../../hooks/use_theme';
+import { useInvestigation } from '../../contexts/investigation_context';
 import { EditNoteForm } from './edit_note_form';
-import { useDeleteInvestigationNote } from '../../../../hooks/use_delete_investigation_note';
 
 const textContainerClassName = css`
   padding-top: 2px;
@@ -27,15 +27,12 @@ const textContainerClassName = css`
 
 interface Props {
   note: InvestigationNoteResponse;
-  investigationId: string;
   disabled: boolean;
-  onUpdateOrDeleteCompleted: () => void;
 }
 
-export function Note({ note, investigationId, disabled, onUpdateOrDeleteCompleted }: Props) {
+export function Note({ note, disabled }: Props) {
   const [isEditing, setIsEditing] = useState(false);
-  const { mutateAsync: deleteInvestigationNote, isLoading: isDeleting } =
-    useDeleteInvestigationNote();
+  const { deleteNote, isDeletingNote } = useInvestigation();
 
   const theme = useTheme();
   const timelineContainerClassName = css`
@@ -45,16 +42,6 @@ export function Note({ note, investigationId, disabled, onUpdateOrDeleteComplete
       border-bottom: 0px;
     }
   `;
-
-  const deleteNote = async () => {
-    await deleteInvestigationNote({ investigationId, noteId: note.id });
-    onUpdateOrDeleteCompleted();
-  };
-
-  const handleUpdateCompleted = async () => {
-    setIsEditing(false);
-    onUpdateOrDeleteCompleted();
-  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className={timelineContainerClassName}>
@@ -83,7 +70,7 @@ export function Note({ note, investigationId, disabled, onUpdateOrDeleteComplete
               iconSize="s"
               color="text"
               iconType="pencil"
-              disabled={disabled || isDeleting}
+              disabled={disabled || isDeletingNote}
               onClick={() => {
                 setIsEditing(!isEditing);
               }}
@@ -95,8 +82,8 @@ export function Note({ note, investigationId, disabled, onUpdateOrDeleteComplete
               iconSize="s"
               color="text"
               iconType="trash"
-              disabled={disabled || isDeleting}
-              onClick={() => deleteNote()}
+              disabled={disabled || isDeletingNote}
+              onClick={async () => await deleteNote(note.id)}
               data-test-subj="deleteInvestigationNoteButton"
             />
           </EuiFlexItem>
@@ -104,12 +91,7 @@ export function Note({ note, investigationId, disabled, onUpdateOrDeleteComplete
       </EuiFlexGroup>
       <EuiFlexItem className={textContainerClassName}>
         {isEditing ? (
-          <EditNoteForm
-            investigationId={investigationId}
-            note={note}
-            onCancel={() => setIsEditing(false)}
-            onUpdate={() => handleUpdateCompleted()}
-          />
+          <EditNoteForm note={note} onClose={() => setIsEditing(false)} />
         ) : (
           <EuiText size="s">
             <EuiMarkdownFormat textSize="s">{note.content}</EuiMarkdownFormat>

@@ -120,7 +120,7 @@ export class EditJobFlyoutUI extends Component {
 
   showFlyout = (jobLite) => {
     const hasDatafeed = jobLite.hasDatafeed;
-    loadFullJob(this.props.kibana.services.mlServices.mlApiServices, jobLite.id)
+    loadFullJob(this.props.kibana.services.mlServices.mlApi, jobLite.id)
       .then((job) => {
         this.extractJob(job, hasDatafeed);
         this.setState({
@@ -203,12 +203,12 @@ export class EditJobFlyoutUI extends Component {
       ).message;
     }
 
-    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
 
     if (jobDetails.jobGroups !== undefined) {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       if (jobGroupsValidationError === '') {
-        ml.jobs.jobsExist(jobDetails.jobGroups, true).then((resp) => {
+        mlApi.jobs.jobsExist(jobDetails.jobGroups, true).then((resp) => {
           const groups = Object.values(resp);
           const valid = groups.some((g) => g.exists === true && g.isGroup === false) === false;
           if (valid === false) {
@@ -273,11 +273,11 @@ export class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
-    const mlApiServices = this.props.kibana.services.mlServices.mlApiServices;
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
     const { toasts } = this.props.kibana.services.notifications;
     const toastNotificationService = toastNotificationServiceProvider(toasts);
 
-    saveJob(mlApiServices, this.state.job, newJobData)
+    saveJob(mlApi, this.state.job, newJobData)
       .then(() => {
         toasts.addSuccess(
           i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {

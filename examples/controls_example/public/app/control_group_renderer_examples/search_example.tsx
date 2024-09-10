@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -13,7 +14,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -47,8 +47,8 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
-      setControlFilters([...newFilters]);
+    const subscription = controlGroupAPI.filters$.subscribe((newFilters) => {
+      setControlFilters(newFilters ?? []);
     });
     return () => {
       subscription.unsubscribe();
@@ -130,15 +130,15 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         />
         <ControlGroupRenderer
           filters={filters}
-          getCreationOptions={async (initialInput, builder) => {
-            await builder.addDataControlFromField(initialInput, {
+          getCreationOptions={async (initialState, builder) => {
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               title: 'Destintion country',
               fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
             });
-            await builder.addDataControlFromField(initialInput, {
+            await builder.addDataControlFromField(initialState, {
               dataViewId: dataView.id!,
               fieldName: 'bytes',
               width: 'medium',
@@ -146,14 +146,11 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               title: 'Bytes',
             });
             return {
-              initialInput: {
-                ...initialInput,
-                viewMode: ViewMode.VIEW,
-              },
+              initialState,
             };
           }}
           query={query}
-          ref={setControlGroupAPI}
+          onApiAvailable={setControlGroupAPI}
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">

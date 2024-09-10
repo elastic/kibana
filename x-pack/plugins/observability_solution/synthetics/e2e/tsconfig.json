@@ -15,6 +15,7 @@
     "@kbn/apm-plugin",
     "@kbn/es-archiver",
     "@kbn/repo-info",
-    "@kbn/synthetics-plugin"
+    "@kbn/synthetics-plugin",
+    "@kbn/ftr-common-functional-ui-services"
   ]
 }

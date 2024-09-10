@@ -114,6 +114,7 @@ import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
+import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -598,29 +599,36 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = await pMap(
-      agentPoliciesSO.saved_objects,
-      async (agentPolicySO) => {
-        const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
-        if (withPackagePolicies) {
-          agentPolicy.package_policies =
-            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
-        }
-        if (options.withAgentCount) {
-          await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
-            showInactive: true,
-            perPage: 0,
-            page: 1,
-            kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-          }).then(({ total }) => (agentPolicy.agents = total));
-        } else {
-          agentPolicy.agents = 0;
-        }
+    const agentPolicies = agentPoliciesSO.saved_objects.map((agentPolicySO) => {
+      const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
+      agentPolicy.agents = 0;
+      return agentPolicy;
+    });
 
-        return agentPolicy;
-      },
-      { concurrency: 50 }
-    );
+    if (options.withAgentCount || withPackagePolicies) {
+      await pMap(
+        agentPolicies,
+        async (agentPolicy) => {
+          if (withPackagePolicies) {
+            agentPolicy.package_policies =
+              (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
+          }
+          if (options.withAgentCount) {
+            await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
+              showInactive: true,
+              perPage: 0,
+              page: 1,
+              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+            }).then(({ total }) => (agentPolicy.agents = total));
+          } else {
+            agentPolicy.agents = 0;
+          }
+
+          return agentPolicy;
+        },
+        { concurrency: 50 }
+      );
+    }
 
     for (const agentPolicy of agentPolicies) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -986,14 +994,24 @@ class AgentPolicyService {
       }
     );
 
-    await pMap(
-      savedObjectsResults,
-      (policy) =>
-        this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
+      await scheduleDeployAgentPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        savedObjectsResults.map((policy) => ({
+          id: policy.id,
           spaceId: policy.namespaces?.[0],
-        }),
-      { concurrency: 50 }
-    );
+        }))
+      );
+    } else {
+      await pMap(
+        savedObjectsResults,
+        (policy) =>
+          this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+            spaceId: policy.namespaces?.[0],
+          }),
+        { concurrency: 50 }
+      );
+    }
 
     return res;
   }
@@ -1251,7 +1269,7 @@ class AgentPolicyService {
           agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
         }),
       {
-        concurrency: 50,
+        concurrency: 20,
       }
     );
 
@@ -1623,10 +1641,21 @@ class AgentPolicyService {
     const config = appContextService.getConfig();
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
     const policyIds = updatedPoliciesSuccess.map((policy) => policy.id);
-    await asyncForEach(
-      chunk(policyIds, batchSize),
-      async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
-    );
+
+    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
+      await scheduleDeployAgentPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        updatedPoliciesSuccess.map((policy) => ({
+          id: policy.id,
+          spaceId: policy.namespaces?.[0],
+        }))
+      );
+    } else {
+      await asyncForEach(
+        chunk(policyIds, batchSize),
+        async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
+      );
+    }
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }

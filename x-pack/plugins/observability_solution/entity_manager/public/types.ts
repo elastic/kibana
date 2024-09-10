@@ -5,30 +5,17 @@
  * 2.0.
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import { CreateEntityDefinitionQuery } from '@kbn/entities-schema';
-import {
-  DisableManagedEntityResponse,
-  EnableManagedEntityResponse,
-  ManagedEntityEnabledResponse,
-} from '../common/types_api';
+import type { EntityClient } from './lib/entity_client';
 
 export interface EntityManagerPublicPluginSetup {
-  entityClient: IEntityClient;
+  entityClient: EntityClient;
 }
 
 export interface EntityManagerPublicPluginStart {
-  entityClient: IEntityClient;
+  entityClient: EntityClient;
 }
 
 export type EntityManagerPluginClass = PluginClass<
-  EntityManagerPublicPluginSetup | undefined,
-  EntityManagerPublicPluginStart | undefined
+  EntityManagerPublicPluginSetup,
+  EntityManagerPublicPluginStart
 >;
-
-export interface IEntityClient {
-  isManagedEntityDiscoveryEnabled: () => Promise<ManagedEntityEnabledResponse>;
-  enableManagedEntityDiscovery: (
-    query?: CreateEntityDefinitionQuery
-  ) => Promise<EnableManagedEntityResponse>;
-  disableManagedEntityDiscovery: () => Promise<DisableManagedEntityResponse>;
-}
