@@ -12,7 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, CreateRuleAdditionalOptions } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -44,7 +44,6 @@ import { createEnrichEventsFunction } from '../utils/enrichments';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import type { CreateRuleAdditionalOptions } from '../types';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions & CreateRuleAdditionalOptions

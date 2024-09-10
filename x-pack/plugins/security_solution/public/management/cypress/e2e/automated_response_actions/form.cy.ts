@@ -13,6 +13,7 @@ import {
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
+  selectIsolateAndSaveWithoutEnabling,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
@@ -216,10 +217,7 @@ describe(
         addEndpointResponseAction();
         focusAndOpenCommandDropdown();
         validateAvailableCommands();
-        cy.getByTestSubj(`command-type-isolate`).click();
-
-        cy.getByTestSubj('create-enabled-false').click();
-        cy.contains(`${ruleName} was created`);
+        selectIsolateAndSaveWithoutEnabling(ruleName);
       });
     });
 
