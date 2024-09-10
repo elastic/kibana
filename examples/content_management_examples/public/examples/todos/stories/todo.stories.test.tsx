@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SimpleTodoApp } from './todo.stories';
 
@@ -29,7 +29,7 @@ test('SimpleTodoApp works', async () => {
   // apply "completed" filter
   let todoFilters = screen.getByRole('group', { name: 'Todo filters' });
   let completedFilter = within(todoFilters).getByTestId('completed');
-  userEvent.click(completedFilter);
+  await userEvent.click(completedFilter);
 
   // check only completed todos are shown
   todos = await screen.findAllByRole('listitem');
@@ -40,7 +40,7 @@ test('SimpleTodoApp works', async () => {
   // apply "todo" filter
   todoFilters = screen.getByRole('group', { name: 'Todo filters' });
   const todoFilter = within(todoFilters).getByTestId('todo');
-  userEvent.click(todoFilter);
+  await userEvent.click(todoFilter);
 
   // check only todo todos are shown
   todos = await screen.findAllByRole('listitem');
@@ -51,7 +51,7 @@ test('SimpleTodoApp works', async () => {
   // apply "all" filter
   todoFilters = screen.getByRole('group', { name: 'Todo filters' });
   const allFilter = within(todoFilters).getByTestId('all');
-  userEvent.click(allFilter);
+  await userEvent.click(allFilter);
 
   // check all todos are shown
   todos = await screen.findAllByRole('listitem');
@@ -60,7 +60,7 @@ test('SimpleTodoApp works', async () => {
 
   // add new todo
   const newTodoInput = screen.getByTestId('newTodo');
-  userEvent.type(newTodoInput, 'Learn React{enter}');
+  await userEvent.type(newTodoInput, 'Learn React{enter}');
 
   // wait for new todo to be added
   await screen.findByText('Learn React');
@@ -69,12 +69,12 @@ test('SimpleTodoApp works', async () => {
   let newTodo = todos[2];
 
   // mark new todo as completed
-  userEvent.click(within(newTodo).getByRole('checkbox'));
+  await userEvent.click(within(newTodo).getByRole('checkbox'));
 
   // apply "completed" filter again
   todoFilters = screen.getByRole('group', { name: 'Todo filters' });
   completedFilter = within(todoFilters).getByTestId('completed');
-  userEvent.click(completedFilter);
+  await userEvent.click(completedFilter);
 
   // check only completed todos are shown and a new todo is there
   await screen.findByText('Learn React'); // wait for new todo to be there
@@ -84,8 +84,10 @@ test('SimpleTodoApp works', async () => {
   expect(newTodo).toHaveTextContent('Learn React');
 
   // remove new todo
-  userEvent.click(within(newTodo).getByLabelText('Delete'));
+  await userEvent.click(within(newTodo).getByLabelText('Delete'));
 
   // wait for new todo to be removed
-  await waitForElementToBeRemoved(() => screen.getByText('Learn React'));
+  await waitFor(() => {
+    expect(screen.queryByText('Learn React')).not.toBeInTheDocument();
+  });
 });
