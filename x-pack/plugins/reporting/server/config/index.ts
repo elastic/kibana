@@ -67,11 +67,47 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           },
         });
       }
+
+      if (reporting?.csv?.enablePanelActionDownload === true) {
+        addDeprecation({
+          configPath: `${fromPath}.csv.enablePanelActionDownload`,
+          title: i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.title', {
+            defaultMessage:
+              'The setting to enable CSV Download from saved search panels in dashboards is deprecated.',
+          }),
+          level: 'warning',
+          message: i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.message', {
+            defaultMessage: `The "{enablePanelActionDownload}" setting is deprecated.`,
+            values: {
+              enablePanelActionDownload: `${fromPath}.csv.enablePanelActionDownload`,
+            },
+          }),
+          correctiveActions: {
+            manualSteps: [
+              i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.manualStep1', {
+                defaultMessage:
+                  'Remove "{enablePanelActionDownload}" from `kibana.yml` or change the setting to `false`.',
+                values: {
+                  enablePanelActionDownload: `${fromPath}.csv.enablePanelActionDownload`,
+                },
+              }),
+              i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.manualStep2', {
+                defaultMessage:
+                  'Use the replacement panel action to generate CSV reports from saved search panels in the Dashboard application.',
+              }),
+            ],
+          },
+        });
+      }
     },
   ],
   exposeToUsage: {
     capture: { maxAttempts: true },
-    csv: { maxSizeBytes: true, scroll: { size: true, duration: true } },
+    csv: {
+      enablePanelActionDownload: true,
+      maxSizeBytes: true,
+      scroll: { size: true, duration: true },
+    },
     kibanaServer: false, // show as [redacted]
     queue: { indexInterval: true, pollEnabled: true, timeout: true },
     roles: { enabled: true },
