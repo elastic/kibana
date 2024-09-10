@@ -83,6 +83,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   PackagePolicyRestrictionRelatedError,
+  AgentlessPackagePolicyRequestError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -410,7 +411,7 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string }
+    givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
 
@@ -422,13 +423,24 @@ class AgentPolicyService {
     const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
     if (Array.isArray(idsWithName)) {
       const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
-      if (!givenPolicy.id || !isEditingSelf) {
+
+      if (
+        (!givenPolicy?.supports_agentless && !givenPolicy.id) ||
+        (!givenPolicy?.supports_agentless && !isEditingSelf)
+      ) {
         const isSinglePolicy = idsWithName.length === 1;
         const existClause = isSinglePolicy
           ? `Agent Policy '${idsWithName[0]}' already exists`
           : `Agent Policies '${idsWithName.join(',')}' already exist`;
 
         throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
+      }
+
+      if (givenPolicy?.supports_agentless && !givenPolicy.id) {
+        const integrationName = givenPolicy.name.split(' ').pop();
+        throw new AgentlessPackagePolicyRequestError(
+          `${givenPolicy.name} already exist. Please rename ${integrationName} integration.`
+        );
       }
     }
   }
@@ -646,6 +658,7 @@ class AgentPolicyService {
       await this.requireUniqueName(soClient, {
         id,
         name: agentPolicy.name,
+        supports_agentless: agentPolicy?.supports_agentless,
       });
     }
     if (agentPolicy.namespace) {

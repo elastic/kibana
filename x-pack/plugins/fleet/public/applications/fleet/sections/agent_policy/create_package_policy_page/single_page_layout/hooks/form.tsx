@@ -343,10 +343,18 @@ export function useOnSubmit({
           }
         } catch (e) {
           setFormState('VALID');
+          const agentlessPolicy = agentPolicies.find(
+            (policy) => policy?.supports_agentless === true
+          );
+
           notifications.toasts.addError(e, {
-            title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-              defaultMessage: 'Unable to create agent policy',
-            }),
+            title: agentlessPolicy?.supports_agentless
+              ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to create agentless integration',
+                })
+              : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to create agent policy',
+                }),
           });
           return;
         }
