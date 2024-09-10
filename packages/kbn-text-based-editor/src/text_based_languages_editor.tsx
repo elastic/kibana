@@ -731,8 +731,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
-        isHelpMenuOpen={isLanguagePopoverOpen}
-        setIsHelpMenuOpen={setIsLanguagePopoverOpen}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}
