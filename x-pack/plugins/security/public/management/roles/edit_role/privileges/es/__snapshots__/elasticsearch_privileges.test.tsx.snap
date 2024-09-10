@@ -142,6 +142,7 @@ exports[`it renders correctly in serverless mode 1`] = `
     }
     validator={
       RoleValidator {
+        "buildFlavor": "serverless",
         "shouldValidate": undefined,
       }
     }
@@ -337,6 +338,7 @@ exports[`it renders without crashing 1`] = `
     }
     validator={
       RoleValidator {
+        "buildFlavor": undefined,
         "shouldValidate": undefined,
       }
     }

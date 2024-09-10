@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -57,7 +57,8 @@ describe('Policy Details', () => {
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
     ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
-    render = () => mount(<PolicyDetails />, { wrappingComponent: AppWrapper });
+    render = () =>
+      mount(<PolicyDetails />, { wrappingComponent: AppWrapper as EnzymeComponentType<{}> });
     http = coreStart.http;
   });
 

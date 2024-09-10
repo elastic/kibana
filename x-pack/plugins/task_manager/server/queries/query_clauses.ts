@@ -38,9 +38,12 @@ export interface ScriptClause {
 export type PinnedQuery = Pick<estypes.QueryDslQueryContainer, 'pinned'>;
 
 type BoolClause = Pick<estypes.QueryDslQueryContainer, 'bool'>;
-export function matchesClauses(...clauses: BoolClause[]): BoolClause {
+export function matchesClauses(...clauses: Array<BoolClause | undefined>): BoolClause {
   return {
-    bool: Object.assign({}, ...clauses.map((clause) => clause.bool)),
+    bool: Object.assign(
+      {},
+      ...clauses.filter((clause): clause is BoolClause => !!clause).map((clause) => clause.bool)
+    ),
   };
 }
 

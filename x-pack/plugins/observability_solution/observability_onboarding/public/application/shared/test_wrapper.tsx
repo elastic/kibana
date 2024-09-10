@@ -14,7 +14,7 @@ interface WrapperProps {
 }
 
 export const Wrapper =
-  (props: WrapperProps): React.FC =>
+  (props: WrapperProps): React.FC<React.PropsWithChildren<{}>> =>
   ({ children }) => {
     return (
       <I18nProvider>

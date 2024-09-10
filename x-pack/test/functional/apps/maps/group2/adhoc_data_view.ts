@@ -10,18 +10,18 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
 
   describe('maps adhoc data view', () => {
     before(async () => {
       await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader'], {
         skipBrowserRefresh: true,
       });
-      await PageObjects.maps.loadSavedMap('adhoc data view');
+      await maps.loadSavedMap('adhoc data view');
     });
 
     it('should render saved map with adhoc data view', async () => {
-      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('adhocDataView');
+      const tooltipText = await maps.getLayerTocTooltipMsg('adhocDataView');
       expect(tooltipText).to.equal(
         'adhocDataView\nFound 908 documents.\nResults narrowed by global search\nResults narrowed by global time'
       );

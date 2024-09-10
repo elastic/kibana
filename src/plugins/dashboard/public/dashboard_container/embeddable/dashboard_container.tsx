@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -229,7 +230,12 @@ export class DashboardContainer
           .pipe(
             skipWhile((controlGroupApi) => !controlGroupApi),
             switchMap(async (controlGroupApi) => {
-              await controlGroupApi?.untilInitialized();
+              // Bug in main where panels are loaded before control filters are ready
+              // Want to migrate to react embeddable controls with same behavior
+              // TODO - do not load panels until control filters are ready
+              /*
+                await controlGroupApi?.untilInitialized();
+              */
             }),
             first()
           )
@@ -251,9 +257,7 @@ export class DashboardContainer
       { embeddableLoaded: {} },
       getEmbeddableFactory,
       parent,
-      {
-        untilContainerInitialized,
-      }
+      { untilContainerInitialized }
     );
 
     this.controlGroupApi$ = controlGroupApi$;
