@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import type { Annotation } from '../annotations';
+import { FlexibleInput } from '../flexible_input/flexible_input';
 
 export interface EsqlEditorProps {
   src: string;
@@ -15,6 +16,6 @@ export interface EsqlEditorProps {
   onChange: (src: string) => void;
 }
 
-export const EsqlEditor: React.FC<EsqlEditorProps> = (props) => {
-  return <div>editor</div>;
+export const EsqlEditor: React.FC<EsqlEditorProps> = ({ src, highlight, onChange }) => {
+  return <FlexibleInput value={src} onChange={(e) => onChange(e.target.value)} />;
 };

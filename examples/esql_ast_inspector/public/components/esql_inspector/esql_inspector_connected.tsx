@@ -7,12 +7,21 @@
  */
 
 import * as React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EsqlInspectorState } from './esql_inspector_state';
+import { Editor } from './components/editor';
 
 export interface EsqlInspectorConnectedProps {
   state?: EsqlInspectorState;
 }
 
 export const EsqlInspectorConnected: React.FC<EsqlInspectorConnectedProps> = (props) => {
-  return <div>inspector</div>;
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>UI</EuiFlexItem>
+      <EuiFlexItem>
+        <Editor />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
