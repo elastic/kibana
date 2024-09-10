@@ -357,11 +357,11 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
@@ -388,11 +388,11 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
@@ -478,7 +478,7 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       expect(screen.getByTestId('comment-action-show-alert-alert-action-id')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'));
+      await userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'));
 
       await waitFor(() => {
         expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -579,7 +579,7 @@ describe('createCommentUserActionBuilder', () => {
       const res = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
       expect(res.getByTestId('comment-action-show-alerts-1234'));
-      userEvent.click(res.getByTestId('comment-action-show-alerts-1234'));
+      await userEvent.click(res.getByTestId('comment-action-show-alerts-1234'));
 
       await waitFor(() => {
         expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: '1234', tabId: 'alerts' });
@@ -928,12 +928,10 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
-      userEvent.click(screen.getByLabelText('My primary button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });
 
-      userEvent.click(screen.getByLabelText('My primary 2 button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(screen.getByLabelText('My primary 2 button'), {
+        pointerEventsCheck: 0,
       });
 
       expect(onClick).toHaveBeenCalledTimes(2);
@@ -977,7 +975,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(customButton).toBeInTheDocument();
 
-      userEvent.click(customButton);
+      await userEvent.click(customButton);
 
       expect(onClick).toHaveBeenCalledTimes(1);
     });
@@ -1034,14 +1032,12 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('My primary 3 button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My primary 3 button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalled();
     });
@@ -1089,7 +1085,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
 
       await waitForEuiPopoverOpen();
 
@@ -1098,7 +1094,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.queryByText('Delete attachment')).not.toBeInTheDocument();
       expect(screen.getByText('My button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('My button'), undefined, { skipPointerEventsCheck: true });
+      await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalledTimes(1);
     });
@@ -1167,17 +1163,15 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
-      userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByText('My button')).toBeInTheDocument();
       expect(screen.getByText('My button 2')).toBeInTheDocument();
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('My button'), undefined, { skipPointerEventsCheck: true });
-      userEvent.click(screen.getByText('My button 2'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
+      await userEvent.click(screen.getByText('My button 2'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalledTimes(2);
     });
@@ -1217,9 +1211,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
 
-      userEvent.click(screen.getByLabelText('My primary button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalled();
     });
@@ -1229,16 +1221,16 @@ describe('createCommentUserActionBuilder', () => {
 const deleteAttachment = async (result: RenderResult, deleteIcon: string, buttonLabel: string) => {
   expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-  userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+  await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
   await waitForEuiPopoverOpen();
 
   expect(screen.queryByTestId(`property-actions-user-action-${deleteIcon}`)).toBeInTheDocument();
 
-  userEvent.click(screen.getByTestId(`property-actions-user-action-${deleteIcon}`));
+  await userEvent.click(screen.getByTestId(`property-actions-user-action-${deleteIcon}`));
 
   await waitFor(() => {
     expect(screen.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
   });
 
-  userEvent.click(screen.getByText(buttonLabel));
+  await userEvent.click(screen.getByText(buttonLabel));
 };

@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects([
+  const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'timePicker',
@@ -39,10 +39,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         hideAnnouncements: true,
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     afterEach(async () => {
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('search', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
@@ -66,13 +66,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should be able to search by string', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('geo');
+        await discover.findFieldByNameInDocViewer('geo');
 
         await retry.waitFor('first updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
 
-        await PageObjects.discover.findFieldByNameInDocViewer('.sr');
+        await discover.findFieldByNameInDocViewer('.sr');
 
         await retry.waitFor('second updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
@@ -80,21 +80,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should be able to search by wildcard', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('relatedContent*image');
+        await discover.findFieldByNameInDocViewer('relatedContent*image');
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
 
       it('should be able to search with spaces as wildcard', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');
+        await discover.findFieldByNameInDocViewer('relatedContent image');
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
       });
 
       it('should be able to search with fuzzy search (1 typo)', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('rel4tedContent.art');
+        await discover.findFieldByNameInDocViewer('rel4tedContent.art');
 
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should ignore empty search', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('   '); // only spaces
+        await discover.findFieldByNameInDocViewer('   '); // only spaces
 
         await retry.waitFor('the clear button', async () => {
           return await testSubjects.exists('clearSearchButton');
@@ -118,22 +118,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('filter by field type', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
       });
 
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
-        await PageObjects.discover.openFilterByFieldTypeInDocViewer();
+        await discover.openFilterByFieldTypeInDocViewer();
         expect(await find.allByCssSelector('[data-test-subj*="typeFilter"]')).to.have.length(6);
-        await PageObjects.discover.closeFilterByFieldTypeInDocViewer();
+        await discover.closeFilterByFieldTypeInDocViewer();
       });
 
       it('should filter by field type', async function () {
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
 
-        await PageObjects.discover.openFilterByFieldTypeInDocViewer();
+        await discover.openFilterByFieldTypeInDocViewer();
 
         await testSubjects.click('typeFilter-date');
 
@@ -157,16 +157,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show filters by type in ES|QL view', async function () {
-        await PageObjects.discover.selectTextBaseLang();
+        await discover.selectTextBaseLang();
 
         const testQuery = `from logstash-* | limit 10000`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const pinnedFieldsCount = 1;
         await dataGrid.togglePinActionInFlyout('agent');
 
-        await PageObjects.discover.openFilterByFieldTypeInDocViewer();
+        await discover.openFilterByFieldTypeInDocViewer();
         expect(await find.allByCssSelector('[data-test-subj*="typeFilter"]')).to.have.length(6);
 
         await testSubjects.click('typeFilter-number');
@@ -195,19 +195,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('hide null values switch - ES|QL mode', function () {
       beforeEach(async () => {
-        await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const testQuery = 'from logstash-* | sort @timestamp | limit 10000';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
       });
 
       afterEach(async () => {
@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should hide fields with null values ', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('machine');
+        await discover.findFieldByNameInDocViewer('machine');
         const results = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('pinning fields', function () {
       it('should be able to pin and unpin fields', async function () {
         await dataGrid.clickRowToggle();
-        await PageObjects.discover.isShowingDocViewer();
+        await discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });

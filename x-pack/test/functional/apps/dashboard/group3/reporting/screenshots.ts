@@ -16,7 +16,7 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'share']);
+  const { reporting, dashboard, share } = getPageObjects(['reporting', 'dashboard', 'share']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
@@ -73,7 +73,7 @@ export default function ({
       ]);
     });
     after('clean up archives', async () => {
-      await PageObjects.share.closeShareModal();
+      await share.closeShareModal();
       await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
@@ -85,20 +85,20 @@ export default function ({
 
     describe('Print PDF button', () => {
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        await share.closeShareModal();
       });
 
       it('is available if new', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openExportTab();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await reporting.openExportTab();
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('is available when saved', async () => {
-        await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
-        await PageObjects.reporting.openExportTab();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await dashboard.saveDashboard('My PDF Dashboard');
+        await reporting.openExportTab();
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
@@ -114,18 +114,18 @@ export default function ({
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openExportTab();
-        await PageObjects.reporting.checkUsePrintLayout();
-        await PageObjects.reporting.clickGenerateReportButton();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.openExportTab();
+        await reporting.checkUsePrintLayout();
+        await reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url ?? '');
+        const url = await reporting.getReportURL(60000);
+        const res = await reporting.getResponse(url ?? '');
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
-        await PageObjects.share.closeShareModal();
+        await share.closeShareModal();
       });
     });
 
@@ -138,19 +138,19 @@ export default function ({
       });
 
       it('is available if new', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openExportTab();
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await reporting.openExportTab();
         await testSubjects.click('pngV2-radioOption');
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await PageObjects.share.closeShareModal();
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await share.closeShareModal();
       });
 
       it('is available when saved', async () => {
-        await PageObjects.dashboard.saveDashboard('My PNG Dash');
-        await PageObjects.reporting.openExportTab();
+        await dashboard.saveDashboard('My PNG Dash');
+        await reporting.openExportTab();
         await testSubjects.click('pngV2-radioOption');
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
     });
@@ -167,14 +167,14 @@ export default function ({
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openExportTab();
-        await PageObjects.reporting.clickGenerateReportButton();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.openExportTab();
+        await reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url ?? '');
-        await PageObjects.share.closeShareModal();
+        const url = await reporting.getReportURL(60000);
+        const res = await reporting.getResponse(url ?? '');
+        await share.closeShareModal();
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
@@ -197,28 +197,24 @@ export default function ({
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
 
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
-        await PageObjects.reporting.openExportTab();
+        await reporting.openExportTab();
         await testSubjects.click('pngV2-radioOption');
-        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-        await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.reporting.removeForceSharedItemsContainerSize();
+        await reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await reporting.clickGenerateReportButton();
+        await reporting.removeForceSharedItemsContainerSize();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
-        sessionReportPath = await PageObjects.reporting.writeSessionReport(
+        const url = await reporting.getReportURL(60000);
+        const reportData = await reporting.getRawReportData(url ?? '');
+        sessionReportPath = await reporting.writeSessionReport(
           reportFileName,
           'png',
           reportData,
           REPORTS_FOLDER
         );
-        baselinePath = PageObjects.reporting.getBaselineReportPath(
-          reportFileName,
-          'png',
-          REPORTS_FOLDER
-        );
+        baselinePath = reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER);
       });
 
       after(async () => {
