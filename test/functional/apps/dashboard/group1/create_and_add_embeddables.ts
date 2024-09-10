@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -31,9 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('ensure toolbar popover closes on add', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Log stream (deprecated)');
       await dashboardAddPanel.expectEditorMenuClosed();
@@ -45,73 +45,70 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('add new visualization link', () => {
       before(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.preserveCrossAppState();
-        await PageObjects.dashboard.loadSavedDashboard('few panels');
+        await dashboard.navigateToApp();
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard('few panels');
       });
 
       it('adds new visualization via the top nav link', async () => {
-        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-        await PageObjects.dashboard.switchToEditMode();
+        const originalPanelCount = await dashboard.getPanelCount();
+        await dashboard.switchToEditMode();
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAggBasedVisualizations();
-        await PageObjects.visualize.clickAreaChart();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'visualization from top nav add new panel',
-          { redirectToOrigin: true }
-        );
+        await visualize.clickAreaChart();
+        await visualize.clickNewSearch();
+        await visualize.saveVisualizationExpectSuccess('visualization from top nav add new panel', {
+          redirectToOrigin: true,
+        });
         await retry.try(async () => {
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount + 1);
         });
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
 
       it('adds a new visualization', async () => {
-        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        const originalPanelCount = await dashboard.getPanelCount();
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAggBasedVisualizations();
-        await PageObjects.visualize.clickAreaChart();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'visualization from add new link',
-          { redirectToOrigin: true }
-        );
+        await visualize.clickAreaChart();
+        await visualize.clickNewSearch();
+        await visualize.saveVisualizationExpectSuccess('visualization from add new link', {
+          redirectToOrigin: true,
+        });
 
         await retry.try(async () => {
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount + 1);
         });
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
 
       it('adds a new timelion visualization', async () => {
         // adding this case, as the timelion agg-based viz doesn't need the `clickNewSearch()` step
-        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+        const originalPanelCount = await dashboard.getPanelCount();
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAggBasedVisualizations();
-        await PageObjects.visualize.clickTimelion();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'timelion visualization from add new link',
-          { redirectToOrigin: true }
-        );
+        await visualize.clickTimelion();
+        await visualize.saveVisualizationExpectSuccess('timelion visualization from add new link', {
+          redirectToOrigin: true,
+        });
 
         await retry.try(async () => {
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount + 1);
         });
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       });
 
       it('saves the listing page instead of the visualization to the app link', async () => {
-        await PageObjects.header.clickVisualize(true);
+        await header.clickVisualize(true);
         const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).not.to.contain(VisualizeConstants.EDIT_PATH);
       });
 
       after(async () => {
-        await PageObjects.header.clickDashboard();
+        await header.clickDashboard();
       });
     });
   });

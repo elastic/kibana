@@ -9,6 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -88,6 +89,7 @@ export const getOptionsListControlFactory = (
       >(
         uuid,
         OPTIONS_LIST_CONTROL,
+        'optionsListDataView',
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
         controlGroupApi,
@@ -244,7 +246,7 @@ export const getOptionsListControlFactory = (
                 searchTechnique: searchTechnique$.getValue(),
                 runPastTimeout: runPastTimeout$.getValue(),
                 singleSelect: singleSelect$.getValue(),
-                selections: selections.selectedOptions$.getValue(),
+                selectedOptions: selections.selectedOptions$.getValue(),
                 sort: sort$.getValue(),
                 existsSelected: selections.existsSelected$.getValue(),
                 exclude: selections.exclude$.getValue(),
@@ -278,7 +280,7 @@ export const getOptionsListControlFactory = (
           sort: [
             sort$,
             (sort) => sort$.next(sort),
-            (a, b) => (a ?? OPTIONS_LIST_DEFAULT_SORT) === (b ?? OPTIONS_LIST_DEFAULT_SORT),
+            (a, b) => fastIsEqual(a ?? OPTIONS_LIST_DEFAULT_SORT, b ?? OPTIONS_LIST_DEFAULT_SORT),
           ],
 
           /** This state cannot currently be changed after the control is created */

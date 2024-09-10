@@ -106,7 +106,7 @@ const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id
 
   return {
     result: renderHook(() => useContextAppFetch(props.props), {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
       ),
     }).result,

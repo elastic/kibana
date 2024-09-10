@@ -120,7 +120,7 @@ describe('Presentation panel', () => {
       };
       const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
       await renderPresentationPanel({ api, props: { getActions } });
-      userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
+      await userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
       await waitForEuiPopoverOpen();
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelContextMenuOpen')).toBeInTheDocument();
