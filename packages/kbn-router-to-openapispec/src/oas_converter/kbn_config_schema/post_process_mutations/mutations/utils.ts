@@ -8,7 +8,7 @@
  */
 
 import { metaFields } from '@kbn/config-schema';
-import type { OpenAPIV3 } from '../../../../type';
+import type { OpenAPIV3 } from 'openapi-types';
 
 export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.default?.special === 'deep') {

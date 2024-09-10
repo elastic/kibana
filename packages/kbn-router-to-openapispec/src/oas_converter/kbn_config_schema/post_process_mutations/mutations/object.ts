@@ -8,7 +8,7 @@
  */
 
 import { metaFields } from '@kbn/config-schema';
-import type { OpenAPIV3 } from '../../../../type';
+import type { OpenAPIV3 } from 'openapi-types';
 import { deleteField, stripBadDefault } from './utils';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;

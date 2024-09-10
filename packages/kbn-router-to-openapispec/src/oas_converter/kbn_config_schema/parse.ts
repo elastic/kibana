@@ -10,7 +10,7 @@
 import Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
 import { omit } from 'lodash';
-import type { OpenAPIV3 } from '../../type';
+import type { OpenAPIV3 } from 'openapi-types';
 import { createCtx, postProcessMutations } from './post_process_mutations';
 import type { IContext } from './post_process_mutations';
 

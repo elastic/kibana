@@ -8,7 +8,7 @@
  */
 
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import type { OpenAPIV3 } from './type';
+import type { OpenAPIV3 } from 'openapi-types';
 import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
 import { processRouter } from './process_router';

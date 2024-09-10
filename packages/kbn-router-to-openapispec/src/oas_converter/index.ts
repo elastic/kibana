@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenAPIV3 } from '../type';
+import type { OpenAPIV3 } from 'openapi-types';
 import { KnownParameters, OpenAPIConverter } from '../type';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';

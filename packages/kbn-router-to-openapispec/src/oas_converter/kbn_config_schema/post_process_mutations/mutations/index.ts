@@ -9,7 +9,7 @@
 
 import Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
-import type { OpenAPIV3 } from '../../../../type';
+import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
 import { deleteField, stripBadDefault, processDeprecated, processDiscontinued } from './utils';
 import { IContext } from '../context';

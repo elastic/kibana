@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// import type { OpenAPIV3 } from 'openapi-types';
-
-import type { OpenAPIV3 } from '../openapi_types';
-export type { OpenAPIV3 } from '../openapi_types';
+import type { OpenAPIV3 } from '../openapi-types';
+export type { OpenAPIV3 } from '../openapi-types';
 export interface KnownParameters {
   [paramName: string]: { optional: boolean };
 }
