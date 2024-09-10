@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
@@ -26,8 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await common.navigateToApp('discover');
+      await timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async function unloadMakelogs() {
@@ -37,10 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {
-      const time = await PageObjects.timePicker.getTimeConfig();
+      const time = await timePicker.getTimeConfig();
       expect(time.start).to.be(fromTime);
       expect(time.end).to.be(toTime);
-      const rowData = await PageObjects.discover.getDocTableIndex(1);
+      const rowData = await discover.getDocTableIndex(1);
       expect(rowData.startsWith('Sep 22, 2019 @ 23:50:13.253123345')).to.be.ok();
     });
   });

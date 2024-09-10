@@ -33,7 +33,7 @@ const tooltipContent: CaseTooltipContentProps = {
 };
 
 const tooltipProps: CaseTooltipProps = {
-  children: TestSpan,
+  children: <TestSpan />,
   loading: false,
   content: tooltipContent,
 };

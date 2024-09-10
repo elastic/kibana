@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects([
+  const { common, visualize, visEditor, visChart, timePicker } = getPageObjects([
     'common',
     'visualize',
     'visEditor',
@@ -32,30 +32,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
 
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
-      await PageObjects.visualize.clickDataTable();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await visualize.clickDataTable();
+      await visualize.clickNewSearch();
+      await timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split Rows');
-      await PageObjects.visEditor.clickBucket('Split rows');
+      await visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
-      await PageObjects.visEditor.selectAggregation('Histogram');
+      await visEditor.selectAggregation('Histogram');
       log.debug('Field = machine.ram');
-      await PageObjects.visEditor.selectField('machine.ram');
+      await visEditor.selectField('machine.ram');
     });
 
     describe('interval parameter uses autoBounds', function () {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
         const providedInterval = '2400000000';
         log.debug(`Interval = ${providedInterval}`);
-        await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
-        await PageObjects.visEditor.clickGo();
+        await visEditor.setInterval(providedInterval, { type: 'numeric' });
+        await visEditor.clickGo();
 
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisContent();
+          const data = await visChart.getTableVisContent();
           expect(data.length).to.eql(10);
           const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
           const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
@@ -67,11 +67,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should scale value to round number when number of generated buckets is greater than histogram:maxBars', async function () {
         const providedInterval = '100';
         log.debug(`Interval = ${providedInterval}`);
-        await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.common.sleep(1000); // fix this
+        await visEditor.setInterval(providedInterval, { type: 'numeric' });
+        await visEditor.clickGo();
+        await common.sleep(1000); // fix this
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisContent();
+          const data = await visChart.getTableVisContent();
           expect(data.length).to.eql(10);
           const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
           const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
@@ -84,11 +84,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('autoBounds are not set for number_range data', function () {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
         log.debug('Field = machine.ram_range');
-        await PageObjects.visEditor.selectField('machine.ram_range');
+        await visEditor.selectField('machine.ram_range');
         await retry.waitFor('interval to be set', async () => {
-          return Boolean(await PageObjects.visEditor.getNumericInterval());
+          return Boolean(await visEditor.getNumericInterval());
         });
-        expect(await PageObjects.visEditor.getNumericInterval()).to.eql(100);
+        expect(await visEditor.getNumericInterval()).to.eql(100);
       });
     });
   });
