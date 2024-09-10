@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEffect, useRef } from 'react';
@@ -25,7 +26,7 @@ export const useGridLayoutEvents = ({
 }: {
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
-  const dragEnterCount = useRef(0);
+  const mouseClientPosition = useRef({ x: 0, y: 0 });
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
 
   // -----------------------------------------------------------------------------------------
@@ -33,7 +34,8 @@ export const useGridLayoutEvents = ({
   // -----------------------------------------------------------------------------------------
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
-    const dragOver = (e: MouseEvent) => {
+    const calculateUserEvent = (e: Event) => {
+      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
 
@@ -51,17 +53,14 @@ export const useGridLayoutEvents = ({
         }
       })();
 
-      if (
-        !runtimeSettings$.value ||
-        !interactionEvent ||
-        !previewElement ||
-        !gridRowElements ||
-        !currentGridData
-      ) {
+      if (!runtimeSettings$.value || !previewElement || !gridRowElements || !currentGridData) {
         return;
       }
 
-      const mouseTargetPixel = { x: e.clientX, y: e.clientY };
+      const mouseTargetPixel = {
+        x: mouseClientPosition.current.x,
+        y: mouseClientPosition.current.y,
+      };
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
       const previewRect = {
         left: isResize ? panelRect.left : mouseTargetPixel.x - interactionEvent.mouseOffsets.left,
@@ -159,46 +158,27 @@ export const useGridLayoutEvents = ({
       }
     };
 
-    const onDrop = (e: MouseEvent) => {
+    const onMouseUp = (e: MouseEvent) => {
+      if (!interactionEvent$.value) return;
       e.preventDefault();
       e.stopPropagation();
-      if (!interactionEvent$.value) return;
 
       interactionEvent$.next(undefined);
       gridLayoutStateManager.hideDragPreview();
-      dragEnterCount.current = 0;
     };
 
-    const onDragEnter = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      dragEnterCount.current++;
+    const onMouseMove = (e: MouseEvent) => {
+      mouseClientPosition.current = { x: e.clientX, y: e.clientY };
+      calculateUserEvent(e);
     };
 
-    const onDragLeave = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!interactionEvent$.value) return;
-
-      dragEnterCount.current--;
-      if (dragEnterCount.current === 0) {
-        interactionEvent$.next(undefined);
-        gridLayoutStateManager.hideDragPreview();
-        dragEnterCount.current = 0;
-      }
-    };
-
-    window.addEventListener('drop', onDrop);
-    window.addEventListener('dragover', dragOver);
-    window.addEventListener('dragenter', onDragEnter);
-    window.addEventListener('dragleave', onDragLeave);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('scroll', calculateUserEvent);
     return () => {
-      window.removeEventListener('drop', dragOver);
-      window.removeEventListener('dragover', dragOver);
-      window.removeEventListener('dragenter', onDragEnter);
-      window.removeEventListener('dragleave', onDragLeave);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('scroll', calculateUserEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

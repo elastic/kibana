@@ -40,7 +40,14 @@ export const createActionRoute = (
         deprecated: true,
       },
       validate: {
-        body: bodySchema,
+        request: {
+          body: bodySchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

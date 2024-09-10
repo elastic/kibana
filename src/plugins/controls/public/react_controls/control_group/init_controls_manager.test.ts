@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DefaultDataControlState } from '../controls/data_controls/types';
 import { DefaultControlApi } from '../controls/types';
 import { initControlsManager, getLastUsedDataViewId } from './init_controls_manager';
+import { ControlPanelState } from './types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('delta'),
@@ -185,5 +188,53 @@ describe('getLastUsedDataViewId', () => {
       alpha: { type: 'testControl', order: 0 },
     });
     expect(dataViewId).toBeUndefined();
+  });
+});
+
+describe('getNewControlState', () => {
+  test('should contain defaults when there are no existing controls', () => {
+    const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: true,
+      width: 'medium',
+      dataViewId: DEFAULT_DATA_VIEW_ID,
+    });
+  });
+
+  test('should start with defaults if there are existing controls', () => {
+    const controlsManager = initControlsManager(
+      {
+        alpha: {
+          type: 'testControl',
+          order: 1,
+          dataViewId: 'myOtherDataViewId',
+          width: 'small',
+          grow: false,
+        } as ControlPanelState & Pick<DefaultDataControlState, 'dataViewId'>,
+      },
+      DEFAULT_DATA_VIEW_ID
+    );
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: true,
+      width: 'medium',
+      dataViewId: 'myOtherDataViewId',
+    });
+  });
+
+  test('should contain values of last added control', () => {
+    const controlsManager = initControlsManager({}, DEFAULT_DATA_VIEW_ID);
+    controlsManager.api.addNewPanel({
+      panelType: 'testControl',
+      initialState: {
+        grow: false,
+        width: 'small',
+        dataViewId: 'myOtherDataViewId',
+      },
+    });
+    expect(controlsManager.getNewControlState()).toEqual({
+      grow: false,
+      width: 'small',
+      dataViewId: 'myOtherDataViewId',
+    });
   });
 });

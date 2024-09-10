@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -24,11 +25,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { HistoryLocationState } from '../../build_services';
 import { createSearchSessionMock } from '../../__mocks__/search_session';
+import { createDiscoverServicesMock } from '../../__mocks__/services';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
   ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
 };
+const discoverServices = createDiscoverServicesMock();
 
 describe('ContextApp test', () => {
   const { history } = createSearchSessionMock();
@@ -53,6 +56,7 @@ describe('ContextApp test', () => {
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
+      ...discoverServices.core,
       executionContext: {
         set: jest.fn(),
       },
@@ -75,6 +79,7 @@ describe('ContextApp test', () => {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    profilesManager: discoverServices.profilesManager,
   } as unknown as DiscoverServices;
 
   const defaultProps = {

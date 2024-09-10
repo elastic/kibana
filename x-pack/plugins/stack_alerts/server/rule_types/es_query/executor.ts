@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from '@kbn/core/server';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -51,9 +53,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     logger,
     getTimeRange,
   } = options;
-  const { alertsClient, scopedClusterClient, share } = services;
-  const searchSourceClient = await services.getSearchSourceClient();
-  const dataViews = await services.getDataViews();
+  const { alertsClient, ruleResultService, scopedClusterClient, share } = services;
 
   if (!alertsClient) {
     throw new AlertsClientError();
@@ -86,9 +86,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         spacePrefix,
         services: {
           share,
-          searchSourceClient,
+          getSearchSourceClient: services.getSearchSourceClient,
           logger,
-          dataViews,
+          getDataViews: services.getDataViews,
+          ruleResultService,
         },
         dateStart,
         dateEnd,
@@ -119,6 +120,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         services: {
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
         dateStart,
         dateEnd,
@@ -178,6 +180,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
+    const ecsGroups = getEcsGroups(result.groups);
 
     alertsClient.report({
       id,
@@ -191,6 +194,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        ...ecsGroups,
         ...actionContext.sourceFields,
       },
     });

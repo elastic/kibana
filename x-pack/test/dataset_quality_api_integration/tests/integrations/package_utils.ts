@@ -7,11 +7,6 @@
 
 import { Agent as SuperTestAgent } from 'supertest';
 
-export interface IntegrationPackage {
-  name: string;
-  version: string;
-}
-
 export interface CustomIntegration {
   integrationName: string;
   datasets: IntegrationDataset[];
@@ -42,12 +37,19 @@ export async function installPackage({
   pkg,
 }: {
   supertest: SuperTestAgent;
-  pkg: IntegrationPackage;
+  pkg: string;
 }) {
-  const { name, version } = pkg;
+  const {
+    body: {
+      item: { latestVersion: version },
+    },
+  } = await supertest
+    .get(`/api/fleet/epm/packages/${pkg}`)
+    .set('kbn-xsrf', 'xxxx')
+    .send({ force: true });
 
   return supertest
-    .post(`/api/fleet/epm/packages/${name}/${version}`)
+    .post(`/api/fleet/epm/packages/${pkg}/${version}`)
     .set('kbn-xsrf', 'xxxx')
     .send({ force: true });
 }
@@ -57,9 +59,7 @@ export async function uninstallPackage({
   pkg,
 }: {
   supertest: SuperTestAgent;
-  pkg: IntegrationPackage;
+  pkg: string;
 }) {
-  const { name, version } = pkg;
-
-  return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
+  return supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
 }

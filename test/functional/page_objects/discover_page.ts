@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -413,7 +414,7 @@ export class DiscoverPageObject extends FtrService {
     // add the focus to the button to make it appear
     const skipButton = await this.testSubjects.find('discoverSkipTableButton');
     // force focus on it, to make it interactable
-    skipButton.focus();
+    await skipButton.focus();
     // now click it!
     return skipButton.click();
   }
@@ -521,8 +522,8 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public showsErrorCallout() {
-    this.retry.try(async () => {
+  public async showsErrorCallout() {
+    await this.retry.try(async () => {
       await this.testSubjects.existOrFail('discoverErrorCalloutTitle');
     });
   }

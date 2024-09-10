@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
 export const deserializeControlGroup = (
@@ -46,7 +46,5 @@ export const deserializeControlGroup = (
         ? !state.rawState.showApplySelections
         : false, // Rename "showApplySelections" to "autoApplySelections"
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
-    defaultControlGrow: DEFAULT_CONTROL_GROW,
-    defaultControlWidth: DEFAULT_CONTROL_WIDTH,
   };
 };

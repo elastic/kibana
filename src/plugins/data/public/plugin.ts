@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './index.scss';
@@ -14,7 +15,7 @@ import {
   IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -59,7 +60,9 @@ export class DataPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
-    this.queryService = new QueryService();
+    this.queryService = new QueryService(
+      initializerContext.config.get().query.timefilter.minRefreshInterval
+    );
 
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();

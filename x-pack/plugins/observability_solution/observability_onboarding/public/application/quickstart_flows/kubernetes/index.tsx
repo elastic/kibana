@@ -24,9 +24,13 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 
 export const KubernetesPanel: React.FC = () => {
   const [windowLostFocus, setWindowLostFocus] = useState(false);
-  const { data, status, error, refetch } = useFetcher((callApi) => {
-    return callApi('POST /internal/observability_onboarding/kubernetes/flow');
-  }, []);
+  const { data, status, error, refetch } = useFetcher(
+    (callApi) => {
+      return callApi('POST /internal/observability_onboarding/kubernetes/flow');
+    },
+    [],
+    { showToastOnError: false }
+  );
 
   useEvent('blur', () => setWindowLostFocus(true), window);
 
