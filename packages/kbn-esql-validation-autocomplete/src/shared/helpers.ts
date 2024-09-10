@@ -24,6 +24,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
@@ -136,12 +137,14 @@ let fnLookups: Map<string, FunctionDefinition> | undefined;
 let commandLookups: Map<string, CommandDefinition> | undefined;
 
 function buildFunctionLookup() {
-  if (!fnLookups) {
+  // we always refresh if we have test functions
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
         evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        groupingFunctionDefinitions,
+        getTestFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);
@@ -418,8 +421,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );

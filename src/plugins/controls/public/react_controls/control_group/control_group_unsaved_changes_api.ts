@@ -25,11 +25,7 @@ import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_as
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
-  | 'autoApplySelections'
-  | 'chainingSystem'
-  | 'ignoreParentSettings'
-  | 'initialChildControlState'
-  | 'labelPosition'
+  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
 > & {
   controlsInOrder: ControlsInOrder;
 };
@@ -39,6 +35,7 @@ export function initializeControlGroupUnsavedChanges(
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
+  resetControlsUnsavedChanges: () => void,
   parentApi: unknown,
   lastSavedRuntimeState: ControlGroupRuntimeState
 ) {
@@ -48,7 +45,6 @@ export function initializeControlGroupUnsavedChanges(
       chainingSystem: lastSavedRuntimeState.chainingSystem,
       controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
       ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
-      initialChildControlState: lastSavedRuntimeState.initialChildControlState,
       labelPosition: lastSavedRuntimeState.labelPosition,
     },
     parentApi,
@@ -73,6 +69,7 @@ export function initializeControlGroupUnsavedChanges(
       ),
       asyncResetUnsavedChanges: async () => {
         controlGroupUnsavedChanges.api.resetUnsavedChanges();
+        resetControlsUnsavedChanges();
 
         const filtersReadyPromises: Array<Promise<void>> = [];
         Object.values(children$.value).forEach((controlApi) => {

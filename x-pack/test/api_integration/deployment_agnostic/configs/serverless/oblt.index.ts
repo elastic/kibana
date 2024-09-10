@@ -11,7 +11,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     // load new oblt and platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/console'));
     loadTestFile(require.resolve('../../apis/core'));
+    loadTestFile(require.resolve('../../apis/management'));
     loadTestFile(require.resolve('../../apis/painless_lab'));
+    loadTestFile(require.resolve('../../apis/saved_objects_management'));
     loadTestFile(require.resolve('../../apis/observability/alerting'));
   });
 }

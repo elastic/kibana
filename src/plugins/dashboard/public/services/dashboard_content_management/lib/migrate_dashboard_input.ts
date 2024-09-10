@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   EmbeddableFactoryNotFoundError,
   runEmbeddableFactoryMigrations,
@@ -32,28 +31,7 @@ export const migrateDashboardInput = (
   } = pluginServices.getServices();
   let anyMigrationRun = false;
   if (!dashboardInput) return dashboardInput;
-  if (dashboardInput.controlGroupInput) {
-    /**
-     * If any Control Group migrations are required, we will need to start storing a Control Group Input version
-     * string in Dashboard Saved Objects and then running the whole Control Group input through the embeddable
-     * factory migrations here.
-     */
 
-    // Migrate all of the Control children as well.
-    const migratedControls: ControlGroupInput['panels'] = {};
-
-    Object.entries(dashboardInput.controlGroupInput.panels).forEach(([id, panel]) => {
-      const factory = embeddable.getEmbeddableFactory(panel.type);
-      if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-      const { input: newInput, migrationRun: controlMigrationRun } = runEmbeddableFactoryMigrations(
-        panel.explicitInput,
-        factory
-      );
-      if (controlMigrationRun) anyMigrationRun = true;
-      panel.explicitInput = newInput as DashboardPanelState['explicitInput'];
-      migratedControls[id] = panel;
-    });
-  }
   const migratedPanels: DashboardContainerInput['panels'] = {};
   for (const [id, panel] of Object.entries(dashboardInput.panels)) {
     // if the panel type is registered in the new embeddable system, we do not need to run migrations for it.

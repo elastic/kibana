@@ -7221,6 +7221,10 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
+              },
+              {
                 "plugin": "searchPlayground",
                 "path": "x-pack/plugins/search_playground/server/routes.ts"
               },
@@ -19582,7 +19586,7 @@
             "section": "def-server.RouteValidatorFullConfigRequest",
             "text": "RouteValidatorFullConfigRequest"
           },
-          "<P, Q, B> | ",
+          "<P, Q, B> | (",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -19590,7 +19594,7 @@
             "section": "def-server.RouteValidatorRequestAndResponses",
             "text": "RouteValidatorRequestAndResponses"
           },
-          "<P, Q, B>"
+          "<P, Q, B> & NotRouteValidatorFullConfigRequest)"
         ],
         "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
         "deprecated": false,

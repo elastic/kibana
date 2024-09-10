@@ -1351,7 +1351,7 @@ async function getFunctionArgsSuggestions(
 
   const suggestedConstants = uniq(
     typesToSuggestNext
-      .map((d) => d.literalSuggestions || d.literalOptions)
+      .map((d) => d.literalSuggestions || d.acceptedValues)
       .filter((d) => d)
       .flat()
   ) as string[];
