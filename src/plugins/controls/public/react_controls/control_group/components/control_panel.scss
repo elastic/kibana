@@ -27,6 +27,7 @@
   .controlErrorButton {
     width: 100%;
     border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
+    height: $euiButtonHeightSmall;
 
     &--content {
       justify-content: left;

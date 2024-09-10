@@ -424,7 +424,7 @@ describe('editor_frame', () => {
       };
 
       renderEditorFrame();
-      userEvent.click(screen.getByLabelText(/Suggestion1/i));
+      await userEvent.click(screen.getByLabelText(/Suggestion1/i));
 
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({

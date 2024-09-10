@@ -1136,7 +1136,9 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
-              virtualizationOptions={VIRTUALIZATION_OPTIONS}
+              // Don't use row overscan when showing Document column since
+              // rendering so much DOM content in each cell impacts performance
+              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
             />
           )}
         </div>

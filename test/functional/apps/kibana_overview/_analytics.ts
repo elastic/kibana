@@ -36,19 +36,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const apps = ['dashboards', 'discover', 'canvas', 'maps', 'ml'];
 
-    it('should display Analytics apps cards', async () => {
-      const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
-      expect(kbnOverviewAppsCards.length).to.be(apps.length);
+    describe('Analytics apps cards', function () {
+      this.tags('skipFIPS');
+      it('should display ', async () => {
+        const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
+        expect(kbnOverviewAppsCards.length).to.be(apps.length);
 
-      const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
-        const image = await el.findByCssSelector('img');
-        const imageUrl = (await image.getAttribute('src')) ?? '';
-        expect(imageUrl.includes(imgName)).to.be(true);
-      };
+        const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
+          const image = await el.findByCssSelector('img');
+          const imageUrl = (await image.getAttribute('src')) ?? '';
+          expect(imageUrl.includes(imgName)).to.be(true);
+        };
 
-      for (let i = 0; i < apps.length; i++) {
-        await verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
-      }
+        for (let i = 0; i < apps.length; i++) {
+          await verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
+        }
+      });
     });
 
     it('click on a card should lead to the appropriate app', async () => {
