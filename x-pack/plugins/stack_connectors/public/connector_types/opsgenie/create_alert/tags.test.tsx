@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor, act } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tags } from './tags';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
@@ -36,7 +36,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxClearButton'));
+    await userEvent.click(screen.getByTestId('comboBoxClearButton'));
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
@@ -55,7 +55,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTitle('Remove super from selection in this group'));
+    await userEvent.click(screen.getByTitle('Remove super from selection in this group'));
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
@@ -76,9 +76,9 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
-    userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
+    await userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
@@ -99,7 +99,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
@@ -114,18 +114,14 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
       expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
     });
 
-    act(() => {
-      userEvent.click(screen.getByText('The tags of the rule.'), undefined, {
-        skipPointerEventsCheck: true,
-      });
-    });
+    await userEvent.click(screen.getByText('The tags of the rule.'), { pointerEventsCheck: 0 });
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
@@ -146,7 +142,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('opsgenie-tags-rule-tags')).not.toBeInTheDocument();

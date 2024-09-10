@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
@@ -29,14 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return 'Tableau';
       case 'bar':
         return 'Vertical à barres';
-      case 'bar_stacked':
-        return 'Vertical à barres empilées';
-      case 'bar_horizontal':
-        return 'Horizontal à barres';
       case 'line':
         return 'Ligne';
-      case 'donut':
-        return 'Graphique en anneau';
       case 'pie':
         return 'Camembert';
       case 'treemap':
@@ -78,14 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '表';
       case 'bar':
         return '縦棒';
-      case 'bar_stacked':
-        return '積み上げ縦棒';
-      case 'bar_horizontal':
-        return '横棒';
       case 'line':
         return '折れ線';
-      case 'donut':
-        return 'ドーナッツ';
       case 'pie':
         return '円';
       case 'treemap':
@@ -124,14 +112,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '表';
       case 'bar':
         return '垂直条形图';
-      case 'bar_stacked':
-        return '垂直堆积条形图';
-      case 'bar_horizontal':
-        return '水平条形图';
       case 'line':
         return '折线图';
-      case 'donut':
-        return '圆环图';
       case 'pie':
         return '饼图';
       case 'treemap':
@@ -186,49 +168,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow creation of lens xy chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
       });
 
-      await PageObjects.lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
-      await PageObjects.lens.removeDimension('lnsDatatable_rows');
-      await PageObjects.lens.switchToVisualization('bar_stacked', termTranslator('bar_stacked'));
+      await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
+      await lens.removeDimension('lnsDatatable_rows');
+      await lens.switchToVisualization('bar', termTranslator('bar'));
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
 
-      await PageObjects.lens.save('Afancilenstest');
+      await lens.save('Afancilenstest');
 
       // Ensure the visualization shows up in the visualize list, and takes
       // us back to the visualization as we configured it.
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Afancilenstest');
-      await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.clickVisualizeListItemTitle('Afancilenstest');
+      await lens.goToTimeRange();
+      await lens.waitForVisualization('xyVisChart');
 
-      expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
+      expect(await lens.getTitle()).to.eql('Afancilenstest');
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
@@ -237,482 +219,443 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
+      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.goToTimeRange();
       // Change the IP field to filters
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'filters',
         keepOpen: true,
       });
-      await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.addFilterToAgg(`geo.src : CN`);
+      await lens.waitForVisualization('xyVisChart');
 
       // Verify that the field was persisted from the transition
-      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`"ip" : *`, `geo.src : CN`]);
+      expect(await lens.getFiltersAggLabels()).to.eql([`"ip" : *`, `geo.src : CN`]);
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
     it('should transition from metric to table to metric', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
-      await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertLegacyMetric(termTranslator('max', 'bytes'), '19,986');
-      await PageObjects.lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
-      expect(await PageObjects.lens.getDatatableHeaderText()).to.eql(
-        termTranslator('max', 'bytes')
-      );
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
-      await PageObjects.lens.switchToVisualization(
-        'lnsLegacyMetric',
-        termTranslator('legacyMetric')
-      );
-      await PageObjects.lens.assertLegacyMetric(termTranslator('max', 'bytes'), '19,986');
+      await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
+      await lens.goToTimeRange();
+      await lens.assertLegacyMetric(termTranslator('max', 'bytes'), '19,986');
+      await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
+      expect(await lens.getDatatableHeaderText()).to.eql(termTranslator('max', 'bytes'));
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('19,986');
+      await lens.switchToVisualization('lnsLegacyMetric', termTranslator('legacyMetric'));
+      await lens.assertLegacyMetric(termTranslator('max', 'bytes'), '19,986');
     });
 
     it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.createLayer();
+      await lens.createLayer();
 
-      expect(await PageObjects.lens.hasChartSwitchWarning('line', termTranslator('line'))).to.eql(
-        false
-      );
+      expect(await lens.hasChartSwitchWarning('line', termTranslator('line'))).to.eql(false);
 
-      await PageObjects.lens.switchToVisualization('line', termTranslator('line'));
+      await lens.switchToVisualization('line', termTranslator('line'));
 
-      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('line'));
-      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('bar_stacked'));
+      expect(await lens.getLayerType(0)).to.eql(termTranslator('line'));
+      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'machine.ram',
       });
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(2);
-      await PageObjects.lens.removeLayer();
-      await PageObjects.lens.removeLayer();
+      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.removeLayer();
+      await lens.removeLayer();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
     it('should transition selected layer in a multi layer bar using layer chart switch', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.createLayer('data', undefined, 'bar');
-      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('bar'));
-      await PageObjects.lens.configureDimension({
+      await lens.createLayer('data', undefined, 'bar');
+      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'machine.ram',
       });
 
       // only changes one layer for compatible chart
-      await PageObjects.lens.switchToVisualization('line', termTranslator('line'), 1);
+      await lens.switchToVisualization('line', termTranslator('line'), 1);
 
-      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('bar_stacked'));
-      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('line'));
-
-      // changes all layers for multilayer chart
-      await PageObjects.lens.switchToVisualization(
-        'bar_horizontal',
-        termTranslator('bar_horizontal'),
-        1
-      );
-      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('bar_horizontal'));
-      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('bar_horizontal'));
+      expect(await lens.getLayerType(0)).to.eql(termTranslator('bar'));
+      expect(await lens.getLayerType(1)).to.eql(termTranslator('line'));
 
       // generates new one layer chart based on selected layer
-      await PageObjects.lens.switchToVisualization('pie', termTranslator('pie'), 1);
-      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('pie'));
-      const sliceByText = await PageObjects.lens.getDimensionTriggerText(
-        'lnsPie_sliceByDimensionPanel'
-      );
-      const sizeByText = await PageObjects.lens.getDimensionTriggerText(
-        'lnsPie_sizeByDimensionPanel'
-      );
+      await lens.switchToVisualization('pie', termTranslator('pie'), 1);
+      expect(await lens.getLayerType(0)).to.eql(termTranslator('pie'));
+      const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
+      const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
 
       expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 5));
       expect(sizeByText).to.be(termTranslator('average', 'machine.ram'));
     });
 
     it('should edit settings of xy line chart', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.removeDimension('lnsXY_splitDimensionPanel');
-      await PageObjects.lens.switchToVisualization('line', termTranslator('line'));
-      await PageObjects.lens.configureDimension({
+      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.goToTimeRange();
+      await lens.removeDimension('lnsXY_splitDimensionPanel');
+      await lens.switchToVisualization('line', termTranslator('line'));
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'max',
         field: 'memory',
         keepOpen: true,
       });
-      await PageObjects.lens.editDimensionLabel('Test of label');
-      await PageObjects.lens.editDimensionFormat(termTranslator('Percent'));
-      await PageObjects.lens.editDimensionColor('#ff0000');
-      await PageObjects.lens.openVisualOptions();
+      await lens.editDimensionLabel('Test of label');
+      await lens.editDimensionFormat(termTranslator('Percent'));
+      await lens.editDimensionColor('#ff0000');
+      await lens.openVisualOptions();
 
-      await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
-      await PageObjects.lens.editMissingValues('Linear');
+      await lens.setCurvedLines('CURVE_MONOTONE_X');
+      await lens.editMissingValues('Linear');
 
-      await PageObjects.lens.assertMissingValues(termTranslator('Linear'));
+      await lens.assertMissingValues(termTranslator('Linear'));
 
-      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
-      await PageObjects.lens.assertColor('#ff0000');
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      await lens.assertColor('#ff0000');
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Test of label'
-      );
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql('Test of label');
     });
 
     it('should not show static value tab for data layers', async () => {
-      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       // Quick functions and Formula tabs should be visible
       expect(await testSubjects.exists('lens-dimensionTabs-quickFunctions')).to.eql(true);
       expect(await testSubjects.exists('lens-dimensionTabs-formula')).to.eql(true);
       // Static value tab should not be visible
       expect(await testSubjects.exists('lens-dimensionTabs-static_value')).to.eql(false);
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
     });
 
     it('should be able to add very long labels and still be able to remove a dimension', async () => {
-      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       const longLabel =
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
-      await PageObjects.lens.editDimensionLabel(longLabel);
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.editDimensionLabel(longLabel);
+      await lens.waitForVisualization('xyVisChart');
+      await lens.closeDimensionEditor();
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        longLabel
-      );
-      expect(await PageObjects.lens.canRemoveDimension('lnsXY_yDimensionPanel')).to.equal(true);
-      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(longLabel);
+      expect(await lens.canRemoveDimension('lnsXY_yDimensionPanel')).to.equal(true);
+      await lens.removeDimension('lnsXY_yDimensionPanel');
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
 
     it('should allow creation of a multi-axis chart and switching multiple times', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('bar', termTranslator('bar'));
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('bar', termTranslator('bar'));
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.dest',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'unique_count',
         field: 'bytes',
         keepOpen: true,
       });
 
-      await PageObjects.lens.changeAxisSide('right');
-      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      await lens.changeAxisSide('right');
+      let data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
 
-      await PageObjects.lens.changeAxisSide('left');
-      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      await lens.changeAxisSide('left');
+      data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y.length).to.eql(1);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(false);
 
-      await PageObjects.lens.changeAxisSide('right');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await lens.changeAxisSide('right');
+      await lens.waitForVisualization('xyVisChart');
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
     });
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.openVisualOptions();
+      await lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
 
       // check for value labels
-      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      let data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels).not.to.eql(0);
 
       // switch to stacked bar chart
-      await PageObjects.lens.switchToVisualization('bar_stacked', termTranslator('bar_stacked'));
+      await lens.switchToVisualization('bar', termTranslator('bar'));
 
       // check for value labels
-      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels).not.to.eql(0);
     });
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.toggleToolbarPopover('lnsLeftAxisButton');
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
 
-      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      let data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
 
-      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
-    it('should transition from line chart to donut chart and to bar chart', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+    it('should transition from line chart to pie chart and to bar chart', async () => {
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      expect(await PageObjects.lens.hasChartSwitchWarning('donut', termTranslator('donut'))).to.eql(
-        true
-      );
-      await PageObjects.lens.switchToVisualization('donut', termTranslator('donut'));
+      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.goToTimeRange();
+      expect(await lens.hasChartSwitchWarning('pie', termTranslator('pie'))).to.eql(true);
+      await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+      expect(await lens.getTitle()).to.eql('lnsXYvis');
+      expect(await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
         termTranslator('terms', 'ip')
       );
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
+      expect(await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
       );
 
-      expect(await PageObjects.lens.hasChartSwitchWarning('bar', termTranslator('bar'))).to.eql(
-        false
-      );
-      await PageObjects.lens.switchToVisualization('bar', termTranslator('bar'));
-      expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+      expect(await lens.hasChartSwitchWarning('bar', termTranslator('bar'))).to.eql(false);
+      await lens.switchToVisualization('bar', termTranslator('bar'));
+      expect(await lens.getTitle()).to.eql('lnsXYvis');
+      expect(await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
         termTranslator('terms', 'ip')
       );
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
       );
     });
 
     it('should transition from bar chart to line chart', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('line', termTranslator('line'));
-      expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        '@timestamp'
-      );
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+      await lens.clickVisualizeListItemTitle('lnsXYvis');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('line', termTranslator('line'));
+      expect(await lens.getTitle()).to.eql('lnsXYvis');
+      expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
       );
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
+      expect(await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
         termTranslator('terms', 'ip')
       );
     });
 
     it('should transition from pie chart to treemap chart', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsPieVis');
-      await PageObjects.lens.clickVisualizeListItemTitle('lnsPieVis');
-      await PageObjects.lens.goToTimeRange();
-      expect(
-        await PageObjects.lens.hasChartSwitchWarning('treemap', termTranslator('treemap'))
-      ).to.eql(false);
-      await PageObjects.lens.switchToVisualization('treemap', termTranslator('treemap'));
-      expect(
-        await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
-      ).to.eql([termTranslator('terms', 'geo.dest', 7), termTranslator('terms', 'geo.src')]);
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
+      await lens.clickVisualizeListItemTitle('lnsPieVis');
+      await lens.goToTimeRange();
+      expect(await lens.hasChartSwitchWarning('treemap', termTranslator('treemap'))).to.eql(false);
+      await lens.switchToVisualization('treemap', termTranslator('treemap'));
+      expect(await lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')).to.eql([
+        termTranslator('terms', 'geo.dest', 7),
+        termTranslator('terms', 'geo.src'),
+      ]);
+      expect(await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         termTranslator('average', 'bytes')
       );
     });
 
     it('should create a pie chart and switch to datatable', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('pie', termTranslator('pie'));
-      await PageObjects.lens.configureDimension({
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('pie', termTranslator('pie'));
+      await lens.configureDimension({
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
         disableEmptyRows: true,
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      expect(
-        await PageObjects.lens.hasChartSwitchWarning('lnsDatatable', termTranslator('datatable'))
-      ).to.eql(false);
-      await PageObjects.lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
+      expect(await lens.hasChartSwitchWarning('lnsDatatable', termTranslator('datatable'))).to.eql(
+        false
+      );
+      await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
 
       // Need to provide a fn for these
-      //   expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
-      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql(
-        termTranslator('average', 'bytes')
-      );
-      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
-      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
+      //   expect(await lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
+      expect(await lens.getDatatableHeaderText(1)).to.eql(termTranslator('average', 'bytes'));
+      expect(await lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
+      expect(await lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
 
     it('should create a heatmap chart and transition to barchart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('heatmap', termTranslator('heatmap'));
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('heatmap', termTranslator('heatmap'));
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsHeatmap_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsHeatmap_yDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.dest',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsHeatmap_cellPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      expect(await PageObjects.lens.hasChartSwitchWarning('bar', termTranslator('bar'))).to.eql(
-        false
-      );
-      await PageObjects.lens.switchToVisualization('bar', termTranslator('bar'));
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        '@timestamp'
-      );
+      expect(await lens.hasChartSwitchWarning('bar', termTranslator('bar'))).to.eql(false);
+      await lens.switchToVisualization('bar', termTranslator('bar'));
+      expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
-        'bytes'
-      );
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain('bytes');
     });
 
     it('should create a valid XY chart with references', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'moving_average',
         keepOpen: true,
       });
-      await PageObjects.lens.configureReference({
+      await lens.configureReference({
         operation: termTranslator('sum'),
         field: 'bytes',
       });
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
         keepOpen: true,
       });
-      await PageObjects.lens.configureReference({
+      await lens.configureReference({
         field: termTranslator('Records'),
       });
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
       // Two Y axes that are both valid
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
     it('should allow formatting on references', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
         disableEmptyRows: true,
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'moving_average',
         keepOpen: true,
       });
-      await PageObjects.lens.configureReference({
+      await lens.configureReference({
         operation: termTranslator('sum'),
         field: 'bytes',
       });
-      await PageObjects.lens.editDimensionFormat(termTranslator('Number'));
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.editDimensionFormat(termTranslator('Number'));
+      await lens.closeDimensionEditor();
 
-      await PageObjects.lens.waitForVisualization();
+      await lens.waitForVisualization();
 
       const values = await Promise.all(
-        range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
+        range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
         '-',
@@ -732,149 +675,143 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
      * 3. Being able to switch charts while in partial config
      */
     it('should handle edge cases in reference-based operations', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
+      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
 
-      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(2);
+      await lens.removeDimension('lnsXY_xDimensionPanel');
+      expect(await lens.getWorkspaceErrorCount()).to.eql(2);
 
-      await PageObjects.lens.dragFieldToDimensionTrigger(
+      await lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
+      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
 
-      expect(
-        await PageObjects.lens.hasChartSwitchWarning('lnsDatatable', termTranslator('datatable'))
-      ).to.eql(false);
-      await PageObjects.lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
+      expect(await lens.hasChartSwitchWarning('lnsDatatable', termTranslator('datatable'))).to.eql(
+        false
+      );
+      await lens.switchToVisualization('lnsDatatable', termTranslator('datatable'));
 
       // TODO: fix this later on
-      //   expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql(
+      //   expect(await lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql(
       //     'Cumulative sum of (incomplete)'
       //   );
     });
 
     it('should keep the field selection while transitioning to every reference-based operation', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'counter_rate',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'cumulative_sum',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'differences',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'moving_average',
       });
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
-        'bytes'
-      );
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain('bytes');
     });
 
     it('should not leave an incomplete column in the visualization config with field-based operation', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'min',
       });
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        undefined
-      );
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(undefined);
     });
 
     it('should revert to previous configuration and not leave an incomplete column in the visualization config with reference-based operations', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'moving_average',
         field: termTranslator('Records'),
       });
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
         termTranslator('moving_average')
       );
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'median',
         isPreviousIncompatible: true,
         keepOpen: true,
       });
 
-      expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
+      expect(await lens.isDimensionEditorOpen()).to.eql(true);
 
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
         termTranslator('moving_average')
       );
     });
 
     it('should transition from unique count to last value', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'unique_count',
         field: 'ip',
       });
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'last_value',
         field: 'bytes',
         isPreviousIncompatible: true,
       });
 
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain(
-        'bytes'
-      );
+      expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.contain('bytes');
     });
 
     it('should allow to change index pattern', async () => {
@@ -884,34 +821,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       } else {
         indexPatternString = 'log*';
       }
-      await PageObjects.lens.switchFirstLayerIndexPattern(indexPatternString);
-      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
+      await lens.switchFirstLayerIndexPattern(indexPatternString);
+      expect(await lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
     });
 
     it('should allow filtering by legend on an xy chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'extension.raw',
       });
 
-      await PageObjects.lens.filterLegend('jpg');
+      await lens.filterLegend('jpg');
       const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
       expect(hasExtensionFilter).to.be(true);
 
@@ -919,57 +856,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow filtering by legend on a pie chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('pie', termTranslator('pie'));
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
+      await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'extension.raw',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'agent.raw',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
       });
 
-      await PageObjects.lens.filterLegend('jpg');
+      await lens.filterLegend('jpg');
       const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
       expect(hasExtensionFilter).to.be(true);
 
       await filterBar.removeFilter('extension.raw');
     });
 
-    it('should show visual options button group for a donut chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchToVisualization('donut', termTranslator('donut'));
+    it('should show visual options button group for a pie chart', async () => {
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
       expect(hasVisualOptionsButton).to.be(true);
 
-      await PageObjects.lens.openVisualOptions();
+      await lens.openVisualOptions();
       await retry.try(async () => {
-        expect(await PageObjects.lens.hasEmptySizeRatioButtonGroup()).to.be(true);
+        expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });
-    });
-
-    it('should not show visual options button group for a pie chart', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.switchToVisualization('pie', termTranslator('pie'));
-
-      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(false);
     });
   });
 }
