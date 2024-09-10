@@ -78,6 +78,11 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
       filters={filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
+      overrides={{
+        settings: {
+          externalPointerEvents: { tooltip: { visible: true } },
+        },
+      }}
     />
   );
 };
