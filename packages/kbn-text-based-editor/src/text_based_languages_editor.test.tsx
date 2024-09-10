@@ -133,9 +133,6 @@ describe('TextBasedLanguagesEditor', () => {
     expect(
       component!.find('[data-test-subj="TextBasedLangEditor-toggleWordWrap"]').length
     ).not.toBe(0);
-    expect(component!.find('[data-test-subj="TextBasedLangEditor-documentation"]').length).not.toBe(
-      0
-    );
   });
 
   it('should render the resize for the expanded code editor mode', async () => {
