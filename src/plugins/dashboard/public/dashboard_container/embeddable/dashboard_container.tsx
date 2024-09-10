@@ -271,7 +271,7 @@ export class DashboardContainer
       })
     );
 
-    this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.expandedPanelId = new BehaviorSubject<string | undefined>(undefined);
     this.publishingSubscription.add(
       this.onStateChange(() => {
         if (this.expandedPanelId.value === this.getExpandedPanelId()) return;

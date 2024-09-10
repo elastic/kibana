@@ -192,7 +192,7 @@ export function DashboardApp({
     getScreenshotContext,
   ]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!dashboardAPI) return;
     const { stopWatchingExpandedPanel } = startSyncingExpandedPanelState({ dashboardAPI, history });
     return () => stopWatchingExpandedPanel();

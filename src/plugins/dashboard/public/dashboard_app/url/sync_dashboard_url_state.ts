@@ -117,7 +117,6 @@ export const startSyncingExpandedPanelState = ({
 }) => {
   const expandedPanelSubscription = dashboardAPI?.expandedPanelId.subscribe(() => {
     const expandedPanel = dashboardAPI.expandedPanelId.value;
-
     if (expandedPanel) {
       history.replace({
         ...history.location,
