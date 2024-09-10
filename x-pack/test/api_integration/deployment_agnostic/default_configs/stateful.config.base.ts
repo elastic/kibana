@@ -113,7 +113,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           '--xpack.cloud.id=ftr_fake_cloud_id',
           // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
           // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
-          // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
+          // Selector is disabled (replicating Serverless configuration). By declaring `cloud-basic` with a higher
           // order, we indicate that basic authentication can still be used, but only if explicitly requested when the
           // user navigates to `/login` page directly and enters username and password in the login form.
           '--xpack.security.authc.selector.enabled=false',
