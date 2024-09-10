@@ -224,6 +224,115 @@ describe('useCurrentConversation', () => {
     expect(mockUseConversation.createConversation).toHaveBeenCalled();
   });
 
+  it('should create a new conversation using the connector portion of the apiConfig of the current conversation', async () => {
+    const newConversation = {
+      ...mockData.welcome_id,
+      id: 'new-id',
+      title: 'NEW_CHAT',
+      messages: [],
+    } as Conversation;
+    mockUseConversation.createConversation.mockResolvedValue(newConversation);
+
+    const { result } = setupHook({
+      conversations: {
+        'old-id': {
+          ...mockData.welcome_id,
+          id: 'old-id',
+          title: 'Old Chat',
+          messages: [],
+        } as Conversation,
+      },
+      conversationId: 'old-id',
+      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+        data: {
+          'old-id': {
+            ...mockData.welcome_id,
+            id: 'old-id',
+            title: 'Old Chat',
+            messages: [],
+          } as Conversation,
+          [newConversation.id]: newConversation,
+        },
+      }),
+    });
+
+    await act(async () => {
+      await result.current.handleCreateConversation();
+    });
+    const { defaultSystemPromptId: _, ...everythingExceptSystemPromptId } =
+      mockData.welcome_id.apiConfig;
+
+    expect(mockUseConversation.createConversation).toHaveBeenCalledWith({
+      apiConfig: everythingExceptSystemPromptId,
+      title: 'New chat',
+    });
+  });
+
+  it('should create a new conversation with correct isNewConversationDefault: true system prompt', async () => {
+    const newConversation = {
+      ...mockData.welcome_id,
+      id: 'new-id',
+      title: 'NEW_CHAT',
+      messages: [],
+    } as Conversation;
+    mockUseConversation.createConversation.mockResolvedValue(newConversation);
+
+    const { result } = setupHook({
+      conversations: {
+        'old-id': {
+          ...mockData.welcome_id,
+          id: 'old-id',
+          title: 'Old Chat',
+          messages: [],
+        } as Conversation,
+      },
+      allSystemPrompts: [
+        {
+          timestamp: '2024-09-10T15:52:24.761Z',
+          users: [
+            {
+              id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+              name: 'elastic',
+            },
+          ],
+          content: 'Address the user as Mr Orange in each response',
+          isNewConversationDefault: true,
+          updatedAt: '2024-09-10T22:07:44.915Z',
+          id: 'LBOi3JEBy3uD9EGi1d_G',
+          name: 'Call me Orange',
+          promptType: 'system',
+          consumer: 'securitySolutionUI',
+        },
+      ],
+      conversationId: 'old-id',
+      refetchCurrentUserConversations: jest.fn().mockResolvedValue({
+        data: {
+          'old-id': {
+            ...mockData.welcome_id,
+            id: 'old-id',
+            title: 'Old Chat',
+            messages: [],
+          } as Conversation,
+          [newConversation.id]: newConversation,
+        },
+      }),
+    });
+
+    await act(async () => {
+      await result.current.handleCreateConversation();
+    });
+    const { defaultSystemPromptId: _, ...everythingExceptSystemPromptId } =
+      mockData.welcome_id.apiConfig;
+
+    expect(mockUseConversation.createConversation).toHaveBeenCalledWith({
+      apiConfig: {
+        ...everythingExceptSystemPromptId,
+        defaultSystemPromptId: 'LBOi3JEBy3uD9EGi1d_G',
+      },
+      title: 'New chat',
+    });
+  });
+
   it('should delete a conversation', async () => {
     const conversationTitle = 'Test Conversation';
     const conversation = {
