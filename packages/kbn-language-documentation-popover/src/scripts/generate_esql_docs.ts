@@ -95,7 +95,7 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
   };`;
   });
 
-  const pathToDocsFile = path.join(__dirname, '../src/esql_documentation_sections.tsx');
+  const pathToDocsFile = path.join(__dirname, '../sections/esql_documentation_sections.tsx');
 
   const ast = recast.parse(fs.readFileSync(pathToDocsFile, 'utf-8'), {
     parser: require('recast/parsers/babel'),
