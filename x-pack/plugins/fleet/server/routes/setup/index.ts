@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
@@ -11,6 +12,8 @@ import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetConfigType } from '../../../common/types';
+
+import { genericErrorResponse, internalErrorResponse } from '../schema/errors';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
@@ -26,7 +29,38 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          // operationId: 'setup',
+          request: {},
+          response: {
+            200: {
+              body: () =>
+                schema.object(
+                  {
+                    isInitialized: schema.boolean(),
+                    nonFatalErrors: schema.arrayOf(
+                      schema.object({
+                        name: schema.string(),
+                        message: schema.string(),
+                      })
+                    ),
+                  },
+                  {
+                    meta: {
+                      description:
+                        "A summary of the result of Fleet's `setup` lifecycle. If `isInitialized` is true, Fleet is ready to accept agent enrollment. `nonFatalErrors` may include useful insight into non-blocking issues with Fleet setup.",
+                    },
+                  }
+                ),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            500: {
+              body: internalErrorResponse,
+            },
+          },
+        },
       },
       fleetSetupHandler
     );
