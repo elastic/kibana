@@ -52,6 +52,7 @@ import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
+// TODO: when installByUpload and installBundle are migrated, remove this function in favor of _state_machine_package_install
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
 // only the more explicit `installPackage*` functions should be used
