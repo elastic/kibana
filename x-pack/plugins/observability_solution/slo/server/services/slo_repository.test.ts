@@ -90,7 +90,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
       const savedSLO = await repository.save(slo);
 
-      expect(savedSLO).toEqual(slo);
+      expect(savedSLO.slo).toEqual(slo);
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
         page: 1,
@@ -131,7 +131,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
 
       const savedSLO = await repository.save(slo);
 
-      expect(savedSLO).toEqual(slo);
+      expect(savedSLO.slo).toEqual(slo);
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
         page: 1,
