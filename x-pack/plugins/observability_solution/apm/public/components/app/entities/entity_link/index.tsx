@@ -16,7 +16,7 @@ import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_
 import { useServiceEntitySummaryFetcher } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
 import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { isPending } from '../../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ApmPluginStartDeps } from '../../../../plugin';
@@ -43,7 +43,15 @@ export function EntityLink() {
     environment: ENVIRONMENT_ALL_VALUE,
   });
 
-  if (isPending(entityManagerEnablementStatus) || isPending(serviceEntitySummaryStatus)) {
+  const { data: hasApmData, status: hasApmDataStatus } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/has_data');
+  }, []);
+
+  if (
+    isPending(entityManagerEnablementStatus) ||
+    isPending(serviceEntitySummaryStatus) ||
+    isPending(hasApmDataStatus)
+  ) {
     return (
       <div>
         <EuiLoadingSpinner />
@@ -55,7 +63,9 @@ export function EntityLink() {
     // When EEM is disabled we'll show the APM overview page.
     isEntityCentricExperienceViewEnabled === false ||
     // When EEM is enabled and the Service has APM and/or Logs data, we'll show the APM overview page
-    (serviceEntitySummary?.dataStreamTypes && serviceEntitySummary.dataStreamTypes.length > 0)
+    (serviceEntitySummary?.dataStreamTypes && serviceEntitySummary.dataStreamTypes.length > 0) ||
+    // When EEM is enabled and the service is not found on the EEM indices but it has APM data
+    hasApmData?.hasData === true
   ) {
     return (
       <Redirect
