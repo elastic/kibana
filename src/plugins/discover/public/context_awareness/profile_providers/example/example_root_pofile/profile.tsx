@@ -8,11 +8,11 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 
-export const exampleRootProfileProvider: RootProfileProvider = {
+export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
   isExperimental: true,
   profile: {
@@ -36,9 +36,4 @@ export const exampleRootProfileProvider: RootProfileProvider = {
 
     return { isMatch: true, context: { solutionType: SolutionType.Default } };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
-};
+});

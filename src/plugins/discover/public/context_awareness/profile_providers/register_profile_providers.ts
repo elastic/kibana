@@ -13,9 +13,9 @@ import type {
   RootProfileService,
 } from '../profiles';
 import type { BaseProfileProvider, BaseProfileService } from '../profile_service';
-import { exampleDataSourceProfileProvider } from './example/example_data_source_profile';
-import { exampleDocumentProfileProvider } from './example/example_document_profile';
-import { exampleRootProfileProvider } from './example/example_root_pofile';
+import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
+import { createExampleDocumentProfileProvider } from './example/example_document_profile';
+import { createExampleRootProfileProvider } from './example/example_root_pofile';
 import { createLogsDataSourceProfileProviders } from './common/logs_data_source_profile';
 import { createLogDocumentProfileProvider } from './common/log_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
@@ -85,16 +85,16 @@ export const registerEnabledProfileProviders = <
 };
 
 const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
-  exampleRootProfileProvider,
+  createExampleRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
 ];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
-  exampleDataSourceProfileProvider,
+  createExampleDataSourceProfileProvider(),
   ...createLogsDataSourceProfileProviders(providerServices),
 ];
 
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
-  exampleDocumentProfileProvider,
+  createExampleDocumentProfileProvider(),
   createLogDocumentProfileProvider(providerServices),
 ];

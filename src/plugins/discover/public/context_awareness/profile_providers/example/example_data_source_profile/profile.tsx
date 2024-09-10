@@ -17,7 +17,7 @@ import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 
-export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
+export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider => ({
   profileId: 'example-data-source-profile',
   isExperimental: true,
   profile: {
@@ -159,4 +159,4 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       context: { category: DataSourceCategory.Logs },
     };
   },
-};
+});
