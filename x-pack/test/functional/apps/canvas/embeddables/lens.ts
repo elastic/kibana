@@ -79,8 +79,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
       it('edits lens by-value embeddable', async () => {
         await header.waitUntilLoadingHasFinished();
-        const panelHeader = await testSubjects.find('embeddablePanelHeading-');
-        await dashboardPanelActions.openContextMenu(panelHeader);
         await dashboardPanelActions.clickEdit();
         await lens.saveAndReturn();
         await header.waitUntilLoadingHasFinished();

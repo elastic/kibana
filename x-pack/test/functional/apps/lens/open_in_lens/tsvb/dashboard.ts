@@ -53,8 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
-      await panelActions.openContextMenu();
-      const editInLensExists = await testSubjects.exists(
+      const editInLensExists = await panelActions.panelActionExists(
         'embeddablePanelAction-ACTION_EDIT_IN_LENS'
       );
       if (!editInLensExists) {

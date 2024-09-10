@@ -71,7 +71,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const newTitle = 'look out library, here I come!';
       const originalPanelCount = await dashboard.getPanelCount();
       await dashboard.waitForRenderComplete();
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await lens.save(newTitle, false, true);
       await dashboard.waitForRenderComplete();
