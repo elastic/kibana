@@ -51,19 +51,19 @@ describe('Options list sorting button', () => {
     return component;
   };
 
-  test('run past timeout', () => {
+  test('run past timeout', async () => {
     const component = mountComponent({
       initialState: getMockedState({ runPastTimeout: false }),
       field: { type: 'string' } as DataViewField,
     });
     const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
     expect(toggle.getAttribute('aria-checked')).toBe('false');
-    userEvent.click(toggle);
+    await userEvent.click(toggle);
     expect(updateState).toBeCalledWith({ runPastTimeout: true });
     expect(toggle.getAttribute('aria-checked')).toBe('true');
   });
 
-  test('selection options', () => {
+  test('selection options', async () => {
     const component = mountComponent({
       initialState: getMockedState({ singleSelect: true }),
       field: { type: 'string' } as DataViewField,
@@ -73,7 +73,7 @@ describe('Options list sorting button', () => {
     expect(multiSelect).not.toBeChecked();
     expect(component.container.querySelector('input#single')).toBeChecked();
 
-    userEvent.click(multiSelect!);
+    await userEvent.click(multiSelect!);
     expect(updateState).toBeCalledWith({ singleSelect: false });
     expect(multiSelect).toBeChecked();
     expect(component.container.querySelector('input#single')).not.toBeChecked();
@@ -206,7 +206,7 @@ describe('Options list sorting button', () => {
 
         /** responds to change in search technique */
         const exactSearch = component.container.querySelector('input#exact');
-        userEvent.click(exactSearch!);
+        await userEvent.click(exactSearch!);
         expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
         expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(exactSearch).toBeChecked();
@@ -241,7 +241,7 @@ describe('Options list sorting button', () => {
 
         /** responds to change in search technique */
         const prefixSearch = component.container.querySelector('input#prefix');
-        userEvent.click(prefixSearch!);
+        await userEvent.click(prefixSearch!);
         expect(updateState).toBeCalledWith({ searchTechnique: 'prefix' });
 
         /** responds to the field type changing */
