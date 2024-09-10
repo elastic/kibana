@@ -95,9 +95,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
       drilldowns: `${KIBANA_DOCS}drilldowns.html`,
-      drilldownsTriggerPicker: `${KIBANA_DOCS}create-drilldowns.html#url-drilldowns`,
-      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}create-drilldowns.html#url_templating-language`,
-      urlDrilldownVariables: `${KIBANA_DOCS}create-drilldowns.html#url-template-variables`,
+      drilldownsTriggerPicker: `${KIBANA_DOCS}drilldowns.html#create-url-drilldowns`,
+      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}drilldowns.html#url-templating-language`,
+      urlDrilldownVariables: `${KIBANA_DOCS}drilldowns.html#url-template-variable`,
     },
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
@@ -578,7 +578,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lensPanels: `${KIBANA_DOCS}lens.html`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,
       vega: `${KIBANA_DOCS}vega.html`,
-      tsvbIndexPatternMode: `${KIBANA_DOCS}tsvb.html#tsvb-index-pattern-mode`,
+      tsvbIndexPatternMode: `${KIBANA_DOCS}legacy-editors.html#tsvb-index-patterns-mode`,
     },
     observability: {
       guide: isServerless
