@@ -10,6 +10,7 @@
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import { parseReferenceName } from '../controls/data_controls/reference_name_utils';
 
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
@@ -21,9 +22,9 @@ export const deserializeControlGroup = (
   const references = state.references ?? [];
   references.forEach((reference) => {
     const referenceName = reference.name;
-    const panelId = referenceName.substring('controlGroup_'.length, referenceName.lastIndexOf(':'));
-    if (panels[panelId]) {
-      panels[panelId].dataViewId = reference.id;
+    const { controlId } = parseReferenceName(referenceName);
+    if (panels[controlId]) {
+      panels[controlId].dataViewId = reference.id;
     }
   });
 

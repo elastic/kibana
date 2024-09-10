@@ -342,7 +342,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
               noNestingFunctions: true,
               optional: false,
               constantOnly: true,
-              literalOptions: ['asc', 'desc'],
+              acceptedValues: ['asc', 'desc'],
             },
           ],
           returnType: 'any',

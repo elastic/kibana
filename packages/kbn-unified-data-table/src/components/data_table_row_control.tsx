@@ -14,7 +14,10 @@ export enum Size {
   normal = 'normal',
 }
 
-export const DataTableRowControl: React.FC<{ size?: Size }> = ({ size, children }) => {
+export const DataTableRowControl: React.FC<React.PropsWithChildren<{ size?: Size }>> = ({
+  size,
+  children,
+}) => {
   const classes = classnames('unifiedDataTable__rowControl', {
     // normalize the size of the control
     [`unifiedDataTable__rowControl--size-${size}`]: size,
