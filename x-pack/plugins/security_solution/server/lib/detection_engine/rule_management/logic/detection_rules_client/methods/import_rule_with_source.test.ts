@@ -290,7 +290,7 @@ describe('importRuleWithSource', () => {
       expect(mockRulesClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            enabled: true
+            enabled: true,
           }),
         })
       );
