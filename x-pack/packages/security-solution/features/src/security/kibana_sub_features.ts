@@ -125,7 +125,7 @@ const trustedApplicationsSubFeature: SubFeatureConfig = {
     },
   ],
 };
-const hostIsolationExceptionsSubFeature: SubFeatureConfig = {
+const hostIsolationExceptionsBasicSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
@@ -664,7 +664,7 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
-    [SecuritySubFeatureId.hostIsolationExceptions, hostIsolationExceptionsSubFeature],
+    [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature],

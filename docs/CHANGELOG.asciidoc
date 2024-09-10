@@ -657,6 +657,18 @@ The visualization type, region map, comes out of technical preview and is genera
 UI improvements for managed tags. For more information, refer to ({kibana-pull}177089[#177089]).
 ====
 
+[discrete]
+[[breaking-178159]]
+.Downloading a CSV file from a saved search panel in a dashboard has become deprecated in favor of generating a CSV report.
+[%collapsible]
+====
+*Details* +
+The mechanism of exporting CSV data from a saved search panel in a dashboard has been changed to generate a CSV report, rather than allowing the CSV data to be downloaded
+without creating a report. To preserve the original behavior, it is necessary to update `kibana.yml` with the setting of `xpack.reporting.csv.enablePanelActionDownload:
+true`. The scope of this breaking change is limited to downloading CSV files from saved search panels only; downloading CSV files from other types of dashboard panels is
+unchanged. For more information, refer to {kibana-pull}178159[#178159].
+====
+
 [float]
 [[features-8.14.0]]
 === Features
@@ -2320,6 +2332,16 @@ For the full list, refer to {kib-issue}146945[#146945].
 ====
 *Details* +
 The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
+====
+
+[discrete]
+[[breaking-162288]]
+.The Download CSV endpoint has changed.
+[%collapsible]
+====
+*Details* +
+The API endpoint for downloading a CSV file from a saved search in the Dashboard application has changed to reflect the fact that this is an internal API. The previous API path of
+`/api/reporting/v1/generate/immediate/csv_searchsource` has been changed to `/internal/reporting/generate/immediate/csv_searchsource`. For more information, refer to {kibana-pull}162288[#162288].
 ====
 
 [float]

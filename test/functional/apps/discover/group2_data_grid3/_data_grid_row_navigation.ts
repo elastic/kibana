@@ -13,7 +13,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
+  const { common, discover, timePicker, settings } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'settings',
+  ]);
   const es = getService('es');
   const security = getService('security');
 
@@ -32,18 +37,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid row navigation', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'similar_index', 'similar_index_two']);
-      await PageObjects.common.navigateToApp('settings');
+      await common.navigateToApp('settings');
 
       await createIndex('similar_index');
       await createIndex('similar_index_two');
 
-      await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await settings.createIndexPattern('similar_index*', '@timestamp', true);
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     it('should navigate through rows with the same id but different indices correctly', async () => {
-      await PageObjects.discover.selectIndexPattern('similar_index*');
+      await discover.selectIndexPattern('similar_index*');
 
       await dataGrid.clickRowToggle();
       const indexBeforePaginating = await testSubjects.getVisibleText(
