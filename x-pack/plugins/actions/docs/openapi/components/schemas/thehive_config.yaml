@@ -4,7 +4,7 @@ type: object
 required:
   - url
 properties:
-  organization:
+  organisation:
     type: string
     description: >
       The organisation in TheHive that will contain the alerts or cases.
