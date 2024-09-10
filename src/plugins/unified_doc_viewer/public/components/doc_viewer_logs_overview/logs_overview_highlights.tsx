@@ -218,7 +218,7 @@ const hostNameLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.labe
 const serviceInfraAccordionTitle = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.accordion.title.serviceInfra',
   {
-    defaultMessage: 'Service & Infrastructure 2',
+    defaultMessage: 'Service & Infrastructure',
   }
 );
 
