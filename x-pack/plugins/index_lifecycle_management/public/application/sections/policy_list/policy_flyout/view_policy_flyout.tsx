@@ -109,7 +109,12 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
   );
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout
+      onClose={onClose}
+      closeButtonProps={{
+        'data-test-subj': 'policyFlyoutCloseButton',
+      }}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>

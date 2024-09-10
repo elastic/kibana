@@ -32,8 +32,8 @@ export const PhaseDescription = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      {components.map((Component) => (
-        <Component phase={phase} phases={phases} />
+      {components.map((Component, index) => (
+        <Component phase={phase} phases={phases} key={index} />
       ))}
       <EuiSpacer size="l" />
     </>

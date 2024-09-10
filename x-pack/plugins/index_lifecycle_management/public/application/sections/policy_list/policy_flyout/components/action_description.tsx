@@ -25,8 +25,8 @@ export const ActionDescription = ({
       <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
       {descriptionItems && (
         <EuiDescriptionListDescription>
-          {descriptionItems.map((descriptionItem) => (
-            <EuiText color="subdued">
+          {descriptionItems.map((descriptionItem, index) => (
+            <EuiText color="subdued" key={index}>
               <EuiSpacer size="s" />
               {descriptionItem}
             </EuiText>
