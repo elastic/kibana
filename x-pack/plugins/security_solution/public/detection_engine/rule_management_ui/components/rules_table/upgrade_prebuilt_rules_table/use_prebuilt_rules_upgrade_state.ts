@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import type { FieldsDiff } from '../../../../../../common/api/detection_engine';
 import {
   ThreeWayDiffConflict,
   type DiffableAllFields,
@@ -89,8 +90,24 @@ function calcFinalDiffableRule(
 ): DiffableRule {
   return {
     ...convertRuleToDiffable(ruleUpgradeInfo.target_rule),
+    ...convertRuleFieldsDiffToDiffable(ruleUpgradeInfo.diff.fields),
     ...ruleResolvedConflicts,
   } as DiffableRule;
+}
+
+/**
+ * Assembles a `DiffableRule` from rule fields diff `merge_value`s.
+ */
+function convertRuleFieldsDiffToDiffable(
+  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>
+): Partial<DiffableRule> {
+  const mergeVersionRule: Record<string, unknown> = {};
+
+  for (const fieldName of Object.keys(ruleFieldsDiff)) {
+    mergeVersionRule[fieldName] = ruleFieldsDiff[fieldName].merged_version;
+  }
+
+  return mergeVersionRule;
 }
 
 function calcUnresolvedConflicts(
