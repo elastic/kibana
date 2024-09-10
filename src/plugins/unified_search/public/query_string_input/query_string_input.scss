@@ -3,6 +3,9 @@
   z-index: $euiZContentMenu;
   height: $euiFormControlHeight;
   display: flex;
+  border-radius: $euiFormControlBorderRadius;
+  border-top-left-radius: calc($euiBorderRadius / 2);
+  border-bottom-left-radius: calc($euiBorderRadius / 2);
 
   >[aria-expanded='true'] {
     // Using filter allows it to adhere the children's bounds
@@ -27,6 +30,8 @@
   padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
   // Firefox adds margin to textarea
   margin: 0;
+  height: $euiFormControlCompressedHeight;
+  line-height: 1;
 
   &:not(.kbnQueryBar__textarea--autoHeight) {
     overflow-y: hidden;

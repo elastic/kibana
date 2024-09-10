@@ -153,7 +153,7 @@ function QueryBarMenuComponent({
   const button = (
     <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()}>
       <EuiButtonIcon
-        size="m"
+        size="s"
         display="empty"
         onClick={onButtonClick}
         isDisabled={isDisabled}
@@ -162,6 +162,7 @@ function QueryBarMenuComponent({
         iconType="filter"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
+        className="kbnFilterButtonGroup"
       />
     </EuiToolTip>
   );

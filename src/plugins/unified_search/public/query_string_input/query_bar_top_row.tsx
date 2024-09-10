@@ -518,7 +518,7 @@ export const QueryBarTopRow = React.memo(
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
-          compressed={shouldShowDatePickerAsBadge()}
+          compressed
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);

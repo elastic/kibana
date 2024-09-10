@@ -11,7 +11,7 @@ import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
-import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { EuiFlexItem, EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
@@ -606,7 +606,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     }
 
     return (
-      <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
+      <EuiFlexItem className={classes} css={cssStyles} data-test-subj="globalQueryBar" compressed>
         <QueryBarTopRow<QT>
           timeHistory={this.props.timeHistory}
           query={this.state.query}
@@ -661,7 +661,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           renderQueryInputAppend={this.props.renderQueryInputAppend}
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
         />
-      </div>
+      </EuiFlexItem>
     );
   }
 

@@ -558,7 +558,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 />
               </p>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} compressed>
                   <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
                     <FormattedMessage
                       id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
@@ -801,23 +801,33 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     });
     const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
     return (
-      <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
+      <EuiFlexItem
+        className={containerClassName}
+        onFocus={this.onFocusWithin}
+        onBlur={this.onBlurWithin}
+        compressed
+      >
         {prependElement}
 
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
-          <div
+          <EuiFlexItem
             {...ariaCombobox}
             style={{
               position: 'relative',
               width: '100%',
               zIndex: euiThemeVars.euiZLevel1,
+              height: euiThemeVars.euiFormControlCompressedHeight,
             }}
             aria-label={strings.getQueryBarComboboxAriaLabel(this.props.appName)}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
             data-skip-axe="aria-required-children"
           >
-            <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
+            <EuiFlexItem
+              role="search"
+              className={inputWrapClassName}
+              ref={this.assignQueryInputDivRef}
+            >
               <EuiTextArea
                 placeholder={this.props.placeholder || this.getSearchInputPlaceholder()}
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
@@ -875,7 +885,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                   }}
                 />
               ) : null}
-            </div>
+            </EuiFlexItem>
             <EuiPortal>
               <SuggestionsComponent
                 show={this.state.isSuggestionsVisible}
@@ -888,9 +898,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 inputContainer={this.state.queryBarInputDiv}
               />
             </EuiPortal>
-          </div>
+          </EuiFlexItem>
         </EuiOutsideClickDetector>
-      </div>
+      </EuiFlexItem>
     );
   }
 

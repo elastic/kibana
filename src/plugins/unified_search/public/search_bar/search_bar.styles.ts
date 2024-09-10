@@ -15,6 +15,7 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
     uniSearchBar: css`
       padding: ${isESQLQuery ? 0 : euiTheme.size.s};
       position: relative;
+      max-height: ${euiTheme.size.xxxl};
     `,
     detached: css`
       border-bottom: ${euiTheme.border.thin};
