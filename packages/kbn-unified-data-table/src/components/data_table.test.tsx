@@ -1265,9 +1265,7 @@ describe('UnifiedDataTable', () => {
     };
     const clickColumnAction = async (name: string) => {
       const action = screen.getByRole('button', { name });
-      await act(async () => {
-        await userEvent.click(action, undefined, { skipPointerEventsCheck: true });
-      });
+      await userEvent.click(action);
     };
     const queryButton = (name: string) => screen.queryByRole('button', { name });
 
