@@ -8,7 +8,7 @@ properties:
     type: string
     description: >
       The organisation in TheHive that will contain the alerts or cases.
-      By default, the connector uses the default organisation for the user account.
+      By default, the connector uses the default organisation of the user account that created the API key.
   url:
     type: string
     description: >
