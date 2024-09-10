@@ -102,7 +102,7 @@ describe('UrlFormatEditor', () => {
 
     // TODO: sample image url emitted only during change event
     // So can't just path `type: img` and check rendered value
-    userEvent.selectOptions(getByLabelText('Type'), 'img');
+    await userEvent.selectOptions(getByLabelText('Type'), 'img');
     expect(sampleImageUrlTemplate).toContain(MY_BASE_PATH);
     expect(sampleImageUrlTemplate).toMatchInlineSnapshot(
       `"my-base-path/plugins/dataViewFieldEditor/assets/icons/{{value}}.png"`

@@ -99,14 +99,14 @@ describe('SelectSystemPrompt', () => {
     expect(getByTestId('clearSystemPrompt')).toBeInTheDocument();
   });
 
-  it('clears the selected system prompt when the clear button is clicked', () => {
+  it('clears the selected system prompt when the clear button is clicked', async () => {
     const clearSelectedSystemPrompt = jest.fn();
 
     const { getByTestId } = render(
       <SelectSystemPrompt {...props} clearSelectedSystemPrompt={clearSelectedSystemPrompt} />
     );
 
-    userEvent.click(getByTestId('clearSystemPrompt'));
+    await userEvent.click(getByTestId('clearSystemPrompt'));
 
     expect(clearSelectedSystemPrompt).toHaveBeenCalledTimes(1);
   });

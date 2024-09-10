@@ -42,3 +42,5 @@ export { getAstAndSyntaxErrors } from './src/ast_parser';
 export { ESQLErrorListener } from './src/antlr_error_listener';
 
 export { Walker, type WalkerOptions, walk } from './src/walker';
+
+export { BasicPrettyPrinter } from './src/pretty_print/basic_pretty_printer';

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 import { FormProvider, LOCAL_STORAGE_KEY } from './form_provider';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { useLLMsModels } from '../hooks/use_llms_models';

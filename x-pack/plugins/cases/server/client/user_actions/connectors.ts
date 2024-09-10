@@ -148,14 +148,19 @@ const getConnectorsInfo = async ({
    * the severity user actions or if there is a mechanism to
    * define supported user actions per connector type
    */
-  const hasCasesWebhookConnector = actionConnectors.some(
-    (actionConnector) => actionConnector.actionTypeId === ConnectorTypes.casesWebhook
+  const hasAdditionalUserActionsConnector = actionConnectors.some(
+    (actionConnector) =>
+      actionConnector.actionTypeId === ConnectorTypes.casesWebhook ||
+      actionConnector.actionTypeId === ConnectorTypes.theHive
   );
-  let latestUserActionCasesWebhook: SavedObject<UserActionAttributes> | undefined;
-  if (hasCasesWebhookConnector) {
+  let latestAdditionalUserActionConnector: SavedObject<UserActionAttributes> | undefined;
+  if (hasAdditionalUserActionsConnector) {
     // if cases webhook connector, we need to fetch latestUserAction again because
     // the cases webhook connector includes extra fields other case connectors do not track
-    latestUserActionCasesWebhook = await userActionService.getMostRecentUserAction(caseId, true);
+    latestAdditionalUserActionConnector = await userActionService.getMostRecentUserAction(
+      caseId,
+      true
+    );
   }
 
   return createConnectorInfoResult({
@@ -163,7 +168,7 @@ const getConnectorsInfo = async ({
     connectors,
     pushInfo,
     latestUserAction,
-    latestUserActionCasesWebhook,
+    latestAdditionalUserActionConnector,
   });
 };
 
@@ -289,13 +294,13 @@ const createConnectorInfoResult = ({
   connectors,
   pushInfo,
   latestUserAction,
-  latestUserActionCasesWebhook,
+  latestAdditionalUserActionConnector,
 }: {
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
   latestUserAction?: SavedObject<UserActionAttributes>;
-  latestUserActionCasesWebhook?: SavedObject<UserActionAttributes>;
+  latestAdditionalUserActionConnector?: SavedObject<UserActionAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
   const actionConnectorsMap = new Map(
@@ -312,8 +317,9 @@ const createConnectorInfoResult = ({
        * the severity user actions or if there is a mechanism to
        * define supported user actions per connector type
        */
-      connectorDetails?.actionTypeId === ConnectorTypes.casesWebhook
-        ? latestUserActionCasesWebhook?.attributes.created_at
+      connectorDetails?.actionTypeId === ConnectorTypes.casesWebhook ||
+        connectorDetails?.actionTypeId === ConnectorTypes.theHive
+        ? latestAdditionalUserActionConnector?.attributes.created_at
         : latestUserAction?.attributes.created_at
     );
 
