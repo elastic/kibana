@@ -14,6 +14,7 @@ import {
   PackageName,
   Pipeline,
   RawSamples,
+  SamplesFormat,
 } from '../model/common_attributes';
 import { RelatedAPIResponse } from '../model/response_schemas';
 
@@ -22,6 +23,7 @@ export const RelatedRequestBody = z.object({
   packageName: PackageName,
   dataStreamName: DataStreamName,
   rawSamples: RawSamples,
+  samplesFormat: SamplesFormat,
   currentPipeline: Pipeline,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

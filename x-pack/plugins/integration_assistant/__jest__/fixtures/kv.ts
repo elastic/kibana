@@ -7,17 +7,18 @@
 
 import { SamplesFormatName } from '../../common/api/model/common_attributes';
 
-export const logFormatDetectionTestState = {
+export const kvState = {
   lastExecutedChain: 'testchain',
-  logSamples: ['{"test1": "test1"}'],
-  jsonSamples: ['{"test1": "test1"}'],
-  exAnswer: 'testanswer',
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',
+  kvProcessor: { kv: { field: 'test', target_field: 'newtest' } },
+  logSamples: ['<134>1 dummy="data"'],
+  jsonSamples: ['{"test1": "test1"}'],
+  kvLogMessages: ['{"test1": "test1"}'],
   finalized: false,
   samplesFormat: { name: SamplesFormatName.Values.structured },
   header: true,
   ecsVersion: 'testVersion',
-  results: { test1: 'test1' },
+  errors: { test: 'testerror' },
   additionalProcessors: [{ kv: { field: 'test', target_field: 'newtest' } }],
 };

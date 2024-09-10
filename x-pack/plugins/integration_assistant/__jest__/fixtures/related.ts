@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SamplesFormatName } from '../../common/api/model/common_attributes';
 import type { Pipeline } from '../../common';
 
 export const relatedInitialPipeline: Pipeline = {
@@ -166,6 +167,7 @@ export const relatedTestState = {
   initialPipeline: relatedInitialPipeline,
   results: { test: 'testresults' },
   lastExecutedChain: 'testchain',
+  samplesFormat: { name: SamplesFormatName.Values.json },
 };
 
 export const relatedMockProcessors = [
