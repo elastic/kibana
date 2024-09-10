@@ -28,7 +28,7 @@ const DiscoverSourcePopoverContent = dynamic(
 );
 
 interface ContentProps extends DataGridCellValueElementProps {
-  isSingleLine: boolean;
+  isSingleLine?: boolean;
 }
 
 const LogMessage = ({
@@ -38,7 +38,7 @@ const LogMessage = ({
 }: {
   field?: string;
   value: string;
-  isSingleLine: boolean;
+  isSingleLine?: boolean;
 }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
   return (
@@ -124,7 +124,7 @@ export const Content = ({
   );
 };
 
-const formatJsonDocumentForContent = (row: DataTableRecord) => {
+export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   const flattenedResult: DataTableRecord['flattened'] = {};
   const rawFieldResult: DataTableRecord['raw']['fields'] = {};
   const { raw, flattened } = row;

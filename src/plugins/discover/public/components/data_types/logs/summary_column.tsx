@@ -13,19 +13,29 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { getAvailableResourceFields } from '../../../utils/get_available_resource_fields';
 import {
   UseVirtualColumnServices,
   VirtualColumnServiceProvider,
 } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
 import { Resource } from '../../discover_grid/virtual_columns/logs/resource';
-import { Content } from '../../discover_grid/virtual_columns/logs/content';
+import {
+  Content,
+  formatJsonDocumentForContent,
+} from '../../discover_grid/virtual_columns/logs/content';
 import * as constants from '../../../../common/data_types/logs/constants';
+
+const DiscoverSourcePopoverContent = dynamic(
+  () => import('@kbn/unified-data-table/src/components/source_popover_content')
+);
 
 type SummaryColumnProps = DataGridCellValueElementProps;
 
@@ -57,7 +67,12 @@ export const getSummaryColumn =
           {...(shouldCenter && { alignItems: 'center' })}
         >
           <EuiFlexItem grow={false}>
-            <Resource {...props} limited={isSingleLine} shouldCenter={shouldCenter} truncated />
+            <Resource
+              truncated
+              limited={isSingleLine}
+              {...(shouldCenter && { alignItems: 'center' })}
+              {...props}
+            />
           </EuiFlexItem>
           <Content {...props} isSingleLine={isSingleLine} />
         </EuiFlexGroup>
@@ -78,49 +93,67 @@ const SummaryPopover = (props: SummaryColumnProps & UseVirtualColumnServices) =>
   const eventOriginalValue = documentOverview[constants.EVENT_ORIGINAL_FIELD];
   const shouldRenderEventOriginal = Boolean(eventOriginalValue);
 
+  const shouldRenderSource = !shouldRenderContent && !shouldRenderEventOriginal;
+
   return (
     <VirtualColumnServiceProvider services={services}>
-      {shouldRenderResource && (
-        <>
-          <EuiTitle size="xxs">
-            <span>Resource</span>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <Resource {...props} />
-          <EuiSpacer />
-        </>
-      )}
-      {shouldRenderContent && (
-        <>
-          <EuiTitle size="xxs">
-            <span>Content</span>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued" size="xs">
-            {field}
-          </EuiText>
-          <EuiCodeBlock overflowHeight={100} paddingSize="s" isCopyable language="txt" fontSize="s">
-            {value}
-          </EuiCodeBlock>
-          {shouldRenderEventOriginal && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="xs">
-                {constants.EVENT_ORIGINAL_FIELD}
-              </EuiText>
-              <EuiCodeBlock
-                overflowHeight={100}
-                paddingSize="s"
-                isCopyable
-                language="txt"
-                fontSize="s"
-              >
-                {value}
-              </EuiCodeBlock>
-            </>
-          )}
-        </>
-      )}
+      <EuiPanel paddingSize="s" hasShadow={false} css={{ width: 580 }}>
+        {shouldRenderResource && (
+          <>
+            <EuiTitle size="xxs">
+              <span>Resource</span>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <Resource wrap {...props} />
+            <EuiSpacer />
+          </>
+        )}
+        <EuiSpacer size="s" />
+        <EuiTitle size="xxs">
+          <span>Content</span>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {shouldRenderContent && (
+          <>
+            <EuiText color="subdued" size="xs">
+              {field}
+            </EuiText>
+            <EuiCodeBlock
+              overflowHeight={100}
+              paddingSize="s"
+              isCopyable
+              language="txt"
+              fontSize="s"
+            >
+              {value}
+            </EuiCodeBlock>
+          </>
+        )}
+        {shouldRenderEventOriginal && (
+          <>
+            <EuiText color="subdued" size="xs">
+              {constants.EVENT_ORIGINAL_FIELD}
+            </EuiText>
+            <EuiCodeBlock
+              overflowHeight={100}
+              paddingSize="s"
+              isCopyable
+              language="txt"
+              fontSize="s"
+            >
+              {value}
+            </EuiCodeBlock>
+          </>
+        )}
+        {shouldRenderSource && (
+          <>
+            <EuiText color="subdued" size="xs">
+              Document
+            </EuiText>
+            <JsonCodeEditor json={formatJsonDocumentForContent(row)} height={300} />
+          </>
+        )}
+      </EuiPanel>
     </VirtualColumnServiceProvider>
   );
 };
