@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Component as ReactComponent } from 'react';
-import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
+import { Component as ReactComponent, ComponentType } from 'react';
+import { HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';

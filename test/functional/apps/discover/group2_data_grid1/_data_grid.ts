@@ -13,7 +13,11 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid tests', function describeDiscoverDataGrid() {
     const esArchiver = getService('esArchiver');
-    const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
+    const { common, timePicker, unifiedFieldList } = getPageObjects([
+      'common',
+      'timePicker',
+      'unifiedFieldList',
+    ]);
     const kibanaServer = getService('kibanaServer');
     const defaultSettings = { defaultIndex: 'logstash-*' };
     const testSubjects = getService('testSubjects');
@@ -27,8 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('can add fields to the table', async function () {
@@ -37,16 +41,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getTitles()).to.be('@timestamp Document');
 
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
       expect(await getTitles()).to.be('@timestamp bytes');
 
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
+      await unifiedFieldList.clickFieldListItemAdd('agent');
       expect(await getTitles()).to.be('@timestamp bytes agent');
 
-      await PageObjects.unifiedFieldList.clickFieldListItemRemove('bytes');
+      await unifiedFieldList.clickFieldListItemRemove('bytes');
       expect(await getTitles()).to.be('@timestamp agent');
 
-      await PageObjects.unifiedFieldList.clickFieldListItemRemove('agent');
+      await unifiedFieldList.clickFieldListItemRemove('agent');
       expect(await getTitles()).to.be('@timestamp Document');
     });
 

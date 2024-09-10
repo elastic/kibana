@@ -19,11 +19,11 @@ export const getReducedSpaceStyling = () => {
         }
         .euiTable thead tr {
           display: grid;
-          grid-template-columns: 40px 1fr 0 auto 72px;
+          grid-template-columns: 40px 1fr 0 auto;
         }
         .euiTable tbody tr {
           display: grid;
-          grid-template-columns: 40px 1fr auto 72px;
+          grid-template-columns: 40px 1fr auto;
           grid-template-areas:
             'status timeRan lastDuration actions'
             '. queryString queryString queryString';

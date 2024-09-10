@@ -20,7 +20,7 @@ export type KibanaWiredConnectionDetailsProviderProps = Omit<
 >;
 
 export const KibanaWiredConnectionDetailsProvider: React.FC<
-  KibanaWiredConnectionDetailsProviderProps
+  React.PropsWithChildren<KibanaWiredConnectionDetailsProviderProps>
 > = (props) => {
   return (
     <KibanaConnectionDetailsProvider {...props} start={getGlobalDependencies().start}>

@@ -8,13 +8,7 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import {
-  parseErrors,
-  parseWarning,
-  getWrappedInPipesCode,
-  getIndicesList,
-  getRemoteIndicesList,
-} from './helpers';
+import { parseErrors, parseWarning, getIndicesList, getRemoteIndicesList } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -207,29 +201,6 @@ describe('helpers', function () {
           startLineNumber: 1,
         },
       ]);
-    });
-  });
-
-  describe('getWrappedInPipesCode', function () {
-    it('should return the code wrapped', function () {
-      const code = getWrappedInPipesCode('FROM index1 | keep field1, field2 | order field1', false);
-      expect(code).toEqual('FROM index1\n| keep field1, field2\n| order field1');
-    });
-
-    it('should return the code unwrapped', function () {
-      const code = getWrappedInPipesCode(
-        'FROM index1 \n| keep field1, field2 \n| order field1',
-        true
-      );
-      expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
-    });
-
-    it('should return the code unwrapped and trimmed', function () {
-      const code = getWrappedInPipesCode(
-        'FROM index1       \n| keep field1, field2     \n| order field1',
-        true
-      );
-      expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
     });
   });
 
