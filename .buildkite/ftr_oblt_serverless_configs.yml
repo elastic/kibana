@@ -5,9 +5,6 @@ disabled:
   # Cypress configs, for now these are still run manually
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
-
-defaultQueue: 'n2-4-spot'
-enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
@@ -26,3 +23,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+
+# Serverless tests only run on main
+defaultQueue: 'n2-4-spot'
+enabled:
