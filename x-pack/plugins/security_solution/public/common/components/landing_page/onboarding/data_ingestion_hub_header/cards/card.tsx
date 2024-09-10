@@ -21,10 +21,10 @@ interface CardProps {
   target?: EuiCardProps['target'];
 }
 
+const IMAGE_WIDTH = 64;
+
 export const Card: React.FC<CardProps> = React.memo((props) => {
   const { icon, title, description, children, onClick, href, target } = props;
-
-  const IMAGE_WIDTH = 64;
 
   const { cardBodyStyle, cardTitleStyle, cardDescriptionStyle } = useCardStyles();
 
