@@ -13,6 +13,8 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
+  prettifyQuery,
+  isQueryWrappedByPipes,
   retieveMetadataColumns,
 } from './query_parsing_helpers';
 
@@ -175,6 +177,43 @@ describe('esql query helpers', () => {
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
         )
       ).toBe('event.timefield');
+    });
+  });
+
+  describe('prettifyQuery', function () {
+    it('should return the code wrapped', function () {
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
+    });
+
+    it('should return the code unwrapped', function () {
+      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should return the code unwrapped and trimmed', function () {
+      const code = prettifyQuery(
+        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
+        true
+      );
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+  });
+
+  describe('isQueryWrappedByPipes', function () {
+    it('should return false if the query is not wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(flag).toBeFalsy();
+    });
+
+    it('should return true if the query is wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n| KEEP field1, field2 /n| SORT field1');
+      expect(flag).toBeTruthy();
+    });
+
+    it('should return true if the query is wrapped and prettified', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
+      expect(flag).toBeTruthy();
     });
   });
 

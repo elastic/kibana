@@ -678,10 +678,7 @@ export class TaskRunner<
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))
       );
 
-      // fetch the rule again to ensure we return the correct schedule as it may have
-      // changed during the task execution
-      const data = await getDecryptedRule(this.context, ruleId, spaceId);
-      schedule = asOk(data.rawRule.schedule);
+      schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
