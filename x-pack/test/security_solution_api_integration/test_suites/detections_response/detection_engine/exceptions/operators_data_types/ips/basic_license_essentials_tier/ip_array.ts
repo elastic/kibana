@@ -408,7 +408,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips.flat(10)).to.eql([]);
+        expect(ips.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -513,7 +513,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const ips = alertsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
-        expect(ips.flat(10)).to.eql([]);
+        expect(ips.flat(10)).to.eql([undefined]);
       });
 
       it('will return 2 results if we have a list which contains the CIDR ranges of "127.0.0.1/32, 127.0.0.2/31, 127.0.0.4/30"', async () => {

@@ -341,7 +341,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.text).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
@@ -521,7 +521,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForAlertsToBePresent(supertest, log, 1, [id]);
         const alertsOpen = await getAlertsById(supertest, log, id);
         const hits = alertsOpen.hits.hits.map((hit) => hit._source?.text).sort();
-        expect(hits.flat(10)).to.eql([]);
+        expect(hits.flat(10)).to.eql([undefined]);
       });
     });
 
