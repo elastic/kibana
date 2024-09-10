@@ -49,7 +49,7 @@ export const IGNORE_FILE_GLOBS = [
   'packages/kbn-router-to-openapispec/openapi-types.d.ts',
 
   // Required to match the name in the docs.elastic.dev repo.
-  'nav-kibana-dev.docnav.json',
+  'dev_docs/nav-kibana-dev.docnav.json',
 
   // Match elastic wide naming convention for catalog-info.yaml
   'catalog-info.yaml',
@@ -84,6 +84,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // ecs templates
   '**/ecs/fields/**/*',
+
+  // Support for including http-client.env.json configurations
+  '**/http-client.env.json',
 ];
 
 /**
