@@ -137,7 +137,7 @@ export interface FunctionDefinition {
        * we can't check the return value of a function to see if it
        * matches one of the options prior to runtime.
        */
-      literalOptions?: string[];
+      acceptedValues?: string[];
       /**
        * Must only be included _in addition to_ literalOptions.
        *
