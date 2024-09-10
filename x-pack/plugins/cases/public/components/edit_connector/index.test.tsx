@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { EditConnectorProps } from '.';
 import { EditConnector } from '.';
@@ -55,10 +55,21 @@ const usePushToServiceMockRes: ReturnUsePushToService = {
 };
 
 describe('EditConnector ', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     appMockRender = createAppMockRenderer();
     usePushToServiceMock.mockReturnValue(usePushToServiceMockRes);
   });
@@ -86,20 +97,18 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('connector-edit-button'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     expect(screen.getByTestId('edit-connectors-submit')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
@@ -134,7 +143,7 @@ describe('EditConnector ', () => {
     );
 
     expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('push-to-external-service'));
+    await user.click(screen.getByTestId('push-to-external-service'));
 
     await waitFor(() => expect(handlePushToService).toHaveBeenCalled());
   });
@@ -157,18 +166,16 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('connector-edit-button'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
-    userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();
@@ -208,15 +215,15 @@ describe('EditConnector ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('connector-edit-button'));
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('connector-edit-button'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
-    userEvent.click(screen.getByTestId('edit-connectors-cancel'));
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('edit-connectors-cancel'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('edit-connectors-submit')).not.toBeInTheDocument();

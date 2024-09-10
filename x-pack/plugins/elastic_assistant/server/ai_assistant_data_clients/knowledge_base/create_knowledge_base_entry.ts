@@ -51,7 +51,7 @@ export const createKnowledgeBaseEntry = async ({
     });
   } catch (err) {
     logger.error(
-      `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.metadata.kbResource}`
+      `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.name}`
     );
     throw err;
   }
@@ -61,22 +61,37 @@ export const transformToCreateSchema = (
   createdAt: string,
   spaceId: string,
   user: AuthenticatedUser,
-  { metadata, text }: KnowledgeBaseEntryCreateProps
+  entry: KnowledgeBaseEntryCreateProps
 ): CreateKnowledgeBaseEntrySchema => {
-  return {
+  const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user.profile_uid ?? 'unknown',
     updated_at: createdAt,
     updated_by: user.profile_uid ?? 'unknown',
+    namespace: spaceId,
     users: [
       {
         id: user.profile_uid,
         name: user.username,
       },
     ],
-    namespace: spaceId,
-    metadata,
-    text,
   };
+
+  if (entry.type === 'index') {
+    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
+    return {
+      ...base,
+      ...restEntry,
+      query_description: queryDescription,
+      input_schema:
+        entry.inputSchema?.map((schema) => ({
+          field_name: schema.fieldName,
+          field_type: schema.fieldType,
+          description: schema.description,
+        })) ?? undefined,
+      output_fields: outputFields ?? undefined,
+    };
+  }
+  return { ...base, ...entry, vector: undefined };
 };

@@ -5,8 +5,6 @@
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "sideEffects": false,
   "scripts": {
-    "make:tests": "ts-node --transpileOnly ./scripts/generate_function_validation_tests.ts",
-    "postmake:tests": "yarn run lint:fix",
     "make:defs": "ts-node --transpileOnly ./scripts/generate_function_definitions.ts",
     "postmake:defs": "yarn run lint:fix",
     "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-esql-validation-autocomplete/src/**/*.ts",

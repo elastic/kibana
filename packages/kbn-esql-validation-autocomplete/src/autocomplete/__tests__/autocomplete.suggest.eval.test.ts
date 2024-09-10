@@ -432,7 +432,7 @@ describe('autocomplete.suggest', () => {
 
                 const suggestedConstants = uniq(
                   typesToSuggestNext
-                    .map((d) => d.literalSuggestions || d.literalOptions)
+                    .map((d) => d.literalSuggestions || d.acceptedValues)
                     .filter((d) => d)
                     .flat()
                 );
@@ -487,7 +487,7 @@ describe('autocomplete.suggest', () => {
           test(`${fn.name}`, async () => {
             const { assertSuggestions } = await setup();
             const firstParam = fn.signatures[0].params[0];
-            const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
+            const suggestedConstants = firstParam?.literalSuggestions || firstParam?.acceptedValues;
             const requiresMoreArgs = true;
 
             await assertSuggestions(
