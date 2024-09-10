@@ -273,7 +273,12 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
+      kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as KibanaRequest<
+        P,
+        Q,
+        B,
+        typeof request.method
+      >;
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
       return hapiResponseAdapter.toBadRequest(error.message);
