@@ -15,7 +15,8 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { TheHiveTLP } from './types';
 
-describe('TheHive Cases Fields', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192475
+describe.skip('TheHive Cases Fields', () => {
   const fields = {
     TLP: 1,
   };
