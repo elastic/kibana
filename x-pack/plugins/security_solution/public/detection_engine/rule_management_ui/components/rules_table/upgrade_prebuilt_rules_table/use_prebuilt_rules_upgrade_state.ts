@@ -65,12 +65,12 @@ export function usePrebuiltRulesUpgradeState(
         ...ruleUpgradeInfo,
         finalRule: calcFinalDiffableRule(
           ruleUpgradeInfo,
-          rulesResolvedConflicts[ruleUpgradeInfo.id] ?? {}
+          rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
         hasUnresolvedConflicts:
           getUnacceptedConflictsCount(
             ruleUpgradeInfo.diff.fields,
-            rulesResolvedConflicts[ruleUpgradeInfo.id] ?? {}
+            rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
           ) > 0,
       };
     }
