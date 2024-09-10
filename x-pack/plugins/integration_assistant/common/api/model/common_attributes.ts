@@ -123,7 +123,7 @@ export const InputType = z.enum([
   'filestream',
   'gcp-pubsub',
   'gcs',
-  'http-endpoint',
+  'http_endpoint',
   'journald',
   'kafka',
   'tcp',
