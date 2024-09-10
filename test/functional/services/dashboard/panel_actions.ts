@@ -130,9 +130,8 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async clickPanelActionByTitle(testSubject: string, title = '') {
-    this.log.debug(`openContextMenuByTitle(${testSubject},${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickPanelAction(testSubject, header);
+    this.log.debug(`clickPanelActionByTitle(${testSubject},${title})`);
+    await this.clickPanelActionByTitle(testSubject, title);
   }
 
   async navigateToEditorFromFlyout(parent?: WebElementWrapper) {
@@ -202,21 +201,18 @@ export class DashboardPanelActionsService extends FtrService {
 
   async customizePanel(title = '') {
     this.log.debug(`customizePanel(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, title);
   }
 
   async clonePanel(title = '') {
     this.log.debug(`clonePanel(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickPanelAction(CLONE_PANEL_DATA_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(CLONE_PANEL_DATA_TEST_SUBJ, title);
     await this.dashboard.waitForRenderComplete();
   }
 
   async openCopyToModalByTitle(title = '') {
     this.log.debug(`copyPanelTo(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickPanelAction(COPY_PANEL_TO_DATA_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(COPY_PANEL_TO_DATA_TEST_SUBJ, title);
   }
 
   async openInspectorByTitle(title = '') {
@@ -252,24 +248,21 @@ export class DashboardPanelActionsService extends FtrService {
 
   async legacyUnlinkFromLibrary(title = '') {
     this.log.debug(`legacyUnlinkFromLibrary(${title}`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     await this.testSubjects.existOrFail('unlinkPanelSuccess');
     await this.expectNotLinkedToLibrary(title, true);
   }
 
   async unlinkFromLibrary(title = '') {
     this.log.debug(`unlinkFromLibrary(${title})`);
-    const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
     await this.testSubjects.existOrFail('unlinkPanelSuccess');
     await this.expectNotLinkedToLibrary(title);
   }
 
   async legacySaveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`legacySaveToLibrary(${newTitle},${oldTitle})`);
-    const header = await this.getPanelHoverActions(oldTitle);
-    await this.clickContextMenuItem(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
@@ -280,8 +273,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
-    const header = await this.getPanelHoverActions(oldTitle);
-    await this.clickContextMenuItem(SAVE_TO_LIBRARY_TEST_SUBJ, header);
+    await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
