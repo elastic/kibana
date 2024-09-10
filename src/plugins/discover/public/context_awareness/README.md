@@ -62,3 +62,19 @@ The `ProfilesManager` implementation is located in the [`profiles_manager.ts`](.
 
 The following diagram models the overall Discover context awareness framework and how each of the above concepts come together:
 ![image](./docs/architecture.png)
+
+## Registering a profile
+
+In order to register a Discover profile, follow these steps:
+
+1. Identify at which [context level](#context-levels) your profile should be implemented.
+2. Create a subfolder for your profile provider within the [`profile_providers`](./profile_providers) folder. Common Discover providers should be created within the corresponding `profile_providers/common` subfolder, while solution specific providers should be created within a `profile_providers/{SOLUTION_TYPE}` subfolder, e.g. `profile_providers/security/security_root_profile`.
+3. Create a `profile.ts(x)` file within your provider subfolder that exports a factory function which optionally accepts a `ProfileProviderServices` parameter and returns your provider implementation, e.g. `createSecurityRootProfileProvider(services: ProfileProviderServices) => RootProfileProvider`.
+4. **If your provider is not ready for GA or should only be enabled for specific configurations, make sure to set the `isExperimental` flag to true in your profile provider.** This will ensure the profile is disabled by default, and can be enabled in `kibana.yml` like this: `discover.experimental.enabledProfiles: [{YOUR_PROFILE_ID}]`.
+5. Call and return the result of your provider factory function from the corresponding factory function in [`register_profile_providers.ts`](./profile_providers/register_profile_providers.ts), e.g. `createRootProfileProviders`.
+
+Existing profiles can be extended using the [`extendProfileProvider`](./profile_providers/extend_profile_provider.ts) utility, allowing multiple sub profiles to be composed from a shared parent profile.
+
+Example profile provider implementations are located in [`profile_providers/example`](./profile_providers/example).
+
+## Code sharing
