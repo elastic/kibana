@@ -1,0 +1,229 @@
+openapi: 3.0.3
+info:
+  description: ''
+  title: Security Solution Entity Analytics API (Elastic Cloud and self-hosted)
+  version: '1'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/entity_store/engines:
+    get:
+      operationId: ListEntityStoreEngines
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+          description: Successful response
+      summary: List the Entity Store engines
+      tags:
+        - Security Solution Entity Analytics API
+  '/api/entity_store/engines/{entityType}':
+    delete:
+      operationId: DeleteEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response
+      summary: Delete the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+    get:
+      operationId: GetEntityStoreEngine
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineDescriptor'
+          description: Successful response
+      summary: Get the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+  '/api/entity_store/engines/{entityType}/init':
+    post:
+      operationId: InitEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/IndexPattern'
+        description: Schema for the engine initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngineDescriptor'
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Solution Entity Analytics API
+  '/api/entity_store/engines/{entityType}/start':
+    post:
+      operationId: StartEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  started:
+                    type: boolean
+          description: Successful response
+      summary: Start the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+  '/api/entity_store/engines/{entityType}/stats':
+    post:
+      operationId: GetEntityStoreStats
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  indexPattern:
+                    $ref: '#/components/schemas/IndexPattern'
+                  indices:
+                    items:
+                      type: object
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/EngineStatus'
+                  transforms:
+                    items:
+                      type: object
+                    type: array
+                  type:
+                    $ref: '#/components/schemas/EntityType'
+          description: Successful response
+      summary: Get the Entity Store engine stats
+      tags:
+        - Security Solution Entity Analytics API
+  '/api/entity_store/engines/{entityType}/stop':
+    post:
+      operationId: StopEntityStore
+      parameters:
+        - description: The entity type of the store (either 'user' or 'host').
+          in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stopped:
+                    type: boolean
+          description: Successful response
+      summary: Stop the Entity Store engine
+      tags:
+        - Security Solution Entity Analytics API
+components:
+  schemas:
+    EngineDescriptor:
+      type: object
+      properties:
+        filter:
+          type: string
+        indexPattern:
+          $ref: '#/components/schemas/IndexPattern'
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+        type:
+          $ref: '#/components/schemas/EntityType'
+    EngineStatus:
+      enum:
+        - installing
+        - started
+        - stopped
+      type: string
+    EntityType:
+      enum:
+        - user
+        - host
+      type: string
+    IndexPattern:
+      type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Solution Entity Analytics API
