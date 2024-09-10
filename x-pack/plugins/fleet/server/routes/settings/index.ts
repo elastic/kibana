@@ -122,7 +122,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       description: `Get settings`,
       options: {
-        tags: ['Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(
@@ -153,7 +153,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       description: `Update settings`,
       options: {
-        tags: ['Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(
@@ -184,7 +184,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       description: `Get enrollment settings`,
       options: {
-        tags: ['Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(

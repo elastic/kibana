@@ -45,7 +45,7 @@ export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
       },
       description: `Initiate Fleet setup`,
       options: {
-        tags: ['Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(
@@ -80,7 +80,7 @@ export const registerCreateFleetSetupRoute = (router: FleetAuthzRouter) => {
       },
       description: `Initiate agent setup`,
       options: {
-        tags: ['Elastic Agents'],
+        tags: ['oas-tag:Elastic Agents'],
       },
     })
     .addVersion(
@@ -111,7 +111,7 @@ export const registerGetFleetStatusRoute = (router: FleetAuthzRouter) => {
       },
       description: `Get agent setup info`,
       options: {
-        tags: ['Elastic Agents'],
+        tags: ['oas-tag:Elastic Agents'],
       },
     })
     .addVersion(
