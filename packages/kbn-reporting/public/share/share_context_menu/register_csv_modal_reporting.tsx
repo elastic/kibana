@@ -177,8 +177,8 @@ export const reportingCsvShareProvider = ({
           />
         ),
         generateExport: generateReportingJobCSV,
+        generateExportUrl: () => absoluteUrl,
         generateCopyUrl: reportingUrl,
-        absoluteUrl,
         renderCopyURLButton: true,
       });
     }

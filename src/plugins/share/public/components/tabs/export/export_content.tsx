@@ -64,7 +64,7 @@ const ExportContentUi = ({
     helpText,
     renderCopyURLButton,
     generateExport,
-    absoluteUrl,
+    generateExportUrl,
     renderLayoutOptionSwitch,
   } = useMemo(() => {
     return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
@@ -123,18 +123,20 @@ const ExportContentUi = ({
     }
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
+  const postUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
+  console.log('absoluteUrl', postUrl);
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton && publicAPIEnabled)
+    if (renderCopyURLButton && publicAPIEnabled) {
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={absoluteUrl ?? ''}>
+            <EuiCopy textToCopy={postUrl ?? ''}>
               {(copy) => (
                 <EuiButtonEmpty
                   iconType="copyClipboard"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
-                  data-share-url={absoluteUrl}
+                  data-share-url={postUrl}
                 >
                   <FormattedMessage
                     id="share.modalContent.copyUrlButtonLabel"
@@ -160,7 +162,8 @@ const ExportContentUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
+    }
+  }, [renderCopyURLButton, publicAPIEnabled, postUrl]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (

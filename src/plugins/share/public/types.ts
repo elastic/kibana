@@ -116,10 +116,12 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
     intl: InjectedIntl;
     optimizedForPrinting?: boolean;
   }) => Promise<unknown>;
+  generateExportUrl:
+    | ((args: { intl: InjectedIntl; optimizedForPrinting?: boolean }) => string | undefined)
+    | null; // for exports that do not call a remote API, set this field to `null`
   theme?: ThemeServiceSetup;
   renderLayoutOptionSwitch?: boolean;
   layoutOption?: 'print';
-  absoluteUrl?: string;
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
 }

@@ -398,6 +398,7 @@ export const reportingExportModalProvider = ({
       },
       label: 'PDF' as const,
       generateExport: generateReportPDF,
+      generateExportUrl: () => new URL(relativePathPDF, window.location.href).toString(),
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
@@ -415,7 +416,6 @@ export const reportingExportModalProvider = ({
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderLayoutOptionSwitch: objectType === 'dashboard',
       renderCopyURLButton: true,
-      absoluteUrl: new URL(relativePathPDF, window.location.href).toString(),
     });
 
     shareActions.push({
@@ -429,6 +429,7 @@ export const reportingExportModalProvider = ({
       },
       label: 'PNG' as const,
       generateExport: generateReportPNG,
+      generateExportUrl: () => new URL(relativePathPNG, window.location.href).toString(),
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
@@ -442,7 +443,6 @@ export const reportingExportModalProvider = ({
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderCopyURLButton: true,
-      absoluteUrl: new URL(relativePathPNG, window.location.href).toString(),
     });
 
     return shareActions;
