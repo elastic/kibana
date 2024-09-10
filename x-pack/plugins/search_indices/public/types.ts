@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
@@ -25,6 +27,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   console?: ConsolePluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  cloud: CloudStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
@@ -40,4 +43,10 @@ export interface AppUsageTracker {
   click: (eventName: string | string[]) => void;
   count: (eventName: string | string[]) => void;
   load: (eventName: string | string[]) => void;
+}
+
+export interface Mappings {
+  mappings: {
+    properties: MappingPropertyBase['properties'];
+  };
 }

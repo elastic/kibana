@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import { EuiPageSection, EuiSpacer, EuiButton, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiPageSection,
+  EuiSpacer,
+  EuiButton,
+  EuiPageTemplate,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
+import { ConnectionDetails } from '../connection_details/connection_details';
+import { QuickStats } from '../quick_stats/quick_stats';
+import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-  const { console: consolePlugin, application } = useKibana().services;
+  const { console: consolePlugin, application, cloud } = useKibana().services;
 
-  const { data: index } = useIndex(indexName);
+  const { data: index, isLoading } = useIndex(indexName);
+  const { data: mappings, isLoading: isMappingLoading } = useIndexMapping(indexName);
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -24,6 +35,13 @@ export const SearchIndexDetailsPage = () => {
   const navigateToIndexListPage = useCallback(() => {
     application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application]);
+
+  const elasticsearchUrl = cloud.elasticsearchUrl || 'http://localhost:9200';
+
+  if (!index || !mappings) {
+    return null;
+  }
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -50,13 +68,21 @@ export const SearchIndexDetailsPage = () => {
         data-test-subj="searchIndexDetailsHeader"
         pageTitle={index?.name}
         rightSideItems={[]}
-
       />
-      <EuiSpacer size="l" />
-
       <div data-test-subj="searchIndexDetailsContent" />
       <EuiPageTemplate.Section grow={false}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <ConnectionDetails elasticsearchUrl={elasticsearchUrl} />
+          </EuiFlexItem>
+          <EuiFlexItem>{/*TODO: API KEY */}</EuiFlexItem>
+        </EuiFlexGroup>
 
+        <EuiSpacer size="l" />
+
+        <EuiFlexGroup>
+          <QuickStats index={index} mappings={mappings} />
+        </EuiFlexGroup>
       </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
