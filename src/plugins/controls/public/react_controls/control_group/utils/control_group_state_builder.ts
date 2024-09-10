@@ -13,10 +13,12 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
-  type ControlGroupRuntimeState,
-  type ControlPanelsState,
   type DefaultDataControlState,
 } from '../../../../common';
+import {
+  type ControlGroupRuntimeState,
+  type ControlPanelsState,
+} from '../../../../common/control_group';
 import type { OptionsListControlState } from '../../../../common/options_list';
 import { pluginServices } from '../../../services';
 import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';

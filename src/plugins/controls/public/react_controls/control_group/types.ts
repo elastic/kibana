@@ -40,12 +40,11 @@ import {
 } from '../../../common/control_group';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
-export type ControlGroupUnsavedChanges = Omit<
-  ControlGroupRuntimeState,
-  'initialChildControlState'
-> & {
-  filters: Filter[] | undefined;
-};
+/**
+ * ----------------------------------------------------------------
+ * Control group API
+ * ----------------------------------------------------------------
+ */
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
@@ -78,6 +77,19 @@ export type ControlGroupApi = PresentationContainer &
     /** Public setters */
     setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
   };
+
+/**
+ * ----------------------------------------------------------------
+ * Helper types
+ * ----------------------------------------------------------------
+ */
+
+export type ControlGroupUnsavedChanges = Omit<
+  ControlGroupRuntimeState,
+  'initialChildControlState'
+> & {
+  filters: Filter[] | undefined;
+};
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
