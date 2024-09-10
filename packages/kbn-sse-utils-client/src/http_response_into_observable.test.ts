@@ -12,7 +12,7 @@ import { httpResponseIntoObservable } from './http_response_into_observable';
 import type { StreamedHttpResponse } from './create_observable_from_http_response';
 import { ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
 
-function toSse(...events: Array<{ type: string; data: Record<string, any> }>) {
+function toSse(...events: Array<{ type: string } & Record<string, unknown>>) {
   return events.map((event) => {
     const { type, ...rest } = event;
     return new TextEncoder().encode(`event: ${type}\ndata: ${JSON.stringify(rest)}\n\n`);
@@ -48,7 +48,7 @@ describe('httpResponseIntoObservable', () => {
     const events = [
       {
         type: 'error',
-        data: {
+        error: {
           code: ServerSentEventErrorCode.internalError,
           message: 'Internal error',
         },

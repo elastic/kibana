@@ -21,9 +21,10 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { Observable } from 'rxjs';
-import { RequiredKeys } from 'utility-types';
+import { Readable } from 'stream';
+import { RequiredKeys, ValuesType } from 'utility-types';
 
-type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
+type MaybeOptional<T extends { params?: Record<string, any> }> = RequiredKeys<
   T['params']
 > extends never
   ? { params?: T['params'] }
@@ -67,30 +68,82 @@ type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
     : false
   : false;
 
-type IsInvalidObservableReturnType<TReturnType> = TReturnType extends Observable<infer TValueType>
-  ? TValueType extends ServerSentEvent
-    ? false
-    : true
-  : false;
+// this ensures only plain objects can be returned, if it's not one
+// of the other allowed types
+
+type ValidateSerializableValue<T, TWalkRecursively extends boolean = true> = T extends Function
+  ? 0
+  : T extends Record<string, any>
+  ? TWalkRecursively extends true
+    ? ValuesType<{
+        [key in keyof T]: ValidateSerializableValue<T[key], false>;
+      }>
+    : 1
+  : T extends string | number | boolean | null | undefined
+  ? 1
+  : T extends any[]
+  ? 1
+  : 0;
+
+type GuardAgainstInvalidRecord<T> = 0 extends ValidateSerializableValue<T> ? never : T;
+
+type ServerRouteHandlerReturnTypeWithoutRecord =
+  | Observable<ServerSentEvent>
+  | Readable
+  | IKibanaResponse
+  | void
+  | null;
+
+type ServerRouteHandlerReturnType = ServerRouteHandlerReturnTypeWithoutRecord | Record<string, any>;
+
+type ServerRouteHandler<
+  TRouteHandlerResources extends ServerRouteHandlerResources,
+  TRouteParamsRT extends RouteParamsRT | undefined,
+  TReturnType extends ServerRouteHandlerReturnType
+> = (
+  options: TRouteHandlerResources &
+    (TRouteParamsRT extends RouteParamsRT ? DecodedRequestParamsOfType<TRouteParamsRT> : {})
+) => Promise<
+  TReturnType extends ServerRouteHandlerReturnTypeWithoutRecord
+    ? TReturnType
+    : GuardAgainstInvalidRecord<TReturnType>
+>;
+
+export type CreateServerRouteFactory<
+  TRouteHandlerResources extends ServerRouteHandlerResources,
+  TRouteCreateOptions extends ServerRouteCreateOptions
+> = <
+  TEndpoint extends string,
+  TReturnType extends ServerRouteHandlerReturnType,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined
+>(
+  options: {
+    endpoint: ValidateEndpoint<TEndpoint> extends true ? TEndpoint : never;
+    handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
+    params?: TRouteParamsRT;
+  } & TRouteCreateOptions
+) => Record<
+  TEndpoint,
+  ServerRoute<
+    TEndpoint,
+    TRouteParamsRT,
+    TRouteHandlerResources,
+    Awaited<TReturnType>,
+    TRouteCreateOptions
+  >
+>;
 
 export type ServerRoute<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
-  TReturnType,
+  TReturnType extends ServerRouteHandlerReturnType,
   TRouteCreateOptions extends ServerRouteCreateOptions
-> = ValidateEndpoint<TEndpoint> extends true
-  ? {
-      endpoint: TEndpoint;
-      handler: ({}: TRouteHandlerResources &
-        (TRouteParamsRT extends RouteParamsRT
-          ? DecodedRequestParamsOfType<TRouteParamsRT>
-          : {})) => IsInvalidObservableReturnType<TReturnType> extends true
-        ? never
-        : Promise<TReturnType>;
-    } & TRouteCreateOptions &
-      (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {})
-  : never;
+> = {
+  endpoint: TEndpoint;
+  handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
+} & TRouteCreateOptions &
+  (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {});
 
 export type ServerRouteRepository = Record<
   string,
@@ -106,7 +159,7 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: z.input<TRouteParamsRT>;
       }>
-    : {};
+    : never;
 
 type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
   TRouteParamsRT extends t.Mixed
@@ -117,7 +170,7 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: z.output<TRouteParamsRT>;
       }>
-    : {};
+    : never;
 
 export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
   keyof TServerRouteRepository;
@@ -164,8 +217,10 @@ export type ClientRequestParamsOf<
 >
   ? TRouteParamsRT extends RouteParamsRT
     ? ClientRequestParamsOfType<TRouteParamsRT>
-    : {}
-  : {};
+    : TRouteParamsRT extends undefined
+    ? {}
+    : never
+  : never;
 
 type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends never
   ? [T] | []
