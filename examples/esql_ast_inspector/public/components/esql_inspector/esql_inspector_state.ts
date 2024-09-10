@@ -7,12 +7,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { ESQLCommand, EsqlQuery, Walker } from '@kbn/esql-ast';
 
 export class EsqlInspectorState {
   public readonly src$ = new BehaviorSubject<string>('FROM index | LIMIT 10');
   public readonly query$ = new BehaviorSubject<EsqlQuery | null>(null);
   public readonly queryLastValid$ = new BehaviorSubject<EsqlQuery | null>(EsqlQuery.fromSrc(''));
+  public readonly from$ = new BehaviorSubject<ESQLCommand | null>(null);
 
   constructor() {
     this.src$.subscribe((src) => {
@@ -26,6 +27,15 @@ export class EsqlInspectorState {
     this.query$.subscribe((query) => {
       if (query instanceof EsqlQuery) {
         this.queryLastValid$.next(query);
+
+        const from = Walker.match(query?.ast, {
+          type: 'command',
+          name: 'from',
+        });
+
+        if (from) {
+          this.from$.next(from as ESQLCommand);
+        }
       }
     });
   }

@@ -9,6 +9,7 @@
 import * as React from 'react';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
+import { FromCommand } from './components/from_command';
 
 export const PreviewUi: React.FC = (props) => {
   const state = useEsqlInspector();
@@ -18,5 +19,9 @@ export const PreviewUi: React.FC = (props) => {
     return null;
   }
 
-  return <div>UI</div>;
+  return (
+    <div style={{ paddingTop: 16 }}>
+      <FromCommand />
+    </div>
+  );
 };
