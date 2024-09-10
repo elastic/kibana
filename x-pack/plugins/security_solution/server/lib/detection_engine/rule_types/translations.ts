@@ -20,3 +20,10 @@ export const FIND_SOURCE_DOCUMENTS_REQUEST_DESCRIPTION = i18n.translate(
     defaultMessage: 'Retrieve source documents when ES|QL query is not aggregable',
   }
 );
+
+export const EQL_SEARCH_REQUEST_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.esqlRuleType.eqlSearchRequestDescription',
+  {
+    defaultMessage: 'EQL request to find all matches',
+  }
+);

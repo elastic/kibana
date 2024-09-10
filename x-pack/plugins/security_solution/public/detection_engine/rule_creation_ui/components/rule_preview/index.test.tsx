@@ -37,14 +37,7 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
 jest.mock('./use_preview_invocation_count');
 
 // rule types that do not support logged requests
-const ruleTypes: Type[] = [
-  'eql',
-  'threshold',
-  'threat_match',
-  'machine_learning',
-  'query',
-  'new_terms',
-];
+const ruleTypes: Type[] = ['threshold', 'threat_match', 'machine_learning', 'query', 'new_terms'];
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,

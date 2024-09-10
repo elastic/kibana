@@ -30,7 +30,7 @@ import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RunOpts, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 import {
   addToSearchAfterReturn,

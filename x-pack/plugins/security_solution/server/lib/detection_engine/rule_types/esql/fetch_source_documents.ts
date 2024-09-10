@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logQueryRequest } from '../utils/logged_requests';
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 interface FetchSourceDocumentsArgs {
   isRuleAggregating: boolean;

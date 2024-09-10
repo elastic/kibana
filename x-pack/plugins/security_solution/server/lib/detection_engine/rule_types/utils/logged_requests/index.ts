@@ -6,4 +6,5 @@
  */
 
 export * from './log_esql';
+export * from './log_eql';
 export * from './log_query';
