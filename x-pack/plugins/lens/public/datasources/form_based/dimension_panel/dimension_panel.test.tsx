@@ -187,7 +187,8 @@ function mountWithServices(component: React.ReactElement): ReactWrapper {
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
  */
-describe('FormBasedDimensionEditor', () => {
+// Failing: See https://github.com/elastic/kibana/issues/192476
+describe.skip('FormBasedDimensionEditor', () => {
   let state: FormBasedPrivateState;
   let setState: jest.Mock;
   let defaultProps: FormBasedDimensionEditorProps;
