@@ -91,8 +91,11 @@ type ServerRouteHandlerReturnTypeWithoutRecord =
   | Observable<ServerSentEvent>
   | Readable
   | IKibanaResponse
-  | void
-  | null;
+  | string
+  | number
+  | boolean
+  | null
+  | void;
 
 type ServerRouteHandlerReturnType = ServerRouteHandlerReturnTypeWithoutRecord | Record<string, any>;
 
