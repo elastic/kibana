@@ -25,7 +25,7 @@ const inputCss = css({
   padding: 0,
   margin: 0,
   background: 0,
-  outline: 0,
+  outline: '0 !important',
   border: 0,
   color: 'inherit',
   fontWeight: 'inherit',

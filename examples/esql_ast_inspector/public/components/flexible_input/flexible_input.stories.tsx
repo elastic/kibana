@@ -18,14 +18,21 @@ const Demo: React.FC<FlexibleInputProps> = (props) => {
   const [value, setValue] = React.useState(props.value);
 
   return (
-    <FlexibleInput
-      {...props}
-      value={value}
-      onChange={(e) => {
-        setValue(e.target.value);
-      }}
-    />
+    <code>
+      <FlexibleInput
+        {...props}
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+        }}
+      />
+    </code>
   );
 };
 
-export const Example = () => <Demo value="hello" multiline />;
+const src = `FROM index, index2
+  | WHERE language = "esql"
+  | LIMIT 10
+`;
+
+export const Example = () => <Demo value={src} multiline />;
