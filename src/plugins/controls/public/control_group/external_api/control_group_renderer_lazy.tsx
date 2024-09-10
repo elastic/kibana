@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupContainer } from '..';
+import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import type { ControlGroupRendererProps } from './control_group_renderer';
 
-// TODO lock down ControlGroupAPI
-export type ControlGroupAPI = ControlGroupContainer;
-export type AwaitingControlGroupAPI = ControlGroupAPI | null;
+const Component = dynamic(async () => {
+  const { ControlGroupRenderer } = await import('./control_group_renderer');
+  return {
+    default: ControlGroupRenderer,
+  };
+});
 
-export const buildApiFromControlGroupContainer = (container?: ControlGroupContainer) =>
-  container ?? null;
+export function LazyControlGroupRenderer(props: ControlGroupRendererProps) {
+  return <Component {...props} />;
+}
