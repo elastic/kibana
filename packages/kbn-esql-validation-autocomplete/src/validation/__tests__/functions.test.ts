@@ -300,7 +300,7 @@ describe('function validation', () => {
 
       await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*)', []);
       await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*, "")', [
-        // It may seeem strange that these are syntax errors, but the grammar actually doesn't allow
+        // It may seem strange that these are syntax errors, but the grammar actually doesn't allow
         // for a function to support the asterisk and have additional arguments. Testing it here so we'll
         // be notified if that changes.
         `SyntaxError: extraneous input ')' expecting <EOF>`,
@@ -342,20 +342,90 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
     });
 
-    it('enforces constant-only parameters', () => {
-      // testErrorsAndWarnings('from a_index | stats percentile(doubleField, doubleField)', [
-      //   'Argument of [percentile] must be a constant, received [doubleField]',
-      // ]);
-      // testErrorsAndWarnings(
-      //   'from a_index | stats var = round(percentile(doubleField, doubleField))',
-      //   [
-      //     'Argument of [=] must be a constant, received [round(percentile(doubleField,doubleField))]',
-      //   ]
-      // );
+    it('enforces constant-only parameters', async () => {
+      setTestFunctions([
+        {
+          name: 'test',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'integer', constantOnly: true }],
+              returnType: 'integer',
+            },
+          ],
+        },
+        {
+          name: 'test2',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          signatures: [
+            {
+              params: [
+                { name: 'arg1', type: 'integer' },
+                { name: 'arg2', type: 'date', constantOnly: true },
+              ],
+              returnType: 'integer',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | EVAL TEST(1)', []);
+      // operators, functions are ok
+      await expectErrors('FROM a_index | EVAL TEST(1 + 1)', []);
+      await expectErrors('FROM a_index | EVAL TEST(integerField)', [
+        'Argument of [test] must be a constant, received [integerField]',
+      ]);
+      await expectErrors('FROM a_index | EVAL var = 10 | EVAL TEST(var)', [
+        'Argument of [test] must be a constant, received [var]',
+      ]);
+
+      await expectErrors('FROM a_index | EVAL TEST2(integerField, NOW())', []);
+      await expectErrors('FROM a_index | EVAL TEST2(integerField, dateField)', [
+        'Argument of [test2] must be a constant, received [dateField]',
+      ]);
+    });
+
+    it('validates accepted values', async () => {
+      setTestFunctions([
+        {
+          name: 'test',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'keyword', acceptedValues: ['ASC', 'DESC'] }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | EVAL TEST("ASC")', [], []);
+      await expectErrors('FROM a_index | EVAL TEST("DESC")', [], []);
+
+      // case-insensitive
+      await expectErrors('FROM a_index | EVAL TEST("aSc")', [], []);
+      await expectErrors('FROM a_index | EVAL TEST("DesC")', [], []);
+
+      // not constantOnly, so field is accepted
+      await expectErrors('FROM a_index | EVAL TEST(keywordField)', [], []);
+
+      await expectErrors(
+        'FROM a_index | EVAL TEST("foo")',
+        [],
+        ['Invalid option ["foo"] for test. Supported options: ["ASC", "DESC"].']
+      );
     });
   });
 
-  describe('command support', () => {
+  describe('command/option support', () => {
     it('does not allow aggregations outside of STATS', () => {
       // SORT
       // WHERE

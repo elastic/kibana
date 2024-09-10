@@ -420,8 +420,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );

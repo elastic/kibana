@@ -133,46 +133,48 @@ function getFieldMapping(
     number: '5',
     date: 'now()',
   };
-  return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
-    const typeString: string = type as string;
-    if (dataTypes.includes(typeString as SupportedDataType)) {
-      if (useLiterals && literalOptions) {
+  return params.map(
+    ({ name: _name, type, constantOnly, acceptedValues: literalOptions, ...rest }) => {
+      const typeString: string = type as string;
+      if (dataTypes.includes(typeString as SupportedDataType)) {
+        if (useLiterals && literalOptions) {
+          return {
+            name: `"${literalOptions[0]}"`,
+            type,
+            ...rest,
+          };
+        }
+
+        const fieldName =
+          constantOnly && typeString in literalValues
+            ? literalValues[typeString as keyof typeof literalValues]!
+            : getFieldName(typeString, {
+                useNestedFunction,
+                isStats: !useLiterals,
+              });
         return {
-          name: `"${literalOptions[0]}"`,
+          name: fieldName,
           type,
           ...rest,
         };
       }
-
-      const fieldName =
-        constantOnly && typeString in literalValues
-          ? literalValues[typeString as keyof typeof literalValues]!
-          : getFieldName(typeString, {
-              useNestedFunction,
-              isStats: !useLiterals,
-            });
-      return {
-        name: fieldName,
-        type,
-        ...rest,
-      };
+      if (/literal$/.test(typeString) && useLiterals) {
+        return {
+          name: getLiteralType(typeString as 'time_literal'),
+          type,
+          ...rest,
+        };
+      }
+      if (/\[\]$/.test(typeString)) {
+        return {
+          name: getMultiValue(typeString),
+          type,
+          ...rest,
+        };
+      }
+      return { name: 'textField', type, ...rest };
     }
-    if (/literal$/.test(typeString) && useLiterals) {
-      return {
-        name: getLiteralType(typeString as 'time_literal'),
-        type,
-        ...rest,
-      };
-    }
-    if (/\[\]$/.test(typeString)) {
-      return {
-        name: getMultiValue(typeString),
-        type,
-        ...rest,
-      };
-    }
-    return { name: 'textField', type, ...rest };
-  });
+  );
 }
 
 describe('validation logic', () => {
