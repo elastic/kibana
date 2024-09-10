@@ -135,6 +135,9 @@ function needsTypeConversion(sample: unknown, expected: string): boolean {
 }
 
 function generateProcessors(ecsMapping: object, samples: object, basePath: string = ''): object[] {
+  if (Object.keys(ecsMapping).length === 0) {
+    return [];
+  }
   const ecsTypes = ECS_TYPES;
   const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
   const results: object[] = [];
