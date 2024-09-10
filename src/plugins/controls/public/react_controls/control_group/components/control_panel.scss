@@ -42,30 +42,30 @@
 
 .controlFrame__formControlLayout:not(.controlFrame__formControlLayout--edit):not(.controlFrame__formControlLayout--twoLine) {
   .euiFormControlLayout__prepend {
-    padding-inline-start: $euiSizeS !important; // to-do remove !important when new controls are merged
+    padding-inline-start: $euiSizeS;
   }
 }
 
-.controlFrame__formControlLayout.controlFrame__formControlLayout--view.timeSlider {
+.controlFrame__formControlLayout:not(.controlFrame__formControlLayout--edit).timeSlider {
   .euiFormControlLayout__prepend {
-    padding-inline-start: 0 !important; // to-do remove !important when new controls are merged
+    padding-inline-start: 0;
   }
 }
 
 .controlFrame__formControlLayout.controlFrame__formControlLayout--twoLine.controlFrame__formControlLayout--edit {
   .euiFormControlLayout__prepend {
-    padding-inline-end: 0 !important; // to-do remove !important when new controls are merged
+    padding-inline-end: 0;
   }
 }
 
 .controlFrame__formControlLayout.controlFrame__formControlLayout--twoLine:not(.controlFrame__formControlLayout--edit) {
   .euiFormControlLayout__prepend {
-    padding-inline: 0 !important; // to-do remove !important when new controls are merged
+    padding-inline: 0;
   }
 }
 
 .controlFrame__formControlLayout:not(.controlFrame__formControlLayout--twoLine).controlFrame__formControlLayout--edit {
   .euiFormControlLayout__prepend {
-    padding-inline-start: $euiSizeXS * 0.5 !important; // skinny icon, to-do remove !important when new controls are merged
+    padding-inline-start: $euiSizeXS * 0.5; // skinny icon
   }
 }
