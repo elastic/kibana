@@ -52,7 +52,7 @@ describe('SolutionFilter ', () => {
 
       expect(screen.getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('options-filter-popover-button-owner'));
+      await userEvent.click(screen.getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
@@ -71,11 +71,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      await userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      await userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
@@ -92,11 +92,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      await userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      await userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
@@ -122,7 +122,7 @@ describe('SolutionFilter ', () => {
 
       expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      await userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
@@ -139,11 +139,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      await userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      await userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
@@ -160,11 +160,11 @@ describe('SolutionFilter ', () => {
         />
       );
 
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
+      await userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
+      await userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',

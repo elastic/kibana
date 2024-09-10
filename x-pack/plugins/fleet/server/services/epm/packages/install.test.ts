@@ -28,7 +28,6 @@ import {
   installPackage,
   isPackageVersionOrLaterInstalled,
 } from './install';
-import * as install from './_install_package';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
@@ -76,11 +75,6 @@ jest.mock('../../license');
 jest.mock('../../upgrade_sender');
 jest.mock('./cleanup');
 jest.mock('./bundled_packages');
-jest.mock('./_install_package', () => {
-  return {
-    _installPackage: jest.fn(() => Promise.resolve()),
-  };
-});
 jest.mock('./install_state_machine/_state_machine_package_install', () => {
   return {
     _stateMachineInstallPackage: jest.fn(() => Promise.resolve()),
@@ -173,7 +167,6 @@ describe('install', () => {
     );
 
     mockGetBundledPackageByPkgKey.mockReset();
-    (install._installPackage as jest.Mock).mockClear();
     (installStateMachine._stateMachineInstallPackage as jest.Mock).mockClear();
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReset();
   });
@@ -181,9 +174,6 @@ describe('install', () => {
   describe('registry', () => {
     beforeEach(() => {
       mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
-    });
-    afterEach(() => {
-      (install._installPackage as jest.Mock).mockClear();
     });
 
     it('should send telemetry on install failure, out of date', async () => {
@@ -320,7 +310,7 @@ describe('install', () => {
 
       expect(response.error).toBeUndefined();
 
-      expect(install._installPackage).toHaveBeenCalledWith(
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
         expect.objectContaining({ installSource: 'bundled' })
       );
     });
@@ -435,7 +425,9 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
+      jest
+        .mocked(installStateMachine._stateMachineInstallPackage)
+        .mockRejectedValue(new Error('error'));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -556,11 +548,11 @@ describe('handleInstallPackageFailure', () => {
 
   beforeEach(() => {
     mockedLogger.error.mockClear();
-    jest.mocked(install._installPackage).mockClear();
+    jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
     jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
     mockGetBundledPackageByPkgKey.mockReset();
 
-    jest.mocked(install._installPackage).mockResolvedValue({} as any);
+    jest.mocked(installStateMachine._stateMachineInstallPackage).mockResolvedValue({} as any);
     mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
     jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
@@ -610,7 +602,7 @@ describe('handleInstallPackageFailure', () => {
     });
 
     expect(mockedLogger.error).not.toBeCalled();
-    expect(install._installPackage).not.toBeCalled();
+    expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
   });
 
   it('should rollback on upgrade on FleetError', async () => {

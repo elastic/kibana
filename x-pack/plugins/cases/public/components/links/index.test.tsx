@@ -144,12 +144,21 @@ describe('CaseDetailsLink', () => {
     expect(screen.getByLabelText(`click to visit case with title my title`)).toBeInTheDocument();
   });
 
-  test('it calls navigateToCaseViewClick on click', () => {
+  test('it calls navigateToCaseViewClick on click', async () => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    jest.useFakeTimers();
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
+
     render(<CaseDetailsLink {...props} />);
-    userEvent.click(screen.getByText('test detail name'));
+    await user.click(screen.getByText('test detail name'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: props.detailName,
     });
+
+    jest.useRealTimers();
   });
 
   test('it set the href correctly', () => {
