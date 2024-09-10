@@ -37,7 +37,8 @@
     "@kbn/share-plugin",
     "@kbn/router-utils",
     "@kbn/unified-field-list",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/management-settings-ids"
   ],
   "exclude": [
     "target/**/*",
