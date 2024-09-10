@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -13,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'header']);
+  const { dashboard, timePicker, header } = getPageObjects(['dashboard', 'timePicker', 'header']);
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -30,17 +31,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setDefaultDataRange();
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await timePicker.setDefaultDataRange();
+      await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectEditorMenuClosed();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
       await retry.try(async () => {
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });
 
@@ -49,9 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should remove the panel if cancel button is clicked', async () => {
       await testSubjects.click('cancelFlyoutButton');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       await retry.try(async () => {
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(0);
       });
     });
@@ -60,11 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectEditorMenuClosed();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
 
       await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
       await testSubjects.click('TextBasedLangEditor-run-query-button');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('applyFlyoutButton');
       expect(await testSubjects.exists('mtrVis')).to.be(true);

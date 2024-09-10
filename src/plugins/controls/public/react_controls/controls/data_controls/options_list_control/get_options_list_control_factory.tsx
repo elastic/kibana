@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -88,7 +88,6 @@ export const getOptionsListControlFactory = (
       >(
         uuid,
         OPTIONS_LIST_CONTROL,
-        'optionsListDataView',
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
         controlGroupApi,
@@ -245,7 +244,7 @@ export const getOptionsListControlFactory = (
                 searchTechnique: searchTechnique$.getValue(),
                 runPastTimeout: runPastTimeout$.getValue(),
                 singleSelect: singleSelect$.getValue(),
-                selectedOptions: selections.selectedOptions$.getValue(),
+                selections: selections.selectedOptions$.getValue(),
                 sort: sort$.getValue(),
                 existsSelected: selections.existsSelected$.getValue(),
                 exclude: selections.exclude$.getValue(),
@@ -279,7 +278,7 @@ export const getOptionsListControlFactory = (
           sort: [
             sort$,
             (sort) => sort$.next(sort),
-            (a, b) => fastIsEqual(a ?? OPTIONS_LIST_DEFAULT_SORT, b ?? OPTIONS_LIST_DEFAULT_SORT),
+            (a, b) => (a ?? OPTIONS_LIST_DEFAULT_SORT) === (b ?? OPTIONS_LIST_DEFAULT_SORT),
           ],
 
           /** This state cannot currently be changed after the control is created */

@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: CreateConversation
-      description: Create a conversation
+      description: Create a new Security AI Assistant conversation.
       summary: Create a conversation
       tags:
         - Conversation API
@@ -44,8 +44,8 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: ReadConversation
-      description: Read a single conversation
-      summary: Read a single conversation
+      description: Get the details of an existing conversation using the conversation ID.
+      summary: Get a conversation
       tags:
         - Conversations API
       parameters:
@@ -79,7 +79,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: UpdateConversation
-      description: Update a single conversation
+      description: Update an existing conversation using the conversation ID.
       summary: Update a conversation
       tags:
         - Conversation API
@@ -120,8 +120,8 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: DeleteConversation
-      description: Deletes a single conversation using the `id` field.
-      summary: Deletes a single conversation using the `id` field.
+      description: Delete an existing conversation using the conversation ID.
+      summary: Delete a conversation
       tags:
         - Conversation API
       parameters:

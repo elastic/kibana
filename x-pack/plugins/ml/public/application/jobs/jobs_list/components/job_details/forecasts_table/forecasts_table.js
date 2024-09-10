@@ -89,6 +89,7 @@ export class ForecastsTable extends Component {
   async openSingleMetricView(forecast) {
     const {
       services: {
+        chrome: { recentlyAccessed },
         application: { navigateToUrl },
         share,
       },
@@ -156,7 +157,8 @@ export class ForecastsTable extends Component {
     addItemToRecentlyAccessed(
       'timeseriesexplorer',
       this.props.job.job_id,
-      singleMetricViewerForecastLink
+      singleMetricViewerForecastLink,
+      recentlyAccessed
     );
     await navigateToUrl(singleMetricViewerForecastLink);
   }

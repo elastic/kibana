@@ -14,17 +14,39 @@ import {
   ViewDashboardSteps,
 } from './types';
 import { ProductLine, ProductTier } from './configs';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
+
+const mockedUseKibana = mockUseKibana();
+const mockedStorageGet = jest.fn();
+const mockedStorageSet = jest.fn();
+
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+
+  return {
+    ...original,
+    useCurrentUser: jest.fn().mockReturnValue({ fullName: 'UserFullName' }),
+    useKibana: () => ({
+      mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        storage: {
+          ...mockedUseKibana.services.storage,
+          get: mockedStorageGet,
+          set: mockedStorageSet,
+        },
+      },
+    }),
+  };
+});
 
 jest.mock('./toggle_panel');
-jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-(useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' });
 
 describe('OnboardingComponent', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -89,7 +111,7 @@ describe('OnboardingComponent', () => {
 
   describe('AVC 2024 Results banner', () => {
     beforeEach(() => {
-      (useKibana().services.storage.get as jest.Mock).mockReturnValue(true);
+      mockedStorageGet.mockReturnValue(true);
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -112,14 +134,11 @@ describe('OnboardingComponent', () => {
       render();
       renderResult.getByTestId('euiDismissCalloutButton').click();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
-      expect(useKibana().services.storage.set).toHaveBeenCalledWith(
-        'securitySolution.showAvcBanner',
-        false
-      );
+      expect(mockedStorageSet).toHaveBeenCalledWith('securitySolution.showAvcBanner', false);
     });
 
     it('should stay dismissed if it has been closed once', () => {
-      (useKibana().services.storage.get as jest.Mock).mockReturnValueOnce(false);
+      mockedStorageGet.mockReturnValueOnce(false);
       render();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
     });

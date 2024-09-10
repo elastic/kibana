@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -44,7 +45,7 @@ jest.mock('./dashboard_grid_item', () => {
   };
 });
 
-const createAndMountDashboardGrid = async () => {
+const createAndMountDashboardGrid = () => {
   const dashboardContainer = buildMockDashboard({
     overrides: {
       panels: {
@@ -61,7 +62,6 @@ const createAndMountDashboardGrid = async () => {
       },
     },
   });
-  await dashboardContainer.untilContainerInitialized();
   const component = mountWithIntl(
     <DashboardContainerContext.Provider value={dashboardContainer}>
       <DashboardGrid viewportWidth={1000} />
@@ -71,20 +71,20 @@ const createAndMountDashboardGrid = async () => {
 };
 
 test('renders DashboardGrid', async () => {
-  const { component } = await createAndMountDashboardGrid();
+  const { component } = createAndMountDashboardGrid();
   const panelElements = component.find('GridItem');
   expect(panelElements.length).toBe(2);
 });
 
 test('renders DashboardGrid with no visualizations', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   dashboardContainer.updateInput({ panels: {} });
   component.update();
   expect(component.find('GridItem').length).toBe(0);
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   const originalPanels = dashboardContainer.getInput().panels;
   const filteredPanels = { ...originalPanels };
   delete filteredPanels['1'];
@@ -95,7 +95,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
 });
 
 test('DashboardGrid renders expanded panel', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   dashboardContainer.setExpandedPanelId('1');
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -113,7 +113,7 @@ test('DashboardGrid renders expanded panel', async () => {
 });
 
 test('DashboardGrid renders focused panel', async () => {
-  const { dashboardContainer, component } = await createAndMountDashboardGrid();
+  const { dashboardContainer, component } = createAndMountDashboardGrid();
   dashboardContainer.setFocusedPanelId('2');
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.

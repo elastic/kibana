@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
@@ -293,6 +294,18 @@ describe('autocomplete.suggest', () => {
           'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
           [',', '| ', '+ $0', '- $0']
         );
+      });
+
+      test('count(/) to suggest * for all', async () => {
+        const { assertSuggestions } = await setup();
+
+        const expected = [
+          '*',
+          ...getFieldNamesByType(['any']).map((field) => `${field}`),
+          ...allEvaFunctions,
+        ];
+        await assertSuggestions('from a | stats count(/)', expected);
+        await assertSuggestions('from a | stats var0 = count(/)', expected);
       });
     });
   });

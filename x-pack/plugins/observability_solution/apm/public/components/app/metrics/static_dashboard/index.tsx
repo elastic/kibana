@@ -16,7 +16,8 @@ import {
 import { DataView } from '@kbn/data-views-plugin/common';
 import { buildExistsFilter, buildPhraseFilter, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
+import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { NotificationsStart } from '@kbn/core/public';
 import {
   ENVIRONMENT_ALL,
@@ -70,9 +71,10 @@ async function getCreationOptions(
   dataView: DataView
 ): Promise<DashboardCreationOptions> {
   try {
-    const controlGroupState = {};
+    const builder = controlGroupInputBuilder;
+    const controlGroupInput = getDefaultControlGroupInput();
 
-    await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
+    await builder.addDataControlFromField(controlGroupInput, {
       dataViewId: dataView.id ?? '',
       title: 'Node name',
       fieldName: 'service.node.name',
@@ -90,7 +92,7 @@ async function getCreationOptions(
       getInitialInput: () => ({
         viewMode: ViewMode.VIEW,
         panels,
-        controlGroupState,
+        controlGroupInput,
       }),
     };
   } catch (error) {
