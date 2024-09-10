@@ -232,5 +232,5 @@ function encodeDiscoveryRulesYaml(discoveryRules: IDiscoveryRule[]): string {
       [`${operation}-${type}`]: probe,
     })
   );
-  return yaml.safeDump(mappedDiscoveryRules);
+  return yaml.dump(mappedDiscoveryRules);
 }

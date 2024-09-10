@@ -949,7 +949,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -978,7 +978,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
@@ -1014,7 +1014,7 @@ describe('EPM template', () => {
         },
       },
     };
-    const fields: Field[] = safeLoad(nestedYaml);
+    const fields: Field[] = load(nestedYaml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
