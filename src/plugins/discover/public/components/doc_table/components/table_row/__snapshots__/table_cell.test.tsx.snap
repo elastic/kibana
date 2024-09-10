@@ -66,6 +66,14 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                       "before": null,
                       "container": <head>
                         <style
+                          data-styled="active"
+                          data-styled-version="5.3.11"
+                        />
+                        <style
+                          data-styled="active"
+                          data-styled-version="5.3.11"
+                        />
+                        <style
                           data-emotion="css"
                           data-s=""
                         >
@@ -79,10 +87,6 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                           
                           .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
                         </style>
-                        <style
-                          data-styled="active"
-                          data-styled-version="5.3.11"
-                        />
                       </head>,
                       "ctr": 2,
                       "insertionPoint": undefined,
@@ -189,6 +193,14 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                       "before": null,
                       "container": <head>
                         <style
+                          data-styled="active"
+                          data-styled-version="5.3.11"
+                        />
+                        <style
+                          data-styled="active"
+                          data-styled-version="5.3.11"
+                        />
+                        <style
                           data-emotion="css"
                           data-s=""
                         >
@@ -202,10 +214,6 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                           
                           .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
                         </style>
-                        <style
-                          data-styled="active"
-                          data-styled-version="5.3.11"
-                        />
                       </head>,
                       "ctr": 2,
                       "insertionPoint": undefined,
