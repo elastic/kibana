@@ -3,6 +3,7 @@
   background-color: $euiFormInputGroupLabelBackground;
   border-radius: $euiFormControlBorderRadius;
   box-shadow: 0 0 1px inset rgba($euiFormBorderOpaqueColor, .4);
+  max-height: $euiFormControlCompressedHeight;
 
   // Targets any interactable elements
   *:enabled {
