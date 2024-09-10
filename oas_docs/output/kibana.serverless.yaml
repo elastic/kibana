@@ -7269,6 +7269,14 @@ paths:
       summary: Import saved objects
       tags:
         - saved objects
+      x-codeSamples:
+        - label: Import with createNewCopies
+          lang: cURL
+          source: |
+            curl \
+              -X POST api/saved_objects/_import?createNewCopies=true
+              -H "kbn-xsrf: true"
+              --form file=@file.ndjson
   /api/status:
     get:
       operationId: '%2Fapi%2Fstatus#0'

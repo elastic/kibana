@@ -67,23 +67,23 @@ describe('LogsExplorerTabs', () => {
     expect(getLogsExplorerTab()).toHaveAttribute('href', ALL_DATASETS_LOCATOR_ID);
   });
 
-  it('should render Discover as the selected tab', () => {
+  it('should render Discover as the selected tab', async () => {
     const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'true');
-    userEvent.click(getDiscoverTab());
+    await userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).not.toHaveBeenCalled();
     expect(getLogsExplorerTab()).toHaveAttribute('aria-selected', 'false');
-    userEvent.click(getLogsExplorerTab());
+    await userEvent.click(getLogsExplorerTab());
     expect(mockLogsExplorerLocator.navigate).toHaveBeenCalledWith({});
   });
 
-  it('should render Log Explorer as the selected tab', () => {
+  it('should render Log Explorer as the selected tab', async () => {
     const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs('logs-explorer');
     expect(getLogsExplorerTab()).toHaveAttribute('aria-selected', 'true');
-    userEvent.click(getLogsExplorerTab());
+    await userEvent.click(getLogsExplorerTab());
     expect(mockLogsExplorerLocator.navigate).not.toHaveBeenCalled();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'false');
-    userEvent.click(getDiscoverTab());
+    await userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
   });
 });
