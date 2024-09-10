@@ -17,7 +17,7 @@ export const knowledgeBaseIngestPipeline = ({ id, modelId }: { id: string; model
         input_output: [
           {
             input_field: 'text',
-            output_field: 'vector',
+            output_field: 'vector.tokens',
           },
         ],
       },
