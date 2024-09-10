@@ -41,7 +41,7 @@ export const getConsoleTourStepProps = (
       css: step.css,
       onFinish: () => actions.finishTour(false),
       footerAction:
-        tourState.currentTourStep === stateTourStepProps.length ? (
+        step.step === step.stepsTotal ? (
           <EuiButton
             color="success"
             size="s"
