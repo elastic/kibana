@@ -16,20 +16,13 @@ export type {
   SerializedControlState,
 } from './types';
 
-export const TIME_SLIDER_CONTROL = 'timeSlider';
-export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
-export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-
 export {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
-} from './control_group/control_group_constants';
-export { CONTROL_GROUP_TYPE } from './control_group/types';
-export type {
-  ControlGroupChainingSystem,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlPanelState,
-  ControlPanelsState,
-} from './control_group/types';
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from './constants';
+
+export { CONTROL_GROUP_TYPE } from './control_group';

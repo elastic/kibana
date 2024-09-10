@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlStyle, ControlWidth } from '../types';
+export type {
+  ControlGroupChainingSystem,
+  ControlGroupEditorConfig,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelState,
+  ControlPanelsState,
+} from './types';
 
-export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'medium';
-export const DEFAULT_CONTROL_GROW: boolean = true;
-export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
+export { CONTROL_GROUP_TYPE } from './types';

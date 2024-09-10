@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
@@ -20,6 +20,7 @@ import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDataLoading,
+  PublishesDisabledActionIds,
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
@@ -29,12 +30,14 @@ import {
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
-import { ControlStyle, ParentIgnoreSettings } from '../../../common';
+import { ControlStyle, DefaultControlState, ParentIgnoreSettings } from '../../../common';
 import {
+  ControlGroupChainingSystem,
+  ControlGroupEditorConfig,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelState,
-} from '../../../common/control_group/types';
+} from '../../../common/control_group';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
 export type ControlGroupUnsavedChanges = Omit<
@@ -51,24 +54,37 @@ export type ControlGroupApi = PresentationContainer &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesDataLoading &
-  Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
+  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges'> &
   PublishesTimeslice &
+  PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
-    asyncResetUnsavedChanges: () => Promise<void>;
-    autoApplySelections$: PublishingSubject<boolean>;
-    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
-    getLastSavedControlState: (controlUuid: string) => object;
-    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
-    untilInitialized: () => Promise<void>;
+    autoApplySelections$: PublishingSubject<boolean>;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    labelPosition: PublishingSubject<ControlStyle>;
+
+    asyncResetUnsavedChanges: () => Promise<void>;
+    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
-      // controlInputTransform?: ControlInputTransform;
+      controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
     }) => void;
-    labelPosition: PublishingSubject<ControlStyle>;
+    untilInitialized: () => Promise<void>;
+
+    /** Public getters */
+    getEditorConfig: () => ControlGroupEditorConfig | undefined;
+    getLastSavedControlState: (controlUuid: string) => object;
+
+    /** Public setters */
+    setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
   };
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
   'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
+
+export type ControlStateTransform<State extends DefaultControlState = DefaultControlState> = (
+  newState: Partial<State>,
+  controlType: string
+) => Partial<State>;

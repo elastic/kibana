@@ -9,7 +9,7 @@
 
 import { ControlsPlugin } from './plugin';
 
-export { controlGroupStateBuilder } from './react_controls/control_group/control_group_state_builder';
+export { controlGroupStateBuilder } from './react_controls/control_group/utils/control_group_state_builder';
 
 export type { ControlGroupApi } from './react_controls/control_group/types';
 
