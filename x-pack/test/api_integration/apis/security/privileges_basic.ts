@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
+            searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],

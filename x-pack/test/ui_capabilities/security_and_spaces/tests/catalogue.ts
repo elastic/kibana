@@ -97,6 +97,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'observabilityAIAssistant',
               'workplaceSearch',
               'searchExperiences',
+              'searchInferenceEndpoints',
               'spaces',
               ...esFeatureExceptions,
             ];
