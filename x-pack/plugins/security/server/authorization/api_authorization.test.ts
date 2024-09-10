@@ -140,7 +140,7 @@ describe('initAPIAuthorization', () => {
   });
 
   describe('security config', () => {
-    const testSecurityConfig = async (
+    const testSecurityConfig = (
       description: string,
       {
         security,
