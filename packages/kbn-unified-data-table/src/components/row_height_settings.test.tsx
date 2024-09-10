@@ -34,40 +34,40 @@ const renderRowHeightSettings = ({ maxRowHeight }: { maxRowHeight?: number } = {
 };
 
 describe('RowHeightSettings', () => {
-  it('should set rowHeight when the selected button changes', () => {
+  it('should set rowHeight when the selected button changes', async () => {
     renderRowHeightSettings();
     expect(screen.getByRole('button', { name: 'Single', pressed: true })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Auto fit', pressed: false })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Custom', pressed: false })).toBeInTheDocument();
-    userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
     expect(screen.getByRole('button', { name: 'Single', pressed: false })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Auto fit', pressed: true })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Custom', pressed: false })).toBeInTheDocument();
-    userEvent.click(screen.getByRole('button', { name: 'Custom' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
     expect(screen.getByRole('button', { name: 'Single', pressed: false })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Auto fit', pressed: false })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Custom', pressed: true })).toBeInTheDocument();
   });
 
-  it('should show the range input when Custom is selected', () => {
+  it('should show the range input when Custom is selected', async () => {
     renderRowHeightSettings();
     expect(screen.queryByRole('slider', { hidden: true })).not.toBeInTheDocument();
-    userEvent.click(screen.getByRole('button', { name: 'Custom' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
     expect(screen.getByRole('slider', { hidden: true })).toBeInTheDocument();
   });
 
-  it('should set rowHeightLines when the range input changes', () => {
+  it('should set rowHeightLines when the range input changes', async () => {
     renderRowHeightSettings();
-    userEvent.click(screen.getByRole('button', { name: 'Custom' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
     const slider = screen.getByRole('slider', { hidden: true });
     expect(slider).toHaveValue('2');
     fireEvent.change(slider, { target: { value: 10 } });
     expect(slider).toHaveValue('10');
   });
 
-  it('should limit the range input to the maxRowHeight', () => {
+  it('should limit the range input to the maxRowHeight', async () => {
     renderRowHeightSettings({ maxRowHeight: 5 });
-    userEvent.click(screen.getByRole('button', { name: 'Custom' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
     const slider = screen.getByRole('slider', { hidden: true });
     expect(slider).toHaveValue('2');
     fireEvent.change(slider, { target: { value: 10 } });

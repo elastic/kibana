@@ -115,15 +115,15 @@ export class EuiSuperDatePickerTestHarness {
   /**
    * Opens the popover for the date picker
    */
-  static togglePopover() {
-    userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
+  static async togglePopover() {
+    await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
   }
 
   /**
    * Selects a commonly-used range from the date picker (opens the popover if it's not already open)
    */
   static async selectCommonlyUsedRange(label: string) {
-    if (!screen.queryByText('Commonly used')) this.togglePopover();
+    if (!screen.queryByText('Commonly used')) await this.togglePopover();
 
     // Using fireEvent here because userEvent erroneously claims that
     // pointer-events is set to 'none'.
@@ -135,8 +135,8 @@ export class EuiSuperDatePickerTestHarness {
   /**
    * Activates the refresh button
    */
-  static refresh() {
-    userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  static async refresh() {
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
   }
 }
 

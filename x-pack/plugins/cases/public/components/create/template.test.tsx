@@ -52,7 +52,7 @@ describe('TemplateSelector', () => {
 
     expect(onTemplateChange).not.toHaveBeenCalled();
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );
@@ -95,7 +95,7 @@ describe('TemplateSelector', () => {
 
     expect(await screen.findByText(templateToSelect.name)).toBeInTheDocument();
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       newTemplate.key
     );
@@ -119,7 +119,7 @@ describe('TemplateSelector', () => {
       />
     );
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );

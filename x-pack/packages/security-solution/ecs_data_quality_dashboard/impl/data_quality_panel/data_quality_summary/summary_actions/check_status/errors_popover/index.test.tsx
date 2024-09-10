@@ -6,7 +6,7 @@
  */
 
 import userEvent from '@testing-library/user-event';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
@@ -57,7 +57,7 @@ describe('ErrorsPopover', () => {
   describe('popover content', () => {
     const addSuccessToast = jest.fn();
 
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.resetAllMocks();
 
       render(
@@ -68,9 +68,7 @@ describe('ErrorsPopover', () => {
 
       const viewErrorsButton = screen.getByTestId('viewErrors');
 
-      act(() => {
-        userEvent.click(viewErrorsButton);
-      });
+      await userEvent.click(viewErrorsButton);
     });
 
     test('it renders the expected callout content', () => {
@@ -79,11 +77,9 @@ describe('ErrorsPopover', () => {
       );
     });
 
-    test('it invokes `addSuccessToast` when the copy button is clicked', () => {
+    test('it invokes `addSuccessToast` when the copy button is clicked', async () => {
       const copyToClipboardButton = screen.getByTestId('copyToClipboard');
-      act(() => {
-        userEvent.click(copyToClipboardButton, undefined, { skipPointerEventsCheck: true });
-      });
+      await userEvent.click(copyToClipboardButton, { pointerEventsCheck: 0 });
 
       expect(addSuccessToast).toBeCalledWith({ title: 'Copied errors to the clipboard' });
     });

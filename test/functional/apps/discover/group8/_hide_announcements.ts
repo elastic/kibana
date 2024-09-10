@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -24,8 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display take tour button', async function () {
-      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await discover.selectIndexPattern('logstash-*');
       const tourButtonExists = await testSubjects.exists('discoverTakeTourButton');
       expect(tourButtonExists).to.be(true);
     });
