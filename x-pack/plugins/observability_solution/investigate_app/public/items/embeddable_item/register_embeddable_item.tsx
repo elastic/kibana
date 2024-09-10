@@ -15,6 +15,8 @@ import { ErrorMessage } from '../../components/error_message';
 import { useKibana } from '../../hooks/use_kibana';
 import { Options } from '../register_items';
 
+export const EMBEDDABLE_ITEM_TYPE = 'embeddable';
+
 const embeddableClassName = css`
   height: 100%;
   > [data-shared-item] {
@@ -163,7 +165,7 @@ export function registerEmbeddableItem({
   services,
 }: Options) {
   investigate.registerItemDefinition<EmbeddableItemParams, {}>({
-    type: 'embeddable',
+    type: EMBEDDABLE_ITEM_TYPE,
     generate: async (option: {
       itemParams: EmbeddableItemParams;
       globalParams: GlobalWidgetParameters;

@@ -14,6 +14,7 @@ import React, { useMemo, useRef } from 'react';
 import { Item } from '@kbn/investigation-shared';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { EMBEDDABLE_ITEM_TYPE } from '../../../../items/embeddable_item/register_embeddable_item';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigateTextButton } from '../investigate_text_button';
 
@@ -53,7 +54,7 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
     }) {
       const embeddableItem = {
         title,
-        type: 'embeddable',
+        type: EMBEDDABLE_ITEM_TYPE,
         params: {
           savedObjectId,
           config: attributes,
