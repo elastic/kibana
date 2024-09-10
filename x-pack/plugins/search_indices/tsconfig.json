@@ -28,7 +28,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
     "@kbn/index-management",
-    "@kbn/es-ui-shared-plugin"
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/doc-links"
   ],
   "exclude": [
     "target/**/*",
