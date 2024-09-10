@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
-import { parseReferenceName } from '../controls/data_controls/reference_name_utils';
+
+import { SerializedPanelState } from '@kbn/presentation-containers';
+
+import { parseReferenceName } from '../../controls/data_controls/reference_name_utils';
+import { ControlGroupRuntimeState, ControlGroupSerializedState } from '../types';
 
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
@@ -45,7 +47,7 @@ export const deserializeControlGroup = (
     autoApplySelections:
       typeof state.rawState.showApplySelections === 'boolean'
         ? !state.rawState.showApplySelections
-        : false, // Rename "showApplySelections" to "autoApplySelections"
+        : true, // Rename "showApplySelections" to "autoApplySelections"
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
   };
 };
