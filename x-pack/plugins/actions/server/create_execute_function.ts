@@ -221,18 +221,9 @@ export function createEphemeralExecutionEnqueuerFunction({
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
   ): Promise<RunNowResult> {
-    const { action } = await getAction(unsecuredSavedObjectsClient, inMemoryConnectors, id);
+    const { connector } = await getConnector(unsecuredSavedObjectsClient, inMemoryConnectors, id);
 
-    if (action.isMissingSecrets) {
-      throw new Error(
-        `Unable to execute action because no secrets are defined for the "${action.name}" connector.`
-      );
-    }
-
-    const { actionTypeId } = action;
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    }
+    validateConnector({ id, connector, actionTypeRegistry });
 
     const taskParams: ActionTaskExecutorParams = {
       spaceId,
@@ -292,19 +283,19 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
     : {};
 }
 
-async function getAction(
+async function getConnector(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   inMemoryConnectors: InMemoryConnector[],
   actionId: string
-): Promise<{ action: InMemoryConnector | RawAction; isInMemory: boolean }> {
+): Promise<{ connector: InMemoryConnector | RawAction; isInMemory: boolean }> {
   const inMemoryAction = inMemoryConnectors.find((action) => action.id === actionId);
 
   if (inMemoryAction) {
-    return { action: inMemoryAction, isInMemory: true };
+    return { connector: inMemoryAction, isInMemory: true };
   }
 
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return { action: attributes, isInMemory: false };
+  return { connector: attributes, isInMemory: false };
 }
 
 async function getConnectors(
