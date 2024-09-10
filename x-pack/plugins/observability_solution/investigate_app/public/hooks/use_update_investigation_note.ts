@@ -44,11 +44,7 @@ export function useUpdateInvestigationNote() {
             defaultMessage: 'Note updated',
           })
         );
-        queryClient.invalidateQueries({
-          queryKey: investigationKeys.detailNotes(investigationId),
-          exact: false,
-          refetchType: 'all',
-        });
+        queryClient.invalidateQueries({ queryKey: investigationKeys.detailNotes(investigationId) });
       },
       onError: (error, {}, context) => {
         toasts.addError(

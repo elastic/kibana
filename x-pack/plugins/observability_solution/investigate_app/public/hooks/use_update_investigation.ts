@@ -44,11 +44,7 @@ export function useUpdateInvestigation() {
             defaultMessage: 'Investigation updated',
           })
         );
-        queryClient.invalidateQueries({
-          queryKey: investigationKeys.all,
-          exact: false,
-          refetchType: 'all',
-        });
+        queryClient.invalidateQueries({ queryKey: investigationKeys.all });
       },
       onError: (error, {}, context) => {
         toasts.addError(
