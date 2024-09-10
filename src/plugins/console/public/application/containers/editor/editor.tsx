@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, memo, useEffect, useState } from 'react';
+import React, { useRef, useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiProgress,
@@ -54,9 +54,10 @@ export const Editor = memo(
   ({ loading, containerWidth, inputEditorValue, setInputEditorValue }: Props) => {
     const { euiTheme } = useEuiTheme();
     const {
-      services: { storage },
+      services: { storage, objectStorageClient },
     } = useServicesContext();
 
+    const editorValueRef = useRef<TextObject | null>(null);
     const { currentTextObject } = useEditorReadContext();
     const {
       requestInFlight,
@@ -91,16 +92,26 @@ export const Editor = memo(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     const debouncedUpdateLocalStorageValue = useCallback(
       debounce((textObject: TextObject) => {
-        editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+        editorValueRef.current = textObject;
+        objectStorageClient.text.update(textObject);
       }, DEBOUNCE_DELAY),
       []
     );
 
-    // Always keep the currentTextObject in sync with the value in the editor
+    useEffect(() => {
+      return () => {
+        editorDispatch({
+          type: 'setCurrentTextObject',
+          payload: editorValueRef.current!,
+        });
+      };
+    }, [editorDispatch]);
+
+    // Always keep the localstorage in sync with the value in the editor
     // to avoid losing the text object when the user navigates away from the shell
     useEffect(() => {
-      // Only update when its not empty, this is to avoid setting the currentTextObject
-      // to the example text when the user clears the editor.
+      // Only update when its not empty, this is to avoid setting the localstorage value
+      // to an empty string that will then be replaced by the example request.
       if (inputEditorValue !== '') {
         const textObject = {
           ...currentTextObject,
@@ -148,7 +159,7 @@ export const Editor = memo(
                     paddingSize="none"
                     grow={true}
                     className="consoleEditorPanel"
-                    style={{ top: 0 }}
+                    style={{ top: 0, height: 'calc(100% - 40px)' }}
                   >
                     {loading ? (
                       <EditorContentSpinner />

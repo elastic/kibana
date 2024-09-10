@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const browser = getService('browser');
 
   describe('Listing of Reports', function () {
     const kbnArchive =
@@ -167,10 +168,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.waitUntilUrlIncludes('dev_tools#/console');
 
       await retry.try(async () => {
-        const actualRequest = await pageObjects.console.getEditorText();
+        // Getting the text of the console directly will only return the visible
+        // text, not the full content so this test could fail on smaller screens.
+        // So we need to copy the content to the clipboard and then read it from there.
+        await pageObjects.console.copyRequestsToClipboard();
+        const actualRequest = await browser.execute(() => navigator.clipboard.readText());
+
         expect(actualRequest.trim()).to.contain(
           '# These are the queries used when exporting data for\n# the CSV report'
         );
+
         expect(actualRequest).to.contain('POST /_search');
       });
     });
