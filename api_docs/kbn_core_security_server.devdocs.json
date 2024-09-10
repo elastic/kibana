@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.isCreateRestAPIKeyParams",
+        "id": "def-server.isCreateRestAPIKeyParams",
         "type": "Function",
         "tags": [],
         "label": "isCreateRestAPIKeyParams",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.isCreateRestAPIKeyParams.$1",
+            "id": "def-server.isCreateRestAPIKeyParams.$1",
             "type": "Any",
             "tags": [],
             "label": "params",
@@ -56,7 +48,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.APIKeys",
+        "id": "def-server.APIKeys",
         "type": "Interface",
         "tags": [],
         "label": "APIKeys",
@@ -69,7 +61,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.areAPIKeysEnabled",
+            "id": "def-server.APIKeys.areAPIKeysEnabled",
             "type": "Function",
             "tags": [],
             "label": "areAPIKeysEnabled",
@@ -87,7 +79,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.areCrossClusterAPIKeysEnabled",
+            "id": "def-server.APIKeys.areCrossClusterAPIKeysEnabled",
             "type": "Function",
             "tags": [],
             "label": "areCrossClusterAPIKeysEnabled",
@@ -105,7 +97,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.create",
+            "id": "def-server.APIKeys.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -116,17 +108,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateAPIKeyParams",
+                "section": "def-server.CreateAPIKeyParams",
                 "text": "CreateAPIKeyParams"
               },
               ") => Promise<",
@@ -139,7 +131,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.create.$1",
+                "id": "def-server.APIKeys.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -149,9 +141,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -163,7 +155,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.create.$2",
+                "id": "def-server.APIKeys.create.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "createParams",
@@ -173,9 +165,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateAPIKeyParams",
+                    "section": "def-server.CreateAPIKeyParams",
                     "text": "CreateAPIKeyParams"
                   }
                 ],
@@ -189,7 +181,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.update",
+            "id": "def-server.APIKeys.update",
             "type": "Function",
             "tags": [],
             "label": "update",
@@ -200,17 +192,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, updateParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.UpdateAPIKeyParams",
+                "section": "def-server.UpdateAPIKeyParams",
                 "text": "UpdateAPIKeyParams"
               },
               ") => Promise<",
@@ -223,7 +215,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.update.$1",
+                "id": "def-server.APIKeys.update.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -233,9 +225,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -247,7 +239,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.update.$2",
+                "id": "def-server.APIKeys.update.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "updateParams",
@@ -257,9 +249,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.UpdateAPIKeyParams",
+                    "section": "def-server.UpdateAPIKeyParams",
                     "text": "UpdateAPIKeyParams"
                   }
                 ],
@@ -273,7 +265,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.grantAsInternalUser",
+            "id": "def-server.APIKeys.grantAsInternalUser",
             "type": "Function",
             "tags": [],
             "label": "grantAsInternalUser",
@@ -284,33 +276,33 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateRestAPIKeyParams",
+                "section": "def-server.CreateRestAPIKeyParams",
                 "text": "CreateRestAPIKeyParams"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
                 "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.GrantAPIKeyResult",
+                "section": "def-server.GrantAPIKeyResult",
                 "text": "GrantAPIKeyResult"
               },
               " | null>"
@@ -321,7 +313,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.grantAsInternalUser.$1",
+                "id": "def-server.APIKeys.grantAsInternalUser.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -331,9 +323,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -345,7 +337,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.grantAsInternalUser.$2",
+                "id": "def-server.APIKeys.grantAsInternalUser.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "createParams",
@@ -355,17 +347,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateRestAPIKeyParams",
+                    "section": "def-server.CreateRestAPIKeyParams",
                     "text": "CreateRestAPIKeyParams"
                   },
                   " | ",
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                    "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
                     "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
                   }
                 ],
@@ -379,7 +371,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.validate",
+            "id": "def-server.APIKeys.validate",
             "type": "Function",
             "tags": [],
             "label": "validate",
@@ -390,9 +382,9 @@
               "(apiKeyPrams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.ValidateAPIKeyParams",
+                "section": "def-server.ValidateAPIKeyParams",
                 "text": "ValidateAPIKeyParams"
               },
               ") => Promise<boolean>"
@@ -403,7 +395,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.validate.$1",
+                "id": "def-server.APIKeys.validate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "apiKeyPrams",
@@ -413,9 +405,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.ValidateAPIKeyParams",
+                    "section": "def-server.ValidateAPIKeyParams",
                     "text": "ValidateAPIKeyParams"
                   }
                 ],
@@ -429,7 +421,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.invalidate",
+            "id": "def-server.APIKeys.invalidate",
             "type": "Function",
             "tags": [],
             "label": "invalidate",
@@ -440,25 +432,25 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, params: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeysParams",
+                "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeyResult",
+                "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
@@ -469,7 +461,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.invalidate.$1",
+                "id": "def-server.APIKeys.invalidate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -479,9 +471,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -493,7 +485,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.invalidate.$2",
+                "id": "def-server.APIKeys.invalidate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -503,9 +495,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.InvalidateAPIKeysParams",
+                    "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
@@ -519,7 +511,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeys.invalidateAsInternalUser",
+            "id": "def-server.APIKeys.invalidateAsInternalUser",
             "type": "Function",
             "tags": [],
             "label": "invalidateAsInternalUser",
@@ -530,17 +522,17 @@
               "(params: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeysParams",
+                "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeyResult",
+                "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
@@ -551,7 +543,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeys.invalidateAsInternalUser.$1",
+                "id": "def-server.APIKeys.invalidateAsInternalUser.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -561,9 +553,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.InvalidateAPIKeysParams",
+                    "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
@@ -580,7 +572,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.APIKeysServiceWithContext",
+        "id": "def-server.APIKeysServiceWithContext",
         "type": "Interface",
         "tags": [],
         "label": "APIKeysServiceWithContext",
@@ -593,7 +585,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeysServiceWithContext.areAPIKeysEnabled",
+            "id": "def-server.APIKeysServiceWithContext.areAPIKeysEnabled",
             "type": "Function",
             "tags": [],
             "label": "areAPIKeysEnabled",
@@ -611,7 +603,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeysServiceWithContext.create",
+            "id": "def-server.APIKeysServiceWithContext.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -622,9 +614,9 @@
               "(createParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateAPIKeyParams",
+                "section": "def-server.CreateAPIKeyParams",
                 "text": "CreateAPIKeyParams"
               },
               ") => Promise<",
@@ -637,7 +629,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeysServiceWithContext.create.$1",
+                "id": "def-server.APIKeysServiceWithContext.create.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "createParams",
@@ -647,9 +639,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateAPIKeyParams",
+                    "section": "def-server.CreateAPIKeyParams",
                     "text": "CreateAPIKeyParams"
                   }
                 ],
@@ -663,7 +655,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeysServiceWithContext.update",
+            "id": "def-server.APIKeysServiceWithContext.update",
             "type": "Function",
             "tags": [],
             "label": "update",
@@ -674,9 +666,9 @@
               "(updateParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.UpdateAPIKeyParams",
+                "section": "def-server.UpdateAPIKeyParams",
                 "text": "UpdateAPIKeyParams"
               },
               ") => Promise<",
@@ -689,7 +681,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeysServiceWithContext.update.$1",
+                "id": "def-server.APIKeysServiceWithContext.update.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "updateParams",
@@ -699,9 +691,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.UpdateAPIKeyParams",
+                    "section": "def-server.UpdateAPIKeyParams",
                     "text": "UpdateAPIKeyParams"
                   }
                 ],
@@ -715,7 +707,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeysServiceWithContext.validate",
+            "id": "def-server.APIKeysServiceWithContext.validate",
             "type": "Function",
             "tags": [],
             "label": "validate",
@@ -726,9 +718,9 @@
               "(apiKeyPrams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.ValidateAPIKeyParams",
+                "section": "def-server.ValidateAPIKeyParams",
                 "text": "ValidateAPIKeyParams"
               },
               ") => Promise<boolean>"
@@ -739,7 +731,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeysServiceWithContext.validate.$1",
+                "id": "def-server.APIKeysServiceWithContext.validate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "apiKeyPrams",
@@ -749,9 +741,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.ValidateAPIKeyParams",
+                    "section": "def-server.ValidateAPIKeyParams",
                     "text": "ValidateAPIKeyParams"
                   }
                 ],
@@ -765,7 +757,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.APIKeysServiceWithContext.invalidate",
+            "id": "def-server.APIKeysServiceWithContext.invalidate",
             "type": "Function",
             "tags": [],
             "label": "invalidate",
@@ -776,17 +768,17 @@
               "(params: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeysParams",
+                "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeyResult",
+                "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
@@ -797,7 +789,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.APIKeysServiceWithContext.invalidate.$1",
+                "id": "def-server.APIKeysServiceWithContext.invalidate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -807,9 +799,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.InvalidateAPIKeysParams",
+                    "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
@@ -826,7 +818,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditEvent",
+        "id": "def-server.AuditEvent",
         "type": "Interface",
         "tags": [],
         "label": "AuditEvent",
@@ -836,9 +828,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditEvent",
+            "section": "def-server.AuditEvent",
             "text": "AuditEvent"
           },
           " extends ",
@@ -856,7 +848,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditEvent.message",
+            "id": "def-server.AuditEvent.message",
             "type": "string",
             "tags": [],
             "label": "message",
@@ -869,7 +861,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditEvent.kibana",
+            "id": "def-server.AuditEvent.kibana",
             "type": "Object",
             "tags": [],
             "label": "kibana",
@@ -879,9 +871,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditKibana",
+                "section": "def-server.AuditKibana",
                 "text": "AuditKibana"
               },
               " | undefined"
@@ -892,7 +884,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditEvent.http",
+            "id": "def-server.AuditEvent.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -902,9 +894,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditHttp",
+                "section": "def-server.AuditHttp",
                 "text": "AuditHttp"
               },
               " | undefined"
@@ -918,7 +910,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditHttp",
+        "id": "def-server.AuditHttp",
         "type": "Interface",
         "tags": [],
         "label": "AuditHttp",
@@ -928,9 +920,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditHttp",
+            "section": "def-server.AuditHttp",
             "text": "AuditHttp"
           },
           " extends ",
@@ -942,7 +934,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditHttp.request",
+            "id": "def-server.AuditHttp.request",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -952,9 +944,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditRequest",
+                "section": "def-server.AuditRequest",
                 "text": "AuditRequest"
               },
               " | undefined"
@@ -968,7 +960,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditKibana",
+        "id": "def-server.AuditKibana",
         "type": "Interface",
         "tags": [],
         "label": "AuditKibana",
@@ -981,7 +973,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.space_id",
+            "id": "def-server.AuditKibana.space_id",
             "type": "string",
             "tags": [],
             "label": "space_id",
@@ -997,7 +989,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.session_id",
+            "id": "def-server.AuditKibana.session_id",
             "type": "string",
             "tags": [],
             "label": "session_id",
@@ -1013,7 +1005,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.saved_object",
+            "id": "def-server.AuditKibana.saved_object",
             "type": "Object",
             "tags": [],
             "label": "saved_object",
@@ -1029,7 +1021,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.authentication_provider",
+            "id": "def-server.AuditKibana.authentication_provider",
             "type": "string",
             "tags": [],
             "label": "authentication_provider",
@@ -1045,7 +1037,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.authentication_type",
+            "id": "def-server.AuditKibana.authentication_type",
             "type": "string",
             "tags": [],
             "label": "authentication_type",
@@ -1061,7 +1053,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.authentication_realm",
+            "id": "def-server.AuditKibana.authentication_realm",
             "type": "string",
             "tags": [],
             "label": "authentication_realm",
@@ -1077,7 +1069,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.lookup_realm",
+            "id": "def-server.AuditKibana.lookup_realm",
             "type": "string",
             "tags": [],
             "label": "lookup_realm",
@@ -1093,7 +1085,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.add_to_spaces",
+            "id": "def-server.AuditKibana.add_to_spaces",
             "type": "Object",
             "tags": [],
             "label": "add_to_spaces",
@@ -1109,7 +1101,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.delete_from_spaces",
+            "id": "def-server.AuditKibana.delete_from_spaces",
             "type": "Object",
             "tags": [],
             "label": "delete_from_spaces",
@@ -1125,7 +1117,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.unauthorized_spaces",
+            "id": "def-server.AuditKibana.unauthorized_spaces",
             "type": "Object",
             "tags": [],
             "label": "unauthorized_spaces",
@@ -1141,7 +1133,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditKibana.unauthorized_types",
+            "id": "def-server.AuditKibana.unauthorized_types",
             "type": "Object",
             "tags": [],
             "label": "unauthorized_types",
@@ -1160,7 +1152,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditLogger",
+        "id": "def-server.AuditLogger",
         "type": "Interface",
         "tags": [],
         "label": "AuditLogger",
@@ -1171,7 +1163,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditLogger.log",
+            "id": "def-server.AuditLogger.log",
             "type": "Function",
             "tags": [],
             "label": "log",
@@ -1182,9 +1174,9 @@
               "(event: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditEvent",
+                "section": "def-server.AuditEvent",
                 "text": "AuditEvent"
               },
               " | undefined) => void"
@@ -1195,7 +1187,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.AuditLogger.log.$1",
+                "id": "def-server.AuditLogger.log.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "event",
@@ -1203,9 +1195,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.AuditEvent",
+                    "section": "def-server.AuditEvent",
                     "text": "AuditEvent"
                   },
                   " | undefined"
@@ -1220,7 +1212,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditLogger.enabled",
+            "id": "def-server.AuditLogger.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -1236,7 +1228,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditRequest",
+        "id": "def-server.AuditRequest",
         "type": "Interface",
         "tags": [],
         "label": "AuditRequest",
@@ -1246,9 +1238,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditRequest",
+            "section": "def-server.AuditRequest",
             "text": "AuditRequest"
           },
           " extends { body?: { bytes?: number | undefined; content?: string | undefined; } | undefined; bytes?: number | undefined; id?: string | undefined; method?: string | undefined; mime_type?: string | undefined; referrer?: string | undefined; }"
@@ -1259,7 +1251,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditRequest.headers",
+            "id": "def-server.AuditRequest.headers",
             "type": "Object",
             "tags": [],
             "label": "headers",
@@ -1278,7 +1270,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditRequestHandlerContext",
+        "id": "def-server.AuditRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "AuditRequestHandlerContext",
@@ -1289,7 +1281,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuditRequestHandlerContext.logger",
+            "id": "def-server.AuditRequestHandlerContext.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -1297,9 +1289,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -1312,7 +1304,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuthcRequestHandlerContext",
+        "id": "def-server.AuthcRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "AuthcRequestHandlerContext",
@@ -1323,7 +1315,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuthcRequestHandlerContext.getCurrentUser",
+            "id": "def-server.AuthcRequestHandlerContext.getCurrentUser",
             "type": "Function",
             "tags": [],
             "label": "getCurrentUser",
@@ -1347,7 +1339,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.AuthcRequestHandlerContext.apiKeys",
+            "id": "def-server.AuthcRequestHandlerContext.apiKeys",
             "type": "Object",
             "tags": [],
             "label": "apiKeys",
@@ -1355,9 +1347,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.APIKeysServiceWithContext",
+                "section": "def-server.APIKeysServiceWithContext",
                 "text": "APIKeysServiceWithContext"
               }
             ],
@@ -1370,7 +1362,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CoreAuditService",
+        "id": "def-server.CoreAuditService",
         "type": "Interface",
         "tags": [],
         "label": "CoreAuditService",
@@ -1381,7 +1373,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreAuditService.asScoped",
+            "id": "def-server.CoreAuditService.asScoped",
             "type": "Function",
             "tags": [],
             "label": "asScoped",
@@ -1392,17 +1384,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -1412,7 +1404,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.CoreAuditService.asScoped.$1",
+                "id": "def-server.CoreAuditService.asScoped.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1420,9 +1412,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1437,7 +1429,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreAuditService.withoutRequest",
+            "id": "def-server.CoreAuditService.withoutRequest",
             "type": "Object",
             "tags": [],
             "label": "withoutRequest",
@@ -1447,9 +1439,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -1462,7 +1454,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CoreAuthenticationService",
+        "id": "def-server.CoreAuthenticationService",
         "type": "Interface",
         "tags": [],
         "label": "CoreAuthenticationService",
@@ -1475,7 +1467,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreAuthenticationService.getCurrentUser",
+            "id": "def-server.CoreAuthenticationService.getCurrentUser",
             "type": "Function",
             "tags": [],
             "label": "getCurrentUser",
@@ -1486,9 +1478,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -1507,7 +1499,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.CoreAuthenticationService.getCurrentUser.$1",
+                "id": "def-server.CoreAuthenticationService.getCurrentUser.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1517,9 +1509,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1534,7 +1526,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreAuthenticationService.apiKeys",
+            "id": "def-server.CoreAuthenticationService.apiKeys",
             "type": "Object",
             "tags": [],
             "label": "apiKeys",
@@ -1542,9 +1534,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.APIKeys",
+                "section": "def-server.APIKeys",
                 "text": "APIKeys"
               }
             ],
@@ -1557,7 +1549,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CoreFipsService",
+        "id": "def-server.CoreFipsService",
         "type": "Interface",
         "tags": [],
         "label": "CoreFipsService",
@@ -1570,7 +1562,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreFipsService.isEnabled",
+            "id": "def-server.CoreFipsService.isEnabled",
             "type": "Function",
             "tags": [],
             "label": "isEnabled",
@@ -1591,7 +1583,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CoreSecurityDelegateContract",
+        "id": "def-server.CoreSecurityDelegateContract",
         "type": "Interface",
         "tags": [],
         "label": "CoreSecurityDelegateContract",
@@ -1604,7 +1596,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreSecurityDelegateContract.authc",
+            "id": "def-server.CoreSecurityDelegateContract.authc",
             "type": "Object",
             "tags": [],
             "label": "authc",
@@ -1612,9 +1604,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CoreAuthenticationService",
+                "section": "def-server.CoreAuthenticationService",
                 "text": "CoreAuthenticationService"
               }
             ],
@@ -1624,7 +1616,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CoreSecurityDelegateContract.audit",
+            "id": "def-server.CoreSecurityDelegateContract.audit",
             "type": "Object",
             "tags": [],
             "label": "audit",
@@ -1632,9 +1624,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CoreAuditService",
+                "section": "def-server.CoreAuditService",
                 "text": "CoreAuditService"
               }
             ],
@@ -1647,7 +1639,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CreateCrossClusterAPIKeyParams",
+        "id": "def-server.CreateCrossClusterAPIKeyParams",
         "type": "Interface",
         "tags": [],
         "label": "CreateCrossClusterAPIKeyParams",
@@ -1658,7 +1650,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateCrossClusterAPIKeyParams.type",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -1672,7 +1664,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateCrossClusterAPIKeyParams.expiration",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.expiration",
             "type": "string",
             "tags": [],
             "label": "expiration",
@@ -1686,7 +1678,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateCrossClusterAPIKeyParams.name",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1697,7 +1689,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateCrossClusterAPIKeyParams.metadata",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.metadata",
             "type": "Object",
             "tags": [],
             "label": "metadata",
@@ -1711,7 +1703,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateCrossClusterAPIKeyParams.access",
+            "id": "def-server.CreateCrossClusterAPIKeyParams.access",
             "type": "Object",
             "tags": [],
             "label": "access",
@@ -1728,7 +1720,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CreateRestAPIKeyParams",
+        "id": "def-server.CreateRestAPIKeyParams",
         "type": "Interface",
         "tags": [],
         "label": "CreateRestAPIKeyParams",
@@ -1739,7 +1731,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyParams.type",
+            "id": "def-server.CreateRestAPIKeyParams.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -1753,7 +1745,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyParams.expiration",
+            "id": "def-server.CreateRestAPIKeyParams.expiration",
             "type": "string",
             "tags": [],
             "label": "expiration",
@@ -1767,7 +1759,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyParams.name",
+            "id": "def-server.CreateRestAPIKeyParams.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1778,7 +1770,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyParams.role_descriptors",
+            "id": "def-server.CreateRestAPIKeyParams.role_descriptors",
             "type": "Object",
             "tags": [],
             "label": "role_descriptors",
@@ -1792,7 +1784,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyParams.metadata",
+            "id": "def-server.CreateRestAPIKeyParams.metadata",
             "type": "Object",
             "tags": [],
             "label": "metadata",
@@ -1809,7 +1801,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+        "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
         "type": "Interface",
         "tags": [],
         "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
@@ -1820,7 +1812,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.type",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -1834,7 +1826,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.expiration",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.expiration",
             "type": "string",
             "tags": [],
             "label": "expiration",
@@ -1848,7 +1840,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.name",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1859,7 +1851,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.metadata",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.metadata",
             "type": "Object",
             "tags": [],
             "label": "metadata",
@@ -1873,7 +1865,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
+            "id": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
             "type": "Object",
             "tags": [],
             "label": "kibana_role_descriptors",
@@ -1882,17 +1874,17 @@
               "{ [x: string]: { elasticsearch: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.ElasticsearchPrivilegesType",
+                "section": "def-server.ElasticsearchPrivilegesType",
                 "text": "ElasticsearchPrivilegesType"
               },
               " & { [key: string]: unknown; }; kibana: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.KibanaPrivilegesType",
+                "section": "def-server.KibanaPrivilegesType",
                 "text": "KibanaPrivilegesType"
               },
               "; }; }"
@@ -1906,7 +1898,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.ElasticsearchPrivilegesType",
+        "id": "def-server.ElasticsearchPrivilegesType",
         "type": "Interface",
         "tags": [],
         "label": "ElasticsearchPrivilegesType",
@@ -1919,7 +1911,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ElasticsearchPrivilegesType.cluster",
+            "id": "def-server.ElasticsearchPrivilegesType.cluster",
             "type": "Array",
             "tags": [],
             "label": "cluster",
@@ -1933,7 +1925,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ElasticsearchPrivilegesType.remote_cluster",
+            "id": "def-server.ElasticsearchPrivilegesType.remote_cluster",
             "type": "Array",
             "tags": [],
             "label": "remote_cluster",
@@ -1947,7 +1939,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ElasticsearchPrivilegesType.indices",
+            "id": "def-server.ElasticsearchPrivilegesType.indices",
             "type": "Array",
             "tags": [],
             "label": "indices",
@@ -1961,7 +1953,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ElasticsearchPrivilegesType.remote_indices",
+            "id": "def-server.ElasticsearchPrivilegesType.remote_indices",
             "type": "Array",
             "tags": [],
             "label": "remote_indices",
@@ -1975,7 +1967,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ElasticsearchPrivilegesType.run_as",
+            "id": "def-server.ElasticsearchPrivilegesType.run_as",
             "type": "Array",
             "tags": [],
             "label": "run_as",
@@ -1992,7 +1984,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.GrantAPIKeyResult",
+        "id": "def-server.GrantAPIKeyResult",
         "type": "Interface",
         "tags": [],
         "label": "GrantAPIKeyResult",
@@ -2003,7 +1995,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.GrantAPIKeyResult.id",
+            "id": "def-server.GrantAPIKeyResult.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -2016,7 +2008,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.GrantAPIKeyResult.name",
+            "id": "def-server.GrantAPIKeyResult.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -2029,7 +2021,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.GrantAPIKeyResult.api_key",
+            "id": "def-server.GrantAPIKeyResult.api_key",
             "type": "string",
             "tags": [],
             "label": "api_key",
@@ -2045,7 +2037,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.InvalidateAPIKeyResult",
+        "id": "def-server.InvalidateAPIKeyResult",
         "type": "Interface",
         "tags": [],
         "label": "InvalidateAPIKeyResult",
@@ -2058,7 +2050,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.InvalidateAPIKeyResult.invalidated_api_keys",
+            "id": "def-server.InvalidateAPIKeyResult.invalidated_api_keys",
             "type": "Array",
             "tags": [],
             "label": "invalidated_api_keys",
@@ -2074,7 +2066,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.InvalidateAPIKeyResult.previously_invalidated_api_keys",
+            "id": "def-server.InvalidateAPIKeyResult.previously_invalidated_api_keys",
             "type": "Array",
             "tags": [],
             "label": "previously_invalidated_api_keys",
@@ -2090,7 +2082,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.InvalidateAPIKeyResult.error_count",
+            "id": "def-server.InvalidateAPIKeyResult.error_count",
             "type": "number",
             "tags": [],
             "label": "error_count",
@@ -2103,7 +2095,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.InvalidateAPIKeyResult.error_details",
+            "id": "def-server.InvalidateAPIKeyResult.error_details",
             "type": "Array",
             "tags": [],
             "label": "error_details",
@@ -2122,7 +2114,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.InvalidateAPIKeysParams",
+        "id": "def-server.InvalidateAPIKeysParams",
         "type": "Interface",
         "tags": [],
         "label": "InvalidateAPIKeysParams",
@@ -2135,7 +2127,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.InvalidateAPIKeysParams.ids",
+            "id": "def-server.InvalidateAPIKeysParams.ids",
             "type": "Array",
             "tags": [],
             "label": "ids",
@@ -2154,7 +2146,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.SecurityRequestHandlerContext",
+        "id": "def-server.SecurityRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "SecurityRequestHandlerContext",
@@ -2165,7 +2157,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.SecurityRequestHandlerContext.authc",
+            "id": "def-server.SecurityRequestHandlerContext.authc",
             "type": "Object",
             "tags": [],
             "label": "authc",
@@ -2173,9 +2165,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuthcRequestHandlerContext",
+                "section": "def-server.AuthcRequestHandlerContext",
                 "text": "AuthcRequestHandlerContext"
               }
             ],
@@ -2185,7 +2177,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.SecurityRequestHandlerContext.audit",
+            "id": "def-server.SecurityRequestHandlerContext.audit",
             "type": "Object",
             "tags": [],
             "label": "audit",
@@ -2193,9 +2185,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditRequestHandlerContext",
+                "section": "def-server.AuditRequestHandlerContext",
                 "text": "AuditRequestHandlerContext"
               }
             ],
@@ -2208,7 +2200,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.SecurityServiceSetup",
+        "id": "def-server.SecurityServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "SecurityServiceSetup",
@@ -2221,7 +2213,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.SecurityServiceSetup.registerSecurityDelegate",
+            "id": "def-server.SecurityServiceSetup.registerSecurityDelegate",
             "type": "Function",
             "tags": [],
             "label": "registerSecurityDelegate",
@@ -2232,9 +2224,9 @@
               "(api: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CoreSecurityDelegateContract",
+                "section": "def-server.CoreSecurityDelegateContract",
                 "text": "CoreSecurityDelegateContract"
               },
               ") => void"
@@ -2245,7 +2237,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server",
-                "id": "def-common.SecurityServiceSetup.registerSecurityDelegate.$1",
+                "id": "def-server.SecurityServiceSetup.registerSecurityDelegate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "api",
@@ -2253,9 +2245,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CoreSecurityDelegateContract",
+                    "section": "def-server.CoreSecurityDelegateContract",
                     "text": "CoreSecurityDelegateContract"
                   }
                 ],
@@ -2269,7 +2261,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.SecurityServiceSetup.fips",
+            "id": "def-server.SecurityServiceSetup.fips",
             "type": "Object",
             "tags": [],
             "label": "fips",
@@ -2279,9 +2271,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CoreFipsService",
+                "section": "def-server.CoreFipsService",
                 "text": "CoreFipsService"
               }
             ],
@@ -2294,7 +2286,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.SecurityServiceStart",
+        "id": "def-server.SecurityServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "SecurityServiceStart",
@@ -2307,7 +2299,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.SecurityServiceStart.authc",
+            "id": "def-server.SecurityServiceStart.authc",
             "type": "Object",
             "tags": [],
             "label": "authc",
@@ -2317,9 +2309,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CoreAuthenticationService",
+                "section": "def-server.CoreAuthenticationService",
                 "text": "CoreAuthenticationService"
               }
             ],
@@ -2329,7 +2321,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.SecurityServiceStart.audit",
+            "id": "def-server.SecurityServiceStart.audit",
             "type": "Object",
             "tags": [],
             "label": "audit",
@@ -2339,9 +2331,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CoreAuditService",
+                "section": "def-server.CoreAuditService",
                 "text": "CoreAuditService"
               }
             ],
@@ -2354,7 +2346,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.UpdateCrossClusterAPIKeyParams",
+        "id": "def-server.UpdateCrossClusterAPIKeyParams",
         "type": "Interface",
         "tags": [],
         "label": "UpdateCrossClusterAPIKeyParams",
@@ -2365,7 +2357,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateCrossClusterAPIKeyParams.id",
+            "id": "def-server.UpdateCrossClusterAPIKeyParams.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -2376,7 +2368,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateCrossClusterAPIKeyParams.type",
+            "id": "def-server.UpdateCrossClusterAPIKeyParams.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -2390,7 +2382,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateCrossClusterAPIKeyParams.expiration",
+            "id": "def-server.UpdateCrossClusterAPIKeyParams.expiration",
             "type": "string",
             "tags": [],
             "label": "expiration",
@@ -2404,7 +2396,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateCrossClusterAPIKeyParams.metadata",
+            "id": "def-server.UpdateCrossClusterAPIKeyParams.metadata",
             "type": "Object",
             "tags": [],
             "label": "metadata",
@@ -2418,7 +2410,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateCrossClusterAPIKeyParams.access",
+            "id": "def-server.UpdateCrossClusterAPIKeyParams.access",
             "type": "Object",
             "tags": [],
             "label": "access",
@@ -2435,7 +2427,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.UpdateRestAPIKeyParams",
+        "id": "def-server.UpdateRestAPIKeyParams",
         "type": "Interface",
         "tags": [],
         "label": "UpdateRestAPIKeyParams",
@@ -2446,7 +2438,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyParams.id",
+            "id": "def-server.UpdateRestAPIKeyParams.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -2457,7 +2449,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyParams.type",
+            "id": "def-server.UpdateRestAPIKeyParams.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -2471,7 +2463,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyParams.expiration",
+            "id": "def-server.UpdateRestAPIKeyParams.expiration",
             "type": "string",
             "tags": [],
             "label": "expiration",
@@ -2485,7 +2477,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyParams.role_descriptors",
+            "id": "def-server.UpdateRestAPIKeyParams.role_descriptors",
             "type": "Object",
             "tags": [],
             "label": "role_descriptors",
@@ -2499,7 +2491,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyParams.metadata",
+            "id": "def-server.UpdateRestAPIKeyParams.metadata",
             "type": "Object",
             "tags": [],
             "label": "metadata",
@@ -2516,7 +2508,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+        "id": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams",
         "type": "Interface",
         "tags": [],
         "label": "UpdateRestAPIKeyWithKibanaPrivilegesParams",
@@ -2527,7 +2519,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.id",
+            "id": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -2538,7 +2530,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.type",
+            "id": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -2552,7 +2544,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.expiration",
+            "id": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams.expiration",
             "type": "string",
             "tags": [],
             "label": "expiration",
@@ -2566,7 +2558,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.metadata",
+            "id": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams.metadata",
             "type": "Object",
             "tags": [],
             "label": "metadata",
@@ -2580,7 +2572,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
+            "id": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams.kibana_role_descriptors",
             "type": "Object",
             "tags": [],
             "label": "kibana_role_descriptors",
@@ -2589,17 +2581,17 @@
               "{ [x: string]: { elasticsearch: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.ElasticsearchPrivilegesType",
+                "section": "def-server.ElasticsearchPrivilegesType",
                 "text": "ElasticsearchPrivilegesType"
               },
               " & { [key: string]: unknown; }; kibana: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.KibanaPrivilegesType",
+                "section": "def-server.KibanaPrivilegesType",
                 "text": "KibanaPrivilegesType"
               },
               "; }; }"
@@ -2613,7 +2605,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.ValidateAPIKeyParams",
+        "id": "def-server.ValidateAPIKeyParams",
         "type": "Interface",
         "tags": [],
         "label": "ValidateAPIKeyParams",
@@ -2626,7 +2618,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ValidateAPIKeyParams.id",
+            "id": "def-server.ValidateAPIKeyParams.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -2639,7 +2631,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server",
-            "id": "def-common.ValidateAPIKeyParams.api_key",
+            "id": "def-server.ValidateAPIKeyParams.api_key",
             "type": "string",
             "tags": [],
             "label": "api_key",
@@ -2658,7 +2650,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuditServiceContract",
+        "id": "def-server.AuditServiceContract",
         "type": "Type",
         "tags": [],
         "label": "AuditServiceContract",
@@ -2666,9 +2658,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CoreAuditService",
+            "section": "def-server.CoreAuditService",
             "text": "CoreAuditService"
           }
         ],
@@ -2679,7 +2671,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.AuthenticationServiceContract",
+        "id": "def-server.AuthenticationServiceContract",
         "type": "Type",
         "tags": [],
         "label": "AuthenticationServiceContract",
@@ -2687,9 +2679,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CoreAuthenticationService",
+            "section": "def-server.CoreAuthenticationService",
             "text": "CoreAuthenticationService"
           }
         ],
@@ -2700,7 +2692,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CreateAPIKeyParams",
+        "id": "def-server.CreateAPIKeyParams",
         "type": "Type",
         "tags": [],
         "label": "CreateAPIKeyParams",
@@ -2708,25 +2700,25 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateRestAPIKeyParams",
+            "section": "def-server.CreateRestAPIKeyParams",
             "text": "CreateRestAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
             "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateCrossClusterAPIKeyParams",
+            "section": "def-server.CreateCrossClusterAPIKeyParams",
             "text": "CreateCrossClusterAPIKeyParams"
           }
         ],
@@ -2737,7 +2729,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.CreateAPIKeyResult",
+        "id": "def-server.CreateAPIKeyResult",
         "type": "Type",
         "tags": [],
         "label": "CreateAPIKeyResult",
@@ -2754,7 +2746,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.KibanaPrivilegesType",
+        "id": "def-server.KibanaPrivilegesType",
         "type": "Type",
         "tags": [],
         "label": "KibanaPrivilegesType",
@@ -2771,7 +2763,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.UpdateAPIKeyParams",
+        "id": "def-server.UpdateAPIKeyParams",
         "type": "Type",
         "tags": [],
         "label": "UpdateAPIKeyParams",
@@ -2781,25 +2773,25 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateRestAPIKeyParams",
+            "section": "def-server.UpdateRestAPIKeyParams",
             "text": "UpdateRestAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateCrossClusterAPIKeyParams",
+            "section": "def-server.UpdateCrossClusterAPIKeyParams",
             "text": "UpdateCrossClusterAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+            "section": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams",
             "text": "UpdateRestAPIKeyWithKibanaPrivilegesParams"
           }
         ],
@@ -2810,7 +2802,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
-        "id": "def-common.UpdateAPIKeyResult",
+        "id": "def-server.UpdateAPIKeyResult",
         "type": "Type",
         "tags": [],
         "label": "UpdateAPIKeyResult",
@@ -2826,6 +2818,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -126,7 +126,6 @@ export interface LensTopNavMenuProps {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
   indexPatternService: IndexPatternServiceAPI;
-  onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
   getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { makeHighContrastColor } from '@elastic/eui';
@@ -39,23 +40,23 @@ export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
       ),
       ...buildRuleGroup(
         ['status.info'],
-        makeHighContrastColor(euiThemeVars.euiColorWarningText)(background),
-        true
+        makeHighContrastColor(euiThemeVars.euiTextColor)(background)
       ),
       ...buildRuleGroup(
         ['status.success'],
-        makeHighContrastColor(euiThemeVars.euiColorSuccessText)(background),
-        true
+        makeHighContrastColor(euiThemeVars.euiTextColor)(euiThemeVars.euiColorSuccess)
       ),
       ...buildRuleGroup(
         ['status.redirect'],
-        makeHighContrastColor(euiThemeVars.euiColorWarningText)(background),
-        true
+        makeHighContrastColor(euiThemeVars.euiTextColor)(background)
+      ),
+      ...buildRuleGroup(
+        ['status.warning'],
+        makeHighContrastColor(euiThemeVars.euiTextColor)(euiThemeVars.euiColorWarning)
       ),
       ...buildRuleGroup(
         ['status.error'],
-        makeHighContrastColor(euiThemeVars.euiColorDangerText)(background),
-        true
+        makeHighContrastColor('#FFFFFF')(euiThemeVars.euiColorDanger)
       ),
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),

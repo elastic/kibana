@@ -26,10 +26,18 @@ export const disableRuleRoute = (
       options: {
         access: 'public',
         summary: 'Disable a rule',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: disableRuleRequestParamsSchemaV1,
-        body: disableRuleRequestBodySchemaV1,
+        request: {
+          params: disableRuleRequestParamsSchemaV1,
+          body: disableRuleRequestBodySchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

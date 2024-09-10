@@ -115,5 +115,6 @@
     "@kbn/slo-schema",
     "@kbn/server-http-tools",
     "@kbn/avc-banner",
+    "@kbn/zod",
   ]
 }

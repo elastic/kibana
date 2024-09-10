@@ -165,7 +165,10 @@ export class TaskPool {
                       message: VERSION_CONFLICT_MESSAGE,
                     })
               )
-              .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
+              .catch((err) => {
+                this.handleFailureOfMarkAsRunning(taskRunner, err);
+                throw err;
+              });
           })
       );
     }
@@ -225,7 +228,7 @@ export class TaskPool {
                 )}`
               : ``
           }${
-            taskRunner.definition.timeout
+            taskRunner.definition?.timeout
               ? ` (with timeout set at ${taskRunner.definition.timeout})`
               : ``
           }.`

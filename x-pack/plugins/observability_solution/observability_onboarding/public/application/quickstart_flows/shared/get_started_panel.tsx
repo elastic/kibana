@@ -17,30 +17,30 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
 export function GetStartedPanel({
   integration,
-  dashboardLinks,
+  actionLinks,
+  previewImage = 'charts_screen.svg',
   newTab,
   isLoading,
 }: {
   integration: string;
   newTab: boolean;
-  dashboardLinks: Array<{
+  actionLinks: Array<{
     id: string;
-    label: string;
     title: string;
+    label: string;
+    href: string;
   }>;
+  previewImage?: string;
   isLoading: boolean;
 }) {
   const {
-    services: { http, share },
+    services: { http },
   } = useKibana<ObservabilityOnboardingContextValue>();
-
-  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
   return (
     <>
@@ -50,7 +50,7 @@ export function GetStartedPanel({
             <EuiSkeletonRectangle width={162} height={117} />
           ) : (
             <EuiImage
-              src={http.staticAssets.getPluginAssetHref('charts_screen.svg')}
+              src={http.staticAssets.getPluginAssetHref(previewImage)}
               width={162}
               height={117}
               alt=""
@@ -61,17 +61,15 @@ export function GetStartedPanel({
 
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {dashboardLinks.map(({ id, label, title }) => (
-              <EuiFlexItem>
+            {actionLinks.map(({ id, title, label, href }) => (
+              <EuiFlexItem key={id}>
                 <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
                   <EuiText key={id} size="s">
                     <p>{title}</p>
                   </EuiText>
                   <EuiLink
-                    data-test-subj={`observabilityOnboardingDataIngestStatusViewDashboardLink-${id}`}
-                    href={dashboardLocator?.getRedirectUrl({
-                      dashboardId: id,
-                    })}
+                    data-test-subj={`observabilityOnboardingDataIngestStatusActionLink-${id}`}
+                    href={href}
                     target={newTab ? '_blank' : '_self'}
                   >
                     {label}

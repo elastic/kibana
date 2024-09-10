@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { chunk } from 'lodash';
 
@@ -45,11 +45,7 @@ export async function getColumnsWithMetadata(
           const metadata = fields.fields[removeKeywordSuffix(c.name)];
 
           // Need to convert metadata's type (e.g. keyword) to ES|QL type (e.g. string) to check if they are the same
-          if (
-            !metadata ||
-            (metadata?.type && esFieldTypeToKibanaFieldType(metadata.type) !== c.type)
-          )
-            return c;
+          if (!metadata || (metadata?.type && metadata.type !== c.type)) return c;
           return {
             ...c,
             metadata: { description: metadata.description },

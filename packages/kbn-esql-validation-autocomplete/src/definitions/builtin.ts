@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
+import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
+
+type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
 
 function createMathDefinition(
   name: string,
-  types: Array<
-    | (FunctionParameterType & FunctionReturnType)
-    | [FunctionParameterType, FunctionParameterType, FunctionReturnType]
-  >,
+  functionSignatures: MathFunctionSignature[],
   description: string,
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
@@ -24,27 +25,40 @@ function createMathDefinition(
     description,
     supportedCommands: ['eval', 'where', 'row', 'stats', 'metrics', 'sort'],
     supportedOptions: ['by'],
-    signatures: types.map((type) => {
-      if (Array.isArray(type)) {
-        return {
-          params: [
-            { name: 'left', type: type[0] },
-            { name: 'right', type: type[1] },
-          ],
-          returnType: type[2],
-        };
-      }
+    signatures: functionSignatures.map((functionSignature) => {
+      const [lhs, rhs, result] = functionSignature;
       return {
         params: [
-          { name: 'left', type },
-          { name: 'right', type },
+          { name: 'left', type: lhs },
+          { name: 'right', type: rhs },
         ],
-        returnType: type,
+        returnType: result,
       };
     }),
     validate,
   };
 }
+
+// https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
+const baseComparisonTypeTable: MathFunctionSignature[] = [
+  ['date', 'date', 'boolean'],
+  ['double', 'double', 'boolean'],
+  ['double', 'integer', 'boolean'],
+  ['double', 'long', 'boolean'],
+  ['integer', 'double', 'boolean'],
+  ['integer', 'integer', 'boolean'],
+  ['integer', 'long', 'boolean'],
+  ['ip', 'ip', 'boolean'],
+  ['keyword', 'keyword', 'boolean'],
+  ['keyword', 'text', 'boolean'],
+  ['long', 'double', 'boolean'],
+  ['long', 'integer', 'boolean'],
+  ['long', 'long', 'boolean'],
+  ['text', 'keyword', 'boolean'],
+  ['text', 'text', 'boolean'],
+  ['unsigned_long', 'unsigned_long', 'boolean'],
+  ['version', 'version', 'boolean'],
+];
 
 function createComparisonDefinition(
   {
@@ -58,6 +72,17 @@ function createComparisonDefinition(
   },
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
+  const commonSignatures = baseComparisonTypeTable.map((functionSignature) => {
+    const [lhs, rhs, result] = functionSignature;
+    return {
+      params: [
+        { name: 'left', type: lhs },
+        { name: 'right', type: rhs },
+      ],
+      returnType: result,
+    };
+  });
+
   return {
     type: 'builtin' as const,
     name,
@@ -66,41 +91,7 @@ function createComparisonDefinition(
     supportedOptions: ['by'],
     validate,
     signatures: [
-      {
-        params: [
-          { name: 'left', type: 'number' },
-          { name: 'right', type: 'number' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'string' },
-          { name: 'right', type: 'string' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'date' },
-          { name: 'right', type: 'date' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'ip' },
-          { name: 'right', type: 'ip' },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'version' },
-          { name: 'right', type: 'version' },
-        ],
-        returnType: 'boolean',
-      },
+      ...commonSignatures,
       // constant strings okay because of implicit casting for
       // string to version and ip
       //
@@ -113,13 +104,13 @@ function createComparisonDefinition(
         {
           params: [
             { name: 'left', type },
-            { name: 'right', type: 'string' as const, constantOnly: true },
+            { name: 'right', type: 'text' as const, constantOnly: true },
           ],
           returnType: 'boolean' as const,
         },
         {
           params: [
-            { name: 'right', type: 'string' as const, constantOnly: true },
+            { name: 'left', type: 'text' as const, constantOnly: true },
             { name: 'right', type },
           ],
           returnType: 'boolean' as const,
@@ -130,31 +121,111 @@ function createComparisonDefinition(
   };
 }
 
+const addTypeTable: MathFunctionSignature[] = [
+  ['date_period', 'date_period', 'date_period'],
+  ['date_period', 'date', 'date'],
+  ['date', 'date_period', 'date'],
+  ['date', 'time_duration', 'date'],
+  ['date', 'time_literal', 'date'],
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['time_duration', 'date', 'date'],
+  ['time_duration', 'time_duration', 'time_duration'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+  ['time_literal', 'date', 'date'],
+];
+
+const subtractTypeTable: MathFunctionSignature[] = [
+  ['date_period', 'date_period', 'date_period'],
+  ['date', 'date_period', 'date'],
+  ['date', 'time_duration', 'date'],
+  ['date', 'time_literal', 'date'],
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['time_duration', 'date', 'date'],
+  ['time_duration', 'time_duration', 'time_duration'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+  ['time_literal', 'date', 'date'],
+];
+
+const multiplyTypeTable: MathFunctionSignature[] = [
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
+const divideTypeTable: MathFunctionSignature[] = [
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
+const modulusTypeTable: MathFunctionSignature[] = [
+  ['double', 'double', 'double'],
+  ['double', 'integer', 'double'],
+  ['double', 'long', 'double'],
+  ['integer', 'double', 'double'],
+  ['integer', 'integer', 'integer'],
+  ['integer', 'long', 'long'],
+  ['long', 'double', 'double'],
+  ['long', 'integer', 'long'],
+  ['long', 'long', 'long'],
+  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
+];
+
 export const mathFunctions: FunctionDefinition[] = [
   createMathDefinition(
     '+',
-    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+    addTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
       defaultMessage: 'Add (+)',
     })
   ),
   createMathDefinition(
     '-',
-    ['number', ['date', 'time_literal', 'date'], ['time_literal', 'date', 'date']],
+    subtractTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
       defaultMessage: 'Subtract (-)',
     })
   ),
   createMathDefinition(
     '*',
-    ['number'],
+    multiplyTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.multiplyDoc', {
       defaultMessage: 'Multiply (*)',
     })
   ),
   createMathDefinition(
     '/',
-    ['number'],
+    divideTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.divideDoc', {
       defaultMessage: 'Divide (/)',
     }),
@@ -162,7 +233,7 @@ export const mathFunctions: FunctionDefinition[] = [
       const [left, right] = fnDef.args;
       const messages = [];
       if (!Array.isArray(left) && !Array.isArray(right)) {
-        if (right.type === 'literal' && right.literalType === 'number') {
+        if (right.type === 'literal' && isNumericType(right.literalType)) {
           if (right.value === 0) {
             messages.push({
               type: 'warning' as const,
@@ -187,7 +258,7 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
   createMathDefinition(
     '%',
-    ['number'],
+    modulusTypeTable,
     i18n.translate('kbn-esql-validation-autocomplete.esql.definition.moduleDoc', {
       defaultMessage: 'Module (%)',
     }),
@@ -195,7 +266,7 @@ export const mathFunctions: FunctionDefinition[] = [
       const [left, right] = fnDef.args;
       const messages = [];
       if (!Array.isArray(left) && !Array.isArray(right)) {
-        if (right.type === 'literal' && right.literalType === 'number') {
+        if (right.type === 'literal' && isNumericType(right.literalType)) {
           if (right.value === 0) {
             messages.push({
               type: 'warning' as const,
@@ -220,7 +291,7 @@ export const mathFunctions: FunctionDefinition[] = [
   ),
 ];
 
-const comparisonFunctions: FunctionDefinition[] = [
+export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToDoc', {
@@ -238,13 +309,13 @@ const comparisonFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
         ],
         returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
@@ -268,13 +339,13 @@ const comparisonFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
         ],
         returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
@@ -347,8 +418,15 @@ const likeFunctions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'left', type: 'string' as const },
-          { name: 'right', type: 'string' as const },
+          { name: 'left', type: 'text' as const },
+          { name: 'right', type: 'text' as const },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const },
+          { name: 'right', type: 'keyword' as const },
         ],
         returnType: 'boolean',
       },
@@ -383,17 +461,24 @@ const inFunctions: FunctionDefinition[] = [
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
   signatures: [
+    ...ESQL_NUMBER_TYPES.map((type) => ({
+      params: [
+        { name: 'left', type: type as FunctionParameterType },
+
+        { name: 'right', type: 'any[]' as FunctionParameterType },
+      ],
+      returnType: 'boolean' as FunctionReturnType,
+    })),
     {
       params: [
-        { name: 'left', type: 'number' },
-
+        { name: 'left', type: 'keyword' },
         { name: 'right', type: 'any[]' },
       ],
       returnType: 'boolean',
     },
     {
       params: [
-        { name: 'left', type: 'string' },
+        { name: 'left', type: 'text' },
         { name: 'right', type: 'any[]' },
       ],
       returnType: 'boolean',
@@ -507,7 +592,16 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: ['eval', 'stats', 'metrics', 'row', 'dissect', 'where', 'enrich'],
+    supportedCommands: [
+      'eval',
+      'stats',
+      'inlinestats',
+      'metrics',
+      'row',
+      'dissect',
+      'where',
+      'enrich',
+    ],
     supportedOptions: ['by', 'with'],
     signatures: [
       {

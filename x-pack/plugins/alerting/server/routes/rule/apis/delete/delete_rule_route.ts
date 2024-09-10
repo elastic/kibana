@@ -24,6 +24,7 @@ export const deleteRuleRoute = (
       options: {
         access: 'public',
         summary: `Delete a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {

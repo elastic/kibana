@@ -31,7 +31,7 @@ export function createRetriever(esQuery: string) {
       const query = JSON.parse(replacedQuery);
       return query;
     } catch (e) {
-      throw Error(e);
+      throw Error("Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.");
     }
   };
 }
@@ -57,9 +57,8 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
       const { indices } = request.body;
 
       const fields = await fetchFields(client, indices);
@@ -89,13 +88,14 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
-      const [{ analytics }, { actions }] = await getStartServices();
+    errorHandler(logger)(async (context, request, response) => {
+      const [{ analytics }, { actions, cloud }] = await getStartServices();
+
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
-      const { messages, data } = await request.body;
+      const { messages, data } = request.body;
       const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
@@ -149,7 +149,13 @@ export function defineRoutes({
           isCitationsEnabled: data.citations,
         });
 
-        return handleStreamResponse({ logger, stream, response, request });
+        return handleStreamResponse({
+          logger,
+          stream,
+          response,
+          request,
+          isCloud: cloud?.isCloudEnabled ?? false,
+        });
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
@@ -177,7 +183,7 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { name, expiresInDays, indices } = request.body;
       const { client } = (await context.core).elasticsearch;
 
@@ -216,7 +222,7 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { search_query: searchQuery, size } = request.query;
       const {
         client: { asCurrentUser },

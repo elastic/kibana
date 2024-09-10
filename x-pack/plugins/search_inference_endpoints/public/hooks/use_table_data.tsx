@@ -7,8 +7,9 @@
 
 import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { DeploymentState, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
@@ -17,9 +18,8 @@ import {
   QueryParams,
   SortOrder,
   ServiceProviderKeys,
-  TaskTypes,
 } from '../components/all_inference_endpoints/types';
-import { DeploymentStatusEnum } from '../components/all_inference_endpoints/types';
+import { useTrainedModelStats } from './use_trained_model_stats';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];
@@ -33,9 +33,17 @@ export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   queryParams: QueryParams,
   filterOptions: FilterOptions,
-  searchKey: string,
-  deploymentStatus: Record<string, DeploymentStatusEnum>
+  searchKey: string
 ): UseTableDataReturn => {
+  const { data: trainedModelStats } = useTrainedModelStats();
+
+  const deploymentStatus = trainedModelStats?.trained_model_stats.reduce((acc, modelStat) => {
+    if (modelStat.deployment_stats?.deployment_id) {
+      acc[modelStat.deployment_stats.deployment_id] = modelStat?.deployment_stats?.state;
+    }
+    return acc;
+  }, {} as Record<string, DeploymentState | undefined>);
+
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
 
@@ -52,23 +60,16 @@ export const useTableData = (
     }
 
     return filteredEndpoints
-      .filter((endpoint) => endpoint.model_id.includes(searchKey))
+      .filter((endpoint) => endpoint.inference_id.includes(searchKey))
       .map((endpoint) => {
         const isElasticService =
           endpoint.service === ServiceProviderKeys.elasticsearch ||
           endpoint.service === ServiceProviderKeys.elser;
-
-        let deploymentStatusValue = DeploymentStatusEnum.notApplicable;
-        if (isElasticService) {
-          const modelId = endpoint.service_settings?.model_id;
-          deploymentStatusValue =
-            modelId && deploymentStatus[modelId] !== undefined
-              ? deploymentStatus[modelId]
-              : DeploymentStatusEnum.notDeployable;
-        }
+        const deploymentId = isElasticService ? endpoint.inference_id : undefined;
+        const deployment = (deploymentId && deploymentStatus?.[deploymentId]) || undefined;
 
         return {
-          deployment: deploymentStatusValue,
+          deployment,
           endpoint,
           provider: endpoint.service,
           type: endpoint.task_type,
@@ -82,9 +83,9 @@ export const useTableData = (
       const bValue = b[queryParams.sortField];
 
       if (queryParams.sortOrder === SortOrder.asc) {
-        return aValue.model_id.localeCompare(bValue.model_id);
+        return aValue.inference_id.localeCompare(bValue.inference_id);
       } else {
-        return bValue.model_id.localeCompare(aValue.model_id);
+        return bValue.inference_id.localeCompare(aValue.inference_id);
       }
     });
   }, [tableData, queryParams]);

@@ -339,23 +339,21 @@ export class TaskRunner<
         taskInstance: this.taskInstance,
       })
     );
-    const executorServices = await withAlertingSpan('alerting:get-executor-services', () =>
-      getExecutorServices({
-        context: this.context,
-        fakeRequest,
-        abortController: this.searchAbortController,
-        logger: this.logger,
-        ruleMonitoringService: this.ruleMonitoring,
-        ruleResultService: this.ruleResult,
-        ruleData: {
-          name: rule.name,
-          alertTypeId: rule.alertTypeId,
-          id: rule.id,
-          spaceId,
-        },
-        ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
-      })
-    );
+    const executorServices = getExecutorServices({
+      context: this.context,
+      fakeRequest,
+      abortController: this.searchAbortController,
+      logger: this.logger,
+      ruleMonitoringService: this.ruleMonitoring,
+      ruleResultService: this.ruleResult,
+      ruleData: {
+        name: rule.name,
+        alertTypeId: rule.alertTypeId,
+        id: rule.id,
+        spaceId,
+      },
+      ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
+    });
 
     const {
       state: updatedRuleTypeState,
@@ -680,10 +678,7 @@ export class TaskRunner<
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))
       );
 
-      // fetch the rule again to ensure we return the correct schedule as it may have
-      // changed during the task execution
-      const data = await getDecryptedRule(this.context, ruleId, spaceId);
-      schedule = asOk(data.rawRule.schedule);
+      schedule = asOk(validatedRuleData.rule.schedule);
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseBody, removeTrailingWhitespaces } from './tokens_utils';
+import { parseBody, removeTrailingWhitespaces, parseUrl, parseLine } from './tokens_utils';
 
 describe('tokens_utils', () => {
   describe('removeTrailingWhitespaces', () => {
@@ -29,6 +30,53 @@ describe('tokens_utils', () => {
       const url = '_search?q="with whitespace"';
       const result = removeTrailingWhitespaces(url);
       expect(result).toBe(url);
+    });
+  });
+
+  describe('parseLine', () => {
+    it('works with a comment', () => {
+      const { method, url } = parseLine('GET _search // a comment');
+      expect(method).toBe('GET');
+      expect(url).toBe('_search');
+    });
+    it('works with a url param', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine(
+        'GET _search?query="test1 test2 test3" // comment'
+      );
+      expect(method).toBe('GET');
+      expect(url).toBe('_search?query="test1 test2 test3"');
+      expect(urlPathTokens).toEqual(['_search']);
+      expect(urlParamsTokens[0]).toEqual(['query', '"test1 test2 test3"']);
+    });
+    it('works with multiple whitespaces', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine(
+        ' GET   _search?query="test1     test2    test3"    //   comment'
+      );
+      expect(method).toBe('GET');
+      expect(url).toBe('_search?query="test1     test2    test3"');
+      expect(urlPathTokens).toEqual(['_search']);
+      expect(urlParamsTokens[0]).toEqual(['query', '"test1     test2    test3"']);
+    });
+    it('normalizes the method to upper case', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine('Get _');
+      expect(method).toBe('GET');
+      expect(url).toBe('_');
+      expect(urlPathTokens).toEqual(['_']);
+      expect(urlParamsTokens).toEqual([]);
+    });
+    it('correctly parses the line when the url is empty, no whitespace', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine('GET');
+      expect(method).toBe('GET');
+      expect(url).toBe('');
+      expect(urlPathTokens).toEqual([]);
+      expect(urlParamsTokens).toEqual([]);
+    });
+    it('correctly parses the line when the url is empty, with whitespace', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine('GET ');
+      expect(method).toBe('GET');
+      expect(url).toBe('');
+      expect(urlPathTokens).toEqual([]);
+      expect(urlParamsTokens).toEqual([]);
     });
   });
 
@@ -135,5 +183,19 @@ describe('tokens_utils', () => {
         expect(parsedTokens).toEqual(tokens);
       });
     }
+  });
+
+  describe('parseUrl', () => {
+    it('groups more than 1 slashes together when splitting', () => {
+      const url = '_search//test';
+      const result = parseUrl(url);
+      expect(result.urlPathTokens).toEqual(['_search', 'test']);
+    });
+
+    it('filters out empty tokens', () => {
+      const url = '/_search/test/';
+      const result = parseUrl(url);
+      expect(result.urlPathTokens).toEqual(['_search', 'test']);
+    });
   });
 });

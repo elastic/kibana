@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
 import { BehaviorSubject, of } from 'rxjs';
@@ -19,13 +21,15 @@ import { NavigationProvider } from '../src/services';
 import { Navigation } from '../src/ui/navigation';
 import type { PanelContentProvider } from '../src/ui';
 import { NavigationServices } from '../src/types';
+import { EventTracker } from '../src/analytics';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];
 
 export const getServicesMock = (): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
-  const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
+  const basePath = { prepend: jest.fn((path: string) => `/base${path}`), remove: jest.fn() };
   const recentlyAccessed$ = new BehaviorSubject([]);
+  const eventTracker = new EventTracker({ reportEvent: jest.fn() });
 
   return {
     basePath,
@@ -34,6 +38,7 @@ export const getServicesMock = (): NavigationServices => {
     navigateToUrl,
     activeNodes$: of(activeNodes),
     isSideNavCollapsed: false,
+    eventTracker,
   };
 };
 

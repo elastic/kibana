@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -12,13 +13,15 @@ import {
   ElasticsearchSupertestProvider,
 } from './services';
 
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     services: {
-      ...commonConfig.get('services'),
+      ...commonFunctionalServices,
       supertest: createKibanaSupertestProvider(),
       supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq } from 'lodash';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
@@ -16,52 +16,49 @@ import type { BaseProfileProvider, BaseProfileService } from '../profile_service
 import { exampleDataSourceProfileProvider } from './example_data_source_profile';
 import { exampleDocumentProfileProvider } from './example_document_profile';
 import { exampleRootProfileProvider } from './example_root_pofile';
-import { createLogsDataSourceProfileProvider } from './logs_data_source_profile';
+import { createLogsDataSourceProfileProviders } from './logs_data_source_profile';
 import { createLogDocumentProfileProvider } from './log_document_profile';
-import { createProfileProviderServices } from './profile_provider_services';
+import { createSecurityRootProfileProvider } from './security/security_root_profile';
+import {
+  createProfileProviderServices,
+  ProfileProviderServices,
+} from './profile_provider_services';
 
 export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
-  experimentalProfileIds,
+  enabledExperimentalProfileIds,
 }: {
   rootProfileService: RootProfileService;
   dataSourceProfileService: DataSourceProfileService;
   documentProfileService: DocumentProfileService;
-  experimentalProfileIds: string[];
+  /**
+   * List of experimental profile Ids which are enabled in kibana config.
+   * */
+  enabledExperimentalProfileIds: string[];
 }) => {
   const providerServices = createProfileProviderServices();
-  const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
-  const logsDocumentProfileProvider = createLogDocumentProfileProvider(providerServices);
-  const rootProfileProviders = [exampleRootProfileProvider];
-  const dataSourceProfileProviders = [
-    exampleDataSourceProfileProvider,
-    logsDataSourceProfileProvider,
-  ];
-  const documentProfileProviders = [exampleDocumentProfileProvider, logsDocumentProfileProvider];
-  const enabledProfileIds = uniq([
-    logsDataSourceProfileProvider.profileId,
-    logsDocumentProfileProvider.profileId,
-    ...experimentalProfileIds,
-  ]);
+  const rootProfileProviders = createRootProfileProviders(providerServices);
+  const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
+  const documentProfileProviders = createDocumentProfileProviders(providerServices);
 
   registerEnabledProfileProviders({
     profileService: rootProfileService,
-    availableProviders: rootProfileProviders,
-    enabledProfileIds,
+    providers: [...rootProfileProviders],
+    enabledExperimentalProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
-    availableProviders: dataSourceProfileProviders,
-    enabledProfileIds,
+    providers: [...dataSourceProfileProviders],
+    enabledExperimentalProfileIds,
   });
 
   registerEnabledProfileProviders({
     profileService: documentProfileService,
-    availableProviders: documentProfileProviders,
-    enabledProfileIds,
+    providers: [...documentProfileProviders],
+    enabledExperimentalProfileIds,
   });
 };
 
@@ -70,16 +67,37 @@ export const registerEnabledProfileProviders = <
   TService extends BaseProfileService<TProvider, {}>
 >({
   profileService,
-  availableProviders,
-  enabledProfileIds,
+  providers: availableProviders,
+  enabledExperimentalProfileIds = [],
 }: {
   profileService: TService;
-  availableProviders: TProvider[];
-  enabledProfileIds: string[];
+  providers: TProvider[];
+  /**
+   * List of experimental profile Ids which are enabled in kibana config.
+   * */
+  enabledExperimentalProfileIds?: string[];
 }) => {
-  for (const profile of availableProviders) {
-    if (enabledProfileIds.includes(profile.profileId)) {
-      profileService.registerProvider(profile);
+  for (const provider of availableProviders) {
+    const isProfileExperimental = provider.isExperimental ?? false;
+    const isProfileEnabled =
+      enabledExperimentalProfileIds.includes(provider.profileId) || !isProfileExperimental;
+    if (isProfileEnabled) {
+      profileService.registerProvider(provider);
     }
   }
 };
+
+const createRootProfileProviders = (_providerServices: ProfileProviderServices) => [
+  exampleRootProfileProvider,
+  createSecurityRootProfileProvider(_providerServices),
+];
+
+const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  exampleDataSourceProfileProvider,
+  ...createLogsDataSourceProfileProviders(providerServices),
+];
+
+const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
+  exampleDocumentProfileProvider,
+  createLogDocumentProfileProvider(providerServices),
+];

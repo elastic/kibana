@@ -8,21 +8,26 @@ import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
+import { findingsNavigation } from '@kbn/cloud-security-posture';
+import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage, defaultLoadingRenderer } from '../../components/cloud_posture_page';
-import { useDataView } from '../../common/api/use_data_view';
-import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
+import { cloudPosturePages } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 
 export const Configurations = () => {
   const location = useLocation();
-  const dataViewQuery = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const dataViewQuery = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
   const { data: getSetupStatus, isLoading: getSetupStatusIsLoading } = useCspSetupStatusApi();
-  const hasConfigurationFindings =
-    getSetupStatus?.kspm.status === 'indexed' || getSetupStatus?.cspm.status === 'indexed';
+  const hasMisconfigurationsFindings = !!getSetupStatus?.hasMisconfigurationsFindings;
+
+  const hasFindings =
+    hasMisconfigurationsFindings ||
+    getSetupStatus?.kspm.status === 'indexed' ||
+    getSetupStatus?.cspm.status === 'indexed';
 
   // For now, when there are no findings we prompt first to install cspm, if it is already installed we will prompt to
   // install kspm
@@ -30,7 +35,7 @@ export const Configurations = () => {
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
   if (getSetupStatusIsLoading) return defaultLoadingRenderer();
-  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
+  if (!hasFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,

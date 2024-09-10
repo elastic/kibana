@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -491,6 +492,9 @@ describe('DataViewLazy', () => {
         Object.values((await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap()).length -
           fieldCount
       ).toEqual(2);
+      expect(Object.keys(dataViewLazy.getRuntimeFields({ fieldName: ['new_field.a'] }))).toEqual([
+        'new_field.a',
+      ]);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.a']).toBeDefined();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.b']).toBeDefined();

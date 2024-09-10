@@ -74,7 +74,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   const {
     services: {
       notifications,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -163,7 +163,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
 
   async function fetchJobs() {
     try {
-      const resp = await mlApiServices.jobs.jobsWithTimerange(dateFormatTz);
+      const resp = await mlApi.jobs.jobsWithTimerange(dateFormatTz);
       const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz, DEFAULT_GANTT_BAR_WIDTH);
       const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
       setJobs(normalizedJobs);
@@ -242,7 +242,9 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                             </EuiButtonEmpty>
                           )}
                         </EuiFlexItem>
-                        {withTimeRangeSelector && applyTimeRangeConfig !== undefined && (
+                        {withTimeRangeSelector &&
+                        applyTimeRangeConfig !== undefined &&
+                        jobs.length !== 0 ? (
                           <EuiFlexItem grow={false}>
                             <EuiSwitch
                               label={i18n.translate(
@@ -256,7 +258,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                               data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
                             />
                           </EuiFlexItem>
-                        )}
+                        ) : null}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -278,19 +280,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={applySelection}
-              fill
-              isDisabled={newSelection.length === 0}
-              data-test-subj="mlFlyoutJobSelectorButtonApply"
-            >
-              {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
-                defaultMessage: 'Apply',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               iconType="cross"
@@ -301,6 +291,20 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
                 defaultMessage: 'Close',
               })}
             </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {jobs.length !== 0 ? (
+              <EuiButton
+                onClick={applySelection}
+                fill
+                isDisabled={newSelection.length === 0}
+                data-test-subj="mlFlyoutJobSelectorButtonApply"
+              >
+                {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
+                  defaultMessage: 'Apply',
+                })}
+              </EuiButton>
+            ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

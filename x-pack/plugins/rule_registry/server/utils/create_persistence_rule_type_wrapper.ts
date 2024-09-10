@@ -25,6 +25,7 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 import type { IRuleDataClient } from '..';
@@ -55,11 +56,13 @@ const augmentAlerts = <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
+  intendedTimestamp,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
+  intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
   return alerts.map((alert) => {
@@ -69,6 +72,9 @@ const augmentAlerts = <T>({
         [ALERT_RULE_EXECUTION_TIMESTAMP]: new Date(),
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+        [ALERT_INTENDED_TIMESTAMP]: intendedTimestamp
+          ? intendedTimestamp
+          : currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
         ...(options?.maintenanceWindowIds?.length
           ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
@@ -249,14 +255,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
           ...options,
           services: {
             ...options.services,
-            alertWithPersistence: async (
-              alerts,
-              refresh,
-              maxAlerts = undefined,
-              enrichAlerts,
-              currentTimeOverride
-            ) => {
+            alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
+
               logger.debug(`Found ${numAlerts} alerts.`);
 
               const ruleDataClientWriter = await ruleDataClient.getWriter({
@@ -303,11 +304,17 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
+                let intendedTimestamp;
+                if (options.startedAtOverridden) {
+                  intendedTimestamp = options.startedAt;
+                }
+
                 const augmentedAlerts = augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
-                  currentTimeOverride,
+                  currentTimeOverride: undefined,
+                  intendedTimestamp,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -386,6 +393,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               let alertsWereTruncated = false;
+
+              let intendedTimestamp;
+              if (options.startedAtOverridden) {
+                intendedTimestamp = options.startedAt;
+              }
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -566,6 +578,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
+                  intendedTimestamp,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

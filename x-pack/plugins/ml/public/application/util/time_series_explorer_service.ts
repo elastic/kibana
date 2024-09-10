@@ -29,25 +29,25 @@ import {
   MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
-import type { MlApiServices } from '../services/ml_api_service';
-import { mlResultsServiceProvider, type MlResultsService } from '../services/results_service';
+import type { MlApi } from '../services/ml_api_service';
+import { useMlResultsService, type MlResultsService } from '../services/results_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlApi, useMlKibana } from '../contexts/kibana';
 
 export interface Interval {
   asMilliseconds: () => number;
   expression: string;
 }
 
-interface ChartDataPoint {
+export interface ChartDataPoint {
   date: Date;
   value: number | null;
   upper?: number | null;
   lower?: number | null;
 }
 
-interface FocusData {
+export interface FocusData {
   focusChartData: ChartDataPoint[];
   anomalyRecords: MlAnomalyRecordDoc[];
   scheduledEvents: any;
@@ -57,24 +57,23 @@ interface FocusData {
   focusForecastData?: any;
 }
 
-// TODO Consolidate with legacy code in
-// `ml/public/application/timeseriesexplorer/timeseriesexplorer_utils/timeseriesexplorer_utils.js`.
 export function timeSeriesExplorerServiceFactory(
   uiSettings: IUiSettingsClient,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   mlResultsService: MlResultsService
 ) {
   const timeBuckets = timeBucketsServiceFactory(uiSettings);
-  const mlForecastService = forecastServiceFactory(mlApiServices);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
+  const mlForecastService = forecastServiceFactory(mlApi);
+  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApi);
 
-  function getAutoZoomDuration(selectedJob: Job) {
+  function getAutoZoomDuration(bucketSpan: Job['analysis_config']['bucket_span']) {
+    // function getAutoZoomDuration(selectedJob: Job) {
     // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
     // Get the minimum bucket span of selected jobs.
     let autoZoomDuration;
-    if (selectedJob.analysis_config.bucket_span) {
-      const bucketSpan = parseInterval(selectedJob.analysis_config.bucket_span);
-      const bucketSpanSeconds = bucketSpan!.asSeconds();
+    if (bucketSpan) {
+      const parsedBucketSpan = parseInterval(bucketSpan);
+      const bucketSpanSeconds = parsedBucketSpan!.asSeconds();
 
       // In most cases the duration can be obtained by simply multiplying the points target
       // Check that this duration returns the bucket span when run back through the
@@ -512,7 +511,7 @@ export function timeSeriesExplorerServiceFactory(
         esFunctionToPlotIfMetric
       ),
       // Query 2 - load all the records across selected time range for the chart anomaly markers.
-      mlApiServices.results.getAnomalyRecords$(
+      mlApi.results.getAnomalyRecords$(
         [selectedJob.job_id],
         criteriaFields,
         0,
@@ -531,7 +530,7 @@ export function timeSeriesExplorerServiceFactory(
         MAX_SCHEDULED_EVENTS
       ),
       // Query 4 - load any annotations for the selected job.
-      mlApiServices.annotations
+      mlApi.annotations
         .getAnnotations$({
           jobIds: [selectedJob.job_id],
           earliestMs: searchBounds.min.valueOf(),
@@ -647,19 +646,15 @@ export function timeSeriesExplorerServiceFactory(
 }
 
 export function useTimeSeriesExplorerService(): TimeSeriesExplorerService {
-  const {
-    services: {
-      uiSettings,
-      mlServices: { mlApiServices },
-    },
-  } = useMlKibana();
-  const mlResultsService = mlResultsServiceProvider(mlApiServices);
-
-  const mlTimeSeriesExplorer = useMemo(
-    () => timeSeriesExplorerServiceFactory(uiSettings, mlApiServices, mlResultsService),
-    [uiSettings, mlApiServices, mlResultsService]
+  const { services } = useMlKibana();
+  const mlApi = useMlApi();
+  const mlResultsService = useMlResultsService();
+  return useMemo(
+    () => timeSeriesExplorerServiceFactory(services.uiSettings, mlApi, mlResultsService),
+    // initialize only once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
-  return mlTimeSeriesExplorer;
 }
 
 export type TimeSeriesExplorerService = ReturnType<typeof timeSeriesExplorerServiceFactory>;

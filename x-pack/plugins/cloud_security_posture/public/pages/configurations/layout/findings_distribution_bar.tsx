@@ -6,19 +6,11 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiHealth,
-  EuiBadge,
-  EuiSpacer,
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiHealth, EuiBadge, EuiSpacer, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { statusColors } from '@kbn/cloud-security-posture';
 import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
-import { statusColors } from '../../../common/constants';
 import type { Evaluation } from '../../../../common/types_old';
 
 interface Props {
@@ -34,31 +26,6 @@ const I18N_PASSED_FINDINGS = i18n.translate('xpack.csp.findings.distributionBar.
 const I18N_FAILED_FINDINGS = i18n.translate('xpack.csp.findings.distributionBar.totalFailedLabel', {
   defaultMessage: 'Failed Findings',
 });
-
-export const CurrentPageOfTotal = ({
-  pageEnd,
-  pageStart,
-  total,
-  type,
-}: {
-  pageEnd: number;
-  pageStart: number;
-  total: number;
-  type: string;
-}) => (
-  <EuiTextColor color="subdued">
-    <FormattedMessage
-      id="xpack.csp.findings.distributionBar.showingPageOfTotalLabel"
-      defaultMessage="Showing {pageStart}-{pageEnd} of {total} {type}"
-      values={{
-        pageStart: <b>{pageStart}</b>,
-        pageEnd: <b>{pageEnd}</b>,
-        total: <b>{getAbbreviatedNumber(total)}</b>,
-        type,
-      }}
-    />
-  </EuiTextColor>
-);
 
 export const FindingsDistributionBar = (props: Props) => (
   <div>

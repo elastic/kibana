@@ -3,7 +3,3 @@
     background-image: euiFormControlGradient($euiColorDanger);
   }
 }
-// increase the section height to avoid vertical scrolling
-.euiQuickSelectPopover__section {
-  max-height: 142px;
-}

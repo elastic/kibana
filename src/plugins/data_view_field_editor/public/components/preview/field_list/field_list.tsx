@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import { i18n } from '@kbn/i18n';
@@ -50,6 +52,7 @@ function fuzzyMatch(searchValue: string, text: string) {
 
 const pinnedFieldsSelector = (s: PreviewState) => s.pinnedFields;
 const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
+const fieldMapSelector = (s: PreviewState) => s.fieldMap;
 
 interface RowProps {
   index: number;
@@ -74,13 +77,13 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   const { controller } = useFieldPreviewContext();
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
+  const fieldMap = useStateSelector(controller.state$, fieldMapSelector);
 
   const [showAllFields, setShowAllFields] = useState(false);
 
   const fieldList: DocumentField[] = useMemo(
     () =>
-      dataView.fields
-        .getAll()
+      Object.values(fieldMap)
         .map((field) => {
           const { name, displayName } = field;
           const formatter = dataView.getFormatterForField(field);
@@ -95,7 +98,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           };
         })
         .filter(({ value }) => value !== undefined),
-    [dataView, currentDocument?.fields]
+    [dataView, fieldMap, currentDocument?.fields]
   );
 
   const fieldListWithPinnedFields: DocumentField[] = useMemo(() => {

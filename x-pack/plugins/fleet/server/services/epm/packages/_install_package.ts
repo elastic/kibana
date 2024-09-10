@@ -21,7 +21,7 @@ import { getNormalizedDataStreams } from '../../../../common/services';
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
@@ -53,6 +53,7 @@ import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
+// TODO: when installByUpload and installBundle are migrated, remove this function in favor of _state_machine_package_install
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
 // only the more explicit `installPackage*` functions should be used
@@ -366,7 +367,7 @@ export async function _installPackage({
         const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
           page: 1,
           perPage: SO_SEARCH_LIMIT,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+          kuery: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
         });
         logger.debug(
           `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`

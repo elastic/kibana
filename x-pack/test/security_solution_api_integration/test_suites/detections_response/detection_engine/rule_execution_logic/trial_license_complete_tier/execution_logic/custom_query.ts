@@ -18,6 +18,8 @@ import {
   ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
   ALERT_LAST_DETECTED,
+  ALERT_INTENDED_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { Rule } from '@kbn/alerting-plugin/common';
@@ -69,6 +71,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
+  getLuceneRuleForTesting,
 } from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -117,7 +120,10 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
+      await deleteAllAlerts(supertest, log, es, [
+        '.preview.alerts-security.alerts-*',
+        '.alerts-security.alerts-*',
+      ]);
       await deleteAllRules(supertest, log);
     });
 
@@ -325,7 +331,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({
@@ -534,7 +540,20 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).toEqual(1);
     });
 
-    describe('with suppression enabled', async () => {
+    it('should generate alerts with the correct intended timestamp fields', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForAlertTesting(['auditbeat-*']),
+        query: `_id:${ID}`,
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      const alert = previewAlerts[0]._source;
+
+      expect(alert?.[ALERT_INTENDED_TIMESTAMP]).toEqual(alert?.[TIMESTAMP]);
+    });
+
+    describe('with suppression enabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/suppression');
       });
@@ -825,7 +844,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with a suppression time window', async () => {
+      describe('with a suppression time window', () => {
         const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
           es,
           index: 'ecs_compliant',
@@ -1469,7 +1488,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        describe('with host risk index', async () => {
+        describe('with host risk index', () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
           });
@@ -1965,7 +1984,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // following 2 tests created to show the difference in 2 modes, using the same data and using suppression time window
         // rule will be executing 2 times and will create alert during both executions, that will be suppressed according to time window
-        describe('with a suppression time window', async () => {
+        describe('with a suppression time window', () => {
           let id: string;
           const timestamp = '2020-10-28T06:00:00.000Z';
           const laterTimestamp = '2020-10-28T07:00:00.000Z';
@@ -2137,7 +2156,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with exceptions', async () => {
+    describe('with exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
@@ -2229,7 +2248,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // https://github.com/elastic/kibana/issues/149920
-    describe('field name wildcard queries', async () => {
+    describe('field name wildcard queries', () => {
       const { indexEnhancedDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',
@@ -2440,6 +2459,56 @@ export default ({ getService }: FtrProviderContext) => {
         await stopAllManualRuns(supertest);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('alerts has intended_timestamp set to the time of the manual run', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h').toISOString();
+        const secondTimestamp = new Date().toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-2',
+          },
+        };
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        expect(alerts.hits.hits[0]?._source?.[ALERT_INTENDED_TIMESTAMP]).toEqual(
+          alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TIMESTAMP]
+        );
+
+        const backfillStartDate = moment(firstTimestamp).startOf('hour');
+        const backfillEndDate = moment(backfillStartDate).add(1, 'h');
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: backfillStartDate,
+          endDate: backfillEndDate,
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_INTENDED_TIMESTAMP]).toEqual(
+          backfillEndDate.toISOString()
         );
       });
 
@@ -2748,6 +2817,19 @@ export default ({ getService }: FtrProviderContext) => {
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
+      });
+    });
+
+    describe('with a Lucene query rule', () => {
+      it('should run successfully and generate an alert that matches the lucene query', async () => {
+        const luceneQueryRule = getLuceneRuleForTesting();
+        const { previewId } = await previewRule({ supertest, rule: luceneQueryRule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBeGreaterThan(0);
+        expect(previewAlerts[0]?._source?.destination).toEqual(
+          expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
+        );
+        expect(previewAlerts[0]?._source?.['event.dataset']).toEqual('network_traffic.tls');
       });
     });
   });

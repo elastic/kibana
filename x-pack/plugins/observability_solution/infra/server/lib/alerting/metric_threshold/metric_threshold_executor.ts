@@ -12,7 +12,7 @@ import {
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { castArray, isEqual } from 'lodash';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
@@ -23,11 +23,12 @@ import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/aler
 import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { InfraBackendLibs } from '../../infra_types';
+import { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -52,15 +53,15 @@ import { getEvaluationValues, getThresholds } from '../common/get_values';
 import { EvaluatedRuleParams, evaluateRule, Evaluation } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
-import { Group } from '../../../../common/alerting/types';
 
 export type MetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values'
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -94,12 +95,17 @@ type MetricThresholdAlertReporter = (params: {
   context: MetricThresholdAlertContext;
   additionalContext?: AdditionalContext | null;
   evaluationValues?: Array<number | null>;
-  groups?: object[];
+  groups?: Group[];
   thresholds?: Array<number | null>;
 }) => void;
 
+// TODO: Refactor the executor code to have better flow-control with better
+// reasoning of different state/conditions for improved maintainability
 export const createMetricThresholdExecutor =
-  (libs: InfraBackendLibs) =>
+  (
+    libs: InfraBackendLibs,
+    { alertsLocator, assetDetailsLocator, metricsExplorerLocator }: InfraLocators
+  ) =>
   async (
     options: RuleExecutorOptions<
       MetricThresholdRuleParams,
@@ -125,6 +131,8 @@ export const createMetricThresholdExecutor =
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
+    const groupBy = castArray<string>(params.groupBy);
+
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
       alertId: ruleId,
       executionId,
@@ -149,7 +157,6 @@ export const createMetricThresholdExecutor =
         id,
         actionGroup,
       });
-      const groupsPayload = typeof groups !== 'undefined' ? { [ALERT_GROUP]: groups } : {};
 
       alertsClient.setAlertData({
         id,
@@ -157,8 +164,9 @@ export const createMetricThresholdExecutor =
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
-          ...groupsPayload,
+          [ALERT_GROUP]: groups,
           ...flattenAdditionalContext(additionalContext),
+          ...getEcsGroups(groups),
         },
         context: {
           ...contextWithoutAlertDetailsUrl,
@@ -166,7 +174,7 @@ export const createMetricThresholdExecutor =
             uuid,
             spaceId,
             start ?? startedAt.toISOString(),
-            libs.alertsLocator,
+            alertsLocator,
             libs.basePath.publicBaseUrl
           ),
         },
@@ -198,10 +206,12 @@ export const createMetricThresholdExecutor =
           reason,
           timestamp,
           value: null,
+          // TODO: Check if we need additionalContext here or not?
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
+            groupBy,
+            assetDetailsLocator,
+            metricsExplorerLocator,
           }),
         };
 
@@ -216,7 +226,7 @@ export const createMetricThresholdExecutor =
           state: {
             lastRunTimestamp: startedAt.valueOf(),
             missingGroups: [],
-            groupBy: params.groupBy,
+            groupBy,
             filterQuery: params.filterQuery,
           },
         };
@@ -406,10 +416,11 @@ export const createMetricThresholdExecutor =
             }).currentValue;
           }),
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-            basePath: libs.basePath,
-            spaceId,
             timestamp,
-            hostName: additionalContext?.host?.name,
+            groupBy,
+            assetDetailsLocator,
+            metricsExplorerLocator,
+            additionalContext,
           }),
           ...additionalContext,
         };
@@ -449,7 +460,7 @@ export const createMetricThresholdExecutor =
           alertUuid,
           spaceId,
           indexedStartedAt,
-          libs.alertsLocator,
+          alertsLocator,
           libs.basePath.publicBaseUrl
         ),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -464,10 +475,11 @@ export const createMetricThresholdExecutor =
         timestamp,
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
-          basePath: libs.basePath,
-          spaceId,
           timestamp: indexedStartedAt,
-          hostName: additionalContext?.host?.name,
+          groupBy,
+          assetDetailsLocator,
+          metricsExplorerLocator,
+          additionalContext,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
@@ -485,7 +497,7 @@ export const createMetricThresholdExecutor =
       state: {
         lastRunTimestamp: startedAt.valueOf(),
         missingGroups: [...nextMissingGroups],
-        groupBy: params.groupBy,
+        groupBy,
         filterQuery: params.filterQuery,
       },
     };

@@ -6,16 +6,19 @@
  */
 
 import { QueryState } from '@kbn/data-plugin/common';
+import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import {
   LogsExplorerController,
   LogsExplorerPublicState,
   LogsExplorerPublicStateUpdate,
 } from '@kbn/logs-explorer-plugin/public';
+import { DoneInvokeEvent } from 'xstate';
 
 export type ObservabilityLogsExplorerContext = ObservabilityLogsExplorerTypeState['context'];
 
 export interface CommonObservabilityLogsExplorerContext {
   initialLogsExplorerState: LogsExplorerPublicStateUpdate;
+  allSelection: AllDatasetSelection;
 }
 
 export interface WithLogsExplorerState {
@@ -47,7 +50,8 @@ export type ObservabilityLogsExplorerEvent =
   | {
       type: 'LOGS_EXPLORER_DATA_RECEIVED';
       rowCount: number;
-    };
+    }
+  | DoneInvokeEvent<AllDatasetSelection>;
 
 export type ObservabilityLogsExplorerTypeState =
   | {

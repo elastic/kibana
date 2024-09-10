@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 require('../../../src/setup_node_env');
@@ -21,10 +22,19 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['serverless'],
-      specInfo: {
-        title: 'Security Solution Exceptions API (Elastic Cloud Serverless)',
-        description:
-          "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Exceptions API (Elastic Cloud Serverless)',
+          description:
+            "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+        },
+        tags: [
+          {
+            name: 'Security Solution Exceptions API',
+            description:
+              "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+          },
+        ],
       },
     },
   });
@@ -37,10 +47,19 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['ess'],
-      specInfo: {
-        title: 'Security Solution Exceptions API (Elastic Cloud and self-hosted)',
-        description:
-          "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Exceptions API (Elastic Cloud and self-hosted)',
+          description:
+            "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+        },
+        tags: [
+          {
+            name: 'Security Solution Exceptions API',
+            description:
+              "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
+          },
+        ],
       },
     },
   });

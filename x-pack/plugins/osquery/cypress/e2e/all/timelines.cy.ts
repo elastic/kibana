@@ -10,8 +10,7 @@ import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/189136
-describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
+describe('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
@@ -42,7 +41,8 @@ describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
     });
     cy.getBySel('sourcerer-save').click();
 
-    cy.getBySel('docTableExpandToggleColumn').first().click();
+    // Force true due to pointer-events: none on parent prevents user mouse interaction.
+    cy.getBySel('docTableExpandToggleColumn').first().click({ force: true });
     takeOsqueryActionWithParams();
   });
 });

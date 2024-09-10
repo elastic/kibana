@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { pageObjects as xpackFunctionalPageObjects } from '../../../test/functional/page_objects';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { cloudSecurityPosturePageObjects } from '../../../test/cloud_security_posture_functional/page_objects';
+import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
+
+import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
 import { SvlCommonNavigationProvider } from './svl_common_navigation';
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
@@ -22,6 +21,8 @@ import { SvlSearchConnectorsPageProvider } from './svl_search_connectors_page';
 import { SvlManagementPageProvider } from './svl_management_page';
 import { SvlIngestPipelines } from './svl_ingest_pipelines';
 import { SvlSearchHomePageProvider } from './svl_search_homepage';
+import { SvlSearchIndexDetailPageProvider } from './svl_search_index_detail_page';
+import { SvlSearchElasticsearchStartPageProvider } from './svl_search_elasticsearch_start_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -40,4 +41,6 @@ export const pageObjects = {
   svlManagementPage: SvlManagementPageProvider,
   svlIngestPipelines: SvlIngestPipelines,
   svlSearchHomePage: SvlSearchHomePageProvider,
+  svlSearchIndexDetailPage: SvlSearchIndexDetailPageProvider,
+  svlSearchElasticsearchStartPage: SvlSearchElasticsearchStartPageProvider,
 };

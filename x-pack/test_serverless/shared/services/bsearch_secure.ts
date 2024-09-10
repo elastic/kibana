@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-// NOTE: This is pretty much a copy/paste from test/common/services/bsearch.ts but with the ability
-// to provide custom auth
+// NOTE: This is pretty much a copy/paste from packages/kbn-ftr-common-functional-services/services/bsearch.ts
+// but with the ability to provide custom auth
 
 import expect from '@kbn/expect';
 import { GenericFtrService } from '@kbn/test';
 import request from 'superagent';
-import type SuperTest from 'supertest';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
@@ -24,8 +24,8 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
     .map((item) => JSON.parse(item));
 };
 
-interface SendOptions {
-  supertestWithoutAuth: SuperTest.Agent;
+export interface SendOptions {
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   apiKeyHeader: { Authorization: string };
   referer?: string;
   kibanaVersion?: string;

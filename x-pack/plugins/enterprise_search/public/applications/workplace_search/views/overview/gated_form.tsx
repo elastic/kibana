@@ -55,10 +55,11 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.analytics.action.Label',
       {
-        defaultMessage: 'Start with Behavioral Analytics',
+        defaultMessage: 'Add Search Analytics',
       }
     ),
-    actionLink: './analytics ',
+    actionLink:
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-event.html',
     addOnLearnMoreLabel: undefined,
     addOnLearnMoreUrl: undefined,
     description: i18n.translate(
@@ -69,7 +70,8 @@ const featuresList = {
       }
     ),
     id: 'Analytics',
-    learnMore: 'https://www.elastic.co/guide/en/enterprise-search/current/analytics-overview.html',
+    learnMore:
+      'https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.gateForm.analytics.featureName', {
       defaultMessage: 'Use Behavioral Analytics',
     }),
@@ -153,22 +155,22 @@ const featuresList = {
     actionLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.action.Label',
       {
-        defaultMessage: 'Create a Search Application',
+        defaultMessage: 'Build a search experience with Search UI',
       }
     ),
-    actionLink: './applications/search_applications',
+    actionLink: 'https://www.elastic.co/docs/current/search-ui/overview',
     addOnLearnMoreLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.addOn.learnMoreLabel',
       {
         defaultMessage: 'Search UI',
       }
     ),
-    addOnLearnMoreUrl: 'https://www.elastic.co/guide/en/enterprise-search/current/search-ui.html  ',
+    addOnLearnMoreUrl: 'https://www.elastic.co/docs/current/search-ui/tutorials/elasticsearch',
     description: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.gateForm.searchApplication.featureDescription',
       {
         defaultMessage:
-          'Did you know you can restrict access to documents in your Elasticsearch indices according to user and group permissions? Return only authorized search results for users with Elastic’s document level security. ',
+          'Search-powered applications that leverage the full power of Elasticsearch! Build a unified search using Search Applications or integrate directly with your existing UI with Search UI.',
       }
     ),
     id: 'Search Application',
@@ -241,7 +243,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
                     {i18n.translate(
                       'xpack.enterpriseSearch.workplaceSearch.gateForm.educationalPanel.subTitle',
                       {
-                        defaultMessage: 'Based on your selection we recommend you',
+                        defaultMessage: 'Based on your selection we recommend:',
                       }
                     )}
                   </p>

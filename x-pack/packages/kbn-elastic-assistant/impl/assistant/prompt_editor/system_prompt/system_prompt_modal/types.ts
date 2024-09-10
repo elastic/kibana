@@ -6,7 +6,7 @@
  */
 import {
   PromptResponse,
-  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { Conversation } from '../../../../..';

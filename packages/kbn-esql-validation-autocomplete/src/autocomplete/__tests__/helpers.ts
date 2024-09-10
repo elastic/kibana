@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { camelCase } from 'lodash';
@@ -17,6 +18,15 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
+import { getFunctionSignatures } from '../../definitions/helpers';
+import { ESQLRealField } from '../../validation/types';
+import {
+  FieldType,
+  fieldTypes,
+  FunctionParameterType,
+  FunctionReturnType,
+  SupportedDataType,
+} from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -37,23 +47,13 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...[
-    'string',
-    'number',
-    'date',
-    'boolean',
-    'ip',
-    'geo_point',
-    'geo_shape',
-    'cartesian_point',
-    'cartesian_shape',
-  ].map((type) => ({
+export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+  ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
-  { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'number' },
+  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
+  { name: 'kubernetes.something.something', type: 'double' },
 ];
 
 export const indexes = (
@@ -123,7 +123,7 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: string | string[],
+  _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
@@ -139,10 +139,10 @@ export function getFunctionSignaturesByReturnType(
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: string[],
+  paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string
-) {
+): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
     : [_expectedReturnType];
@@ -176,7 +176,7 @@ export function getFunctionSignaturesByReturnType(
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -203,24 +203,38 @@ export function getFunctionSignaturesByReturnType(
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map(({ type, name, signatures }) => {
+    .map<PartialSuggestionWithText>((definition) => {
+      const { type, name, signatures } = definition;
+
       if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1)
-          ? `${name.toUpperCase()} $0`
-          : name.toUpperCase();
+        return {
+          text: signatures.some(({ params }) => params.length > 1)
+            ? `${name.toUpperCase()} $0`
+            : name.toUpperCase(),
+          label: name.toUpperCase(),
+        };
       }
-      return `${name.toUpperCase()}($0)`;
+      const printedSignatures = getFunctionSignatures(definition, {
+        withTypes: true,
+        capitalize: true,
+      });
+      return {
+        text: `${name.toUpperCase()}($0)`,
+        label: printedSignatures[0].declaration,
+      };
     });
 }
 
-export function getFieldNamesByType(_requestedType: string | string[]) {
+export function getFieldNamesByType(
+  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: string | string[]) {
+export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
@@ -229,13 +243,13 @@ export function getLiteralsByType(_type: string | string[]) {
   return [];
 }
 
-export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(
-  customFields?: Array<{ name: string; type: string }>,
+  customFields?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -273,7 +287,7 @@ export function getPolicyFields(policyName: string) {
 }
 
 export interface SuggestOptions {
-  ctx?: EditorContext;
+  triggerCharacter?: string;
   callbacks?: ESQLCallbacks;
 }
 
@@ -288,9 +302,10 @@ export const setup = async (caret = '/') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    const ctx =
-      opts.ctx ??
-      (pos > 0 ? { triggerKind: 1, triggerCharacter: query[pos - 1] } : { triggerKind: 0 });
+    const ctx: EditorContext = opts.triggerCharacter
+      ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
+      : { triggerKind: 0 };
+
     return await autocomplete.suggest(
       querySansCaret,
       pos,
@@ -300,11 +315,34 @@ export const setup = async (caret = '/') => {
     );
   };
 
-  const assertSuggestions = async (query: string, expected: string[], opts?: SuggestOptions) => {
-    const result = await suggest(query, opts);
-    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+  const assertSuggestions = async (
+    query: string,
+    expected: Array<string | PartialSuggestionWithText>,
+    opts?: SuggestOptions
+  ) => {
+    try {
+      const result = await suggest(query, opts);
+      const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    expect(resultTexts).toEqual([...expected].sort());
+      const expectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
+
+      expect(resultTexts).toEqual(expectedTexts);
+
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
+
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
+    }
   };
 
   return {

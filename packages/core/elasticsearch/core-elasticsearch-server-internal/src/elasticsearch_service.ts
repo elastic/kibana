@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs';
+import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -107,6 +107,13 @@ export class ElasticsearchService
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
 
+    // Log every error we may encounter in the connection to Elasticsearch
+    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
     this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser);
@@ -137,13 +144,6 @@ export class ElasticsearchService
     }
 
     const config = await firstValueFrom(this.config$);
-
-    // Log every error we may encounter in the connection to Elasticsearch
-    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
 
     let capabilities: ElasticsearchCapabilities;
     let elasticsearchWaitTime: number;

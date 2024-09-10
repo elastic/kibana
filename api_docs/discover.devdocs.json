@@ -511,6 +511,29 @@
             "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppState.density",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "density",
+            "description": [
+              "\nDensity of table"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/state_management/discover_app_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -985,7 +1008,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>; onOpenSavedSearch: (savedSearchId: string) => void; onUpdateQuery: (payload: { dateRange: ",
+              ") => Promise<void>; transitionFromESQLToDataView: (dataViewId: string) => void; transitionFromDataViewToESQL: (dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => void; onOpenSavedSearch: (savedSearchId: string) => void; onUpdateQuery: (payload: { dateRange: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1880,9 +1911,9 @@
           ">; scopedHistory: ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
+            "section": "def-public.ScopedHistory",
             "text": "ScopedHistory"
           },
           "<unknown>; customizationCallbacks: ",
@@ -1997,17 +2028,17 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTitles",
+            "section": "def-public.SerializedTitles",
             "text": "SerializedTitles"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
+            "section": "def-public.SerializedTimeRange",
             "text": "SerializedTimeRange"
           },
           " & Partial<Pick<",
@@ -2252,9 +2283,9 @@
               "(req: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => Promise<",
@@ -2281,9 +2312,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2974,10 +3005,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
-              },
-              {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/overview_tab.tsx"
               },
               {
                 "plugin": "exploratoryView",

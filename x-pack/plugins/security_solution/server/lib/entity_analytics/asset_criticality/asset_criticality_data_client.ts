@@ -272,12 +272,37 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
-    await this.options.esClient.delete({
-      id: createId(idParts),
-      index: this.getIndex(),
-      refresh: refresh ?? false,
-    });
+  public async delete(
+    idParts: AssetCriticalityIdParts,
+    refresh = 'wait_for' as const
+  ): Promise<AssetCriticalityRecord | undefined> {
+    let record: AssetCriticalityRecord | undefined;
+    try {
+      record = await this.get(idParts);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
+
+    if (!record) {
+      return undefined;
+    }
+
+    try {
+      await this.options.esClient.delete({
+        id: createId(idParts),
+        index: this.getIndex(),
+        refresh: refresh ?? false,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to delete asset criticality record: ${err.message}`);
+      throw err;
+    }
+
+    return record;
   }
 
   public formatSearchResponse(response: SearchResponse<AssetCriticalityRecord>): {

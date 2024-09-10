@@ -6,6 +6,8 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   getCreateRulesSchemaMock,
@@ -29,6 +31,8 @@ describe('DetectionRulesClient.importRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient: jest.Mocked<ActionsClient>;
+
   const immutable = false as const; // Can only take value of false
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
@@ -46,7 +50,12 @@ describe('DetectionRulesClient.importRule', () => {
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     const savedObjectsClient = savedObjectsClientMock.create();
-    detectionRulesClient = createDetectionRulesClient({ rulesClient, mlAuthz, savedObjectsClient });
+    detectionRulesClient = createDetectionRulesClient({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      savedObjectsClient,
+    });
   });
 
   it('calls rulesClient.create with the correct parameters when rule_id does not match an installed rule', async () => {
@@ -146,6 +155,74 @@ describe('DetectionRulesClient.importRule', () => {
             timestamp_override: expect.anything(),
             timestampOverride: expect.anything(),
           }),
+        })
+      );
+    });
+
+    it('enables the rule if the imported rule has enabled: true', async () => {
+      const disabledExistingRule = {
+        ...existingRule,
+        enabled: false,
+      };
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(disabledExistingRule);
+
+      const rule = await detectionRulesClient.importRule({
+        ruleToImport: {
+          ...ruleToImport,
+          enabled: true,
+        },
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+          data: expect.not.objectContaining({
+            enabled: expect.anything(),
+          }),
+        })
+      );
+
+      expect(rule.enabled).toBe(true);
+      expect(rulesClient.enableRule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+        })
+      );
+    });
+
+    it('disables the rule if the imported rule has enabled: false', async () => {
+      const enabledExistingRule = {
+        ...existingRule,
+        enabled: true,
+      };
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(enabledExistingRule);
+
+      const rule = await detectionRulesClient.importRule({
+        ruleToImport: {
+          ...ruleToImport,
+          enabled: false,
+        },
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+          data: expect.not.objectContaining({
+            enabled: expect.anything(),
+          }),
+        })
+      );
+
+      expect(rule.enabled).toBe(false);
+      expect(rulesClient.disableRule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
         })
       );
     });

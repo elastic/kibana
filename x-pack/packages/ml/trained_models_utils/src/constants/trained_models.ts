@@ -58,7 +58,10 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
 
-export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
+export const ELASTIC_MODEL_DEFINITIONS: Record<
+  string,
+  Omit<ModelDefinition, 'supported'>
+> = Object.freeze({
   [ELSER_ID_V1]: {
     modelName: 'elser',
     hidden: true,
@@ -156,6 +159,8 @@ export interface ModelDefinition {
   default?: boolean;
   /** Indicates if model version is recommended for deployment based on the cluster configuration */
   recommended?: boolean;
+  /** Indicates if model version is supported by the cluster */
+  supported: boolean;
   hidden?: boolean;
   /** Software license of a model, e.g. MIT */
   license?: string;
@@ -259,13 +264,29 @@ export type InferenceServiceSettings =
         api_key: string;
         url: string;
       };
+    }
+  | {
+      service: 'amazonbedrock';
+      service_settings: {
+        access_key: string;
+        secret_key: string;
+        region: string;
+        provider: string;
+        model: string;
+      };
     };
 
 export type InferenceAPIConfigResponse = {
   // Refers to a deployment id
-  model_id: string;
+  inference_id: string;
   task_type: 'sparse_embedding' | 'text_embedding';
   task_settings: {
     model?: string;
   };
 } & InferenceServiceSettings;
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
+}

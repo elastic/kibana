@@ -10,12 +10,20 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 servers:
   - url: /
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: saved objects
-    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+    x-displayName: Saved objects
+    description: |
+      Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+
+      To manage a specific type of saved object, use the corresponding APIs.
+      For example, use:
+
+      * [Data views](../group/endpoint-data-views)
+      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
+      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
 paths:
   /api/encrypted_saved_objects/_rotate_key:
     post:
@@ -253,11 +261,13 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_export:
     post:
-      summary: Export saved objects in the default space
+      summary: Export saved objects
       operationId: exportSavedObjectsDefault
       description: |
         Retrieve sets of saved objects that you want to import into Kibana.
         You must include `type` or `objects` in the request body.
+
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
 
@@ -416,7 +426,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_import:
     post:
-      summary: Import saved objects in the default space
+      summary: Import saved objects
       operationId: importSavedObjectsDefault
       description: |
         Create sets of Kibana saved objects from a file created by the export API.
@@ -501,6 +511,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+      x-codeSamples:
+        - lang: cURL
+          label: Import with createNewCopies
+          source: |
+            curl \
+              -X POST api/saved_objects/_import?createNewCopies=true
+              -H "kbn-xsrf: true"
+              --form file=@file.ndjson
   /api/saved_objects/_resolve_import_errors:
     post:
       summary: Resolve import errors
@@ -798,15 +816,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/400_response'
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     key_rotation_response:
       summary: Encryption key rotation using default parameters.

@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/zod-helpers",
+    "@kbn/zod",
   ]
 }

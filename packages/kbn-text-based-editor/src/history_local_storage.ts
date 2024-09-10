@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import moment from 'moment';
 import 'moment-timezone';
 const QUERY_HISTORY_ITEM_KEY = 'QUERY_HISTORY_ITEM_KEY';
@@ -20,8 +22,6 @@ export interface QueryHistoryItem {
   startDateMilliseconds?: number;
   timeRan?: string;
   timeZone?: string;
-  duration?: string;
-  queryRunning?: boolean;
 }
 
 const MAX_QUERIES_NUMBER = 20;
@@ -55,7 +55,11 @@ export const getCachedQueries = (): QueryHistoryItem[] => {
   return Array.from(cachedQueries, ([name, value]) => ({ ...value }));
 };
 
-export const addQueriesToCache = (item: QueryHistoryItem) => {
+// Adding the maxQueriesAllowed here for testing purposes
+export const addQueriesToCache = (
+  item: QueryHistoryItem,
+  maxQueriesAllowed = MAX_QUERIES_NUMBER
+) => {
   const queries = getHistoryItems('desc');
   queries.forEach((queryItem) => {
     const trimmedQueryString = getKey(queryItem.queryString);
@@ -69,29 +73,10 @@ export const addQueriesToCache = (item: QueryHistoryItem) => {
       ...item,
       timeRan: moment().tz(tz).format(dateFormat),
       startDateMilliseconds: moment().valueOf(),
-      queryRunning: true,
-    });
-  }
-};
-// Adding the maxQueriesAllowed here for testing purposes
-export const updateCachedQueries = (
-  item: QueryHistoryItem,
-  maxQueriesAllowed = MAX_QUERIES_NUMBER
-) => {
-  const trimmedQueryString = getKey(item.queryString);
-  const query = cachedQueries.get(trimmedQueryString);
-
-  if (query) {
-    const now = moment().valueOf();
-    const duration = moment(now).diff(moment(query?.startDateMilliseconds));
-    cachedQueries.set(trimmedQueryString, {
-      ...query,
-      timeRan: query.queryRunning ? query.timeRan : moment().format('MMM. D, YY HH:mm:ss'),
-      duration: query.queryRunning ? `${duration}ms` : query.duration,
       status: item.status,
-      queryRunning: false,
     });
   }
+
   const queriesToStore = getCachedQueries();
   const localStorageQueries = getHistoryItems('desc');
   // if the user is working on multiple tabs

@@ -1,0 +1,42 @@
+.timeSlider-playToggle {
+  height: 100%;
+  &:enabled {
+    background-color: $euiColorPrimary !important;
+  }
+}
+
+.timeSlider-prependButton {
+  background-color: transparent !important;
+}
+
+.timeSlider__anchor {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+  overflow: hidden;
+
+  .euiText {
+    background-color: transparent !important;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:not(.euiFormControlLayoutDelimited__delimiter) {
+      cursor: pointer !important;
+    }
+  }
+
+  .timeSlider__anchorText {
+    font-weight: $euiFontWeightMedium;
+  }
+
+  .timeSlider__anchorText--default {
+    color: $euiColorMediumShade;
+  }
+
+  .timeSlider__anchorText--invalid {
+    text-decoration: line-through;
+    color: $euiColorMediumShade;
+  }
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -33,8 +34,8 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregati
   useGetAlertsGroupAggregationsQuery: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_data_view', () => ({
-  useAlertDataView: jest.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => ({
+  useAlertsDataView: jest.fn().mockReturnValue({ dataView: { fields: [] } }),
 }));
 
 jest.mock('../contexts/alerts_grouping_context', () => {
@@ -158,7 +159,7 @@ describe('AlertsGrouping', () => {
             },
             {
               range: {
-                '@timestamp': {
+                'kibana.alert.time_range': {
                   gte: mockDate.from,
                   lte: mockDate.to,
                 },

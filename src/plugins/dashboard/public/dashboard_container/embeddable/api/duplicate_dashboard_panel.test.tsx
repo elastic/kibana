@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart } from '@kbn/core/public';
@@ -215,8 +216,6 @@ describe('React embeddables', () => {
           },
           {}
         );
-        fullApi$.next(fullApi);
-        fullApi$.complete();
         return {
           Component: () => <div> TEST DUPLICATE </div>,
           api: fullApi,
@@ -234,6 +233,7 @@ describe('React embeddables', () => {
         },
       },
     });
+
     // render a fake Dashboard to initialize react embeddables
     const FakeDashboard = () => {
       return (
@@ -244,7 +244,11 @@ describe('React embeddables', () => {
               <div style={{ width: '100%', height: '100px' }} key={panelId}>
                 <ReactEmbeddableRenderer
                   type={panel.type}
-                  onApiAvailable={(api) => dashboard.children$.next({ [panelId]: api })}
+                  onApiAvailable={(api) => {
+                    fullApi$.next(api as Api & HasSnapshottableState<{}>);
+                    fullApi$.complete();
+                    dashboard.children$.next({ [panelId]: api });
+                  }}
                   getParentApi={() => ({
                     getSerializedStateForChild: () =>
                       panel.explicitInput as unknown as SerializedPanelState<object> | undefined,

@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.CoreTheme",
+        "id": "def-public.CoreTheme",
         "type": "Interface",
         "tags": [],
         "label": "CoreTheme",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.CoreTheme.darkMode",
+            "id": "def-public.CoreTheme.darkMode",
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
@@ -51,7 +35,7 @@
       },
       {
         "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.ThemeServiceSetup",
+        "id": "def-public.ThemeServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "ThemeServiceSetup",
@@ -62,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.ThemeServiceSetup.theme$",
+            "id": "def-public.ThemeServiceSetup.theme$",
             "type": "Object",
             "tags": [],
             "label": "theme$",
@@ -74,9 +58,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
@@ -87,7 +71,7 @@
           },
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.ThemeServiceSetup.getTheme",
+            "id": "def-public.ThemeServiceSetup.getTheme",
             "type": "Function",
             "tags": [],
             "label": "getTheme",
@@ -98,9 +82,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               }
             ],
@@ -118,7 +102,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.ThemeServiceStart",
+        "id": "def-public.ThemeServiceStart",
         "type": "Type",
         "tags": [],
         "label": "ThemeServiceStart",
@@ -126,9 +110,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceSetup",
+            "section": "def-public.ThemeServiceSetup",
             "text": "ThemeServiceSetup"
           }
         ],
@@ -138,6 +122,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

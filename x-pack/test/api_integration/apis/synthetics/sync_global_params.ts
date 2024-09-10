@@ -88,11 +88,10 @@ export default function ({ getService }: FtrProviderContext) {
           isServiceManaged: false,
           label: 'Test private location 0',
           geo: {
-            lat: '',
-            lon: '',
+            lat: 0,
+            lon: 0,
           },
           agentPolicyId: testFleetPolicyID,
-          namespace: 'default',
         },
       ];
 

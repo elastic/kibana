@@ -40,6 +40,8 @@
     "@kbn/serverless",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-ui-settings-server",
+    "@kbn/server-route-repository-utils",
+    "@kbn/inference-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
+import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
   type DataTableColumnsMeta,
@@ -104,10 +106,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGridMemoized
         {...gridProps}
+        isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
-        configRowHeight={props.services.uiSettings.get(ROW_HEIGHT_OPTION)}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
@@ -115,7 +117,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         externalCustomRenderers={cellRenderers}
         enableComparisonMode
         showColumnTokens
-        configHeaderRowHeight={3}
         showFullScreenButton={false}
         className="unifiedDataTable"
       />

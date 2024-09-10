@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -49,14 +50,14 @@ export async function openLinkEditorFlyout({
     });
   };
 
-  return new Promise<UnorderedLink | undefined>((resolve, reject) => {
+  return new Promise<UnorderedLink | undefined>((resolve) => {
     const onSave = async (newLink: UnorderedLink) => {
       resolve(newLink);
       await unmountFlyout();
     };
 
     const onCancel = async () => {
-      reject();
+      resolve(undefined);
       await unmountFlyout();
     };
 
@@ -71,8 +72,5 @@ export async function openLinkEditorFlyout({
       </KibanaRenderContextProvider>,
       ref.current
     );
-  }).catch(() => {
-    // on reject (i.e. on cancel), just return the original list of links
-    return undefined;
   });
 }

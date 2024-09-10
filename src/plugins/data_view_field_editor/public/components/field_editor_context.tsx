@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
@@ -16,7 +17,7 @@ import React, {
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type {
-  DataView,
+  DataViewLazy,
   DataPublicPluginStart,
   FieldFormatsStart,
   RuntimeFieldSubFields,
@@ -25,7 +26,7 @@ import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {
-  dataView: DataView;
+  dataView: DataViewLazy;
   fieldTypeToProcess: InternalFieldType;
   uiSettings: CoreStart['uiSettings'];
   links: {
@@ -38,22 +39,7 @@ export interface Context {
   };
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
-  /**
-   * An array of field names not allowed.
-   * e.g we probably don't want a user to give a name of an existing
-   * runtime field (for that the user should edit the existing runtime field).
-   */
-  namesNotAllowed: {
-    fields: string[];
-    runtimeComposites: string[];
-  };
-  /**
-   * An array of existing concrete fields. If the user gives a name to the runtime
-   * field that matches one of the concrete fields, a callout will be displayed
-   * to indicate that this runtime field will shadow the concrete field.
-   * It is also used to provide the list of field autocomplete suggestions to the code editor.
-   */
-  existingConcreteFields: Array<{ name: string; type: string }>;
+
   fieldName$: BehaviorSubject<string>;
   subfields$: BehaviorSubject<RuntimeFieldSubFields | undefined>;
 }
@@ -68,8 +54,6 @@ export const FieldEditorProvider: FunctionComponent<PropsWithChildren<Context>> 
   fieldTypeToProcess,
   fieldFormats,
   fieldFormatEditors,
-  namesNotAllowed,
-  existingConcreteFields,
   children,
   fieldName$,
   subfields$,
@@ -83,8 +67,6 @@ export const FieldEditorProvider: FunctionComponent<PropsWithChildren<Context>> 
       services,
       fieldFormats,
       fieldFormatEditors,
-      namesNotAllowed,
-      existingConcreteFields,
       fieldName$,
       subfields$,
     }),
@@ -96,8 +78,6 @@ export const FieldEditorProvider: FunctionComponent<PropsWithChildren<Context>> 
       uiSettings,
       fieldFormats,
       fieldFormatEditors,
-      namesNotAllowed,
-      existingConcreteFields,
       fieldName$,
       subfields$,
     ]

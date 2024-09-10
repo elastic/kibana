@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { monaco, ParsedRequest } from '@kbn/monaco';
+import type { MetricsTracker } from '../../../../../types';
 import {
   getAutoIndentedRequests,
   getCurlRequest,
+  getRequestEndLineNumber,
   replaceRequestVariables,
-  stringifyRequest,
   trackSentRequests,
+  getRequestFromEditor,
 } from './requests_utils';
-import { MetricsTracker } from '../../../../../types';
 
 describe('requests_utils', () => {
   const dataObjects = [
@@ -26,35 +29,23 @@ describe('requests_utils', () => {
       test: 'test',
     },
   ];
-  describe('stringifyRequest', () => {
-    const request = {
-      startOffset: 0,
-      endOffset: 11,
-      method: 'get',
-      url: '_search some_text',
-    };
-    it('calls the "removeTrailingWhitespaces" on the url', () => {
-      const stringifiedRequest = stringifyRequest(request);
-      expect(stringifiedRequest.url).toBe('_search');
-    });
-
-    it('normalizes the method to upper case', () => {
-      const stringifiedRequest = stringifyRequest(request);
-      expect(stringifiedRequest.method).toBe('GET');
-    });
-    it('stringifies the request body', () => {
-      const result = stringifyRequest({ ...request, data: [dataObjects[0]] });
-      expect(result.data.length).toBe(1);
-      expect(result.data[0]).toBe(JSON.stringify(dataObjects[0], null, 2));
-    });
-
-    it('works for several request bodies', () => {
-      const result = stringifyRequest({ ...request, data: dataObjects });
-      expect(result.data.length).toBe(2);
-      expect(result.data[0]).toBe(JSON.stringify(dataObjects[0], null, 2));
-      expect(result.data[1]).toBe(JSON.stringify(dataObjects[1], null, 2));
-    });
-  });
+  const inlineData = '{"query":"test"}';
+  const multiLineData = '{\n  "query": "test"\n}';
+  const invalidData = '{\n  "query":\n    {';
+  const getMockModel = (content: string[]) => {
+    return {
+      getLineContent: (lineNumber: number) => content[lineNumber - 1],
+      getValueInRange: ({
+        startLineNumber,
+        endLineNumber,
+      }: {
+        startLineNumber: number;
+        endLineNumber: number;
+      }) => content.slice(startLineNumber - 1, endLineNumber).join('\n'),
+      getLineMaxColumn: (lineNumber: number) => content[lineNumber - 1].length,
+      getLineCount: () => content.length,
+    } as unknown as monaco.editor.ITextModel;
+  };
 
   describe('replaceRequestVariables', () => {
     const variables = [
@@ -63,6 +54,11 @@ describe('requests_utils', () => {
         id: '2',
         name: 'variable2',
         value: 'test2',
+      },
+      {
+        id: '3',
+        name: 'variable3',
+        value: '{"match_all": {}}',
       },
     ];
 
@@ -96,11 +92,20 @@ describe('requests_utils', () => {
       const request = {
         method: 'GET',
         url: '${variable1}',
-        data: [JSON.stringify({ '${variable1}': '${variable2}' }, null, 2)],
+        data: [
+          JSON.stringify(
+            { '${variable1}': '${variable2}', '${variable2}': '${variable3}' },
+            null,
+            2
+          ),
+        ],
       };
       it('works with several variables', () => {
         const result = replaceRequestVariables(request, variables);
-        expect(result.data[0]).toBe(JSON.stringify({ test1: 'test2' }, null, 2));
+        expect(JSON.parse(result.data[0])).toMatchObject({
+          test1: 'test2',
+          test2: { match_all: {} },
+        });
       });
     });
   });
@@ -199,9 +204,6 @@ describe('requests_utils', () => {
     ];
 
     const TEST_REQUEST_1 = {
-      method: 'GET',
-      url: '_search',
-      data: [{ query: { match_all: {} } }],
       // Offsets are with respect to the sample editor text
       startLineNumber: 2,
       endLineNumber: 7,
@@ -210,9 +212,6 @@ describe('requests_utils', () => {
     };
 
     const TEST_REQUEST_2 = {
-      method: 'GET',
-      url: '_all',
-      data: [],
       // Offsets are with respect to the sample editor text
       startLineNumber: 10,
       endLineNumber: 10,
@@ -221,10 +220,6 @@ describe('requests_utils', () => {
     };
 
     const TEST_REQUEST_3 = {
-      method: 'POST',
-      url: '/_bulk',
-      // Multi-data
-      data: [{ index: { _index: 'books' } }, { name: '1984' }, { name: 'Atomic habits' }],
       // Offsets are with respect to the sample editor text
       startLineNumber: 15,
       endLineNumber: 23,
@@ -233,11 +228,8 @@ describe('requests_utils', () => {
     };
 
     const TEST_REQUEST_4 = {
-      method: 'GET',
-      url: '_search',
-      data: [{ query: { match_all: {} } }],
       // Offsets are with respect to the sample editor text
-      startLineNumber: 24,
+      startLineNumber: 25,
       endLineNumber: 30,
       startOffset: 1,
       endOffset: 36,
@@ -339,17 +331,131 @@ describe('requests_utils', () => {
       expect(formattedData).toBe(expectedResultLines.join('\n'));
     });
 
-    it('does not auto-indent a request with comments', () => {
-      const requestText = sampleEditorTextLines
-        .slice(TEST_REQUEST_4.startLineNumber - 1, TEST_REQUEST_4.endLineNumber)
+    it(`auto-indents method line but doesn't auto-indent data with comments`, () => {
+      const methodLine = sampleEditorTextLines[TEST_REQUEST_4.startLineNumber - 1];
+      const dataText = sampleEditorTextLines
+        .slice(TEST_REQUEST_4.startLineNumber, TEST_REQUEST_4.endLineNumber)
         .join('\n');
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_4],
-        requestText,
+        `${methodLine}\n${dataText}`,
         sampleEditorTextLines.join('\n')
       );
 
-      expect(formattedData).toBe(requestText);
+      expect(formattedData).toBe(`GET _search // test comment\n${dataText}`);
+    });
+  });
+
+  describe('getRequestEndLineNumber', () => {
+    const parsedRequest: ParsedRequest = {
+      startOffset: 1,
+    };
+    it('detects the end of the request when there is a line that starts with a method (next not parsed request)', () => {
+      /*
+       * Mocking the model to return these 6 lines of text
+       * 1. GET /_search
+       * 2. {
+       * 3. empty
+       * 4. empty
+       * 5. POST _search
+       * 6. empty
+       */
+      const content = ['GET /_search', '{', '', '', 'POST _search', ''];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+      expect(result).toEqual(2);
+    });
+
+    it('detects the end of the request when the text ends', () => {
+      /*
+       * Mocking the model to return these 4 lines of text
+       * 1. GET /_search
+       * 2. {
+       * 3.   {
+       * 4. empty
+       */
+      const content = ['GET _search', '{', '  {', ''];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+      expect(result).toEqual(3);
+    });
+  });
+
+  describe('getRequestFromEditor', () => {
+    it('cleans up any text following the url', () => {
+      const content = ['GET _search // inline comment'];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 1);
+      expect(request).toEqual({ method: 'GET', url: '_search', data: [] });
+    });
+
+    it(`doesn't incorrectly removes parts of url params that include whitespaces`, () => {
+      const content = ['GET _search?query="test test"'];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 1);
+      expect(request).toEqual({ method: 'GET', url: '_search?query="test test"', data: [] });
+    });
+
+    it(`normalizes method to upper case`, () => {
+      const content = ['get _search'];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 1);
+      expect(request).toEqual({ method: 'GET', url: '_search', data: [] });
+    });
+
+    it('correctly includes the request body', () => {
+      const content = ['GET _search', '{', '  "query": {}', '}'];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 4);
+      expect(request).toEqual({ method: 'GET', url: '_search', data: ['{\n  "query": {}\n}'] });
+    });
+
+    it('works for several request bodies', () => {
+      const content = ['GET _search', '{', '  "query": {}', '}', '{', '  "query": {}', '}'];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 7);
+      expect(request).toEqual({
+        method: 'GET',
+        url: '_search',
+        data: ['{\n  "query": {}\n}', '{\n  "query": {}\n}'],
+      });
+    });
+
+    it('splits several json objects', () => {
+      const content = ['GET _search', inlineData, ...multiLineData.split('\n'), inlineData];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 6);
+      expect(request).toEqual({
+        method: 'GET',
+        url: '_search',
+        data: [inlineData, multiLineData, inlineData],
+      });
+    });
+    it('works for invalid json objects', () => {
+      const content = ['GET _search', inlineData, ...invalidData.split('\n')];
+      const model = getMockModel(content);
+      const request = getRequestFromEditor(model, 1, 5);
+      expect(request).toEqual({
+        method: 'GET',
+        url: '_search',
+        data: [inlineData, invalidData],
+      });
     });
   });
 });

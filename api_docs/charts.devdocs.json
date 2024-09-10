@@ -609,7 +609,8 @@
           "Chart",
           ">, syncOptions: ",
           "ActiveCursorSyncOption",
-          ") => (cursor: any) => void"
+          ") => ",
+          "PointerUpdateListener"
         ],
         "path": "src/plugins/charts/public/services/active_cursor/use_active_cursor.ts",
         "deprecated": false,
@@ -2257,9 +2258,9 @@
             "<",
             {
               "pluginId": "@kbn/core-theme-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreThemeBrowserPluginApi",
-              "section": "def-common.CoreTheme",
+              "section": "def-public.CoreTheme",
               "text": "CoreTheme"
             },
             ">; useDarkMode: () => boolean; useChartsTheme: () => ",

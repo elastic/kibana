@@ -64,7 +64,7 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
   typeof useMultipleAgentPolicies
 >;
 
-describe('step select agent policy', () => {
+describe('stepStepSelectAgentPolicy', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const mockSetHasAgentPolicyError = jest.fn();
@@ -80,53 +80,56 @@ describe('step select agent policy', () => {
       />
     ));
 
-  beforeEach(() => {
-    testRenderer = createFleetTestRendererMock();
-    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
-    updateAgentPoliciesMock.mockReset();
-  });
-
-  test('should not select agent policy by default if multiple exists', async () => {
-    useGetAgentPoliciesMock.mockReturnValue({
-      data: {
-        items: [
-          { id: 'policy-1', name: 'Policy 1' },
-          { id: 'policy-2', name: 'Policy 2' },
-        ],
-      },
-      error: undefined,
-      isLoading: false,
-      resendRequest: jest.fn(),
-    } as any);
-
-    render();
-
-    await act(async () => {
-      const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
-      expect((select as any)?.value).toEqual('');
-
-      expect(renderResult.getByText('At least one agent policy is required.')).toBeVisible();
-    });
-  });
-
-  test('should select agent policy by default if one exists', async () => {
-    useGetAgentPoliciesMock.mockReturnValueOnce({
-      data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
-      error: undefined,
-      isLoading: false,
-      resendRequest: jest.fn(),
-    } as any);
-
-    render();
-    await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-    await act(async () => {
-      expect(updateAgentPoliciesMock).toBeCalled();
-      expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
-    });
-  });
-
-  describe('multiple agent policies', () => {
+  describe('with single agent policy', () => {
     beforeEach(() => {
+      testRenderer = createFleetTestRendererMock();
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+    });
+    afterEach(() => {
+      updateAgentPoliciesMock.mockReset();
+      useGetAgentPoliciesMock.mockReset();
+    });
+
+    test('should not select agent policy by default if multiple exists', async () => {
+      useGetAgentPoliciesMock.mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy-1', name: 'Policy 1' },
+            { id: 'policy-2', name: 'Policy 2' },
+          ],
+        },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
+
+      render();
+      await act(async () => {
+        const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
+        expect((select as any)?.value).toEqual('');
+      });
+    });
+
+    test('should select agent policy by default if one exists', async () => {
+      useGetAgentPoliciesMock.mockReturnValue({
+        data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
+
+      render();
+      await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
+      await act(async () => {
+        expect(updateAgentPoliciesMock).toBeCalledTimes(1);
+        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
+      });
+    });
+  });
+
+  describe('with multiple agent policies', () => {
+    beforeEach(() => {
+      testRenderer = createFleetTestRendererMock();
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
 
       useGetAgentPoliciesMock.mockReturnValue({
@@ -140,6 +143,10 @@ describe('step select agent policy', () => {
         isLoading: false,
         resendRequest: jest.fn(),
       } as any);
+    });
+    afterEach(() => {
+      updateAgentPoliciesMock.mockReset();
+      useGetAgentPoliciesMock.mockReset();
     });
 
     test('should select agent policy by default if one exists', async () => {
@@ -177,8 +184,6 @@ describe('step select agent policy', () => {
           '[data-test-subj="agentPolicyMultiSelect"]'
         );
         expect((select as any)?.value).toEqual(undefined);
-
-        expect(renderResult.getByText('At least one agent policy is required.')).toBeVisible();
       });
     });
 

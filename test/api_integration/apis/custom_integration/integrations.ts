@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(55);
+        expect(resp.body.length).to.be(56);
 
         // Test for sample data card
         expect(resp.body.findIndex((c: { id: string }) => c.id === 'sample_data_all')).to.be.above(
@@ -40,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.body).to.be.an('array');
 
-        expect(resp.body.length).to.be(109); // the beats
+        expect(resp.body.length).to.be(108); // the beats
       });
     });
   });

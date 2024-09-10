@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { monaco } from '@kbn/monaco';
@@ -43,10 +44,6 @@ export const getDocumentationLinkFromAutocomplete = (
 ) => {
   // get the url parts from the request url
   const { urlPathTokens } = parseUrl(request.url);
-  // remove the last token, if it's empty
-  if (!urlPathTokens[urlPathTokens.length - 1]) {
-    urlPathTokens.pop();
-  }
   // add the end of url token
   urlPathTokens.push(END_OF_URL_TOKEN);
   const { endpoint } = populateContextForMethodAndUrl(request.method, urlPathTokens);
@@ -62,7 +59,7 @@ export const getDocumentationLinkFromAutocomplete = (
  * Helper function that filters out suggestions without a name.
  */
 const filterTermsWithoutName = (terms: ResultTerm[]): ResultTerm[] =>
-  terms.filter((term) => term.name !== undefined);
+  terms.filter((term) => term.name !== undefined && term.name !== '');
 
 /*
  * This function returns an array of completion items for the request method
@@ -125,41 +122,50 @@ export const getUrlPathCompletionItems = (
     endColumn: column,
   });
 
+  // flag to only suggest index names
+  let onlyIndexNames = false;
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
-  // remove the last token that is either empty if the url has like "_search/" as the last char
-  // or it's a word that need to be replaced with autocomplete suggestions like "_search/s"
-  urlPathTokens.pop();
-  const { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
-
+  // if the line ends with /, then we use all url path tokens for autocomplete suggestions
+  // otherwise, we don't use the last token for populating the autocomplete context
+  if (!lineContent.trim().endsWith('/')) {
+    const lastToken = urlPathTokens.pop();
+    // if the last token contains a comma, only suggest index names
+    if (lastToken?.includes(',')) {
+      onlyIndexNames = true;
+    }
+  }
+  let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
+  autoCompleteSet = autoCompleteSet ?? [];
+  // filter out non index names items if needed
+  if (onlyIndexNames) {
+    autoCompleteSet = autoCompleteSet.filter((term) => term.meta === 'index');
+  }
   const wordUntilPosition = model.getWordUntilPosition(position);
   const range = {
-    startLineNumber: position.lineNumber,
+    startLineNumber: lineNumber,
     // replace the whole word with the suggestion
     startColumn: lineContent.endsWith('.')
       ? // if there is a dot at the end of the content, it's ignored in the wordUntilPosition
         wordUntilPosition.startColumn - 1
       : wordUntilPosition.startColumn,
-    endLineNumber: position.lineNumber,
-    endColumn: position.column,
+    endLineNumber: lineNumber,
+    endColumn: column,
   };
-  if (autoCompleteSet && autoCompleteSet.length > 0) {
-    return (
-      filterTermsWithoutName(autoCompleteSet)
-        // map autocomplete items to completion items
-        .map((item) => {
-          return {
-            label: item.name + '',
-            insertText: item.name + '',
-            detail: item.meta ?? i18nTexts.endpoint,
-            // the kind is only used to configure the icon
-            kind: monaco.languages.CompletionItemKind.Constant,
-            range,
-          };
-        })
-    );
-  }
-  return [];
+  return (
+    filterTermsWithoutName(autoCompleteSet)
+      // map autocomplete items to completion items
+      .map((item) => {
+        return {
+          label: item.name + '',
+          insertText: item.name + '',
+          detail: item.meta ?? i18nTexts.endpoint,
+          // the kind is only used to configure the icon
+          kind: monaco.languages.CompletionItemKind.Constant,
+          range,
+        };
+      })
+  );
 };
 
 /*
@@ -338,7 +344,16 @@ const getInsertText = (
   }
   let insertText = '';
   if (typeof name === 'string') {
-    insertText = bodyContent.endsWith('"') ? '' : '"';
+    const bodyContentLines = bodyContent.split('\n');
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1];
+    const incompleteFieldRegex = /.*"[^"]*$/;
+    if (incompleteFieldRegex.test(currentContentLine)) {
+      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+      insertText = '';
+    } else {
+      // The cursor is at the beginning of a field so the insert text should start with a quote
+      insertText = '"';
+    }
     if (insertValue && insertValue !== '{' && insertValue !== '[') {
       insertText += `${insertValue}"`;
     } else {

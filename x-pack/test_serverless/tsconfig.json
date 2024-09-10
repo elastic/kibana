@@ -2,10 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "rootDirs": [
-      ".",
-      "../test"
-    ],
     "types": [
       "node",
       "@kbn/ambient-ftr-types",
@@ -27,9 +23,7 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    {
-      "path": "../test/tsconfig.json"
-    },
+    "@kbn/test-suites-xpack",
     "@kbn/expect",
     "@kbn/test",
     "@kbn/repo-info",
@@ -45,10 +39,6 @@
     "@kbn/apm-plugin",
     "@kbn/server-route-repository",
     "@kbn/core-chrome-browser",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-management",
-    "@kbn/default-nav-devtools",
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
@@ -105,5 +95,10 @@
     "@kbn/features-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/ml-trained-models-utils",
+    "@kbn/test-suites-src",
+    "@kbn/console-plugin",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-saved-objects-import-export-server-internal",
   ]
 }

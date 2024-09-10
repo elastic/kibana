@@ -26,13 +26,14 @@ import {
   type EuiTextProps,
   EuiToolTip,
   EuiToolTipProps,
+  type CommonProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { statusColors } from '@kbn/cloud-security-posture';
 import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
-import { statusColors } from '../../../common/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import type { Evaluation, PostureTrend, Stats } from '../../../../common/types_old';
@@ -50,13 +51,14 @@ const CounterButtonLink = ({
   text,
   count,
   color,
+  'data-test-subj': dataTestSubj,
   onClick,
 }: {
   count: number;
   text: string;
   color: EuiTextProps['color'];
   onClick: EuiLinkButtonProps['onClick'];
-}) => {
+} & Pick<CommonProps, 'data-test-subj'>) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -74,6 +76,7 @@ const CounterButtonLink = ({
       <EuiLink
         color="text"
         onClick={onClick}
+        data-test-subj={dataTestSubj}
         css={css`
           display: flex;
           &:hover {
@@ -148,6 +151,7 @@ const PercentageLabels = ({
           text="Passed Findings"
           count={stats.totalPassed}
           color={statusColors.passed}
+          data-test-subj="dashboard-summary-passed-findings"
           onClick={() => onEvalCounterClick(RULE_PASSED)}
         />
       </EuiFlexItem>
@@ -156,6 +160,7 @@ const PercentageLabels = ({
           text="Failed Findings"
           count={stats.totalFailed}
           color={statusColors.failed}
+          data-test-subj="dashboard-summary-failed-findings"
           onClick={() => onEvalCounterClick(RULE_FAILED)}
         />
       </EuiFlexItem>
@@ -257,7 +262,12 @@ const CounterLink = ({
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiLink color="text" onClick={onClick} css={{ display: 'flex' }}>
+      <EuiLink
+        data-test-subj={`compliance-score-section-${text}`}
+        color="text"
+        onClick={onClick}
+        css={{ display: 'flex' }}
+      >
         <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
           <CompactFormattedNumber number={count} abbreviateAbove={999} />
           &nbsp;

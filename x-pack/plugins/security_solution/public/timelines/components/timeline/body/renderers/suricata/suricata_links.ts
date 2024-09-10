@@ -18,8 +18,8 @@ const lazySuricataLibConfiguration = () => {
   );
 };
 
-const has = <T>(obj: T, key: string | number | symbol): key is keyof T =>
-  Object.prototype.hasOwnProperty.call(obj, key);
+const has = <T extends object>(obj: T, key: string | number | symbol): key is keyof T =>
+  Object.hasOwn(obj, key);
 
 export const getLinksFromSignature = async (id: number): Promise<string[]> => {
   const db = (await lazySuricataLibConfiguration()).db;

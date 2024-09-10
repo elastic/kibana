@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CommandDefinition, FunctionDefinition } from './types';
+import type { CommandDefinition, FunctionDefinition, FunctionParameterType } from './types';
 
 /**
  * Given a function definition, this function will return a list of function signatures
@@ -17,7 +18,10 @@ import type { CommandDefinition, FunctionDefinition } from './types';
  */
 export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
-  { withTypes }: { withTypes: boolean } = { withTypes: true }
+  { withTypes, capitalize }: { withTypes: boolean; capitalize?: boolean } = {
+    withTypes: true,
+    capitalize: false,
+  }
 ) {
   return signatures.map(({ params, returnType, minParams }) => {
     // for functions with a minimum number of args, repeat the last arg multiple times
@@ -25,7 +29,7 @@ export function getFunctionSignatures(
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
     const extraArg = Array(minParamsToAdd || 1).fill(params[Math.max(params.length - 1, 0)]);
     return {
-      declaration: `${name}(${params
+      declaration: `${capitalize ? name.toUpperCase() : name}(${params
         .map((arg) => printArguments(arg, withTypes))
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''
@@ -38,7 +42,7 @@ function handleAdditionalArgs(
   criteria: boolean,
   additionalArgs: Array<{
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
     reference?: string;
   }>,
@@ -90,7 +94,7 @@ function printCommandArgument(
     return param.name || '';
   }
   return `${param.name}${param.optional ? ':?' : ':'} ${param.type}${
-    param.innerType ? `{${param.innerType}}` : ''
+    param.innerTypes ? `{${param.innerTypes}}` : ''
   }`;
 }
 
@@ -101,7 +105,7 @@ export function printArguments(
     optional,
   }: {
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
   },
   withTypes: boolean

@@ -220,6 +220,7 @@ describe('Task Runner', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.restoreAllMocks(); // clear spy mock implementations
     logger.isLevelEnabled.mockReturnValue(true);
     jest
       .requireMock('../lib/wrap_scoped_cluster_client')
@@ -1946,32 +1947,10 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('rescheduled the rule if the schedule has update during a task run', async () => {
-    const taskRunner = new TaskRunner({
-      ruleType,
-      internalSavedObjectsRepository,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalled();
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-      ...mockedRawRuleSO,
-      attributes: { ...mockedRawRuleSO.attributes, schedule: { interval: '30s' } },
-    });
-
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(
-      generateRunnerResult({ state: true, interval: '30s', history: [true] })
-    );
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
   test('should set unexpected errors as framework-error', async () => {
-    (getExecutorServicesModule.getExecutorServices as jest.Mock).mockRejectedValue(
-      new Error('test')
-    );
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new Error('test');
+    });
 
     const taskRunner = new TaskRunner({
       ruleType,
@@ -2873,7 +2852,7 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
       ...generateSavedObjectParams({
-        nextRun: '1970-01-01T00:00:50.000Z',
+        nextRun: '1970-01-01T00:00:10.000Z',
       })
     );
   });

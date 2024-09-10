@@ -1,17 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
-import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTable,
+  DataLoadingState,
+  type SortOrder,
+  renderCustomToolbar,
+  UnifiedDataTableRenderCustomToolbarProps,
+} from '@kbn/unified-data-table';
+import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -24,6 +35,7 @@ interface ESQLDataGridProps {
   core: CoreStart;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
   rows: ESQLRow[];
   dataView: DataView;
   columns: DatatableColumn[];
@@ -31,6 +43,8 @@ interface ESQLDataGridProps {
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
   initialColumns?: DatatableColumn[];
+  initialRowHeight?: number;
+  controlColumnIds?: string[];
 }
 type DataTableColumnsMeta = Record<
   string,
@@ -41,15 +55,21 @@ type DataTableColumnsMeta = Record<
 >;
 
 const sortOrder: SortOrder[] = [];
+const DEFAULT_INITIAL_ROW_HEIGHT = 5;
+const DEFAULT_ROWS_PER_PAGE = 10;
+const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
   );
-  const [rowHeight, setRowHeight] = useState<number>(5);
+  const [rowHeight, setRowHeight] = useState<number>(
+    props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
+  );
+  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback((columns) => {
+  const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
 
@@ -123,9 +143,71 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.fieldFormats,
   ]);
 
+  const discoverLocator = useMemo(() => {
+    return props.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+  }, [props.share?.url.locators]);
+
+  const renderToolbar = useCallback(
+    (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
+      const discoverLink = discoverLocator?.getRedirectUrl({
+        dataViewSpec: props.dataView.toSpec(),
+        timeRange: props.data.query.timefilter.timefilter.getTime(),
+        query: props.query,
+        columns: activeColumns,
+      });
+      return renderCustomToolbar({
+        ...customToolbarProps,
+        toolbarProps: {
+          ...customToolbarProps.toolbarProps,
+          hasRoomForGridControls: true,
+        },
+        gridProps: {
+          additionalControls: (
+            <EuiLink
+              href={discoverLink}
+              target="_blank"
+              color="primary"
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+              external={false}
+            >
+              <EuiIcon
+                type="discoverApp"
+                size="s"
+                color="primary"
+                css={css`
+                  margin-right: 4px;
+                `}
+              />
+              <EuiText size="xs">
+                {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
+                  defaultMessage: 'Open in Discover',
+                })}
+              </EuiText>
+            </EuiLink>
+          ),
+        },
+      });
+    },
+    [
+      activeColumns,
+      discoverLocator,
+      props.data.query.timefilter.timefilter,
+      props.dataView,
+      props.query,
+    ]
+  );
+
   return (
     <UnifiedDataTable
       columns={activeColumns}
+      css={css`
+        .unifiedDataTableToolbar {
+          padding: 4px 0px;
+        }
+      `}
       rows={rows}
       columnsMeta={columnsMeta}
       services={services}
@@ -134,8 +216,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}
       sampleSizeState={rows.length}
-      rowsPerPageState={10}
+      rowsPerPageState={rowsPerPage}
+      rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
       onSetColumns={onSetColumns}
+      onUpdateRowsPerPage={setRowsPerPage}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       showTimeCol
@@ -146,9 +230,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       maxDocFieldsDisplayed={100}
       renderDocumentView={renderDocumentView}
       showFullScreenButton={false}
-      configRowHeight={5}
+      configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
       rowHeightState={rowHeight}
       onUpdateRowHeight={setRowHeight}
+      controlColumnIds={props.controlColumnIds}
+      renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
     />
   );
 };

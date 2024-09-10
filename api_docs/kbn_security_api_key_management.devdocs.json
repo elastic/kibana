@@ -37,9 +37,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -187,9 +187,9 @@
               "(apiKey: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateAPIKeyParams",
+                "section": "def-server.CreateAPIKeyParams",
                 "text": "CreateAPIKeyParams"
               },
               ") => Promise<",
@@ -210,9 +210,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateAPIKeyParams",
+                    "section": "def-server.CreateAPIKeyParams",
                     "text": "CreateAPIKeyParams"
                   }
                 ],
@@ -235,9 +235,9 @@
               "(apiKey: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.UpdateAPIKeyParams",
+                "section": "def-server.UpdateAPIKeyParams",
                 "text": "UpdateAPIKeyParams"
               },
               ") => Promise<",
@@ -258,9 +258,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.UpdateAPIKeyParams",
+                    "section": "def-server.UpdateAPIKeyParams",
                     "text": "UpdateAPIKeyParams"
                   }
                 ],
@@ -533,9 +533,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateAPIKeyParams",
+            "section": "def-server.CreateAPIKeyParams",
             "text": "CreateAPIKeyParams"
           }
         ],
@@ -587,9 +587,9 @@
           ") => ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateAPIKeyParams",
+            "section": "def-server.UpdateAPIKeyParams",
             "text": "UpdateAPIKeyParams"
           }
         ],
@@ -660,7 +660,7 @@
         "label": "TimeToolTip",
         "description": [],
         "signature": [
-          "({ timestamp, children }: React.PropsWithChildren<",
+          "({ timestamp, children, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -668,7 +668,7 @@
             "section": "def-public.TimeToolTipProps",
             "text": "TimeToolTipProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
         "deprecated": false,
@@ -679,10 +679,10 @@
             "id": "def-public.TimeToolTip.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ timestamp, children }",
+            "label": "{\n  timestamp,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
@@ -690,7 +690,7 @@
                 "section": "def-public.TimeToolTipProps",
                 "text": "TimeToolTipProps"
               },
-              ">"
+              ">>"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
             "deprecated": false,
@@ -1133,25 +1133,25 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateRestAPIKeyParams",
+            "section": "def-server.CreateRestAPIKeyParams",
             "text": "CreateRestAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
             "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateCrossClusterAPIKeyParams",
+            "section": "def-server.CreateCrossClusterAPIKeyParams",
             "text": "CreateCrossClusterAPIKeyParams"
           }
         ],
@@ -1204,25 +1204,25 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateRestAPIKeyParams",
+            "section": "def-server.UpdateRestAPIKeyParams",
             "text": "UpdateRestAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateCrossClusterAPIKeyParams",
+            "section": "def-server.UpdateCrossClusterAPIKeyParams",
             "text": "UpdateCrossClusterAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+            "section": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams",
             "text": "UpdateRestAPIKeyWithKibanaPrivilegesParams"
           }
         ],

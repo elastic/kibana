@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Observable } from 'rxjs';
@@ -15,8 +16,9 @@ import type {
   ChromeProjectNavigationNode,
   ChromeRecentlyAccessedHistoryItem,
 } from '@kbn/core-chrome-browser';
+import { EventTracker } from './analytics';
 
-type BasePathService = Pick<IBasePath, 'prepend'>;
+export type BasePathService = Pick<IBasePath, 'prepend' | 'remove'>;
 
 /**
  * @internal
@@ -35,6 +37,7 @@ export interface NavigationServices {
   navigateToUrl: NavigateToUrlFn;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   isSideNavCollapsed: boolean;
+  eventTracker: EventTracker;
 }
 
 /**
@@ -55,6 +58,9 @@ export interface NavigationKibanaDependencies {
     http: {
       basePath: BasePathService;
       getLoadingCount$(): Observable<number>;
+    };
+    analytics: {
+      reportEvent: (eventType: string, eventData: object) => void;
     };
   };
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;

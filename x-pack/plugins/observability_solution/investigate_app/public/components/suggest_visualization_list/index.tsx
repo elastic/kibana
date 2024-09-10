@@ -40,6 +40,19 @@ const iconContainerClassName = css`
   width: 16px;
 `;
 
+interface Props {
+  suggestions?: Array<
+    Suggestion & {
+      id: string;
+    }
+  >;
+  loading: boolean;
+  error?: Error;
+  onSuggestionClick: (suggestion: Suggestion) => void;
+  onSuggestionRollOver: (suggestion: Suggestion) => void;
+  onMouseLeave: () => void;
+}
+
 export function SuggestVisualizationList({
   suggestions,
   loading,
@@ -47,14 +60,7 @@ export function SuggestVisualizationList({
   onSuggestionClick,
   onSuggestionRollOver,
   onMouseLeave,
-}: {
-  suggestions?: Array<Suggestion & { id: string }>;
-  loading: boolean;
-  error?: Error;
-  onSuggestionClick: (suggestion: Suggestion) => void;
-  onSuggestionRollOver: (suggestion: Suggestion) => void;
-  onMouseLeave: () => void;
-}) {
+}: Props) {
   if (error) {
     return (
       <EuiFlexGroup

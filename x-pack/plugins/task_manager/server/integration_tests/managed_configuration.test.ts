@@ -43,6 +43,11 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
+        kibanas_per_partition: 2,
         capacity: 10,
         max_attempts: 9,
         poll_interval: 3000,
@@ -101,7 +106,7 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart);
+      taskManagerStart = await taskManager.start(coreStart, {});
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -160,6 +165,11 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
+        kibanas_per_partition: 2,
         capacity: 10,
         max_attempts: 9,
         poll_interval: 3000,
@@ -218,7 +228,7 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart);
+      taskManagerStart = await taskManager.start(coreStart, {});
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -280,6 +290,11 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
+        kibanas_per_partition: 2,
         capacity: 10,
         max_attempts: 9,
         poll_interval: 3000,
@@ -315,7 +330,7 @@ describe('managed configuration', () => {
         },
         worker_utilization_running_average_window: 5,
         metrics_reset_interval: 3000,
-        claim_strategy: 'unsafe_mget',
+        claim_strategy: 'mget',
         request_timeouts: {
           update_by_query: 1000,
         },
@@ -338,7 +353,7 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart);
+      taskManagerStart = await taskManager.start(coreStart, {});
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall

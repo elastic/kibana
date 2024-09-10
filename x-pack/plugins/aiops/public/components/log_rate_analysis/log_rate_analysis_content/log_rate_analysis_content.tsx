@@ -136,8 +136,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       ? (d, g) => {
           return g.specId === 'document_count' &&
             documentCountStats?.changePoint &&
-            d.x > documentCountStats.changePoint.startTs &&
-            d.x < documentCountStats.changePoint.endTs
+            Number(d.x) > documentCountStats.changePoint.startTs &&
+            Number(d.x) < documentCountStats.changePoint.endTs
             ? barStyle
             : null;
         }

@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { DocumentType } from '../../profiles';
+import {
+  DataSourceCategory,
+  DataSourceContext,
+  DocumentType,
+  RootContext,
+  SolutionType,
+} from '../../profiles';
 import { createContextAwarenessMocks } from '../../__mocks__';
 import { createLogDocumentProfileProvider } from './profile';
 
@@ -16,6 +23,8 @@ const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createLogDocumentProfileProvider(mockServices);
+  const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
+  const DATA_SOURCE_CONTEXT: DataSourceContext = { category: DataSourceCategory.Logs };
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: {
@@ -29,7 +38,9 @@ describe('logDocumentProfileProvider', () => {
   it('matches records with the correct data stream type', () => {
     expect(
       logDocumentProfileProvider.resolve({
-        record: buildMockRecord('logs-2000-01-01', {
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
           'data_stream.type': ['logs'],
         }),
       })
@@ -39,21 +50,40 @@ describe('logDocumentProfileProvider', () => {
   it('matches records with fields prefixed with "log."', () => {
     expect(
       logDocumentProfileProvider.resolve({
-        record: buildMockRecord('logs-2000-01-01', {
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
           'log.level': ['INFO'],
         }),
       })
     ).toEqual(RESOLUTION_MATCH);
   });
 
+  it('does not match records where fields prefixed with "log." are null', () => {
+    expect(
+      logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
+        record: buildMockRecord('another-index', {
+          'log.level': null,
+          'log.other': undefined,
+        }),
+      })
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
   it('matches records with indices matching the allowed pattern', () => {
     expect(
       logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
         record: buildMockRecord('logs-2000-01-01'),
       })
     ).toEqual(RESOLUTION_MATCH);
     expect(
       logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
         record: buildMockRecord('remote_cluster:filebeat'),
       })
     ).toEqual(RESOLUTION_MATCH);
@@ -62,6 +92,8 @@ describe('logDocumentProfileProvider', () => {
   it('does not match records with neither characteristic', () => {
     expect(
       logDocumentProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSourceContext: DATA_SOURCE_CONTEXT,
         record: buildMockRecord('another-index'),
       })
     ).toEqual(RESOLUTION_MISMATCH);
@@ -94,7 +126,7 @@ describe('logDocumentProfileProvider', () => {
   });
 });
 
-const buildMockRecord = (index: string, fields: Record<string, unknown[]> = {}) =>
+const buildMockRecord = (index: string, fields: Record<string, unknown> = {}) =>
   buildDataTableRecord({
     _id: '',
     _index: index,

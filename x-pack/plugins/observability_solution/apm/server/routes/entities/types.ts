@@ -5,30 +5,13 @@
  * 2.0.
  */
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { SignalTypes, EntityMetrics } from '../../../common/entities/types';
+import { EntityMetrics } from '../../../common/entities/types';
 
-export interface Entity {
-  id: string;
-  latestTimestamp: string;
-  identityFields: string[];
-  metrics: EntityMetrics;
+export enum EntityType {
+  SERVICE = 'service',
 }
 
-export interface TraceMetrics {
-  latency: number | null;
-  throughput: number | null;
-  failedTransactionRate: number | null;
-}
-
-export interface ServiceEntities {
-  serviceName: string;
-  environment?: string;
-  agentName: AgentName;
-  signalTypes: string[];
-  entity: Entity;
-}
-
-export interface EntitiesRaw {
+export interface EntityLatestServiceRaw {
   agent: {
     name: AgentName[];
   };
@@ -37,15 +20,15 @@ export interface EntitiesRaw {
   };
   service: {
     name: string;
-    environment: string;
+    environment?: string;
   };
   entity: Entity;
 }
 
-export interface MergedServiceEntities {
-  serviceName: string;
-  agentName: AgentName;
-  signalTypes: SignalTypes[];
-  environments: string[];
-  metrics: EntityMetrics[];
+interface Entity {
+  id: string;
+  lastSeenTimestamp: string;
+  firstSeenTimestamp: string;
+  identityFields: string[];
+  metrics: EntityMetrics;
 }

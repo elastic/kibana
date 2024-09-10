@@ -13,19 +13,28 @@ servers:
     variables:
       kibana_url:
         default: localhost:5601
-security:
-  - apiKeyAuth: []
 tags:
   - name: saved objects
-    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+    x-displayName: Saved objects
+    description: |
+      Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+
+      To manage a specific type of saved object, use the corresponding APIs.
+      For example, use:
+
+      [Data views](../group/endpoint-data-views)
+
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
 paths:
   /api/saved_objects/_export:
     post:
-      summary: Export saved objects in the default space
+      summary: Export saved objects
       operationId: exportSavedObjectsDefault
       description: |
         Retrieve sets of saved objects that you want to import into Kibana.
         You must include `type` or `objects` in the request body.
+
+        Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
 
@@ -82,7 +91,7 @@ paths:
                 $ref: '#/components/schemas/400_response'
   /api/saved_objects/_import:
     post:
-      summary: Import saved objects in the default space
+      summary: Import saved objects
       operationId: importSavedObjectsDefault
       description: |
         Create sets of Kibana saved objects from a file created by the export API.
@@ -167,98 +176,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-  /s/{spaceId}/api/saved_objects/_export:
-    post:
-      summary: Export saved objects
-      operationId: exportSavedObjects
-      description: |
-        Retrieves sets of saved objects that you want to import into Kibana.
-        You must include `type` or `objects` in the request body.
-
-        NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      tags:
-        - saved objects
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/export_objects_request'
-            examples:
-              exportSavedObjectsRequest:
-                $ref: '#/components/examples/export_objects_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/x-ndjson:
-              schema:
-                type: object
-                additionalProperties: true
-              examples:
-                exportSavedObjectsResponse:
-                  $ref: '#/components/examples/export_objects_response'
-        '400':
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
-  /s/{spaceId}/api/saved_objects/_import:
-    post:
-      summary: Import saved objects
-      operationId: importSavedObjects
-      description: |
-        Creates sets of Kibana saved objects from a file created by the export API.
-        Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      tags:
-        - saved objects
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-        - $ref: '#/components/parameters/compatibility_mode'
-        - $ref: '#/components/parameters/create_new_copies'
-        - $ref: '#/components/parameters/overwrite'
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/import_objects_request'
-            examples:
-              importObjectsRequest:
-                $ref: '#/components/examples/import_objects_request'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/200_import_objects_response'
-              examples:
-                importObjectsResponse:
-                  $ref: '#/components/examples/import_objects_response'
-        '400':
-          description: Bad request.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
+      x-codeSamples:
+        - lang: cURL
+          label: Import with createNewCopies
+          source: |
+            curl \
+              -X POST api/saved_objects/_import?createNewCopies=true
+              -H "kbn-xsrf: true"
+              --form file=@file.ndjson
 components:
-  securitySchemes:
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: |
-        Serverless APIs support only key-based authentication. You must create an API key and use the encoded value in the request header. For example: 'Authorization: ApiKey base64AccessApiKey'.
   parameters:
     kbn_xsrf:
       schema:
@@ -267,38 +193,6 @@ components:
       name: kbn-xsrf
       description: Cross-site request forgery protection
       required: true
-    space_id:
-      in: path
-      name: spaceId
-      description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-      required: true
-      schema:
-        type: string
-        example: default
-    compatibility_mode:
-      in: query
-      name: compatibilityMode
-      schema:
-        type: boolean
-      required: false
-      description: |
-        Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.
-    create_new_copies:
-      in: query
-      name: createNewCopies
-      schema:
-        type: boolean
-      required: false
-      description: |
-        Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.
-    overwrite:
-      in: query
-      name: overwrite
-      schema:
-        type: boolean
-      required: false
-      description: |
-        Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.
   examples:
     export_objects_request:
       summary: Export a specific saved object.
@@ -370,57 +264,3 @@ components:
           type: integer
           enum:
             - 400
-    export_objects_request:
-      type: object
-      properties:
-        excludeExportDetails:
-          description: Do not add export details entry at the end of the stream.
-          type: boolean
-          default: false
-        includeReferencesDeep:
-          description: Includes all of the referenced objects in the exported objects.
-          type: boolean
-        objects:
-          description: A list of objects to export.
-          type: array
-          items:
-            type: object
-        type:
-          description: The saved object types to include in the export. Use `*` to export all the types.
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-    import_objects_request:
-      type: object
-      properties:
-        file:
-          description: |
-            A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.
-    200_import_objects_response:
-      type: object
-      properties:
-        success:
-          type: boolean
-          description: |
-            Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.
-        successCount:
-          type: integer
-          description: Indicates the number of successfully imported records.
-        errors:
-          type: array
-          items:
-            type: object
-          description: |
-            Indicates the import was unsuccessful and specifies the objects that failed to import.
-
-            NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.
-        successResults:
-          type: array
-          items:
-            type: object
-          description: |
-            Indicates the objects that are successfully imported, with any metadata if applicable.
-
-            NOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.

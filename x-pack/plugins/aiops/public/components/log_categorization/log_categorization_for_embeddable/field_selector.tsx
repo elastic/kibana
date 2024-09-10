@@ -25,16 +25,12 @@ interface Props {
   fields: DataViewField[];
   selectedField: DataViewField | null;
   setSelectedField: (field: DataViewField) => void;
+  WarningComponent?: FC;
 }
 
 export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedField }) => {
   const [showPopover, setShowPopover] = useState(false);
   const togglePopover = () => setShowPopover(!showPopover);
-
-  const fieldOptions = useMemo(
-    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
-    [fields]
-  );
 
   const button = (
     <EuiDataGridToolbarControl
@@ -57,23 +53,48 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
       button={button}
       className="unifiedDataTableToolbarControlButton"
     >
-      <EuiFormRow
-        data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
-        label={i18n.translate(
-          'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
-          {
-            defaultMessage: 'Selected field',
-          }
-        )}
-      >
+      <FieldSelector
+        fields={fields}
+        selectedField={selectedField}
+        setSelectedField={setSelectedField}
+      />
+    </EuiPopover>
+  );
+};
+
+export const FieldSelector: FC<Props> = ({
+  fields,
+  selectedField,
+  setSelectedField,
+  WarningComponent,
+}) => {
+  const fieldOptions = useMemo(
+    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
+    [fields]
+  );
+
+  const label = i18n.translate(
+    'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
+    {
+      defaultMessage: 'Selected field',
+    }
+  );
+
+  return (
+    <>
+      {WarningComponent !== undefined ? <WarningComponent /> : null}
+
+      <EuiFormRow fullWidth data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow" label={label}>
         <EuiSuperSelect
-          aria-label="Select a field"
+          fullWidth
+          compressed
+          aria-label={label}
           options={fieldOptions}
+          disabled={fields.length === 0}
           valueOfSelected={selectedField ?? undefined}
           onChange={setSelectedField}
-          css={{ minWidth: '300px' }}
         />
       </EuiFormRow>
-    </EuiPopover>
+    </>
   );
 };

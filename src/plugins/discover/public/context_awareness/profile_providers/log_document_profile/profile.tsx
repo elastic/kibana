@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataTableRecord } from '@kbn/discover-utils';
@@ -56,5 +57,7 @@ const getDataStreamType = getFieldValues('data_stream.type');
 const getIndices = getFieldValues('_index');
 
 const hasFieldsWithPrefix = (prefix: string) => (record: DataTableRecord) => {
-  return Object.keys(record.flattened).some((field) => field.startsWith(prefix));
+  return Object.keys(record.flattened).some(
+    (field) => field.startsWith(prefix) && record.flattened[field] != null
+  );
 };

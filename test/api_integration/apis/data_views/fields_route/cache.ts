@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
@@ -58,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.get('vary')).to.equal('accept-encoding, user-hash');
       expect(response.get('etag')).to.not.be.empty();
 
-      kibanaServer.uiSettings.replace({ 'data_views:cache_max_age': 5 });
+      await kibanaServer.uiSettings.replace({ 'data_views:cache_max_age': 5 });
     });
 
     it('returns 304 on matching etag', async () => {

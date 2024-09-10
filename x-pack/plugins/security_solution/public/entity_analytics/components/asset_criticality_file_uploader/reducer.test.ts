@@ -118,7 +118,7 @@ describe('reducer', () => {
     const action: ReducerAction = { type: 'fileError', payload: { message } };
     const nextState = reducer(
       {
-        step: 9999,
+        step: FileUploaderSteps.VALIDATION,
         isLoading: true,
         validatedFile: {
           name: '',
@@ -139,7 +139,10 @@ describe('reducer', () => {
 
   it('should handle "resetState" action', () => {
     const action: ReducerAction = { type: 'resetState' };
-    const nextState = reducer({ step: 9999, isLoading: true, validatedFile }, action);
+    const nextState = reducer(
+      { step: FileUploaderSteps.VALIDATION, isLoading: true, validatedFile },
+      action
+    );
 
     expect(nextState).toEqual(initialState);
   });

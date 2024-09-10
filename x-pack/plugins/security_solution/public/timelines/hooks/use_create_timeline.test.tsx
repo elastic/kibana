@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { RowRendererCount, TimelineType } from '../../../common/api/timeline';
+import { RowRendererCount, TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
@@ -41,9 +41,12 @@ describe('useCreateTimeline', () => {
 
   it('should return a function', () => {
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -57,9 +60,12 @@ describe('useCreateTimeline', () => {
     const addNotes = jest.spyOn(appActions, 'addNotes');
 
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -67,7 +73,7 @@ describe('useCreateTimeline', () => {
 
     await hookResult.result.current();
     expect(createTimeline.mock.calls[0][0].id).toEqual(TimelineId.test);
-    expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineType.default);
+    expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineTypeEnum.default);
     expect(createTimeline.mock.calls[0][0].columns).toEqual(defaultUdtHeaders);
     expect(createTimeline.mock.calls[0][0].dataViewId).toEqual(
       mockGlobalState.sourcerer.defaultDataView.id
@@ -99,11 +105,13 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({
           timelineId: TimelineId.test,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           onClick,
         }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -118,9 +126,12 @@ describe('useCreateTimeline', () => {
     const setAbsoluteRangeDatePicker = jest.spyOn(inputsActions, 'setAbsoluteRangeDatePicker');
 
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -138,9 +149,12 @@ describe('useCreateTimeline', () => {
     const setRelativeRangeDatePicker = jest.spyOn(inputsActions, 'setRelativeRangeDatePicker');
 
     const hookResult = renderHook(
-      () => useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineType.default }),
+      () =>
+        useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 

@@ -20,25 +20,27 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '0.1.0',
+    version: '1.0.2',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    filter: '@timestamp >= now-10m',
-    indexPatterns: ['logs-*', 'filebeat*', 'metrics-apm.service_transaction.1m*'],
+    indexPatterns: [
+      'logs-*',
+      'filebeat*',
+      'metrics-apm.service_transaction.1m*',
+      'metrics-apm.service_summary.1m*',
+    ],
     history: {
       timestampField: '@timestamp',
       interval: '1m',
       settings: {
+        lookbackPeriod: '10m',
         frequency: '2m',
         syncDelay: '2m',
       },
-    },
-    latest: {
-      lookback: '5m',
     },
     identityFields: ['service.name', { field: 'service.environment', optional: true }],
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
@@ -102,17 +104,13 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
       },
       {
         name: 'logErrorRate',
-        equation: 'A / B',
+        equation: 'A',
         metrics: [
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error" OR error.log.level: "error"',
-          },
-          {
-            name: 'B',
-            aggregation: 'doc_count',
-            filter: 'log.level: * OR error.log.level: *',
+            filter:
+              'log.level: "error" OR log.level: "ERROR" OR error.log.level: "error" OR error.log.level: "ERROR"',
           },
         ],
       },

@@ -6,29 +6,29 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteIndex,
   addIndex,
   createPackagePolicy,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import {
   findingsMockData,
   vulnerabilityMockData,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/mock_data';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 ];
 
