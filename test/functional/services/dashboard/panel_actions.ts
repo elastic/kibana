@@ -119,16 +119,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickContextMenuMoreItem();
   }
 
-  async clickContextMenuItem(testSubject: string, parent?: WebElementWrapper) {
-    this.log.debug(`clickContextMenuItem(${testSubject})`);
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(testSubject, { timeout: 500 });
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(testSubject, { timeout: 500 });
-  }
-
   async clickPanelActionByTitle(testSubject: string, title = '') {
     this.log.debug(`clickPanelActionByTitle(${testSubject},${title})`);
     await this.clickPanelActionByTitle(testSubject, title);
