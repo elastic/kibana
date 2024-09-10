@@ -6,12 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
@@ -19,6 +17,7 @@ import { pluginServices } from '../../../services/plugin_services';
 import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
+import { PANELS_CONTROL_GROUP_KEY } from '../../../services/dashboard_backup/dashboard_backup_service';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -113,8 +112,12 @@ export function startDiffingDashboardState(
     combineLatest([
       dashboardUnsavedChanges,
       childrenUnsavedChanges$(this.children$),
-      this.controlGroup?.unsavedChanges ??
-        (of(undefined) as Observable<PersistableControlGroupInput | undefined>),
+      this.controlGroupApi$.pipe(
+        skipWhile((controlGroupApi) => !controlGroupApi),
+        switchMap((controlGroupApi) => {
+          return controlGroupApi!.unsavedChanges;
+        })
+      ),
     ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       // calculate unsaved changes
       const hasUnsavedChanges =
@@ -127,11 +130,11 @@ export function startDiffingDashboardState(
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
-        backupUnsavedChanges.bind(this)(
-          dashboardChanges,
-          unsavedPanelState ? unsavedPanelState : {},
-          controlGroupChanges
-        );
+        const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
+        if (controlGroupChanges) {
+          reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
+        }
+        backupUnsavedChanges.bind(this)(dashboardChanges, reactEmbeddableChanges);
       }
     })
   );
@@ -183,8 +186,7 @@ export async function getDashboardUnsavedChanges(
 function backupUnsavedChanges(
   this: DashboardContainer,
   dashboardChanges: Partial<DashboardContainerInput>,
-  reactEmbeddableChanges: UnsavedPanelState,
-  controlGroupChanges: PersistableControlGroupInput | undefined
+  reactEmbeddableChanges: UnsavedPanelState
 ) {
   const { dashboardBackup } = pluginServices.getServices();
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
@@ -194,7 +196,6 @@ function backupUnsavedChanges(
     {
       ...dashboardStateToBackup,
       panels: dashboardChanges.panels,
-      controlGroupInput: controlGroupChanges,
     },
     reactEmbeddableChanges
   );
