@@ -20,10 +20,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getDocumentationSections } from '@kbn/text-based-editor';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import {
-  LanguageDocumentationFlyout,
-  type LanguageDocumentationSections,
-} from '@kbn/language-documentation-popover';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export const ESQLMenuPopover = () => {
@@ -32,8 +28,7 @@ export const ESQLMenuPopover = () => {
   const { docLinks } = kibana.services;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-  const [documentationSections, setDocumentationSections] =
-    useState<LanguageDocumentationSections>();
+  const [documentationSections, setDocumentationSections] = useState<unknown>();
 
   useEffect(() => {
     async function getDocumentation() {
@@ -126,13 +121,6 @@ export const ESQLMenuPopover = () => {
       >
         <EuiContextMenuPanel size="s" items={esqlPanelItems} />
       </EuiPopover>
-      <LanguageDocumentationFlyout
-        sections={documentationSections}
-        searchInDescription
-        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-        isHelpMenuOpen={isLanguageComponentOpen}
-        onHelpMenuVisibilityChange={setIsLanguageComponentOpen}
-      />
     </>
   );
 };
