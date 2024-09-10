@@ -56,7 +56,7 @@ const DragHandle = ({
     >
       <EuiIcon type="grabHorizontal" />
     </button>
-  ) :null;
+  ) : null;
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
@@ -163,9 +163,13 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
             fullWidth
             isLoading={Boolean(dataLoading)}
             compressed
-            className={classNames('controlFrame__formControlLayout', {
-              'controlFrame__formControlLayout--twoLine': usingTwoLineLayout,
-              'controlFrame__formControlLayout--edit' : isEditable}, `${controlType}`
+            className={classNames(
+              'controlFrame__formControlLayout',
+              {
+                'controlFrame__formControlLayout--twoLine': usingTwoLineLayout,
+                'controlFrame__formControlLayout--edit': isEditable,
+              },
+              `${controlType}`
             )}
             prepend={
               <>
