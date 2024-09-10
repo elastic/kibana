@@ -47,10 +47,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const clickDownloadCsv = async (wrapper?: WebElementWrapper) => {
-    log.debug(`click "Generate CSV" on "${title}"`);
+    log.debug('click "Generate CSV"');
     await dashboardPanelActions.clickPanelAction(
       'embeddablePanelAction-generateCsvReport',
       wrapper
+    );
+    await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
+  };
+
+  const clickDownloadCsvByTitle = async (title?: string) => {
+    log.debug(`click "Generate CSV" on "${title}"`);
+    await dashboardPanelActions.clickPanelActionByTitle(
+      'embeddablePanelAction-generateCsvReport',
+      title
     );
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
@@ -81,8 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Generate CSV export of a saved search panel', async function () {
         await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
-        await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv('EcommerceData');
+        await clickDownloadCsvByTitle('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(76137);
@@ -94,9 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // add a filter
         await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
-
-        await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(17106);
@@ -105,9 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
         await dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period - custom time range');
-
-        await clickActionsMenu('EcommerceData');
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle('EcommerceData');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(23277);
@@ -119,9 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const savedSearchPanel = await find.byCssSelector(
           '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
         ); // panel title is hidden
-        await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
-        await clickDownloadCsv();
+        await clickDownloadCsv(savedSearchPanel);
         await testSubjects.existOrFail('csvReportStarted');
 
         const csvFile = await getCsvReportData();
@@ -157,8 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads filtered Discover saved search report', async () => {
-        await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle(TEST_SEARCH_TITLE);
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(2446);
@@ -195,8 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Generate CSV export of a saved search panel', async () => {
-        await clickActionsMenu('namessearch');
-        await clickDownloadCsv();
+        await clickDownloadCsvByTitle('namessearch');
 
         const csvFile = await getCsvReportData();
         expect(csvFile.length).to.be(166);
