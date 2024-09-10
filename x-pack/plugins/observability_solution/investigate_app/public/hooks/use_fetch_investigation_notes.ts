@@ -15,6 +15,7 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
@@ -58,7 +59,9 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
       refetchIntervalInBackground: true,
       onError: (error: Error) => {
         toasts.addError(error, {
-          title: 'Something went wrong while fetching investigation notes',
+          title: i18n.translate('xpack.investigateApp.useFetchInvestigationList.errorTitle', {
+            defaultMessage: 'Something went wrong while fetching investigation notes',
+          }),
         });
       },
     }

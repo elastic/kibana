@@ -12,6 +12,7 @@ import {
   FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';
 
@@ -43,7 +44,11 @@ export function useCreateInvestigation() {
 
     {
       onSuccess: (response, investigation, context) => {
-        toasts.addSuccess('Investigation created');
+        toasts.addSuccess(
+          i18n.translate('xpack.investigateApp.useCreateInvestigation.successMessage', {
+            defaultMessage: 'Investigation created',
+          })
+        );
         queryClient.invalidateQueries({
           queryKey: investigationKeys.list(),
           exact: false,
@@ -51,7 +56,19 @@ export function useCreateInvestigation() {
         });
       },
       onError: (error, investigation, context) => {
-        toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });
+        toasts.addError(
+          new Error(
+            error.body?.message ??
+              i18n.translate('xpack.investigateApp.useCreateInvestigation.errorMessage', {
+                defaultMessage: 'an error occurred',
+              })
+          ),
+          {
+            title: i18n.translate('xpack.investigateApp.useCreateInvestigation.errorTitle', {
+              defaultMessage: 'Error',
+            }),
+          }
+        );
       },
     }
   );

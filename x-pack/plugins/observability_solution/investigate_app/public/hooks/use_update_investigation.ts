@@ -8,6 +8,7 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 import { investigationKeys } from './query_key_factory';
 
@@ -38,7 +39,11 @@ export function useUpdateInvestigation() {
     },
     {
       onSuccess: (response, { investigationId }) => {
-        toasts.addSuccess('Investigation updated');
+        toasts.addSuccess(
+          i18n.translate('xpack.investigateApp.useUpdateInvestigation.successMessage', {
+            defaultMessage: 'Investigation updated',
+          })
+        );
         queryClient.invalidateQueries({
           queryKey: investigationKeys.fetch({ id: investigationId }),
           exact: false,
@@ -46,7 +51,19 @@ export function useUpdateInvestigation() {
         });
       },
       onError: (error, {}, context) => {
-        toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });
+        toasts.addError(
+          new Error(
+            error.body?.message ??
+              i18n.translate('xpack.investigateApp.useUpdateInvestigationNote.errorMessage', {
+                defaultMessage: 'an error occurred',
+              })
+          ),
+          {
+            title: i18n.translate('xpack.investigateApp.useUpdateInvestigationNote.errorTitle', {
+              defaultMessage: 'Error',
+            }),
+          }
+        );
       },
     }
   );

@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { FindInvestigationsResponse } from '@kbn/investigation-shared';
+import { i18n } from '@kbn/i18n';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
@@ -54,16 +55,11 @@ export function useFetchInvestigationList({
     },
     cacheTime: 0,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (String(error) === 'Error: Forbidden') {
-        return false;
-      }
-
-      return failureCount < 3;
-    },
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: 'Something went wrong while fetching Investigations',
+        title: i18n.translate('xpack.investigateApp.useFetchInvestigationList.errorTitle', {
+          defaultMessage: 'Something went wrong while fetching investigations',
+        }),
       });
     },
   });
