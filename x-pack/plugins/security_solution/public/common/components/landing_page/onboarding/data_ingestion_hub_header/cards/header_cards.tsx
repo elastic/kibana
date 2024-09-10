@@ -28,37 +28,37 @@ export const useHeaderCards: () => ReactNode[] = () => {
   const usersUrl = useUsersUrl();
   const spaceId = useSpaceId();
 
-  const videoCard = useMemo(() => {
+  const cards = useMemo(() => {
+    const headerCards = [
+      <LinkCard
+        icon={isDarkMode ? darkTeammates : teammates}
+        title={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_TITLE}
+        description={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_DESCRIPTION}
+        href={usersUrl}
+        linkTitle={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_LINK_TITLE}
+      />,
+      <LinkCard
+        icon={isDarkMode ? darkDemo : demo}
+        title={i18n.DATA_INGESTION_HUB_HEADER_DEMO_TITLE}
+        description={i18n.DATA_INGESTION_HUB_HEADER_DEMO_DESCRIPTION}
+        href={demoUrl}
+        linkTitle={i18n.DATA_INGESTION_HUB_HEADER_DEMO_LINK_TITLE}
+      />,
+    ];
+
     if (spaceId) {
-      return (
+      return [
         <VideoCard
           spaceId={spaceId}
           icon={isDarkMode ? darkVideo : video}
           title={i18n.DATA_INGESTION_HUB_HEADER_VIDEO_TITLE}
           description={i18n.DATA_INGESTION_HUB_HEADER_VIDEO_DESCRIPTION}
-        />
-      );
+        />,
+        ...headerCards,
+      ];
     }
-    return null;
-  }, [isDarkMode, spaceId]);
+    return headerCards;
+  }, [isDarkMode, spaceId, usersUrl]);
 
-  const headerCards = [
-    videoCard,
-    <LinkCard
-      icon={isDarkMode ? darkTeammates : teammates}
-      title={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_TITLE}
-      description={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_DESCRIPTION}
-      href={usersUrl}
-      linkTitle={i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_LINK_TITLE}
-    />,
-    <LinkCard
-      icon={isDarkMode ? darkDemo : demo}
-      title={i18n.DATA_INGESTION_HUB_HEADER_DEMO_TITLE}
-      description={i18n.DATA_INGESTION_HUB_HEADER_DEMO_DESCRIPTION}
-      href={demoUrl}
-      linkTitle={i18n.DATA_INGESTION_HUB_HEADER_DEMO_LINK_TITLE}
-    />,
-  ];
-
-  return headerCards;
+  return cards;
 };
