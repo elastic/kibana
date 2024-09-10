@@ -98,6 +98,17 @@ export function InvestigationList() {
       },
     },
     {
+      field: 'tags',
+      name: 'Tags',
+      render: (tags: InvestigationResponse['tags']) => {
+        return tags.map((tag) => (
+          <EuiBadge color={'default'} key="tag">
+            {tag}
+          </EuiBadge>
+        ));
+      },
+    },
+    {
       name: 'Actions',
       render: (investigation: InvestigationResponse) => (
         <InvestigationListActions investigation={investigation} />
