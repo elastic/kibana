@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import UseUnmount from 'react-use/lib/useUnmount';
@@ -15,6 +16,7 @@ import {
   getContextProvider as getPresentationUtilContextProvider,
 } from '@kbn/presentation-util-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   EuiBreadcrumb,
@@ -28,7 +30,6 @@ import {
 import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -113,8 +114,16 @@ export function InternalDashboardTopNav({
   const query = dashboard.select((state) => state.explicitInput.query);
   const title = dashboard.select((state) => state.explicitInput.title);
 
+  // store data views in state & subscribe to dashboard data view changes.
+  const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const allDataViews = useStateFromPublishingSubject(dashboard.dataViews);
+  useEffect(() => {
+    setAllDataViews(dashboard.getAllDataViews());
+    const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
+      setAllDataViews(dataViews)
+    );
+    return () => subscription.unsubscribe();
+  }, [dashboard]);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -403,7 +412,7 @@ export function InternalDashboardTopNav({
         screenTitle={title}
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
-        indexPatterns={allDataViews ?? []}
+        indexPatterns={allDataViews}
         saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}

@@ -6,15 +6,15 @@
  */
 
 import type { StateGraphArgs } from '@langchain/langgraph';
-import { StateGraph, END, START } from '@langchain/langgraph';
+import { END, START, StateGraph } from '@langchain/langgraph';
 import type { RelatedState } from '../../types';
-import type { RelatedGraphParams, RelatedBaseNodeParams } from './types';
-import { prefixSamples, formatSamples } from '../../util/samples';
 import { handleValidatePipeline } from '../../util/graph';
-import { handleRelated } from './related';
-import { handleErrors } from './errors';
-import { handleReview } from './review';
+import { formatSamples, prefixSamples } from '../../util/samples';
 import { RELATED_ECS_FIELDS, RELATED_EXAMPLE_ANSWER } from './constants';
+import { handleErrors } from './errors';
+import { handleRelated } from './related';
+import { handleReview } from './review';
+import type { RelatedBaseNodeParams, RelatedGraphParams } from './types';
 
 const graphState: StateGraphArgs<RelatedState>['channels'] = {
   lastExecutedChain: {
@@ -32,6 +32,10 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
   formattedSamples: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
+  },
+  hasTriedOnce: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
   },
   ecs: {
     value: (x: string, y?: string) => y ?? x,
@@ -123,6 +127,9 @@ function inputRouter({ state }: RelatedBaseNodeParams): string {
 
 function chainRouter({ state }: RelatedBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
+    if (state.hasTriedOnce || state.reviewed) {
+      return 'modelOutput';
+    }
     return 'related';
   }
   if (Object.keys(state.errors).length > 0) {

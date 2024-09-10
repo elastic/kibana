@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -198,14 +199,14 @@ describe('Options List Control Api', () => {
       );
 
       const control = render(<Component className={'controlPanel'} />);
-      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
         expect(control.getAllByRole('option').length).toBe(4);
       });
 
       expect(control.getByTestId('optionsList-control-selection-exists')).toBeChecked();
       const option = control.getByTestId('optionsList-control-selection-woof');
-      userEvent.click(option);
+      await userEvent.click(option);
       await waitOneTick();
       expect(control.getByTestId('optionsList-control-selection-exists')).not.toBeChecked();
       expect(option).toBeChecked();
@@ -224,7 +225,7 @@ describe('Options List Control Api', () => {
       );
 
       const control = render(<Component className={'controlPanel'} />);
-      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
         expect(control.getAllByRole('option').length).toEqual(4);
       });
@@ -235,7 +236,7 @@ describe('Options List Control Api', () => {
       expect(control.getByTestId('optionsList-control-selection-bark')).toBeChecked();
       expect(control.getByTestId('optionsList-control-selection-meow')).not.toBeChecked();
 
-      userEvent.click(existsOption);
+      await userEvent.click(existsOption);
       await waitOneTick();
       expect(existsOption).toBeChecked();
       expect(control.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
@@ -256,17 +257,17 @@ describe('Options List Control Api', () => {
       );
 
       const control = render(<Component className={'controlPanel'} />);
-      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
         expect(control.getAllByRole('option').length).toEqual(4);
       });
-      userEvent.click(control.getByTestId('optionsList-control-show-only-selected'));
+      await userEvent.click(control.getByTestId('optionsList-control-show-only-selected'));
 
       expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(control.getByTestId('optionsList-control-selection-bark')).toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-meow')).toBeNull();
 
-      userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
+      await userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
       await waitOneTick();
       expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-bark')).toBeNull();
@@ -316,14 +317,14 @@ describe('Options List Control Api', () => {
         },
       ]);
 
-      userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
+      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
       await waitFor(() => {
         expect(control.getAllByRole('option').length).toEqual(4);
       });
       expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-      userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
+      await userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
       await waitOneTick();
       expect(control.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
       expect(control.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
