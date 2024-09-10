@@ -219,40 +219,14 @@ export function useModelActions({
             await trainedModelsApiService.startModelAllocation(
               item.model_id,
               {
-                threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
                 priority: modelDeploymentParams.priority!,
-                deployment_id: !!modelDeploymentParams.deploymentId
-                  ? modelDeploymentParams.deploymentId
-                  : item.model_id,
-                ...(modelDeploymentParams.adaptive_allocations?.enabled
-                  ? {}
-                  : { number_of_allocations: modelDeploymentParams.numOfAllocations! }),
+                threads_per_allocation: modelDeploymentParams.threads_per_allocation!,
+                number_of_allocations: modelDeploymentParams.number_of_allocations,
+                deployment_id: modelDeploymentParams.deployment_id,
               },
               {
                 ...(modelDeploymentParams.adaptive_allocations?.enabled
-                  ? {
-                      adaptive_allocations: {
-                        enabled: modelDeploymentParams.adaptive_allocations?.enabled,
-                        ...(Number.isInteger(
-                          modelDeploymentParams.adaptive_allocations?.min_number_of_allocations
-                        )
-                          ? {
-                              min_number_of_allocations:
-                                modelDeploymentParams.adaptive_allocations
-                                  ?.min_number_of_allocations,
-                            }
-                          : {}),
-                        ...(Number.isInteger(
-                          modelDeploymentParams.adaptive_allocations?.max_number_of_allocations
-                        )
-                          ? {
-                              max_number_of_allocations:
-                                modelDeploymentParams.adaptive_allocations
-                                  ?.max_number_of_allocations,
-                            }
-                          : {}),
-                      },
-                    }
+                  ? { adaptive_allocations: modelDeploymentParams.adaptive_allocations }
                   : {}),
               }
             );

@@ -87,6 +87,7 @@ export function useCloudCheck() {
         isCloudTrial: resp.isCloudTrial === true,
         deploymentId: !resp.cloudId ? null : extractDeploymentId(resp.cloudId),
         cloudUrl: resp.cloudUrl ?? null,
+        isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
       });
     } catch (error) {
       if (error.statusCode === 403) {
