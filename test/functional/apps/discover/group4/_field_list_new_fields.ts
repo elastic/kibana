@@ -18,7 +18,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
 
   describe('Field list new fields in background handling', function () {
     before(async () => {
@@ -26,8 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setCommonlyUsedTime('This_week');
+      await common.navigateToApp('discover');
+      await timePicker.setCommonlyUsedTime('This_week');
     });
 
     after(async () => {
@@ -60,11 +65,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
       });
       await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      expect(await PageObjects.discover.getHitCountInt()).to.be(1);
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await discover.getHitCountInt()).to.be(1);
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
       ]);
@@ -80,11 +85,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await PageObjects.discover.getHitCountInt()) === 2;
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        return (await discover.getHitCountInt()) === 2;
       });
 
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
         'b',
@@ -108,11 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
       });
       await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      expect(await PageObjects.discover.getHitCountInt()).to.be(1);
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await discover.getHitCountInt()).to.be(1);
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
       ]);
@@ -141,11 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await PageObjects.discover.getHitCountInt()) === 2;
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        return (await discover.getHitCountInt()) === 2;
       });
 
-      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
         '@timestamp',
         'a',
       ]);

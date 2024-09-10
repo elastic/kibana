@@ -1,0 +1,306 @@
+= Panels and visualizations
+
+{kib} provides many options to create panels with visualizations of your data and add content to your dashboards. From advanced charts, maps, and metrics to plain text and images, multiple types of panels with different capabilities are available.
+
+Use one of the editors to create visualizations of your data. Each editor offers various capabilities.
+
+[[panels-editors]]
+[cols="3", options="header"]
+|===
+
+| **Content** | **Panel type** | **Description**
+
+.5+| Visualizations
+| <<lens,Lens>>
+| The default editor for creating powerful <<chart-types,charts>> in {kib}
+
+| link:{ref}/esql-kibana.html[ES\|QL]
+| Create visualizations from ES\|QL queries
+
+| <<maps,Maps>>
+| Create beautiful displays of your geographical data
+
+| <<field-statistics-dashboard,Field statistics>>
+| Add a field statistics view of your data to your dashboards
+
+| <<vega, Custom visualizations>>
+| Use Vega to create new types of visualizations
+
+.3+| Annotations and navigation
+| <<add-text,Text>>
+| Add context to your dashboard with markdown-based *text*
+
+| <<add-image,Image>>
+| Personalize your dashboard with custom images
+
+| <<dashboard-links,Links>>
+| Add links to other dashboards or to external websites
+
+.4+| Machine Learning and Analytics
+| <<xpack-ml-anomalies,Anomaly swim lane>>
+| Display the results from machine learning anomaly detection jobs
+
+| <<xpack-ml-anomalies,Anomaly chart>>
+| Display an anomaly chart from the *Anomaly Explorer*
+
+| <<xpack-ml-anomalies,Single metric viewer>>
+| Display an anomaly chart from the *Single Metric Viewer*
+
+| <<change-point-detection,Change point detection>>
+| Display a chart to visualize change points in your data
+
+.3+| Observability
+| link:{observability-guide}/slo.html[SLO overview]
+| Visualize a selected SLO’s health, including name, current SLI value, target, and status
+
+| link:{observability-guide}/slo.html[SLO Alerts]
+| Visualize one or more SLO alerts, including status, rule name, duration, and reason. In addition, configure and update alerts, or create cases directly from the panel
+
+| link:{observability-guide}/slo.html[SLO Error Budget]
+| Visualize the consumption of your SLO's error budget
+
+.3+| Legacy
+| <<logs-app,Log stream>> (deprecated)
+| Display a table of live streaming logs
+
+| <<add-aggregation-based-visualization-panels,Aggregation based>>
+.2+| While these panel types are still available, we recommend to use <<lens,Lens>>
+
+| <<tsvb-panel,TSVB>>
+
+|===
+
+include::chart-types.asciidoc[]
+
+[[manage-panels]]
+== Manage panels
+When creating a panel, you can choose to add it to a dashboard, or to save it to the Visualize Library so it can be added to multiple dashboards later.
+
+There are also some common options that you can configure on the various types of panels to make a dashboard easier to navigate and analyze.
+
+[float]
+[[save-the-markdown-panel]]
+[[save-to-visualize-library]]
+=== Save to the Visualize Library
+
+To use a panel on multiple dashboards, you can save it to the *Visualize Library*. Any updates made to a shared panel is replicated to all dashboards where the panel is added.
+//When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
+
+If you created the panel from a dashboard:
+
+. In the editor, click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Select *Add to Dashboard after saving* to add the panel to your dashboard at the same time.
+
+. Click *Save and return*.
+
+If you created the panel from the *Visualize Library*:
+
+. In the editor, click *Save*.
+
+. On the *Save* window, enter the *Title*.
+
+. Choose one of the following options:
+
+* To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable <<managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
+
+* To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
+
+[float]
+[[save-to-the-dashboard]]
+=== Save to the dashboard
+
+Return to the dashboard and add the panel without specifying the save options or adding the panel to the *Visualize Library*. 
+
+If you created the panel from a dashboard:
+
+. In the editor, click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Panel settings* window, select *Show title*.
+
+.. Enter the *Title*, then click *Save*.
+
+If you created the panel from the *Visualize Library*:
+
+. Click *Save*.
+
+. On the *Save* window, add a *Title* to name the visualization.
+
+. Choose one of the following options:
+
+* If you want to add the panel to an existing dashboard, select *Existing*, select the dashboard from the dropdown, then click *Save and go to Dashboard*.
+
+* If you want to add the panel to a new dashboard, select *New*, then click *Save and go to Dashboard*.
+
+To add unsaved dashboard panels to the *Visualize Library*:
+
+. Open the panel menu, then select *More > Save to library*.
+
+. Enter the panel title, then click *Save*.
+
+[[explore-the-underlying-documents]]
+=== Link to Discover
+
+You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one data view. 
+
+There are three types of *Discover* interactions you can add to dashboard panels:
+
+* *Panel interactions* &mdash; Opens panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
++
+To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
++
+To use panel interactions, open the panel menu, then click *Explore underlying data*.
+
+* *Series data interactions* &mdash; Opens the series data in *Discover*.
++
+To enable series data interactions, configure <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, data series interactions are enabled by default.
++
+To use series data interactions, click a data series in the panel.
+
+* *Saved search interactions* &mdash; Opens <<save-your-search,saved search>> data in *Discover*.
++
+To use saved search interactions, open the panel menu, then click *More > View saved search*.
+
+[[edit-panels]]
+=== Edit panels
+
+To make changes to the panel, use the panel menu options.
+
+. In the toolbar, click *Edit*.
+
+. Open the panel menu, then use the following options:
+
+* *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
++
+To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
+
+* *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
+
+* *Panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
+
+* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
+
+* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
++
+If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
+
+
+
+include::lens.asciidoc[leveloffset=-1]
+
+[[esql-visualizations]]
+== ES|QL visualizations
+
+You can add ES|QL visualizations to a dashboard directly from queries in Discover, or you can start from a dashboard.
+
+[float]
+=== Edit and add from Discover
+
+In Discover, {ref}/esql-kibana.html[typing ES|QL queries] automatically shows a visualization. The visualization type depends on the content of the query: histogram, bar charts, etc. You can manually make changes to that visualization and edit its type and display options using the
+pencil button image:images/esql-icon-edit-visualization.svg[pencil button].
+
+You can then **Save** and add it to an existing or a new dashboard using the save button of the visualization image:images/esql-icon-save-visualization.svg[save button].
+
+[float]
+=== Create from dashboard
+
+. From your dashboard, select **Add panel**.
+. Choose **ES|QL** under **Visualizations**. An ES|QL editor appears and lets you configure your query and its associated visualization. The **Suggestions** panel can help you find alternative ways to configure the visualization.
++
+TIP: Check the link:esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
+. When editing your query or its configuration, run the query to update the preview of the visualization.
++
+image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt69dcceb4f1e12bc1/66c752d6aff77d384dc44209/edit-esql-visualization.gif[Previewing an ESQL visualization]
+. Select **Apply and close** to save the visualization to the dashboard.
+
+[[maps-visualizations]]
+== Maps
+
+The Maps editor has extensive documentation. For your reading comfort, we have moved it to <<maps,this section>>.
+
+[[field-statistics-dashboard]]
+== Field statistics
+
+**Field statistics** panels allow to display a table with additional field information in your dashboards, such as document count, values, and distribution. 
+
+. From your dashboard, select **Add panel**.
+. Choose **Field statistics** under **Visualizations**. An ES|QL editor appears and lets you configure your query with the fields and information that you want to show.
++
+TIP: Check the link:esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
+. When editing your query or its configuration, run the query to update the preview of the visualization.
++
+image:images/dashboards-field-statistics.png[Editing a field statistics dashboard panel]
+. Select **Apply and close** to save the visualization to the dashboard.
+
+include::vega.asciidoc[leveloffset=-1]
+
+[[add-text]]
+== Text panels
+
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
+
+. On the dashboard, click image:images/dashboard_createNewTextButton_7.15.0.png[Create New Text button in dashboard toolbar].
+
+. In the *Markdown* field, enter the text, then click *Update*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[Markdown text with links]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[Panel with markdown link text]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[Markdown text with image file]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[Panel with markdown image]
+
+For detailed information about writing on GitHub, click *Help*.
+
+
+
+[[add-image]]
+== Image panels
+
+To personalize your dashboards, add your own logos and graphics with the *Image* panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.
+
+. On the dashboard, click image:images/dashboard_createNewImageButton_8.7.0.png[Create New Image button in dashboard toolbar].
+. Use the editor to add an image.
+
+[role="screenshot"]
+image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
+
+To manage your uploaded image files, open the main menu, then click *Stack Management > Kibana > Files*. 
+
+
+[WARNING]
+============================================================================
+When you export a dashboard, the uploaded image files are not exported. 
+When importing a dashboard with an image panel, and the image file is unavailable, the image panel displays a `not found` warning. Such panels have to be fixed manually by re-uploading the image using the panel's image editor.
+============================================================================
+
+include::links-panel.asciidoc[leveloffset=-1]
+
+[[legacy-editors]]
+== Legacy editors
+
+include::aggregation-based.asciidoc[]
+
+include::tsvb.asciidoc[]
+
+include::timelion.asciidoc[]
+
