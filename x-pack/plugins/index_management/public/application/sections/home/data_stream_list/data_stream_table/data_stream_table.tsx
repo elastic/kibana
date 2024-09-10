@@ -79,6 +79,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       return (
         <Fragment>
           <EuiLink
+            role="button"
             data-test-subj="nameLink"
             {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
           >
