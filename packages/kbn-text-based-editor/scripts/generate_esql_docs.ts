@@ -11,7 +11,7 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import { functions } from '../src/esql_documentation_sections';
+import { scalarFunctions } from '../src/inline_documentation/generated/scalar_functions';
 
 (function () {
   const pathToElasticsearch = process.argv[2];
@@ -95,7 +95,10 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
   };`;
   });
 
-  const pathToDocsFile = path.join(__dirname, '../src/esql_documentation_sections.tsx');
+  const pathToDocsFile = path.join(
+    __dirname,
+    '../src/inline_documentation/generated/scalar_functions.tsx'
+  );
 
   const ast = recast.parse(fs.readFileSync(pathToDocsFile, 'utf-8'), {
     parser: require('recast/parsers/babel'),
@@ -143,7 +146,7 @@ function removeAsciiDocInternalCrossReferences(asciidocString: string, functionN
 function findFunctionsList(ast: any): recast.types.namedTypes.ArrayExpression {
   let foundArray: recast.types.namedTypes.ArrayExpression | null = null;
 
-  const functionsArrayIdentifier = Object.keys({ functions })[0];
+  const functionsArrayIdentifier = Object.keys({ scalarFunctions })[0];
 
   recast.visit(ast, {
     visitVariableDeclarator(astPath) {
