@@ -22,6 +22,7 @@ import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_RESOURCE } from './constants';
 import { getKbResource } from './get_kb_resource';
+import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 /**
  * Delete Knowledge Base index, pipeline, and resources (collection of documents)
@@ -49,16 +50,20 @@ export const deleteKnowledgeBaseRoute = (
       },
       async (context, request: KibanaRequest<DeleteKnowledgeBaseRequestParams>, response) => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = ctx.elasticAssistant.logger;
         const telemetry = assistantContext.telemetry;
+
+        // FF Check for V2 KB
+        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         try {
           const kbResource = getKbResource(request);
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled);
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
