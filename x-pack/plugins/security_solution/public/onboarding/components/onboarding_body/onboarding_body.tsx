@@ -5,60 +5,55 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback } from 'react';
-import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import React, { Suspense, useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 import { PAGE_CONTENT_WIDTH, type OnboardingHubCardId } from '../../constants';
 import { useCardGroupsConfig } from './use_card_groups_config';
 import { useOnboardingContext } from '../onboarding_context';
-import { useStoredCompletedCardIds, useStoredExpandedCardId } from '../use_stored_state';
 import { OnboardingCardGroup } from './onboarding_card_group';
 import { OnboardingCardPanel } from './onboarding_card_panel';
+import { useCheckCompleteCards } from './use_check_complete_cards';
+import { useExpandedCard } from './use_expanded_card';
+import { useCompletedCards } from './use_completed_cards';
 
 export const OnboardingBody = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { spaceId } = useOnboardingContext();
-
-  const [completeCardIds, setCompleteCardIds] = useStoredCompletedCardIds(spaceId);
-  const [expandedCardId, setExpandedCardId] = useStoredExpandedCardId(spaceId);
-
   const cardGroupsConfig = useCardGroupsConfig();
 
-  const isCardComplete = useCallback(
-    (cardId: OnboardingHubCardId) => completeCardIds.includes(cardId),
-    [completeCardIds]
+  const { expandedCardId, setExpandedCardId } = useExpandedCard(spaceId);
+  const { isCardComplete, setCardComplete } = useCompletedCards(spaceId);
+
+  const { checkAllCardsComplete, checkCardComplete } = useCheckCompleteCards(
+    cardGroupsConfig,
+    setCardComplete
   );
 
-  const setCompleteCard = useCallback(
-    (stepId: OnboardingHubCardId, complete: boolean) => {
-      if (complete) {
-        setCompleteCardIds((currentCompleteCards = []) => [
-          ...new Set([...currentCompleteCards, stepId]),
-        ]);
-      } else {
-        setCompleteCardIds((currentCompleteCards = []) =>
-          currentCompleteCards.filter((id) => id !== stepId)
-        );
-      }
-    },
-    [setCompleteCardIds]
-  );
-
-  //   const {loading, completedCards, error} = useCheckCompleteCards(groupsConfig);
-
-  const createCardSetComplete = useCallback(
-    (cardId: OnboardingHubCardId) => (complete: boolean) => {
-      setCompleteCard(cardId, complete);
-    },
-    [setCompleteCard]
-  );
+  useEffect(() => {
+    // initial auto-check for all cards
+    checkAllCardsComplete();
+  }, [checkAllCardsComplete]);
 
   const createOnToggleExpanded = useCallback(
-    (cardId: OnboardingHubCardId) => (expanded: boolean) => {
-      setExpandedCardId(expanded ? cardId : null);
+    (cardId: OnboardingHubCardId) => () => {
+      if (expandedCardId === cardId) {
+        setExpandedCardId(null);
+      } else {
+        setExpandedCardId(cardId);
+        // execute the auto-check for the card when it's been expanded
+        checkCardComplete(cardId);
+      }
     },
-    [setExpandedCardId]
+    [setExpandedCardId, expandedCardId, checkCardComplete]
+  );
+
+  const createSetCardComplete = useCallback(
+    (cardId: OnboardingHubCardId) => (complete: boolean) => {
+      setCardComplete(cardId, complete);
+    },
+    [setCardComplete]
   );
 
   return (
@@ -71,44 +66,35 @@ export const OnboardingBody = React.memo(() => {
         background-color: ${euiTheme.colors.lightestShade};
       `}
     >
-      {cardGroupsConfig.map((group) => {
-        return (
-          <OnboardingCardGroup key={group.title} title={group.title}>
-            {group.cards.map((card) => {
-              const LazyCardComponent = card.component;
-              const onToggleExpanded = createOnToggleExpanded(card.id);
-              return (
-                <OnboardingCardPanel
-                  key={card.id}
-                  id={card.id}
-                  title={card.title}
-                  icon={card.icon}
-                  isExpanded={expandedCardId === card.id}
-                  isComplete={isCardComplete(card.id)}
-                  onToggleExpanded={onToggleExpanded}
-                >
-                  <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-                    <LazyCardComponent setComplete={createCardSetComplete(card.id)} />
-                  </Suspense>
-                </OnboardingCardPanel>
-              );
-            })}
-          </OnboardingCardGroup>
-        );
-      })}
+      <EuiFlexGroup direction="column" gutterSize="xl">
+        {cardGroupsConfig.map((group, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <OnboardingCardGroup title={group.title}>
+              <EuiFlexGroup direction="column" gutterSize="m">
+                {group.cards.map(({ id, title, icon, Component: LazyCardComponent }) => (
+                  <EuiFlexItem key={id} grow={false}>
+                    <OnboardingCardPanel
+                      id={id}
+                      title={title}
+                      icon={icon}
+                      isExpanded={expandedCardId === id}
+                      isComplete={isCardComplete(id)}
+                      onToggleExpanded={createOnToggleExpanded(id)}
+                    >
+                      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+                        <LazyCardComponent setComplete={createSetCardComplete(id)} />
+                      </Suspense>
+                    </OnboardingCardPanel>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </OnboardingCardGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
     </KibanaPageTemplate.Section>
   );
 });
 
 OnboardingBody.displayName = 'OnboardingBody';
-
-/**
- TODO: 
-- implement OnboardingCardBody component in separate file
-- implement OnboardingCardPanel components in separate files, it should call
-- implement useCheckCompleteCards hook to execute only the first render
-- if the logic related to completed cards (including useCheckCompleteCards) becomes too big or complex, consider moving it to a custom hook: 
-   const { isCardComplete, setCompleteCard } = useCompleteCards(groupsConfig);
-- implement header and footer components
-(most of the components are already implemented in the original code, so you can copy them and adjust them as needed)
- */

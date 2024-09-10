@@ -11,11 +11,19 @@ import { hasCapabilities } from '../../../common/lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { cardGroupsConfig } from './card_groups_config';
 
+/**
+ * Hook that filters the card groups config based on the user's capabilities and license
+ */
 export const useCardGroupsConfig = () => {
   const { application, licensing } = useKibana().services;
   const license = useObservable(licensing.license$);
 
   const filteredCardGroupsConfig = useMemo(() => {
+    // If the license is not defined, return an empty array. It always eventually becomes available.
+    // This exit case is just to prevent config-dependent code to run multiple times for each card.
+    if (!license) {
+      return [];
+    }
     return cardGroupsConfig.filter((group) => {
       const filteredCards = group.cards.filter((card) => {
         if (card.capabilities) {
@@ -26,7 +34,7 @@ export const useCardGroupsConfig = () => {
         }
 
         if (card.licenseType) {
-          const cardHasLicense = license?.hasAtLeast(card.licenseType);
+          const cardHasLicense = license.hasAtLeast(card.licenseType);
           if (!cardHasLicense) {
             return false;
           }

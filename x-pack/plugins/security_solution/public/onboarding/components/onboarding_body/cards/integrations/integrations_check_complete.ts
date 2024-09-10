@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { OnboardingHubCardCheckComplete } from '../../../../types';
+import type { OnboardingCardCheckComplete } from '../../../../types';
 
-export const checkIntegrationsCardComplete: OnboardingHubCardCheckComplete = async () => {
+export const checkIntegrationsCardComplete: OnboardingCardCheckComplete = async () => {
   // implement this function
-  return new Promise((resolve) => setTimeout(() => resolve(true), 1000));
+  return new Promise((resolve) => setTimeout(() => resolve(true), 3000));
 };

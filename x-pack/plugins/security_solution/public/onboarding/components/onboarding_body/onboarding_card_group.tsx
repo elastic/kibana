@@ -6,37 +6,18 @@
  */
 
 import React, { type PropsWithChildren } from 'react';
-import { useEuiTheme, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export const OnboardingCardGroup = React.memo<PropsWithChildren<{ title: string }>>(
   ({ title, children }) => {
-    const { euiTheme } = useEuiTheme();
     return (
-      <EuiPanel
-        color="plain"
-        element="div"
-        grow={false}
-        paddingSize="none"
-        hasShadow={false}
-        borderRadius="none"
-        css={css`
-          margin: ${euiTheme.size.l} 0;
-          padding-top: 4px;
-          background-color: ${euiTheme.colors.lightestShade};
-        `}
-      >
-        <h2
-          css={css`
-            font-size: ${euiTheme.base * 1.375}px;
-            font-weight: ${euiTheme.font.weight.bold};
-          `}
-        >
-          {title}
-        </h2>
-        <EuiSpacer size="l" />
+      <div>
+        <EuiTitle size="xs">
+          <h2>{title}</h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
         {children}
-      </EuiPanel>
+      </div>
     );
   }
 );

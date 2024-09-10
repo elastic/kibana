@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, type PropsWithChildren } from 'react';
+import React, { type PropsWithChildren } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
   EuiPanel,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import classnames from 'classnames';
 import type { OnboardingHubCardId } from '../../constants';
-import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from '../translations';
+import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import { useCardPanelStyles } from './onboarding_card_panel.styles';
 
 interface OnboardingCardPanelProps {
@@ -27,18 +27,15 @@ interface OnboardingCardPanelProps {
   icon: IconType;
   isExpanded: boolean;
   isComplete: boolean;
-  onToggleExpanded: (expanded: boolean) => void;
+  onToggleExpanded: () => void;
 }
 
 export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPanelProps>>(
   ({ id, title, icon, isExpanded, isComplete, onToggleExpanded, children }) => {
-    const onToggle = useCallback(() => {
-      onToggleExpanded(!isExpanded);
-    }, [onToggleExpanded, isExpanded]);
-
     const styles = useCardPanelStyles();
     const cardPanelClassName = classnames(styles, {
-      'onboardingCardPanel-collapsed': !isExpanded,
+      'onboardingCardPanel-expanded': isExpanded,
+      'onboardingCardPanel-completed': isComplete,
     });
 
     return (
@@ -46,20 +43,20 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
         id={id}
         color="plain"
         grow={false}
-        hasShadow={false}
+        hasShadow={isExpanded}
         borderRadius="m"
         paddingSize="none"
-        hasBorder={true}
+        hasBorder={!isExpanded}
         className={cardPanelClassName}
       >
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
-          onClick={onToggle}
+          onClick={onToggleExpanded}
           className="onboardingCardHeader"
         >
           <EuiFlexItem grow={false}>
-            <span>
+            <span className="onboardingCardIcon">
               <EuiIcon type={icon} size="l" />
             </span>
           </EuiFlexItem>

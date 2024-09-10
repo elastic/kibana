@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { OnboardingGroupConfig } from '../../types';
 import { integrationsCardConfig } from './cards/integrations';
-import type { OnboardingHubGroupConfig } from '../../types';
+import { dashboardsCardConfig } from './cards/dashboards';
 
-export const cardGroupsConfig: OnboardingHubGroupConfig[] = [
+export const cardGroupsConfig: OnboardingGroupConfig[] = [
   {
-    title: 'Add and validate your data', // TODO: i18n
-    cards: [
-      integrationsCardConfig,
-      // dashboardsCardConfig,
-    ],
+    title: i18n.translate('xpack.securitySolution.onboarding.dataGroup.title', {
+      defaultMessage: 'Ingest your data',
+    }),
+    cards: [integrationsCardConfig, dashboardsCardConfig],
   },
-  // ...
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.alertsGroup.title', {
+      defaultMessage: 'Configure rules and alerts',
+    }),
+    cards: [],
+  },
 ];

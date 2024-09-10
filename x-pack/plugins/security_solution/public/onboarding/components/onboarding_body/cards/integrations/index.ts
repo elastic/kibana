@@ -6,15 +6,18 @@
  */
 
 import React from 'react';
-import type { OnboardingHubCardConfig } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingHubCardId } from '../../../../constants';
 
-export const integrationsCardConfig: OnboardingHubCardConfig = {
+export const integrationsCardConfig: OnboardingCardConfig = {
   id: OnboardingHubCardId.integrations,
-  title: 'Add data with integrations', // TODO: i18n
+  title: i18n.translate('xpack.securitySolution.onboarding.integrationsCard.title', {
+    defaultMessage: 'Add data with integrations',
+  }),
   icon: 'fleetApp',
-  component: React.lazy(
+  Component: React.lazy(
     () => import('./integrations_card' /* webpackChunkName: "onboarding_integrations_card" */)
   ),
   checkComplete: checkIntegrationsCardComplete,

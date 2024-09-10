@@ -11,9 +11,10 @@ import { PluginTemplateWrapper } from '../../common/components/plugin_template_w
 import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { OnboardingContextProvider } from './onboarding_context';
+import { OnboardingAVCBanner } from './onboarding_avc_banner';
 import { OnboardingHeader } from './onboarding_header';
 import { OnboardingBody } from './onboarding_body';
-import { OnboardingAVCBanner } from './onboarding_avc_banner';
+import { OnboardingFooter } from './onboarding_footer';
 
 export const OnboardingPage = React.memo(() => {
   const spaceId = useSpaceId();
@@ -32,6 +33,7 @@ export const OnboardingPage = React.memo(() => {
         <OnboardingAVCBanner />
         <OnboardingHeader />
         <OnboardingBody />
+        <OnboardingFooter />
       </PluginTemplateWrapper>
     </OnboardingContextProvider>
   );
