@@ -221,7 +221,7 @@ export async function cloneJob(toastNotifications, application, mlApi, jobId) {
       loadFullJob(mlApi, jobId),
     ]);
 
-    const tempJobCloningObjects = {
+    const tempJobCloningData = {
       skipTimeRangeStep: false,
     };
 
@@ -232,9 +232,9 @@ export async function cloneJob(toastNotifications, application, mlApi, jobId) {
       createdBy !== CREATED_BY_LABEL.ADVANCED
     ) {
       // if the job is from a wizards, i.e. contains a created_by property
-      // use tempJobCloningObjects to temporarily store the job
-      tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;
-      tempJobCloningObjects.job = cloneableJob;
+      // use tempJobCloningData to temporarily store the job
+      tempJobCloningData.createdBy = originalJob?.custom_settings?.created_by;
+      tempJobCloningData.job = cloneableJob;
 
       if (
         originalJob.data_counts.earliest_record_timestamp !== undefined &&
@@ -260,27 +260,27 @@ export async function cloneJob(toastNotifications, application, mlApi, jobId) {
           end = originalJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
         }
 
-        tempJobCloningObjects.start = start;
-        tempJobCloningObjects.end = end;
+        tempJobCloningData.start = start;
+        tempJobCloningData.end = end;
       }
     } else {
-      // otherwise tempJobCloningObjects
-      tempJobCloningObjects.job = cloneableJob;
+      // otherwise tempJobCloningData
+      tempJobCloningData.job = cloneableJob;
       // resets the createdBy field in case it still retains previous settings
-      tempJobCloningObjects.createdBy = undefined;
+      tempJobCloningData.createdBy = undefined;
     }
     if (datafeed !== undefined) {
-      tempJobCloningObjects.datafeed = datafeed;
+      tempJobCloningData.datafeed = datafeed;
     }
 
     if (originalJob.calendars) {
-      tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
+      tempJobCloningData.calendars = await mlCalendarService.fetchCalendarsByIds(
         mlApi,
         originalJob.calendars
       );
     }
 
-    jobCloningService.stashJobCloningObjects(tempJobCloningObjects);
+    jobCloningService.stashJobCloningData(tempJobCloningData);
 
     application.navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {

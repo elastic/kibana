@@ -115,7 +115,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     if (jobCloningService.calendars) {
       jobCreator.calendars = jobCloningService.calendars;
     }
-    jobCloningService.clearJobCloningObjects();
+    jobCloningService.clearJobCloningData();
   } else {
     // creating a new job
     jobCreator.bucketSpan = DEFAULT_BUCKET_SPAN;

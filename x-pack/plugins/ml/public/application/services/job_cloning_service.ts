@@ -8,7 +8,7 @@
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { JobCreator } from '../jobs/new_job/common/job_creator/job_creator';
 
-interface TempJobCloningObjects {
+interface TempJobCloningData {
   createdBy: any;
   datafeed: any;
   job: any;
@@ -20,12 +20,12 @@ interface TempJobCloningObjects {
 }
 
 export class JobCloningService {
-  // tempJobCloningObjects -> used to pass a job object between the job management page and
+  // tempJobCloningData -> used to pass a job object between the job management page and
   // and the advanced wizard.
   // if populated when loading the advanced wizard, the job is used for cloning.
   // if populated when loading the job management page, the start datafeed modal
   // is automatically opened.
-  private tempJobCloningObjects: TempJobCloningObjects = {
+  private tempJobCloningData: TempJobCloningData = {
     createdBy: undefined,
     datafeed: undefined,
     job: undefined,
@@ -36,12 +36,12 @@ export class JobCloningService {
     autoSetTimeRange: false,
   };
 
-  public getJobCloningObjects(): Readonly<TempJobCloningObjects> {
-    return this.tempJobCloningObjects;
+  public getJobCloningData(): Readonly<TempJobCloningData> {
+    return this.tempJobCloningData;
   }
 
-  clearJobCloningObjects() {
-    this.tempJobCloningObjects = {
+  clearJobCloningData() {
+    this.tempJobCloningData = {
       createdBy: undefined,
       datafeed: undefined,
       job: undefined,
@@ -59,7 +59,7 @@ export class JobCloningService {
     includeTimeRange: boolean,
     autoSetTimeRange: boolean = false
   ) {
-    const tempJobCloningObjects: TempJobCloningObjects = {
+    const tempJobCloningData: TempJobCloningData = {
       job: jobCreator.jobConfig,
       datafeed: jobCreator.datafeedConfig,
       createdBy: jobCreator.createdBy ?? undefined,
@@ -75,16 +75,16 @@ export class JobCloningService {
         : { autoSetTimeRange: true }),
     };
 
-    this.tempJobCloningObjects = tempJobCloningObjects;
+    this.tempJobCloningData = tempJobCloningData;
   }
 
   public checkForAutoStartDatafeed() {
-    const job = this.tempJobCloningObjects.job;
-    const datafeed = this.tempJobCloningObjects.datafeed;
+    const job = this.tempJobCloningData.job;
+    const datafeed = this.tempJobCloningData.datafeed;
     if (job !== undefined) {
-      this.tempJobCloningObjects.job = undefined;
-      this.tempJobCloningObjects.datafeed = undefined;
-      this.tempJobCloningObjects.createdBy = undefined;
+      this.tempJobCloningData.job = undefined;
+      this.tempJobCloningData.datafeed = undefined;
+      this.tempJobCloningData.createdBy = undefined;
 
       const hasDatafeed = isPopulatedObject(datafeed);
       const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
@@ -97,33 +97,33 @@ export class JobCloningService {
     }
   }
 
-  public stashJobCloningObjects(config: TempJobCloningObjects) {
-    this.tempJobCloningObjects = config;
+  public stashJobCloningData(config: TempJobCloningData) {
+    this.tempJobCloningData = config;
   }
 
   public get createdBy() {
-    return this.tempJobCloningObjects.createdBy;
+    return this.tempJobCloningData.createdBy;
   }
   public get datafeed() {
-    return this.tempJobCloningObjects.datafeed;
+    return this.tempJobCloningData.datafeed;
   }
   public get job() {
-    return this.tempJobCloningObjects.job;
+    return this.tempJobCloningData.job;
   }
   public get skipTimeRangeStep() {
-    return this.tempJobCloningObjects.skipTimeRangeStep;
+    return this.tempJobCloningData.skipTimeRangeStep;
   }
   public get start() {
-    return this.tempJobCloningObjects.start;
+    return this.tempJobCloningData.start;
   }
   public get end() {
-    return this.tempJobCloningObjects.end;
+    return this.tempJobCloningData.end;
   }
   public get calendars() {
-    return this.tempJobCloningObjects.calendars;
+    return this.tempJobCloningData.calendars;
   }
   public get autoSetTimeRange() {
-    return this.tempJobCloningObjects.autoSetTimeRange;
+    return this.tempJobCloningData.autoSetTimeRange;
   }
 }
 
