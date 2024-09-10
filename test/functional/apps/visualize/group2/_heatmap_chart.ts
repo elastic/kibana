@@ -14,38 +14,43 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
+  const { visualize, visEditor, visChart, timePicker } = getPageObjects([
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+  ]);
 
   describe('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
     let isNewChartsLibraryEnabled = false;
 
     before(async function () {
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled(
+      isNewChartsLibraryEnabled = await visChart.isNewChartsLibraryEnabled(
         'visualization:visualize:legacyHeatmapChartsLibrary'
       );
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests(isNewChartsLibraryEnabled);
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');
-      await PageObjects.visualize.clickHeatmapChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await visualize.clickHeatmapChart();
+      await visualize.clickNewSearch();
+      await timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
-      await PageObjects.visEditor.clickBucket('X-axis');
+      await visEditor.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await visEditor.selectAggregation('Date Histogram');
       log.debug('Field = @timestamp');
-      await PageObjects.visEditor.selectField('@timestamp');
+      await visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo(isNewChartsLibraryEnabled);
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visChart.waitForVisualization();
+      await visualize.loadSavedVisualization(vizName1);
+      await visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
@@ -83,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show 4 color ranges as default colorNumbers param', async function () {
-      const legends = await PageObjects.visChart.getLegendEntries();
+      const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
       if (isNewChartsLibraryEnabled) {
         // the bands are different because we always scale to data bounds in the implementation
@@ -95,12 +100,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show 6 color ranges if changed on options', async function () {
-      await PageObjects.visEditor.clickOptionsTab();
-      await PageObjects.visEditor.changeHeatmapColorNumbers(6);
-      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await visEditor.clickOptionsTab();
+      await visEditor.changeHeatmapColorNumbers(6);
+      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visChart.waitForVisualizationRenderingStabilized();
 
-      const legends = await PageObjects.visChart.getLegendEntries();
+      const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
       if (isNewChartsLibraryEnabled) {
         // the bands are different because we always scale to data bounds in the implementation
@@ -125,23 +130,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(legends).to.eql(expectedLegends);
     });
     it('should show 6 custom color ranges', async function () {
-      await PageObjects.visEditor.clickOptionsTab();
-      await PageObjects.visEditor.clickEnableCustomRanges();
-      await PageObjects.visEditor.clickAddRange();
-      await PageObjects.visEditor.clickAddRange();
-      await PageObjects.visEditor.clickAddRange();
-      await PageObjects.visEditor.clickAddRange();
-      await PageObjects.visEditor.clickAddRange();
-      await PageObjects.visEditor.clickAddRange();
-      await PageObjects.visEditor.clickAddRange();
+      await visEditor.clickOptionsTab();
+      await visEditor.clickEnableCustomRanges();
+      await visEditor.clickAddRange();
+      await visEditor.clickAddRange();
+      await visEditor.clickAddRange();
+      await visEditor.clickAddRange();
+      await visEditor.clickAddRange();
+      await visEditor.clickAddRange();
+      await visEditor.clickAddRange();
 
       log.debug('customize 2 last ranges');
-      await PageObjects.visEditor.setCustomRangeByIndex(6, '650', '720');
-      await PageObjects.visEditor.setCustomRangeByIndex(7, '800', '905');
-      await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.setCustomRangeByIndex(6, '650', '720');
+      await visEditor.setCustomRangeByIndex(7, '800', '905');
+      await visEditor.clickGo(isNewChartsLibraryEnabled);
 
-      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const legends = await PageObjects.visChart.getLegendEntries();
+      await visChart.waitForVisualizationRenderingStabilized();
+      const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
       if (isNewChartsLibraryEnabled) {
         expectedLegends = [
