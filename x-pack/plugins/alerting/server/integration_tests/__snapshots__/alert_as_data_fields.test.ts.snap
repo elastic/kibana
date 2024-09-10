@@ -837,6 +837,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -1929,6 +1934,11 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
+    },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.last_detected": Object {
       "array": false,
@@ -3023,6 +3033,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -4116,6 +4131,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -5208,6 +5228,11 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
+    },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.last_detected": Object {
       "array": false,
@@ -6308,6 +6333,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -7401,6 +7431,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
+    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -8493,6 +8528,11 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
+    },
+    "kibana.alert.intended_timestamp": Object {
+      "array": false,
+      "required": false,
+      "type": "date",
     },
     "kibana.alert.last_detected": Object {
       "array": false,

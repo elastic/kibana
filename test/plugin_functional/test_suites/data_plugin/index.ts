@@ -15,15 +15,15 @@ export default function ({
   loadTestFile,
 }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+  const { common, settings } = getPageObjects(['common', 'settings']);
 
   describe('data plugin', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );
-      await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('shakespeare', '');
+      await common.navigateToApp('settings');
+      await settings.createIndexPattern('shakespeare', '');
     });
 
     loadTestFile(require.resolve('./search'));
