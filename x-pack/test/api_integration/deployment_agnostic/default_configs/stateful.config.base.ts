@@ -102,6 +102,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          // explicitly enable mock-idp-plugin for UI role selector
+          '--mockIdpPlugin.enabled=true',
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,
