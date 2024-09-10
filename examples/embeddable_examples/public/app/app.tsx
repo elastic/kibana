@@ -20,6 +20,7 @@ import { RenderExamples } from './render_examples';
 import { PresentationContainerExample } from './presentation_container_example/components/presentation_container_example';
 import { StartDeps } from '../plugin';
 import { Sidebar } from './sidebar';
+import { StateManagementExample } from './state_management_example/components/state_management_example';
 
 const App = ({
   core,
@@ -46,6 +47,11 @@ const App = ({
         id: 'renderEmbeddable',
         title: 'Render embeddables in your application',
         component: <RenderExamples />,
+      },
+      {
+        id: 'stateManagement',
+        title: 'Embeddable state management',
+        component: <StateManagementExample uiActions={deps.uiActions} />
       },
       {
         id: 'presentationContainer',
