@@ -85,7 +85,7 @@ describe('Assignees', () => {
       expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
+    await userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
 
     expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
   });
@@ -104,7 +104,7 @@ describe('Assignees', () => {
       expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
+    await userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
@@ -132,7 +132,7 @@ describe('Assignees', () => {
 
     expect(await screen.findByText(`${currentUserProfile.user.full_name}`)).toBeInTheDocument();
 
-    userEvent.click(await screen.findByText(`${currentUserProfile.user.full_name}`));
+    await userEvent.click(await screen.findByText(`${currentUserProfile.user.full_name}`));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
@@ -174,12 +174,12 @@ describe('Assignees', () => {
       expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(await screen.findByTestId('comboBoxSearchInput'));
+    await userEvent.click(await screen.findByTestId('comboBoxSearchInput'));
 
     expect(await screen.findByText('Turtle')).toBeInTheDocument();
     expect(await screen.findByText('turtle')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Turtle'), undefined, { skipPointerEventsCheck: true });
+    await userEvent.click(screen.getByText('Turtle'), { pointerEventsCheck: 0 });
 
     // ensure that the similar user is still available for selection
     expect(await screen.findByText('turtle')).toBeInTheDocument();
