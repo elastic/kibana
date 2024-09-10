@@ -348,11 +348,11 @@ export class CoreKibanaRequest<
 
     const security = this.getSecurity(request);
 
-    if (security?.authc) {
-      return security.authc.enabled ?? true;
+    if (security) {
+      return security.authc?.enabled ?? true;
     }
 
-    const authOptions = security?.authc?.enabled ?? request.route.settings.auth;
+    const authOptions = request.route.settings.auth;
     if (typeof authOptions === 'object') {
       // 'try' is used in the legacy platform
       if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
@@ -368,7 +368,7 @@ export class CoreKibanaRequest<
       return true;
     }
 
-    // According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
+    // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
     if (authOptions === false) {
       return false;
     }

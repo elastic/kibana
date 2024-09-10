@@ -13,6 +13,7 @@ import type {
   RequestHandler,
   RouteConfig,
   VersionedRouteValidation,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import { Router } from '../router';
 import { createFooValidation } from '../router.test.util';
@@ -428,5 +429,65 @@ describe('Versioned route', () => {
     expect(doNotBypassResponse1.payload).toMatch('Please specify a version');
     expect(doNotBypassResponse2.status).toBe(400);
     expect(doNotBypassResponse2.payload).toMatch('Please specify a version');
+  });
+
+  it('can register multiple handlers with different security configurations', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const securityConfig1: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+    const securityConfig2: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar'],
+      },
+      authc: {
+        enabled: true,
+      },
+    };
+    const securityConfig3: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar', 'baz'],
+      },
+    };
+    versionedRouter
+      .get({ path: '/test/{id}', access: 'internal' })
+      .addVersion(
+        {
+          version: '1',
+          validate: false,
+          security: securityConfig1,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: false,
+          security: securityConfig2,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '3',
+          validate: false,
+          security: securityConfig3,
+        },
+        handlerFn
+      );
+    const routes = versionedRouter.getRoutes();
+    expect(routes).toHaveLength(1);
+    const [route] = routes;
+    expect(route.handlers).toHaveLength(3);
+
+    expect(route.handlers[0].options.security).toStrictEqual(securityConfig1);
+    expect(route.handlers[1].options.security).toStrictEqual(securityConfig2);
+    expect(route.handlers[2].options.security).toStrictEqual(securityConfig3);
+    expect(router.get).toHaveBeenCalledTimes(1);
   });
 });

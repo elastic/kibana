@@ -353,7 +353,7 @@ describe('CoreKibanaRequest', () => {
     });
 
     describe('route.options.security property', () => {
-      it('takes precedence over auth property: undefined', () => {
+      it('takes precedence over auth property', () => {
         const request = hapiMocks.createRequest({
           route: {
             settings: {
@@ -370,7 +370,22 @@ describe('CoreKibanaRequest', () => {
         expect(kibanaRequest.route.options.authRequired).toBe(true);
       });
 
-      it('handles required auth: undefined', () => {
+      it('handles required authc: undefined', () => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                security: { authc: undefined },
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.authRequired).toBe(true);
+      });
+
+      it('handles required authc: { enabled: undefined }', () => {
         const request = hapiMocks.createRequest({
           route: {
             settings: {
@@ -385,7 +400,7 @@ describe('CoreKibanaRequest', () => {
         expect(kibanaRequest.route.options.authRequired).toBe(true);
       });
 
-      it('handles required auth: true', () => {
+      it('handles required authc: { enabled: true }', () => {
         const request = hapiMocks.createRequest({
           route: {
             settings: {
@@ -399,7 +414,7 @@ describe('CoreKibanaRequest', () => {
 
         expect(kibanaRequest.route.options.authRequired).toBe(true);
       });
-      it('handles required auth: false', () => {
+      it('handles required authc: { enabled: false }', () => {
         const request = hapiMocks.createRequest({
           route: {
             settings: {
@@ -414,7 +429,7 @@ describe('CoreKibanaRequest', () => {
         expect(kibanaRequest.route.options.authRequired).toBe(false);
       });
 
-      it('handles required auth: optional', () => {
+      it(`handles required authc: { enabled: 'optional' }`, () => {
         const request = hapiMocks.createRequest({
           route: {
             settings: {
