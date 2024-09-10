@@ -8,8 +8,9 @@
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchUpsertMonitorAction } from '../state/monitor_list/actions';
 import { ConfigKey } from '../components/monitors_page/overview/types';
-import { fetchUpsertMonitorAction, selectMonitorUpsertStatuses } from '../state';
+import { selectMonitorUpsertStatuses } from '../state';
 
 export interface EnableStateMonitorLabels {
   failureLabel: string;

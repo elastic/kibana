@@ -9,13 +9,13 @@ import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
-import { createEsParams, SyntheticsEsClient } from '../../lib';
 import {
-  OverviewPendingStatusMetaData,
-  OverviewPing,
-  OverviewStatus,
-  OverviewStatusMetaData,
-} from '../../../common/runtime_types';
+  AlertOverviewStatus,
+  AlertPendingStatusMetaData,
+  AlertStatusMetaData,
+} from '../../../common/runtime_types/alert_rules/common';
+import { createEsParams, SyntheticsEsClient } from '../../lib';
+import { OverviewPing } from '../../../common/runtime_types';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
@@ -40,25 +40,15 @@ export async function queryMonitorStatusForAlert(
   monitorQueryIds: string[],
   monitorLocationsMap: Record<string, string[]>,
   monitorQueryIdToConfigIdMap: Record<string, string>
-): Promise<
-  Omit<
-    OverviewStatus,
-    | 'disabledCount'
-    | 'allMonitorsCount'
-    | 'disabledMonitorsCount'
-    | 'projectMonitorsCount'
-    | 'disabledMonitorQueryIds'
-    | 'allIds'
-  >
-> {
+): Promise<AlertOverviewStatus> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   let up = 0;
   let down = 0;
-  const upConfigs: Record<string, OverviewStatusMetaData> = {};
-  const downConfigs: Record<string, OverviewStatusMetaData> = {};
+  const upConfigs: Record<string, AlertStatusMetaData> = {};
+  const downConfigs: Record<string, AlertStatusMetaData> = {};
   const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
-  const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
+  const pendingConfigs: Record<string, AlertPendingStatusMetaData> = {};
 
   await pMap(
     times(pageCount),
@@ -214,5 +204,6 @@ export async function queryMonitorStatusForAlert(
     downConfigs,
     pendingConfigs,
     enabledMonitorQueryIds: monitorQueryIds,
+    staleDownConfigs: {},
   };
 }

@@ -30,6 +30,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
@@ -37,12 +38,11 @@ import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enab
 import { ActionsPopover } from './actions_popover';
 import {
   selectMonitorUpsertStatus,
-  selectOverviewState,
   selectServiceLocationsState,
   setFlyoutConfig,
 } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
+import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
@@ -218,14 +218,17 @@ export function LoadingState() {
 
 export function MonitorDetailFlyout(props: Props) {
   const { id, configId, onLocationChange, locationId } = props;
-  const {
-    data: { monitors },
-  } = useSelector(selectOverviewState);
 
-  const monitor: MonitorOverviewItem | undefined = useMemo(() => {
-    const overviewItem = monitors.filter(({ id: overviewItemId }) => overviewItemId === id)[0];
+  const { status: overviewStatus } = useOverviewStatus({ scopeStatusByLocation: true });
+
+  const monitor: OverviewStatusMetaData | undefined = useMemo(() => {
+    const allConfigs = Object.values({
+      ...(overviewStatus?.upConfigs ?? {}),
+      ...(overviewStatus?.downConfigs ?? {}),
+    });
+    const overviewItem = allConfigs.find((ov) => ov.configId === configId);
     if (overviewItem) return overviewItem;
-  }, [id, monitors]);
+  }, [overviewStatus?.upConfigs, overviewStatus?.downConfigs, configId]);
 
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>

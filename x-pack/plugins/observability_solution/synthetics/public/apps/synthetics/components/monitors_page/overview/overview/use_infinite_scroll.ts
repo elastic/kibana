@@ -9,10 +9,11 @@ import useThrottle from 'react-use/lib/useThrottle';
 import { useEffect, useState, MutableRefObject } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { useSelector } from 'react-redux';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectOverviewState } from '../../../../state';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 
 export const useInfiniteScroll = ({
   intersectionRef,
@@ -27,11 +28,12 @@ export const useInfiniteScroll = ({
   const { statusFilter } = useGetUrlParams();
   const {
     pageState: { perPage, sortField },
-    data: { monitors },
   } = useSelector(selectOverviewState);
 
+  const { allConfigs } = useSelector(selectOverviewStatus);
+
   const currentMonitors = getCurrentMonitors({
-    monitors,
+    monitors: allConfigs,
     monitorsSortedByStatus,
     perPage,
     page,
@@ -49,8 +51,8 @@ export const useInfiniteScroll = ({
   useThrottle(() => {
     if (
       hasIntersected &&
-      currentMonitors.length === page * perPage &&
-      currentMonitors.length !== monitors.length
+      currentMonitors?.length === page * perPage &&
+      currentMonitors?.length !== allConfigs?.length
     ) {
       setLoadNextPage(true);
     } else {
@@ -79,13 +81,13 @@ const getCurrentMonitors = ({
   sortField: MonitorListSortField;
   perPage: number;
   page: number;
-  monitors: MonitorOverviewItem[];
-  monitorsSortedByStatus: MonitorOverviewItem[];
+  monitors?: OverviewStatusMetaData[];
+  monitorsSortedByStatus: OverviewStatusMetaData[];
   statusFilter?: string;
 }) => {
   if (sortField === 'status' || statusFilter) {
     return monitorsSortedByStatus.slice(0, perPage * page);
   } else {
-    return monitors.slice(0, perPage * page);
+    return monitors?.slice(0, perPage * page);
   }
 };

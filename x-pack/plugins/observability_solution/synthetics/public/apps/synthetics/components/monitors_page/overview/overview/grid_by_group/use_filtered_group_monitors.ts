@@ -9,12 +9,12 @@ import { useSelector } from 'react-redux';
 import { selectServiceLocationsState } from '../../../../../state';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { getConfigStatusByLocation, useGetUrlParams } from '../../../../../hooks';
-import { MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const useFilteredGroupMonitors = ({
   groupMonitors,
 }: {
-  groupMonitors: MonitorOverviewItem[];
+  groupMonitors: OverviewStatusMetaData[];
 }) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
   const { statusFilter } = useGetUrlParams();
@@ -27,10 +27,9 @@ export const useFilteredGroupMonitors = ({
 
   return groupMonitors.filter((monitor) => {
     const locationLabel =
-      locations.find((location) => location.id === monitor.location.id)?.label ??
-      monitor.location.id;
+      locations.find((location) => location.id === monitor.locationId)?.label ?? monitor.locationId;
 
-    const status = getConfigStatusByLocation(overviewStatus, monitor.id, locationLabel);
+    const status = getConfigStatusByLocation(overviewStatus, monitor.configId, locationLabel);
     if (statusFilter === 'up' && status.status === 'up') {
       return true;
     } else if (statusFilter === 'down' && status.status === 'down') {

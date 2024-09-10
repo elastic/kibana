@@ -5,30 +5,12 @@
  * 2.0.
  */
 
-import { debounce, call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
+import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
+import { OverviewStatusStateReducer, selectOverviewStatus } from '../overview_status';
 import type { TrendTable } from '../../../../../common/types';
-import { fetchEffectFactory } from '../utils/fetch_effect';
-import { selectOverviewState, selectOverviewTrends } from './selectors';
-import {
-  fetchMonitorOverviewAction,
-  quietFetchOverviewAction,
-  refreshOverviewTrends,
-  trendStatsBatch,
-} from './actions';
-import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
-import { MonitorOverviewState } from '.';
-
-export function* fetchMonitorOverviewEffect() {
-  yield debounce(
-    200, // Only take the latest while ignoring any intermediate triggers
-    [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
-    fetchEffectFactory(
-      fetchMonitorOverview,
-      fetchMonitorOverviewAction.success,
-      fetchMonitorOverviewAction.fail
-    )
-  );
-}
+import { selectOverviewTrends } from './selectors';
+import { refreshOverviewTrends, trendStatsBatch } from './actions';
+import { fetchOverviewTrendStats as trendsApi } from './api';
 
 export const TRENDS_CHUNK_SIZE = 50;
 
@@ -55,7 +37,9 @@ export function* fetchOverviewTrendStats() {
 
 export function* refreshTrends(): Generator<unknown, void, any> {
   const existingTrends: TrendTable = yield select(selectOverviewTrends);
-  const overviewState: MonitorOverviewState = yield select(selectOverviewState);
+  const { allConfigs }: OverviewStatusStateReducer = yield select(selectOverviewStatus);
+
+  const monitorConfigs = Object.values(allConfigs ?? {});
 
   let acc = {};
   const keys = Object.keys(existingTrends);
@@ -65,16 +49,13 @@ export function* refreshTrends(): Generator<unknown, void, any> {
       .filter(
         (key: string) =>
           existingTrends[key] !== null &&
-          overviewState.data.monitors.some(
-            ({ configId }) => configId === existingTrends[key]!.configId
-          )
+          monitorConfigs.some(({ configId }) => configId === existingTrends[key]!.configId)
       )
       .map((key: string) => ({
         configId: existingTrends[key]!.configId,
         locationId: existingTrends[key]!.locationId,
-        schedule: overviewState.data.monitors.find(
-          ({ configId }) => configId === existingTrends[key]!.configId
-        )!.schedule,
+        schedule: monitorConfigs.find(({ configId }) => configId === existingTrends[key]!.configId)!
+          .schedule,
       }));
     if (chunk.length) {
       const res = yield call(trendsApi, chunk);

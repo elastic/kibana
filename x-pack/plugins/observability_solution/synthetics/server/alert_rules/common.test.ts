@@ -6,8 +6,11 @@
  */
 import { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
-import { StaleDownConfig } from './status_rule/status_rule_executor';
+import {
+  AlertOverviewStatus,
+  StaleDownConfig,
+  SyntheticsCommonState,
+} from '../../common/runtime_types/alert_rules/common';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -193,7 +196,7 @@ describe('setRecoveredAlertsContext', () => {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
 
-  const upConfigs = {
+  const upConfigs: AlertOverviewStatus['upConfigs'] = {
     [idWithLocation]: {
       configId,
       monitorQueryId: 'stale-config',
@@ -237,7 +240,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: Record<string, StaleDownConfig> = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -311,7 +314,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: Record<string, StaleDownConfig> = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',
@@ -385,7 +388,7 @@ describe('setRecoveredAlertsContext', () => {
       setAlertData: jest.fn(),
       isTrackedAlert: jest.fn(),
     };
-    const staleDownConfigs = {
+    const staleDownConfigs: Record<string, StaleDownConfig> = {
       [idWithLocation]: {
         configId,
         monitorQueryId: 'stale-config',

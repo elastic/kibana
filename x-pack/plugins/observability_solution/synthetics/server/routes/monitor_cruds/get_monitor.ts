@@ -7,17 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  MonitorOverviewItem,
-} from '../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
 import { mapSavedObjectToMonitor } from './helper';
 import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
@@ -79,57 +73,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       throw getErr;
     }
-  },
-});
-
-export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'GET',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
-  validate: {
-    query: QuerySchema,
-  },
-  handler: async (routeContext): Promise<any> => {
-    const { request, savedObjectsClient } = routeContext;
-
-    const {
-      sortField,
-      sortOrder,
-      query,
-      locations: queriedLocations,
-    } = request.query as MonitorsQuery;
-
-    const { filtersStr } = await getMonitorFilters({
-      ...request.query,
-      context: routeContext,
-    });
-
-    const allMonitorConfigs = await getAllMonitors({
-      sortOrder,
-      filter: filtersStr,
-      soClient: savedObjectsClient,
-      sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
-      search: query ? `${query}*` : undefined,
-      searchFields: SEARCH_FIELDS,
-    });
-
-    const allMonitorIds: string[] = [];
-    let total = 0;
-    const allMonitors: MonitorOverviewItem[] = [];
-
-    for (const { attributes } of allMonitorConfigs) {
-      const configId = attributes[ConfigKey.CONFIG_ID];
-      allMonitorIds.push(configId);
-
-      const monitorConfigsPerLocation = getOverviewConfigsPerLocation(attributes, queriedLocations);
-      allMonitors.push(...monitorConfigsPerLocation);
-      total += monitorConfigsPerLocation.length;
-    }
-
-    return {
-      monitors: allMonitors,
-      total,
-      allMonitorIds,
-    };
   },
 });
 

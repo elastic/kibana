@@ -5,113 +5,50 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
-import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
 import { useGetUrlParams } from './use_url_params';
 
-export function useMonitorsSortedByStatus(): {
-  monitorsSortedByStatus: MonitorOverviewItem[];
-  downMonitors: Record<string, string[]> | null;
-} {
+export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
   const { statusFilter } = useGetUrlParams();
-  const { status } = useSelector(selectOverviewStatus);
+  const { status, disabledConfigs } = useSelector(selectOverviewStatus);
 
   const {
     pageState: { sortOrder },
-    data: { monitors },
   } = useSelector(selectOverviewState);
 
-  const downMonitors = useRef<Record<string, string[]> | null>(null);
-
-  const monitorsSortedByStatus = useMemo(() => {
+  return useMemo(() => {
     if (!status) {
-      return {
-        down: [],
-        up: [],
-        disabled: [],
-        pending: [],
-      };
+      return [];
     }
 
-    const { downConfigs, pendingConfigs } = status;
-    const downMonitorMap: Record<string, string[]> = {};
-    Object.values(downConfigs).forEach(({ locationId, configId }) => {
-      if (downMonitorMap[configId]) {
-        downMonitorMap[configId].push(locationId);
-      } else {
-        downMonitorMap[configId] = [locationId];
-      }
-    });
+    const { downConfigs, pendingConfigs, upConfigs } = status;
 
-    const orderedDownMonitors: MonitorOverviewItem[] = [];
-    const orderedUpMonitors: MonitorOverviewItem[] = [];
-    const orderedDisabledMonitors: MonitorOverviewItem[] = [];
-    const orderedPendingMonitors: MonitorOverviewItem[] = [];
-
-    monitors.forEach((monitor) => {
-      if (!monitor.isEnabled) {
-        orderedDisabledMonitors.push(monitor);
-      } else if (
-        monitor.configId in downMonitorMap &&
-        downMonitorMap[monitor.configId].includes(monitor.location.id)
-      ) {
-        orderedDownMonitors.push(monitor);
-      } else if (pendingConfigs?.[`${monitor.configId}-${monitor.location.id}`]) {
-        orderedPendingMonitors.push(monitor);
-      } else {
-        orderedUpMonitors.push(monitor);
-      }
-    });
-    downMonitors.current = downMonitorMap;
-
-    return {
-      down: orderedDownMonitors,
-      up: orderedUpMonitors,
-      disabled: orderedDisabledMonitors,
-      pending: orderedPendingMonitors,
-    };
-  }, [monitors, downMonitors, status]);
-
-  return useMemo(() => {
     switch (statusFilter) {
       case 'down':
-        return {
-          monitorsSortedByStatus: monitorsSortedByStatus.down,
-          downMonitors: downMonitors.current,
-        };
+        return Object.values(downConfigs) as OverviewStatusMetaData[];
       case 'up':
-        return {
-          monitorsSortedByStatus: monitorsSortedByStatus.up,
-          downMonitors: downMonitors.current,
-        };
+        return Object.values(upConfigs) as OverviewStatusMetaData[];
       case 'disabled':
-        return {
-          monitorsSortedByStatus: monitorsSortedByStatus.disabled,
-          downMonitors: downMonitors.current,
-        };
+        return Object.values(disabledConfigs ?? {}) as OverviewStatusMetaData[];
       case 'pending':
-        return {
-          monitorsSortedByStatus: monitorsSortedByStatus.pending,
-          downMonitors: downMonitors.current,
-        };
+        return Object.values(pendingConfigs) as OverviewStatusMetaData[];
       default:
         break;
     }
+
     const upAndDownMonitors =
       sortOrder === 'asc'
-        ? [...monitorsSortedByStatus.down, ...monitorsSortedByStatus.up]
-        : [...monitorsSortedByStatus.up, ...monitorsSortedByStatus.down];
+        ? [...Object.values(downConfigs), ...Object.values(upConfigs)]
+        : [...Object.values(upConfigs), ...Object.values(downConfigs)];
 
-    return {
-      monitorsSortedByStatus: [
-        ...upAndDownMonitors,
-        ...monitorsSortedByStatus.disabled,
-        ...monitorsSortedByStatus.pending,
-      ],
-      downMonitors: downMonitors.current,
-    };
-  }, [downMonitors, monitorsSortedByStatus, sortOrder, statusFilter]);
+    return [
+      ...upAndDownMonitors,
+      ...Object.values(disabledConfigs ?? {}),
+      ...Object.values(pendingConfigs),
+    ] as OverviewStatusMetaData[];
+  }, [disabledConfigs, sortOrder, status, statusFilter]);
 }

@@ -11,9 +11,9 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
-export const MetricItemBody = ({ monitor }: { monitor: MonitorOverviewItem }) => {
+export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const tags = monitor.tags;
   const history = useHistory();
 
@@ -23,13 +23,11 @@ export const MetricItemBody = ({ monitor }: { monitor: MonitorOverviewItem }) =>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <MonitorTypeBadge
-            monitorType={monitor[ConfigKey.MONITOR_TYPE]}
-            ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
+            monitorType={monitor.type}
+            ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
             onClick={() => {
               history.push({
-                search: `monitorTypes=${encodeURIComponent(
-                  JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
-                )}`,
+                search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
               });
             }}
           />
