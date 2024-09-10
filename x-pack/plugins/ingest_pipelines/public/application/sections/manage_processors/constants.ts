@@ -10,29 +10,37 @@ import type { GeoipDatabase } from '../../../../common/types';
 
 export const ADD_DATABASE_MODAL_TITLE_ID = 'manageProcessorsAddGeoipDatabase';
 export const ADD_DATABASE_MODAL_FORM_ID = 'manageProcessorsAddGeoipDatabaseForm';
-export const DATABASE_NAME_OPTIONS = [
+export const DATABASE_TYPE_OPTIONS = [
+  {
+    value: 'maxmind',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.maxmindDatabaseType', {
+      defaultMessage: 'MaxMind',
+    }),
+  },
+  {
+    value: 'ipinfo',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.ipinfoDatabaseType', {
+      defaultMessage: 'IPInfo',
+    }),
+  },
+];
+export const GEOIP_NAME_OPTIONS = [
   {
     value: 'GeoIP2-Anonymous-IP',
-    text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
-      {
-        defaultMessage: 'GeoIP2 Anonymous IP',
-      }
-    ),
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.anonymousIPDatabaseName', {
+      defaultMessage: 'GeoIP2 Anonymous IP',
+    }),
   },
   {
     value: 'GeoIP2-City',
-    text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
-      {
-        defaultMessage: 'GeoIP2 City',
-      }
-    ),
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.cityDatabaseName', {
+      defaultMessage: 'GeoIP2 City',
+    }),
   },
   {
     value: 'GeoIP2-Connection-Type',
     text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
+      'xpack.ingestPipelines.manageProcessors.geoip.connectionTypeDatabaseName',
       {
         defaultMessage: 'GeoIP2 Connection Type',
       }
@@ -40,39 +48,53 @@ export const DATABASE_NAME_OPTIONS = [
   },
   {
     value: 'GeoIP2-Country',
-    text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
-      {
-        defaultMessage: 'GeoIP2 Country',
-      }
-    ),
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.countryDatabaseName', {
+      defaultMessage: 'GeoIP2 Country',
+    }),
   },
   {
     value: 'GeoIP2-Domain',
-    text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
-      {
-        defaultMessage: 'GeoIP2 Domain',
-      }
-    ),
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.domainDatabaseName', {
+      defaultMessage: 'GeoIP2 Domain',
+    }),
   },
   {
     value: 'GeoIP2-Enterprise',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.enterpriseDatabaseName', {
+      defaultMessage: 'GeoIP2 Enterprise',
+    }),
+  },
+  {
+    value: 'GeoIP2-ISP',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.ispDatabaseName', {
+      defaultMessage: 'GeoIP2 ISP',
+    }),
+  },
+];
+export const IPINFO_NAME_OPTIONS = [
+  {
+    value: 'Privacy-Detection',
     text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
+      'xpack.ingestPipelines.manageProcessors.ipinfo.privacyDetectionDatabaseName',
       {
-        defaultMessage: 'GeoIP2 Enterprise',
+        defaultMessage: 'Privacy detection',
       }
     ),
   },
   {
-    value: 'GeoIP2-ISP',
+    value: 'IP-Geolocation',
     text: i18n.translate(
-      'xpack.ingestPipelines.manageProcessors.geoip.geoipAnonymousDatabaseName',
+      'xpack.ingestPipelines.manageProcessors.ipinfo.ipGeolocationDatabaseName',
       {
-        defaultMessage: 'GeoIP2 ISP',
+        defaultMessage: 'IP geolocation',
       }
     ),
+  },
+  {
+    value: 'ASN',
+    text: i18n.translate('xpack.ingestPipelines.manageProcessors.ipinfo.asnDatabaseName', {
+      defaultMessage: 'ASN',
+    }),
   },
 ];
 

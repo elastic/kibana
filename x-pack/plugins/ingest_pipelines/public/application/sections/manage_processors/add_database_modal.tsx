@@ -23,12 +23,15 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { GeoipDatabase } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import {
   ADD_DATABASE_MODAL_TITLE_ID,
   ADD_DATABASE_MODAL_FORM_ID,
-  DATABASE_NAME_OPTIONS,
+  DATABASE_TYPE_OPTIONS,
+  GEOIP_NAME_OPTIONS,
+  IPINFO_NAME_OPTIONS,
   getAddDatabaseSuccessMessage,
   addDatabaseErrorTitle,
 } from './constants';
@@ -42,9 +45,10 @@ export const AddDatabaseModal = ({
   reloadDatabases: () => void;
   databases: GeoipDatabase[];
 }) => {
+  const [databaseType, setDatabaseType] = useState<string | undefined>(undefined);
   const [maxmind, setMaxmind] = useState('');
   const [databaseName, setDatabaseName] = useState('');
-  const [nameExistsError, setDatabaseExistsError] = useState(false);
+  const [nameExistsError, setNameExistsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const existingDatabaseNames = useMemo(
@@ -54,13 +58,23 @@ export const AddDatabaseModal = ({
   const { services } = useKibana();
   const onDatabaseNameChange = (value: string) => {
     setDatabaseName(value);
-    setDatabaseExistsError(existingDatabaseNames.includes(value));
+    setNameExistsError(existingDatabaseNames.includes(value));
   };
-  const isValid = maxmind && databaseName && !nameExistsError;
-
+  const isFormValid = () => {
+    if (!databaseType || nameExistsError) {
+      return false;
+    }
+    if (databaseType === 'maxmid') {
+      return maxmind && databaseName;
+    }
+    return databaseName;
+  };
+  const onDatabaseTypeChange = (value: string) => {
+    setDatabaseType(value);
+  };
   const onAddDatabase = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isValid) {
+    if (!isFormValid()) {
       return;
     }
     setIsLoading(true);
@@ -83,11 +97,15 @@ export const AddDatabaseModal = ({
       });
     }
   };
+
   return (
     <EuiModal
+      css={css`
+        width: 500px;
+      `}
       aria-labelledby={ADD_DATABASE_MODAL_TITLE_ID}
       onClose={closeModal}
-      initialFocus="[name=maxmind]"
+      initialFocus={'[data-test-subj="datanaseTypeSelect"]'}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={ADD_DATABASE_MODAL_TITLE_ID}>
@@ -99,36 +117,8 @@ export const AddDatabaseModal = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
-              defaultMessage="Add MaxMind license key to keystore"
-            />
-          }
-          iconType="iInCircle"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
-              defaultMessage="In order to grant access to your MaxMind account, you must add the license key to the keystore. {link}"
-              values={{
-                link: (
-                  <EuiLink href="#">
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.manageProcessors.geoip.licenseLearnMoreLink"
-                      defaultMessage="Learn more."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiCallOut>
-
-        <EuiSpacer />
-
         <EuiForm
+          fullWidth={true}
           id={ADD_DATABASE_MODAL_FORM_ID}
           component="form"
           onSubmit={(event) => onAddDatabase(event)}
@@ -136,35 +126,86 @@ export const AddDatabaseModal = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.maxMindInputLabel"
-                defaultMessage="MaxMind Account ID"
-              />
-            }
-          >
-            <EuiFieldText
-              name="maxmind"
-              value={maxmind}
-              onChange={(e) => setMaxmind(e.target.value)}
-              data-test-subj="addDatabaseMaxmind"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.databaseNameSelectLabel"
-                defaultMessage="Database name"
+                id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.databaseTypeSelectLabel"
+                defaultMessage="Type"
               />
             }
           >
             <EuiSelect
-              options={DATABASE_NAME_OPTIONS}
+              options={DATABASE_TYPE_OPTIONS}
               hasNoInitialSelection={true}
-              value={databaseName}
-              onChange={(e) => onDatabaseNameChange(e.target.value)}
-              data-test-subj="addDatabaseName"
+              value={databaseType}
+              onChange={(e) => onDatabaseTypeChange(e.target.value)}
+              data-test-subj="datanaseTypeSelect"
             />
           </EuiFormRow>
+          {databaseType && (
+            <>
+              <EuiSpacer />
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
+                    defaultMessage="Add MaxMind license key to keystore"
+                  />
+                }
+                iconType="iInCircle"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
+                    defaultMessage="In order to grant access to your MaxMind account, you must add the license key to the keystore. {link}"
+                    values={{
+                      link: (
+                        <EuiLink href="#">
+                          <FormattedMessage
+                            id="xpack.ingestPipelines.manageProcessors.geoip.licenseLearnMoreLink"
+                            defaultMessage="Learn more."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+
+          {databaseType === 'maxmind' && (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.maxMindInputLabel"
+                  defaultMessage="MaxMind Account ID"
+                />
+              }
+            >
+              <EuiFieldText
+                value={maxmind}
+                onChange={(e) => setMaxmind(e.target.value)}
+                data-test-subj="maxmindField"
+              />
+            </EuiFormRow>
+          )}
+          {databaseType && (
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.databaseNameSelectLabel"
+                  defaultMessage="Database name"
+                />
+              }
+            >
+              <EuiSelect
+                options={databaseType === 'maxmind' ? GEOIP_NAME_OPTIONS : IPINFO_NAME_OPTIONS}
+                hasNoInitialSelection={true}
+                value={databaseName}
+                onChange={(e) => onDatabaseNameChange(e.target.value)}
+                data-test-subj="databaseNameSelect"
+              />
+            </EuiFormRow>
+          )}
         </EuiForm>
 
         {nameExistsError && (
@@ -206,7 +247,7 @@ export const AddDatabaseModal = ({
           fill
           type="submit"
           form={ADD_DATABASE_MODAL_FORM_ID}
-          disabled={isLoading || !isValid}
+          disabled={isLoading || !isFormValid()}
           data-test-subj="addGeoipDatabaseSubmit"
         >
           <FormattedMessage
