@@ -19,7 +19,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-http-browser",
     "@kbn/ace",
-    "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/core-http-router-server-internal",
     "@kbn/web-worker-stub",

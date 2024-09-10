@@ -13,7 +13,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { formatRequestBodyDoc } from '../../../lib/utils';
 import { DevToolsSettings } from '../../../services';
-import { useResizeCheckerUtils } from '../editor/monaco/hooks';
+import { useResizeCheckerUtils } from '../editor/hooks';
 
 export const HistoryViewer = ({
   settings,

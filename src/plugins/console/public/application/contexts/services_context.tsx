@@ -33,7 +33,6 @@ export interface ContextValue extends ConsoleStartServices {
   docLinkVersion: string;
   docLinks: DocLinksStart['links'];
   config: {
-    isMonacoEnabled: boolean;
     isDevMode: boolean;
   };
 }

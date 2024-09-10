@@ -316,16 +316,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
           {currentView === SHELL_TAB_ID && (
             <Editor
               loading={!done}
-              setEditorInstance={() => {}}
               containerWidth={containerDimensions.width}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
             />
           )}
           {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
-          {currentView === CONFIG_TAB_ID && (
-            <Config editorInstance={null} containerWidth={containerDimensions.width} />
-          )}
+          {currentView === CONFIG_TAB_ID && <Config containerWidth={containerDimensions.width} />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner

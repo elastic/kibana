@@ -11,14 +11,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 
 import { Settings } from './settings';
 import { Variables } from './variables';
-import type { SenseEditor } from '../../models';
 
 export interface Props {
-  editorInstance: SenseEditor | null;
   containerWidth: number;
 }
 
-export function Config({ editorInstance, containerWidth }: Props) {
+export function Config({ containerWidth }: Props) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -37,7 +35,7 @@ export function Config({ editorInstance, containerWidth }: Props) {
         responsive={false}
       >
         <EuiFlexItem>
-          <Settings editorInstance={editorInstance} />
+          <Settings />
         </EuiFlexItem>
         <EuiFlexItem>
           <Variables />

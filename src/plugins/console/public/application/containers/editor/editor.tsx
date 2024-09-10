@@ -27,7 +27,6 @@ import {
   OutputPanelEmptyState,
   NetworkRequestStatusBar,
 } from '../../components';
-import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import {
   useEditorReadContext,
@@ -36,8 +35,8 @@ import {
   useRequestActionContext,
   useEditorActionContext,
 } from '../../contexts';
-import type { SenseEditor } from '../../models';
-import { MonacoEditor, MonacoEditorOutput } from './monaco';
+import { MonacoEditor } from './monaco_editor';
+import { MonacoEditorOutput } from './monaco_editor_output';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const INITIAL_PANEL_SIZE = 50;
@@ -46,24 +45,16 @@ const DEBOUNCE_DELAY = 500;
 
 interface Props {
   loading: boolean;
-  setEditorInstance: (instance: SenseEditor) => void;
   containerWidth: number;
   inputEditorValue: string;
   setInputEditorValue: (value: string) => void;
 }
 
 export const Editor = memo(
-  ({
-    loading,
-    setEditorInstance,
-    containerWidth,
-    inputEditorValue,
-    setInputEditorValue,
-  }: Props) => {
+  ({ loading, containerWidth, inputEditorValue, setInputEditorValue }: Props) => {
     const { euiTheme } = useEuiTheme();
     const {
       services: { storage },
-      config: { isMonacoEnabled } = {},
     } = useServicesContext();
 
     const { currentTextObject } = useEditorReadContext();
@@ -162,16 +153,11 @@ export const Editor = memo(
                   >
                     {loading ? (
                       <EditorContentSpinner />
-                    ) : isMonacoEnabled ? (
+                    ) : (
                       <MonacoEditor
                         localStorageValue={currentTextObject.text}
                         value={inputEditorValue}
                         setValue={setInputEditorValue}
-                      />
-                    ) : (
-                      <EditorUI
-                        initialTextValue={currentTextObject.text}
-                        setEditorInstance={setEditorInstance}
                       />
                     )}
                   </EuiSplitPanel.Inner>
@@ -224,11 +210,7 @@ export const Editor = memo(
                     className="consoleEditorPanel"
                   >
                     {data ? (
-                      isMonacoEnabled ? (
-                        <MonacoEditorOutput />
-                      ) : (
-                        <EditorOutput />
-                      )
+                      <MonacoEditorOutput />
                     ) : isLoading ? (
                       <EditorContentSpinner />
                     ) : (
