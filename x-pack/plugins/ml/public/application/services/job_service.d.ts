@@ -9,7 +9,7 @@ import type { TimeRange } from '@kbn/data-plugin/common/query/timefilter/types';
 import type { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
 import type { Calendar } from '../../../common/types/calendars';
 import type { ToastNotificationService } from './toast_notification_service';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 import type { JobCreatorType } from '../jobs/new_job/common/job_creator';
 
 export interface ExistingJobsAndGroups {
@@ -62,7 +62,7 @@ export declare interface MlJobService {
 
 export const mlJobServiceFactory: (
   toastNotificationService: ToastNotificationService,
-  mlApiServices: MlApiServices
+  mlApi: MlApi
 ) => MlJobService;
 
 export const useMlJobService: () => MlJobService;
