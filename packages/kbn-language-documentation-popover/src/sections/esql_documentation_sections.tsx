@@ -17,10 +17,8 @@ const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
 
 export const initialSection = (
   <Markdown
-    markdownContent={i18n.translate(
-      'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
-      {
-        defaultMessage: `
+    markdownContent={i18n.translate('languageDocumentationPopover.documentationESQL.markdown', {
+      defaultMessage: `
 An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
 A source command can be followed by one or more **processing commands**. Processing commands can change the output table of the previous command by adding, removing, and changing rows and columns.
@@ -33,8 +31,7 @@ source-command
 
 The result of a query is the table produced by the final processing command.                                  
                                       `,
-      }
-    )}
+    })}
   />
 );
 
@@ -50,17 +47,14 @@ export const sourceCommands = {
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from',
-        {
-          defaultMessage: 'FROM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.from', {
+        defaultMessage: 'FROM',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from.markdown',
+            'languageDocumentationPopover.documentationESQL.from.markdown',
             {
               defaultMessage: `### FROM
 The \`FROM\` source command returns a table with up to 10,000 documents from a data stream, index, or alias. Each row in the resulting table represents a document. Each column corresponds to a field, and can be accessed by the name of that field.
@@ -118,16 +112,13 @@ FROM employees METADATA _index, _id
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row',
-        {
-          defaultMessage: 'ROW',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.row', {
+        defaultMessage: 'ROW',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row.markdown',
+            'languageDocumentationPopover.documentationESQL.row.markdown',
             {
               defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
@@ -156,16 +147,13 @@ ROW a = ROUND(1.23, 0)
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show',
-        {
-          defaultMessage: 'SHOW',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.show', {
+        defaultMessage: 'SHOW',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show.markdown',
+            'languageDocumentationPopover.documentationESQL.show.markdown',
             {
               defaultMessage: `### SHOW
 The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
@@ -196,17 +184,14 @@ export const processingCommands = {
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect',
-        {
-          defaultMessage: 'DISSECT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.dissect', {
+        defaultMessage: 'DISSECT',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect.markdown',
+            'languageDocumentationPopover.documentationESQL.dissect.markdown',
             {
               defaultMessage: `### DISSECT
 \`DISSECT\` enables you to extract structured data out of a string. \`DISSECT\` matches the string against a delimiter-based pattern, and extracts the specified keys as columns.
@@ -226,16 +211,13 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop',
-        {
-          defaultMessage: 'DROP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.drop', {
+        defaultMessage: 'DROP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop.markdown',
+            'languageDocumentationPopover.documentationESQL.drop.markdown',
             {
               defaultMessage: `### DROP
 Use \`DROP\` to remove columns from a table:
@@ -260,17 +242,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich',
-        {
-          defaultMessage: 'ENRICH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.enrich', {
+        defaultMessage: 'ENRICH',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich.markdown',
+            'languageDocumentationPopover.documentationESQL.enrich.markdown',
             {
               defaultMessage: `### ENRICH
 You can use \`ENRICH\` to add data from your existing indices to incoming records. It’s similar to [ingest enrich](https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest-enriching-data.html), but it works at query time.
@@ -316,16 +295,13 @@ In case of name collisions, the newly created fields will override the existing 
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval',
-        {
-          defaultMessage: 'EVAL',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.eval', {
+        defaultMessage: 'EVAL',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval.markdown',
+            'languageDocumentationPopover.documentationESQL.eval.markdown',
             {
               defaultMessage: `### EVAL
 \`EVAL\` enables you to add new columns:
@@ -355,17 +331,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok',
-        {
-          defaultMessage: 'GROK',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.grok', {
+        defaultMessage: 'GROK',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok.markdown',
+            'languageDocumentationPopover.documentationESQL.grok.markdown',
             {
               defaultMessage: `### GROK
 \`GROK\` enables you to extract structured data out of a string. \`GROK\` matches the string against patterns, based on regular expressions, and extracts the specified patterns as columns.
@@ -385,16 +358,13 @@ ROW a = "12 15.5 15.6 true"
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep',
-        {
-          defaultMessage: 'KEEP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.keep', {
+        defaultMessage: 'KEEP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep.markdown',
+            'languageDocumentationPopover.documentationESQL.keep.markdown',
             {
               defaultMessage: `### KEEP
 The \`KEEP\` command enables you to specify what columns are returned and the order in which they are returned.
@@ -428,16 +398,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit',
-        {
-          defaultMessage: 'LIMIT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.limit', {
+        defaultMessage: 'LIMIT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit.markdown',
+            'languageDocumentationPopover.documentationESQL.limit.markdown',
             {
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
@@ -455,16 +422,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvExpand',
-        {
-          defaultMessage: 'MV_EXPAND',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mvExpand', {
+        defaultMessage: 'MV_EXPAND',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvExpand.markdown',
+            'languageDocumentationPopover.documentationESQL.mvExpand.markdown',
             {
               defaultMessage: `### MV_EXPAND
 The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:              
@@ -481,16 +445,13 @@ ROW a=[1,2,3], b="b", j=["a","b"]
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename',
-        {
-          defaultMessage: 'RENAME',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.rename', {
+        defaultMessage: 'RENAME',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename.markdown',
+            'languageDocumentationPopover.documentationESQL.rename.markdown',
             {
               defaultMessage: `### RENAME
 Use \`RENAME\` to rename a column using the following syntax:
@@ -526,16 +487,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort',
-        {
-          defaultMessage: 'SORT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.sort', {
+        defaultMessage: 'SORT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort.markdown',
+            'languageDocumentationPopover.documentationESQL.sort.markdown',
             {
               defaultMessage: `### SORT
 Use the \`SORT\` command to sort rows on one or more fields:
@@ -579,16 +537,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.statsby',
-        {
-          defaultMessage: 'STATS ... BY',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.statsby', {
+        defaultMessage: 'STATS ... BY',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.statsby.markdown',
+            'languageDocumentationPopover.documentationESQL.statsby.markdown',
             {
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
@@ -669,16 +624,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where',
-        {
-          defaultMessage: 'WHERE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.where', {
+        defaultMessage: 'WHERE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where.markdown',
+            'languageDocumentationPopover.documentationESQL.where.markdown',
             {
               defaultMessage: `### WHERE
 Use \`WHERE\` to produce a table that contains all the rows from the input table for which the provided condition evaluates to \`true\`:
@@ -721,16 +673,13 @@ export const functions = {
   items: [
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.abs',
-        {
-          defaultMessage: 'ABS',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.abs', {
+        defaultMessage: 'ABS',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.abs.markdown',
+            'languageDocumentationPopover.documentationESQL.abs.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -754,16 +703,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acos',
-        {
-          defaultMessage: 'ACOS',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.acos', {
+        defaultMessage: 'ACOS',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acos.markdown',
+            'languageDocumentationPopover.documentationESQL.acos.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -787,16 +733,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asin',
-        {
-          defaultMessage: 'ASIN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.asin', {
+        defaultMessage: 'ASIN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asin.markdown',
+            'languageDocumentationPopover.documentationESQL.asin.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -821,16 +764,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan',
-        {
-          defaultMessage: 'ATAN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.atan', {
+        defaultMessage: 'ATAN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan.markdown',
+            'languageDocumentationPopover.documentationESQL.atan.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -855,16 +795,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2',
-        {
-          defaultMessage: 'ATAN2',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.atan2', {
+        defaultMessage: 'ATAN2',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2.markdown',
+            'languageDocumentationPopover.documentationESQL.atan2.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -889,16 +826,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.bucket',
-        {
-          defaultMessage: 'BUCKET',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.bucket', {
+        defaultMessage: 'BUCKET',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.bucket.markdown',
+            'languageDocumentationPopover.documentationESQL.bucket.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -925,16 +859,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.case',
-        {
-          defaultMessage: 'CASE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.case', {
+        defaultMessage: 'CASE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.case.markdown',
+            'languageDocumentationPopover.documentationESQL.case.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -967,16 +898,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cbrt',
-        {
-          defaultMessage: 'CBRT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.cbrt', {
+        defaultMessage: 'CBRT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cbrt.markdown',
+            'languageDocumentationPopover.documentationESQL.cbrt.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1001,16 +929,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceil',
-        {
-          defaultMessage: 'CEIL',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.ceil', {
+        defaultMessage: 'CEIL',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceil.markdown',
+            'languageDocumentationPopover.documentationESQL.ceil.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1035,16 +960,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidr_match',
-        {
-          defaultMessage: 'CIDR_MATCH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.cidr_match', {
+        defaultMessage: 'CIDR_MATCH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidr_match.markdown',
+            'languageDocumentationPopover.documentationESQL.cidr_match.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1069,16 +991,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesce',
-        {
-          defaultMessage: 'COALESCE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.coalesce', {
+        defaultMessage: 'COALESCE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesce.markdown',
+            'languageDocumentationPopover.documentationESQL.coalesce.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1102,16 +1021,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concat',
-        {
-          defaultMessage: 'CONCAT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.concat', {
+        defaultMessage: 'CONCAT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concat.markdown',
+            'languageDocumentationPopover.documentationESQL.concat.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1136,16 +1052,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cos',
-        {
-          defaultMessage: 'COS',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.cos', {
+        defaultMessage: 'COS',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cos.markdown',
+            'languageDocumentationPopover.documentationESQL.cos.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1169,16 +1082,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosh',
-        {
-          defaultMessage: 'COSH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.cosh', {
+        defaultMessage: 'COSH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosh.markdown',
+            'languageDocumentationPopover.documentationESQL.cosh.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1202,16 +1112,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_diff',
-        {
-          defaultMessage: 'DATE_DIFF',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.date_diff', {
+        defaultMessage: 'DATE_DIFF',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_diff.markdown',
+            'languageDocumentationPopover.documentationESQL.date_diff.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1236,16 +1143,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_extract',
-        {
-          defaultMessage: 'DATE_EXTRACT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.date_extract', {
+        defaultMessage: 'DATE_EXTRACT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_extract.markdown',
+            'languageDocumentationPopover.documentationESQL.date_extract.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1269,16 +1173,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_format',
-        {
-          defaultMessage: 'DATE_FORMAT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.date_format', {
+        defaultMessage: 'DATE_FORMAT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_format.markdown',
+            'languageDocumentationPopover.documentationESQL.date_format.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1303,16 +1204,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_parse',
-        {
-          defaultMessage: 'DATE_PARSE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.date_parse', {
+        defaultMessage: 'DATE_PARSE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_parse.markdown',
+            'languageDocumentationPopover.documentationESQL.date_parse.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1336,16 +1234,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_trunc',
-        {
-          defaultMessage: 'DATE_TRUNC',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.date_trunc', {
+        defaultMessage: 'DATE_TRUNC',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_trunc.markdown',
+            'languageDocumentationPopover.documentationESQL.date_trunc.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1370,13 +1265,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.e', {
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.e', {
         defaultMessage: 'E',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.e.markdown',
+            'languageDocumentationPopover.documentationESQL.e.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1399,16 +1294,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ends_with',
-        {
-          defaultMessage: 'ENDS_WITH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.ends_with', {
+        defaultMessage: 'ENDS_WITH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ends_with.markdown',
+            'languageDocumentationPopover.documentationESQL.ends_with.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1433,16 +1325,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.exp',
-        {
-          defaultMessage: 'EXP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.exp', {
+        defaultMessage: 'EXP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.exp.markdown',
+            'languageDocumentationPopover.documentationESQL.exp.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1466,16 +1355,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floor',
-        {
-          defaultMessage: 'FLOOR',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.floor', {
+        defaultMessage: 'FLOOR',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floor.markdown',
+            'languageDocumentationPopover.documentationESQL.floor.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1502,16 +1388,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from_base64',
-        {
-          defaultMessage: 'FROM_BASE64',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.from_base64', {
+        defaultMessage: 'FROM_BASE64',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from_base64.markdown',
+            'languageDocumentationPopover.documentationESQL.from_base64.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1535,16 +1418,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatest',
-        {
-          defaultMessage: 'GREATEST',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.greatest', {
+        defaultMessage: 'GREATEST',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatest.markdown',
+            'languageDocumentationPopover.documentationESQL.greatest.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1570,16 +1450,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ip_prefix',
-        {
-          defaultMessage: 'IP_PREFIX',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.ip_prefix', {
+        defaultMessage: 'IP_PREFIX',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ip_prefix.markdown',
+            'languageDocumentationPopover.documentationESQL.ip_prefix.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1603,16 +1480,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.least',
-        {
-          defaultMessage: 'LEAST',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.least', {
+        defaultMessage: 'LEAST',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.least.markdown',
+            'languageDocumentationPopover.documentationESQL.least.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1636,16 +1510,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.left',
-        {
-          defaultMessage: 'LEFT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.left', {
+        defaultMessage: 'LEFT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.left.markdown',
+            'languageDocumentationPopover.documentationESQL.left.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1672,16 +1543,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.length',
-        {
-          defaultMessage: 'LENGTH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.length', {
+        defaultMessage: 'LENGTH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.length.markdown',
+            'languageDocumentationPopover.documentationESQL.length.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1706,16 +1574,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.locate',
-        {
-          defaultMessage: 'LOCATE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.locate', {
+        defaultMessage: 'LOCATE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.locate.markdown',
+            'languageDocumentationPopover.documentationESQL.locate.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1741,16 +1606,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log',
-        {
-          defaultMessage: 'LOG',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.log', {
+        defaultMessage: 'LOG',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log.markdown',
+            'languageDocumentationPopover.documentationESQL.log.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1776,16 +1638,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10',
-        {
-          defaultMessage: 'LOG10',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.log10', {
+        defaultMessage: 'LOG10',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10.markdown',
+            'languageDocumentationPopover.documentationESQL.log10.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1811,16 +1670,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrim',
-        {
-          defaultMessage: 'LTRIM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.ltrim', {
+        defaultMessage: 'LTRIM',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrim.markdown',
+            'languageDocumentationPopover.documentationESQL.ltrim.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1847,16 +1703,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_append',
-        {
-          defaultMessage: 'MV_APPEND',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_append', {
+        defaultMessage: 'MV_APPEND',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_append.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_append.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1876,16 +1729,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_avg',
-        {
-          defaultMessage: 'MV_AVG',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_avg', {
+        defaultMessage: 'MV_AVG',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_avg.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_avg.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1909,16 +1759,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_concat',
-        {
-          defaultMessage: 'MV_CONCAT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_concat', {
+        defaultMessage: 'MV_CONCAT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_concat.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_concat.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1942,16 +1789,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_count',
-        {
-          defaultMessage: 'MV_COUNT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_count', {
+        defaultMessage: 'MV_COUNT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_count.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_count.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -1975,16 +1819,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_dedupe',
-        {
-          defaultMessage: 'MV_DEDUPE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_dedupe', {
+        defaultMessage: 'MV_DEDUPE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_dedupe.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_dedupe.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2009,16 +1850,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_first',
-        {
-          defaultMessage: 'MV_FIRST',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_first', {
+        defaultMessage: 'MV_FIRST',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_first.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_first.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2050,16 +1888,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_last',
-        {
-          defaultMessage: 'MV_LAST',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_last', {
+        defaultMessage: 'MV_LAST',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_last.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_last.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2091,16 +1926,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_max',
-        {
-          defaultMessage: 'MV_MAX',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_max', {
+        defaultMessage: 'MV_MAX',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_max.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_max.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2124,16 +1956,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_median',
-        {
-          defaultMessage: 'MV_MEDIAN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_median', {
+        defaultMessage: 'MV_MEDIAN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_median.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_median.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2157,16 +1986,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_min',
-        {
-          defaultMessage: 'MV_MIN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_min', {
+        defaultMessage: 'MV_MIN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_min.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_min.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2190,16 +2016,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_percentile',
-        {
-          defaultMessage: 'MV_PERCENTILE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_percentile', {
+        defaultMessage: 'MV_PERCENTILE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_percentile.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_percentile.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2224,7 +2047,7 @@ export const functions = {
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_pseries_weighted_sum',
+        'languageDocumentationPopover.documentationESQL.mv_pseries_weighted_sum',
         {
           defaultMessage: 'MV_PSERIES_WEIGHTED_SUM',
         }
@@ -2232,7 +2055,7 @@ export const functions = {
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_pseries_weighted_sum.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_pseries_weighted_sum.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2257,16 +2080,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_slice',
-        {
-          defaultMessage: 'MV_SLICE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_slice', {
+        defaultMessage: 'MV_SLICE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_slice.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_slice.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2290,16 +2110,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sort',
-        {
-          defaultMessage: 'MV_SORT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_sort', {
+        defaultMessage: 'MV_SORT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sort.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_sort.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2323,16 +2140,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sum',
-        {
-          defaultMessage: 'MV_SUM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_sum', {
+        defaultMessage: 'MV_SUM',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sum.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_sum.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2356,16 +2170,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_zip',
-        {
-          defaultMessage: 'MV_ZIP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.mv_zip', {
+        defaultMessage: 'MV_ZIP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_zip.markdown',
+            'languageDocumentationPopover.documentationESQL.mv_zip.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2390,16 +2201,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.now',
-        {
-          defaultMessage: 'NOW',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.now', {
+        defaultMessage: 'NOW',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.now.markdown',
+            'languageDocumentationPopover.documentationESQL.now.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2422,13 +2230,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pi', {
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.pi', {
         defaultMessage: 'PI',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pi.markdown',
+            'languageDocumentationPopover.documentationESQL.pi.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2451,16 +2259,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pow',
-        {
-          defaultMessage: 'POW',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.pow', {
+        defaultMessage: 'POW',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pow.markdown',
+            'languageDocumentationPopover.documentationESQL.pow.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2485,16 +2290,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.repeat',
-        {
-          defaultMessage: 'REPEAT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.repeat', {
+        defaultMessage: 'REPEAT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.repeat.markdown',
+            'languageDocumentationPopover.documentationESQL.repeat.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2518,16 +2320,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.replace',
-        {
-          defaultMessage: 'REPLACE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.replace', {
+        defaultMessage: 'REPLACE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.replace.markdown',
+            'languageDocumentationPopover.documentationESQL.replace.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2553,16 +2352,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.right',
-        {
-          defaultMessage: 'RIGHT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.right', {
+        defaultMessage: 'RIGHT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.right.markdown',
+            'languageDocumentationPopover.documentationESQL.right.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2589,16 +2385,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.round',
-        {
-          defaultMessage: 'ROUND',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.round', {
+        defaultMessage: 'ROUND',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.round.markdown',
+            'languageDocumentationPopover.documentationESQL.round.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2626,16 +2419,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrim',
-        {
-          defaultMessage: 'RTRIM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.rtrim', {
+        defaultMessage: 'RTRIM',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrim.markdown',
+            'languageDocumentationPopover.documentationESQL.rtrim.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2662,16 +2452,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signum',
-        {
-          defaultMessage: 'SIGNUM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.signum', {
+        defaultMessage: 'SIGNUM',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signum.markdown',
+            'languageDocumentationPopover.documentationESQL.signum.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2696,16 +2483,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sin',
-        {
-          defaultMessage: 'SIN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.sin', {
+        defaultMessage: 'SIN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sin.markdown',
+            'languageDocumentationPopover.documentationESQL.sin.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2729,16 +2513,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinh',
-        {
-          defaultMessage: 'SINH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.sinh', {
+        defaultMessage: 'SINH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinh.markdown',
+            'languageDocumentationPopover.documentationESQL.sinh.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2762,16 +2543,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.split',
-        {
-          defaultMessage: 'SPLIT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.split', {
+        defaultMessage: 'SPLIT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.split.markdown',
+            'languageDocumentationPopover.documentationESQL.split.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2795,16 +2573,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrt',
-        {
-          defaultMessage: 'SQRT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.sqrt', {
+        defaultMessage: 'SQRT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrt.markdown',
+            'languageDocumentationPopover.documentationESQL.sqrt.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2829,16 +2604,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_contains',
-        {
-          defaultMessage: 'ST_CONTAINS',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_contains', {
+        defaultMessage: 'ST_CONTAINS',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_contains.markdown',
+            'languageDocumentationPopover.documentationESQL.st_contains.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2864,16 +2636,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_disjoint',
-        {
-          defaultMessage: 'ST_DISJOINT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_disjoint', {
+        defaultMessage: 'ST_DISJOINT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_disjoint.markdown',
+            'languageDocumentationPopover.documentationESQL.st_disjoint.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2900,16 +2669,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_distance',
-        {
-          defaultMessage: 'ST_DISTANCE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_distance', {
+        defaultMessage: 'ST_DISTANCE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_distance.markdown',
+            'languageDocumentationPopover.documentationESQL.st_distance.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2937,16 +2703,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_intersects',
-        {
-          defaultMessage: 'ST_INTERSECTS',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_intersects', {
+        defaultMessage: 'ST_INTERSECTS',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_intersects.markdown',
+            'languageDocumentationPopover.documentationESQL.st_intersects.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -2974,16 +2737,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_within',
-        {
-          defaultMessage: 'ST_WITHIN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_within', {
+        defaultMessage: 'ST_WITHIN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_within.markdown',
+            'languageDocumentationPopover.documentationESQL.st_within.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3009,16 +2769,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_x',
-        {
-          defaultMessage: 'ST_X',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_x', {
+        defaultMessage: 'ST_X',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_x.markdown',
+            'languageDocumentationPopover.documentationESQL.st_x.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3043,16 +2800,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_y',
-        {
-          defaultMessage: 'ST_Y',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.st_y', {
+        defaultMessage: 'ST_Y',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_y.markdown',
+            'languageDocumentationPopover.documentationESQL.st_y.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3077,16 +2831,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.starts_with',
-        {
-          defaultMessage: 'STARTS_WITH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.starts_with', {
+        defaultMessage: 'STARTS_WITH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.starts_with.markdown',
+            'languageDocumentationPopover.documentationESQL.starts_with.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3111,16 +2862,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substring',
-        {
-          defaultMessage: 'SUBSTRING',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.substring', {
+        defaultMessage: 'SUBSTRING',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substring.markdown',
+            'languageDocumentationPopover.documentationESQL.substring.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3145,16 +2893,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tan',
-        {
-          defaultMessage: 'TAN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.tan', {
+        defaultMessage: 'TAN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tan.markdown',
+            'languageDocumentationPopover.documentationESQL.tan.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3178,16 +2923,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanh',
-        {
-          defaultMessage: 'TANH',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.tanh', {
+        defaultMessage: 'TANH',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanh.markdown',
+            'languageDocumentationPopover.documentationESQL.tanh.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3211,16 +2953,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tau',
-        {
-          defaultMessage: 'TAU',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.tau', {
+        defaultMessage: 'TAU',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tau.markdown',
+            'languageDocumentationPopover.documentationESQL.tau.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3243,16 +2982,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_base64',
-        {
-          defaultMessage: 'TO_BASE64',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_base64', {
+        defaultMessage: 'TO_BASE64',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_base64.markdown',
+            'languageDocumentationPopover.documentationESQL.to_base64.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3276,16 +3012,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_boolean',
-        {
-          defaultMessage: 'TO_BOOLEAN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_boolean', {
+        defaultMessage: 'TO_BOOLEAN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_boolean.markdown',
+            'languageDocumentationPopover.documentationESQL.to_boolean.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3312,16 +3045,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianpoint',
-        {
-          defaultMessage: 'TO_CARTESIANPOINT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_cartesianpoint', {
+        defaultMessage: 'TO_CARTESIANPOINT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianpoint.markdown',
+            'languageDocumentationPopover.documentationESQL.to_cartesianpoint.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3347,16 +3077,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianshape',
-        {
-          defaultMessage: 'TO_CARTESIANSHAPE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_cartesianshape', {
+        defaultMessage: 'TO_CARTESIANSHAPE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianshape.markdown',
+            'languageDocumentationPopover.documentationESQL.to_cartesianshape.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3382,16 +3109,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_datetime',
-        {
-          defaultMessage: 'TO_DATETIME',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_datetime', {
+        defaultMessage: 'TO_DATETIME',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_datetime.markdown',
+            'languageDocumentationPopover.documentationESQL.to_datetime.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3418,16 +3142,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_degrees',
-        {
-          defaultMessage: 'TO_DEGREES',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_degrees', {
+        defaultMessage: 'TO_DEGREES',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_degrees.markdown',
+            'languageDocumentationPopover.documentationESQL.to_degrees.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3451,16 +3172,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_double',
-        {
-          defaultMessage: 'TO_DOUBLE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_double', {
+        defaultMessage: 'TO_DOUBLE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_double.markdown',
+            'languageDocumentationPopover.documentationESQL.to_double.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3486,16 +3204,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geopoint',
-        {
-          defaultMessage: 'TO_GEOPOINT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_geopoint', {
+        defaultMessage: 'TO_GEOPOINT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geopoint.markdown',
+            'languageDocumentationPopover.documentationESQL.to_geopoint.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3520,16 +3235,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geoshape',
-        {
-          defaultMessage: 'TO_GEOSHAPE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_geoshape', {
+        defaultMessage: 'TO_GEOSHAPE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geoshape.markdown',
+            'languageDocumentationPopover.documentationESQL.to_geoshape.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3554,16 +3266,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_integer',
-        {
-          defaultMessage: 'TO_INTEGER',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_integer', {
+        defaultMessage: 'TO_INTEGER',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_integer.markdown',
+            'languageDocumentationPopover.documentationESQL.to_integer.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3590,16 +3299,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_ip',
-        {
-          defaultMessage: 'TO_IP',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_ip', {
+        defaultMessage: 'TO_IP',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_ip.markdown',
+            'languageDocumentationPopover.documentationESQL.to_ip.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3624,16 +3330,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_long',
-        {
-          defaultMessage: 'TO_LONG',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_long', {
+        defaultMessage: 'TO_LONG',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_long.markdown',
+            'languageDocumentationPopover.documentationESQL.to_long.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3659,16 +3362,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_lower',
-        {
-          defaultMessage: 'TO_LOWER',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_lower', {
+        defaultMessage: 'TO_LOWER',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_lower.markdown',
+            'languageDocumentationPopover.documentationESQL.to_lower.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3692,16 +3392,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_radians',
-        {
-          defaultMessage: 'TO_RADIANS',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_radians', {
+        defaultMessage: 'TO_RADIANS',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_radians.markdown',
+            'languageDocumentationPopover.documentationESQL.to_radians.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3725,16 +3422,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_string',
-        {
-          defaultMessage: 'TO_STRING',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_string', {
+        defaultMessage: 'TO_STRING',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_string.markdown',
+            'languageDocumentationPopover.documentationESQL.to_string.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3758,16 +3452,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_unsigned_long',
-        {
-          defaultMessage: 'TO_UNSIGNED_LONG',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_unsigned_long', {
+        defaultMessage: 'TO_UNSIGNED_LONG',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_unsigned_long.markdown',
+            'languageDocumentationPopover.documentationESQL.to_unsigned_long.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3793,16 +3484,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_upper',
-        {
-          defaultMessage: 'TO_UPPER',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_upper', {
+        defaultMessage: 'TO_UPPER',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_upper.markdown',
+            'languageDocumentationPopover.documentationESQL.to_upper.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3826,16 +3514,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_version',
-        {
-          defaultMessage: 'TO_VERSION',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.to_version', {
+        defaultMessage: 'TO_VERSION',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_version.markdown',
+            'languageDocumentationPopover.documentationESQL.to_version.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3858,16 +3543,13 @@ export const functions = {
     },
     // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trim',
-        {
-          defaultMessage: 'TRIM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.trim', {
+        defaultMessage: 'TRIM',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trim.markdown',
+            'languageDocumentationPopover.documentationESQL.trim.markdown',
             {
               defaultMessage: `<!--
   This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
@@ -3905,16 +3587,13 @@ export const aggregationFunctions = {
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.avgFunction',
-        {
-          defaultMessage: 'AVG',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.avgFunction', {
+        defaultMessage: 'AVG',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.avgFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.avgFunction.markdown',
             {
               defaultMessage: `### AVG
 Returns the average of a numeric field.
@@ -3939,16 +3618,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countFunction',
-        {
-          defaultMessage: 'COUNT',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.countFunction', {
+        defaultMessage: 'COUNT',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.countFunction.markdown',
             {
               defaultMessage: `### COUNT
 Returns the total number (count) of input values.
@@ -3984,7 +3660,7 @@ ROW words="foo;bar;baz;qux;quux;foo"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction',
+        'languageDocumentationPopover.documentationESQL.countDistinctFunction',
         {
           defaultMessage: 'COUNT_DISTINCT',
         }
@@ -3993,7 +3669,7 @@ ROW words="foo;bar;baz;qux;quux;foo"
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.countDistinctFunction.markdown',
             {
               defaultMessage: `### COUNT_DISTINCT
 Counts the approximate number of distinct values.
@@ -4025,16 +3701,13 @@ ROW words="foo;bar;baz;qux;quux;foo"
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.maxFunction',
-        {
-          defaultMessage: 'MAX',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.maxFunction', {
+        defaultMessage: 'MAX',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.maxFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.maxFunction.markdown',
             {
               defaultMessage: `### MAX
 Returns the maximum value of a numeric expression.
@@ -4059,17 +3732,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianFunction',
-        {
-          defaultMessage: 'MEDIAN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.medianFunction', {
+        defaultMessage: 'MEDIAN',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.medianFunction.markdown',
             {
               defaultMessage: `### MEDIAN
 Returns the value that is greater than half of all values and less than half of all values, also known as the 50% \`PERCENTILE\`.
@@ -4101,7 +3771,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianAbsoluteDeviationFunction',
+        'languageDocumentationPopover.documentationESQL.medianAbsoluteDeviationFunction',
         {
           defaultMessage: 'MEDIAN_ABSOLUTE_DEVIATION',
         }
@@ -4109,7 +3779,7 @@ FROM employees
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianAbsoluteDeviationFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.medianAbsoluteDeviationFunction.markdown',
             {
               defaultMessage: `### MEDIAN_ABSOLUTE_DEVIATION
 Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than the standard deviation.
@@ -4139,16 +3809,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.minFunction',
-        {
-          defaultMessage: 'MIN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.minFunction', {
+        defaultMessage: 'MIN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.minFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.minFunction.markdown',
             {
               defaultMessage: `### MIN
 Returns the minimum value of a numeric field.
@@ -4173,17 +3840,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.percentileFunction',
-        {
-          defaultMessage: 'PERCENTILE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.percentileFunction', {
+        defaultMessage: 'PERCENTILE',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.percentileFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.percentileFunction.markdown',
             {
               defaultMessage: `### PERCENTILE
 The value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the \`MEDIAN\`.
@@ -4214,16 +3878,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction',
-        {
-          defaultMessage: 'ST_CENTROID_AGG',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.stCentroidFunction', {
+        defaultMessage: 'ST_CENTROID_AGG',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.stCentroidFunction.markdown',
             {
               defaultMessage: `### ST_CENTROID_AGG
 **WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
@@ -4243,16 +3904,13 @@ FROM airports
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sumFunction',
-        {
-          defaultMessage: 'SUM',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.sumFunction', {
+        defaultMessage: 'SUM',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sumFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.sumFunction.markdown',
             {
               defaultMessage: `### SUM
 Returns the sum of a numeric field.
@@ -4277,17 +3935,14 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction',
-        {
-          defaultMessage: 'VALUES',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.valuesFunction', {
+        defaultMessage: 'VALUES',
+      }),
       description: (
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.valuesFunction.markdown',
             {
               defaultMessage: `### VALUES
 
@@ -4332,16 +3987,13 @@ export const groupingFunctions = {
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
-        {
-          defaultMessage: 'BUCKET',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.autoBucketFunction', {
+        defaultMessage: 'BUCKET',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
+            'languageDocumentationPopover.documentationESQL.autoBucketFunction.markdown',
             {
               defaultMessage: `### BUCKET
 Creates groups of values - buckets - out of a datetime or numeric input. The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
@@ -4468,16 +4120,13 @@ export const operators = {
   ),
   items: [
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators',
-        {
-          defaultMessage: 'Binary operators',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.binaryOperators', {
+        defaultMessage: 'Binary operators',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators.markdown',
+            'languageDocumentationPopover.documentationESQL.binaryOperators.markdown',
             {
               defaultMessage: `### Binary operators
 These binary comparison operators are supported:
@@ -4502,16 +4151,13 @@ These binary comparison operators are supported:
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators',
-        {
-          defaultMessage: 'Boolean operators',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.booleanOperators', {
+        defaultMessage: 'Boolean operators',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators.markdown',
+            'languageDocumentationPopover.documentationESQL.booleanOperators.markdown',
             {
               defaultMessage: `### Boolean operators
 The following boolean operators are supported:
@@ -4528,16 +4174,13 @@ The following boolean operators are supported:
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator',
-        {
-          defaultMessage: 'Cast (::)',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.castOperator', {
+        defaultMessage: 'Cast (::)',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.castOperator.markdown',
+            'languageDocumentationPopover.documentationESQL.castOperator.markdown',
             {
               defaultMessage: `### CAST (\`::\`)
 The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
@@ -4556,16 +4199,13 @@ ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator',
-        {
-          defaultMessage: 'IN',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.inOperator', {
+        defaultMessage: 'IN',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator.markdown',
+            'languageDocumentationPopover.documentationESQL.inOperator.markdown',
             {
               defaultMessage: `### IN
 The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
@@ -4583,16 +4223,13 @@ ROW a = 1, b = 4, c = 3
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators',
-        {
-          defaultMessage: 'LIKE and RLIKE',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.stringOperators', {
+        defaultMessage: 'LIKE and RLIKE',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators.markdown',
+            'languageDocumentationPopover.documentationESQL.stringOperators.markdown',
             {
               defaultMessage: `### LIKE and RLIKE
 For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
@@ -4624,16 +4261,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates',
-        {
-          defaultMessage: 'NULL values',
-        }
-      ),
+      label: i18n.translate('languageDocumentationPopover.documentationESQL.predicates', {
+        defaultMessage: 'NULL values',
+      }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates.markdown',
+            'languageDocumentationPopover.documentationESQL.predicates.markdown',
             {
               defaultMessage: `### NULL values
 For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:
