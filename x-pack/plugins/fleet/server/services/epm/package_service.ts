@@ -262,6 +262,7 @@ class PackageClientImpl implements PackageClient {
       datasets,
       spaceId,
       installSource: 'custom',
+      sloClient: appContextService.getSloStart()?.sloClient,
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,

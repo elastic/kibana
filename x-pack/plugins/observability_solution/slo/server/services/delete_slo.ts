@@ -26,7 +26,7 @@ export class DeleteSLO {
     private summaryTransformManager: TransformManager,
     private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
-    private rulesClient: RulesClientApi
+    private rulesClient?: RulesClientApi
   ) {}
 
   public async execute(sloId: string): Promise<void> {
@@ -85,7 +85,7 @@ export class DeleteSLO {
   }
   private async deleteAssociatedRules(sloId: string): Promise<void> {
     try {
-      await this.rulesClient.bulkDeleteRules({
+      await this.rulesClient?.bulkDeleteRules({
         filter: `alert.attributes.params.sloId:${sloId}`,
       });
     } catch (err) {

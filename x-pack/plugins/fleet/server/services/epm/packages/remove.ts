@@ -134,7 +134,7 @@ export async function removeInstallation(options: {
  * installed in 8.x or later.
  */
 export async function deleteKibanaAssets({
-  installedObjects,
+  installedObjects: allAssets,
   packageInfo,
   spaceId = DEFAULT_SPACE_ID,
 }: {
@@ -142,6 +142,9 @@ export async function deleteKibanaAssets({
   spaceId?: string;
   packageInfo: RegistryPackage | ArchivePackage;
 }) {
+  const installedObjects = allAssets.filter(({ type }) => type !== 'slo');
+  const sloAssets = allAssets.filter(({ type }) => type === 'slo');
+
   const savedObjectsClient = new SavedObjectsClient(
     appContextService.getSavedObjects().createInternalRepository()
   );
@@ -158,6 +161,7 @@ export async function deleteKibanaAssets({
   // which might create high memory pressure if a package has a lot of assets.
   if (minKibana && minKibana.major >= 8) {
     await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient);
+    await deleteSloAssets(sloAssets, namespace, savedObjectsClient);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
       installedObjects,
@@ -181,8 +185,30 @@ export async function deleteKibanaAssets({
     const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
 
     await bulkDeleteSavedObjects(assetsToDelete, namespace, savedObjectsClient);
+    await deleteSloAssets(sloAssets, namespace, savedObjectsClient);
   }
 }
+
+const deleteSloAssets = async (
+  sloAssets: KibanaAssetReference[],
+  namespace: string | undefined,
+  soClient: SavedObjectsClientContract
+) => {
+  try {
+    const sloClient = appContextService.getSloStart()?.sloClient;
+    if (!sloClient) {
+      return;
+    }
+
+    const esClient = appContextService.getInternalUserESClient();
+
+    for (const { id } of sloAssets) {
+      await sloClient.deleteSLO({ sloId: id, soClient, esClient, spaceId: namespace ?? 'default' });
+    }
+  } catch (err) {
+    appContextService.getLogger().error(err);
+  }
+};
 
 async function bulkDeleteSavedObjects(
   assetsToDelete: Array<{ id: string; type: string }>,

@@ -75,6 +75,12 @@ export const slo: SavedObjectsType = {
     getTitle(sloSavedObject: SavedObject<StoredSLODefinition>) {
       return `SLO: [${sloSavedObject.attributes.name}]`;
     },
+    getInAppUrl(sloSavedObject: SavedObject<StoredSLODefinition>) {
+      return {
+        path: `/app/slos/edit/${sloSavedObject.id}`,
+        uiCapabilitiesPath: 'slo.show',
+      };
+    },
   },
   migrations: {
     '8.9.0': migrateSlo890,

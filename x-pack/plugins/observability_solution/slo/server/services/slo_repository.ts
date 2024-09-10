@@ -15,7 +15,10 @@ import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  save(slo: SLODefinition, options?: { throwOnConflict: boolean }): Promise<SLODefinition>;
+  save(
+    slo: SLODefinition,
+    options?: { throwOnConflict: boolean }
+  ): Promise<{ sloSavedObjectId: string; slo: SLODefinition }>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string): Promise<void>;
@@ -29,7 +32,10 @@ export interface SLORepository {
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
-  async save(slo: SLODefinition, options = { throwOnConflict: false }): Promise<SLODefinition> {
+  async save(
+    slo: SLODefinition,
+    options = { throwOnConflict: false }
+  ): Promise<{ sloSavedObjectId: string; slo: SLODefinition }> {
     let existingSavedObjectId;
     const findResponse = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
@@ -45,12 +51,16 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
-    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo), {
-      id: existingSavedObjectId,
-      overwrite: true,
-    });
+    const sloSavedObject = await this.soClient.create<StoredSLODefinition>(
+      SO_SLO_TYPE,
+      toStoredSLO(slo),
+      {
+        id: existingSavedObjectId,
+        overwrite: true,
+      }
+    );
 
-    return slo;
+    return { sloSavedObjectId: sloSavedObject.id, slo };
   }
 
   async findById(id: string): Promise<SLODefinition> {

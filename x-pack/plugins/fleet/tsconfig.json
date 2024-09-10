@@ -37,6 +37,7 @@
     "@kbn/cloud-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/home-plugin",
+    "@kbn/slo-plugin",
 
     // requiredBundles from ./kibana.json
     "@kbn/kibana-react-plugin",
@@ -111,6 +112,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/integration-assistant-plugin",
     "@kbn/core-security-server-mocks",
+    "@kbn/slo-schema",
     "@kbn/server-http-tools",
     "@kbn/avc-banner",
     "@kbn/zod",

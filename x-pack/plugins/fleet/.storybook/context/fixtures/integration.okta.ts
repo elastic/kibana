@@ -109,6 +109,7 @@ export const item: GetInfoResponse['item'] = {
       security_rule: [],
       csp_rule_template: [],
       tag: [],
+      slo: [],
     },
     elasticsearch: {
       ingest_pipeline: [

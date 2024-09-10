@@ -36,6 +36,7 @@
       "telemetry",
       "discover",
       "ingestPipelines",
+      "slo",
       "spaces",
       "guidedOnboarding",
       "integrationAssistant",
