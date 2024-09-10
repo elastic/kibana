@@ -106,9 +106,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
     <DefaultLayout section="settings">
       <Routes>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
-          {(route: { match: { params: { itemId: string } } }) => {
+          {(route: { match: { params: { itemId: string } } | null }) => {
             const fleetServerHost = fleetServerHostsItems.find(
-              (o) => route.match.params.itemId === o.id
+              (o) => route.match?.params.itemId === o.id
             );
             if (!fleetServerHost) {
               return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
@@ -155,9 +155,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
-          {(route: { match: { params: { itemId: string } } }) => {
+          {(route: { match: { params: { itemId: string } } | null }) => {
             const fleetProxy = proxies.data?.items.find(
-              (item) => route.match.params.itemId === item.id
+              (item) => route.match?.params.itemId === item.id
             );
             if (!fleetProxy) {
               return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
@@ -170,8 +170,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
           }}
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
-          {(route: { match: { params: { outputId: string } } }) => {
-            const output = outputItems.find((o) => route.match.params.outputId === o.id);
+          {(route: { match: { params: { outputId: string } } | null }) => {
+            const output = outputItems.find((o) => route.match?.params.outputId === o.id);
             if (!output) {
               return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
             }
@@ -199,9 +199,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
-          {(route: { match: { params: { downloadSourceId: string } } }) => {
+          {(route: { match: { params: { downloadSourceId: string } } | null }) => {
             const downloadSource = downloadSources.data?.items.find(
-              (o) => route.match.params.downloadSourceId === o.id
+              (o) => route.match?.params.downloadSourceId === o.id
             );
             if (!downloadSource) {
               return <Redirect to={FLEET_ROUTING_PATHS.settings} />;

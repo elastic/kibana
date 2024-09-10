@@ -350,21 +350,6 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
-    to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
-    core.application.register({
-      id: 'infra',
-      appRoute: '/app/infra',
-      title: 'infra',
-      visibleIn: [],
-      mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./apps/legacy_app');
-
-        return renderApp(coreStart, params);
-      },
-    });
-
     startDep$AndHostViewFlag$.subscribe(
       ([_startServices, isInfrastructureHostsViewEnabled]: [
         [CoreStart, InfraClientStartDeps, InfraClientStartExports],
@@ -385,14 +370,9 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const inventoryViews = this.inventoryViews.start({
-      http: core.http,
-    });
-
-    const metricsExplorerViews = this.metricsExplorerViews?.start({
-      http: core.http,
-    });
-
+    const { http } = core;
+    const inventoryViews = this.inventoryViews.start({ http });
+    const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
     const telemetry = this.telemetry.start();
 
     plugins.uiActions.registerAction<EmbeddableApiContext>({
