@@ -68,8 +68,8 @@ export function usePrebuiltRulesUpgradeState(
           rulesResolvedConflicts[ruleUpgradeInfo.id] ?? {}
         ),
         hasUnresolvedConflicts:
-          calcUnresolvedConflicts(
-            ruleUpgradeInfo,
+          getUnacceptedConflictsCount(
+            ruleUpgradeInfo.diff.fields,
             rulesResolvedConflicts[ruleUpgradeInfo.id] ?? {}
           ) > 0,
       };
@@ -110,24 +110,21 @@ function convertRuleFieldsDiffToDiffable(
   return mergeVersionRule;
 }
 
-function calcUnresolvedConflicts(
-  ruleUpgradeInfo: RuleUpgradeInfoForReview,
+function getUnacceptedConflictsCount(
+  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>,
   ruleResolvedConflicts: RuleResolvedConflicts
 ): number {
-  const fieldNames = Object.keys(ruleUpgradeInfo.diff.fields) as Array<
-    keyof typeof ruleUpgradeInfo.diff.fields
-  >;
-  const fieldNamesWithNonSolvableConflicts = fieldNames.filter(
-    (fieldName) =>
-      ruleUpgradeInfo.diff.fields[fieldName]?.conflict === ThreeWayDiffConflict.NON_SOLVABLE
+  const fieldNames = Object.keys(ruleFieldsDiff);
+  const fieldNamesWithConflict = fieldNames.filter(
+    (fieldName) => ruleFieldsDiff[fieldName].conflict !== ThreeWayDiffConflict.NONE
   );
-  const fieldsWithConflicts = new Set<string>(fieldNamesWithNonSolvableConflicts);
+  const fieldNamesWithConflictSet = new Set(fieldNamesWithConflict);
 
   for (const resolvedConflictField of Object.keys(ruleResolvedConflicts)) {
-    if (fieldsWithConflicts.has(resolvedConflictField)) {
-      fieldsWithConflicts.delete(resolvedConflictField);
+    if (fieldNamesWithConflictSet.has(resolvedConflictField)) {
+      fieldNamesWithConflictSet.delete(resolvedConflictField);
     }
   }
 
-  return fieldsWithConflicts.size;
+  return fieldNamesWithConflictSet.size;
 }
