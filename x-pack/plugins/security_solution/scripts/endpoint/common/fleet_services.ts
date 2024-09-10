@@ -1352,3 +1352,17 @@ export const fetchAllEndpointIntegrationPolicyListIds = async (
 
   return policyIds;
 };
+
+/**
+ * Calls the Fleet internal API to enable space awareness
+ * @param kbnClient
+ */
+export const enableFleetSpaceAwareness = memoize(async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient
+    .request({
+      path: '/internal/fleet/enable_space_awareness',
+      headers: { 'Elastic-Api-Version': '1' },
+      method: 'POST',
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+});

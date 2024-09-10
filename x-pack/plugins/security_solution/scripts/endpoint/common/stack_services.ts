@@ -16,6 +16,7 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { omit } from 'lodash';
+import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import {
   fetchKibanaStatus,
   isServerlessKibanaFlavor,
@@ -63,6 +64,8 @@ interface CreateRuntimeServicesOptions {
   fleetServerUrl?: string;
   username: string;
   password: string;
+  /** The space id in kibana */
+  spaceId?: string;
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   /** If undefined, ES username defaults to `username` */
@@ -107,11 +110,12 @@ class KbnClientExtended extends KbnClient {
 }
 
 export const createRuntimeServices = async ({
-  kibanaUrl,
+  kibanaUrl: _kibanaUrl,
   elasticsearchUrl,
   fleetServerUrl = 'https://localhost:8220',
   username: _username,
   password: _password,
+  spaceId,
   apiKey,
   esUsername: _esUsername,
   esPassword: _esPassword,
@@ -119,6 +123,7 @@ export const createRuntimeServices = async ({
   asSuperuser = false,
   useCertForSsl = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
+  const kibanaUrl = spaceId ? buildUrlWithSpaceId(_kibanaUrl, spaceId) : _kibanaUrl;
   let username = _username;
   let password = _password;
   let esUsername = _esUsername;
@@ -131,6 +136,7 @@ export const createRuntimeServices = async ({
       password,
       useCertForSsl,
       log,
+      spaceId,
     });
 
     await waitForKibana(tmpKbnClient);
@@ -171,7 +177,15 @@ export const createRuntimeServices = async ({
   const fleetURL = new URL(fleetServerUrl);
 
   return {
-    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey, useCertForSsl }),
+    kbnClient: createKbnClient({
+      log,
+      url: kibanaUrl,
+      username,
+      password,
+      spaceId,
+      apiKey,
+      useCertForSsl,
+    }),
     esClient: createEsClient({
       log,
       url: elasticsearchUrl,
@@ -265,9 +279,10 @@ export const createEsClient = ({
 };
 
 export const createKbnClient = ({
-  url,
+  url: _url,
   username,
   password,
+  spaceId,
   apiKey,
   log = createToolingLogger(),
   useCertForSsl = false,
@@ -277,9 +292,11 @@ export const createKbnClient = ({
   password: string;
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
+  spaceId?: string;
   log?: ToolingLog;
   useCertForSsl?: boolean;
 }): KbnClient => {
+  const url = spaceId ? buildUrlWithSpaceId(_url, spaceId) : _url;
   const isHttps = new URL(url).protocol.startsWith('https');
   const clientOptions: ConstructorParameters<typeof KbnClientExtended>[0] = {
     log,
@@ -300,6 +317,26 @@ export const createKbnClient = ({
   }
 
   return new KbnClientExtended(clientOptions);
+};
+
+/**
+ * Builds a new URL based on the one provided on input for the given space id
+ * @param url
+ * @param spaceId
+ */
+export const buildUrlWithSpaceId = (url: string, spaceId: string): string => {
+  const newUrl = new URL(url);
+  let requestPath = newUrl.pathname;
+  const currentUrlSpace = getSpaceIdFromPath(requestPath); // NOTE: we are not currently supporting a Kibana base path prefix
+
+  if (currentUrlSpace.pathHasExplicitSpaceIdentifier) {
+    // Get the request path (if any) from the url
+    requestPath = requestPath.substring(`/s/${currentUrlSpace.spaceId}`.length) || '/';
+  }
+
+  newUrl.pathname = addSpaceIdToPath('/', spaceId, requestPath);
+
+  return newUrl.href;
 };
 
 /**
