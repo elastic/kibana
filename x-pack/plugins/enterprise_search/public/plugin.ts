@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, firstValueFrom, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -187,7 +187,6 @@ const appSearchLinks: AppDeepLink[] = [
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
-  private licenseSubscription: Subscription | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -669,9 +668,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     return {};
   }
 
-  public stop() {
-    this.licenseSubscription?.unsubscribe();
-  }
+  public stop() {}
 
   private updateSideNavDefinition = (items: Partial<DynamicSideNavItems>) => {
     this.sideNavDynamicItems$.next({ ...this.sideNavDynamicItems$.getValue(), ...items });
