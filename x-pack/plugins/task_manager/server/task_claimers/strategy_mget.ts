@@ -13,9 +13,7 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
-import apm from 'elastic-apm-node';
+import apm, { Logger } from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
 import { omit } from 'lodash';
@@ -61,6 +59,7 @@ interface OwnershipClaimingOpts {
   definitions: TaskTypeDictionary;
   taskMaxAttempts: Record<string, number>;
   taskPartitioner: TaskPartitioner;
+  logger: Logger;
 }
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
@@ -125,6 +124,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     size: initialCapacity * TaskCost.Tiny * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
     taskPartitioner,
+    logger,
   });
 
   if (docs.length === 0)
@@ -221,18 +221,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       updatedTasks.push(updateResult.value);
     } else {
       const { id, type, error } = updateResult.error;
-
-      // this check is needed so error will be typed correctly for isConflictError
-      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-        if (SavedObjectsErrorHelpers.isConflictError(error)) {
-          conflicts++;
-        } else {
-          logger.error(
-            `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
-            logMeta
-          );
-          bulkUpdateErrors++;
-        }
+      if (error.statusCode === 409) {
+        conflicts++;
       } else {
         logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
         bulkUpdateErrors++;
@@ -324,6 +314,7 @@ async function searchAvailableTasks({
   getCapacity,
   size,
   taskPartitioner,
+  logger,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
   const excludedTaskTypes = new Set(getExcludedTaskTypes(definitions, excludedTaskTypePatterns));
   const claimPartitions = buildClaimPartitions({
@@ -334,6 +325,11 @@ async function searchAvailableTasks({
     definitions,
   });
   const partitions = await taskPartitioner.getPartitions();
+  if (partitions.length === 0) {
+    logger.warn(
+      `Background task node "${taskPartitioner.getPodName()}" has no assigned partitions, claiming against all partitions`
+    );
+  }
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const searches: SearchOpts[] = [];
@@ -357,7 +353,7 @@ async function searchAvailableTasks({
     const queryUnlimitedTasks = matchesClauses(
       queryForUnlimitedTasks,
       filterDownBy(InactiveTasks),
-      tasksWithPartitions(partitions)
+      partitions.length ? tasksWithPartitions(partitions) : undefined
     );
     searches.push({
       query: queryUnlimitedTasks,
@@ -384,7 +380,7 @@ async function searchAvailableTasks({
     const query = matchesClauses(
       queryForLimitedTasks,
       filterDownBy(InactiveTasks),
-      tasksWithPartitions(partitions)
+      partitions.length ? tasksWithPartitions(partitions) : undefined
     );
     searches.push({
       query,

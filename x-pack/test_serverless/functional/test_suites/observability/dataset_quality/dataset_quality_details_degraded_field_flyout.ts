@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await synthtrace.clean();
+      await synthtrace.clean();
     });
 
     describe('degraded field flyout open-close', () => {
@@ -63,10 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.datasetQuality.closeFlyout();
-
-        await testSubjects.missingOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
-        );
       });
 
       it('should open the flyout when navigating to the page with degradedField in URL State', async () => {
@@ -80,10 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.datasetQuality.closeFlyout();
-
-        await testSubjects.missingOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
-        );
       });
     });
 

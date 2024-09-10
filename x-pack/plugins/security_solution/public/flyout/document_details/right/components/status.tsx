@@ -16,7 +16,7 @@ import { StatusPopoverButton } from './status_popover_button';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { EnrichedFieldInfo, EnrichedFieldInfoWithValues } from '../utils/enriched_field_info';
 import { getEnrichedFieldInfo } from '../utils/enriched_field_info';
-import { CellActions } from './cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 /**

@@ -50,11 +50,21 @@ info:
 
     NOTE: Access to internal Kibana API endpoints will be restricted in Kibana
     version 9.0. Please move any integrations to publicly documented APIs.
-  license:
-    name: Attribution-NonCommercial-NoDerivatives 4.0 International
-    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
+
+
+    ## Documentation source and versions
+
+
+    This documentation is derived from the `main` branch of the
+    [kibana](https://github.com/elastic/kibana) repository.
+
+    It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0
+    International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
   title: Kibana APIs
   version: 1.0.2
+  x-doc-license:
+    name: Attribution-NonCommercial-NoDerivatives 4.0 International
+    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
   x-feedbackLink:
     label: Feedback
     url: >-
@@ -10191,6 +10201,14 @@ paths:
       summary: Import saved objects
       tags:
         - saved objects
+      x-codeSamples:
+        - label: Import with createNewCopies
+          lang: cURL
+          source: |
+            curl \
+              -X POST api/saved_objects/_import?createNewCopies=true
+              -H "kbn-xsrf: true"
+              --form file=@file.ndjson
   /api/saved_objects/_resolve_import_errors:
     post:
       description: >

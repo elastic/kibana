@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
@@ -240,22 +241,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           })
         : undefined;
 
-      /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
-      try {
-        const { allowExpensiveQueries } = await services.core.http.get<{
-          allowExpensiveQueries: boolean;
-          // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
-        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
-          version: '1',
-        });
-        if (!allowExpensiveQueries) {
-          // only set if this returns false, since it defaults to true
-          allowExpensiveQueries$.next(allowExpensiveQueries);
-        }
-      } catch {
-        // do nothing - default to true on error (which it was initialized to)
-      }
-
       return {
         api,
         Component: () => {
@@ -265,6 +250,25 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
 
           useEffect(() => {
+            /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
+            const fetchAllowExpensiveQueries = async () => {
+              try {
+                const { allowExpensiveQueries } = await services.core.http.get<{
+                  allowExpensiveQueries: boolean;
+                  // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
+                }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+                  version: '1',
+                });
+                if (!allowExpensiveQueries) {
+                  // only set if this returns false, since it defaults to true
+                  allowExpensiveQueries$.next(allowExpensiveQueries);
+                }
+              } catch {
+                // do nothing - default to true on error (which it was initialized to)
+              }
+            };
+            fetchAllowExpensiveQueries(); // no need to await - don't want to block anything waiting for this
+
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();

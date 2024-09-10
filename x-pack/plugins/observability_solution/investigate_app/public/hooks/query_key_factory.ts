@@ -7,8 +7,8 @@
 
 export const investigationKeys = {
   all: ['investigation'] as const,
-  list: (params: { page: number; perPage: number }) =>
-    [...investigationKeys.all, 'list', params] as const,
+  list: (params?: { page: number; perPage: number }) =>
+    [...investigationKeys.all, 'list', ...(params ? [params] : [])] as const,
   fetch: (params: { id: string }) => [...investigationKeys.all, 'fetch', params] as const,
   notes: ['investigation', 'notes'] as const,
   fetchNotes: (params: { investigationId: string }) =>

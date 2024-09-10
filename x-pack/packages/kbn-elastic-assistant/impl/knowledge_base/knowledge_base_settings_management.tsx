@@ -68,7 +68,8 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   );
 
   const handleUpdateKnowledgeBaseSettings = useCallback(
-    (updatedKnowledgebase) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (updatedKnowledgebase: any) => {
       setHasPendingChanges(true);
       setUpdatedKnowledgeBaseSettings(updatedKnowledgebase);
     },
