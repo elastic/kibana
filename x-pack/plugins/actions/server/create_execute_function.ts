@@ -240,7 +240,7 @@ export function createEphemeralExecutionEnqueuerFunction({
     };
 
     return taskManager.ephemeralRunNow({
-      taskType: `actions:${action.actionTypeId}`,
+      taskType: `actions:${connector.actionTypeId}`,
       params: taskParams,
       state: {},
       scope: ['actions'],
