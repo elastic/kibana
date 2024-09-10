@@ -41,6 +41,10 @@ const apmRoutes = {
       path: t.type({
         serviceName: t.string,
       }),
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+      }),
     }),
   },
   '/link-to/transaction': {
