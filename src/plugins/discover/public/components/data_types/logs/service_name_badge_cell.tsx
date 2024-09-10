@@ -25,12 +25,8 @@ export const getServiceNameBadgeCell =
     const serviceNameValue = props.row.flattened[serviceNameField];
     const agentNameValue = props.row.flattened[AGENT_NAME_FIELD];
 
-    if (!agentNameValue) {
-      return (
-        <EuiText data-test-subj={`${dataTestSubj}-unknown`} size="xs">
-          {serviceNameValue}
-        </EuiText>
-      );
+    if (!serviceNameValue) {
+      return null;
     }
 
     const agentName = (
@@ -38,7 +34,11 @@ export const getServiceNameBadgeCell =
     ) as AgentName;
 
     return (
-      <EuiFlexGroup gutterSize="xs" css={badgeCss} data-test-subj={`${dataTestSubj}-${agentName}`}>
+      <EuiFlexGroup
+        gutterSize="xs"
+        css={badgeCss}
+        data-test-subj={`${dataTestSubj}-${agentName || 'unknown'}`}
+      >
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName} size="m" />
         </EuiFlexItem>
