@@ -13,7 +13,7 @@ import {
   IndexEntryType,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import { EsKnowledgeBaseEntrySchema } from './types';
+import { EsKnowledgeBaseEntrySchema, LegacyEsKnowledgeBaseEntrySchema } from './types';
 
 export const transformESSearchToKnowledgeBaseEntry = (
   response: estypes.SearchResponse<EsKnowledgeBaseEntrySchema>
@@ -102,6 +102,41 @@ const transformEsSchemaToEntry = (
     };
     return indexEntry;
   }
-  // TODO: Return null/error and have caller manage errors as to not completely stop the operation
-  throw new Error(`Unknown Knowledge Base Entry`);
+
+  // Parse Legacy KB Entry as a DocumentEntry
+  return getDocumentEntryFromLegacyKbEntry(esKbEntry);
+};
+
+const getDocumentEntryFromLegacyKbEntry = (
+  legacyEsKbDoc: LegacyEsKnowledgeBaseEntrySchema
+): DocumentEntry => {
+  const documentEntry: DocumentEntry = {
+    id: legacyEsKbDoc.id,
+    createdAt: legacyEsKbDoc.created_at,
+    createdBy: legacyEsKbDoc.created_by,
+    updatedAt: legacyEsKbDoc.updated_at,
+    updatedBy: legacyEsKbDoc.updated_by,
+    users:
+      legacyEsKbDoc.users?.map((user) => ({
+        id: user.id,
+        name: user.name,
+      })) ?? [],
+
+    name: legacyEsKbDoc.text,
+    namespace: legacyEsKbDoc.namespace,
+    type: DocumentEntryType.value,
+    kbResource: legacyEsKbDoc.metadata?.kbResource ?? 'unknown',
+    source: legacyEsKbDoc.metadata?.source ?? 'unknown',
+    required: legacyEsKbDoc.metadata?.required ?? false,
+    text: legacyEsKbDoc.text,
+    ...(legacyEsKbDoc.vector
+      ? {
+          vector: {
+            modelId: legacyEsKbDoc.vector.model_id,
+            tokens: legacyEsKbDoc.vector.tokens,
+          },
+        }
+      : {}),
+  };
+  return documentEntry;
 };
