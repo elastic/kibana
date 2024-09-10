@@ -62,8 +62,9 @@ while read -r config; do
     export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
 
     # download the beta version of chromedriver
-    BETA_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
-    node node_modules/chromedriver/install.js --chromedriver-force-download --chromedriver-version="$BETA_VERSION"
+    export CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
+    export DETECT_CHROMEDRIVER_VERSION=false
+    node node_modules/chromedriver/install.js --chromedriver-force-download
   fi
 
   # prevent non-zero exit code from breaking the loop
