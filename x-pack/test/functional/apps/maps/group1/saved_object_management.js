@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps', 'header', 'timePicker']);
+  const { maps, timePicker } = getPageObjects(['maps', 'timePicker']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const browser = getService('browser');
@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
           'meta_for_geoshape_data_reader',
           'test_logstash_reader',
         ]);
-        await PageObjects.maps.loadSavedMap('join example');
+        await maps.loadSavedMap('join example');
         joinMapUrl = await browser.getCurrentUrl();
       });
       after(async () => {
@@ -37,27 +37,27 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should update global Kibana time to value stored with map', async () => {
-        const timeConfig = await PageObjects.timePicker.getTimeConfig();
+        const timeConfig = await timePicker.getTimeConfig();
         expect(timeConfig.start).to.equal('~ 17 minutes ago');
         expect(timeConfig.end).to.equal('now');
       });
 
       it('should update global Kibana refresh config to value stored with map', async () => {
-        const kibanaRefreshConfig = await PageObjects.timePicker.getRefreshConfig();
+        const kibanaRefreshConfig = await timePicker.getRefreshConfig();
         expect(kibanaRefreshConfig.interval).to.equal('1');
         expect(kibanaRefreshConfig.units).to.equal('Seconds');
         expect(kibanaRefreshConfig.isPaused).to.equal(true);
       });
 
       it('should set map location to value stored with map', async () => {
-        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        const { lat, lon, zoom } = await maps.getView();
         expect(lat).to.equal(-0.04647);
         expect(lon).to.equal(77.33426);
         expect(zoom).to.equal(3.02);
       });
 
       it('should load map layers stored with map', async () => {
-        const layerExists = await PageObjects.maps.doesLayerExist('geo_shapes*');
+        const layerExists = await maps.doesLayerExist('geo_shapes*');
         expect(layerExists).to.equal(true);
       });
 
@@ -65,16 +65,16 @@ export default function ({ getPageObjects, getService }) {
         const urlSplit = joinMapUrl.split('?');
         const globalState = `_g=(time:(from:now-36m,to:now))`;
         await browser.get(`${urlSplit[0]}?${globalState}`, true);
-        await PageObjects.maps.waitForLayersToLoad();
+        await maps.waitForLayersToLoad();
 
-        const timeConfig = await PageObjects.timePicker.getTimeConfig();
+        const timeConfig = await timePicker.getTimeConfig();
         expect(timeConfig.start).to.equal('~ 36 minutes ago');
         expect(timeConfig.end).to.equal('now');
       });
 
       describe('mapState contains query', () => {
         before(async () => {
-          await PageObjects.maps.loadSavedMap('document example with query');
+          await maps.loadSavedMap('document example with query');
         });
 
         it('should update query bar with query stored with map', async () => {
@@ -94,7 +94,7 @@ export default function ({ getPageObjects, getService }) {
           await inspector.open();
           await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
           expect(hits).to.equal('1');
         });
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }) {
           const urlWithQueryInAppState = `${kibanaBaseUrl}/maps/map/8eabdab0-144f-11e9-809f-ad25bb78262c#?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.waitForLayersToLoad();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');
@@ -115,14 +115,14 @@ export default function ({ getPageObjects, getService }) {
           await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           await inspector.close();
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
           expect(hits).to.equal('1');
         });
       });
 
       describe('mapState contains filters', () => {
         before(async () => {
-          await PageObjects.maps.loadSavedMap('document example with filter');
+          await maps.loadSavedMap('document example with filter');
         });
 
         it('should update filter bar with filters stored with map', async () => {
@@ -142,7 +142,7 @@ export default function ({ getPageObjects, getService }) {
           await inspector.open();
           await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits = maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
           expect(hits).to.equal('1');
         });
@@ -151,30 +151,30 @@ export default function ({ getPageObjects, getService }) {
 
     describe('create', () => {
       it('should allow saving map', async () => {
-        await PageObjects.maps.openNewMap();
+        await maps.openNewMap();
 
-        await PageObjects.maps.saveMap(MAP1_NAME);
+        await maps.saveMap(MAP1_NAME);
 
-        await PageObjects.maps.searchAndExpectItemsCount(MAP1_NAME, 1);
+        await maps.searchAndExpectItemsCount(MAP1_NAME, 1);
       });
 
       it('should allow saving map that crosses dateline', async () => {
-        await PageObjects.maps.openNewMap();
-        await PageObjects.maps.setView('64', '179', '5');
+        await maps.openNewMap();
+        await maps.setView('64', '179', '5');
 
-        await PageObjects.maps.saveMap(MAP2_NAME);
+        await maps.saveMap(MAP2_NAME);
 
-        await PageObjects.maps.searchAndExpectItemsCount(MAP2_NAME, 1);
+        await maps.searchAndExpectItemsCount(MAP2_NAME, 1);
       });
     });
 
     describe('delete', () => {
       it('should delete selected saved objects', async () => {
-        await PageObjects.maps.deleteSavedMaps(MAP_NAME_PREFIX);
+        await maps.deleteSavedMaps(MAP_NAME_PREFIX);
 
-        await PageObjects.maps.searchAndExpectItemsCount(MAP1_NAME, 0);
+        await maps.searchAndExpectItemsCount(MAP1_NAME, 0);
 
-        await PageObjects.maps.searchAndExpectItemsCount(MAP2_NAME, 0);
+        await maps.searchAndExpectItemsCount(MAP2_NAME, 0);
       });
     });
   });
