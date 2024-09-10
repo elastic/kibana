@@ -101,6 +101,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     grow,
     width,
     labelPosition,
+    disabledActionIds,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
@@ -110,6 +111,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     api?.grow,
     api?.width,
     api?.parentApi?.labelPosition,
+    api?.parentApi?.disabledActionIds,
     viewModeSubject
   );
   const usingTwoLineLayout = labelPosition === 'twoLine';
@@ -149,7 +151,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
           'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
         })}
         viewMode={viewMode}
-        disabledActions={[]}
+        disabledActions={disabledActionIds}
         isEnabled={true}
       >
         <EuiFormRow

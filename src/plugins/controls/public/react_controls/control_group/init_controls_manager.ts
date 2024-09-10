@@ -264,9 +264,7 @@ export function initControlsManager(
 
 export function getLastUsedDataViewId(
   controlsInOrder: ControlsInOrder,
-  initialControlPanelsState: ControlPanelsState<
-    ControlPanelState & Partial<DefaultDataControlState>
-  >
+  initialControlPanelsState: ControlPanelsState<Partial<DefaultDataControlState>>
 ) {
   let dataViewId: string | undefined;
   for (let i = controlsInOrder.length - 1; i >= 0; i--) {
