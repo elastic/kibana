@@ -125,13 +125,13 @@ Object {
 exports[`ValueWithSpaceWarning should render if showSpaceWarning is truthy 1`] = `
 Object {
   "asFragment": [Function],
-  "baseElement": .c0 {
+  "baseElement": <body>
+    .c0 {
   display: inline;
   margin-left: 4px;
 }
 
-<body>
-    <div>
+<div>
       <div
         class="c0"
       >
