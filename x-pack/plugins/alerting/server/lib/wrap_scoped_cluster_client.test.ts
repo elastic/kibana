@@ -75,6 +75,9 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
+      expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
+        `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"body\":{},\"statusCode\":200,\"headers\":{\"x-elastic-product\":\"Elasticsearch\"},\"warnings\":[],\"meta\":{}}`
+      );
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -100,6 +103,9 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
+      );
+      expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
+        `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"body\":{},\"statusCode\":200,\"headers\":{\"x-elastic-product\":\"Elasticsearch\"},\"warnings\":[],\"meta\":{}}`
       );
       expect(logger.warn).not.toHaveBeenCalled();
     });
@@ -132,6 +138,9 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {\"ignore\":[404],\"requestTimeout\":10000} and 5000ms requestTimeout`
       );
+      expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
+        `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"body\":{},\"statusCode\":200,\"headers\":{\"x-elastic-product\":\"Elasticsearch\"},\"warnings\":[],\"meta\":{}}`
+      );
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -154,6 +163,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
+      expect(logger.trace).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
@@ -187,6 +197,9 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
+      expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
+        `result of executing query for rule .test-rule-type:abcdefg in space my-space: {}`
+      );
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -219,6 +232,9 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
+      expect(loggingSystemMock.collect(logger).trace[0][0]).toEqual(
+        `result of executing query for rule .test-rule-type:abcdefg in space my-space: {\"took\":333}`
+      );
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -244,6 +260,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
+      expect(logger.trace).not.toHaveBeenCalled();
       expect(logger.warn).not.toHaveBeenCalled();
     });
   });
