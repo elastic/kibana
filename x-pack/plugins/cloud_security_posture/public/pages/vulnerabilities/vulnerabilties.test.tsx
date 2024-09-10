@@ -21,11 +21,12 @@ import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   VULNERABILITIES_CONTAINER_TEST_SUBJ,
 } from '../../components/test_subjects';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
 import { TestProvider } from '../../test/test_provider';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { VULNERABILITIES_PAGE } from './test_subjects';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_data_view');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
@@ -170,10 +171,6 @@ describe('<Vulnerabilities />', () => {
     });
   });
 
-  xit("renders the success state component when 'latest vulnerabilities findings' DataView exists and request status is 'success'", async () => {
-    // TODO: Add test cases for VulnerabilityContent
-  });
-
   it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
@@ -202,5 +199,29 @@ describe('<Vulnerabilities />', () => {
         NO_VULNERABILITIES_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
+  });
+
+  it('renders Vulnerabilities page when there are findings', async () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          hasVulnerabilitiesFindings: true,
+        },
+      })
+    );
+
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'success',
+      data: createStubDataView({
+        spec: {
+          id: CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+        },
+      }),
+    });
+
+    renderVulnerabilitiesPage();
+
+    expect(screen.getByTestId(VULNERABILITIES_PAGE)).toBeInTheDocument();
   });
 });
