@@ -56,6 +56,7 @@ const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
 const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
 
 // Failing: See https://github.com/elastic/kibana/issues/192517
+// Failing: See https://github.com/elastic/kibana/issues/192516
 describe.skip('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
