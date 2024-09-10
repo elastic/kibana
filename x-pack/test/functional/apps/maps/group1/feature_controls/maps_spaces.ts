@@ -11,19 +11,24 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'maps', 'security', 'header']);
+  const { common, maps, security, header } = getPageObjects([
+    'common',
+    'maps',
+    'security',
+    'header',
+  ]);
   const listingTable = getService('listingTable');
   const appsMenu = getService('appsMenu');
 
   describe('spaces feature controls', () => {
     before(async () => {
-      PageObjects.maps.setBasePath('/s/custom_space');
+      maps.setBasePath('/s/custom_space');
     });
 
     after(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await PageObjects.security.forceLogout();
-      PageObjects.maps.setBasePath('');
+      await security.forceLogout();
+      maps.setBasePath('');
     });
 
     describe('space with no features disabled', () => {
@@ -40,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Maps navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -48,17 +53,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a map to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl(APP_ID, '/map', {
+        await common.navigateToActualUrl(APP_ID, '/map', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.maps.waitForLayersToLoad();
-        await PageObjects.maps.saveMap('my test map');
+        await maps.waitForLayersToLoad();
+        await maps.saveMap('my test map');
       });
 
       it(`allows a map to be deleted`, async () => {
-        await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
+        await common.navigateToActualUrl(APP_ID, '/', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
@@ -67,11 +72,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Can not use maps.deleteSavedMaps because maps.deleteSavedMaps will
         // navigate to default space if on list page check fails
         await listingTable.searchForItemWithName('my test map');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
-        await PageObjects.common.clickConfirmOnModal();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await common.clickConfirmOnModal();
+        await header.waitUntilLoadingHasFinished();
         await listingTable.expectItemsCount('map', 0);
       });
     });
@@ -90,12 +95,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(APP_ID, '/', {
+        await common.navigateToActualUrl(APP_ID, '/', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getJsonBodyText();
+        const messageText = await common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
