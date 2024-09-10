@@ -13,6 +13,7 @@ export interface StartRuntimeServicesOptions {
   fleetServerUrl?: string;
   username: string;
   password: string;
+  apiKey?: string;
   version?: string;
   policy?: string;
   log?: ToolingLog;

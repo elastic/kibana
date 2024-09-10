@@ -36,6 +36,10 @@
         "user": {
           "type": "nested",
           "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
             "first": {
               "type": "keyword"
             },
