@@ -11,9 +11,9 @@
         "label": "DataTableRowControl",
         "description": [],
         "signature": [
-          "({ size, children }: React.PropsWithChildren<{ size?: ",
+          "({ size, children, }: React.PropsWithChildren<React.PropsWithChildren<{ size?: ",
           "Size",
-          " | undefined; }>) => JSX.Element"
+          " | undefined; }>>) => JSX.Element"
         ],
         "path": "packages/kbn-unified-data-table/src/components/data_table_row_control.tsx",
         "deprecated": false,
@@ -24,12 +24,12 @@
             "id": "def-public.DataTableRowControl.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ size, children }",
+            "label": "{\n  size,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ size?: ",
+              "React.PropsWithChildren<React.PropsWithChildren<{ size?: ",
               "Size",
-              " | undefined; }>"
+              " | undefined; }>>"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table_row_control.tsx",
             "deprecated": false,
