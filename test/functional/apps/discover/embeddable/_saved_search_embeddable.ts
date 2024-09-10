@@ -19,7 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const { common, dashboard, header, discover } = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'discover',
+  ]);
 
   describe('discover saved search embeddable', () => {
     before(async () => {
@@ -32,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.setTime({
+      await common.setTime({
         from: 'Sep 22, 2015 @ 00:00:00.000',
         to: 'Sep 23, 2015 @ 00:00:00.000',
       });
@@ -40,28 +45,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     beforeEach(async () => {
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
     });
 
     const addSearchEmbeddableToDashboard = async () => {
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const rows = await dataGrid.getDocTableRows();
       expect(rows.length).to.be.above(0);
     };
 
     const refreshDashboardPage = async () => {
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
     };
 
     it('can save a search embeddable with a defined rows per page number', async function () {
@@ -69,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName, {
+      await dashboard.saveDashboard(dashboardName, {
         saveAsNew: true,
         waitDialogIsClosed: true,
         exitFromEditMode: false,
@@ -81,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeRowsPerPageTo(10);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
+      await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await refreshDashboardPage();
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
@@ -89,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should control columns correctly', async () => {
       await addSearchEmbeddableToDashboard();
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
 
       const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
@@ -118,11 +123,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       await queryBar.setQuery('bytes > 5000');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('2,572 documents');
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getSavedSearchDocumentCount()).to.be('2,572 documents');
       await queryBar.setQuery('this < is not : a valid > query');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
       const errorText = await errorMessage.getVisibleText();

@@ -272,7 +272,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       expect(screen.queryByLabelText('Cell row height')).not.toBeInTheDocument();
     });
 
-    it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', () => {
+    it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {
       const onChangeRowHeight = jest.fn();
       const onChangeRowHeightLines = jest.fn();
       renderDisplaySettings({
@@ -282,7 +282,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       });
       fireEvent.change(screen.getByRole('slider', { hidden: true }), { target: { value: 5 } });
       expect(onChangeRowHeightLines).toHaveBeenCalledWith(5);
-      userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
   });
@@ -301,7 +301,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       expect(screen.queryByLabelText('Header row height')).not.toBeInTheDocument();
     });
 
-    it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', () => {
+    it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', async () => {
       const onChangeHeaderRowHeight = jest.fn();
       const onChangeHeaderRowHeightLines = jest.fn();
       renderDisplaySettings({
@@ -311,7 +311,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       });
       fireEvent.change(screen.getByRole('slider', { hidden: true }), { target: { value: 3 } });
       expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3);
-      userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });
   });

@@ -22,10 +22,10 @@
   dependencies:
     tunnel "^0.0.6"
 
-"@adobe/css-tools@^4.0.1":
-  version "4.3.3"
-  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.3.3.tgz#90749bde8b89cd41764224f5aac29cd4138f75ff"
-  integrity sha512-rE0Pygv0sEZ4vBWHlAgJLGDU7Pm8xoO6p3wsEceb7GYAjScrOHpEo8KK/eVkAcnSM+slAEtXjA2JpdjLp4fJQQ==
+"@adobe/css-tools@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.4.0.tgz#728c484f4e10df03d5a3acd0d8adcbbebff8ad63"
+  integrity sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.0"
@@ -1831,10 +1831,10 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.15.3":
-  version "8.15.3"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.15.3.tgz#0d2753e689a8e5c1f1167a883f8beb863b31b3f0"
-  integrity sha512-sUhVQReQ1VPn4qRlsYyjDOp340LZxYmaQCcu1HgKSYr1NR7pdSUhbSxmEbl/sH4HXh7Avq4bRf14vBvtHi19kA==
+"@elastic/request-converter@^8.15.4":
+  version "8.15.4"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.15.4.tgz#332dc6266841b5a578c92e1655eee46b82c47ed2"
+  integrity sha512-iZDQpZpygV+AVOweaDzTsMJBfa2hwwduPXNNzk/yTXgC9qtjmns/AjehtLStKXs274+u3fg+BFxVt6NcMwUAAg==
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
@@ -9717,19 +9717,17 @@
     lz-string "^1.4.4"
     pretty-format "^27.0.2"
 
-"@testing-library/jest-dom@^5.16.5":
-  version "5.16.5"
-  resolved "https://registry.yarnpkg.com/@testing-library/jest-dom/-/jest-dom-5.16.5.tgz#3912846af19a29b2dbf32a6ae9c31ef52580074e"
-  integrity sha512-N5ixQ2qKpi5OLYfwQmUb/5mSV9LneAcaUfp32pn4yCnpb8r/Yz0pXFPck21dIicKmi+ta5WRAknkZCfA8refMA==
+"@testing-library/jest-dom@^6.5.0":
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/@testing-library/jest-dom/-/jest-dom-6.5.0.tgz#50484da3f80fb222a853479f618a9ce5c47bfe54"
+  integrity sha512-xGGHpBXYSHUUr6XsKBfs85TWlYKpTc37cSBBVrXcib2MkHLboWlkClhWF37JKlDb9KEq3dHs+f2xR7XJEWGBxA==
   dependencies:
-    "@adobe/css-tools" "^4.0.1"
-    "@babel/runtime" "^7.9.2"
-    "@types/testing-library__jest-dom" "^5.9.1"
+    "@adobe/css-tools" "^4.4.0"
     aria-query "^5.0.0"
     chalk "^3.0.0"
     css.escape "^1.5.1"
-    dom-accessibility-api "^0.5.6"
-    lodash "^4.17.15"
+    dom-accessibility-api "^0.6.3"
+    lodash "^4.17.21"
     redent "^3.0.0"
 
 "@testing-library/react-hooks@^8.0.1":
@@ -9749,12 +9747,10 @@
     "@testing-library/dom" "^8.0.0"
     "@types/react-dom" "<18.0.0"
 
-"@testing-library/user-event@^13.5.0":
-  version "13.5.0"
-  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-13.5.0.tgz#69d77007f1e124d55314a2b73fd204b333b13295"
-  integrity sha512-5Kwtbo3Y/NowpkbRuSepbyMFkZmHgD+vPzYB/RJ4oxt5Gj/avFFBYjhw27cqSVPVw/3a67NK1PbiIr9k4Gwmdg==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
+"@testing-library/user-event@^14.5.2":
+  version "14.5.2"
+  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-14.5.2.tgz#db7257d727c891905947bd1c1a99da20e03c2ebd"
+  integrity sha512-YAh82Wh4TIrxYLmfGcixwD18oIjyC1pFQC2Y01F2lzV2HTMiYrI0nze0FD0ocB//CKS/7jIUgae+adPqxK5yCQ==
 
 "@tootallnate/once@2":
   version "2.0.0"
@@ -11367,13 +11363,6 @@
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.6.tgz#a9ca4b70a18b270ccb2bc0aaafefd1d486b7ea74"
   integrity sha512-W+bw9ds02rAQaMvaLYxAbJ6cvguW/iJXNT6lTssS1ps6QdrMKttqEAMEG/b5CR8TZl3/L7/lH0ZV5nNR1LXikA==
-
-"@types/testing-library__jest-dom@^5.14.7", "@types/testing-library__jest-dom@^5.9.1":
-  version "5.14.7"
-  resolved "https://registry.yarnpkg.com/@types/testing-library__jest-dom/-/testing-library__jest-dom-5.14.7.tgz#fff92bed2a32c58a9224a85603e731519c0a9037"
-  integrity sha512-PFDoAbR9y8pD9+41oM1Yy0nVCkaRPlklmDZoPCXhNpR0ZO13HAYWqdNEjLtvIiveBmfB/+jdvmuOVeOXehKOaA==
-  dependencies:
-    "@types/jest" "*"
 
 "@types/textarea-caret@^3.0.1":
   version "3.0.1"
@@ -16272,10 +16261,15 @@ doctrine@^2.1.0:
   dependencies:
     esutils "^2.0.2"
 
-dom-accessibility-api@^0.5.6, dom-accessibility-api@^0.5.9:
+dom-accessibility-api@^0.5.9:
   version "0.5.13"
   resolved "https://registry.yarnpkg.com/dom-accessibility-api/-/dom-accessibility-api-0.5.13.tgz#102ee5f25eacce09bdf1cfa5a298f86da473be4b"
   integrity sha512-R305kwb5CcMDIpSHUnLyIAp7SrSPBx6F0VfQFB3M75xVMHhXJJIdePYgbPPh1o57vCHNu5QztokWUPsLjWzFqw==
+
+dom-accessibility-api@^0.6.3:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/dom-accessibility-api/-/dom-accessibility-api-0.6.3.tgz#993e925cc1d73f2c662e7d75dd5a5445259a8fd8"
+  integrity sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==
 
 dom-converter@^0.2.0:
   version "0.2.0"
@@ -18593,10 +18587,10 @@ gcp-metadata@^6.1.0:
     gaxios "^6.0.0"
     json-bigint "^1.0.0"
 
-geckodriver@^4.4.3:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.4.3.tgz#0f3ae367e784bb0f37df4088d3d551913df1ffde"
-  integrity sha512-79rvaq8pvKVUtuM9XBjQApb04kOVkl3TFRX+zTt1wlmL+wqpt85ocWCdqiENU/3zIzg2Me21eClUcnE7F1kL2w==
+geckodriver@^4.4.4:
+  version "4.4.4"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-4.4.4.tgz#0aad02533e8cf127573f4d86f1cc5450c913f095"
+  integrity sha512-0zaw19tcmWeluqx7+Y559JGBtidu1D0Lb8ElYKiNEQu8r3sCfrLUf5V10xypl8u29ZLbgRV7WflxCJVTCkCMFA==
   dependencies:
     "@wdio/logger" "^9.0.0"
     "@zip.js/zip.js" "^2.7.48"

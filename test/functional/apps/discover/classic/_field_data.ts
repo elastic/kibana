@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
+  const { common, timePicker } = getPageObjects(['common', 'timePicker']);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'discover:searchFieldsFromSource': true,
         'doc_table:legacy': true,
       });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // we don't technically need this sleep here because the tryForTime will retry and the
       // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
       // case and it can be avoided with just a few seconds sleep.
-      await PageObjects.common.sleep(2000);
+      await common.sleep(2000);
       await retry.try(async function tryingForTime() {
         const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(1)`);
         const rowData = await row.getVisibleText();

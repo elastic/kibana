@@ -28,7 +28,7 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('4 options')).toBeInTheDocument();
@@ -52,12 +52,12 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Limit reached')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByRole('option', { name: 'tag a' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'tag a' }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({ filterId: 'tags', selectedOptionKeys: [] });
@@ -86,12 +86,12 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
 
-    userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
@@ -123,12 +123,12 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Limit reached')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
 
     await waitFor(() => {
       expect(onChange).not.toHaveBeenCalled();
@@ -174,7 +174,7 @@ describe('multi select filter', () => {
     };
 
     render(<MultiSelectFilter {...props} />);
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
     await waitForEuiPopoverOpen();
     expect((await screen.findAllByTestId(TEST_ID)).length).toBe(2);
   });
