@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getAstAndSyntaxErrors } from '../../ast_parser';
@@ -152,22 +153,19 @@ describe('single line query', () => {
         expect(text).toBe('FROM a METADATA column1, _column2');
       });
 
-      // Un-skip when columns are parsed correctly: https://github.com/elastic/kibana/issues/189913
-      test.skip('nested fields', () => {
+      test('nested fields', () => {
         const { text } = reprint('FROM a | KEEP a.b');
 
         expect(text).toBe('FROM a | KEEP a.b');
       });
 
-      // Un-skip when columns are parsed correctly: https://github.com/elastic/kibana/issues/189913
-      test.skip('quoted nested fields', () => {
+      test('quoted nested fields', () => {
         const { text } = reprint('FROM index | KEEP `a`.`b`, c.`d`');
 
         expect(text).toBe('FROM index | KEEP a.b, c.d');
       });
 
-      // Un-skip when identifier names are escaped correctly.
-      test.skip('special character in identifier', () => {
+      test('special character in identifier', () => {
         const { text } = reprint('FROM a | KEEP `a 👉 b`, a.`✅`');
 
         expect(text).toBe('FROM a | KEEP `a 👉 b`, a.`✅`');
@@ -445,6 +443,26 @@ describe('multiline query', () => {
     const text1 = multiline(query, { pipeTab: '' }).text;
 
     expect(text1).toBe(query);
+  });
+
+  test('does not change well formatted query', () => {
+    const query = `FROM kibana_sample_data_logs
+| SORT @timestamp
+| EVAL t = NOW()
+| EVAL key = CASE(timestamp < (t - 1 hour) AND timestamp > (t - 2 hour), "Last hour", "Other")
+| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY key, extension.keyword
+| EVAL sum_last_hour = CASE(key == "Last hour", sum), sum_rest = CASE(key == "Other", sum), count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
+| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY key, extension.keyword
+| EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))
+| EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
+| EVAL bytes_transform = ROUND(total_bytes / 1000000.0, 1)
+| EVAL bytes_transform_last_hour = ROUND(sum_last_hour / 1000.0, 2)
+| KEEP count_last_hour, total_visits, bytes_transform, bytes_transform_last_hour, extension.keyword
+| STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword
+| RENAME total_visits AS \`Unique Visits (Total)\`, count_last_hour AS \`Unique Visits (Last hour)\`, bytes_transform AS \`Bytes(Total - MB)\`, bytes_transform_last_hour AS \`Bytes(Last hour - KB)\`, extension.keyword AS Type`;
+    const text = multiline(query, { pipeTab: '' }).text;
+
+    expect(text).toBe(query);
   });
 });
 
