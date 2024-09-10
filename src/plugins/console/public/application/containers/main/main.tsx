@@ -103,7 +103,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
   // Update the URL hash when currentView changes
   useEffect(() => {
     if (!isEmbeddable && routeHistory && routeHistory.location.hash !== `#/${currentView}`) {
-      routeHistory.push(`#/${currentView}`);
+      // Preserve search as it may contain load_from param
+      routeHistory.push({ hash: `#/${currentView}`, search: routeHistory.location.search });
     }
   }, [currentView, isEmbeddable, routeHistory]);
 

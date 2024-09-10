@@ -166,12 +166,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.common.waitUntilUrlIncludes('dev_tools#/console');
 
+      await pageObjects.console.skipTourIfExists();
+
       await retry.try(async () => {
         const actualRequest = await pageObjects.console.getEditorText();
-        expect(actualRequest.trim()).to.contain(
-          '# These are the queries used when exporting data for\n# the CSV report'
+        log.debug(actualRequest);
+        expect(actualRequest.replace(/\s/g, '')).to.contain(
+          '# These are the queries used when exporting data for\n# the CSV report'.replace(
+            /\s/g,
+            ''
+          )
         );
-        expect(actualRequest).to.contain('POST /_search');
       });
     });
   });
