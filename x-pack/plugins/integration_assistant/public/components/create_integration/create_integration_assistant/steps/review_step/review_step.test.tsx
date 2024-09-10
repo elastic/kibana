@@ -25,7 +25,7 @@ const customPipeline = {
 };
 const defaultRequest = {
   pipeline: customPipeline,
-  rawSamples: integrationSettings.logsSampleParsed!,
+  rawSamples: integrationSettings.logSamples!,
 };
 const mockRunCheckPipelineResults = jest.fn((_: unknown) => ({ results: mockResults }));
 jest.mock('../../../../../common/lib/api', () => ({

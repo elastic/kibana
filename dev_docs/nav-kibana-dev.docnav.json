@@ -64,7 +64,35 @@
           "id": "kibDevAnatomyOfAPlugin"
         },
         {
-          "id": "kibDevPerformance"
+          "id": "kibDevPerformance",
+          "items": [
+            {
+              "id": "kibDevPerformanceClient",
+              "label": "Client-side code"
+            },
+            {
+              "id": "kibDevPerformanceServer",
+              "label": "Server-side code"
+            },
+            {
+              "label": "Case studies",
+              "id": "kibDevPerformanceCaseStudies",
+              "items": [
+                {
+                  "label": "Async too early",
+                  "id": "kibDevPerformanceCaseStudyAsyncTooEarly"
+                },
+                {
+                  "label": "Top-level imports",
+                  "id": "kibDevPerformanceCaseStudyTopLevelImports"
+                },
+                {
+                  "label": "Uncommon code in common",
+                  "id": "kibDevPerformanceCaseStudyUncommonCodeInCommon"
+                }
+              ]
+            }
+          ]
         },
         {
           "id": "kibBuildingBlocks"

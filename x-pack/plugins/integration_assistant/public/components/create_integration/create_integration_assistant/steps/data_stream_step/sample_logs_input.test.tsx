@@ -161,7 +161,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: logsSampleRaw.split(','),
+          logSamples: logsSampleRaw.split(','),
           samplesFormat: { name: 'json', json_path: [] },
         });
       });
@@ -174,7 +174,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
+            logSamples: tooLargeLogsSample.split(',').slice(0, 2),
             samplesFormat: { name: 'json', json_path: [] },
           });
         });
@@ -193,7 +193,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: splitNDJSON,
+          logSamples: splitNDJSON,
           samplesFormat: { name: 'json', json_path: ['events'] },
         });
       });
@@ -201,10 +201,6 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        [
-          '[{"message":"test message 1"}',
-          'Cannot parse the logs sample file as either a JSON or NDJSON file',
-        ],
         ['["test message 1"]', 'The logs sample file contains non-object entries'],
         ['[]', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
@@ -218,7 +214,7 @@ describe('SampleLogsInput', () => {
 
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: undefined,
+            logSamples: undefined,
             samplesFormat: undefined,
           });
         });
@@ -236,7 +232,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: splitNDJSON,
+          logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
@@ -249,7 +245,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 10),
+            logSamples: tooLargeLogsSample.split('\n').slice(0, 2),
             samplesFormat: { name: 'ndjson', multiline: false },
           });
         });
@@ -268,7 +264,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: [splitNDJSON[0]],
+          logSamples: [splitNDJSON[0]],
           samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
@@ -281,7 +277,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: splitNDJSON,
+          logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: true },
         });
       });
@@ -289,10 +285,6 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        [
-          '{"message":"test message 1"}\n{"message": }',
-          'Cannot parse the logs sample file as either a JSON or NDJSON file',
-        ],
         ['"test message 1"', 'The logs sample file contains non-object entries'],
         ['', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
@@ -306,11 +298,87 @@ describe('SampleLogsInput', () => {
 
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: undefined,
+            logSamples: undefined,
             samplesFormat: undefined,
           });
         });
       });
+    });
+  });
+
+  describe('when the file is too large', () => {
+    const type = 'text/plain';
+    let jsonParseSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      // Simulate large log content that would cause a RangeError
+      jsonParseSpy = jest.spyOn(JSON, 'parse').mockImplementation(() => {
+        throw new RangeError();
+      });
+
+      await changeFile(input, new File(['...'], 'test.json', { type }));
+    });
+
+    afterAll(() => {
+      // Restore the original implementation after all tests
+      jsonParseSpy.mockRestore();
+    });
+
+    it('should raise an appropriate error', () => {
+      expect(result.queryByText('This logs sample file is too large to parse')).toBeInTheDocument();
+    });
+  });
+
+  describe('when the file is neither a valid json nor ndjson', () => {
+    const plainTextFile = 'test message 1\ntest message 2';
+    const type = 'text/plain';
+
+    beforeEach(async () => {
+      await changeFile(input, new File([plainTextFile], 'test.txt', { type }));
+    });
+
+    it('should set the integrationSetting correctly', () => {
+      expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        logSamples: plainTextFile.split('\n'),
+        samplesFormat: undefined,
+      });
+    });
+  });
+
+  describe('when the file reader fails', () => {
+    const mockedMessage = 'Mocked error';
+    let myFileReader: FileReader;
+    let fileReaderSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      myFileReader = new FileReader();
+      fileReaderSpy = jest.spyOn(global, 'FileReader').mockImplementation(() => myFileReader);
+
+      // We need to mock the error property
+      Object.defineProperty(myFileReader, 'error', {
+        value: new Error(mockedMessage),
+        writable: false,
+      });
+
+      jest.spyOn(myFileReader, 'readAsText').mockImplementation(() => {
+        const errorEvent = new ProgressEvent('error');
+        myFileReader.dispatchEvent(errorEvent);
+      });
+
+      const file = new File([`...`], 'test.json', { type: 'application/json' });
+      act(() => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+    });
+
+    afterEach(() => {
+      fileReaderSpy.mockRestore();
+    });
+
+    it('should set the error message accordingly', () => {
+      expect(
+        result.queryByText(`An error occurred when reading logs sample: ${mockedMessage}`)
+      ).toBeInTheDocument();
     });
   });
 });

@@ -150,6 +150,74 @@ describe('DetectionRulesClient.importRule', () => {
       );
     });
 
+    it('enables the rule if the imported rule has enabled: true', async () => {
+      const disabledExistingRule = {
+        ...existingRule,
+        enabled: false,
+      };
+      (readRules as jest.Mock).mockResolvedValueOnce(disabledExistingRule);
+
+      const rule = await detectionRulesClient.importRule({
+        ruleToImport: {
+          ...ruleToImport,
+          enabled: true,
+        },
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+          data: expect.not.objectContaining({
+            enabled: expect.anything(),
+          }),
+        })
+      );
+
+      expect(rule.enabled).toBe(true);
+      expect(rulesClient.enable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+        })
+      );
+    });
+
+    it('disables the rule if the imported rule has enabled: false', async () => {
+      const enabledExistingRule = {
+        ...existingRule,
+        enabled: true,
+      };
+      (readRules as jest.Mock).mockResolvedValueOnce(enabledExistingRule);
+
+      const rule = await detectionRulesClient.importRule({
+        ruleToImport: {
+          ...ruleToImport,
+          enabled: false,
+        },
+        overwriteRules: true,
+        allowMissingConnectorSecrets,
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+          data: expect.not.objectContaining({
+            enabled: expect.anything(),
+          }),
+        })
+      );
+
+      expect(rule.enabled).toBe(false);
+      expect(rulesClient.disable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+        })
+      );
+    });
+
     it('rejects when overwriteRules is false', async () => {
       (readRules as jest.Mock).mockResolvedValue(existingRule);
       await expect(
