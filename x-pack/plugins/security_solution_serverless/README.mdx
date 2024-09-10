@@ -21,7 +21,8 @@ The primary goal of the `security_solution_serverless` plugin is to:
 - Provide a modular approach by encapsulating serverless-related functionality, thereby maintaining the codebase's cleanliness and modularity.
 
 ## **Architecture**
-The `security_solution_serverless` plugin interacts with the main `security_solution` plugin through the plugin lifecycle contract. 
+The `security_solution_serverless` plugin depends on the main `security_solution` plugin, it can import code from it thought the use of agnostic packages is preferred,
+and they interact through the plugin lifecycle contract.
 This architecture allows the `security_solution_serverless` plugin to:
 - Modify the behavior of the main plugin by providing serverless-specific content.
 - Ensure that the `security_solution` plugin remains offering-agnostic by using APIs for serverless-specific behavior only when necessary.
