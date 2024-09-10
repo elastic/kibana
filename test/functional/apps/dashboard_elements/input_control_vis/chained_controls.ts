@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
+  const { common, visualize, visEditor } = getPageObjects(['common', 'visualize', 'visEditor']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
@@ -22,9 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
 
     before(async () => {
-      await PageObjects.visualize.initTests();
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.loadSavedVisualization('chained input control', {
+      await visualize.initTests();
+      await common.navigateToApp('visualize');
+      await visualize.loadSavedVisualization('chained input control', {
         navigateToVisualize: false,
       });
       await testSubjects.waitForEnabled('addFilter', 10000);
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a seperate filter pill for parent control and child control', async () => {
       await comboBox.set('listControlSelect1', '14.61.182.136');
 
-      await PageObjects.visEditor.inputControlSubmit();
+      await visEditor.inputControlSubmit();
 
       const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
       expect(hasParentControlFilter).to.equal(true);
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should clear child control dropdown when parent control value is removed', async () => {
       await comboBox.clear('listControlSelect0');
-      await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
+      await common.sleep(500); // give time for filter to be removed and event handlers to fire
 
       const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
       const isDisabled = await childControlInput.getAttribute('disabled');
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should clear child control dropdown when parent control filter pill removed', async () => {
       await filterBar.removeFilter('geo.src');
-      await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
+      await common.sleep(500); // give time for filter to be removed and event handlers to fire
 
       const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
       expect(hasValue).to.equal(false);

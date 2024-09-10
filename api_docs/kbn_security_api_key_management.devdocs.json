@@ -660,7 +660,7 @@
         "label": "TimeToolTip",
         "description": [],
         "signature": [
-          "({ timestamp, children }: React.PropsWithChildren<",
+          "({ timestamp, children, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/security-api-key-management",
             "scope": "public",
@@ -668,7 +668,7 @@
             "section": "def-public.TimeToolTipProps",
             "text": "TimeToolTipProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
         "deprecated": false,
@@ -679,10 +679,10 @@
             "id": "def-public.TimeToolTip.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ timestamp, children }",
+            "label": "{\n  timestamp,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/security-api-key-management",
                 "scope": "public",
@@ -690,7 +690,7 @@
                 "section": "def-public.TimeToolTipProps",
                 "text": "TimeToolTipProps"
               },
-              ">"
+              ">>"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
             "deprecated": false,
