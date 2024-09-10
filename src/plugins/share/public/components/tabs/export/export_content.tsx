@@ -124,7 +124,6 @@ const ExportContentUi = ({
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const postUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
-  console.log('absoluteUrl', postUrl);
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton && publicAPIEnabled) {
       return (
