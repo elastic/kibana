@@ -45,7 +45,7 @@ jest.mock('./dashboard_grid_item', () => {
   };
 });
 
-const createAndMountDashboardGrid = () => {
+const createAndMountDashboardGrid = async () => {
   const dashboardContainer = buildMockDashboard({
     overrides: {
       panels: {
@@ -62,6 +62,7 @@ const createAndMountDashboardGrid = () => {
       },
     },
   });
+  await dashboardContainer.untilContainerInitialized();
   const component = mountWithIntl(
     <DashboardContainerContext.Provider value={dashboardContainer}>
       <DashboardGrid viewportWidth={1000} />
@@ -71,20 +72,20 @@ const createAndMountDashboardGrid = () => {
 };
 
 test('renders DashboardGrid', async () => {
-  const { component } = createAndMountDashboardGrid();
+  const { component } = await createAndMountDashboardGrid();
   const panelElements = component.find('GridItem');
   expect(panelElements.length).toBe(2);
 });
 
 test('renders DashboardGrid with no visualizations', async () => {
-  const { dashboardContainer, component } = createAndMountDashboardGrid();
+  const { dashboardContainer, component } = await createAndMountDashboardGrid();
   dashboardContainer.updateInput({ panels: {} });
   component.update();
   expect(component.find('GridItem').length).toBe(0);
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const { dashboardContainer, component } = createAndMountDashboardGrid();
+  const { dashboardContainer, component } = await createAndMountDashboardGrid();
   const originalPanels = dashboardContainer.getInput().panels;
   const filteredPanels = { ...originalPanels };
   delete filteredPanels['1'];
@@ -95,7 +96,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
 });
 
 test('DashboardGrid renders expanded panel', async () => {
-  const { dashboardContainer, component } = createAndMountDashboardGrid();
+  const { dashboardContainer, component } = await createAndMountDashboardGrid();
   dashboardContainer.setExpandedPanelId('1');
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -113,7 +114,7 @@ test('DashboardGrid renders expanded panel', async () => {
 });
 
 test('DashboardGrid renders focused panel', async () => {
-  const { dashboardContainer, component } = createAndMountDashboardGrid();
+  const { dashboardContainer, component } = await createAndMountDashboardGrid();
   dashboardContainer.setFocusedPanelId('2');
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.

@@ -122,6 +122,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
   );
 
+  // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
+  if (isEnabledKnowledgeBase && dataClients?.kbDataClient?.isV2KnowledgeBaseEnabled) {
+    const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
+      assistantToolParams,
+      esClient,
+    });
+    if (kbTools) {
+      tools.push(...kbTools);
+    }
+  }
+
   const agentRunnable = isOpenAI
     ? await createOpenAIFunctionsAgent({
         llm: createLlmInstance(),

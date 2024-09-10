@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
         'doc_table:legacy': true,
@@ -37,9 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
+      await discover.waitForDocTableLoadingComplete();
     });
 
     it('should open the doc view of the selected document', async function () {
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should create an exists filter from the doc view of the selected document', async function () {
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await docTable.toggleRowExpanded();
       const detailsRow = await docTable.getDetailsRow();

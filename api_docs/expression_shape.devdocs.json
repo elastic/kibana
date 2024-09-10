@@ -1697,7 +1697,7 @@
         "label": "ShapeDrawerProps",
         "description": [],
         "signature": [
-          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
+          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1705,7 +1705,7 @@
             "section": "def-public.ShapeProps",
             "text": "ShapeProps"
           },
-          ") => JSX.Element; data: ",
+          ">) => JSX.Element; data: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1815,7 +1815,7 @@
         "label": "ShapeType",
         "description": [],
         "signature": [
-          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
+          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1823,7 +1823,7 @@
             "section": "def-public.ShapeProps",
             "text": "ShapeProps"
           },
-          ") => JSX.Element; data: ",
+          ">) => JSX.Element; data: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",

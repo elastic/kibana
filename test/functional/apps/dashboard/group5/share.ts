@@ -43,19 +43,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
 
-  const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
+  const { dashboard, common, share } = getPageObjects(['dashboard', 'common', 'share']);
 
   const getSharedUrl = async (mode: TestingModes): Promise<string> => {
     await retry.waitFor('share menu to open', async () => {
-      await PageObjects.share.clickShareTopNavButton();
-      return await PageObjects.share.isShareMenuOpen();
+      await share.clickShareTopNavButton();
+      return await share.isShareMenuOpen();
     });
-    return await PageObjects.share.getSharedUrl();
+    return await share.getSharedUrl();
   };
 
   const unpinnedFilterIsOnlyWhenDashboardIsUnsaved = async (mode: TestingModes) => {
     await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
-    await PageObjects.dashboard.waitForRenderComplete();
+    await dashboard.waitForRenderComplete();
 
     const sharedUrl = await getSharedUrl(mode);
     const { globalState, appState } = getStateFromUrl(sharedUrl);
@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const unpinnedFilterIsRemoved = async (mode: TestingModes) => {
-    await PageObjects.dashboard.clickQuickSave();
-    await PageObjects.dashboard.waitForRenderComplete();
+    await dashboard.clickQuickSave();
+    await dashboard.waitForRenderComplete();
 
     const sharedUrl = await getSharedUrl(mode);
     expect(sharedUrl).to.not.contain('appState');
@@ -77,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const pinnedFilterIsWhenDashboardInGlobalState = async (mode: TestingModes) => {
     await filterBar.toggleFilterPinned('geo.src');
-    await PageObjects.dashboard.clickQuickSave();
-    await PageObjects.dashboard.waitForRenderComplete();
+    await dashboard.clickQuickSave();
+    await dashboard.waitForRenderComplete();
 
     const sharedUrl = await getSharedUrl(mode);
     const { globalState, appState } = getStateFromUrl(sharedUrl);
@@ -99,17 +99,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       const from = 'Sep 19, 2017 @ 06:31:44.000';
       const to = 'Sep 23, 2018 @ 18:31:44.000';
-      await PageObjects.common.setTime({ from, to });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await common.setTime({ from, to });
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('few panels');
+      await dashboard.switchToEditMode();
+      await dashboard.waitForRenderComplete();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     describe('snapshot share', () => {
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardPanelActions.customizePanel();
           await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
           await dashboardCustomizePanel.clickSaveButton();
-          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboard.waitForRenderComplete();
           await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
 
           const sharedUrl = await getSharedUrl('snapshot');
@@ -132,8 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should once again not have "panels" state when save is clicked', async () => {
-          await PageObjects.dashboard.clickQuickSave();
-          await PageObjects.dashboard.waitForRenderComplete();
+          await dashboard.clickQuickSave();
+          await dashboard.waitForRenderComplete();
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
         });
@@ -161,8 +161,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await filterBar.removeAllFilters();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.clickQuickSave();
+        await dashboard.waitForRenderComplete();
       });
     });
 
