@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { EuiCode, EuiPanel } from '@elastic/eui';
 import { EsqlEditor } from '../../../esql_editor/esql_editor';
 import { useEsqlInspector } from '../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
@@ -15,5 +16,9 @@ export const Editor: React.FC = (props) => {
   const state = useEsqlInspector();
   const src = useBehaviorSubject(state.src$);
 
-  return <EsqlEditor src={src} onChange={(newSrc) => state.src$.next(newSrc)} />;
+  return (
+    <EuiPanel paddingSize="l">
+      <EsqlEditor src={src} onChange={(newSrc) => state.src$.next(newSrc)} />
+    </EuiPanel>
+  );
 };

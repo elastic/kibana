@@ -10,6 +10,7 @@ import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EsqlInspectorState } from './esql_inspector_state';
 import { Editor } from './components/editor';
+import { Preview } from './components/preview';
 
 export interface EsqlInspectorConnectedProps {
   state?: EsqlInspectorState;
@@ -17,11 +18,15 @@ export interface EsqlInspectorConnectedProps {
 
 export const EsqlInspectorConnected: React.FC<EsqlInspectorConnectedProps> = (props) => {
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>UI</EuiFlexItem>
-      <EuiFlexItem>
-        <Editor />
-      </EuiFlexItem>
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGroup style={{ maxWidth: 1200 }}>
+        <EuiFlexItem>
+          <Preview />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Editor />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };
