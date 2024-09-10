@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -20,12 +20,12 @@ const options = [
   {
     label: 'Ongoing',
     value: 'ongoing',
-    prepend: <EuiIcon size="s" type="dot" color="danger" />,
+    color: 'danger',
   },
   {
     label: 'Closed',
     value: 'closed',
-    prepend: <EuiIcon size="s" type="dot" color="success" />,
+    color: 'success',
   },
 ];
 
@@ -51,7 +51,7 @@ export function StatusField() {
             onChange={(selected) => {
               return field.onChange(selected[0].value);
             }}
-            singleSelection={{ asPlainText: true }}
+            singleSelection
           />
         )}
       />
