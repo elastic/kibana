@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'dashboard']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -31,11 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to copy a column values to clipboard', async () => {
       const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickCopyColumnValues('@timestamp');
 
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to copy a column name to clipboard', async () => {
       const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickCopyColumnName('@timestamp');
       if (canReadClipboard) {

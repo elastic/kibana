@@ -12,14 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
-    'common',
-    'home',
-    'settings',
-    'discover',
-    'timePicker',
-    'header',
-  ]);
+  const { discover, timePicker, header } = getPageObjects(['discover', 'timePicker', 'header']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
@@ -34,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
@@ -49,11 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultRoute: '/app/discover#/view/ab12e3c0-f231-11e6-9486-733b1ac9221a',
       });
       await browser.navigateTo(deployment.getHostPort());
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await retry.try(async () => {
-        expect(await PageObjects.discover.getCurrentQueryName()).to.be('A Saved Search');
-        expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+        expect(await discover.getCurrentQueryName()).to.be('A Saved Search');
+        expect(await discover.getHitCount()).to.be('14,004');
       });
     });
 
@@ -63,12 +56,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z',to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(extension,host),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*',key:extension.raw,negate:!f,params:(query:jpg),type:phrase),query:(match_phrase:(extension.raw:jpg)))),hideChart:!f,interval:auto,query:(language:lucene,query:media),sort:!(!('@timestamp',desc)))",
       });
       await browser.navigateTo(deployment.getHostPort());
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await retry.try(async () => {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
         expect(await queryBar.getQueryString()).to.be('media');
-        expect(await PageObjects.discover.getHitCount()).to.be('9,109');
+        expect(await discover.getHitCount()).to.be('9,109');
       });
     });
   });
