@@ -100,10 +100,10 @@ async function getHoverItemForFunction(
       const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
       // We only know if it's start or end after first 3 characters (?t_s or ?t_e)
       if (hoveredArg.text.length > 3 && bestMatch) {
-        contents.push({
-          value: `**${bestMatch}**: ${
-            TIME_SYSTEM_DESCRIPTIONS[bestMatch as keyof typeof TIME_SYSTEM_DESCRIPTIONS]
-          }`,
+        Object.entries(TIME_SYSTEM_DESCRIPTIONS).forEach(([key, value]) => {
+          contents.push({
+            value: `**${key}**: ${value}`,
+          });
         });
       }
     }
