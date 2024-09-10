@@ -43,7 +43,7 @@ export const FromCommand: React.FC = () => {
       </div>
       <EuiSpacer size={'m'} />
       <EuiFormRow fullWidth>
-        <EuiButton fullWidth size={'s'} fill color="text" onClick={() => {}}>
+        <EuiButton fullWidth size={'s'} color="text" onClick={() => {}}>
           Add source
         </EuiButton>
       </EuiFormRow>
