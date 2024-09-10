@@ -57,7 +57,7 @@ type GetTotalCountsResults = Pick<
 
 type GetMWTelemetryResults = Pick<
   AlertingUsage,
-  'count_total_mw' | 'count_mw_with_repeate_toggle_on' | 'count_mw_with_filter_alert_toggle_on'
+  'count_mw_total' | 'count_mw_with_repeat_toggle_on' | 'count_mw_with_filter_alert_toggle_on'
 > & {
   errorMessage?: string;
   hasErrors: boolean;
@@ -516,17 +516,17 @@ export async function getMWTelemetry({
       perPage: 100,
     });
 
-    let MWTotalCount = 0;
-    let MWWithFilterAlertToggleON = 0;
-    let MWWithRepeateToggleON = 0;
+    let countTotalMW = 0;
+    let countMWWithRepeatToggleON = 0;
+    let countMWWithFilterAlertToggleON = 0;
     for await (const response of MWFinder.find()) {
       for (const MWSavedObject of response.saved_objects) {
-        MWTotalCount = MWTotalCount + 1;
+        countTotalMW = countTotalMW + 1;
         if (MWSavedObject.attributes.scopedQuery) {
-          MWWithFilterAlertToggleON = MWWithFilterAlertToggleON + 1;
+          countMWWithFilterAlertToggleON = countMWWithFilterAlertToggleON + 1;
         }
         if (MWSavedObject.attributes.rRule.freq) {
-          MWWithRepeateToggleON = MWWithRepeateToggleON + 1;
+          countMWWithRepeatToggleON = countMWWithRepeatToggleON + 1;
         }
       }
     }
@@ -534,9 +534,9 @@ export async function getMWTelemetry({
 
     return {
       hasErrors: false,
-      count_total_mw: MWTotalCount,
-      count_mw_with_repeate_toggle_on: MWWithRepeateToggleON,
-      count_mw_with_filter_alert_toggle_on: MWWithFilterAlertToggleON,
+      count_mw_total: countTotalMW,
+      count_mw_with_repeat_toggle_on: countMWWithRepeatToggleON,
+      count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
     };
   } catch (err) {
     const errorMessage = err?.message ? err.message : err.toString();
@@ -550,8 +550,8 @@ export async function getMWTelemetry({
     return {
       hasErrors: true,
       errorMessage,
-      count_total_mw: 0,
-      count_mw_with_repeate_toggle_on: 0,
+      count_mw_total: 0,
+      count_mw_with_repeat_toggle_on: 0,
       count_mw_with_filter_alert_toggle_on: 0,
     };
   }

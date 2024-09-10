@@ -530,8 +530,8 @@ describe('kibana index telemetry', () => {
         perPage: 100,
       });
       expect(telemetry).toStrictEqual({
-        count_total_mw: 3,
-        count_mw_with_repeate_toggle_on: 2,
+        count_mw_total: 3,
+        count_mw_with_repeat_toggle_on: 2,
         count_mw_with_filter_alert_toggle_on: 1,
         hasErrors: false,
       });
@@ -551,8 +551,8 @@ describe('kibana index telemetry', () => {
     });
 
     expect(telemetry).toStrictEqual({
-      count_total_mw: 0,
-      count_mw_with_repeate_toggle_on: 0,
+      count_mw_total: 0,
+      count_mw_with_repeat_toggle_on: 0,
       count_mw_with_filter_alert_toggle_on: 0,
       hasErrors: true,
       errorMessage: 'Fail',

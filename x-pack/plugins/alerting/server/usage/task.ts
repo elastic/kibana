@@ -165,8 +165,8 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
-                count_total_mw: MWTelemetry.count_total_mw,
-                count_mw_with_repeate_toggle_on: MWTelemetry.count_mw_with_repeate_toggle_on,
+                count_mw_total: MWTelemetry.count_mw_total,
+                count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:
                   MWTelemetry.count_mw_with_filter_alert_toggle_on,
                 count_rules_with_muted_alerts: totalCountAggregations.count_rules_with_muted_alerts,
