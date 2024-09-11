@@ -78,3 +78,16 @@ Existing profiles can be extended using the [`extendProfileProvider`](./profile_
 Example profile provider implementations are located in [`profile_providers/example`](./profile_providers/example).
 
 ## Code sharing
+
+One of the core ideas of the context awareness framework is that Discover is still a single application which should know about which profiles it supports and directly import the code needed to support them. This is why profile registrations are all handled internally to the plugin instead of having a registration system exposed through the plugin contract. This approach comes with several main benefits:
+
+- There is a single, central place where all registrations happen, which is much easier to maintan versus scattered registrations.
+- The Data Discovery team remains aware of which profiles exist and what changes are made. This is critical to ensure the Data Discovery team is able to provide adequate customer and SDH support for Discover.
+- Common code and utilities can be easily shared across profiles since they need to be accessible to Discover by default, rather than being scattered throughout various plugin codebases.
+
+It also comes with an important drawback: **Discover cannot depend on other plugins (e.g. solution plugins) to import code for profiles due to the dependency graph issues it would create.**
+
+This means that in an ideal situation, the code for Discover profiles should either live directly within the Discover codebase, or within dedicated packages which Discover imports from:
+
+- When adding solution specific code directly to the Discover codebase, it should be done in an organized way in order to support shared ownership. For example, the [`profile_providers/security`](./profile_providers/security) folder contains code specific to Security Solution maintained profiles, and an override has been added to the [`CODEOWNERS`](/.github/CODEOWNERS) file to reflect the shared ownership of this folder.
+- When creating a dedicated package for some profile code, the maintaining team can retain full ownership over the package, and Discover is only responsible for importing the functionality and adding it to the associated profile registration.
