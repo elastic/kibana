@@ -34,28 +34,32 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly browser = this.ctx.getService('browser');
 
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
 
-  async findContextMenu(parent?: WebElementWrapper) {
+  async findContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug('findContextMenu');
-    return parent
-      ? await parent.findByTestSubject(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ)
+    return wrapper
+      ? await wrapper.findByTestSubject(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ)
       : await this.testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
   }
 
-  async scrollParentIntoView(parent?: WebElementWrapper) {
-    this.log.debug(`scrollParentIntoView`);
-    if (!parent) parent = await this.testSubjects.find('dashboardPanel');
-    await parent.scrollIntoView({ block: 'end' });
-    await parent.moveMouseTo();
+  async scrollPanelIntoView(wrapper?: WebElementWrapper) {
+    this.log.debug(`scrollPanelIntoView`);
+    if (!wrapper) wrapper = await this.getPanelWrapper();
+    const yOffset = (await wrapper.getPosition()).y - DASHBOARD_TOP_OFFSET;
+    if (yOffset > 0) {
+      this.browser.execute(() => window.scrollBy(0, yOffset));
+    }
+    await wrapper.moveMouseTo();
   }
 
-  async toggleContextMenu(parent?: WebElementWrapper) {
+  async toggleContextMenu(wrapper?: WebElementWrapper) {
     this.log.debug(`toggleContextMenu`);
-    const toggleMenuItem = await this.findContextMenu(parent);
+    const toggleMenuItem = await this.findContextMenu(wrapper);
     await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
 
@@ -70,12 +74,12 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen', { allowHidden: true });
   }
 
-  async openContextMenu(parent?: WebElementWrapper) {
-    this.log.debug(`openContextMenu(${parent}`);
+  async openContextMenu(wrapper?: WebElementWrapper) {
+    this.log.debug(`openContextMenu(${wrapper}`);
     const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen', {
       allowHidden: true,
     });
-    if (!open) await this.toggleContextMenu(parent);
+    if (!open) await this.toggleContextMenu(wrapper);
     await this.expectContextMenuToBeOpen();
   }
 
@@ -85,12 +89,12 @@ export class DashboardPanelActionsService extends FtrService {
     await this.openContextMenu(wrapper);
   }
 
-  async clickPanelAction(testSubject: string, parent?: WebElementWrapper) {
+  async clickPanelAction(testSubject: string, wrapper?: WebElementWrapper) {
     this.log.debug(`clickPanelAction(${testSubject})`);
 
-    await this.scrollParentIntoView(parent);
+    await this.scrollPanelIntoView(wrapper);
     const exists = await this.testSubjects.exists(testSubject, { allowHidden: true });
-    if (!exists) await this.openContextMenu(parent);
+    if (!exists) await this.openContextMenu(wrapper);
     await this.testSubjects.existOrFail(testSubject);
     await this.testSubjects.click(testSubject);
   }
@@ -107,9 +111,9 @@ export class DashboardPanelActionsService extends FtrService {
     }
   }
 
-  async openContextMenuMorePanel(parent?: WebElementWrapper) {
+  async openContextMenuMorePanel(wrapper?: WebElementWrapper) {
     this.log.debug('openContextMenuMorePanel');
-    await this.openContextMenu(parent);
+    await this.openContextMenu(wrapper);
     await this.clickContextMenuMoreItem();
   }
 
@@ -118,9 +122,9 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelActionByTitle(testSubject, title);
   }
 
-  async navigateToEditorFromFlyout(parent?: WebElementWrapper) {
+  async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
     this.log.debug('navigateToEditorFromFlyout');
-    await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, parent);
+    await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
@@ -142,15 +146,15 @@ export class DashboardPanelActionsService extends FtrService {
    * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
-  async clickEdit(parent?: WebElementWrapper) {
+  async clickEdit(wrapper?: WebElementWrapper) {
     this.log.debug(`clickEdit`);
-    await this.scrollParentIntoView(parent);
-    // navigate to the editor
+    await this.scrollPanelIntoView(wrapper);
     if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
+      // navigate to the editor
       await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
-      // open the flyout and then navigate to the editor
     } else {
-      await this.navigateToEditorFromFlyout(parent);
+      // open the flyout and then navigate to the editor
+      await this.navigateToEditorFromFlyout(wrapper);
     }
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
@@ -172,9 +176,9 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
-  async removePanel(parent?: WebElementWrapper) {
+  async removePanel(wrapper?: WebElementWrapper) {
     this.log.debug('removePanel');
-    await this.clickPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, parent);
+    await this.clickPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, wrapper);
   }
 
   async removePanelByTitle(title = '') {
@@ -225,9 +229,9 @@ export class DashboardPanelActionsService extends FtrService {
     return response;
   }
 
-  async openInspector(parent?: WebElementWrapper) {
+  async openInspector(wrapper?: WebElementWrapper) {
     this.log.debug(`openInspector`);
-    await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, parent);
+    await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, wrapper);
   }
 
   async legacyUnlinkFromLibrary(title = '') {
@@ -275,7 +279,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async panelActionExistsByTitle(testSubject: string, title = '') {
     this.log.debug(`panelActionExists(${testSubject}) on "${title}"`);
-    const wrapper = title ? await this.getPanelWrapper(title) : undefined;
+    const wrapper = await this.getPanelWrapper(title);
 
     return wrapper
       ? await this.testSubjects.descendantExists(testSubject, wrapper)
@@ -285,7 +289,7 @@ export class DashboardPanelActionsService extends FtrService {
   async expectExistsPanelAction(testSubject: string, title = '') {
     this.log.debug('expectExistsPanelAction', testSubject, title);
 
-    const wrapper = title ? await this.getPanelWrapper(title) : undefined;
+    const wrapper = await this.getPanelWrapper(title);
 
     const exists = this.panelActionExists(testSubject, wrapper);
 
@@ -322,7 +326,8 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
-    const wrapper = title ? await this.getPanelWrapper(title) : undefined;
+    const wrapper = await this.getPanelWrapper(title);
+
     const exists = this.panelActionExists(testSubject, wrapper);
 
     if (!exists) {
@@ -373,9 +378,9 @@ export class DashboardPanelActionsService extends FtrService {
     throw new Error(`No action matching text "${text}"`);
   }
 
-  async canConvertToLens(parent?: WebElementWrapper) {
+  async canConvertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('canConvertToLens');
-    await this.openContextMenu(parent);
+    await this.openContextMenu(wrapper);
     return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
   }
 
@@ -385,11 +390,11 @@ export class DashboardPanelActionsService extends FtrService {
     return await this.canConvertToLens(wrapper);
   }
 
-  async convertToLens(parent?: WebElementWrapper) {
+  async convertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('convertToLens');
 
     await this.retry.try(async () => {
-      if (!(await this.canConvertToLens(parent))) {
+      if (!(await this.canConvertToLens(wrapper))) {
         throw new Error('Convert to Lens option not found');
       }
 
