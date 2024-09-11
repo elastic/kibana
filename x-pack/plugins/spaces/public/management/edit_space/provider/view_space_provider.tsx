@@ -47,7 +47,7 @@ export interface EditSpaceServices extends EditSpaceProviderProps {
 }
 
 interface EditSpaceClients {
-  spacesManager: EditSpaceProviderProps['spacesManager'];
+  spacesManager: SpacesManager;
   rolesClient: RolesAPIClient;
   privilegesClient: PrivilegesAPIClientPublicContract;
 }
@@ -144,7 +144,3 @@ export const useEditSpaceStore = () => {
   return context;
 };
 
-export const useEditSpaceStoreDispatch = () => {
-  const { dispatch } = useEditSpaceStore();
-  return dispatch;
-};

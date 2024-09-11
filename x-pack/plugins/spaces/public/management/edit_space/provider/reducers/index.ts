@@ -22,7 +22,7 @@ export type IDispatchAction =
 
 export interface IEditSpaceStoreState {
   /** roles assigned to current space */
-  roles: Map<Role['name'], Role>;
+  roles: Map<string, Role>;
 }
 
 export const createSpaceRolesReducer: Reducer<IEditSpaceStoreState, IDispatchAction> = (

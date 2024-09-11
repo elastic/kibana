@@ -80,9 +80,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
                     );
                   }
 
-                  if (errors) {
-                    for (const roleName in errors) {
-                      if (Object.prototype.hasOwnProperty.call(errors, roleName)) {
+for (const [roleName, error] of Object.entries(errors ?? {})) {
                         notifications.toasts.addError(new Error(JSON.stringify(errors[roleName])), {
                           title: `Error updating ${roleName}`,
                         });
