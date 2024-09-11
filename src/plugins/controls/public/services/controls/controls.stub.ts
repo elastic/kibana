@@ -17,24 +17,30 @@ export const controlsServiceFactory = () => getStubControlsService();
 export const getStubControlsService = () => {
   const controlsFactoriesMap: { [key: string]: ControlFactory<any, any> } = {};
 
-  const registerControlFactory = (factory: ControlFactory<any, any>) => {
-    controlsFactoriesMap[factory.type] = factory;
+  const mockRegisterControlFactory = async <
+    State extends object = object,
+    ApiType extends DefaultControlApi = DefaultControlApi
+  >(
+    controlType: string,
+    getFactory: () => Promise<ControlFactory<State, ApiType>>
+  ) => {
+    controlsFactoriesMap[controlType] = (await getFactory()) as ControlFactory<any, any>;
   };
 
-  const getControlFactory = <
+  const mockGetControlFactory = <
     State extends object = object,
     ApiType extends DefaultControlApi = DefaultControlApi
   >(
     type: string
   ) => {
-    return controlsFactoriesMap[type] as ControlFactory<any, any>;
+    return controlsFactoriesMap[type] as ControlFactory<State, ApiType>;
   };
 
   const getAllControlTypes = () => Object.keys(controlsFactoriesMap);
 
   return {
-    registerControlFactory,
-    getControlFactory,
+    registerControlFactory: mockRegisterControlFactory,
+    getControlFactory: mockGetControlFactory,
     getAllControlTypes,
   };
 };
