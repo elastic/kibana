@@ -18,7 +18,9 @@ const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID
 export function TraceIdHighlightField(props: HighlightFieldProps) {
   const {
     share: { url: urlService },
+    core,
   } = getUnifiedDocViewerServices();
+  const canViewApm = core.application.capabilities.apm.show;
 
   const apmLinkToServiceEntityLocator = urlService.locators.get<{ traceId: string }>(
     TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR
@@ -33,7 +35,7 @@ export function TraceIdHighlightField(props: HighlightFieldProps) {
   });
   return (
     <HighlightField {...props}>
-      {({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>}
+      {canViewApm ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink> : undefined}
     </HighlightField>
   );
 }

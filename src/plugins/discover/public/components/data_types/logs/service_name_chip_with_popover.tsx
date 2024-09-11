@@ -18,6 +18,7 @@ const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';
 
 export function ServiceNameChipWithPopover(props: ChipWithPopoverProps) {
   const { share, core } = useDiscoverServices();
+  const canViewApm = core.application.capabilities.apm.show;
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get(
     OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE
   );
@@ -39,7 +40,7 @@ export function ServiceNameChipWithPopover(props: ChipWithPopoverProps) {
 
   return (
     <ChipWithPopover {...props}>
-      {isEntityCentricExperienceSettingEnabled && routeLinkProps
+      {canViewApm && isEntityCentricExperienceSettingEnabled && routeLinkProps
         ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>
         : undefined}
     </ChipWithPopover>

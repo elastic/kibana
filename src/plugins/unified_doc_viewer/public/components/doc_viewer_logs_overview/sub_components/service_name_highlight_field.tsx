@@ -21,6 +21,7 @@ export function ServiceNameHighlightField(props: HighlightFieldProps) {
     share: { url: urlService },
     core,
   } = getUnifiedDocViewerServices();
+  const canViewApm = core.application.capabilities.apm.show;
 
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get(
     OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE
@@ -43,7 +44,7 @@ export function ServiceNameHighlightField(props: HighlightFieldProps) {
 
   return (
     <HighlightField {...props}>
-      {isEntityCentricExperienceSettingEnabled && routeLinkProps
+      {canViewApm && isEntityCentricExperienceSettingEnabled && routeLinkProps
         ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>
         : undefined}
     </HighlightField>
