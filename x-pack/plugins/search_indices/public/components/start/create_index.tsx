@@ -11,8 +11,10 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiIcon,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -65,7 +67,7 @@ export const CreateIndexForm = ({
   };
 
   return (
-    <>
+    <EuiForm data-test-subj="createIndexUIView" fullWidth>
       <EuiFormRow
         label={i18n.translate('xpack.searchIndices.startPage.createIndex.name.label', {
           defaultMessage: 'Name your index',
@@ -93,6 +95,7 @@ export const CreateIndexForm = ({
           )}
         />
       </EuiFormRow>
+      <EuiSpacer />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           {userPrivileges?.privileges?.canCreateIndex === false ? (
@@ -149,6 +152,6 @@ export const CreateIndexForm = ({
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiForm>
   );
 };

@@ -41,7 +41,7 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
   }, [selectedLanguage]);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <LanguageSelector
