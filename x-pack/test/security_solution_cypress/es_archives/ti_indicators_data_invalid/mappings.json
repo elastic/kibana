@@ -1,0 +1,1599 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-ti_abusech.malware-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "ti_abusech"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-ti_abusech.malware-*"
+      ],
+      "name": "logs-ti_abusech.malware",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "ti_abusech"
+            }
+          },
+          "date_detection": false,
+          "dynamic_templates": [
+            {
+              "strings_as_keyword": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "abusech": {
+              "properties": {
+                "malware": {
+                  "properties": {
+                    "signature": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "virustotal": {
+                      "properties": {
+                        "link": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "percent": {
+                          "type": "float"
+                        },
+                        "result": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "account": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "availability_zone": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "image": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "machine": {
+                  "properties": {
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "project": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "region": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "image": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "labels": {
+                  "type": "object"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "message": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "category": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "created": {
+                  "type": "date"
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "ti_abusech.malware"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "type": "date"
+                },
+                "kind": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "ti_abusech"
+                },
+                "original": {
+                  "doc_values": false,
+                  "ignore_above": 1024,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "containerized": {
+                  "type": "boolean"
+                },
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "mac": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "os": {
+                  "properties": {
+                    "build": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "codename": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "family": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "kernel": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "platform": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "file": {
+                  "properties": {
+                    "path": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "flags": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "offset": {
+                  "type": "long"
+                }
+              }
+            },
+            "message": {
+              "type": "match_only_text"
+            },
+            "related": {
+              "properties": {
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "tags": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "threat": {
+              "properties": {
+                "feed": {
+                  "properties": {
+                    "dashboard_id": {
+                      "type": "constant_keyword",
+                      "value": "ti_abusech-c0d8d1f0-3b20-11ec-ae50-2fdf1e96c6a6"
+                    },
+                    "name": {
+                      "type": "constant_keyword",
+                      "value": "AbuseCH Malware"
+                    }
+                  }
+                },
+                "indicator": {
+                  "properties": {
+                    "file": {
+                      "properties": {
+                        "hash": {
+                          "properties": {
+                            "md5": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "sha256": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "ssdeep": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "tlsh": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "pe": {
+                          "properties": {
+                            "imphash": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "long"
+                        },
+                        "type": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "first_seen": {
+                      "type": "date"
+                    },
+                    "provider": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "codec": "best_compression",
+            "default_pipeline": "logs-ti_abusech.malware-1.3.1",
+            "final_pipeline": ".fleet_final_pipeline-1",
+            "lifecycle": {
+              "name": "logs"
+            },
+            "mapping": {
+              "total_fields": {
+                "limit": "10000"
+              }
+            },
+            "query": {
+              "default_field": [
+                "cloud.account.id",
+                "cloud.availability_zone",
+                "cloud.instance.id",
+                "cloud.instance.name",
+                "cloud.machine.type",
+                "cloud.provider",
+                "cloud.region",
+                "cloud.project.id",
+                "cloud.image.id",
+                "container.id",
+                "container.image.name",
+                "container.name",
+                "host.architecture",
+                "host.domain",
+                "host.hostname",
+                "host.id",
+                "host.mac",
+                "host.name",
+                "host.os.family",
+                "host.os.kernel",
+                "host.os.name",
+                "host.os.platform",
+                "host.os.version",
+                "host.os.build",
+                "host.os.codename",
+                "host.type",
+                "event.kind",
+                "event.category",
+                "event.type",
+                "event.original",
+                "threat.indicator.type",
+                "threat.indicator.file.type",
+                "threat.indicator.file.hash.md5",
+                "threat.indicator.file.hash.sha256",
+                "threat.indicator.file.hash.ssdeep",
+                "threat.indicator.file.hash.tlsh",
+                "threat.indicator.file.pe.imphash",
+                "threat.indicator.provider",
+                "input.type",
+                "log.flags",
+                "log.file.path",
+                "ecs.version",
+                "message",
+                "error.message",
+                "tags",
+                "related.hash",
+                "abusech.malware.signature",
+                "abusech.malware.virustotal.result",
+                "abusech.malware.virustotal.link"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-ti_abusech.malwarebazaar-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "ti_abusech"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-ti_abusech.malwarebazaar-*"
+      ],
+      "name": "logs-ti_abusech.malwarebazaar",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "ti_abusech"
+            }
+          },
+          "date_detection": false,
+          "dynamic_templates": [
+            {
+              "strings_as_keyword": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "abusech": {
+              "properties": {
+                "malwarebazaar": {
+                  "properties": {
+                    "anonymous": {
+                      "type": "long"
+                    },
+                    "code_sign": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "intelligence": {
+                      "properties": {
+                        "downloads": {
+                          "type": "long"
+                        },
+                        "mail": {
+                          "properties": {
+                            "Generic": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "IT": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "uploads": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "tags": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "account": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "availability_zone": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "image": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "machine": {
+                  "properties": {
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "project": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "region": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "image": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "labels": {
+                  "type": "object"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "message": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "category": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "created": {
+                  "type": "date"
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "ti_abusech.malwarebazaar"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "type": "date"
+                },
+                "kind": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "ti_abusech"
+                },
+                "original": {
+                  "doc_values": false,
+                  "ignore_above": 1024,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "containerized": {
+                  "type": "boolean"
+                },
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "mac": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "os": {
+                  "properties": {
+                    "build": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "codename": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "family": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "kernel": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "platform": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "file": {
+                  "properties": {
+                    "path": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "flags": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "offset": {
+                  "type": "long"
+                }
+              }
+            },
+            "message": {
+              "type": "match_only_text"
+            },
+            "related": {
+              "properties": {
+                "hash": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "tags": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "threat": {
+              "properties": {
+                "feed": {
+                  "properties": {
+                    "dashboard_id": {
+                      "type": "constant_keyword",
+                      "value": "ti_abusech-c0d8d1f0-3b20-11ec-ae50-2fdf1e96c6a6"
+                    },
+                    "name": {
+                      "type": "constant_keyword",
+                      "value": "AbuseCH MalwareBazaar"
+                    }
+                  }
+                },
+                "indicator": {
+                  "properties": {
+                    "file": {
+                      "properties": {
+                        "elf": {
+                          "properties": {
+                            "telfhash": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "extension": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "hash": {
+                          "properties": {
+                            "md5": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "sha1": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "sha256": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "sha384": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "ssdeep": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "tlsh": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "mime_type": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "pe": {
+                          "properties": {
+                            "imphash": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "long"
+                        },
+                        "type": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "x509": {
+                          "properties": {
+                            "issuer": {
+                              "properties": {
+                                "common_name": {
+                                  "ignore_above": 1024,
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "not_after": {
+                              "type": "date"
+                            },
+                            "not_before": {
+                              "type": "date"
+                            },
+                            "public_key_algorithm": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "serial_number": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "subject": {
+                              "properties": {
+                                "common_name": {
+                                  "ignore_above": 1024,
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "first_seen": {
+                      "type": "date"
+                    },
+                    "geo": {
+                      "properties": {
+                        "country_iso_code": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "last_seen": {
+                      "type": "date"
+                    },
+                    "provider": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "software": {
+                  "properties": {
+                    "alias": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "codec": "best_compression",
+            "default_pipeline": "logs-ti_abusech.malwarebazaar-1.3.1",
+            "final_pipeline": ".fleet_final_pipeline-1",
+            "lifecycle": {
+              "name": "logs"
+            },
+            "mapping": {
+              "total_fields": {
+                "limit": "10000"
+              }
+            },
+            "query": {
+              "default_field": [
+                "cloud.account.id",
+                "cloud.availability_zone",
+                "cloud.instance.id",
+                "cloud.instance.name",
+                "cloud.machine.type",
+                "cloud.provider",
+                "cloud.region",
+                "cloud.project.id",
+                "cloud.image.id",
+                "container.id",
+                "container.image.name",
+                "container.name",
+                "host.architecture",
+                "host.domain",
+                "host.hostname",
+                "host.id",
+                "host.mac",
+                "host.name",
+                "host.os.family",
+                "host.os.kernel",
+                "host.os.name",
+                "host.os.platform",
+                "host.os.version",
+                "host.os.build",
+                "host.os.codename",
+                "host.type",
+                "event.kind",
+                "event.category",
+                "event.type",
+                "event.original",
+                "threat.indicator.type",
+                "threat.indicator.file.type",
+                "threat.indicator.file.name",
+                "threat.indicator.file.extension",
+                "threat.indicator.file.hash.sha1",
+                "threat.indicator.file.hash.md5",
+                "threat.indicator.file.hash.sha256",
+                "threat.indicator.file.hash.ssdeep",
+                "threat.indicator.file.hash.sha384",
+                "threat.indicator.file.hash.tlsh",
+                "threat.indicator.file.mime_type",
+                "threat.indicator.file.pe.imphash",
+                "threat.indicator.file.elf.telfhash",
+                "threat.indicator.file.x509.subject.common_name",
+                "threat.indicator.file.x509.issuer.common_name",
+                "threat.indicator.file.x509.public_key_algorithm",
+                "threat.indicator.file.x509.serial_number",
+                "threat.indicator.provider",
+                "threat.indicator.geo.country_iso_code",
+                "threat.software.alias",
+                "input.type",
+                "log.flags",
+                "log.file.path",
+                "ecs.version",
+                "message",
+                "error.message",
+                "tags",
+                "related.hash",
+                "abusech.malwarebazaar.tags",
+                "abusech.malwarebazaar.intelligence.mail.Generic",
+                "abusech.malwarebazaar.intelligence.mail.IT",
+                "abusech.malwarebazaar.code_sign"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-ti_abusech.url-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "ti_abusech"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-ti_abusech.url-*"
+      ],
+      "name": "logs-ti_abusech.url",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "ti_abusech"
+            }
+          },
+          "date_detection": false,
+          "dynamic_templates": [
+            {
+              "strings_as_keyword": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "type": "date"
+            },
+            "abusech": {
+              "properties": {
+                "url": {
+                  "properties": {
+                    "blacklists": {
+                      "properties": {
+                        "spamhaus_dbl": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "surbl": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "larted": {
+                      "type": "boolean"
+                    },
+                    "reporter": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "tags": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "threat": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "url_status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "urlhaus_reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "cloud": {
+              "properties": {
+                "account": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "availability_zone": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "image": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "machine": {
+                  "properties": {
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "project": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "provider": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "region": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "container": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "image": {
+                  "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "labels": {
+                  "type": "object"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "ecs": {
+              "properties": {
+                "version": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "error": {
+              "properties": {
+                "message": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "category": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "created": {
+                  "type": "date"
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "ti_abusech.url"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "type": "date"
+                },
+                "kind": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "ti_abusech"
+                },
+                "original": {
+                  "doc_values": false,
+                  "ignore_above": 1024,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "architecture": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "containerized": {
+                  "type": "boolean"
+                },
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "mac": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "os": {
+                  "properties": {
+                    "build": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "codename": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "family": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "kernel": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "platform": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "file": {
+                  "properties": {
+                    "path": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "flags": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "offset": {
+                  "type": "long"
+                }
+              }
+            },
+            "message": {
+              "type": "match_only_text"
+            },
+            "tags": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "threat": {
+              "properties": {
+                "feed": {
+                  "properties": {
+                    "dashboard_id": {
+                      "type": "constant_keyword",
+                      "value": "ti_abusech-c0d8d1f0-3b20-11ec-ae50-2fdf1e96c6a6"
+                    },
+                    "name": {
+                      "type": "constant_keyword",
+                      "value": "AbuseCH URL"
+                    }
+                  }
+                },
+                "indicator": {
+                  "properties": {
+                    "first_seen": {
+                      "type": "date"
+                    },
+                    "ip": {
+                      "type": "ip"
+                    },
+                    "provider": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "reference": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "url": {
+                      "properties": {
+                        "domain": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "extension": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "full": {
+                          "fields": {
+                            "text": {
+                              "type": "match_only_text"
+                            }
+                          },
+                          "ignore_above": 1024,
+                          "type": "wildcard"
+                        },
+                        "original": {
+                          "fields": {
+                            "text": {
+                              "type": "match_only_text"
+                            }
+                          },
+                          "ignore_above": 1024,
+                          "type": "wildcard"
+                        },
+                        "path": {
+                          "ignore_above": 1024,
+                          "type": "wildcard"
+                        },
+                        "port": {
+                          "type": "long"
+                        },
+                        "query": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "scheme": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "codec": "best_compression",
+            "default_pipeline": "logs-ti_abusech.url-1.3.1",
+            "final_pipeline": ".fleet_final_pipeline-1",
+            "lifecycle": {
+              "name": "logs"
+            },
+            "mapping": {
+              "total_fields": {
+                "limit": "10000"
+              }
+            },
+            "query": {
+              "default_field": [
+                "cloud.account.id",
+                "cloud.availability_zone",
+                "cloud.instance.id",
+                "cloud.instance.name",
+                "cloud.machine.type",
+                "cloud.provider",
+                "cloud.region",
+                "cloud.project.id",
+                "cloud.image.id",
+                "container.id",
+                "container.image.name",
+                "container.name",
+                "host.architecture",
+                "host.domain",
+                "host.hostname",
+                "host.id",
+                "host.mac",
+                "host.name",
+                "host.os.family",
+                "host.os.kernel",
+                "host.os.name",
+                "host.os.platform",
+                "host.os.version",
+                "host.os.build",
+                "host.os.codename",
+                "host.type",
+                "event.kind",
+                "event.category",
+                "event.type",
+                "event.original",
+                "threat.indicator.type",
+                "threat.indicator.reference",
+                "threat.indicator.url.domain",
+                "threat.indicator.url.full",
+                "threat.indicator.url.extension",
+                "threat.indicator.url.original",
+                "threat.indicator.url.path",
+                "threat.indicator.url.scheme",
+                "threat.indicator.url.query",
+                "threat.indicator.provider",
+                "input.type",
+                "log.flags",
+                "log.file.path",
+                "ecs.version",
+                "message",
+                "error.message",
+                "tags",
+                "abusech.url.id",
+                "abusech.url.urlhaus_reference",
+                "abusech.url.url_status",
+                "abusech.url.threat",
+                "abusech.url.reporter",
+                "abusech.url.tags",
+                "abusech.url.blacklists.spamhaus_dbl",
+                "abusech.url.blacklists.surbl"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
