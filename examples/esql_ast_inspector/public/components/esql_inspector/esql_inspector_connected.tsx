@@ -20,7 +20,7 @@ export const EsqlInspectorConnected: React.FC<EsqlInspectorConnectedProps> = (pr
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexGroup style={{ maxWidth: 1200 }}>
-        <EuiFlexItem>
+        <EuiFlexItem style={{ width: 400, minWidth: 400 }}>
           <Preview />
         </EuiFlexItem>
         <EuiFlexItem>

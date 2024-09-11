@@ -16,6 +16,7 @@ const blockCss = css({
   position: 'relative',
   width: '100%',
   fontSize: '18px',
+  lineHeight: '1.3',
   fontFamily:
     "'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace",
 });
@@ -28,6 +29,7 @@ const backdropCss = css({
   pointerEvents: 'none',
   userSelect: 'none',
   whiteSpace: 'pre',
+  color: 'rgba(255, 255, 255, 0.01)',
 });
 
 const inputCss = css({

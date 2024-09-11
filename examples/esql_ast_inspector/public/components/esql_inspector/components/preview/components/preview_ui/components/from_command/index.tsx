@@ -25,6 +25,7 @@ export const FromCommand: React.FC = () => {
   let i = 0;
 
   for (const arg of from.args) {
+    if ((arg as any).type !== 'source') continue;
     sources.push(<Source key={i} index={i + 1} node={arg as ESQLSource} />);
     i++;
   }
@@ -36,7 +37,7 @@ export const FromCommand: React.FC = () => {
       </EuiTitle>
       <div
         css={{
-          paddingTop: 16,
+          paddingTop: 4,
         }}
       >
         {sources}

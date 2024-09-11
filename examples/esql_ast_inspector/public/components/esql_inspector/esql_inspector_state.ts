@@ -8,6 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ESQLCommand, EsqlQuery, Walker } from '@kbn/esql-ast';
+import { ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { Annotation } from '../annotations';
 import { highlight } from './helpers';
 
@@ -25,9 +26,11 @@ export class EsqlInspectorState {
   public readonly highlight$ = new BehaviorSubject<Annotation[]>([]);
   public readonly from$ = new BehaviorSubject<ESQLCommand | null>(null);
   public readonly limit$ = new BehaviorSubject<ESQLCommand | null>(null);
+  public readonly focusedNode$ = new BehaviorSubject<ESQLProperNode | null>(null);
 
   constructor() {
     this.src$.subscribe((src) => {
+      this.focusedNode$.next(null);
       try {
         this.query$.next(EsqlQuery.fromSrc(src, { withFormatting: true }));
       } catch (e) {

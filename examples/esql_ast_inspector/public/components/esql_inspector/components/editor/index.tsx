@@ -11,11 +11,27 @@ import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { EsqlEditor } from '../../../esql_editor/esql_editor';
 import { useEsqlInspector } from '../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
+import { Annotation } from '../../../annotations';
 
 export const Editor: React.FC = (props) => {
   const state = useEsqlInspector();
   const src = useBehaviorSubject(state.src$);
   const highlight = useBehaviorSubject(state.highlight$);
+  const focusedNode = useBehaviorSubject(state.focusedNode$);
+
+  const backdrop: Annotation[] = [];
+
+  if (focusedNode) {
+    const location = focusedNode.location;
+
+    if (location) {
+      backdrop.push([
+        location.min,
+        location.max + 1,
+        (text) => <span style={{ background: 'rgb(190, 237, 224)' }}>{text}</span>,
+      ]);
+    }
+  }
 
   return (
     <>
@@ -41,6 +57,7 @@ export const Editor: React.FC = (props) => {
         <EsqlEditor
           src={src}
           onChange={(newSrc) => state.src$.next(newSrc)}
+          backdrop={backdrop}
           highlight={highlight}
         />
       </EuiPanel>
