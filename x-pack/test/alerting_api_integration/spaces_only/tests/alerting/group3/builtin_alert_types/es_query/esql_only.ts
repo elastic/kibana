@@ -200,7 +200,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredName).to.be('fire then recovers');
       expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
       expect(recoveredMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
     });
 
