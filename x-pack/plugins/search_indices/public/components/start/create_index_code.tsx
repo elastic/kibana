@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
@@ -42,12 +42,6 @@ export const CreateIndexCodeView = ({ createIndexForm }: CreateIndexCodeViewProp
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiPanel color="subdued">
-          <div>TODO - API KEY Panel</div>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiHorizontalRule />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <LanguageSelector
