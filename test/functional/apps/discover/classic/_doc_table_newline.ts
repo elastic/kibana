@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList']);
+  const { common, unifiedFieldList } = getPageObjects(['common', 'unifiedFieldList']);
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'newline-test',
         'doc_table:legacy': true,
       });
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should break text on newlines', async function () {
-      await PageObjects.unifiedFieldList.clickFieldListItemToggle('message');
+      await unifiedFieldList.clickFieldListItemToggle('message');
       const dscTableRows = await find.allByCssSelector('.kbnDocTable__row');
 
       await retry.waitFor('height of multi-line content > single-line content', async () => {
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const heightWithNewline = await dscTableRows[1].getAttribute('clientHeight');
         log.debug(`Without newlines: ${heightWithoutNewline}, With newlines: ${heightWithNewline}`);
 
-        await PageObjects.common.sleep(10000);
+        await common.sleep(10000);
         return Number(heightWithNewline) > Number(heightWithoutNewline);
       });
     });

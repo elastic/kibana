@@ -11,6 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
+import { isNumber } from 'lodash';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   MlServerDefaults,
@@ -300,6 +301,12 @@ export function mlApiProvider(httpService: HttpService) {
       start?: number;
       end?: number;
     }) {
+      // if the end timestamp is a number, add one ms to it to make it
+      // inclusive of the end of the data
+      if (isNumber(end)) {
+        end++;
+      }
+
       const body = JSON.stringify({
         ...(start !== undefined ? { start } : {}),
         ...(end !== undefined ? { end } : {}),

@@ -10,11 +10,14 @@ import { SamplesFormatName } from '../../common/api/model/common_attributes';
 export const logFormatDetectionTestState = {
   lastExecutedChain: 'testchain',
   logSamples: ['{"test1": "test1"}'],
+  jsonSamples: ['{"test1": "test1"}'],
   exAnswer: 'testanswer',
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',
   finalized: false,
-  samplesFormat: { name: SamplesFormatName.Values.json },
+  samplesFormat: { name: SamplesFormatName.Values.structured },
+  header: true,
   ecsVersion: 'testVersion',
   results: { test1: 'test1' },
+  additionalProcessors: [{ kv: { field: 'test', target_field: 'newtest' } }],
 };

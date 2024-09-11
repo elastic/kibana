@@ -223,9 +223,9 @@ describe('Layer Data Panel', () => {
     return render(<LayerPanel {...defaultProps} />);
   };
 
-  it('should list all index patterns', () => {
+  it('should list all index patterns', async () => {
     renderLayerPanel();
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
     const dataviewOptions = screen
       .getAllByRole('option')
       .map((option) => within(option).getByTestId('fullText').textContent);
@@ -237,9 +237,9 @@ describe('Layer Data Panel', () => {
     ]);
   });
 
-  it('should switch data panel to target index pattern', () => {
+  it('should switch data panel to target index pattern', async () => {
     renderLayerPanel();
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
     const dataviewOptions = screen.getAllByRole('option');
     fireEvent.click(dataviewOptions[0]);
     expect(defaultProps.onChangeIndexPattern).toHaveBeenCalledWith('3');

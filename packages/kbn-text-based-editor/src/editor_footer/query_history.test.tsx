@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { QueryHistoryAction, getTableColumns, QueryHistory, QueryColumn } from './query_history';
+import { QueryHistoryAction, getTableColumns, QueryColumn } from './query_history';
 import { render, screen } from '@testing-library/react';
 
 jest.mock('../history_local_storage', () => {
@@ -21,7 +21,6 @@ jest.mock('../history_local_storage', () => {
         timeZone: 'Browser',
         timeRan: 'Mar. 25, 24 08:45:27',
         queryRunning: false,
-        duration: '2ms',
         status: 'success',
       },
     ],
@@ -79,16 +78,6 @@ describe('QueryHistory', () => {
           width: '240px',
         },
         {
-          'data-test-subj': 'lastDuration',
-          field: 'duration',
-          name: 'Last duration',
-          sortable: false,
-          width: '120px',
-          css: {
-            justifyContent: 'flex-end',
-          },
-        },
-        {
           actions: [],
           'data-test-subj': 'actions',
           name: '',
@@ -127,43 +116,12 @@ describe('QueryHistory', () => {
         render: expect.anything(),
       },
       {
-        'data-test-subj': 'lastDuration',
-        field: 'duration',
-        name: 'Last duration',
-        sortable: false,
-        width: 'auto',
-        css: {
-          justifyContent: 'flex-end',
-        },
-      },
-      {
         actions: [],
         'data-test-subj': 'actions',
         name: '',
         width: 'auto',
       },
     ]);
-  });
-
-  describe('QueryHistory component', () => {
-    it('should not fetch the query items if refetchHistoryItems is not given', async () => {
-      render(<QueryHistory onUpdateAndSubmit={jest.fn()} containerWidth={400} containerCSS={''} />);
-      expect(screen.getByRole('table')).toHaveTextContent('No items found');
-    });
-
-    it('should fetch the query items if refetchHistoryItems is given ', async () => {
-      render(
-        <QueryHistory
-          onUpdateAndSubmit={jest.fn()}
-          containerWidth={400}
-          containerCSS={''}
-          refetchHistoryItems
-        />
-      );
-      expect(screen.getByRole('table')).toHaveTextContent(
-        'Time ranRecent queriesLast durationMar. 25, 24 08:45:27from kibana_sample_data_flights | limit 102ms'
-      );
-    });
   });
 
   describe('Querystring column', () => {
