@@ -9,7 +9,7 @@
 
 import React, { PropsWithChildren } from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper, ComponentType } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { pluginServices } from '../services/plugin_services';
@@ -58,7 +58,9 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingP
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardListing {...props} />, { wrappingComponent });
+  const component = mount(<DashboardListing {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 
