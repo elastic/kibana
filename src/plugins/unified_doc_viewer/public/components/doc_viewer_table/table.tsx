@@ -177,7 +177,7 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const { onFilterField, ...tableFiltersProps } = useTableFilters(storage);
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean): FieldRow => {
@@ -386,10 +386,11 @@ export const DocViewerTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={isDetails}
+          onFindSearchTermMatch={onFindSearchTermMatch}
         />
       );
     },
-    [rows, tableFiltersProps.searchTerm]
+    [rows, tableFiltersProps.searchTerm, onFindSearchTermMatch]
   );
 
   const renderCellPopover = useCallback(

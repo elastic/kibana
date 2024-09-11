@@ -109,8 +109,9 @@ const getStoredFieldTypes = (storage: Storage) => {
   return Array.isArray(parsedFieldTypes) ? parsedFieldTypes : [];
 };
 
-interface UseTableFiltersReturn extends TableFiltersCommonProps {
+export interface UseTableFiltersReturn extends TableFiltersCommonProps {
   onFilterField: (row: FieldRow) => boolean;
+  onFindSearchTermMatch: (row: FieldRow, term: string) => 'name' | 'value' | null;
 }
 
 export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
@@ -135,17 +136,32 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
     [storage, setSelectedFieldTypes]
   );
 
-  const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
-    (row) => {
-      const { fieldType, name, dataViewField } = row;
-      const term = searchTerm?.trim();
+  const onFindSearchTermMatch: UseTableFiltersReturn['onFindSearchTermMatch'] = useCallback(
+    (row, term) => {
+      const { name, dataViewField } = row;
+
+      if (fieldNameWildcardMatcher({ name, displayName: dataViewField?.customLabel }, term)) {
+        return 'name';
+      }
 
       if (
-        term &&
-        !fieldNameWildcardMatcher({ name, displayName: dataViewField?.customLabel }, term) &&
-        !fieldNameWildcardMatcher({ name: row.formattedAsText || '' }, term) &&
-        !fieldNameWildcardMatcher({ name: JSON.stringify(row.flattenedValue) || '' }, term)
+        fieldNameWildcardMatcher({ name: row.formattedAsText || '' }, term) ||
+        fieldNameWildcardMatcher({ name: JSON.stringify(row.flattenedValue) || '' }, term)
       ) {
+        return 'value';
+      }
+
+      return null;
+    },
+    []
+  );
+
+  const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
+    (row) => {
+      const { fieldType } = row;
+      const term = searchTerm?.trim();
+
+      if (term && !onFindSearchTermMatch(row, term)) {
         return false;
       }
 
@@ -155,7 +171,7 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
 
       return true;
     },
-    [searchTerm, selectedFieldTypes]
+    [searchTerm, selectedFieldTypes, onFindSearchTermMatch]
   );
 
   return useMemo(
@@ -167,7 +183,15 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
       onChangeFieldTypes,
       // the actual filtering function
       onFilterField,
+      onFindSearchTermMatch,
     }),
-    [searchTerm, onChangeSearchTerm, selectedFieldTypes, onChangeFieldTypes, onFilterField]
+    [
+      searchTerm,
+      onChangeSearchTerm,
+      selectedFieldTypes,
+      onChangeFieldTypes,
+      onFilterField,
+      onFindSearchTermMatch,
+    ]
   );
 };

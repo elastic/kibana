@@ -102,6 +102,7 @@ type TableFieldValueProps = Pick<FieldRecordLegacy['field'], 'field'> & {
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
   isLegacy?: boolean; // true when inside legacy table
+  isHighLighted?: boolean; // whether it's matching a search term
 };
 
 export const TableFieldValue = ({
@@ -111,6 +112,7 @@ export const TableFieldValue = ({
   ignoreReason,
   isDetails,
   isLegacy,
+  isHighLighted,
 }: TableFieldValueProps) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = getUnifiedDocViewerServices();
@@ -158,6 +160,7 @@ export const TableFieldValue = ({
 
   const valueClasses = classnames('kbnDocViewer__value', {
     'kbnDocViewer__value--truncated': shouldTruncate,
+    'kbnDocViewer__value--highlighted': isHighLighted && !isDetails,
   });
 
   return (
