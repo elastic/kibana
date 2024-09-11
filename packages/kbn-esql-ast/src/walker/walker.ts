@@ -8,9 +8,11 @@
 
 import type {
   ESQLAstCommand,
+  ESQLAstComment,
   ESQLAstExpression,
   ESQLAstItem,
   ESQLAstNode,
+  ESQLAstNodeFormatting,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -225,6 +227,58 @@ export class Walker {
     name: string
   ): boolean => {
     return !!Walker.findFunction(node, (fn) => fn.name === name);
+  };
+
+  public static readonly visitComments = (
+    root: ESQLAstNode | ESQLAstNode[],
+    callback: (
+      comment: ESQLAstComment,
+      node: ESQLProperNode,
+      attachment: keyof ESQLAstNodeFormatting
+    ) => void
+  ): void => {
+    Walker.walk(root, {
+      visitAny: (node) => {
+        const formatting = node.formatting;
+        if (!formatting) return;
+
+        if (formatting.top) {
+          for (const decoration of formatting.top) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'top');
+            }
+          }
+        }
+
+        if (formatting.left) {
+          for (const decoration of formatting.left) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'left');
+            }
+          }
+        }
+
+        if (formatting.right) {
+          for (const decoration of formatting.right) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'right');
+            }
+          }
+        }
+
+        if (formatting.rightSingleLine) {
+          callback(formatting.rightSingleLine, node, 'rightSingleLine');
+        }
+
+        if (formatting.bottom) {
+          for (const decoration of formatting.bottom) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'bottom');
+            }
+          }
+        }
+      },
+    });
   };
 
   constructor(protected readonly options: WalkerOptions) {}
