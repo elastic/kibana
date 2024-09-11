@@ -16,7 +16,6 @@
 import apm, { Logger } from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
-import { omit } from 'lodash';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   TaskClaimerOpts,
@@ -24,7 +23,13 @@ import {
   getEmptyClaimOwnershipResult,
   getExcludedTaskTypes,
 } from '.';
-import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion, TaskCost } from '../task';
+import {
+  ConcreteTaskInstance,
+  TaskStatus,
+  ConcreteTaskInstanceVersion,
+  TaskCost,
+  PartialConcreteTaskInstance,
+} from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
@@ -188,12 +193,11 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   // build the updated task objects we'll claim
   const now = new Date();
-  const taskUpdates: ConcreteTaskInstance[] = [];
+  const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
     taskUpdates.push({
-      // omits "enabled" field from task updates so we don't overwrite
-      // any user initiated changes to "enabled" while the task was running
-      ...omit(task, 'enabled'),
+      id: task.id,
+      version: task.version,
       scheduledAt:
         task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
           ? task.retryAt
@@ -207,65 +211,74 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // perform the task object updates, deal with errors
-  const updatedTasks: ConcreteTaskInstance[] = [];
+  const updatedTaskIds: string[] = [];
   let conflicts = staleTasks.length;
   let bulkUpdateErrors = 0;
   let bulkGetErrors = 0;
 
-  const updateResults = await taskStore.bulkUpdate(taskUpdates, {
-    validate: false,
-    excludeLargeFields: true,
-  });
+  const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
   for (const updateResult of updateResults) {
     if (isOk(updateResult)) {
-      updatedTasks.push(updateResult.value);
+      updatedTaskIds.push(updateResult.value.id);
     } else {
-      const { id, type, error } = updateResult.error;
-      if (error.statusCode === 409) {
+      const { id, type, error, status } = updateResult.error;
+
+      // check for 409 conflict errors
+      if (status === 409) {
         conflicts++;
       } else {
-        logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+        logger.error(
+          `Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`,
+          logMeta
+        );
         bulkUpdateErrors++;
       }
     }
   }
 
   // perform an mget to get the full task instance for claiming
-  const fullTasksToRun = (await taskStore.bulkGet(updatedTasks.map((task) => task.id))).reduce<
-    ConcreteTaskInstance[]
-  >((acc, task) => {
-    if (isOk(task)) {
-      acc.push(task.value);
-    } else {
-      const { id, type, error } = task.error;
-      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`, logMeta);
-      bulkGetErrors++;
-    }
-    return acc;
-  }, []);
+  const fullTasksToRun = (await taskStore.bulkGet(updatedTaskIds)).reduce<ConcreteTaskInstance[]>(
+    (acc, task) => {
+      if (isOk(task)) {
+        acc.push(task.value);
+      } else {
+        const { id, type, error } = task.error;
+        logger.error(
+          `Error getting full task ${id}:${type} during claim: ${error.message}`,
+          logMeta
+        );
+        bulkGetErrors++;
+      }
+      return acc;
+    },
+    []
+  );
 
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
   let removedCount = 0;
   if (removedTasks.length > 0) {
     const tasksToRemove = Array.from(removedTasks);
+    const tasksToRemoveUpdates: PartialConcreteTaskInstance[] = [];
     for (const task of tasksToRemove) {
-      task.status = TaskStatus.Unrecognized;
+      tasksToRemoveUpdates.push({
+        id: task.id,
+        status: TaskStatus.Unrecognized,
+      });
     }
 
     // don't worry too much about errors, we'll get them next time
     try {
-      const removeResults = await taskStore.bulkUpdate(tasksToRemove, {
-        validate: false,
-        excludeLargeFields: true,
-      });
+      const removeResults = await taskStore.bulkPartialUpdate(tasksToRemoveUpdates);
       for (const removeResult of removeResults) {
         if (isOk(removeResult)) {
           removedCount++;
         } else {
           const { id, type, error } = removeResult.error;
           logger.warn(
-            `Error updating task ${id}:${type} to mark as unrecognized during claim: ${error.message}`,
+            `Error updating task ${id}:${type} to mark as unrecognized during claim: ${JSON.stringify(
+              error
+            )}`,
             logMeta
           );
         }
