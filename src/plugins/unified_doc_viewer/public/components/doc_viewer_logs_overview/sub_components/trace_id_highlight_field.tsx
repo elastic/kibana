@@ -35,7 +35,16 @@ export function TraceIdHighlightField(props: HighlightFieldProps) {
   });
   return (
     <HighlightField {...props}>
-      {canViewApm ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink> : undefined}
+      {canViewApm
+        ? ({ content }) => (
+            <EuiLink
+              {...routeLinkProps}
+              data-test-subj="unifiedDocViewLogsOverviewTraceIdHighlightLink"
+            >
+              {content}
+            </EuiLink>
+          )
+        : undefined}
     </HighlightField>
   );
 }

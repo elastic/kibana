@@ -45,7 +45,14 @@ export function ServiceNameHighlightField(props: HighlightFieldProps) {
   return (
     <HighlightField {...props}>
       {canViewApm && isEntityCentricExperienceSettingEnabled && routeLinkProps
-        ? ({ content }) => <EuiLink {...routeLinkProps}>{content}</EuiLink>
+        ? ({ content }) => (
+            <EuiLink
+              {...routeLinkProps}
+              data-test-subj="unifiedDocViewLogsOverviewServiceNameHighlightLink"
+            >
+              {content}
+            </EuiLink>
+          )
         : undefined}
     </HighlightField>
   );
