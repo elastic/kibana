@@ -17,13 +17,17 @@ import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from './constants';
  */
 export class HostIsolationExceptionsApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
-    super(http, ENDPOINT_ARTIFACT_LISTS.eventFilters.id, HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION);
+    super(
+      http,
+      ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+      HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION
+    );
   }
 
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
     return super.getInstance(
       http,
-      ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION
     );
   }
