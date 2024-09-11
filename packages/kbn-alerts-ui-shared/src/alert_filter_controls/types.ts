@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupInput, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
-  AddOptionsListControlProps,
-  ControlGroupContainer,
+  ControlGroupRenderer,
+  OptionsListControlState,
+  ControlGroupRuntimeState,
+  ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export type FilterUrlFormat = Record<
   string,
   Pick<
-    OptionsListEmbeddableInput,
+    OptionsListControlState,
     'selectedOptions' | 'title' | 'fieldName' | 'existsSelected' | 'exclude'
   >
 >;
@@ -30,17 +30,20 @@ export interface FilterContextType {
   addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterControlConfig = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> & {
+export type FilterControlConfig = Omit<OptionsListControlState, 'dataViewId'> & {
   /*
    * Determines the presence and order of a control
    * */
   persist?: boolean;
 };
 
-export type FilterGroupHandler = ControlGroupContainer;
+export type FilterGroupHandler = ControlGroupRendererApi;
 
-export interface FilterGroupProps
-  extends Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'> {
+export interface FilterGroupProps extends Pick<ControlGroupRuntimeState, 'chainingSystem'> {
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+
   spaceId?: string;
   dataViewId: string | null;
   featureIds: AlertConsumers[];
