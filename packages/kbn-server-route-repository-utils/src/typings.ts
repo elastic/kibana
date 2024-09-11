@@ -68,10 +68,23 @@ type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
     : false
   : false;
 
-// this ensures only plain objects can be returned, if it's not one
-// of the other allowed types
+type IsAny<T> = 1 | 0 extends (T extends never ? 1 : 0) ? true : false;
 
-type ValidateSerializableValue<T, TWalkRecursively extends boolean = true> = T extends Function
+// this ensures only plain objects can be returned, if it's not one
+// of the other allowed types. here's how it works:
+// - if it's a function, it's invalid
+// - if it's a primitive, it's valid
+// - if it's an array, it's valid
+// - if it's a record, walk it once and apply above principles
+// we don't recursively walk because of circular references in object types
+// we also don't check arrays, as the goal is to not be able to return
+// things like classes and functions at the top level. specifically,
+// this code is intended to allow for Observable<ServerSentEvent> but
+// to disallow Observable<NotAServerSentEvent>.
+
+type ValidateSerializableValue<T, TWalkRecursively extends boolean = true> = IsAny<T> extends true
+  ? 1
+  : T extends Function
   ? 0
   : T extends Record<string, any>
   ? TWalkRecursively extends true
