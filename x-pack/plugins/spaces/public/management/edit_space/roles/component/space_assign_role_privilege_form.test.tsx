@@ -195,7 +195,7 @@ describe('PrivilegesRolesForm', () => {
 
       expect(screen.queryByTestId('rolePrivilegeCustomizationForm')).not.toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('custom-privilege-button'));
+      await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
       expect(screen.getByTestId('rolePrivilegeCustomizationForm')).toBeInTheDocument();
     });
@@ -226,7 +226,7 @@ describe('PrivilegesRolesForm', () => {
 
       expect(screen.queryByTestId('rolePrivilegeCustomizationForm')).not.toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('custom-privilege-button'));
+      await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
       expect(screen.getByTestId('rolePrivilegeCustomizationForm')).toBeInTheDocument();
 
