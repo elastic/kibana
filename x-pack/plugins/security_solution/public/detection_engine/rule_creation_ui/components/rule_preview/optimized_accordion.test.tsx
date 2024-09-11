@@ -29,7 +29,7 @@ describe('OptimizedAccordion', () => {
 
     expect(screen.getByText('content')).toBeInTheDocument();
   });
-  it('should render children content when accordion opened', () => {
+  it('should render children content when accordion opened', async () => {
     render(
       <OptimizedAccordion id="test" buttonContent={'accordion button'}>
         <span>{'content'}</span>
@@ -37,11 +37,11 @@ describe('OptimizedAccordion', () => {
     );
 
     const toggleButton = screen.getByText('accordion button');
-    userEvent.click(toggleButton);
+    await userEvent.click(toggleButton);
 
     expect(screen.getByText('content')).toBeVisible();
   });
-  it('should not destroy children content when accordion closed', () => {
+  it('should not destroy children content when accordion closed', async () => {
     render(
       <OptimizedAccordion id="test" buttonContent={'accordion button'}>
         <span>{'content'}</span>
@@ -49,11 +49,11 @@ describe('OptimizedAccordion', () => {
     );
 
     const toggleButton = screen.getByText('accordion button');
-    userEvent.click(toggleButton);
+    await userEvent.click(toggleButton);
 
     expect(screen.getByText('content')).toBeVisible();
 
-    userEvent.click(toggleButton);
+    await userEvent.click(toggleButton);
     expect(screen.getByText('content')).not.toBeVisible();
   });
 });
