@@ -40,8 +40,8 @@ steps:
       machineType: n2-standard-2
       preemptible: true
 
-  - command: .buildkite/scripts/steps/fips/smoke_test.sh
-    label: 'Pick Smoke Test Group Run Order'
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
     depends_on: build
     timeout_in_minutes: 10
     env:
