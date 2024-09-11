@@ -8,11 +8,14 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ESQLCommand, EsqlQuery, Walker } from '@kbn/esql-ast';
+import { Annotation } from '../annotations';
+import { highlight } from './helpers';
 
 export class EsqlInspectorState {
   public readonly src$ = new BehaviorSubject<string>('FROM index | LIMIT 10');
   public readonly query$ = new BehaviorSubject<EsqlQuery | null>(null);
   public readonly queryLastValid$ = new BehaviorSubject<EsqlQuery | null>(EsqlQuery.fromSrc(''));
+  public readonly highlight$ = new BehaviorSubject<Annotation[]>([]);
   public readonly from$ = new BehaviorSubject<ESQLCommand | null>(null);
   public readonly limit$ = new BehaviorSubject<ESQLCommand | null>(null);
 
@@ -28,6 +31,8 @@ export class EsqlInspectorState {
     this.query$.subscribe((query) => {
       if (query instanceof EsqlQuery) {
         this.queryLastValid$.next(query);
+
+        this.highlight$.next(highlight(query));
 
         const from = Walker.match(query?.ast, {
           type: 'command',

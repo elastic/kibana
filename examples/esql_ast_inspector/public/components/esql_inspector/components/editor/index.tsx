@@ -15,6 +15,7 @@ import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
 export const Editor: React.FC = (props) => {
   const state = useEsqlInspector();
   const src = useBehaviorSubject(state.src$);
+  const highlight = useBehaviorSubject(state.highlight$);
 
   return (
     <>
@@ -40,12 +41,7 @@ export const Editor: React.FC = (props) => {
         <EsqlEditor
           src={src}
           onChange={(newSrc) => state.src$.next(newSrc)}
-          highlight={[
-            [0, 4, (text) => <span style={{ color: 'red' }}>{text}</span>],
-            [5, 10, (text) => <span style={{ color: 'blue' }}>{text}</span>],
-            [13, 18, (text) => <span style={{ color: 'red' }}>{text}</span>],
-            [19, 21, (text) => <span style={{ color: 'green' }}>{text}</span>],
-          ]}
+          highlight={highlight}
         />
       </EuiPanel>
     </>

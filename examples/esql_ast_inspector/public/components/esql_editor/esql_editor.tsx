@@ -15,7 +15,15 @@ const blockCss = css({
   display: 'inline-block',
   position: 'relative',
   width: '100%',
-  fontSize: '16px',
+  fontSize: '18px',
+  fontFamily:
+    "'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace",
+});
+
+const inputCss = css({
+  display: 'inline-block',
+  color: 'rgba(255, 255, 255, 0.01)',
+  caretColor: '#07f',
 });
 
 const overlayCss = css({
@@ -25,6 +33,7 @@ const overlayCss = css({
   width: '100%',
   pointerEvents: 'none',
   userSelect: 'none',
+  whiteSpace: 'pre',
 });
 
 export interface EsqlEditorProps {
@@ -42,7 +51,9 @@ export const EsqlEditor: React.FC<EsqlEditorProps> = ({ src, highlight, onChange
 
   return (
     <div css={blockCss}>
-      <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />
+      <div css={inputCss}>
+        <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />
+      </div>
       {overlay}
     </div>
   );
