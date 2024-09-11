@@ -16,7 +16,7 @@ function getMetadataSourceField({ aggregation, destination, source }: MetadataFi
   if (aggregation.type === 'terms') {
     return `ctx.entity.metadata.${destination}.keySet()`;
   } else if (aggregation.type === 'top_value') {
-    return `ctx.entity.metadata.${destination}["${source}"]`;
+    return `ctx.entity.metadata.${destination}.top_value["${source}"]`;
   }
 }
 
@@ -34,7 +34,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }
 
   return definition.metadata.reduce((acc, metadata) => {
-    const destination = metadata.destination;
+    const { destination, source } = metadata;
     const optionalFieldPath = destination.replaceAll('.', '?.');
 
     if (metadata.aggregation.type === 'terms') {
@@ -46,7 +46,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
       return `${acc}\n${next}`;
     } else if (metadata.aggregation.type === 'top_value') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}["${metadata.source}"] != "null") {
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
           ${mapDestinationToPainless(metadata)}
         }
       `;

@@ -23,10 +23,21 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
       };
     } else if (metadata.aggregation.type === 'top_value') {
       agg = {
-        top_metrics: {
-          metrics: [{ field: metadata.source }],
-          sort: metadata.aggregation.sort,
-          size: 1,
+        filter: {
+          exists: {
+            field: metadata.source,
+          },
+        },
+        aggs: {
+          top_value: {
+            top_metrics: {
+              metrics: {
+                field: metadata.source,
+              },
+              sort: metadata.aggregation.sort,
+              size: 1,
+            },
+          },
         },
       };
     }
@@ -45,10 +56,10 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
 
   const offsetInSeconds = calculateOffset(definition);
 
-  return definition.metadata.reduce(
-    (aggs, metadata) => ({
-      ...aggs,
-      [`entity.metadata.${metadata.destination}`]: {
+  return definition.metadata.reduce((aggs, metadata) => {
+    let agg;
+    if (metadata.aggregation.type === 'terms') {
+      agg = {
         filter: {
           range: {
             '@timestamp': {
@@ -60,12 +71,48 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
           data: {
             terms: {
               field: metadata.destination,
-              size: metadata.aggregation.type === 'terms' ? metadata.aggregation.limit : 1,
+              size: metadata.aggregation.limit,
             },
           },
         },
-      },
-    }),
-    {}
-  );
+      };
+    } else if (metadata.aggregation.type === 'top_value') {
+      agg = {
+        filter: {
+          bool: {
+            must: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-${offsetInSeconds}s`,
+                  },
+                },
+              },
+              {
+                exists: {
+                  field: metadata.destination,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          top_value: {
+            top_metrics: {
+              metrics: {
+                field: metadata.destination,
+              },
+              sort: metadata.aggregation.sort,
+              size: 1,
+            },
+          },
+        },
+      };
+    }
+
+    return {
+      ...aggs,
+      [`entity.metadata.${metadata.destination}`]: agg,
+    };
+  }, {});
 }
