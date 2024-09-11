@@ -272,7 +272,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       if (dataView === null) {
         return;
       }
-
+      dataView.getIndexPattern();
       const field = findMessageField(dataView);
       if (field !== null) {
         setMessageField(field);

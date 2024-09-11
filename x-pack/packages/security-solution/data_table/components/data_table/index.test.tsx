@@ -269,7 +269,7 @@ describe('DataTable', () => {
     );
 
     // click the `@timestamp` column header to display the popover
-    fireEvent.click(screen.getByText('@timestamp'));
+    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
     // click the `Remove column` action in the popover
     fireEvent.click(await screen.getByText(REMOVE_COLUMN));
