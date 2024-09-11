@@ -24,6 +24,9 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('Draggable', () => {
   const renderDraggable = (propsOverrides = {}) => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
     const rtlRender = renderWithDragDropContext(
       <>
         <Draggable
@@ -59,15 +62,15 @@ describe('Draggable', () => {
           jest.runAllTimers();
         });
       },
-      startDraggingByKeyboard: () => {
+      startDraggingByKeyboard: async () => {
         draggableKeyboardHandler.focus();
-        userEvent.keyboard('{enter}');
+        await user.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dragOverToNextByKeyboard: () => {
-        userEvent.keyboard('{arrowright}');
+      dragOverToNextByKeyboard: async () => {
+        await user.keyboard('{arrowright}');
         act(() => {
           jest.runAllTimers();
         });
@@ -127,8 +130,8 @@ describe('Draggable', () => {
       const { startDraggingByKeyboard, dragOverToNextByKeyboard, droppable } = renderDraggable({
         dragClassName: 'dragTest',
       });
-      startDraggingByKeyboard();
-      dragOverToNextByKeyboard();
+      await startDraggingByKeyboard();
+      await dragOverToNextByKeyboard();
       expect(droppable).toHaveClass('domDroppable domDroppable--active domDroppable--hover', EXACT);
       expect(within(screen.getByTestId('domDragDropContainer')).getByText('Drag this')).toHaveClass(
         'dragTest'

@@ -39,7 +39,12 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  RowControlColumn,
+  getShouldShowFieldHandler,
+  canPrependTimeFieldColumn,
+  getVisibleColumns,
+} from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -53,7 +58,6 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  RowControlColumn,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -62,8 +66,6 @@ import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
-  getVisibleColumns,
-  canPrependTimeFieldColumn,
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
@@ -273,10 +275,6 @@ export interface UnifiedDataTableProps {
    */
   onFieldEdited?: () => void;
   /**
-   * Optional triggerId to retrieve the column cell actions that will override the default ones
-   */
-  cellActionsTriggerId?: string;
-  /**
    * Service dependencies
    */
   services: {
@@ -355,6 +353,20 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
+   * Optional triggerId to retrieve the column cell actions that will override the default ones
+   */
+  cellActionsTriggerId?: string;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
+  /**
+   * Controls whether the cell actions should replace the default cell actions or be appended to them
+   */
+  cellActionsHandling?: 'replace' | 'append';
+  /**
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
@@ -390,12 +402,6 @@ export interface UnifiedDataTableProps {
    * Set to true to allow users to compare selected documents
    */
   enableComparisonMode?: boolean;
-  /**
-   * Custom set of properties used by some actions.
-   * An action might require a specific set of metadata properties to render.
-   * This data is sent directly to actions.
-   */
-  cellActionsMetadata?: Record<string, unknown>;
   /**
    * Optional extra props passed to the renderCellValue function/component.
    */
@@ -442,6 +448,9 @@ export const UnifiedDataTable = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   cellActionsTriggerId,
+  cellActionsMetadata,
+  cellActionsHandling = 'replace',
+  visibleCellActions,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -467,14 +476,12 @@ export const UnifiedDataTable = ({
   maxDocFieldsDisplayed = 50,
   externalAdditionalControls,
   rowsPerPageOptions,
-  visibleCellActions,
   externalCustomRenderers,
   additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
-  cellActionsMetadata,
   customGridColumnsConfiguration,
   enableComparisonMode,
   cellContext,
@@ -755,7 +762,7 @@ export const UnifiedDataTable = ({
 
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
-      cellActionsTriggerId && !isPlainRecord
+      cellActionsTriggerId
         ? visibleColumns.map(
             (columnName) =>
               dataView.getFieldByName(columnName)?.toSpec() ?? {
@@ -766,7 +773,7 @@ export const UnifiedDataTable = ({
               }
           )
         : undefined,
-    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
+    [cellActionsTriggerId, visibleColumns, dataView]
   );
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
@@ -809,6 +816,7 @@ export const UnifiedDataTable = ({
       getEuiGridColumns({
         columns: visibleColumns,
         columnsCellActions,
+        cellActionsHandling,
         rowsCount: displayedRows.length,
         settings,
         dataView,
@@ -832,6 +840,7 @@ export const UnifiedDataTable = ({
         onResize,
       }),
     [
+      cellActionsHandling,
       columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,

@@ -95,7 +95,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByLabelText('Copy reference link'));
+    await userEvent.click(screen.getByLabelText('Copy reference link'));
     expect(copy).toHaveBeenCalled();
   });
 
@@ -116,7 +116,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByLabelText('Highlight the referenced comment'));
+    await userEvent.click(screen.getByLabelText('Highlight the referenced comment'));
     expect(handleOutlineComment).toHaveBeenCalled();
   });
 });
