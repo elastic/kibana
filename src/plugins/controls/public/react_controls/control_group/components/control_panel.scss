@@ -40,10 +40,11 @@ $controlMinWidth: $euiSize * 14;
   }
 }
 
-// --------------------------
-// Control panel sizes
-// --------------------------
 .controlFrameWrapper {
+  // --------------------------
+  // Control panel sizes
+  // --------------------------
+
   &--small {
     width: $smallControl;
     min-width: $smallControl;
@@ -72,10 +73,49 @@ $controlMinWidth: $euiSize * 14;
       min-width:unset;
     }
   }
+
+  // --------------------------
+  // Dragging styles
+  // --------------------------
+
+  &:not(.controlFrame__formControlLayout-clone) {
+    .controlFrame__dragHandle {
+      cursor: grab;
+    }
+  }
+
+  &--insertBefore,
+  &--insertAfter {
+    .controlFrame__formControlLayout:after {
+      content: '';
+      position: absolute;
+      background-color: transparentize($euiColorPrimary, .5);
+      border-radius: $euiBorderRadius;
+      top: 0;
+      bottom: 0;
+      width: $euiSizeXS * .5;
+    }
+  }
+
+  &--insertBefore {
+    .controlFrame__formControlLayout:after {
+      left: -$euiSizeXS - 1;
+    }
+  }
+
+  &--insertAfter {
+    .controlFrame__formControlLayout:after {
+      right: -$euiSizeXS - 1;
+    }
+  }
+
+  &-isDragging {
+    opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
+  }
 }
 
 // --------------------------
-// Control frame prepend 
+// Control frame prepend
 // --------------------------
 
 .controlFrame__formControlLayout {
@@ -93,10 +133,10 @@ $controlMinWidth: $euiSize * 14;
   &--edit {
     &:not(#{$parent}--twoLine) {
       .euiFormControlLayout__prepend {
-        padding-inline-start: $euiSizeXS * 0.5; // skinny icon
+        padding-inline-start: $euiSizeXS * .5; // skinny icon
       }
     }
-    
+
     &#{$parent}--twoLine {
       .euiFormControlLayout__prepend {
         padding-inline-end: 0;
@@ -111,7 +151,7 @@ $controlMinWidth: $euiSize * 14;
         padding-inline-start: $euiSizeS;
       }
     }
-    
+
     &#{$parent}--twoLine {
       .euiFormControlLayout__prepend {
         padding-inline: 0;
@@ -202,45 +242,5 @@ $controlMinWidth: $euiSize * 14;
     &--large {
       min-width: unset;
     }
-  }
-}
-
-// --------------------------
-// Dragging styles
-// --------------------------
-.controlFrameWrapper {
-  &:not(.controlFrame__formControlLayout-clone) {
-    .controlFrame__dragHandle {
-      cursor: grab;
-    }
-  }
-
-  &--insertBefore,
-  &--insertAfter {
-    .controlFrame__formControlLayout:after {
-      content: '';
-      position: absolute;
-      background-color: transparentize($euiColorPrimary, .5);
-      border-radius: $euiBorderRadius;
-      top: 0;
-      bottom: 0;
-      width: $euiSizeXS * .5;
-    }
-  }
-
-  &--insertBefore {
-    .controlFrame__formControlLayout:after {
-      left: -$euiSizeXS - 1;
-    }
-  }
-
-  &--insertAfter {
-    .controlFrame__formControlLayout:after {
-      right: -$euiSizeXS - 1;
-    }
-  }
-
-  &-isDragging {
-    opacity: 0; // hide dragged control, while control is dragged its replaced with ControlClone component
   }
 }
