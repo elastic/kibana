@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ControlWidth, ControlInputTransform } from './types';
+export type { ControlWidth, ControlInputTransform, ParentIgnoreSettings } from './types';
 
 // Control Group exports
 export {
