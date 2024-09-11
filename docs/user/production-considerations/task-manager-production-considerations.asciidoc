@@ -85,7 +85,7 @@ By default, each additional {kib} instance will add an additional 10 tasks that 
 
 Other times it, might be preferable to increase the throughput of individual {kib} instances.
 
-Tweak the *Capacity* via the <<task-manager-settings,`xpack.task_manager.capacity`>> setting, which allows each {kib} to pull a higher number of tasks per interval. This could impact the performance of each {kib} instance as the workload will be higher.
+Tweak the capacity with the <<task-manager-settings,`xpack.task_manager.capacity`>> setting, which enables each {kib} instance to pull a higher number of tasks per interval. This setting can impact the performance of each instance as the workload will be higher.
 
 Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which allows each {kib} to pull scheduled tasks at a higher rate.  This could impact the performance of the {es} cluster as the workload will be higher.
 
