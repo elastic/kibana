@@ -56,5 +56,6 @@
     "@kbn/core-security-common",
     "@kbn/lens-embeddable-utils",
     "@kbn/i18n-react",
+    "@kbn/zod",
   ],
 }
