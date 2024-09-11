@@ -66,7 +66,7 @@ export const processRouter = (
         tags: route.options.tags ? extractTags(route.options.tags) : [],
         ...(route.options.description ? { description: route.options.description } : {}),
         ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
-        ...(route.options.discontinued ? { discontinued: route.options.discontinued } : {}),
+        ...(route.options.x_discontinued ? { 'x-discontinued': route.options.x_discontinued } : {}),
         requestBody: !!validationSchemas?.body
           ? {
               content: {

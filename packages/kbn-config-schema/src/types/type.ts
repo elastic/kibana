@@ -36,7 +36,7 @@ export interface TypeMeta {
   /**
    * Release version or date that this route will be removed
    */
-  discontinued?: string;
+  'x-discontinued'?: string;
 }
 
 export interface TypeOptions<T> {
@@ -133,8 +133,8 @@ export abstract class Type<V> {
       if (options.meta.deprecated) {
         schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });
       }
-      if (options.meta.deprecated && options.meta.discontinued)
-        schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta.discontinued });
+      if (options.meta.deprecated && options.meta['x-discontinued'])
+        schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta['x-discontinued'] });
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

@@ -49,7 +49,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
           options: {
             deprecated: true,
-            discontinued: 'post test discontinued',
+            x_discontinued: 'post test x_discontinued',
             summary: 'post test summary',
             description: 'post test description',
           },
@@ -67,7 +67,7 @@ describe('Router', () => {
         isVersioned: false,
         options: {
           deprecated: true,
-          discontinued: 'post test discontinued',
+          x_discontinued: 'post test x_discontinued',
           summary: 'post test summary',
           description: 'post test description',
         },

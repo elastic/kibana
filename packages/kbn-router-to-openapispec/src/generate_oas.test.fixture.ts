@@ -34,7 +34,7 @@ export const sharedOas = {
     '/bar': {
       get: {
         deprecated: true,
-        discontinued: 'route discontinued version or date',
+        'x-discontinued': 'route discontinued version or date',
         operationId: '%2Fbar#0',
         parameters: [
           {

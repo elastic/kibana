@@ -214,7 +214,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *
    * @remarks This will be surfaced in OAS documentation.
    */
-  discontinued?: string;
+  x_discontinued?: string;
 }
 
 /**

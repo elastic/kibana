@@ -37,7 +37,7 @@ export const processDeprecated = (schema: OpenAPIV3.SchemaObject): void => {
 
 export const processDiscontinued = (schema: OpenAPIV3.SchemaObject): void => {
   if (metaFields.META_FIELD_X_OAS_DISCONTINUED in schema) {
-    schema.discontinued = schema[metaFields.META_FIELD_X_OAS_DISCONTINUED] as string;
+    schema['x-discontinued'] = schema[metaFields.META_FIELD_X_OAS_DISCONTINUED] as string;
     deleteField(schema, metaFields.META_FIELD_X_OAS_DISCONTINUED);
   }
 };

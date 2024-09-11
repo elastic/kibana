@@ -138,7 +138,7 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
-        "discontinued": "route discontinued version or date",
+        "x-discontinued": "route x-discontinued version or date",
         "operationId": "%2Fbar#0",
         "parameters": Array [
           Object {
@@ -166,10 +166,10 @@ Object {
                     "description": "deprecated foo",
                     "type": "string",
                   },
-                  "discontinuedFoo": Object {
+                  "x-discontinuedFoo": Object {
                     "deprecated": true,
-                    "description": "discontinued foo",
-                    "discontinued": "foo discontinued version or date",
+                    "description": "x-discontinued foo",
+                    "x-discontinued": "foo x-discontinued version or date",
                     "type": "string",
                   },
                   "foo": Object {
@@ -604,10 +604,10 @@ OK response oas-test-version-2",
                     "description": "deprecated foo",
                     "type": "string",
                   },
-                  "discontinuedFoo": Object {
+                  "x-discontinuedFoo": Object {
                     "deprecated": true,
-                    "description": "discontinued foo",
-                    "discontinued": "foo discontinued version or date",
+                    "description": "x-discontinued foo",
+                    "x-discontinued": "foo x-discontinued version or date",
                     "type": "string",
                   },
                   "foo": Object {

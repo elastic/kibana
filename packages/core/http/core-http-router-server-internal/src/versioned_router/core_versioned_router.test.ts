@@ -37,7 +37,7 @@ describe('Versioned router', () => {
       path: '/test/{id}',
       access: 'internal',
       deprecated: true,
-      discontinued: 'x.y.z',
+      x_discontinued: 'x.y.z',
     });
     versionedRouter.post({
       path: '/test',
@@ -54,7 +54,7 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "deprecated": true,
-            "discontinued": "x.y.z",
+            "x_discontinued": "x.y.z",
           },
           "path": "/test/{id}",
         },

@@ -31,7 +31,7 @@ describe('meta', () => {
 
   it('sets meta with all fields provided', () => {
     const type = new MyType({
-      meta: { description: 'my description', deprecated: true, discontinued: '9.0.0' },
+      meta: { description: 'my description', deprecated: true, 'x-discontinued': '9.0.0' },
     });
     const meta = type.getSchema().describe();
     expect(get(meta, 'flags.description')).toBe('my description');
