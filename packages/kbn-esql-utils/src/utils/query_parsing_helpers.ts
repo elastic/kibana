@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { getAstAndSyntaxErrors, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
 
 import type {
   ESQLSource,
@@ -14,7 +15,6 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -114,7 +114,19 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   return column?.name;
 };
 
-export const retieveMetadataColumns = (esql: string): string[] => {
+export const isQueryWrappedByPipes = (query: string): boolean => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  const numberOfCommands = ast.length;
+  const pipesWithNewLine = query.split('\n  |');
+  return numberOfCommands === pipesWithNewLine?.length;
+};
+
+export const prettifyQuery = (query: string, isWrapped: boolean): string => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
+};
+
+export const retrieveMetadataColumns = (esql: string): string[] => {
   const { ast } = getAstAndSyntaxErrors(esql);
   const options: ESQLCommandOption[] = [];
 

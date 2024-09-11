@@ -12,10 +12,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { OptionsListControl } from './options_list_control';
 import { BehaviorSubject } from 'rxjs';
+import { OptionsListEmbeddableInput } from '..';
+import { ControlOutput } from '../../types';
 
 describe('Options list control', () => {
   const defaultProps = {
