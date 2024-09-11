@@ -39,6 +39,8 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
+  /** See {@link RouteConfigOptions<RouteMethod>['security']} */
+  security?: Exclude<RouteConfigOptions<Method>['security'], undefined>;
   /**
    * When enabled, the router will also check for the presence of an `apiVersion`
    * query parameter to determine the route version to resolve to:

@@ -23,6 +23,7 @@ import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
 import { createRequest } from './core_versioned_route.test.util';
 import { isConfigSchema } from '@kbn/config-schema';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 describe('Versioned route', () => {
   let router: Router;
@@ -488,6 +489,89 @@ describe('Versioned route', () => {
     expect(route.handlers[0].options.security).toStrictEqual(securityConfig1);
     expect(route.handlers[1].options.security).toStrictEqual(securityConfig2);
     expect(route.handlers[2].options.security).toStrictEqual(securityConfig3);
+    expect(router.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to default security configuration if it is not specified for specific version', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const securityConfigDefault: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar', 'baz'],
+      },
+    };
+    const securityConfig1: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+    const securityConfig2: RouteSecurity = {
+      authz: {
+        requiredPrivileges: ['foo', 'bar'],
+      },
+      authc: {
+        enabled: true,
+      },
+    };
+    const versionedRoute = versionedRouter
+      .get({ path: '/test/{id}', access: 'internal', security: securityConfigDefault })
+      .addVersion(
+        {
+          version: '1',
+          validate: false,
+          security: securityConfig1,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '2',
+          validate: false,
+          security: securityConfig2,
+        },
+        handlerFn
+      )
+      .addVersion(
+        {
+          version: '3',
+          validate: false,
+        },
+        handlerFn
+      );
+    const routes = versionedRouter.getRoutes();
+    expect(routes).toHaveLength(1);
+    const [route] = routes;
+    expect(route.handlers).toHaveLength(3);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: {},
+      })
+    ).toStrictEqual(securityConfigDefault);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      })
+    ).toStrictEqual(securityConfig1);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: { [ELASTIC_HTTP_VERSION_HEADER]: '2' },
+      })
+    ).toStrictEqual(securityConfig2);
+
+    expect(
+      // @ts-expect-error
+      versionedRoute.getSecurity({
+        headers: {},
+      })
+    ).toStrictEqual(securityConfigDefault);
     expect(router.get).toHaveBeenCalledTimes(1);
   });
 });

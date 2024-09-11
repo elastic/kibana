@@ -24,6 +24,7 @@ import type {
   IKibanaResponse,
   RouteConfigOptions,
   RouteSecurityGetter,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { Method, VersionedRouterRoute } from './types';
@@ -83,6 +84,7 @@ export class CoreVersionedRoute implements VersionedRoute {
   private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
   private enableQueryVersion: boolean;
+  private defaultSecurityConfig: RouteSecurity | undefined;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
@@ -92,6 +94,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
+    this.defaultSecurityConfig = this.options.security;
     this.router.router[this.method](
       {
         path: this.path,
@@ -270,6 +273,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   public getSecurity: RouteSecurityGetter = (req: KibanaRequest) => {
     const version = this.getVersion(req)!;
 
-    return this.handlers.get(version)?.options.security;
+    return this.handlers.get(version)?.options.security ?? this.defaultSecurityConfig;
   };
 }
