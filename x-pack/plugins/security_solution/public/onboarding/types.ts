@@ -11,8 +11,17 @@ import type { LicenseType } from '@kbn/licensing-plugin/public';
 import type { OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 
+export type SetComplete = (complete: boolean) => void;
+export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
+export type SetExpandedCardId = (
+  cardId: OnboardingCardId | null,
+  options?: { scroll?: boolean }
+) => void;
+
 export type OnboardingCardComponent = React.FunctionComponent<{
-  setComplete: (complete: boolean) => void;
+  setComplete: SetComplete;
+  isCardComplete: IsCardComplete;
+  setExpandedCardId: SetExpandedCardId;
 }>;
 
 export type OnboardingCardCheckComplete = () => Promise<boolean>;
@@ -33,17 +42,19 @@ export interface OnboardingCardConfig {
    */
   checkComplete?: () => Promise<boolean>;
   /**
-   * Capabilities strings using object dot notation to enable the card. e.g. ['siem.crud']
+   * The RBAC capability strings required to enable the card. It uses object dot notation. e.g. `'siem.crud'`.
    *
-   * The format of defining capabilities supports OR and AND mechanism. To specify capabilities in an OR fashion
-   * they can be defined in a single level array like: [requiredCap1, requiredCap2]. If either of these capabilities
-   * is satisfied the link would be included. To require that the capabilities be AND'd together a second level array
-   * can be specified: [cap1, [cap2, cap3]] this would result in cap1 || (cap2 && cap3). To specify
-   * capabilities that all must be and'd together an example would be: [[cap1, cap2]], this would result in the boolean
-   * operation cap1 && cap2.
+   * The format of the capabilities property supports OR and AND mechanism:
    *
-   * The final format is to specify a single capability, this would be like: capabilities: cap1, which is the same as
-   * capabilities: [cap1]
+   * To specify capabilities in an OR fashion, they can be defined in a single level array like: `capabilities: [cap1, cap2]`.
+   * If either of "cap1 || cap2" is granted the card will be included.
+   *
+   * To specify capabilities with AND conditional, use a second level array: `capabilities: [['cap1', 'cap2']]`.
+   * This would result in the boolean expression "cap1 && cap2", both capabilities must be granted to include the card.
+   *
+   * They can also be combined like: `capabilities: ['cap1', ['cap2', 'cap3']]` which would result in the boolean expression "cap1 || (cap2 && cap3)".
+   *
+   * For the single capability requirement: `capabilities: 'cap1'`, which is the same as `capabilities: ['cap1']`
    *
    * Default is `undefined` (no capabilities required)
    */

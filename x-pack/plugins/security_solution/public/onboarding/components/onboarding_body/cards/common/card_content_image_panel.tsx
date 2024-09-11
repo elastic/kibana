@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { type PropsWithChildren } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { OnboardingCardContentWrapper } from './card_content_wrapper';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { OnboardingCardContentPanel } from './card_content_panel';
 import { useCardContentImagePanelStyles } from './card_content_image_panel.styles';
 
 export const IMAGE_WIDTH = 540;
@@ -16,19 +16,17 @@ export const OnboardingCardContentImagePanel = React.memo<
 >(({ children, imageSrc, imageAlt }) => {
   const styles = useCardContentImagePanelStyles();
   return (
-    <OnboardingCardContentWrapper>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="m" className={styles}>
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
-          <EuiFlexItem>{children}</EuiFlexItem>
-          <EuiFlexItem className="cardSpacer" grow={false}>
-            <EuiSpacer size="xl" />
-          </EuiFlexItem>
-          <EuiFlexItem className="cardImage" grow={false}>
-            <img src={imageSrc} alt={imageAlt} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </OnboardingCardContentWrapper>
+    <OnboardingCardContentPanel hasBorder className={styles}>
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="none">
+        <EuiFlexItem>{children}</EuiFlexItem>
+        <EuiFlexItem className="cardSpacer" grow={false}>
+          <EuiSpacer size="xl" />
+        </EuiFlexItem>
+        <EuiFlexItem className="cardImage" grow={false}>
+          <img src={imageSrc} alt={imageAlt} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </OnboardingCardContentPanel>
   );
 });
 OnboardingCardContentImagePanel.displayName = 'OnboardingCardContentImagePanel';

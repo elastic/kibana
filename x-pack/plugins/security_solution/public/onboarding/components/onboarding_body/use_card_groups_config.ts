@@ -19,8 +19,8 @@ export const useCardGroupsConfig = () => {
   const license = useObservable(licensing.license$);
 
   const filteredCardGroupsConfig = useMemo(() => {
-    // If the license is not defined, return an empty array. It always eventually becomes available.
-    // This exit case is just to prevent config-dependent code to run multiple times for each card.
+    // Return empty array when the license is not defined. It should always become defined at some point.
+    // This exit case prevents code dependant on the cards config from running multiple times.
     if (!license) {
       return [];
     }

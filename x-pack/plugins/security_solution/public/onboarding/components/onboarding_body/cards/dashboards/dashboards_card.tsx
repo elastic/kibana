@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
-import { DASHBOARDS_CARD_TITLE } from './translations';
+import { CardCallout } from '../common/card_callout';
 import dashboardsImageSrc from './images/dashboards.png';
+import * as i18n from './translations';
 
-export const DashboardsCard: OnboardingCardComponent = ({ setComplete }) => {
+export const DashboardsCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
+  const isIntegrationsCardComplete = useMemo(
+    () => isCardComplete(OnboardingCardId.integrations),
+    [isCardComplete]
+  );
+
+  const expandIntegrationsCard = useCallback(() => {
+    setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
+  }, [setExpandedCardId]);
+
   return (
-    <OnboardingCardContentImagePanel imageSrc={dashboardsImageSrc} imageAlt={DASHBOARDS_CARD_TITLE}>
+    <OnboardingCardContentImagePanel
+      imageSrc={dashboardsImageSrc}
+      imageAlt={i18n.DASHBOARDS_CARD_TITLE}
+    >
       <EuiFlexGroup
         direction="column"
         gutterSize="xl"
@@ -34,46 +39,53 @@ export const DashboardsCard: OnboardingCardComponent = ({ setComplete }) => {
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.onboarding.dashboardsCard.description"
-              defaultMessage="Use dashboards to visualize data and stay up-to-date with key information. Create your own, or use Elastic's default dashboards — including alerts, user authentication events, known vulnerabilities, and more."
-            />
+            {i18n.DASHBOARDS_CARD_DESCRIPTION}
           </EuiText>
-          <EuiSpacer size="m" />
-          <EuiCallOut color="primary">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <FormattedMessage
-                    id="xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsText"
-                    defaultMessage="To view dashboards add integrations first"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink href={`#${OnboardingCardId.integrations}`}>
-                    <FormattedMessage
-                      id="xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsButton"
-                      defaultMessage="Add integrations"
-                    />
-                    <EuiIcon type="arrowRight" color="primary" size="s" />
+          {!isIntegrationsCardComplete && (
+            <>
+              <EuiSpacer size="m" />
+              <CardCallout
+                color="primary"
+                icon="iInCircle"
+                text={i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}
+                action={
+                  <EuiLink onClick={expandIntegrationsCard}>
+                    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                      <EuiFlexItem>{i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="arrowRight" color="primary" size="s" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiCallOut>
+                }
+              />
+              {/* <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="iInCircle" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs">{i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_TEXT}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <EuiLink onClick={expandIntegrationsCard}>
+                        {i18n.DASHBOARDS_CARD_CALLOUT_INTEGRATIONS_BUTTON}
+                        <EuiIcon type="arrowRight" color="primary" size="s" />
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup> */}
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={() => setComplete(false)} fill>
-            <FormattedMessage
-              id="xpack.securitySolution.onboarding.dashboardsCard.goToDashboardsButton"
-              defaultMessage="Go to dashboards"
-            />
-          </EuiButton>
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.dashboards}
+            fill
+            isDisabled={!isIntegrationsCardComplete}
+          >
+            {i18n.DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON}
+          </SecuritySolutionLinkButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </OnboardingCardContentImagePanel>

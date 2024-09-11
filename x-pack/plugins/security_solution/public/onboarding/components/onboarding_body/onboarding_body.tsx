@@ -82,7 +82,11 @@ export const OnboardingBody = React.memo(() => {
                       onToggleExpanded={createOnToggleExpanded(id)}
                     >
                       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-                        <LazyCardComponent setComplete={createSetCardComplete(id)} />
+                        <LazyCardComponent
+                          setComplete={createSetCardComplete(id)}
+                          isCardComplete={isCardComplete}
+                          setExpandedCardId={setExpandedCardId}
+                        />
                       </Suspense>
                     </OnboardingCardPanel>
                   </EuiFlexItem>
