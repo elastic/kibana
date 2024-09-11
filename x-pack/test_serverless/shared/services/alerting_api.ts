@@ -588,7 +588,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retries: 10 }
+          { retryCount: 10 }
         );
       },
 
