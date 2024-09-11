@@ -170,11 +170,11 @@ export const getDocumentationSections = async (language: string) => {
       sourceCommands,
       processingCommands,
       initialSection,
-      functions,
+      scalarFunctions,
       aggregationFunctions,
       groupingFunctions,
       operators,
-    } = await import('./esql_documentation_sections');
+    } = await import('./inline_documentation/esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
         defaultMessage: 'ES|QL',
@@ -184,7 +184,7 @@ export const getDocumentationSections = async (language: string) => {
     groups.push(
       sourceCommands,
       processingCommands,
-      functions,
+      scalarFunctions,
       aggregationFunctions,
       groupingFunctions,
       operators
