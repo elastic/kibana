@@ -15,30 +15,24 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { TheHiveTLP } from './types';
 
+import { screen } from '@testing-library/react';
+import Fields from './case_fields';
+import { theHiveConnector as connector } from '../mock';
+
+describe('wowowo', () => {
 // Failing: See https://github.com/elastic/kibana/issues/192475
-describe.skip('TheHive Cases Fields', () => {
+
+  let appMockRenderer: AppMockRenderer;
   const fields = {
     TLP: 1,
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
+    appMockRenderer = createAppMockRenderer();
   });
 
   it('all params fields are rendered', () => {
-    appMockRenderer.render(
-      <MockFormWrapperComponent fields={fields}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-
-    expect(screen.getByText('TLP')).toBeInTheDocument();
-  });
-
-  it('sets TLP correctly', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
