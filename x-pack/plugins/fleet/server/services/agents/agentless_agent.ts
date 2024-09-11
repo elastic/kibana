@@ -69,17 +69,23 @@ class AgentlessAgentService {
       soClient
     );
 
-    logger.debug(`Creating agentless agent with fleetUrl ${fleetUrl} and fleetToken ${fleetToken}`);
+    logger.debug(
+      `Creating agentless agent with fleet_url: ${fleetUrl} and fleet_token: [REDACTED]`
+    );
 
-    logger.debug(`Creating agentless agent with TLS config with certificate: ${agentlessConfig.api.tls.certificate},
-       and key: ${agentlessConfig.api.tls.key}`);
+    logger.debug(
+      `Creating agentless agent with TLS cert: ${
+        agentlessConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
+      } and TLS key: ${agentlessConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
+      and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
+    );
 
     const tlsConfig = new SslConfig(
       sslSchema.validate({
         enabled: true,
-        certificate: agentlessConfig.api.tls.certificate,
-        key: agentlessConfig.api.tls.key,
-        certificateAuthorities: agentlessConfig.api.tls.ca,
+        certificate: agentlessConfig?.api?.tls?.certificate,
+        key: agentlessConfig?.api?.tls?.key,
+        certificateAuthorities: agentlessConfig?.api?.tls?.ca,
       })
     );
 
@@ -112,15 +118,15 @@ class AgentlessAgentService {
       ...requestConfig,
       data: {
         ...requestConfig.data,
-        fleet_token: 'REDACTED',
+        fleet_token: '[REDACTED]',
       },
       httpsAgent: {
         ...requestConfig.httpsAgent,
         options: {
           ...requestConfig.httpsAgent.options,
-          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
+          cert: requestConfig.httpsAgent.options.cert ? '[REDACTED]' : undefined,
+          key: requestConfig.httpsAgent.options.key ? '[REDACTED]' : undefined,
+          ca: requestConfig.httpsAgent.options.ca ? '[REDACTED]' : undefined,
         },
       },
     };

@@ -9,6 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
+import type { AxiosError } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentCreateError } from '../../errors';
@@ -20,7 +21,14 @@ import { listFleetServerHosts } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
 
-jest.mock('axios', () => jest.fn());
+jest.mock('axios');
+// Add a mock implementation for `isAxiosError` to simulate that the error is an Axios error
+(axios.isAxiosError as unknown as jest.Mock).mockImplementation(
+  (error: any): error is AxiosError => {
+    return error.isAxiosError === true; // Simulate that the error is an Axios error if it has `isAxiosError` property
+  }
+);
+
 jest.mock('../fleet_server_host');
 jest.mock('../api_keys');
 jest.mock('../output');
@@ -359,6 +367,205 @@ describe('Agentless Agent service', () => {
         method: 'POST',
         url: 'http://api.agentless.com/api/v1/serverless/deployments',
       })
+    );
+  });
+
+  it('should redact sensitive information from debug logs', async () => {
+    const returnValue = {
+      id: 'mocked',
+      regional_id: 'mocked',
+    };
+
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+      id: 'mocked-agentless-agent-policy-id',
+      name: 'agentless agent policy',
+      namespace: 'default',
+      supports_agentless: true,
+    } as AgentPolicy);
+
+    // Assert that sensitive information is redacted
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('fleet_token: [REDACTED]')
+    );
+    expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('cert: [REDACTED]'));
+    expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('key: [REDACTED]'));
+    expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('ca: [REDACTED]'));
+  });
+
+  it('should log "undefined" on debug logs when tls configuration is missing', async () => {
+    const returnValue = {
+      id: 'mocked',
+      regional_id: 'mocked',
+    };
+
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that tls configuration is missing
+    expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('cert: undefined'));
+    expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('key: undefined'));
+    expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('ca: undefined'));
+  });
+
+  it('should redact sensitive information from error logs', async () => {
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+    mockedListFleetServerHosts.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+    // Force axios to throw an AxiosError to simulate an error response
+    const axiosError = new Error('Test Error') as AxiosError;
+    axiosError.isAxiosError = true; // Mark it as an AxiosError
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce(axiosError);
+
+    await expect(
+      agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+      } as AgentPolicy)
+    ).rejects.toThrowError();
+
+    // Assert that sensitive information is redacted
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`\"fleet_token\":\"[REDACTED]\"`),
+      expect.any(Object)
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`\"cert\":\"[REDACTED]\"`),
+      expect.any(Object)
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`\"key\":\"[REDACTED]\"`),
+      expect.any(Object)
+    );
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`\"ca\":\"[REDACTED]\"`),
+      expect.any(Object)
     );
   });
 });
