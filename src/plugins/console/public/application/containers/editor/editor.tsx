@@ -71,9 +71,12 @@ export const Editor = memo(
     const [fetchingMappings, setFetchingMappings] = useState(false);
 
     useEffect(() => {
-      const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
+      const debouncedSetFetchingMappings = debounce(setFetchingMappings, DEBOUNCE_DELAY);
+      const subscription = getAutocompleteInfo().isLoading$.subscribe(debouncedSetFetchingMappings);
+
       return () => {
         subscription.unsubscribe();
+        debouncedSetFetchingMappings.cancel();
       };
     }, []);
 
