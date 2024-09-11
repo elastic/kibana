@@ -6,8 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
+import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import type {
   UpdateRuleRequestBodyV1,
   UpdateRuleRequestParamsV1,
@@ -18,11 +17,13 @@ import {
   updateParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update';
 import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { Rule } from '../../../../application/rule/types';
-import { transformUpdateBodyV1 } from './transforms';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
+import { transformUpdateBodyV1 } from './transforms';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -45,6 +46,10 @@ export const updateRuleRoute = (
           200: {
             body: () => ruleResponseSchemaV1,
             description: 'Indicates a successful call.',
+          },
+          403: {
+            body: () => forbiddenErrorSchemaV1,
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },

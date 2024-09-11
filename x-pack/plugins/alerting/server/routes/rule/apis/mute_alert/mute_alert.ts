@@ -9,6 +9,7 @@ import { transformRequestParamsToApplicationV1 } from './transforms';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import {
   muteAlertParamsSchemaV1,
   MuteAlertRequestParamsV1,
@@ -33,6 +34,10 @@ export const muteAlertRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          403: {
+            body: () => forbiddenErrorSchemaV1,
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },

@@ -7,14 +7,15 @@
 
 import { IRouter } from '@kbn/core/server';
 import {
-  disableRuleRequestParamsSchemaV1,
-  disableRuleRequestBodySchemaV1,
-  DisableRuleRequestParamsV1,
   DisableRuleRequestBodyV1,
+  DisableRuleRequestParamsV1,
+  disableRuleRequestBodySchemaV1,
+  disableRuleRequestParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/disable';
+import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 
 export const disableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -36,6 +37,10 @@ export const disableRuleRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          403: {
+            body: () => forbiddenErrorSchemaV1,
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },

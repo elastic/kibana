@@ -6,13 +6,14 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import {
-  unmuteAlertParamsSchemaV1,
   UnmuteAlertRequestParamsV1,
+  unmuteAlertParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/unmute_alert';
+import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformRequestParamsToApplicationV1 } from './transforms';
 
 export const unmuteAlertRoute = (
@@ -34,6 +35,10 @@ export const unmuteAlertRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          403: {
+            body: () => forbiddenErrorSchemaV1,
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },

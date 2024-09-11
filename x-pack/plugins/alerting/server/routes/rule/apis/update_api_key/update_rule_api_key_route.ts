@@ -10,9 +10,10 @@ import {
   UpdateApiKeyParamsV1,
   updateApiKeyParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update_api_key';
+import { forbiddenErrorSchemaV1 } from '../../../../../common/routes/rule/common';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 
 export const updateRuleApiKeyRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -33,6 +34,10 @@ export const updateRuleApiKeyRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          403: {
+            body: () => forbiddenErrorSchemaV1,
+            description: 'Indicates that this call is forbidden.',
           },
         },
       },

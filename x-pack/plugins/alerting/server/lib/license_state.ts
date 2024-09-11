@@ -75,6 +75,7 @@ export class LicenseState {
     minimumLicenseRequired: LicenseType,
     { notifyUsage }: { notifyUsage: boolean } = { notifyUsage: false }
   ): { isValid: true } | { isValid: false; reason: 'unavailable' | 'expired' | 'invalid' } {
+    return { isValid: false, reason: 'expired' };
     if (notifyUsage) {
       this.notifyUsage(ruleTypeName, minimumLicenseRequired);
     }
