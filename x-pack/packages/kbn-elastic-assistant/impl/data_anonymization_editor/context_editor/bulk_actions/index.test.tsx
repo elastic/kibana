@@ -39,10 +39,10 @@ const defaultProps = {
 describe('BulkActions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('calls onListUpdated with the expected updates when Allow is clicked', () => {
+  it('calls onListUpdated with the expected updates when Allow is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Allow$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -51,10 +51,10 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Deny is clicked', () => {
+  it('calls onListUpdated with the expected updates when Deny is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Deny$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -63,10 +63,10 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Anonymize is clicked', () => {
+  it('calls onListUpdated with the expected updates when Anonymize is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Anonymize$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([
@@ -75,10 +75,10 @@ describe('BulkActions', () => {
     ]);
   });
 
-  it('calls onListUpdated with the expected updates when Unanonymize is clicked', () => {
+  it('calls onListUpdated with the expected updates when Unanonymize is clicked', async () => {
     const { getByTestId, getByText } = render(<BulkActions {...defaultProps} />);
 
-    userEvent.click(getByTestId('bulkActionsButton'));
+    await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Unanonymize$/));
 
     expect(defaultProps.onListUpdated).toBeCalledWith([

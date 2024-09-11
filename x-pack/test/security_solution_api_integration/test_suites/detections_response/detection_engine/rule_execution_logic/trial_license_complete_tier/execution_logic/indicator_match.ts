@@ -153,6 +153,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
       'kibana.alert.rule.uuid',
       'kibana.alert.rule.execution.uuid',
       'kibana.alert.rule.execution.timestamp',
+      'kibana.alert.intended_timestamp',
       'kibana.alert.start',
       'kibana.alert.reason',
       'kibana.alert.uuid',

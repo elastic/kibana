@@ -28,8 +28,7 @@ import {
 } from '@elastic/eui';
 
 import { ControlGroupInput } from '..';
-import { ParentIgnoreSettings } from '../..';
-import { getDefaultControlGroupInput } from '../../../common';
+import { getDefaultControlGroupInput, ParentIgnoreSettings } from '../../../common';
 import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 import { ControlStyle } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';

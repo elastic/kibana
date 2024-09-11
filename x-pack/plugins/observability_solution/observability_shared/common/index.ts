@@ -182,6 +182,7 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
+  SupportedAssetTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
