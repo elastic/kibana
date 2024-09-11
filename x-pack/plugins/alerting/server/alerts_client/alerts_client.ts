@@ -175,33 +175,9 @@ export class AlertsClient<
       return;
     }
 
-    const queryByUuid = async (uuids: string[]) => {
-      const result = await this.search({
-        size: uuids.length,
-        seq_no_primary_term: true,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  [ALERT_RULE_UUID]: this.options.rule.id,
-                },
-              },
-              {
-                terms: {
-                  [ALERT_UUID]: uuids,
-                },
-              },
-            ],
-          },
-        },
-      });
-      return result.hits;
-    };
-
     try {
       const results = await Promise.all(
-        chunk(uuidsToFetch, CHUNK_SIZE).map((uuidChunk: string[]) => queryByUuid(uuidChunk))
+        chunk(uuidsToFetch, CHUNK_SIZE).map((uuidChunk: string[]) => this.queryByUuid(uuidChunk))
       );
 
       for (const hit of results.flat()) {
@@ -223,6 +199,30 @@ export class AlertsClient<
         this.logTags
       );
     }
+  }
+
+  public async queryByUuid(uuids: string[]) {
+    const result = await this.search({
+      size: uuids.length,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                [ALERT_RULE_UUID]: this.options.rule.id,
+              },
+            },
+            {
+              terms: {
+                [ALERT_UUID]: uuids,
+              },
+            },
+          ],
+        },
+      },
+    });
+    return result.hits;
   }
 
   public async search<Aggregation = unknown>(
