@@ -8,6 +8,7 @@
  */
 
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -313,7 +314,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   headingId,
   initialPageSize,
   listingLimit,
-  urlStateEnabled = true,
+  urlStateEnabled = false,
   customTableColumn,
   emptyPrompt,
   rowItemActions,
@@ -493,14 +494,16 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const updateQuery = useCallback(
     (query: Query) => {
-      if (urlStateEnabled) {
-        setUrlState({ s: query.text });
-        return;
-      }
+      flushSync(() => {
+        if (urlStateEnabled) {
+          setUrlState({ s: query.text });
+          return;
+        }
 
-      dispatch({
-        type: 'onSearchQueryChange',
-        data: { query, text: query.text },
+        dispatch({
+          type: 'onSearchQueryChange',
+          data: { query, text: query.text },
+        });
       });
     },
     [urlStateEnabled, setUrlState]
