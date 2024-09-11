@@ -387,7 +387,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -497,7 +497,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 2;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -604,11 +604,11 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
         'Error updating task id-2:task to mark as unrecognized during claim: {"type":"document_missing_exception","reason":"[5]: document missing","index_uuid":"aAsFqTI0Tc2W0LCWgPNrOA","shard":"0","index":".kibana_task_manager_8.16.0_001"}',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 1;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -701,11 +701,11 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
         'Error updating tasks to mark as unrecognized during claim: Error: Oh no',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -855,7 +855,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -948,7 +948,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -1041,7 +1041,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 2; stale: 1; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -1140,7 +1140,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -1271,11 +1271,11 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).toHaveBeenCalledWith(
         'Error getting full task id-2:task during claim: Oh no',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -1511,11 +1511,11 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).toHaveBeenCalledWith(
         'Error updating task id-2:task during claim: {"type":"document_missing_exception","reason":"[5]: document missing","index_uuid":"aAsFqTI0Tc2W0LCWgPNrOA","shard":"0","index":".kibana_task_manager_8.16.0_001"}',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
@@ -1644,7 +1644,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
         'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['claimAvailableTasksMget'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).not.toHaveBeenCalled();
 
@@ -2000,7 +2000,8 @@ describe('TaskClaiming', () => {
       ] = claimedResults;
 
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-        'Background task node "test" has no assigned partitions, claiming against all partitions'
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming'] }
       );
       expect(query).toMatchInlineSnapshot(`
         Object {
