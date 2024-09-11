@@ -9,115 +9,18 @@ import React from 'react';
 import type { Index } from '@kbn/index-management';
 
 import {
-  EuiAccordion,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiI18nNumber,
-  EuiIcon,
   EuiPanel,
   EuiText,
   useEuiTheme,
-  useGeneratedHtmlId,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
-
-interface BaseQuickStatProps {
-  icon: string;
-  iconColor: string;
-  title: string;
-  secondaryTitle: React.ReactNode;
-  open: boolean;
-  content?: React.ReactNode;
-  stats: Array<{
-    title: string;
-    description: NonNullable<React.ReactNode>;
-  }>;
-  setOpen: (open: boolean) => void;
-  first?: boolean;
-}
-
-const QuickStat: React.FC<BaseQuickStatProps> = ({
-  icon,
-  title,
-  stats,
-  open,
-  setOpen,
-  first,
-  secondaryTitle,
-  iconColor,
-  content,
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const id = useGeneratedHtmlId({
-    prefix: 'formAccordion',
-    suffix: title,
-  });
-
-  return (
-    <EuiAccordion
-      forceState={open ? 'open' : 'closed'}
-      onToggle={() => setOpen(!open)}
-      paddingSize="none"
-      id={id}
-      buttonElement="div"
-      arrowDisplay="right"
-      css={{
-        borderLeft: euiTheme.border.thin,
-        ...(first ? { borderLeftWidth: 0 } : {}),
-        '.euiAccordion__arrow': {
-          marginRight: euiTheme.size.s,
-        },
-        '.euiAccordion__triggerWrapper': {
-          background: euiTheme.colors.ghost,
-        },
-        '.euiAccordion__children': {
-          borderTop: euiTheme.border.thin,
-          padding: euiTheme.size.m,
-        },
-      }}
-      buttonContent={
-        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} color={iconColor} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h4>{title}</h4>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued">{secondaryTitle}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      }
-    >
-      {content ? (
-        content
-      ) : (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiDescriptionList
-              type="column"
-              listItems={stats}
-              columnWidths={[3, 1]}
-              compressed
-              descriptionProps={{
-                color: 'subdued',
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </EuiAccordion>
-  );
-};
+import { QuickStat } from './quick_stat';
 
 interface QuickStatsProps {
   index: Index;
@@ -141,6 +44,7 @@ export const SetupAISearchButton: React.FC = () => {
           <EuiButton
             href="https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-search.html"
             target="_blank"
+            data-test-subj="setupAISearchButton"
           >
             {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_button', {
               defaultMessage: 'Setup now',
@@ -162,6 +66,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
   return (
     <EuiPanel
       paddingSize="none"
+      data-test-subj="quickStats"
       hasShadow={false}
       css={() => ({
         border: euiTheme.border.thin,
@@ -179,10 +84,21 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             title={i18n.translate('xpack.searchIndices.quickStats.document_count_heading', {
               defaultMessage: 'Document count',
             })}
+            data-test-subj="QuickStatsDocumentCount"
             secondaryTitle={<EuiI18nNumber value={index.documents ?? 0} />}
             stats={[
-              { title: 'Total', description: <EuiI18nNumber value={index.documents ?? 0} /> },
-              { title: 'Index Size', description: index.size ?? 0 },
+              {
+                title: i18n.translate('xpack.searchIndices.quickStats.documents.totalTitle', {
+                  defaultMessage: 'Total',
+                }),
+                description: <EuiI18nNumber value={index.documents ?? 0} />,
+              },
+              {
+                title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {
+                  defaultMessage: 'Index Size',
+                }),
+                description: index.size ?? 0,
+              },
             ]}
             first
           />
@@ -196,10 +112,11 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
             title={i18n.translate('xpack.searchIndices.quickStats.ai_search_heading', {
               defaultMessage: 'AI Search',
             })}
+            data-test-subj="QuickStatsAIMappings"
             secondaryTitle={
               vectorFieldCount > 0
                 ? i18n.translate('xpack.searchIndices.quickStats.total_count', {
-                    defaultMessage: '{value} Field',
+                    defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
                     values: {
                       value: vectorFieldCount,
                     },
@@ -215,7 +132,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
                   defaultMessage: 'Sparse Vector',
                 }),
                 description: i18n.translate('xpack.searchIndices.quickStats.sparse_vector_count', {
-                  defaultMessage: '{value} Field',
+                  defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
                   values: { value: mappingStats.sparse_vector },
                 }),
               },
@@ -224,7 +141,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
                   defaultMessage: 'Dense Vector',
                 }),
                 description: i18n.translate('xpack.searchIndices.quickStats.dense_vector_count', {
-                  defaultMessage: '{value} Field',
+                  defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
                   values: { value: mappingStats.dense_vector },
                 }),
               },
@@ -233,7 +150,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings }) => {
                   defaultMessage: 'Semantic Text',
                 }),
                 description: i18n.translate('xpack.searchIndices.quickStats.semantic_text_count', {
-                  defaultMessage: '{value} Field',
+                  defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
                   values: { value: mappingStats.semantic_text },
                 }),
               },

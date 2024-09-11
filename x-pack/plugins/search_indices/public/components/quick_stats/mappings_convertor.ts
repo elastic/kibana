@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type {
+  MappingProperty,
+  MappingPropertyBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Mappings } from '../../types';
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 interface VectorFieldTypes {
   semantic_text: number;
@@ -23,30 +26,31 @@ export function countVectorBasedTypesFromMappings(mappings: Mappings): VectorFie
 
   const typeCountKeys = Object.keys(typeCounts);
 
-  function recursiveCount(fields: any) {
-    if (fields.mappings) {
+  function recursiveCount(fields: MappingProperty | Mappings | MappingPropertyBase['fields']) {
+    if (!fields) {
+      return;
+    }
+    if ('mappings' in fields) {
       recursiveCount(fields.mappings);
     }
-    if (fields.properties) {
+    if ('properties' in fields && fields.properties) {
       Object.keys(fields.properties).forEach((key) => {
-        const value = fields.properties[key];
+        const value = (fields.properties as Record<string, MappingProperty>)?.[key];
 
-        if (value.type) {
+        if (value && value.type) {
           if (typeCountKeys.includes(value.type)) {
-            typeCounts[value.type] = typeCounts[value.type] + 1;
+            const type = value.type as keyof VectorFieldTypes;
+            typeCounts[type] = typeCounts[type] + 1;
           }
 
-          // If the field has nested fields, continue recursion
-          if (value.fields) {
+          if ('fields' in value) {
             recursiveCount(value.fields);
           }
 
-          // If the field has nested properties, continue recursion
-          if (value.properties) {
+          if ('properties' in value) {
             recursiveCount(value.properties);
           }
         } else if (value.properties || value.fields) {
-          // In case the structure does not have a "type" field directly, but has properties or fields
           recursiveCount(value);
         }
       });

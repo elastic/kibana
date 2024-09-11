@@ -24,7 +24,7 @@ import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
-  const { console: consolePlugin, application, cloud } = useKibana().services;
+  const { console: consolePlugin, application } = useKibana().services;
 
   const { data: index } = useIndex(indexName);
   const { data: mappings } = useIndexMapping(indexName);
@@ -35,8 +35,6 @@ export const SearchIndexDetailsPage = () => {
   const navigateToIndexListPage = useCallback(() => {
     application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application]);
-
-  const elasticsearchUrl = cloud.elasticsearchUrl || 'http://localhost:9200';
 
   if (!index || !mappings) {
     return null;
@@ -73,7 +71,7 @@ export const SearchIndexDetailsPage = () => {
       <EuiPageTemplate.Section grow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <ConnectionDetails elasticsearchUrl={elasticsearchUrl} />
+            <ConnectionDetails />
           </EuiFlexItem>
           <EuiFlexItem>{/* TODO: API KEY */}</EuiFlexItem>
         </EuiFlexGroup>

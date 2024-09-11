@@ -42,6 +42,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should have embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
     });
+
+    it('should have connection details', async () => {
+      await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
+    });
+
+    it('should have quick stats', async () => {
+      await pageObjects.svlSearchIndexDetailPage.expectQuickStats();
+      await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
+      await es.indices.putMapping({
+        index: indexName,
+        body: {
+          properties: {
+            my_field: {
+              type: 'dense_vector',
+              dims: 3,
+            },
+          },
+        },
+      });
+      await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+        shouldLoginIfPrompted: false,
+      });
+
+      await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappingsToHaveVectorFields();
+    });
+
     it('should redirect to indices list page', async () => {
       await pageObjects.svlSearchIndexDetailPage.expectBackToIndicesButtonExists();
       await pageObjects.svlSearchIndexDetailPage.clickBackToIndicesButton();

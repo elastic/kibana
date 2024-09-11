@@ -18,13 +18,16 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../hooks/use_kibana';
 
-interface ConnectionDetailsProps {
-  elasticsearchUrl: string;
-}
+const DEFAULT_ELASTICSEARCH_URL = 'http://localhost:9200';
 
-export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({ elasticsearchUrl }) => {
+export const ConnectionDetails: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const { cloud } = useKibana().services;
+
+  const elasticsearchUrl = cloud.elasticsearchUrl ?? DEFAULT_ELASTICSEARCH_URL;
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -39,6 +42,7 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({ elasticsea
       </EuiFlexItem>
       <EuiFlexItem css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <p
+          data-test-subj="connectionDetailsEndpoint"
           css={{
             color: euiTheme.colors.successText,
             padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
