@@ -1155,6 +1155,10 @@ class AgentPolicyService {
         );
         logger.error(error);
       }
+      // unenroll  offline agents for agentless policies
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
@@ -1216,9 +1220,11 @@ class AgentPolicyService {
     }
 
     await soClient.delete(savedObjectType, id);
-    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
-      spaceId: soClient.getCurrentNamespace(),
-    });
+    if (!agentPolicy?.supports_agentless) {
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
+    }
 
     // cleanup .fleet-policies docs on delete
     await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
