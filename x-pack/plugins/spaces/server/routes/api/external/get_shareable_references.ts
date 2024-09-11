@@ -12,12 +12,13 @@ import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
-  const { router, getStartServices } = deps;
+  const { router, getStartServices, isServerless } = deps;
 
   router.post(
     {
       path: '/api/spaces/_get_shareable_references',
       options: {
+        access: isServerless ? 'internal' : 'public',
         description: `Get shareable references`,
       },
       validate: {
