@@ -9,14 +9,10 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 
-import type {
-  RuleMetadata,
-  RuleResponse,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { RuleSchedule } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
+import type { RuleMetadata, RuleResponse } from '../../../api/detection_engine/model/rule_schema';
+import type { RuleSchedule } from '../../../api/detection_engine/prebuilt_rules';
 
-export const extractRuleSchedule = (rule: RuleResponse | PrebuiltRuleAsset): RuleSchedule => {
+export const extractRuleSchedule = (rule: RuleResponse): RuleSchedule => {
   const interval = rule.interval ?? '5m';
   const from = rule.from ?? 'now-6m';
   const to = rule.to ?? 'now';
