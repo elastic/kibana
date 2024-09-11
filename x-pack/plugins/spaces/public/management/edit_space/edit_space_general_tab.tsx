@@ -35,7 +35,17 @@ interface Props {
 }
 
 export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history, ...props }) => {
-  const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
+  const imageAvatarSelected = Boolean(space.imageUrl);
+  const [formValues, setFormValues] = useState<CustomizeSpaceFormValues>({
+    ...space,
+    initials: imageAvatarSelected ? '' : space.initials,
+    avatarType: imageAvatarSelected ? 'image' : 'initials',
+    imageUrl: imageAvatarSelected ? space.imageUrl : '',
+    customAvatarInitials: !imageAvatarSelected,
+    customAvatarColor: !imageAvatarSelected,
+    customIdentifier: false, // customizing identifier not available for edit screen
+  });
+
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
@@ -54,27 +64,20 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   });
 
   const onChangeSpaceSettings = useCallback(
-    (formValues: CustomizeSpaceFormValues & Partial<Space>) => {
-      const {
-        customIdentifier,
-        avatarType,
-        customAvatarInitials,
-        customAvatarColor,
-        ...updatedSpace
-      } = formValues;
-      setSpaceSettings({ ...spaceSettings, ...updatedSpace });
+    (newFormValues: CustomizeSpaceFormValues) => {
+      setFormValues({ ...formValues, ...newFormValues });
       setIsDirty(true);
     },
-    [spaceSettings]
+    [formValues]
   );
 
   const onChangeFeatures = useCallback(
     (updatedSpace: Partial<Space>) => {
-      setSpaceSettings({ ...spaceSettings, ...updatedSpace });
+      setFormValues({ ...formValues, ...updatedSpace });
       setIsDirty(true);
       setShowUserImpactWarning(true);
     },
-    [spaceSettings]
+    [formValues]
   );
 
   const onSolutionViewChange = useCallback(
@@ -101,7 +104,17 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const performSave = useCallback(
     async ({ requiresReload = false }) => {
-      const { id, name, disabledFeatures } = spaceSettings;
+      const {
+        avatarType,
+        customIdentifier,
+        customAvatarColor,
+        customAvatarInitials,
+        ...partialSpace
+      } = formValues;
+
+      const spaceClone = structuredClone(partialSpace as Partial<Space>);
+      const { id, name, disabledFeatures } = spaceClone;
+
       if (!id) {
         throw new Error(`Can not update space without id field!`);
       }
@@ -113,10 +126,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
       try {
         await spacesManager.updateSpace({
+          ...spaceClone,
           id,
           name,
           disabledFeatures: disabledFeatures ?? [],
-          ...spaceSettings,
+          imageUrl: avatarType === 'image' ? spaceClone.imageUrl : '',
         });
 
         notifications.toasts.addSuccess(
@@ -147,7 +161,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         setIsLoading(false);
       }
     },
-    [backToSpacesList, notifications.toasts, spaceSettings, spacesManager, props]
+    [backToSpacesList, notifications.toasts, formValues, spacesManager, props]
   );
 
   const onClickSubmit = useCallback(() => {
@@ -222,7 +236,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       {doShowConfirmDeleteSpaceDialog()}
 
       <CustomizeSpace
-        space={spaceSettings}
+        space={formValues}
         onChange={onChangeSpaceSettings}
         editingExistingSpace={true}
         validator={validator}
@@ -232,7 +246,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         <>
           <EuiSpacer />
           <SolutionView
-            space={spaceSettings}
+            space={formValues}
             onChange={onSolutionViewChange}
             validator={validator}
             isEditing={true}
@@ -245,7 +259,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           <EuiSpacer />
           <EditSpaceEnabledFeatures
             features={features}
-            space={spaceSettings}
+            space={formValues}
             onChange={onChangeFeatures}
           />
         </>
