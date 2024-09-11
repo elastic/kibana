@@ -516,16 +516,18 @@ export async function getMWTelemetry({
       perPage: 100,
     });
 
-    let countTotalMW = 0;
+    let countMWTotal = 0;
     let countMWWithRepeatToggleON = 0;
     let countMWWithFilterAlertToggleON = 0;
     for await (const response of MWFinder.find()) {
       for (const MWSavedObject of response.saved_objects) {
-        countTotalMW = countTotalMW + 1;
+        countMWTotal = countMWTotal + 1;
+        // scopedQuery property will be null if "Filter alerts" toggle will be off
         if (MWSavedObject.attributes.scopedQuery) {
           countMWWithFilterAlertToggleON = countMWWithFilterAlertToggleON + 1;
         }
-        if (MWSavedObject.attributes.rRule.freq) {
+        // interval property will be not in place if "Repeat" toggle will be off
+        if (MWSavedObject.attributes.rRule.interval) {
           countMWWithRepeatToggleON = countMWWithRepeatToggleON + 1;
         }
       }
@@ -534,7 +536,7 @@ export async function getMWTelemetry({
 
     return {
       hasErrors: false,
-      count_mw_total: countTotalMW,
+      count_mw_total: countMWTotal,
       count_mw_with_repeat_toggle_on: countMWWithRepeatToggleON,
       count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
     };
