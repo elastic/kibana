@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { RouteAccess } from '@kbn/core-http-server';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { importDashboards } from './lib';
 
@@ -20,7 +21,13 @@ export const registerLegacyImportRoute = (
     maxImportPayloadBytes,
     coreUsageData,
     logger,
-  }: { maxImportPayloadBytes: number; coreUsageData: InternalCoreUsageDataSetup; logger: Logger }
+    access,
+  }: {
+    maxImportPayloadBytes: number;
+    coreUsageData: InternalCoreUsageDataSetup;
+    logger: Logger;
+    access: RouteAccess;
+  }
 ) => {
   router.post(
     {
@@ -38,7 +45,7 @@ export const registerLegacyImportRoute = (
         }),
       },
       options: {
-        access: 'public',
+        access,
         tags: ['api'],
         body: {
           maxBytes: maxImportPayloadBytes,
