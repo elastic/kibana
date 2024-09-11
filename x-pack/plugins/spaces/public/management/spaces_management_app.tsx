@@ -125,7 +125,7 @@ export const spacesManagementApp = Object.freeze({
 
           const breadcrumbText = (space: Space) =>
             i18n.translate('xpack.spaces.management.editSpaceBreadcrumb', {
-              defaultMessage: 'Edit {space}',
+              defaultMessage: 'Edit "{space}"',
               values: { space: space.name },
             });
 

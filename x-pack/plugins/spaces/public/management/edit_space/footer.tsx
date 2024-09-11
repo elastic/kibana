@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
 interface Props {
   isDirty: boolean;
   isLoading: boolean;
@@ -46,14 +48,20 @@ export const EditSpaceTabFooter: React.FC<Props> = ({
               color="danger"
               data-test-subj="delete-space-button"
             >
-              Delete space
+              <FormattedMessage
+                id="xpack.spaces.management.spaceDetails.footerActions.deleteSpace"
+                defaultMessage="Delete space"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={true} />
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClickCancel} data-test-subj="cancel-space-button">
-              Cancel
+              <FormattedMessage
+                id="xpack.spaces.management.spaceDetails.footerActions.cancel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
 
@@ -65,7 +73,10 @@ export const EditSpaceTabFooter: React.FC<Props> = ({
                 onClick={onClickSubmit}
                 data-test-subj="save-space-button"
               >
-                Update space
+                <FormattedMessage
+                  id="xpack.spaces.management.spaceDetails.footerActions.updateSpace"
+                  defaultMessage="Update space"
+                />
               </EuiButton>
             </EuiFlexItem>
           )}

@@ -292,20 +292,19 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const getForm = () => {
     return (
       <EuiForm component="form" fullWidth>
-        <EuiFormRow label="Select a role(s)">
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.spaces.management.spaceDetails.roles.selectRolesFormRowLabel',
+            { defaultMessage: 'Select roles(s)' }
+          )}
+        >
           <EuiComboBox
             data-test-subj="roleSelectionComboBox"
             aria-label={i18n.translate('xpack.spaces.management.spaceDetails.roles.selectRoles', {
-              defaultMessage: 'Select role to assign to the {spaceName} space',
+              defaultMessage: 'Select role to assign to the "{spaceName}" space',
               values: { spaceName: space.name },
             })}
             isLoading={fetchingDataDeps}
-            placeholder={i18n.translate(
-              'xpack.spaces.management.spaceDetails.roles.selectRolesPlaceholder',
-              {
-                defaultMessage: 'Select roles',
-              }
-            )}
             options={createRolesComboBoxOptions(spaceUnallocatedRoles)}
             selectedOptions={selectedRoles}
             onChange={(value) => setSelectedRoles(value)}
@@ -467,7 +466,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         <EuiTitle size="m">
           <h2>
             {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign.privileges.custom', {
-              defaultMessage: 'Assign role to {spaceName}',
+              defaultMessage: 'Assign role to "{spaceName}"',
               values: { spaceName: space.name },
             })}
           </h2>

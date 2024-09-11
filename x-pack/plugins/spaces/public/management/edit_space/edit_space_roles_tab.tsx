@@ -71,7 +71,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
                       i18n.translate(
                         'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
                         {
-                          defaultMessage: `Selected roles have been assigned to the {spaceName} space`,
+                          defaultMessage: `Selected roles have been assigned to the "{spaceName}" space`,
                           values: {
                             spaceName: space.name,
                           },
@@ -148,7 +148,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
             notifications.toasts.addSuccess(
               i18n.translate('xpack.spaces.management.spaceDetails.roles.removalSuccessMsg', {
                 defaultMessage:
-                  'Removed {count, plural, one {role} other {{count} roles}} from {spaceName} space',
+                  'Removed {count, plural, one {role} other {{count} roles}} from "{spaceName}" space',
                 values: {
                   spaceName: space.name,
                   count: updateDoc.length,

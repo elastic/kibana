@@ -24,5 +24,5 @@ export function sortRolesForListing(aRole: Role, bRole: Role) {
     return -1;
   }
 
-  return aName > bName ? 1 : aName === bName ? 0 : -1;
+  return aName.localeCompare(bName);
 }

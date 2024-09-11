@@ -18,6 +18,8 @@ import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { useEditSpaceServices } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
@@ -114,9 +116,11 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
 
   return (
     <EuiBasicTable
-      tableCaption="Demo of EuiBasicTable"
+      tableCaption={i18n.translate('blipblapflapglap', {
+        defaultMessage: 'List of saved object content within the space',
+      })}
       items={items}
-      rowHeader="firstName"
+      rowHeader="type"
       columns={columns}
       rowProps={getRowProps}
       cellProps={getCellProps}

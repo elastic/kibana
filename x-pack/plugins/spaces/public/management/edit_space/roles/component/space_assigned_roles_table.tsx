@@ -315,7 +315,7 @@ export const SpaceAssignedRolesTable = ({
                       'xpack.spaces.management.spaceDetails.rolesTable.selectedStatusInfo',
                       {
                         defaultMessage:
-                          'Showing: {pageItemLength} of {rolesInViewCount} | Selected: {selectedCount} roles',
+                          'Showing: {pageItemLength} of {rolesInViewCount} | Selected: {selectedCount, plural, one {one role} other {{selectedCount} roles}}',
                         values: {
                           pageItemLength: Math.floor(
                             rolesInView.length / (pageSize * (pageIndex + 1))

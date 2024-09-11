@@ -201,7 +201,12 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
             title="Warning"
             data-test-subj="userImpactWarning"
           >
-            The changes made will impact all users in the space.
+            {i18n.translate(
+              'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
+              {
+                defaultMessage: 'The changes made will impact all users in the space.',
+              }
+            )}
           </EuiCallOut>
         </>
       )

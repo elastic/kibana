@@ -23,8 +23,51 @@ const createReserved = (name: string): Role => {
   } as unknown as Role;
 };
 
-describe('sortRolesForListing', () => {
-  it('sorts the roles so that custom roles appear in the beginning', () => {
+const expected = [
+  'Apple',
+  'Banana',
+  'Cherry',
+  'Date',
+  'Elderberry',
+  'Fig',
+  'Grape',
+  'Honeydew melon',
+  'Indian fig',
+  'Jackfruit',
+  'Kiwi',
+  'Lemon',
+  'Mango',
+  'Nectarine',
+  'Orange',
+  'Papaya',
+  'Quince',
+  'Raspberry',
+  'Strawberry',
+  'Tangerine',
+  'Artichoke',
+  'Broccoli',
+  'Carrot',
+  'Daikon',
+  'Eggplant',
+  'Fennel',
+  'Garlic',
+  'Horseradish',
+  'Iceberg lettuce',
+  'Jalapeño',
+  'Kale',
+  'Leek',
+  'Mushroom',
+  'Napa cabbage',
+  'Okra',
+  'Parsnip',
+  'Quinoa greens',
+  'Radish',
+  'Spinach',
+  'Turnip',
+];
+
+describe('sortRolesForListing: sorts the roles correctly', () => {
+  it('when they are originally sorted alphabetically', () => {
     const roles = [
       createCustom('Apple'),
       createReserved('Artichoke'),
@@ -72,49 +115,57 @@ describe('sortRolesForListing', () => {
     const names = sortResult.map(({ name }) => name);
 
     // expect fruits to be at the top, otherwise sorted alphabetically
-    expect(names).toMatchInlineSnapshot(`
-      Array [
-        "Apple",
-        "Banana",
-        "Cherry",
-        "Date",
-        "Elderberry",
-        "Fig",
-        "Grape",
-        "Honeydew melon",
-        "Indian fig",
-        "Jackfruit",
-        "Kiwi",
-        "Lemon",
-        "Mango",
-        "Nectarine",
-        "Orange",
-        "Papaya",
-        "Quince",
-        "Raspberry",
-        "Strawberry",
-        "Tangerine",
-        "Artichoke",
-        "Broccoli",
-        "Carrot",
-        "Daikon",
-        "Eggplant",
-        "Fennel",
-        "Garlic",
-        "Horseradish",
-        "Iceberg lettuce",
-        "Jalapeño",
-        "Kale",
-        "Leek",
-        "Mushroom",
-        "Napa cabbage",
-        "Okra",
-        "Parsnip",
-        "Quinoa greens",
-        "Radish",
-        "Spinach",
-        "Turnip",
-      ]
-    `);
+    expect(names).toEqual(expected);
+  });
+
+  it('when they are originally sorted randomly', () => {
+    const roles = [
+      createReserved('Iceberg lettuce'),
+      createCustom('Nectarine'),
+      createCustom('Strawberry'),
+      createReserved('Jalapeño'),
+      createCustom('Papaya'),
+      createReserved('Fennel'),
+      createCustom('Lemon'),
+      createCustom('Grape'),
+      createReserved('Artichoke'),
+      createCustom('Apple'),
+      createReserved('Quinoa greens'),
+      createCustom('Quince'),
+      createCustom('Raspberry'),
+      createReserved('Leek'),
+      createReserved('Radish'),
+      createReserved('Daikon'),
+      createReserved('Turnip'),
+      createCustom('Elderberry'),
+      createCustom('Tangerine'),
+      createReserved('Broccoli'),
+      createReserved('Mushroom'),
+      createCustom('Honeydew melon'),
+      createCustom('Kiwi'),
+      createCustom('Fig'),
+      createCustom('Mango'),
+      createCustom('Banana'),
+      createCustom('Jackfruit'),
+      createReserved('Napa cabbage'),
+      createReserved('Spinach'),
+      createCustom('Orange'),
+      createReserved('Okra'),
+      createReserved('Eggplant'),
+      createReserved('Kale'),
+      createCustom('Cherry'),
+      createReserved('Horseradish'),
+      createReserved('Garlic'),
+      createReserved('Carrot'),
+      createCustom('Date'),
+      createReserved('Parsnip'),
+      createCustom('Indian fig'),
+    ];
+
+    const sortResult = roles.sort(sortRolesForListing);
+    const names = sortResult.map(({ name }) => name);
+
+    // expect fruits to be at the top, otherwise sorted alphabetically
+    expect(names).toEqual(expected);
   });
 });
