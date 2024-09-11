@@ -115,6 +115,27 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       ],
       rowHeight: 5,
     }),
+    getAdditionalCellActions: (prev) => () =>
+      [
+        ...prev(),
+        {
+          id: 'example-data-source-action',
+          getDisplayName: () => 'Example data source action',
+          getIconType: () => 'plus',
+          execute: () => {
+            alert('Example data source action executed');
+          },
+        },
+        {
+          id: 'another-example-data-source-action',
+          getDisplayName: () => 'Another example data source action',
+          getIconType: () => 'minus',
+          execute: () => {
+            alert('Another example data source action executed');
+          },
+          isCompatible: ({ field }) => field.name !== 'message',
+        },
+      ],
   },
   resolve: (params) => {
     let indexPattern: string | undefined;

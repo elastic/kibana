@@ -7,136 +7,186 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual, pick } from 'lodash';
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { omit } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { compareFilters } from '@kbn/es-query';
+import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-publishing';
 
+import { CONTROL_GROUP_TYPE } from '../../../common';
 import {
-  getDefaultControlGroupInput,
-  getDefaultControlGroupPersistableInput,
-  persistableControlGroupInputKeys,
-} from '../../../common';
-import { ControlGroupContainer } from '../embeddable/control_group_container';
-import { ControlGroupContainerFactory } from '../embeddable/control_group_container_factory';
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '../../react_controls/control_group/types';
 import {
-  ControlGroupCreationOptions,
-  ControlGroupInput,
-  ControlGroupOutput,
-  CONTROL_GROUP_TYPE,
-} from '../types';
-import {
-  AwaitingControlGroupAPI,
-  buildApiFromControlGroupContainer,
-  ControlGroupAPI,
-} from './control_group_api';
-import { controlGroupInputBuilder, ControlGroupInputBuilder } from './control_group_input_builder';
+  controlGroupStateBuilder,
+  type ControlGroupStateBuilder,
+} from '../../react_controls/control_group/utils/control_group_state_builder';
+import { getDefaultControlGroupRuntimeState } from '../../react_controls/control_group/utils/initialization_utils';
+import { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
 
 export interface ControlGroupRendererProps {
-  filters?: Filter[];
+  onApiAvailable: (api: ControlGroupRendererApi) => void;
   getCreationOptions?: (
-    initialInput: Partial<ControlGroupInput>,
-    builder: ControlGroupInputBuilder
-  ) => Promise<ControlGroupCreationOptions>;
+    initialState: Partial<ControlGroupRuntimeState>,
+    builder: ControlGroupStateBuilder
+  ) => Promise<Partial<ControlGroupCreationOptions>>;
+  viewMode?: ViewModeType;
+  filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query;
+  dataLoading?: boolean;
 }
 
-export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
-  ({ getCreationOptions, filters, timeRange, query }, ref) => {
-    const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+export const ControlGroupRenderer = ({
+  onApiAvailable,
+  getCreationOptions,
+  filters,
+  timeRange,
+  query,
+  viewMode,
+  dataLoading,
+}: ControlGroupRendererProps) => {
+  const id = useMemo(() => uuidv4(), []);
+  const [regenerateId, setRegenerateId] = useState(uuidv4());
+  const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
 
-    useImperativeHandle(
-      ref,
-      () => buildApiFromControlGroupContainer(controlGroup) as ControlGroupAPI,
-      [controlGroup]
-    );
+  /**
+   * Parent API set up
+   */
+  const searchApi = useSearchApi({
+    filters,
+    query,
+    timeRange,
+  });
 
-    const controlGroupDomRef = useRef(null);
-    const id = useMemo(() => uuidv4(), []);
+  const viewMode$ = useMemo(
+    () => new BehaviorSubject<ViewModeType>(viewMode ?? ViewMode.VIEW),
+    // viewMode only used as initial value - changes do not effect memoized value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    if (viewMode) viewMode$.next(viewMode);
+  }, [viewMode, viewMode$]);
 
-    // onMount
-    useEffect(() => {
-      let canceled = false;
-      let destroyControlGroup: () => void;
+  const dataLoading$ = useMemo(
+    () => new BehaviorSubject<boolean>(Boolean(dataLoading)),
+    // dataLoading only used as initial value - changes do not effect memoized value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    if (dataLoading !== dataLoading$.getValue()) dataLoading$.next(Boolean(dataLoading));
+  }, [dataLoading, dataLoading$]);
 
-      (async () => {
-        // Lazy loading all services is required in this component because it is exported and contributes to the bundle size.
-        const { pluginServices } = await import('../../services/plugin_services');
-        const { embeddable } = pluginServices.getServices();
+  const reload$ = useMemo(() => new Subject<void>(), []);
 
-        const factory = embeddable.getEmbeddableFactory(CONTROL_GROUP_TYPE) as EmbeddableFactory<
-          ControlGroupInput,
-          ControlGroupOutput,
-          ControlGroupContainer
-        > & {
-          create: ControlGroupContainerFactory['create'];
-        };
-        const { initialInput, settings, fieldFilterPredicate } =
-          (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
-          {};
-        const newControlGroup = (await factory?.create(
-          {
-            id,
-            ...getDefaultControlGroupInput(),
-            ...initialInput,
-          },
-          undefined,
-          {
-            ...settings,
-            lastSavedInput: {
-              ...getDefaultControlGroupPersistableInput(),
-              ...pick(initialInput, persistableControlGroupInputKeys),
-            },
-          },
-          fieldFilterPredicate
-        )) as ControlGroupContainer;
+  /**
+   * Control group API set up
+   */
+  const runtimeState$ = useMemo(
+    () => new BehaviorSubject<ControlGroupRuntimeState>(getDefaultControlGroupRuntimeState()),
+    []
+  );
+  const [serializedState, setSerializedState] = useState<ControlGroupSerializedState | undefined>();
 
-        if (canceled) {
-          newControlGroup.destroy();
-          controlGroup?.destroy();
-          return;
-        }
+  const updateInput = useCallback(
+    (newState: Partial<ControlGroupRuntimeState>) => {
+      runtimeState$.next({
+        ...runtimeState$.getValue(),
+        ...newState,
+      });
+    },
+    [runtimeState$]
+  );
 
-        if (controlGroupDomRef.current) {
-          newControlGroup.render(controlGroupDomRef.current);
-        }
-        setControlGroup(newControlGroup);
-        destroyControlGroup = () => newControlGroup.destroy();
-      })();
-      return () => {
-        canceled = true;
-        destroyControlGroup?.();
+  /**
+   * To mimic `input$`, subscribe to unsaved changes and snapshot the runtime state whenever
+   * something change
+   */
+  useEffect(() => {
+    if (!controlGroup) return;
+    const stateChangeSubscription = controlGroup.unsavedChanges.subscribe((changes) => {
+      runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
+    });
+    return () => {
+      stateChangeSubscription.unsubscribe();
+    };
+  }, [controlGroup, runtimeState$]);
+
+  /**
+   * On mount
+   */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { initialState, editorConfig } =
+        (await getCreationOptions?.(
+          getDefaultControlGroupRuntimeState(),
+          controlGroupStateBuilder
+        )) ?? {};
+      updateInput({
+        ...initialState,
+        editorConfig,
+      });
+      const state = {
+        ...omit(initialState, ['initialChildControlState', 'ignoreParentSettings']),
+        editorConfig,
+        controlStyle: initialState?.labelPosition,
+        panelsJSON: JSON.stringify(initialState?.initialChildControlState ?? {}),
+        ignoreParentSettingsJSON: JSON.stringify(initialState?.ignoreParentSettings ?? {}),
       };
-      // exhaustive deps disabled because we want the control group to be created only on first render.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
-    useEffect(() => {
-      if (!controlGroup) return;
-      if (
-        (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
-        !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
-        !isEqual(controlGroup.getInput().query, query)
-      ) {
-        controlGroup.updateInput({
-          timeRange,
-          query,
-          filters,
-        });
+      if (!cancelled) {
+        setSerializedState(state as ControlGroupSerializedState);
       }
-    }, [query, filters, controlGroup, timeRange]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // exhaustive deps disabled because we want the control group to be created only on first render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return <div ref={controlGroupDomRef} />;
-  }
-);
+  return !serializedState ? null : (
+    <ReactEmbeddableRenderer<ControlGroupSerializedState, ControlGroupRuntimeState, ControlGroupApi>
+      key={regenerateId} // this key forces a re-mount when `updateInput` is called
+      maybeId={id}
+      type={CONTROL_GROUP_TYPE}
+      getParentApi={() => ({
+        reload$,
+        dataLoading: dataLoading$,
+        viewMode: viewMode$,
+        query$: searchApi.query$,
+        timeRange$: searchApi.timeRange$,
+        unifiedSearchFilters$: searchApi.filters$,
+        getSerializedStateForChild: () => ({
+          rawState: serializedState,
+        }),
+        getRuntimeStateForChild: () => {
+          return runtimeState$.getValue();
+        },
+      })}
+      onApiAvailable={(controlGroupApi) => {
+        const controlGroupRendererApi: ControlGroupRendererApi = {
+          ...controlGroupApi,
+          reload: () => reload$.next(),
+          updateInput: (newInput) => {
+            updateInput(newInput);
+            setRegenerateId(uuidv4()); // force remount
+          },
+          getInput$: () => runtimeState$,
+        };
+        setControlGroup(controlGroupRendererApi);
+        onApiAvailable(controlGroupRendererApi);
+      }}
+      hidePanelChrome
+      panelProps={{ hideLoader: true }}
+    />
+  );
+};

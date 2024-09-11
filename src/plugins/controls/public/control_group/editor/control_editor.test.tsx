@@ -15,7 +15,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { OptionsListEmbeddableFactory } from '../..';
 import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
@@ -35,6 +34,7 @@ import { pluginServices } from '../../services';
 import { ControlGroupContainerContext } from '../embeddable/control_group_container';
 import { ControlGroupInput } from '../types';
 import { ControlEditor, EditControlProps } from './control_editor';
+import { OptionsListEmbeddableFactory } from '../../options_list';
 
 describe('Data control editor', () => {
   interface MountOptions {
