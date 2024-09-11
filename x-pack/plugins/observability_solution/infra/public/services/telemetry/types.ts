@@ -11,6 +11,8 @@ export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
 
+export type TelemetryServiceStart = ITelemetryClient;
+
 export enum InfraTelemetryEventTypes {
   HOSTS_VIEW_QUERY_SUBMITTED = 'Hosts View Query Submitted',
   HOSTS_ENTRY_CLICKED = 'Host Entry Clicked',

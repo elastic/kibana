@@ -167,7 +167,7 @@ class TimeseriesChartIntl extends Component {
 
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       constructorContext.services.uiSettings,
-      constructorContext.services.mlServices.mlApiServices,
+      constructorContext.services.mlServices.mlApi,
       constructorContext.services.mlServices.mlResultsService
     );
     this.getTimeBuckets = timeBucketsServiceFactory(

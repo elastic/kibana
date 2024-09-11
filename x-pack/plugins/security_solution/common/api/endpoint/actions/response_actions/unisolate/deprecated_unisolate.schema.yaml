@@ -5,7 +5,11 @@ info:
 paths:
   /api/endpoint/unisolate:
     post:
-      summary: Permanently redirects to a new location
+      summary: Release an isolated endpoint
+      description: |
+        Release an isolated endpoint, allowing it to rejoin a network.
+        > info
+        > This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
       operationId: EndpointUnisolateRedirect
       deprecated: true
       x-codegen-enabled: true

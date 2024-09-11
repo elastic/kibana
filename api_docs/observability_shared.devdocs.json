@@ -5916,6 +5916,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SupportedAssetTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "SupportedAssetTypes",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/asset_details_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -6215,6 +6227,21 @@
           "\"color0\" | \"color1\" | \"color2\" | \"color3\" | \"color4\" | \"color5\" | \"color6\" | \"color7\" | \"color8\" | \"color9\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.COMMON_OBSERVABILITY_GROUPING",
+        "type": "Array",
+        "tags": [],
+        "label": "COMMON_OBSERVABILITY_GROUPING",
+        "description": [],
+        "signature": [
+          "{ id: string; getDisplayName: () => string; getIconType: () => string; order: number; }[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/embeddable_grouping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

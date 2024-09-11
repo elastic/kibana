@@ -7,10 +7,10 @@
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { Pipeline } from '../../../common';
-import type { RelatedState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
-import type { RelatedNodeParams } from './types';
+import type { RelatedState, SimplifiedProcessor, SimplifiedProcessors } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_MAIN_PROMPT } from './prompts';
+import type { RelatedNodeParams } from './types';
 
 export async function handleRelated({
   state,
@@ -37,6 +37,7 @@ export async function handleRelated({
     currentPipeline,
     currentProcessors,
     reviewed: false,
+    hasTriedOnce: true,
     lastExecutedChain: 'related',
   };
 }
