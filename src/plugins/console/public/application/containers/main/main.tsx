@@ -123,7 +123,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
     if (file) {
       if (file.size > MAX_FILE_UPLOAD_SIZE) {
-        notifications.toasts.addSuccess(
+        notifications.toasts.addWarning(
           i18n.translate('console.notification.error.fileTooBigMessage', {
             defaultMessage: `File size exceeds the 2MB limit.`,
           })
@@ -132,6 +132,14 @@ export function Main({ isEmbeddable = false }: MainProps) {
       }
 
       const reader = new FileReader();
+
+      reader.onerror = () => {
+        notifications.toasts.addWarning(
+          i18n.translate('console.notification.error.failedToReadFile', {
+            defaultMessage: `Failed to read the file you selected.`,
+          })
+        );
+      };
 
       reader.onload = (e) => {
         const fileContent = e?.target?.result;
@@ -148,7 +156,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
             })
           );
         } else {
-          notifications.toasts.add(
+          notifications.toasts.addWarning(
             i18n.translate('console.notification.error.fileImportNoContent', {
               defaultMessage: `The file you selected doesn't appear to have any content. Please select a different file.`,
             })
