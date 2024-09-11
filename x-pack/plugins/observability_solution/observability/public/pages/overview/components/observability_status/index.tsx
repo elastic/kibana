@@ -12,10 +12,14 @@ import { ObservabilityStatusBoxes } from './observability_status_boxes';
 import { getContent } from './content';
 
 export function ObservabilityStatus() {
-  const { http, docLinks } = useKibana().services;
+  const {
+    http,
+    docLinks,
+    share: { url },
+  } = useKibana().services;
   const { hasDataMap } = useHasData();
 
-  const content = getContent(http, docLinks);
+  const content = getContent(http, docLinks, url);
 
   const boxes = content.map((app) => {
     return {

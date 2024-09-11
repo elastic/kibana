@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -211,19 +212,6 @@ export const getTableColumns = (
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
-      field: 'duration',
-      'data-test-subj': 'lastDuration',
-      name: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel',
-        {
-          defaultMessage: 'Last duration',
-        }
-      ),
-      sortable: false,
-      width: isOnReducedSpaceLayout ? 'auto' : '120px',
-      css: { justifyContent: 'flex-end' as const }, // right alignment
-    },
-    {
       name: '',
       actions,
       'data-test-subj': 'actions',
@@ -238,27 +226,18 @@ export const getTableColumns = (
 export function QueryHistory({
   containerCSS,
   containerWidth,
-  refetchHistoryItems,
   onUpdateAndSubmit,
   isInCompactMode,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
-  refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [historyItems, setHistoryItems] = useState<QueryHistoryItem[]>([]);
-
-  useEffect(() => {
-    if (refetchHistoryItems) {
-      // get history items from local storage
-      setHistoryItems(getHistoryItems(sortDirection));
-    }
-  }, [refetchHistoryItems, sortDirection]);
+  const historyItems: QueryHistoryItem[] = getHistoryItems(sortDirection);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -360,9 +339,6 @@ export function QueryHistory({
     .euiTableRowCell {
       vertical-align: top;
       border: none;
-    }
-    .euiTable th[data-test-subj='tableHeaderCell_duration_3'] span {
-      justify-content: flex-end;
     }
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
     border-top-left-radius: ${euiTheme.border.radius.medium};

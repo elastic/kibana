@@ -38,7 +38,7 @@ urlServiceWithUptimeLocator.locators.create<
   },
 });
 
-const ProviderWrapper: FC<{ urlService?: UrlService }> = ({
+const ProviderWrapper: FC<React.PropsWithChildren<{ urlService?: UrlService }>> = ({
   children,
   urlService = emptyUrlService,
 }) => {

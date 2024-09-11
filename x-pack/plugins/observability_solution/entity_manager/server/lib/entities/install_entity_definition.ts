@@ -32,11 +32,7 @@ import {
   saveEntityDefinition,
   updateEntityDefinition,
 } from './save_entity_definition';
-import {
-  stopAndDeleteHistoryBackfillTransform,
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from './stop_and_delete_transform';
+
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
 import { generateEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
@@ -45,6 +41,8 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { EntityDefinitionWithState } from './types';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
+import { stopTransforms } from './stop_transforms';
+import { deleteTransforms } from './delete_transforms';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -91,14 +89,7 @@ export async function installEntityDefinition({
     return await install({ esClient, soClient, logger, definition: entityDefinition });
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
-
-    await Promise.all([
-      stopAndDeleteHistoryTransform(esClient, definition, logger),
-      isBackfillEnabled(definition)
-        ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
-        : Promise.resolve(),
-      stopAndDeleteLatestTransform(esClient, definition, logger),
-    ]);
+    await stopAndDeleteTransforms(esClient, definition, logger);
 
     await Promise.all([
       deleteHistoryIngestPipeline(esClient, definition, logger),
@@ -253,13 +244,7 @@ export async function reinstallEntityDefinition({
     });
 
     logger.debug(`Deleting transforms for definition ${definition.id} v${definition.version}`);
-    await Promise.all([
-      stopAndDeleteHistoryTransform(esClient, definition, logger),
-      isBackfillEnabled(definition)
-        ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
-        : Promise.resolve(),
-      stopAndDeleteLatestTransform(esClient, definition, logger),
-    ]);
+    await stopAndDeleteTransforms(esClient, definition, logger);
 
     return await install({
       esClient,
@@ -307,4 +292,13 @@ const shouldReinstallBuiltinDefinition = (
   const partial = installStatus === 'installed' && !state.installed;
 
   return timedOut || outdated || failed || partial;
+};
+
+const stopAndDeleteTransforms = async (
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) => {
+  await stopTransforms(esClient, definition, logger);
+  await deleteTransforms(esClient, definition, logger);
 };

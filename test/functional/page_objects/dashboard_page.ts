@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -717,7 +718,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getDashboardPanels() {
-    return await this.testSubjects.findAll('embeddablePanel');
+    return await this.testSubjects.findAll('dashboardPanel');
   }
 
   public async addVisualizations(visualizations: string[]) {
@@ -847,20 +848,6 @@ export class DashboardPageObject extends FtrService {
     }
 
     return checkList.filter((viz) => viz.isPresent === false).map((viz) => viz.name);
-  }
-
-  public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
-    this.log.debug('getPanelDrilldownCount');
-    const panel = (await this.getDashboardPanels())[panelIndex];
-    try {
-      const count = await panel.findByTestSubject(
-        'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
-      );
-      return Number.parseInt(await count.getVisibleText(), 10);
-    } catch (e) {
-      // if not found then this is 0 (we don't show badge with 0)
-      return 0;
-    }
   }
 
   public async getPanelChartDebugState(panelIndex: number) {

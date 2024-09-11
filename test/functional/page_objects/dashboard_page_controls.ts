@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -475,7 +476,11 @@ export class DashboardPageControls extends FtrService {
     await this.optionsListWaitForLoading(controlId);
     if (!skipOpen) await this.optionsListOpenPopover(controlId);
     await this.retry.try(async () => {
-      expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+      const availableOptions = await this.optionsListPopoverGetAvailableOptions();
+      expect(availableOptions.suggestions).to.eql(expectation.suggestions);
+      expect(availableOptions.invalidSelections.sort()).to.eql(
+        expectation.invalidSelections.sort()
+      );
     });
     if (await this.testSubjects.exists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
@@ -496,7 +501,9 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverSearchForOption(search: string) {
     this.log.debug(`searching for ${search} in options list`);
     await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.setValue(`optionsList-control-search-input`, search);
+    await this.testSubjects.setValue(`optionsList-control-search-input`, search, {
+      typeCharByChar: true,
+    });
     await this.optionsListPopoverWaitForLoading();
   }
 
