@@ -15,64 +15,68 @@ interface OverrideGridCopyEventParams {
 }
 
 export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCopyEventParams) {
-  const selection = window.getSelection();
-  if (!selection) {
-    return;
-  }
-  const ranges = Array.from({ length: selection.rangeCount }, (_, i) => selection.getRangeAt(i));
+  try {
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+    const ranges = Array.from({ length: selection.rangeCount }, (_, i) => selection.getRangeAt(i));
 
-  if (!ranges.length || !event.clipboardData?.setData || !dataGridWrapper) {
-    return;
-  }
+    if (!ranges.length || !event.clipboardData?.setData || !dataGridWrapper) {
+      return;
+    }
 
-  let tsvData = '';
-  let totalCellsCount = 0;
-  let totalRowsCount = 0;
+    let tsvData = '';
+    let totalCellsCount = 0;
+    let totalRowsCount = 0;
 
-  const rows = dataGridWrapper.querySelectorAll('[role="row"]');
-  rows.forEach((row) => {
-    const cells = row.querySelectorAll('[role="gridcell"]');
+    const rows = dataGridWrapper.querySelectorAll('[role="row"]');
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll('[role="gridcell"]');
 
-    const cellsTextContent: string[] = [];
-    let hasSelectedCellsInRow = false;
+      const cellsTextContent: string[] = [];
+      let hasSelectedCellsInRow = false;
 
-    cells.forEach((cell) => {
-      if (
-        cell.classList?.contains?.('euiDataGridRowCell--controlColumn') &&
-        cell.getAttribute('data-gridcell-column-id') !== 'timeline-event-detail-row' // in Security Solution "Event renderes" are appended as control column
-      ) {
-        // skip controls
-        return;
-      }
+      cells.forEach((cell) => {
+        if (
+          cell.classList?.contains?.('euiDataGridRowCell--controlColumn') &&
+          cell.getAttribute('data-gridcell-column-id') !== 'timeline-event-detail-row' // in Security Solution "Event renderes" are appended as control column
+        ) {
+          // skip controls
+          return;
+        }
 
-      const cellContent = cell.querySelector('.euiDataGridRowCell__content');
-      if (!cellContent) {
-        return;
-      }
+        const cellContent = cell.querySelector('.euiDataGridRowCell__content');
+        if (!cellContent) {
+          return;
+        }
 
-      // get text content of selected cells
-      if (ranges.some((range) => range?.intersectsNode(cell))) {
-        cellsTextContent.push(getCellTextContent(cellContent));
-        hasSelectedCellsInRow = true;
-        totalCellsCount++;
-      } else {
-        cellsTextContent.push(''); // placeholder for empty cells
+        // get text content of selected cells
+        if (ranges.some((range) => range?.intersectsNode(cell))) {
+          cellsTextContent.push(getCellTextContent(cellContent));
+          hasSelectedCellsInRow = true;
+          totalCellsCount++;
+        } else {
+          cellsTextContent.push(''); // placeholder for empty cells
+        }
+      });
+
+      if (cellsTextContent.length > 0 && hasSelectedCellsInRow) {
+        tsvData += cellsTextContent.join('\t') + '\n';
+        totalRowsCount++;
       }
     });
 
-    if (cellsTextContent.length > 0 && hasSelectedCellsInRow) {
-      tsvData += cellsTextContent.join('\t') + '\n';
-      totalRowsCount++;
+    if (totalRowsCount === 1) {
+      tsvData = tsvData.trim();
     }
-  });
 
-  if (totalRowsCount === 1) {
-    tsvData = tsvData.trim();
-  }
-
-  if (totalCellsCount > 1 && tsvData) {
-    event.preventDefault();
-    event.clipboardData.setData('text/plain', tsvData);
+    if (totalCellsCount > 1 && tsvData) {
+      event.preventDefault();
+      event.clipboardData.setData('text/plain', tsvData);
+    }
+  } catch {
+    // use default copy behavior
   }
 }
 
