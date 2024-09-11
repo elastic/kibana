@@ -78,6 +78,8 @@ export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> 
   | ChatCompletionTokenCountEvent
   | ChatCompletionMessageEvent<TToolOptions>;
 
+export type FunctionCallingMode = 'native' | 'simulated' | 'auto';
+
 /**
  * Request a completion from the LLM based on a prompt or conversation.
  *
@@ -92,5 +94,6 @@ export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
     connectorId: string;
     system?: string;
     messages: Message[];
+    functionCalling?: FunctionCallingMode;
   } & TToolOptions
 ) => ChatCompletionResponse<TToolOptions>;
