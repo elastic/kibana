@@ -45,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+      mockApiServer.close();
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {

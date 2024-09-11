@@ -213,7 +213,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
             {agentPolicy?.supports_agentless ? (
               <FormattedMessage
                 id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentlessMessage"
-                defaultMessage="Deleting this agent policy will automatically delete agentless deployment, integration, and agent."
+                defaultMessage="Deleting this agent policy will automatically delete integrations assign this policy and unenroll elastic agent."
               />
             ) : (
               <FormattedMessage
