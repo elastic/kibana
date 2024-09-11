@@ -101,7 +101,6 @@ export class AutocompleteInfo {
       .finally(() => {
         this._isLoading$.next(false);
       });
-    ;
   }
 
   public clearSubscriptions() {
