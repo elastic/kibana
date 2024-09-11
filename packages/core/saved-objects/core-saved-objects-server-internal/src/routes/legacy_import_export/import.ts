@@ -38,6 +38,7 @@ export const registerLegacyImportRoute = (
         }),
       },
       options: {
+        access: 'public',
         tags: ['api'],
         body: {
           maxBytes: maxImportPayloadBytes,

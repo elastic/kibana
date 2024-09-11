@@ -31,6 +31,7 @@ export const registerLegacyExportRoute = (
         }),
       },
       options: {
+        access: 'public',
         tags: ['api'],
       },
     },
