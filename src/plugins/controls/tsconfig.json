@@ -9,7 +9,6 @@
     "public/**/*",
     "public/**/*.json",
     "server/**/*",
-    "storybook/**/*",
     "../../../typings/**/*",
     "./jest_setup.ts"
   ],
