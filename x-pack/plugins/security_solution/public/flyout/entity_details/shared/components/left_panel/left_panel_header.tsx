@@ -66,9 +66,7 @@ export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
           border-block-end: none !important;
         `}
       >
-        <EuiTabs size="l" expand>
-          {renderTabs}
-        </EuiTabs>
+        <EuiTabs size="l">{renderTabs}</EuiTabs>
       </FlyoutHeader>
     );
   }
