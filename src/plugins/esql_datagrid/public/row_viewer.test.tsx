@@ -89,10 +89,8 @@ describe('RowViewer', () => {
   it('should run the onClose prop when the close button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
     renderComponent(closeFlyoutSpy);
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('docViewerFlyoutCloseButton'));
-      expect(closeFlyoutSpy).toHaveBeenCalled();
-    });
+    await userEvent.click(screen.getByTestId('docViewerFlyoutCloseButton'));
+    expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
   it('displays row navigation when there is more than 1 row available', async () => {

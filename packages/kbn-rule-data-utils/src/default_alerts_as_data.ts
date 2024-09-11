@@ -59,6 +59,9 @@ const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 // kibana.alert.last_detected - timestamp when the alert was last seen
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
 
+// kiana.alert.intended_timestamp - timestamp when the alert was intended to be detected, useful for backfilling
+const ALERT_INTENDED_TIMESTAMP = `${ALERT_NAMESPACE}.intended_timestamp` as const;
+
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 
@@ -141,6 +144,7 @@ const fields = {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -185,6 +189,7 @@ export {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,

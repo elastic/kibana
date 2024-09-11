@@ -63,6 +63,7 @@ describe('AllCases', () => {
   };
 
   beforeAll(() => {
+    jest.useFakeTimers();
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     (useGetCategories as jest.Mock).mockReturnValue({
       data: ['beverages', 'snacks'],
@@ -76,11 +77,18 @@ describe('AllCases', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('empty table', () => {

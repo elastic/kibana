@@ -18,6 +18,8 @@ import {
   ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
   ALERT_LAST_DETECTED,
+  ALERT_INTENDED_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { Rule } from '@kbn/alerting-plugin/common';
@@ -536,6 +538,19 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule, invocationCount: 2 });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).toEqual(1);
+    });
+
+    it('should generate alerts with the correct intended timestamp fields', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForAlertTesting(['auditbeat-*']),
+        query: `_id:${ID}`,
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      const alert = previewAlerts[0]._source;
+
+      expect(alert?.[ALERT_INTENDED_TIMESTAMP]).toEqual(alert?.[TIMESTAMP]);
     });
 
     describe('with suppression enabled', () => {
@@ -2444,6 +2459,56 @@ export default ({ getService }: FtrProviderContext) => {
         await stopAllManualRuns(supertest);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('alerts has intended_timestamp set to the time of the manual run', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h').toISOString();
+        const secondTimestamp = new Date().toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-2',
+          },
+        };
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          rule_id: 'rule-1',
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        expect(alerts.hits.hits[0]?._source?.[ALERT_INTENDED_TIMESTAMP]).toEqual(
+          alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TIMESTAMP]
+        );
+
+        const backfillStartDate = moment(firstTimestamp).startOf('hour');
+        const backfillEndDate = moment(backfillStartDate).add(1, 'h');
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: backfillStartDate,
+          endDate: backfillEndDate,
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_INTENDED_TIMESTAMP]).toEqual(
+          backfillEndDate.toISOString()
         );
       });
 
