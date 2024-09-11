@@ -26,8 +26,8 @@ export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { console: consolePlugin, application } = useKibana().services;
 
-  const { data: index } = useIndex(indexName);
-  const { data: mappings } = useIndexMapping(indexName);
+  const { data: index, isInitialLoading: isIndexInitialLoading } = useIndex(indexName);
+  const { data: mappings, isInitialLoading: isMappingsInitialLoading } = useIndexMapping(indexName);
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -36,7 +36,7 @@ export const SearchIndexDetailsPage = () => {
     application.navigateToApp('management', { deepLinkId: 'index_management' });
   }, [application]);
 
-  if (!index || !mappings) {
+  if (isIndexInitialLoading || isMappingsInitialLoading) {
     return null;
   }
 
