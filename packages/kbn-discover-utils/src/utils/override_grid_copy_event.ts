@@ -11,7 +11,7 @@ import { ClipboardEvent } from 'react';
 
 interface OverrideGridCopyEventParams {
   event: ClipboardEvent<HTMLDivElement>;
-  dataGridWrapper: HTMLElement | null;
+  dataGridWrapper: HTMLElement | null | Element;
 }
 
 export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCopyEventParams) {
@@ -32,28 +32,38 @@ export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCo
 
     const rows = dataGridWrapper.querySelectorAll('[role="row"]');
     rows.forEach((row) => {
-      const cells = row.querySelectorAll('[role="gridcell"]');
+      const isHeaderRow = row.classList?.contains('euiDataGridHeader');
+
+      const cells = row.querySelectorAll(
+        isHeaderRow ? '[role="columnheader"]' : '[role="gridcell"]'
+      );
 
       const cellsTextContent: string[] = [];
       let hasSelectedCellsInRow = false;
 
       cells.forEach((cell) => {
         if (
-          cell.classList?.contains?.('euiDataGridRowCell--controlColumn') &&
+          cell.classList?.contains?.(
+            isHeaderRow
+              ? 'euiDataGridHeaderCell--controlColumn'
+              : 'euiDataGridRowCell--controlColumn'
+          ) &&
           cell.getAttribute('data-gridcell-column-id') !== 'timeline-event-detail-row' // in Security Solution "Event renderes" are appended as control column
         ) {
           // skip controls
           return;
         }
 
-        const cellContent = cell.querySelector('.euiDataGridRowCell__content');
-        if (!cellContent) {
+        const cellContentElement = cell.querySelector(
+          isHeaderRow ? '.euiDataGridHeaderCell__content' : '.euiDataGridRowCell__content'
+        );
+        if (!cellContentElement) {
           return;
         }
 
         // get text content of selected cells
         if (ranges.some((range) => range?.intersectsNode(cell))) {
-          cellsTextContent.push(getCellTextContent(cellContent));
+          cellsTextContent.push(getCellTextContent(cellContentElement));
           hasSelectedCellsInRow = true;
           totalCellsCount++;
         } else {
@@ -100,7 +110,10 @@ function getCellTextContent(cell: Element) {
   replaceWithSrcTextNode(cellCloned, 'img');
   replaceWithSrcTextNode(cellCloned, 'audio');
 
-  return cellCloned.textContent || '';
+  // remove from the grid
+  dropBySelector(cellCloned, '.euiToolTipAnchor');
+
+  return (cellCloned.textContent || '').trim();
 }
 
 function replaceWithSrcTextNode(element: HTMLElement, tagName: 'img' | 'audio') {

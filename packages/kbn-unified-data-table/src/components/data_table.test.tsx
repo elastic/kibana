@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, ClipboardEvent } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
   EuiButton,
@@ -29,7 +29,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
-import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { buildDataTableRecord, getDocId, overrideGridCopyEvent } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -74,7 +74,18 @@ function getProps(): UnifiedDataTableProps {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+    rows: esHitsMock.map((hit) =>
+      buildDataTableRecord(
+        {
+          ...hit,
+          _source: {
+            ...hit._source,
+            '@timestamp': hit._source.date,
+          },
+        },
+        dataViewMock
+      )
+    ),
     sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
@@ -1351,6 +1362,42 @@ describe('UnifiedDataTable', () => {
         await waitFor(() => {
           expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
+  describe('copy action', () => {
+    it(
+      'should override the default copy action for a selected text in grid',
+      async () => {
+        await renderDataTable({ columns: ['name'] });
+
+        const dataGridWrapper = await screen.getByTestId('euiDataGridBody');
+
+        const selection = global.window.getSelection();
+        const range = document.createRange();
+        range.selectNode(dataGridWrapper);
+        selection!.removeAllRanges();
+        selection!.addRange(range);
+
+        const copyEvent = {
+          preventDefault: jest.fn(),
+          clipboardData: {
+            setData: jest.fn(),
+          },
+        };
+
+        overrideGridCopyEvent({
+          event: copyEvent as unknown as ClipboardEvent<HTMLDivElement>,
+          dataGridWrapper,
+        });
+
+        expect(copyEvent.preventDefault).toHaveBeenCalled();
+        expect(copyEvent.clipboardData.setData).toHaveBeenCalledWith(
+          'text/plain',
+          '@timestamp\tname'
+        );
       },
       EXTENDED_JEST_TIMEOUT
     );
