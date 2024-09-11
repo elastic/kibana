@@ -11,7 +11,11 @@ import { getEntityLatestServices } from './get_entity_latest_services';
 import type { EntityLatestServiceRaw } from './types';
 import { getEntityHistoryServicesMetrics } from './get_entity_history_services_metrics';
 
-export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
+export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryContainer[] {
+  if (!start || !end) {
+    return [];
+  }
+
   return [
     {
       range: {
