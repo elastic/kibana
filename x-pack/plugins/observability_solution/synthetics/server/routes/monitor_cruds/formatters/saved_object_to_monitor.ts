@@ -34,10 +34,7 @@ type Result = MonitorFieldsResult & {
   check: Record<string, any>;
 };
 
-export const transformPublicKeys = (result: Result, ui?: boolean) => {
-  if (ui) {
-    return result;
-  }
+export const transformPublicKeys = (result: Result) => {
   let formattedResult = {
     ...result,
     [ConfigKey.PARAMS]: formatParams(result),
@@ -55,6 +52,9 @@ export const transformPublicKeys = (result: Result, ui?: boolean) => {
     formattedResult.ssl = formatNestedFields(formattedResult, 'ssl');
     formattedResult.response = formatNestedFields(formattedResult, 'response');
     formattedResult.check = formatNestedFields(formattedResult, 'check');
+    if (formattedResult[ConfigKey.MAX_REDIRECTS]) {
+      formattedResult[ConfigKey.MAX_REDIRECTS] = Number(formattedResult[ConfigKey.MAX_REDIRECTS]);
+    }
   }
   const res = omit(formattedResult, keysToOmit) as Result;
 
@@ -77,7 +77,10 @@ export function mapSavedObjectToMonitor({
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;
-  return transformPublicKeys(result, ui);
+  if (ui) {
+    return result;
+  }
+  return transformPublicKeys(result);
 }
 export function mergeSourceMonitor(
   normalizedPreviousMonitor: EncryptedSyntheticsMonitor,
