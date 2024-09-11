@@ -25,7 +25,12 @@ describe('getRowControlColumn', () => {
       id: 'test_row_control',
       headerAriaLabel: 'row control',
       renderControl: jest.fn((Control, rowProps) => (
-        <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
+        <Control
+          label={`test-${rowProps.rowIndex}`}
+          tooltipContent={`test-${rowProps.rowIndex}`}
+          iconType="heart"
+          onClick={mockClick}
+        />
       )),
     };
     const rowControlColumn = getRowControlColumn(props);

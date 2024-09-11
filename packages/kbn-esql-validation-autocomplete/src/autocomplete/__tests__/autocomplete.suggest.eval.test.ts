@@ -17,7 +17,7 @@ import {
   getDateLiteralsByFieldType,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { evalFunctionDefinitions } from '../../definitions/functions';
+import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
   getCompatibleTypesToSuggestNext,
@@ -361,7 +361,7 @@ describe('autocomplete.suggest', () => {
 
     describe('eval functions', () => {
       // // Test suggestions for each possible param, within each signature variation, for each function
-      for (const fn of evalFunctionDefinitions) {
+      for (const fn of scalarFunctionDefinitions) {
         // skip this fn for the moment as it's quite hard to test
         // if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
         if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
@@ -432,7 +432,7 @@ describe('autocomplete.suggest', () => {
 
                 const suggestedConstants = uniq(
                   typesToSuggestNext
-                    .map((d) => d.literalSuggestions || d.literalOptions)
+                    .map((d) => d.literalSuggestions || d.acceptedValues)
                     .filter((d) => d)
                     .flat()
                 );
@@ -487,7 +487,7 @@ describe('autocomplete.suggest', () => {
           test(`${fn.name}`, async () => {
             const { assertSuggestions } = await setup();
             const firstParam = fn.signatures[0].params[0];
-            const suggestedConstants = firstParam?.literalSuggestions || firstParam?.literalOptions;
+            const suggestedConstants = firstParam?.literalSuggestions || firstParam?.acceptedValues;
             const requiresMoreArgs = true;
 
             await assertSuggestions(
@@ -541,7 +541,12 @@ describe('autocomplete.suggest', () => {
       );
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
-        getLiteralsByType('time_literal').map((t) => `${t}, `),
+        [
+          ...getLiteralsByType('time_literal').map((t) => `${t}, `),
+          ...getFunctionSignaturesByReturnType('eval', 'time_duration', { scalar: true }).map(
+            (t) => `${t.text},`
+          ),
+        ],
         { triggerCharacter: '(' }
       );
       await assertSuggestions(

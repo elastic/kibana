@@ -56,8 +56,8 @@ describe('Visual options popover', () => {
     );
   };
 
-  const openAppearancePopover = () => {
-    userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
+  const openAppearancePopover = async () => {
+    await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
   };
 
   it.each<{ seriesType: string; showsMissingValues?: boolean; showsFillOpacity?: boolean }>([
@@ -66,11 +66,11 @@ describe('Visual options popover', () => {
     { seriesType: 'line', showsMissingValues: true, showsFillOpacity: false },
   ])(
     `should show settings for seriesTypes: $seriesType`,
-    ({ seriesType, showsMissingValues = false, showsFillOpacity = false }) => {
+    async ({ seriesType, showsMissingValues = false, showsFillOpacity = false }) => {
       const state = testState();
       (state.layers[0] as XYDataLayerConfig).seriesType = seriesType as SeriesType;
       renderVisualOptionsPopover({ state });
-      openAppearancePopover();
+      await openAppearancePopover();
       if (showsMissingValues) {
         expect(screen.getByText('Missing values')).toBeInTheDocument();
       } else {
