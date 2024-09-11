@@ -34,9 +34,7 @@ export const useViewInAiAssistant = ({
     [attackDiscovery]
   );
 
-  const lastFive = attackDiscovery.id
-    ? ` - ${attackDiscovery.id.substr(attackDiscovery.id.length - 5)}`
-    : '';
+  const lastFive = attackDiscovery.id ? ` - ${attackDiscovery.id.slice(-5)}` : '';
   const { promptContextId, showAssistantOverlay: showOverlay } = useAssistantOverlay(
     category,
     attackDiscovery.title + lastFive, // conversation title
