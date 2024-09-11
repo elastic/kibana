@@ -56,8 +56,16 @@ describe('loadESQL', () => {
 
     it('loads ES|QL docs, language files, and example queries into the Knowledge Base', async () => {
       expect(esStore.addDocuments).toHaveBeenCalledWith([
-        ...mockEsqlDocsFromDirectoryLoader,
-        ...mockEsqlLanguageDocsFromDirectoryLoader,
+        ...addRequiredKbResourceMetadata({
+          docs: mockEsqlDocsFromDirectoryLoader,
+          kbResource: ESQL_RESOURCE,
+          required: false,
+        }),
+        ...addRequiredKbResourceMetadata({
+          docs: mockEsqlLanguageDocsFromDirectoryLoader,
+          kbResource: ESQL_RESOURCE,
+          required: false,
+        }),
         ...addRequiredKbResourceMetadata({
           docs: mockExampleQueryDocsFromDirectoryLoader,
           kbResource: ESQL_RESOURCE,

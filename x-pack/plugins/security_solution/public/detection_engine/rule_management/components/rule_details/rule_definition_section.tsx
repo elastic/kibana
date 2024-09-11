@@ -57,12 +57,14 @@ import {
   queryStyles,
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
+import { getQueryLanguageLabel } from './helpers';
+import { useDefaultIndexPattern } from './use_default_index_pattern';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
 }
 
-const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
+export const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
   <EuiText size="s" data-test-subj="savedQueryNamePropertyValue">
     {savedQueryName}
   </EuiText>
@@ -75,12 +77,19 @@ interface FiltersProps {
   'data-test-subj'?: string;
 }
 
-const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }: FiltersProps) => {
+export const Filters = ({
+  filters,
+  dataViewId,
+  index,
+  'data-test-subj': dataTestSubj,
+}: FiltersProps) => {
   const flattenedFilters = mapAndFlattenFilters(filters);
+
+  const defaultIndexPattern = useDefaultIndexPattern();
 
   const { indexPattern } = useRuleIndexPattern({
     dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
-    index: index ?? [],
+    index: index ?? defaultIndexPattern,
     dataViewId,
   });
 
@@ -104,7 +113,7 @@ interface QueryProps {
   'data-test-subj'?: string;
 }
 
-const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
+export const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
   const styles = queryStyles;
   return (
     <div data-test-subj={dataTestSubj} className={styles.content}>
@@ -117,7 +126,7 @@ interface IndexProps {
   index: string[];
 }
 
-const Index = ({ index }: IndexProps) => (
+export const Index = ({ index }: IndexProps) => (
   <BadgeList badges={index} data-test-subj="indexPropertyValue" />
 );
 
@@ -125,7 +134,7 @@ interface DataViewIdProps {
   dataViewId: string;
 }
 
-const DataViewId = ({ dataViewId }: DataViewIdProps) => (
+export const DataViewId = ({ dataViewId }: DataViewIdProps) => (
   <EuiText size="s" data-test-subj="dataViewIdPropertyValue">
     {dataViewId}
   </EuiText>
@@ -135,7 +144,7 @@ interface DataViewIndexPatternProps {
   dataViewId: string;
 }
 
-const DataViewIndexPattern = ({ dataViewId }: DataViewIndexPatternProps) => {
+export const DataViewIndexPattern = ({ dataViewId }: DataViewIndexPatternProps) => {
   const { data } = useKibana().services;
   const [indexPattern, setIndexPattern] = React.useState('');
   const [hasError, setHasError] = React.useState(false);
@@ -191,18 +200,24 @@ const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
 );
 
 interface MachineLearningJobListProps {
-  jobIds: string[];
+  jobIds?: string | string[];
   isInteractive: boolean;
 }
 
-const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
+export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
   const { jobs } = useSecurityJobs();
 
-  if (isInteractive) {
-    return <MlJobsDescription jobIds={jobIds} />;
+  if (!jobIds) {
+    return null;
   }
 
-  const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
+  const jobIdsArray = Array.isArray(jobIds) ? jobIds : [jobIds];
+
+  if (isInteractive) {
+    return <MlJobsDescription jobIds={jobIdsArray} />;
+  }
+
+  const relevantJobs = jobs.filter((job) => jobIdsArray.includes(job.id));
 
   return (
     <>
@@ -251,7 +266,7 @@ interface RequiredFieldsProps {
   requiredFields: RequiredFieldArray;
 }
 
-const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
+export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
   const styles = useRequiredFieldsStyles();
 
   return (
@@ -293,7 +308,7 @@ interface ThreatIndexProps {
   threatIndex: string[];
 }
 
-const ThreatIndex = ({ threatIndex }: ThreatIndexProps) => (
+export const ThreatIndex = ({ threatIndex }: ThreatIndexProps) => (
   <BadgeList badges={threatIndex} data-test-subj="threatIndexPropertyValue" />
 );
 
@@ -301,7 +316,7 @@ interface ThreatMappingProps {
   threatMapping: ThreatMappingType;
 }
 
-const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
+export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   const description = threatMapping.reduce<string>(
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(
@@ -434,14 +449,28 @@ const prepareDefinitionSectionListItems = (
   }
 
   if (savedQuery) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="savedQueryNamePropertyTitle">
-          {descriptionStepI18n.SAVED_QUERY_NAME_LABEL}
-        </span>
-      ),
-      description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
-    });
+    definitionSectionListItems.push(
+      {
+        title: (
+          <span data-test-subj="savedQueryNamePropertyTitle">
+            {descriptionStepI18n.SAVED_QUERY_NAME_LABEL}
+          </span>
+        ),
+        description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
+      },
+      {
+        title: (
+          <span data-test-subj="savedQueryLanguagePropertyTitle">
+            {i18n.SAVED_QUERY_LANGUAGE_LABEL}
+          </span>
+        ),
+        description: (
+          <span data-test-subj="savedQueryLanguagePropertyValue">
+            {getQueryLanguageLabel(savedQuery.attributes.query.language)}
+          </span>
+        ),
+      }
+    );
 
     if (savedQuery.attributes.filters) {
       definitionSectionListItems.push({
@@ -452,8 +481,10 @@ const prepareDefinitionSectionListItems = (
         ),
         description: (
           <Filters
-            filters={savedQuery.attributes.filters as Filter[]}
+            filters={savedQuery.attributes.filters}
             data-test-subj="savedQueryFiltersPropertyValue"
+            dataViewId={'data_view_id' in rule ? rule.data_view_id : undefined}
+            index={'index' in rule ? rule.index : undefined}
           />
         ),
       });
@@ -508,12 +539,26 @@ const prepareDefinitionSectionListItems = (
         description: <Query query={rule.query} data-test-subj="esqlQueryPropertyValue" />,
       });
     } else {
-      definitionSectionListItems.push({
-        title: (
-          <span data-test-subj="customQueryPropertyTitle">{descriptionStepI18n.QUERY_LABEL}</span>
-        ),
-        description: <Query query={rule.query} data-test-subj="customQueryPropertyValue" />,
-      });
+      definitionSectionListItems.push(
+        {
+          title: (
+            <span data-test-subj="customQueryPropertyTitle">{descriptionStepI18n.QUERY_LABEL}</span>
+          ),
+          description: <Query query={rule.query} data-test-subj="customQueryPropertyValue" />,
+        },
+        {
+          title: (
+            <span data-test-subj="customQueryLanguagePropertyTitle">
+              {i18n.QUERY_LANGUAGE_LABEL}
+            </span>
+          ),
+          description: (
+            <span data-test-subj="customQueryLanguagePropertyValue">
+              {getQueryLanguageLabel(rule.language || '')}
+            </span>
+          ),
+        }
+      );
     }
   }
 
@@ -542,7 +587,7 @@ const prepareDefinitionSectionListItems = (
       ),
       description: (
         <MachineLearningJobList
-          jobIds={rule.machine_learning_job_id as string[]}
+          jobIds={rule.machine_learning_job_id}
           isInteractive={isInteractive}
         />
       ),
@@ -630,6 +675,21 @@ const prepareDefinitionSectionListItems = (
         </span>
       ),
       description: <Query query={rule.threat_query} data-test-subj="threatQueryPropertyValue" />,
+    });
+  }
+
+  if ('threat_language' in rule && rule.threat_language) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="threatQueryLanguagePropertyTitle">
+          {i18n.THREAT_QUERY_LANGUAGE_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="threatQueryLanguagePropertyValue">
+          {getQueryLanguageLabel(rule.threat_language)}
+        </span>
+      ),
     });
   }
 

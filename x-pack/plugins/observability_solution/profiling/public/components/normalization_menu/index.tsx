@@ -85,7 +85,7 @@ export function NormalizationMenu(props: Props) {
   return (
     <EuiPopover
       anchorPosition="downRight"
-      initialFocus={`#${baselineScaleFactorInputId}`}
+      initialFocus={`[id="${baselineScaleFactorInputId}"]`}
       button={
         <EuiFormControlLayout
           onClick={() => {
