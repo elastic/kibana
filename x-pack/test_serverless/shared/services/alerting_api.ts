@@ -15,9 +15,9 @@ import type { Client } from '@elastic/elasticsearch';
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '../../shared/services';
-import { SloBurnRateRuleParams } from './slo_api';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { RoleCredentials } from '.';
+import type { SloBurnRateRuleParams } from '../../api_integration/services/slo_api';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 interface CreateEsQueryRuleParams {
   size: number;
