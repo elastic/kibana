@@ -555,6 +555,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onLayoutChangeRef.current = onLayoutChange;
 
   const codeEditorOptions: CodeEditorProps['options'] = {
+    hover: {
+      above: false,
+    },
     accessibilitySupport: 'off',
     autoIndent: 'none',
     automaticLayout: true,
