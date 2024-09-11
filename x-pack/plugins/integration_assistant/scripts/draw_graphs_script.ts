@@ -46,7 +46,7 @@ async function drawGraph(compiledGraph: RunnableGraph, graphName: string) {
 
 export async function drawGraphs() {
   const relatedGraph = (await getRelatedGraph({ client, model })).getGraph();
-  const logFormatDetectionGraph = (await getLogFormatDetectionGraph({ model })).getGraph();
+  const logFormatDetectionGraph = (await getLogFormatDetectionGraph({ client, model })).getGraph();
   const categorizationGraph = (await getCategorizationGraph({ client, model })).getGraph();
   const ecsSubGraph = (await getEcsSubGraph({ model })).getGraph();
   const ecsGraph = (await getEcsGraph({ model })).getGraph();
