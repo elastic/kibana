@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
@@ -35,13 +36,13 @@ import { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
-import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
 import { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
+import { createDataSource } from '../../common/data_sources';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -137,11 +138,7 @@ export function initializeFetch({
           abortController = currentAbortController;
 
           await discoverServices.profilesManager.resolveDataSourceProfile({
-            dataSource: isOfAggregateQueryType(searchSourceQuery)
-              ? createEsqlDataSource()
-              : dataView.id
-              ? createDataViewDataSource({ dataViewId: dataView.id })
-              : undefined,
+            dataSource: createDataSource({ dataView, query: searchSourceQuery }),
             dataView,
             query: searchSourceQuery,
           });

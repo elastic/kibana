@@ -6,13 +6,12 @@
  */
 
 import { useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { useLocation } from 'react-router-dom';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const RedirectToLogs = () => {
-  const { logViewId } = useParams<{ logViewId?: string }>();
   const location = useLocation();
 
   const {
@@ -28,11 +27,10 @@ export const RedirectToLogs = () => {
       {
         time,
         filter,
-        logView: { ...DEFAULT_LOG_VIEW, logViewId: logViewId || DEFAULT_LOG_VIEW.logViewId },
       },
       { replace: true }
     );
-  }, [filter, logsLocator, logViewId, time]);
+  }, [filter, logsLocator, time]);
 
   return null;
 };

@@ -1,0 +1,15 @@
+## TANH
+
+The `TANH` function returns the hyperbolic tangent of an angle, expressed in radians. If the input angle is null, the function returns null.
+
+### Examples
+
+```esql
+ROW a=1.8
+| EVAL tanh = TANH(a)
+```
+
+```esql
+ROW angle=0.5
+| EVAL hyperbolic_tangent = TANH(angle)
+```

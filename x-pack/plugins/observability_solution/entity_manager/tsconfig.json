@@ -28,6 +28,9 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
+    "@kbn/server-route-repository-client",
+    "@kbn/server-route-repository",
     "@kbn/zod",
+    "@kbn/zod-helpers",
   ]
 }

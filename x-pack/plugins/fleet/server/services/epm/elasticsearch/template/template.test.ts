@@ -2056,5 +2056,101 @@ describe('EPM template', () => {
 
       expect(esClient.indices.rollover).not.toHaveBeenCalled();
     });
+
+    it('should rollover on dynamic dimension mappings changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should not rollover on dynamic dimension mappings not changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {
+            dynamic_templates: [
+              { 'prometheus.test.*': { mapping: { time_series_dimension: true } } },
+              { 'prometheus.labels.*': { mapping: { time_series_dimension: true } } },
+            ],
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
   });
 });

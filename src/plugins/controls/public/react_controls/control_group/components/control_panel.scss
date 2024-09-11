@@ -1,7 +1,7 @@
 .controlPanel {
   width: 100%;
   max-inline-size: 100% !important;
-  height: $euiButtonHeight;
+  height: $euiButtonHeightSmall;
   box-shadow: none !important;
   background-color: $euiFormBackgroundColor !important;
   border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
@@ -11,11 +11,12 @@
   }
 
   &--labelWrapper {
-    height: 100%;
+    height: $euiFormControlCompressedHeight;
 
     .controlPanel--label {
       @include euiTextTruncate;
       padding: 0;
+      height: $euiButtonHeightSmall;
     }
   }
 
@@ -26,6 +27,7 @@
   .controlErrorButton {
     width: 100%;
     border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
+    height: $euiButtonHeightSmall;
 
     &--content {
       justify-content: left;

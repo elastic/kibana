@@ -150,7 +150,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   }, [actionParams]);
 
   const additionalFieldsOnChange = useCallback(
-    (value) => editSubActionProperty('additional_fields', value),
+    (value: string | null) => editSubActionProperty('additional_fields', value),
     [editSubActionProperty]
   );
 
