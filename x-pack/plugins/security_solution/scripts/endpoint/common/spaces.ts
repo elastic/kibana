@@ -8,6 +8,8 @@
 import type { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { Space } from '@kbn/spaces-plugin/common';
+import { memoize } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 
@@ -45,3 +47,17 @@ export const ensureSpaceIdExists = async (
       .catch(catchAxiosErrorFormatAndThrow);
   }
 };
+
+/**
+ * Get the current active space for the provided KbnClient
+ * @param kbnClient
+ */
+export const fetchActiveSpace = memoize(async (kbnClient: KbnClient): Promise<Space> => {
+  return kbnClient
+    .request<Space>({
+      method: 'GET',
+      path: `/internal/spaces/_active_space`,
+    })
+    .catch(catchAxiosErrorFormatAndThrow)
+    .then((response) => response.data);
+});
