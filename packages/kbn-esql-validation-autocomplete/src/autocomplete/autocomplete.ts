@@ -103,7 +103,6 @@ import {
   getValidFunctionSignaturesForPreviousArgs,
   strictlyGetParamAtPosition,
   isLiteralDateItem,
-  isCursorPlacementWithinFunction,
 } from './helper';
 import {
   FunctionParameter,
@@ -1823,7 +1822,9 @@ async function getOptionArgsSuggestions(
             openSuggestions: true,
           }))
         );
-        const canHaveAssignment = !isCursorPlacementWithinFunction(innerText);
+        // Checks if cursor is still within function ()
+        // by checking if the marker editor/cursor is within an unclosed parenthesis
+        const canHaveAssignment = countBracketsUnclosed('(', innerText) === 0;
 
         if (option.name === 'by') {
           // Add quick snippet for for stats ... by bucket(<>)

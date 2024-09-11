@@ -232,22 +232,3 @@ export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
       isValidDateString(nodeArg.text))
   );
 }
-
-/**
- * Checks if the marker editor/cursor is within an unclosed parenthesis
- * E.g. returns false if inner text is "fn(a, b, (c + d), e" <- cursor is at end of string
- * @param innerText
- * @returns boolean
- */
-export function isCursorPlacementWithinFunction(innerText: string) {
-  let openParenCount = 0;
-  for (let i = 0; i < innerText.length; i++) {
-    const char = innerText[i];
-    if (char === '(') {
-      openParenCount++;
-    } else if (char === ')') {
-      openParenCount--;
-    }
-  }
-  return openParenCount > 0;
-}
