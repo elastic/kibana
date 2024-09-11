@@ -1,4 +1,4 @@
-[[url_templating-language]]
+[[url-templating-language]]
 === URL templating
 
 beta[]
@@ -144,7 +144,7 @@ a|Escapes string using built in `encodeURIComponent` function, while keeping "@"
 
 
 [float]
-[[url-template-variables]]
+[[url-template-variable]]
 ==== URL template variables
 
 The URL drilldown template has three sources for variables:

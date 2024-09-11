@@ -59,12 +59,12 @@ describe('Severity form field', () => {
 
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('case-severity-selection'));
+    await userEvent.click(await screen.findByTestId('case-severity-selection'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('case-severity-selection-high'));
+    await userEvent.click(await screen.findByTestId('case-severity-selection-high'));
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
