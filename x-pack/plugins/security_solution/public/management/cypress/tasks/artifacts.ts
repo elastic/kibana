@@ -18,7 +18,8 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { request } from './common';
+import { APP_BLOCKLIST_PATH } from '../../../../common/constants';
+import { loadPage, request } from './common';
 
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -80,7 +81,7 @@ export const createArtifactList = (listId: string) => {
   });
 };
 
-export const createPerPolicyArtifact = (name: string, body: object, policyId?: 'all' | string) => {
+export const createPerPolicyArtifact = (name: string, body: object, policyId?: 'all' | string) =>
   request<ExceptionListItemSchema>({
     method: 'POST',
     url: EXCEPTION_LIST_ITEM_URL,
@@ -95,8 +96,8 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
   }).then((response) => {
     expect(response.status).to.eql(200);
     expect(response.body.name).to.eql(name);
+    return response;
   });
-};
 
 export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
   request<GetPackagePoliciesResponse>({
@@ -106,3 +107,125 @@ export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
     expect(body.items.length).to.be.least(1);
     return body.items[0].id;
   });
+
+export const blocklistFormSelectors = {
+  expectSingleOperator: (field: 'Path' | 'Signature' | 'Hash') => {
+    cy.getByTestSubj('blocklist-form-field-select').contains(field);
+    cy.getByTestSubj('blocklist-form-operator-select-single').should('have.value', 'is one of');
+    cy.getByTestSubj('blocklist-form-operator-select-single').should('have.attr', 'readonly');
+    cy.getByTestSubj('blocklist-form-operator-select-multi').should('not.exist');
+  },
+  expectMultiOperator: (field: 'Path' | 'Signature' | 'Hash', type = 'is one of') => {
+    cy.getByTestSubj('blocklist-form-field-select').contains(field);
+    cy.getByTestSubj('blocklist-form-operator-select-multi').contains(type);
+    cy.getByTestSubj('blocklist-form-operator-select-multi').should('not.have.attr', 'readonly');
+    cy.getByTestSubj('blocklist-form-operator-select-single').should('not.exist');
+  },
+  selectPathField: (caseless = true) => {
+    cy.getByTestSubj('blocklist-form-field-select').click();
+    cy.getByTestSubj(
+      caseless ? 'blocklist-form-file.path.caseless' : 'blocklist-form-file.path'
+    ).click();
+  },
+  selectSignatureField: () => {
+    cy.getByTestSubj('blocklist-form-field-select').click();
+    cy.getByTestSubj('blocklist-form-file.Ext.code_signature').click();
+  },
+  selectOs: (os: 'windows' | 'macos' | 'linux') => {
+    cy.getByTestSubj('blocklist-form-os-select').click();
+    cy.get(`button[role="option"][id="${os}"]`).click();
+  },
+  selectOperator: (operator: 'is one of' | 'is') => {
+    const matchOperator = operator === 'is' ? 'match' : 'match_any';
+    cy.getByTestSubj('blocklist-form-operator-select-multi').click();
+    cy.get(`button[role="option"][id="${matchOperator}"]`).click();
+  },
+  selectHashField: () => {
+    cy.getByTestSubj('blocklist-form-field-select').click();
+    cy.getByTestSubj('blocklist-form-file.hash.*').click();
+  },
+  openBlocklist: ({ create, itemId }: { create?: boolean; itemId?: string } = {}) => {
+    if (!create && !itemId) {
+      loadPage(APP_BLOCKLIST_PATH);
+    } else if (create) {
+      loadPage(`${APP_BLOCKLIST_PATH}?show=create`);
+    } else if (itemId) {
+      loadPage(`${APP_BLOCKLIST_PATH}?itemId=${itemId}&show=edit`);
+    }
+  },
+  fillOutBlocklistFlyout: () => {
+    cy.getByTestSubj('blocklist-form-name-input').type('Test Blocklist');
+    cy.getByTestSubj('blocklist-form-description-input').type('Test Description');
+  },
+  setMultiValue: () => {
+    cy.getByTestSubj('blocklist-form-values-input').within(() => {
+      cy.getByTestSubj('comboBoxSearchInput').type(`Elastic, Inc.{enter}`);
+    });
+  },
+  setSingleValue: () => {
+    cy.getByTestSubj('blocklist-form-value-input').type('Elastic, Inc.');
+  },
+  validateMultiValue: ({ empty } = { empty: false }) => {
+    if (!empty) {
+      cy.getByTestSubj('blocklist-form-values-input').within(() => {
+        cy.getByTestSubj('comboBoxInput').within(() => {
+          cy.getByTestSubj('blocklist-form-values-input-Elastic');
+          cy.getByTestSubj('blocklist-form-values-input- Inc.');
+        });
+      });
+    } else {
+      cy.getByTestSubj('blocklist-form-values-input').within(() => {
+        cy.getByTestSubj('comboBoxInput').children('span').should('not.exist');
+      });
+    }
+  },
+  validateSingleValue: (value = 'Elastic, Inc.') => {
+    cy.getByTestSubj('blocklist-form-value-input').should('have.value', value);
+  },
+  submitBlocklist: () => {
+    cy.getByTestSubj('blocklistPage-flyout-submitButton').click();
+  },
+  expectSubmitButtonToBe: (state: 'disabled' | 'enabled') => {
+    cy.getByTestSubj('blocklistPage-flyout-submitButton').should(
+      state === 'disabled' ? 'be.disabled' : 'not.be.disabled'
+    );
+  },
+  clearMultiValueInput: () => {
+    cy.getByTestSubj('comboBoxClearButton').click();
+  },
+  validateSuccessPopup: (type: 'create' | 'update' | 'delete') => {
+    let expectedTitle = '';
+    switch (type) {
+      case 'create':
+        expectedTitle = '"Test Blocklist" has been added to your blocklist.';
+        break;
+      case 'update':
+        expectedTitle = '"Test Blocklist" has been updated';
+        break;
+      case 'delete':
+        expectedTitle = '"Test Blocklist" has been removed from blocklist.';
+        break;
+    }
+    cy.getByTestSubj('euiToastHeader__title').contains(expectedTitle);
+  },
+  validateRenderedCondition: (expectedCondition: RegExp) => {
+    cy.getByTestSubj('blocklistPage-card')
+      .first()
+      .within(() => {
+        cy.getByTestSubj('blocklistPage-card-criteriaConditions-condition')
+          .invoke('text')
+          // .should('match', /OS\s*IS\s*Windows/);
+          .should('match', expectedCondition);
+      });
+  },
+  deleteBlocklistItem: () => {
+    cy.getByTestSubj('blocklistPage-card')
+      .first()
+      .within(() => {
+        cy.getByTestSubj('blocklistPage-card-header-actions-button').click();
+      });
+
+    cy.getByTestSubj('blocklistPage-card-cardDeleteAction').click();
+    cy.getByTestSubj('blocklistPage-deleteModal-submitButton').click();
+  },
+};
