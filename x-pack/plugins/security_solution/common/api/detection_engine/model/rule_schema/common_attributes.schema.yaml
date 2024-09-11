@@ -43,7 +43,7 @@ components:
     IsRuleImmutable:
       type: boolean
       deprecated: true
-      description: 'This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.'
+      description: This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
 
     IsExternalRuleCustomized:
       type: boolean
