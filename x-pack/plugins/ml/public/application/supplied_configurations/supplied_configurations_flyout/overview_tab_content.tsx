@@ -25,6 +25,8 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import {
   usePermissionCheck,
   createPermissionFailureMessage,
@@ -115,6 +117,7 @@ export const OverviewTabContent: FC<Props> = ({
       },
     },
   } = useMlKibana();
+  const { euiTheme } = useEuiTheme();
   const logsConfigsUrl = docLinks.links.ml.logsAnomalyDetectionConfigs;
   const metricsConfigsUrl = docLinks.links.ml.metricsAnomalyDetectionConfigs;
   const canCreateJob = usePermissionCheck('canCreateJob');
@@ -151,14 +154,14 @@ export const OverviewTabContent: FC<Props> = ({
   return (
     <EuiFlexGroup direction="column">
       {/* DESCRIPTION */}
-      <EuiFlexItem css={{ padding: '0 3%' }}>
+      <EuiFlexItem css={{ padding: `0 ${euiTheme.size.m}` }}>
         <EuiText size="m">
           <p>{module.description}</p>
         </EuiText>
       </EuiFlexItem>
 
       {/* MAIN CONTENT */}
-      <EuiFlexItem css={{ padding: '0 3%' }}>
+      <EuiFlexItem css={{ padding: `0 ${euiTheme.size.m}` }}>
         <EuiFlexGroup gutterSize="m">
           {/* COLUMN WITH ASSETS, TYPE, TAGS */}
           <EuiFlexItem grow={1}>
@@ -203,13 +206,12 @@ export const OverviewTabContent: FC<Props> = ({
                 module.tags.map((tag) => <ListDescriptionItem value={tag} />)
               ) : (
                 <ListDescriptionItem
-                  // @ts-ignore
-                  value={
-                    <FormattedMessage
-                      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.noTagsLabel"
-                      defaultMessage="No tags"
-                    />
-                  }
+                  value={i18n.translate(
+                    'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.noTagsLabel',
+                    {
+                      defaultMessage: 'No tags',
+                    }
+                  )}
                 />
               )}
 
@@ -289,9 +291,9 @@ export const OverviewTabContent: FC<Props> = ({
               </EuiFlexGroup>
             ) : (
               <EuiEmptyPrompt
-                css={{ margin: '10px' }}
+                css={{ margin: `${euiTheme.size.s}` }}
                 color="primary"
-                iconType={(isLogoObject(module.logo) ? module.logo?.icon : module.logo) as string}
+                iconType={isLogoObject(module.logo) ? module.logo?.icon : undefined}
                 title={
                   <h2>
                     <FormattedMessage

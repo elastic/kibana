@@ -20,6 +20,7 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Module } from '../../../../common/types/modules';
 import { isLogoObject } from '../supplied_configurations';
@@ -49,9 +50,10 @@ export type KibanaAssetType = (typeof KIBANA_ASSETS)[keyof typeof KIBANA_ASSETS]
 export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => {
   const [selectedTabId, setSelectedTabId] = useState<TabIdType>(TAB_IDS.OVERVIEW);
   const [selectedKibanaSubTab, setSelectedKibanaSubTab] = useState<KibanaAssetType | undefined>();
+  const { euiTheme } = useEuiTheme();
 
-  const tabs = useMemo(() => {
-    const commonTabs: Array<{ id: TabIdType; name: JSX.Element; content: JSX.Element }> = [
+  const tabs = useMemo(
+    () => [
       {
         id: TAB_IDS.OVERVIEW,
         name: (
@@ -78,35 +80,40 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
         ),
         content: <JobsTabContent module={module} />,
       },
-    ];
+      ...(isPopulatedObject(module.kibana ?? {})
+        ? [
+            {
+              id: TAB_IDS.KIBANA,
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.kibanaTabLabel"
+                  defaultMessage="Kibana"
+                />
+              ),
+              content: (
+                <KibanaTabContent module={module} selectedKibanaSubTab={selectedKibanaSubTab} />
+              ),
+            },
+          ]
+        : []),
+    ],
+    [module, selectedKibanaSubTab]
+  );
 
-    if (isPopulatedObject(module.kibana ?? {})) {
-      commonTabs.push({
-        id: TAB_IDS.KIBANA,
-        name: (
-          <FormattedMessage
-            id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.kibanaTabLabel"
-            defaultMessage="Kibana"
-          />
-        ),
-        content: <KibanaTabContent module={module} selectedKibanaSubTab={selectedKibanaSubTab} />,
-      });
-    }
-
-    return commonTabs;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [module.id, selectedKibanaSubTab]);
-
-  const renderTabs = tabs.map((tab) => (
-    <EuiTab
-      onClick={() => setSelectedTabId(tab.id)}
-      isSelected={tab.id === selectedTabId}
-      key={tab.id}
-      data-test-subj={`mlSuppliedConfigurationsFlyoutTab ${tab.id}`}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
+  const renderTabs = useMemo(
+    () =>
+      tabs.map((tab) => (
+        <EuiTab
+          onClick={() => setSelectedTabId(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          key={tab.id}
+          data-test-subj={`mlSuppliedConfigurationsFlyoutTab ${tab.id}`}
+        >
+          {tab.name}
+        </EuiTab>
+      )),
+    [tabs, selectedTabId]
+  );
 
   return (
     <EuiFlyout
@@ -119,10 +126,7 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiIcon
-              size="xxl"
-              type={(isLogoObject(module.logo) ? module.logo.icon : module.logo) as string}
-            />
+            {isLogoObject(module.logo) ? <EuiIcon size="xxl" type={module.logo.icon} /> : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
@@ -131,7 +135,9 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiTabs style={{ marginBottom: '-25px', paddingLeft: '3%' }}>{renderTabs}</EuiTabs>
+        <EuiTabs css={{ marginBottom: '-25px', paddingLeft: `${euiTheme.size.m}` }}>
+          {renderTabs}
+        </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{tabs.find((tab) => tab.id === selectedTabId)?.content}</EuiFlyoutBody>
     </EuiFlyout>

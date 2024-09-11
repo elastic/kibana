@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { Module, ModuleJob, ModuleDatafeed } from '../../../../common/types/modules';
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export const JobsTabContent: FC<Props> = ({ module }) => {
+  const { euiTheme } = useEuiTheme();
   const jobConfigsWithDatafeeds = useMemo(
     () =>
       module.datafeeds.map(({ job_id: jobId, config }) => {
@@ -32,8 +34,7 @@ export const JobsTabContent: FC<Props> = ({ module }) => {
           config: { ...job.config, datafeed_config: config },
         } as ModuleJob & { datafeed_config: ModuleDatafeed['config'] };
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [module.id]
+    [module]
   );
 
   return (
@@ -48,7 +49,7 @@ export const JobsTabContent: FC<Props> = ({ module }) => {
                   <p>{job.id}</p>
                 </EuiText>
               }
-              css={{ padding: '0 3%' }}
+              css={{ padding: `0 ${euiTheme.size.m}` }}
             >
               <EuiFlexGroup direction="column">
                 <EuiSpacer size="s" />

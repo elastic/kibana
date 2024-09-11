@@ -282,10 +282,17 @@ export class DataRecognizer {
       // run all the queries in parallel
       const response = await Promise.all(
         tempObjs.map(async ({ id, name, title, func }) => {
-          const resp = await func();
-          const totalHits =
-            typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits?.total?.value ?? 0;
-          return { id, name, title, totalHits };
+          try {
+            const resp = await func();
+            const totalHits =
+              typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits?.total?.value ?? 0;
+            return { id, name, title, totalHits };
+          } catch (error) {
+            mlLog.warn(
+              `Data recognizer error running search for query defined in module ${config.module.id}. ${error}`
+            );
+            return { id, name, title, totalHits: 0 };
+          }
         })
       );
 
@@ -331,14 +338,7 @@ export class DataRecognizer {
           if (moduleConfig.logo) {
             logo = moduleConfig.logo;
           } else if (moduleConfig.logoFile) {
-            try {
-              const logoFile = await this._readFile(
-                `${this._modulesDir}/${i.dirName}/${moduleConfig.logoFile}`
-              );
-              logo = JSON.parse(logoFile);
-            } catch (e) {
-              logo = null;
-            }
+            logo = await this._loadLogoFile(moduleConfig.id, i.dirName, moduleConfig.logoFile);
           }
           results.push({
             id: moduleConfig.id,
@@ -354,6 +354,17 @@ export class DataRecognizer {
     results.sort((res1, res2) => res1.id.localeCompare(res2.id));
 
     return results;
+  }
+
+  private async _loadLogoFile(id: string, dirName: string | null | undefined, logoFile: string) {
+    let logo: Logo = null;
+    try {
+      const logoFileString = await this._readFile(`${this._modulesDir}/${dirName}/${logoFile}`);
+      logo = JSON.parse(logoFileString);
+    } catch (error) {
+      mlLog.warn(`Data recognizer error loading logo file ${logoFile} for module ${id}. ${error}`);
+    }
+    return logo;
   }
 
   private async _searchForFields(moduleConfig: FileBasedModule | Module, indexPattern: string) {
@@ -477,19 +488,9 @@ export class DataRecognizer {
 
       datafeeds.push(...(await Promise.all(tempDatafeed)).filter(isDefined));
     }
-    // load the logoFile
+
     if (module.logoFile !== undefined) {
-      try {
-        const logoFileString = await this._readFile(
-          `${this._modulesDir}/${dirName}/${module.logoFile}`
-        );
-        const logoFileIcon = JSON.parse(logoFileString);
-        module.logo = logoFileIcon?.icon;
-      } catch (error) {
-        mlLog.warn(
-          `Data recognizer error loading logo file ${module.logoFile} for module ${id}. ${error}`
-        );
-      }
+      module.logo = await this._loadLogoFile(id, dirName, module.logoFile);
     }
 
     // load all of the kibana saved objects

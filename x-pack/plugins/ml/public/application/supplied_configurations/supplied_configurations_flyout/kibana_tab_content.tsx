@@ -18,6 +18,7 @@ import {
   EuiSplitPanel,
   EuiText,
 } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Module } from '../../../../common/types/modules';
@@ -37,6 +38,7 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
   const {
     services: { application, share },
   } = useMlKibana();
+  const { euiTheme } = useEuiTheme();
 
   useEffect(
     function setUpUrls() {
@@ -61,8 +63,8 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
         if (savedSearchIds.length > 0) {
           const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
           if (discoverLocator) {
-            await asyncForEach(savedSearchIds, async (id) => {
-              const url = await discoverLocator.getRedirectUrl({
+            savedSearchIds.forEach((id) => {
+              const url = discoverLocator.getRedirectUrl({
                 savedSearchId: id,
               });
               if (url) {
@@ -73,11 +75,10 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
         }
 
         if (visualizationIds.length > 0) {
-          await asyncForEach(visualizationIds, async (id) => {
+          visualizationIds.forEach((id) => {
             const url = application.getUrlForApp('visualize#', {
               path: `edit/${id}`,
             });
-
             if (url) {
               allUrls[id] = url;
             }
@@ -103,12 +104,12 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
 
   return (
     <>
-      {Object.keys(module.kibana ?? {}).map((kibanaAsset) => {
+      {Object.entries(module.kibana ?? {}).map(([assetId, asset]) => {
         return (
           <>
             <EuiAccordion
-              id={kibanaAsset}
-              initialIsOpen={kibanaAsset === selectedKibanaSubTab}
+              id={assetId}
+              initialIsOpen={assetId === selectedKibanaSubTab}
               buttonContent={
                 <EuiFlexGroup
                   justifyContent="center"
@@ -118,31 +119,31 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText size="m">
-                      <h4>{LABELS[kibanaAsset as LabelId]}</h4>
+                      <h4>{LABELS[assetId as LabelId]}</h4>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiNotificationBadge color="subdued" size="m">
-                      <h3>{module.kibana[kibanaAsset]!.length}</h3>
+                      <h3>{module.kibana[assetId]!.length}</h3>
                     </EuiNotificationBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
-              css={{ padding: '0 3%' }}
+              css={{ padding: `0 ${euiTheme.size.m}` }}
             >
               <EuiSpacer size="m" />
               <EuiSplitPanel.Outer
                 hasBorder
                 hasShadow={false}
-                data-test-subj={`mlPreconfigJobsKibanaAssetAccordion.${kibanaAsset}`}
+                data-test-subj={`mlPreconfigJobsKibanaAssetAccordion.${assetId}`}
               >
-                {module.kibana[kibanaAsset]!.map(({ config, id, title }) => {
+                {(asset ?? []).map(({ config, id, title }) => {
                   return (
                     <>
                       <EuiSplitPanel.Inner
                         grow={false}
                         key={id}
-                        data-test-subj={`mlPreconfigJobsKibanaAssetAccordion.${kibanaAsset}.${id}`}
+                        data-test-subj={`mlPreconfigJobsKibanaAssetAccordion.${assetId}.${id}`}
                       >
                         <EuiText size="m">
                           <p>

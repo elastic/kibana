@@ -15,9 +15,9 @@ export function filterModules(items: Module[], clauses: Clause[]) {
   }
   // keep count of the number of matches we make as we're looping over the clauses
   // we only want to return items which match all clauses, i.e. each search term is ANDed
-  const matches: Record<string, any> = items.reduce((p: Record<string, any>, c) => {
-    p[c.id] = {
-      job: c,
+  const matches = items.reduce<Record<string, { module: Module; count: number }>>((p, module) => {
+    p[module.id] = {
+      module,
       count: 0,
     };
     return p;
@@ -73,7 +73,7 @@ export function filterModules(items: Module[], clauses: Clause[]) {
   // loop through the matches and return only those items which have match all the clauses
   const filtered = Object.values(matches)
     .filter((m) => (m && m.count) >= clauses.length)
-    .map((m) => m.job);
+    .map((m) => m.module);
 
   return filtered;
 }

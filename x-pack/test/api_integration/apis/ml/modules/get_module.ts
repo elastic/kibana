@@ -106,10 +106,8 @@ export default ({ getService }: FtrProviderContext) => {
         if (isPopulatedObject(rspBody, ['logoFile'])) {
           expect(rspBody).to.have.property('logoFile').a('string');
         }
-        if (typeof rspBody.logo === 'object') {
-          expect(rspBody.logo).to.have.property('icon').a('string');
-        } else {
-          expect(rspBody).to.have.property('logo').a('string');
+        if (isPopulatedObject(rspBody, ['logo'])) {
+          expect(rspBody).to.have.property('logo').an(Object);
         }
         if (isPopulatedObject(rspBody, ['defaultIndexPattern'])) {
           expect(rspBody).to.have.property('defaultIndexPattern').a('string');

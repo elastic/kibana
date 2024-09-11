@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiSearchBarOnChangeArgs,
   SearchFilterConfig,
@@ -20,6 +20,9 @@ import {
   EuiSearchBar,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import useMountedState from 'react-use/lib/useMountedState';
+import useMount from 'react-use/lib/useMount';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana } from '../contexts/kibana';
 import type { Module } from '../../../common/types/modules';
@@ -48,26 +51,26 @@ export const SuppliedConfigurations = () => {
   const [selectedModuleId, setSelectedModuleId] = useState<string | undefined>();
 
   const closeFlyout = () => setIsFlyoutVisible(false);
+  const isMounted = useMountedState();
 
   /**
    * Loads recognizer module configuration.
    */
   const loadModules = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const modulesReponse = (await getDataRecognizerModule()) as Module[];
-      setModules(modulesReponse);
-      setIsLoading(false);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
+    if (isMounted()) {
+      setIsLoading(true);
+      try {
+        const modulesReponse = (await getDataRecognizerModule()) as Module[];
+        setModules(modulesReponse);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
       setIsLoading(false);
     }
-  }, [getDataRecognizerModule]);
+  }, [getDataRecognizerModule, isMounted]);
 
-  useEffect(() => {
-    loadModules();
-  }, [loadModules]);
+  useMount(loadModules);
 
   const filters: SearchFilterConfig[] = useMemo(() => {
     const options: FieldValueOptionType[] = [];
@@ -127,7 +130,12 @@ export const SuppliedConfigurations = () => {
       <EuiSearchBar
         defaultQuery={query}
         box={{
-          placeholder: 'Search supplied configurations',
+          placeholder: i18n.translate(
+            'xpack.ml.anomalyDetection.suppliedConfigurationsPage.searchBarPlaceholder',
+            {
+              defaultMessage: 'Search supplied configurations',
+            }
+          ),
           incremental: true,
           schema,
         }}
@@ -142,7 +150,7 @@ export const SuppliedConfigurations = () => {
               <EuiCard
                 data-test-subj={`mlSuppliedConfigurationsCard ${id}`}
                 layout="horizontal"
-                icon={<EuiIcon size="xxl" type={isLogoObject(logo) ? logo.icon : logo} />}
+                icon={isLogoObject(logo) ? <EuiIcon size="xxl" type={logo.icon} /> : null}
                 title={title}
                 description={description}
                 onClick={() => {
