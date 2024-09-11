@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment } from 'react';
 import type {
   DataTableRecord,
   EsHitRecord,
@@ -52,24 +52,12 @@ export function SourceDocument({
   className?: string;
   isCompressed?: boolean;
 }) {
-  const pairs: FormattedHit = useMemo(
-    () =>
-      useTopLevelObjectColumns
-        ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
-            0,
-            maxEntries
-          )
-        : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats),
-    [
-      columnId,
-      dataView,
-      fieldFormats,
-      maxEntries,
-      row,
-      shouldShowFieldHandler,
-      useTopLevelObjectColumns,
-    ]
-  );
+  const pairs: FormattedHit = useTopLevelObjectColumns
+    ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
+        0,
+        maxEntries
+      )
+    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
   return (
     <EuiDescriptionList
