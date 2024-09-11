@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FlyoutPanelProps } from './types';
+import { FlyoutPanelProps } from '../..';
 
-export interface FlyoutState {
+export interface FlyoutPanels {
   /**
    * Panel to render in the left section
    */
@@ -24,12 +24,12 @@ export interface FlyoutState {
   preview: FlyoutPanelProps[] | undefined;
 }
 
-export interface State {
+export interface PanelsState {
   /**
    * Store the panels for multiple flyouts
    */
   byId: {
-    [id: string]: FlyoutState;
+    [id: string]: FlyoutPanels;
   };
   /**
    * Is the flyout in sync with external storage (eg. url)?
@@ -39,7 +39,29 @@ export interface State {
   needsSync?: boolean;
 }
 
-export const initialState: State = {
+export const initialPanelsState: PanelsState = {
   byId: {},
   needsSync: false,
+};
+
+export interface DataState {
+  /**
+   * All panels information
+   */
+  panels: PanelsState;
+}
+
+export const initialDataState: DataState = {
+  panels: initialPanelsState,
+};
+
+export interface State {
+  /**
+   * All data related information
+   */
+  data: DataState;
+}
+
+export const initialState: State = {
+  data: initialDataState,
 };
