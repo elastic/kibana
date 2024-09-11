@@ -46,14 +46,13 @@ export async function getRootTransactionByTraceId({
           filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
         },
       },
+      fields: ['*'],
     },
   };
 
   const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);
   const fields = resp.hits.hits[0]?.fields;
-  const fields_norm = normalizeFields(fields);
+  const fieldsNorm = normalizeFields(fields);
 
-  console.log(fields_norm);
-
-  return fields_norm;
+  return fieldsNorm;
 }

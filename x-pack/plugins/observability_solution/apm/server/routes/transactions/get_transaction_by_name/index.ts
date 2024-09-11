@@ -49,6 +49,7 @@ export async function getTransactionByName({
         },
       },
     },
+    fields: ['*'],
   });
 
   const fields = resp.hits.hits[0]?.fields;
