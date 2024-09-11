@@ -27,7 +27,6 @@ import {
   createMockIdpMetadata,
 } from '@kbn/mock-idp-utils';
 
-// import { extractAndArchiveLogs } from './extract_and_archive_logs';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -108,8 +107,6 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
-
-// const ARCHIVE_LOGS = true;
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -443,14 +440,6 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
   log.info(chalk.bold('Cleaning up dangling Docker containers.'));
 
   try {
-    // if (ARCHIVE_LOGS) {
-    //   await extractAndArchiveLogs({
-    //     outputFolder: REPO_ROOT,
-    //     log,
-    //     nodeNames: SERVERLESS_NODES.map(({ name }) => name),
-    //   });
-    // }
-
     const { stdout } = await execa('docker', ['container', 'prune', '--force']);
     log.indent(4, () => log.info(stdout));
     log.success('Cleaned up dangling Docker containers.');
@@ -866,13 +855,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
     await readyPromise.catch(async (e) => {
-      // if (ARCHIVE_LOGS) {
-      //   await extractAndArchiveLogs({
-      //     outputFolder: REPO_ROOT,
-      //     log,
-      //     nodeNames: SERVERLESS_NODES.map(({ name }) => name),
-      //   });
-      // }
       throw e;
     });
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
