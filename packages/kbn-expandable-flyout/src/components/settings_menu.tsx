@@ -23,10 +23,12 @@ import {
 import { css } from '@emotion/css';
 import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { changePushVsOverlayAction } from '../store/push_vs_overlay_actions';
-import { resetCollapsedWidthAction, resetExpandedWidthAction } from '../store/widths_actions';
-import { resetInternalPercentagesAction } from '../store/internal_percentages_actions';
-
+import {
+  changePushVsOverlayAction,
+  resetCollapsedWidthAction,
+  resetExpandedWidthAction,
+  resetInternalPercentagesAction,
+} from '../store/actions';
 import { selectPushVsOverlayById, useDispatch, useSelector } from '../store/redux';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
@@ -123,7 +125,7 @@ interface SettingsMenuProps {
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
   ({ urlKey, flyoutCustomProps }: SettingsMenuProps) => {
-    console.log('SettingsMenu');
+    console.log('render - SettingsMenu');
     const dispatch = useDispatch();
 
     const flyoutType = useSelector(selectPushVsOverlayById(urlKey));

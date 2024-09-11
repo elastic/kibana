@@ -11,8 +11,13 @@ import { EuiResizableContainer } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useExpandableFlyoutContext } from '../context';
-import { changeInternalPercentagesAction } from '../store/internal_percentages_actions';
-import { selectInternalPercentagesById, useDispatch, useSelector } from '../store/redux';
+import { changeInternalPercentagesAction } from '../store/actions';
+import {
+  selectDefaultWidths,
+  selectInternalPercentagesById,
+  useDispatch,
+  useSelector,
+} from '../store/redux';
 import {
   RESIZABLE_BUTTON_TEST_ID,
   RESIZABLE_LEFT_SECTION_TEST_ID,
@@ -56,12 +61,22 @@ interface ResizableContainerProps {
  */
 export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
   ({ leftSection, rightSection, left, right, showPreview }: ResizableContainerProps) => {
-    console.log('render ResizableContainer');
+    console.log('render - ResizableContainer');
 
     const { urlKey } = useExpandableFlyoutContext();
     const dispatch = useDispatch();
     const { internalLeftPercentage, internalRightPercentage } = useSelector(
       selectInternalPercentagesById(urlKey)
+    );
+    const defaultPercentages = useSelector(selectDefaultWidths);
+
+    const initialLeftPercentage = useMemo(
+      () => internalLeftPercentage || defaultPercentages.leftPercentage,
+      [defaultPercentages.leftPercentage, internalLeftPercentage]
+    );
+    const initialRightPercentage = useMemo(
+      () => internalRightPercentage || defaultPercentages.rightPercentage,
+      [defaultPercentages.rightPercentage, internalRightPercentage]
     );
 
     const leftComponent = useMemo(
@@ -94,7 +109,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
           <>
             <EuiResizablePanel
               id={LEFT_PANEL_ID}
-              initialSize={50}
+              initialSize={initialLeftPercentage}
               size={internalLeftPercentage}
               minSize={LEFT_SECTION_MIN_WIDTH}
               paddingSize="none"
@@ -105,7 +120,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
             <EuiResizableButton disabled={showPreview} data-test-subj={RESIZABLE_BUTTON_TEST_ID} />
             <EuiResizablePanel
               id={RIGHT_PANEL_ID}
-              initialSize={50}
+              initialSize={initialRightPercentage}
               size={internalRightPercentage}
               minSize={RIGHT_SECTION_MIN_WIDTH}
               paddingSize="none"

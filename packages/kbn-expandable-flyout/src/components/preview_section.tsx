@@ -20,7 +20,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
-import { selectInternalPercentagesById, useSelector } from '../store/redux';
+import { selectDefaultWidths, selectInternalPercentagesById, useSelector } from '../store/redux';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
@@ -84,19 +84,23 @@ interface PreviewSectionProps {
  */
 export const PreviewSection: React.FC<PreviewSectionProps> = memo(
   ({ component, banner, showExpanded }: PreviewSectionProps) => {
-    console.log('PreviewSection');
+    console.log('render - PreviewSection');
     const { euiTheme } = useEuiTheme();
     const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutApi();
 
     const { urlKey } = useExpandableFlyoutContext();
     const { internalRightPercentage } = useSelector(selectInternalPercentagesById(urlKey));
+    const defaultPercentages = useSelector(selectDefaultWidths);
 
     // Calculate the width of the preview section based on the following
     // - if only the right section is visible, then we use 100% of the width (minus some padding)
     // - if both the right and left sections are visible, we use the width of the right section (minus the same padding)
     const width = useMemo(() => {
-      return showExpanded ? `calc(${internalRightPercentage}% - 8px)` : `calc(100% - 8px)`;
-    }, [internalRightPercentage, showExpanded]);
+      const percentage = internalRightPercentage
+        ? internalRightPercentage
+        : defaultPercentages.rightPercentage;
+      return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
+    }, [defaultPercentages.rightPercentage, internalRightPercentage, showExpanded]);
 
     const closeButton = (
       <EuiFlexItem grow={false}>

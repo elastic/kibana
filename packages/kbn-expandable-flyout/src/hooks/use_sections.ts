@@ -46,7 +46,7 @@ export interface UseSectionsResult {
  * Hook that retrieves the left, right, and preview sections to be displayed in the flyout.
  */
 export const useSections = ({ registeredPanels }: UseSectionsParams): UseSectionsResult => {
-  console.log('useSections');
+  console.log('render - useSections');
   const { left, preview, right } = useExpandableFlyoutState();
 
   const rightSection = useMemo(

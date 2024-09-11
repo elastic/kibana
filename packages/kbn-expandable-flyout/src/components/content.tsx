@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
 import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
 import { useExpandableFlyoutContext } from '../context';
-import { changeCollapsedWidthAction, changeExpandedWidthAction } from '../store/widths_actions';
+import { changeCollapsedWidthAction, changeExpandedWidthAction } from '../store/actions';
 import {
+  selectDefaultWidths,
   selectPushVsOverlayById,
   selectWidthsById,
   useDispatch,
@@ -90,7 +91,7 @@ export interface ContentProps extends Omit<EuiFlyoutResizableProps, 'onClose'> {
  */
 export const Content: React.FC<ContentProps> = memo(
   ({ customStyles, registeredPanels, flyoutCustomProps, ...flyoutProps }) => {
-    console.log('Content');
+    console.log('render - Content');
 
     const dispatch = useDispatch();
 
@@ -100,6 +101,7 @@ export const Content: React.FC<ContentProps> = memo(
 
     const flyoutType = useSelector(selectPushVsOverlayById(urlKey));
     const flyoutWidths = useSelector(selectWidthsById(urlKey));
+    const defaultWidths = useSelector(selectDefaultWidths);
 
     // retrieves the sections to be displayed
     const { leftSection, rightSection, previewSection, mostRecentPreview, previewBanner } =
@@ -122,6 +124,24 @@ export const Content: React.FC<ContentProps> = memo(
       () => (rightSection ? rightSection.component({ ...(right as FlyoutPanelProps) }) : null),
       [rightSection, right]
     );
+    useEffect(() => {
+      console.log('render - rightSection is changed -------');
+    }, [rightSection]);
+    useEffect(() => {
+      console.log('render - right is changed -------');
+    }, [right]);
+    useEffect(() => {
+      console.log('render - leftSection is changed -------');
+    }, [leftSection]);
+    useEffect(() => {
+      console.log('render - left is changed -------');
+    }, [left]);
+    useEffect(() => {
+      console.log('render - previewSection is changed -------');
+    }, [previewSection]);
+    useEffect(() => {
+      console.log('render - preview is changed -------');
+    }, [preview]);
     const previewComponent = useMemo(
       () =>
         previewSection
@@ -140,12 +160,19 @@ export const Content: React.FC<ContentProps> = memo(
 
     const flyoutWidth = useMemo(() => {
       if (showCollapsed) {
-        return flyoutWidths.collapsedWidth;
+        return flyoutWidths.collapsedWidth || defaultWidths.rightWidth;
       }
       if (showExpanded) {
-        return flyoutWidths.expandedWidth;
+        return flyoutWidths.expandedWidth || defaultWidths.rightWidth + defaultWidths.leftWidth;
       }
-    }, [showCollapsed, showExpanded, flyoutWidths]);
+    }, [
+      showCollapsed,
+      showExpanded,
+      flyoutWidths.collapsedWidth,
+      flyoutWidths.expandedWidth,
+      defaultWidths.rightWidth,
+      defaultWidths.leftWidth,
+    ]);
 
     // callback function called when user changes the flyout's width
     const onResize = useCallback(
@@ -156,7 +183,7 @@ export const Content: React.FC<ContentProps> = memo(
           dispatch(changeCollapsedWidthAction({ width, id: urlKey, savedToLocalStorage: true }));
         }
       },
-      [dispatch, showLeft, showRight, urlKey]
+      [dispatch, showCollapsed, showExpanded, urlKey]
     );
 
     // don't need to render if the windowWidth is 0 or if nothing needs to be rendered

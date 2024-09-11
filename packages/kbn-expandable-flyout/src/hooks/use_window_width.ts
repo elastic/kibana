@@ -9,7 +9,7 @@
 
 import { useLayoutEffect, useState } from 'react';
 import { useDispatch } from '../store/redux';
-import { setDefaultWidthsAction } from '../store/default_widths_actions';
+import { setDefaultWidthsAction } from '../store/actions';
 
 const RIGHT_SECTION_MIN_WIDTH = 380;
 const MIN_RESOLUTION_BREAKPOINT = 992;
@@ -25,7 +25,7 @@ const FULL_WIDTH_PADDING = 48;
  * Hook that returns the browser window width
  */
 export const useWindowWidth = (): number => {
-  console.log('useFlyoutWidth');
+  console.log('render - useWindowWidth');
   const dispatch = useDispatch();
 
   const [width, setWidth] = useState(0);

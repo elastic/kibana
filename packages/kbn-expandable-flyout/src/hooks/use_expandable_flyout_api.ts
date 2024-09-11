@@ -21,7 +21,7 @@ import {
   openPreviewPanelAction,
   openRightPanelAction,
   previousPreviewPanelAction,
-} from '../store/panels_actions';
+} from '../store/actions';
 import { useDispatch } from '../store/redux';
 import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
 

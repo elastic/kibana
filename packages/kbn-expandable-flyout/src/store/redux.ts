@@ -11,14 +11,18 @@ import { createContext } from 'react';
 import { createDispatchHook, createSelectorHook, ReactReduxContextValue } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
-import { internalPercentagesMiddleware } from './internal_percentages_middleware';
-import { widthsMiddleware } from './widths_middleware';
-import { pushVsOverlayMiddleware } from './push_vs_overlay_middleware';
-import { panelsReducer } from './panels_reducer';
-import { internalPercentagesReducer } from './internal_percentages_reducer';
-import { defaultWidthsReducer } from './default_widths_reducer';
-import { pushVsOverlayReducer } from './push_vs_overlay_reducer';
-import { widthsReducer } from './widths_reducer';
+import {
+  pushVsOverlayMiddleware,
+  widthsMiddleware,
+  internalPercentagesMiddleware,
+} from './middlewares';
+import {
+  panelsReducer,
+  pushVsOverlayReducer,
+  defaultWidthsReducer,
+  widthsReducer,
+  internalPercentagesReducer,
+} from './reducers';
 import { initialState, State } from './state';
 
 export const store = configureStore({

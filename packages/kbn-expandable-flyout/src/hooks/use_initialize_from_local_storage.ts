@@ -7,28 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  COLLAPSED_WIDTH_LOCAL_STORAGE,
+  EXPANDABLE_FLYOUT_LOCAL_STORAGE,
+  EXPANDED_WIDTH_LOCAL_STORAGE,
+  INTERNAL_PERCENTAGES_LOCAL_STORAGE,
+  PUSH_VS_OVERLAY_LOCAL_STORAGE,
+} from '../constants';
 import { useDispatch } from '../store/redux';
 import { useExpandableFlyoutContext } from '../context';
-import { changePushVsOverlayAction } from '../store/push_vs_overlay_actions';
-import { changeCollapsedWidthAction, changeExpandedWidthAction } from '../store/widths_actions';
-import { changeInternalPercentagesAction } from '../store/internal_percentages_actions';
-
-const expandableFlyoutLocalStorage = 'expandableFlyout';
-const collapsedLocalStorage = 'collapsedResizedWidth';
-const expandedLocalStorage = 'expandedResizedWidth';
-const internalPercentagesLocalStorage = 'internalPercentage';
-const pushVsOverlayModeLocalStorage = 'pushVsOverlayMode';
+import {
+  changePushVsOverlayAction,
+  changeCollapsedWidthAction,
+  changeExpandedWidthAction,
+  changeInternalPercentagesAction,
+} from '../store/actions';
 
 /**
  *
  */
 export const useInitializeFromLocalStorage = () => {
-  console.log('useInitializeFromLocalStorage');
+  console.log('render - useInitializeFromLocalStorage');
   const dispatch = useDispatch();
   const { urlKey } = useExpandableFlyoutContext();
 
   const pushVsOverlay = localStorage.getItem(
-    `${expandableFlyoutLocalStorage}.${pushVsOverlayModeLocalStorage}.${urlKey}`
+    `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${PUSH_VS_OVERLAY_LOCAL_STORAGE}.${urlKey}`
   );
   if (pushVsOverlay && urlKey) {
     dispatch(
@@ -37,7 +41,7 @@ export const useInitializeFromLocalStorage = () => {
   }
 
   const collapsedWidth = localStorage.getItem(
-    `${expandableFlyoutLocalStorage}.${collapsedLocalStorage}.${urlKey}`
+    `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${COLLAPSED_WIDTH_LOCAL_STORAGE}.${urlKey}`
   );
   if (collapsedWidth && urlKey) {
     dispatch(
@@ -50,7 +54,7 @@ export const useInitializeFromLocalStorage = () => {
   }
 
   const expandedWidth = localStorage.getItem(
-    `${expandableFlyoutLocalStorage}.${expandedLocalStorage}.${urlKey}`
+    `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${EXPANDED_WIDTH_LOCAL_STORAGE}.${urlKey}`
   );
   if (expandedWidth && urlKey) {
     dispatch(
@@ -63,7 +67,7 @@ export const useInitializeFromLocalStorage = () => {
   }
 
   const internalPercentages = localStorage.getItem(
-    `${expandableFlyoutLocalStorage}.${internalPercentagesLocalStorage}.${urlKey}`
+    `${EXPANDABLE_FLYOUT_LOCAL_STORAGE}.${INTERNAL_PERCENTAGES_LOCAL_STORAGE}.${urlKey}`
   );
   if (internalPercentages && urlKey) {
     const value = JSON.parse(internalPercentages);

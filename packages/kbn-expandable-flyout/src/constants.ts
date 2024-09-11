@@ -11,3 +11,9 @@
  * This is a reserved word that we use as an id when no urlKey is provided and we are in memory storage mode
  */
 export const REDUX_ID_FOR_MEMORY_STORAGE = 'memory';
+
+export const EXPANDABLE_FLYOUT_LOCAL_STORAGE = 'expandableFlyout';
+export const PUSH_VS_OVERLAY_LOCAL_STORAGE = 'pushVsOverlay';
+export const COLLAPSED_WIDTH_LOCAL_STORAGE = 'collapsedWidth';
+export const EXPANDED_WIDTH_LOCAL_STORAGE = 'expandedWidth';
+export const INTERNAL_PERCENTAGES_LOCAL_STORAGE = 'internalPercentage';

@@ -22,7 +22,7 @@ interface LeftSectionProps {
  * Left section of the expanded flyout rendering a panel
  */
 export const LeftSection: React.FC<LeftSectionProps> = memo(({ component }: LeftSectionProps) => {
-  console.log('LeftSection');
+  console.log('render - LeftSection');
   return (
     <EuiFlexItem grow data-test-subj={LEFT_SECTION_TEST_ID} style={{ height: '100%' }}>
       {component}

@@ -74,7 +74,7 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutResizableProps, 'on
  * is already rendered.
  */
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({ ...props }) => {
-  console.log('ExpandableFlyout');
+  console.log('render - ExpandableFlyout');
 
   const windowWidth = useWindowWidth();
 

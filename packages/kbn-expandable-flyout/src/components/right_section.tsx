@@ -23,7 +23,7 @@ interface RightSectionProps {
  */
 export const RightSection: React.FC<RightSectionProps> = memo(
   ({ component }: RightSectionProps) => {
-    console.log('RightSection');
+    console.log('render - RightSection');
     return (
       <EuiFlexItem grow={false} style={{ height: '100%' }} data-test-subj={RIGHT_SECTION_TEST_ID}>
         {component}
