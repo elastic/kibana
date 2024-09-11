@@ -90,7 +90,7 @@ export async function runElasticsearch(
     });
     return async () => {
       await node.cleanup();
-      await extractAndArchiveLogs({ outputFolder: logsDir || REPO_ROOT, log });
+      await extractAndArchiveLogs({ outputFolder: logsDir, log });
     };
   }
 
@@ -119,7 +119,7 @@ export async function runElasticsearch(
   return async () => {
     await localNode.cleanup();
     await remoteNode.cleanup();
-    await extractAndArchiveLogs({ outputFolder: logsDir || REPO_ROOT, log });
+    await extractAndArchiveLogs({ outputFolder: logsDir, log });
   };
 }
 

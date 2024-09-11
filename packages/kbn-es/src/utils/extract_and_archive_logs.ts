@@ -7,9 +7,12 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+
 import execa from 'execa';
 import Fsp from 'fs/promises';
 import { join } from 'path';
+
+import { REPO_ROOT } from '@kbn/repo-info';
 
 /**
  * Extracts logs from Docker nodes, writes them to files, and returns the file paths.
@@ -19,11 +22,13 @@ export async function extractAndArchiveLogs({
   log,
   nodeNames,
 }: {
-  outputFolder: string;
   log: ToolingLog;
   nodeNames?: string[];
+  outputFolder?: string;
 }) {
+  outputFolder = outputFolder || join(REPO_ROOT, '.es');
   const logFiles: string[] = [];
+
   if (!nodeNames) {
     const { stdout: nodeNamesString } = await execa('docker', [
       'ps',
