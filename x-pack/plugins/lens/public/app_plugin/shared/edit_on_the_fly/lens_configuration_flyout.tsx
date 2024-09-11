@@ -48,7 +48,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 
 export function LensEditConfigurationFlyout({
@@ -288,7 +288,7 @@ export function LensEditConfigurationFlyout({
       prevVisState
     );
     if (telemetryEvents && telemetryEvents.length) {
-      trackUiCounterEvents(telemetryEvents);
+      trackSaveUiCounterEvents(telemetryEvents);
     }
 
     onApplyCb?.(attrs as TypedLensByValueInput['attributes']);

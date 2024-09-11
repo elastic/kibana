@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -51,6 +52,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(actual).toMatchSnapshot();
     });
@@ -74,6 +76,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(actual).toMatchSnapshot();
     });
@@ -102,8 +105,78 @@ describe('Data table columns', function () {
           timestamp: { type: 'date', esType: 'dateTime' },
         },
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(actual).toMatchSnapshot();
+    });
+
+    describe('cell actions', () => {
+      it('should replace cell actions', async () => {
+        const cellAction = jest.fn();
+        const actual = getEuiGridColumns({
+          columns: columnsWithTimeCol,
+          settings: {},
+          dataView: dataViewWithTimefieldMock,
+          defaultColumns: false,
+          isSortEnabled: true,
+          isPlainRecord: true,
+          valueToStringConverter: dataTableContextMock.valueToStringConverter,
+          rowsCount: 100,
+          headerRowHeightLines: 5,
+          services: {
+            uiSettings: servicesMock.uiSettings,
+            toastNotifications: servicesMock.toastNotifications,
+          },
+          hasEditDataViewPermission: () =>
+            servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+          onFilter: () => {},
+          columnsMeta: {
+            extension: { type: 'string' },
+            message: { type: 'string', esType: 'keyword' },
+            timestamp: { type: 'date', esType: 'dateTime' },
+          },
+          onResize: () => {},
+          columnsCellActions: [[cellAction]],
+          cellActionsHandling: 'replace',
+        });
+        expect(actual[0].cellActions).toEqual([cellAction]);
+      });
+
+      it('should append cell actions', async () => {
+        const cellAction = jest.fn();
+        const actual = getEuiGridColumns({
+          columns: columnsWithTimeCol,
+          settings: {},
+          dataView: dataViewWithTimefieldMock,
+          defaultColumns: false,
+          isSortEnabled: true,
+          isPlainRecord: true,
+          valueToStringConverter: dataTableContextMock.valueToStringConverter,
+          rowsCount: 100,
+          headerRowHeightLines: 5,
+          services: {
+            uiSettings: servicesMock.uiSettings,
+            toastNotifications: servicesMock.toastNotifications,
+          },
+          hasEditDataViewPermission: () =>
+            servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+          onFilter: () => {},
+          columnsMeta: {
+            extension: { type: 'string' },
+            message: { type: 'string', esType: 'keyword' },
+            timestamp: { type: 'date', esType: 'dateTime' },
+          },
+          onResize: () => {},
+          columnsCellActions: [[cellAction]],
+          cellActionsHandling: 'append',
+        });
+        expect(actual[0].cellActions).toEqual([
+          expect.any(Function),
+          expect.any(Function),
+          expect.any(Function),
+          cellAction,
+        ]);
+      });
     });
   });
 
@@ -301,6 +374,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(actual).toMatchSnapshot();
     });
@@ -329,6 +403,7 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(actual).toMatchSnapshot();
     });
@@ -362,6 +437,7 @@ describe('Data table columns', function () {
           extension: { type: 'string' },
         },
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(gridColumns[1].schema).toBe('string');
     });
@@ -393,6 +469,7 @@ describe('Data table columns', function () {
           var_test: { type: 'number' },
         },
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       expect(gridColumns[1].schema).toBe('numeric');
     });
@@ -420,6 +497,7 @@ describe('Data table columns', function () {
           message: { type: 'string', esType: 'keyword' },
         },
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
 
       const extensionGridColumn = gridColumns[0];
@@ -451,6 +529,7 @@ describe('Data table columns', function () {
           message: { type: 'string', esType: 'keyword' },
         },
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
 
       expect(customizedGridColumns).toMatchSnapshot();
@@ -494,6 +573,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onResize: () => {},
+        cellActionsHandling: 'replace',
       });
       const columnDisplayNames = customizedGridColumns.map((column) => column.displayAsText);
       expect(columnDisplayNames.includes('test_column_one')).toBeTruthy();

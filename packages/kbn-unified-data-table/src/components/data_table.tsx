@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -271,10 +272,6 @@ export interface UnifiedDataTableProps {
    */
   onFieldEdited?: () => void;
   /**
-   * Optional triggerId to retrieve the column cell actions that will override the default ones
-   */
-  cellActionsTriggerId?: string;
-  /**
    * Service dependencies
    */
   services: {
@@ -353,6 +350,20 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
+   * Optional triggerId to retrieve the column cell actions that will override the default ones
+   */
+  cellActionsTriggerId?: string;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
+  /**
+   * Controls whether the cell actions should replace the default cell actions or be appended to them
+   */
+  cellActionsHandling?: 'replace' | 'append';
+  /**
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
@@ -388,12 +399,6 @@ export interface UnifiedDataTableProps {
    * Set to true to allow users to compare selected documents
    */
   enableComparisonMode?: boolean;
-  /**
-   * Custom set of properties used by some actions.
-   * An action might require a specific set of metadata properties to render.
-   * This data is sent directly to actions.
-   */
-  cellActionsMetadata?: Record<string, unknown>;
   /**
    * Optional extra props passed to the renderCellValue function/component.
    */
@@ -440,6 +445,9 @@ export const UnifiedDataTable = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   cellActionsTriggerId,
+  cellActionsMetadata,
+  cellActionsHandling = 'replace',
+  visibleCellActions,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -465,14 +473,12 @@ export const UnifiedDataTable = ({
   maxDocFieldsDisplayed = 50,
   externalAdditionalControls,
   rowsPerPageOptions,
-  visibleCellActions,
   externalCustomRenderers,
   additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
-  cellActionsMetadata,
   customGridColumnsConfiguration,
   enableComparisonMode,
   cellContext,
@@ -751,7 +757,7 @@ export const UnifiedDataTable = ({
 
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
-      cellActionsTriggerId && !isPlainRecord
+      cellActionsTriggerId
         ? visibleColumns.map(
             (columnName) =>
               dataView.getFieldByName(columnName)?.toSpec() ?? {
@@ -762,7 +768,7 @@ export const UnifiedDataTable = ({
               }
           )
         : undefined,
-    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
+    [cellActionsTriggerId, visibleColumns, dataView]
   );
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
@@ -805,6 +811,7 @@ export const UnifiedDataTable = ({
       getEuiGridColumns({
         columns: visibleColumns,
         columnsCellActions,
+        cellActionsHandling,
         rowsCount: displayedRows.length,
         settings,
         dataView,
@@ -828,6 +835,7 @@ export const UnifiedDataTable = ({
         onResize,
       }),
     [
+      cellActionsHandling,
       columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
@@ -1135,7 +1143,9 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
-              virtualizationOptions={VIRTUALIZATION_OPTIONS}
+              // Don't use row overscan when showing Document column since
+              // rendering so much DOM content in each cell impacts performance
+              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
             />
           )}
         </div>
