@@ -59,6 +59,9 @@ interface MainProps {
   isEmbeddable?: boolean;
 }
 
+// 2MB limit (2 * 1024 * 1024 bytes)
+const MAX_FILE_UPLOAD_SIZE = 2 * 1024 * 1024;
+
 export function Main({ isEmbeddable = false }: MainProps) {
   const dispatch = useEditorActionContext();
   const requestDispatch = useRequestActionContext();
@@ -118,6 +121,15 @@ export function Main({ isEmbeddable = false }: MainProps) {
     event.target.value = '';
 
     if (file) {
+      if (file.size > MAX_FILE_UPLOAD_SIZE) {
+        notifications.toasts.addSuccess(
+          i18n.translate('console.notification.error.fileTooBigMessage', {
+            defaultMessage: `File size exceeds the 2MB limit.`,
+          })
+        );
+        return;
+      }
+
       const reader = new FileReader();
 
       reader.onload = (e) => {
@@ -130,7 +142,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
           });
 
           notifications.toasts.addSuccess(
-            i18n.translate('console.notification.error.fileImportedSuccessfully', {
+            i18n.translate('console.notification.fileImportedSuccessfully', {
               defaultMessage: `The file you selected has been imported successfully.`,
             })
           );
