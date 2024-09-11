@@ -21,7 +21,6 @@ const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemM
 const savedObjectsClient = savedObjectsClientMock.create() as unknown as ISavedObjectsRepository;
 const thrownError = new Error('Fail');
 
-// introduce fake dates
 const mockedResponse = {
   saved_objects: [
     {
@@ -518,7 +517,7 @@ describe('kibana index telemetry', () => {
   });
 
   describe('getMWTelemetry', () => {
-    test('should return total count of MW', async () => {
+    test('should return MW telemetry', async () => {
       mockCreatePointInTimeFinder();
       const telemetry = await getMWTelemetry({
         savedObjectsClient,

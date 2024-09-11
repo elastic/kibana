@@ -527,7 +527,7 @@ export async function getMWTelemetry({
           countMWWithFilterAlertToggleON = countMWWithFilterAlertToggleON + 1;
         }
         // interval property will be not in place if "Repeat" toggle will be off
-        if (MWSavedObject.attributes.rRule.interval) {
+        if ('interval' in MWSavedObject.attributes.rRule) {
           countMWWithRepeatToggleON = countMWWithRepeatToggleON + 1;
         }
       }
