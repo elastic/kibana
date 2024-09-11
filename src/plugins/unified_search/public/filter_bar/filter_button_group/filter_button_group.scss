@@ -1,9 +1,14 @@
+.kbnDataViewPicker {
+  max-height: $euiFormControlCompressedHeight;
+}
+
 .kbnFilterButtonGroup {
   height: $euiFormControlCompressedHeight;
   background-color: $euiFormInputGroupLabelBackground;
   border-radius: $euiFormControlBorderRadius;
   box-shadow: 0 0 1px inset rgba($euiFormBorderOpaqueColor, .4);
   max-height: $euiFormControlCompressedHeight;
+  min-width: fit-content;
 
   // Targets any interactable elements
   *:enabled {
@@ -17,6 +22,7 @@
   &--attached {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    max-width: fit-content;
   }
 
   > *:not(:last-of-type) {

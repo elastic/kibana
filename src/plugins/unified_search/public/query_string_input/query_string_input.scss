@@ -6,6 +6,7 @@
   border-radius: $euiFormControlBorderRadius;
   border-top-left-radius: calc($euiBorderRadius / 2);
   border-bottom-left-radius: calc($euiBorderRadius / 2);
+  flex-direction: row;
 
   >[aria-expanded='true'] {
     // Using filter allows it to adhere the children's bounds

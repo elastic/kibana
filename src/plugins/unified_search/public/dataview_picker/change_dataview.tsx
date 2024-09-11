@@ -106,6 +106,7 @@ export function ChangeDataView({
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
         {...rest}
+        className="kbnDataViewPicker"
       >
         <>
           {/* we don't want to display the adHoc icon on text based mode */}
@@ -248,7 +249,9 @@ export function ChangeDataView({
                 background-color: ${euiTheme.colors.lightestShade};
                 border: ${euiTheme.border.thin};
                 border-right: 0;
+                line-height: 0.5;
               `}
+              className="kbnDataViewPicker"
             >
               {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
                 defaultMessage: 'Data view',
