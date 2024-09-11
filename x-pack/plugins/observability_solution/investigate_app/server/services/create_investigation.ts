@@ -18,6 +18,10 @@ export async function createInvestigation(
   params: CreateInvestigationParams,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<CreateInvestigationResponse> {
+  if (await investigationAlreadyExists(params.id, repository)) {
+    throw new Error(`Investigation [id=${params.id}] already exists`);
+  }
+
   const investigation = {
     ...params,
     createdAt: Date.now(),
@@ -29,4 +33,17 @@ export async function createInvestigation(
   await repository.save(investigation);
 
   return investigation;
+}
+
+async function investigationAlreadyExists(
+  investigationId: string,
+  repository: InvestigationRepository
+) {
+  try {
+    await repository.findById(investigationId);
+    return true;
+  } catch (err) {
+    // TODO assert on error type/message
+    return false;
+  }
 }

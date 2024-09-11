@@ -125,28 +125,25 @@ export class InvestigateAppPlugin
       .getStartServices()
       .then(([, pluginsStart]) => pluginsStart);
 
-    pluginsSetup.investigate.register((registerWidget) =>
-      Promise.all([
-        pluginsStartPromise,
-        import('./widgets/register_widgets').then((m) => m.registerWidgets),
-        getCreateEsqlService(),
-      ]).then(([pluginsStart, registerWidgets, createEsqlService]) => {
-        registerWidgets({
-          dependencies: {
-            setup: pluginsSetup,
-            start: pluginsStart,
-          },
-          services: {
-            esql: createEsqlService({
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              lens: pluginsStart.lens,
-            }),
-          },
-          registerWidget,
-        });
-      })
-    );
+    Promise.all([
+      pluginsStartPromise,
+      import('./items/register_items').then((m) => m.registerItems),
+      getCreateEsqlService(),
+    ]).then(([pluginsStart, registerItems, createEsqlService]) => {
+      registerItems({
+        dependencies: {
+          setup: pluginsSetup,
+          start: pluginsStart,
+        },
+        services: {
+          esql: createEsqlService({
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            lens: pluginsStart.lens,
+          }),
+        },
+      });
+    });
 
     return {};
   }

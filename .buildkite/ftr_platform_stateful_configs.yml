@@ -271,6 +271,7 @@ enabled:
   - x-pack/test/functional/config.firefox.js
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
+  - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts

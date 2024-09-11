@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useHostsTable } from './use_hosts_table';
+import { type HostNodeRow, useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
@@ -158,7 +158,7 @@ describe('useHostTable hook', () => {
     } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
   });
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const expected = [
+    const expected: Array<Partial<HostNodeRow>> = [
       {
         name: 'host-0',
         os: '-',

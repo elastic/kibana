@@ -819,6 +819,68 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getFieldValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldValue",
+        "description": [],
+        "signature": [
+          "(record: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ", field: string) => any"
+        ],
+        "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getFieldValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "record",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getFieldValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-discover-utils/src/utils/get_field_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.getIgnoredReason",
         "type": "Function",
         "tags": [],

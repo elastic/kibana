@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -59,6 +60,9 @@ interface MainProps {
   currentTabProp?: string;
   isEmbeddable?: boolean;
 }
+
+// 2MB limit (2 * 1024 * 1024 bytes)
+const MAX_FILE_UPLOAD_SIZE = 2 * 1024 * 1024;
 
 export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const dispatch = useEditorActionContext();
@@ -128,6 +132,15 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
     event.target.value = '';
 
     if (file) {
+      if (file.size > MAX_FILE_UPLOAD_SIZE) {
+        notifications.toasts.addSuccess(
+          i18n.translate('console.notification.error.fileTooBigMessage', {
+            defaultMessage: `File size exceeds the 2MB limit.`,
+          })
+        );
+        return;
+      }
+
       const reader = new FileReader();
 
       reader.onload = (e) => {
@@ -140,7 +153,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           });
 
           notifications.toasts.addSuccess(
-            i18n.translate('console.notification.error.fileImportedSuccessfully', {
+            i18n.translate('console.notification.fileImportedSuccessfully', {
               defaultMessage: `The file you selected has been imported successfully.`,
             })
           );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo } from 'react';
@@ -35,16 +36,17 @@ import './components/index.scss';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
 import { TIME_SLIDER_CONTROL } from '../../../../common';
 
+const displayName = i18n.translate('controls.timesliderControl.displayName', {
+  defaultMessage: 'Time slider',
+});
+
 export const getTimesliderControlFactory = (
   services: Services
 ): ControlFactory<TimesliderControlState, TimesliderControlApi> => {
   return {
     type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
-    getDisplayName: () =>
-      i18n.translate('controls.timesliderControl.displayName', {
-        defaultMessage: 'Time slider',
-      }),
+    getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
@@ -203,6 +205,7 @@ export const getTimesliderControlFactory = (
       const api = buildApi(
         {
           ...defaultControl.api,
+          defaultPanelTitle: new BehaviorSubject<string | undefined>(displayName),
           timeslice$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();

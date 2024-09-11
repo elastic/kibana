@@ -24,7 +24,7 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-enrollment-api-key
 delete:
-  summary: Delete enrollment API key by ID
+  summary: Revoke enrollment API key by ID by marking it as inactive
   tags:
     - Fleet enrollment API keys
   responses:

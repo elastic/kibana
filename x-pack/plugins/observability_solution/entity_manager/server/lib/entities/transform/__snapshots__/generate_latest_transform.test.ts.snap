@@ -98,7 +98,7 @@ Object {
         "filter": Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "now-1m",
+              "gte": "now-360s",
             },
           },
         },
@@ -115,7 +115,7 @@ Object {
         "filter": Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "now-1m",
+              "gte": "now-360s",
             },
           },
         },
@@ -132,7 +132,7 @@ Object {
         "filter": Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "now-1m",
+              "gte": "now-360s",
             },
           },
         },
@@ -149,7 +149,7 @@ Object {
         "filter": Object {
           "range": Object {
             "@timestamp": Object {
-              "gte": "now-1m",
+              "gte": "now-360s",
             },
           },
         },

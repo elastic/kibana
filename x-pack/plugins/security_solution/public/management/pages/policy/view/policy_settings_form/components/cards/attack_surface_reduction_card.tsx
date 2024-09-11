@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
@@ -50,7 +51,7 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     const isChecked = policy.windows.attack_surface_reduction.credential_hardening.enabled;
     const isEditMode = mode === 'edit';
 
-    const handleSwitchChange = useCallback(
+    const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (event) => {
         const updatedPolicy = cloneDeep(policy);
 

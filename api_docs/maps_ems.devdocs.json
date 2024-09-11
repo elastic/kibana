@@ -97,7 +97,7 @@
         "signature": [
           "{ readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly includeElasticMapsService: boolean; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }"
         ],
-        "path": "src/plugins/maps_ems/config.ts",
+        "path": "src/plugins/maps_ems/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -112,7 +112,7 @@
         "signature": [
           "{ readonly url?: string | undefined; readonly options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }"
         ],
-        "path": "src/plugins/maps_ems/config.ts",
+        "path": "src/plugins/maps_ems/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

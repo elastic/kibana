@@ -32,6 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('security/authorization', function () {
+    // see details: https://github.com/elastic/kibana/issues/192282
+    this.tags(['failsOnMKI']);
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -64,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('create/update roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
-              .put('/api/security/roleAuthc/test')
+              .put('/api/security/role/test')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -72,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('get roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
-              .get('/api/security/roleAuthc/superuser')
+              .get('/api/security/role/superuser')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -80,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('get all roles', async () => {
             const { body, status } = await supertestWithoutAuth
-              .get('/api/security/roleAuthc')
+              .get('/api/security/role')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -88,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('delete roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
-              .delete('/api/security/roleAuthc/superuser')
+              .delete('/api/security/role/superuser')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);

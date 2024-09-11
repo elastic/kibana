@@ -1,0 +1,15 @@
+## DATE_DIFF
+
+The `DATE_DIFF` function subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of the specified unit. If `startTimestamp` is later than the `endTimestamp`, negative values are returned. Note that while there is an overlap between the function’s supported units and ES|QL’s supported time span literals, these sets are distinct and not interchangeable. Similarly, the supported abbreviations are conveniently shared with implementations of this function in other established products and not necessarily common with the date-time nomenclature used by Elasticsearch.
+
+### Examples
+
+```esql
+ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
+| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
+```
+
+```esql
+ROW date1 = TO_DATETIME("2023-01-01T00:00:00.000Z"), date2 = TO_DATETIME("2023-12-31T23:59:59.999Z")
+| EVAL dd_days = DATE_DIFF("days", date1, date2)
+```
