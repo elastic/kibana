@@ -45,9 +45,8 @@ export function InvestigationDetailsPage() {
     isError: isFetchInvestigationError,
   } = useFetchInvestigation({ id: investigationId });
 
-  const alertId = alertOriginSchema.is(investigation?.origin)
-    ? investigation?.origin.id
-    : undefined;
+  const alertOriginInvestigation = alertOriginSchema.safeParse(investigation?.origin);
+  const alertId = alertOriginInvestigation.success ? alertOriginInvestigation.data.id : undefined;
 
   const { data: alertDetails } = useFetchAlert({ id: alertId });
 

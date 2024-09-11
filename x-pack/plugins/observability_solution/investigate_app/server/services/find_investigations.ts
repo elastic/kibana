@@ -18,7 +18,7 @@ export async function findInvestigations(
 ): Promise<FindInvestigationsResponse> {
   const investigations = await repository.search(toFilter(params), toPagination(params));
 
-  return findInvestigationsResponseSchema.encode(investigations);
+  return findInvestigationsResponseSchema.parse(investigations);
 }
 
 function toPagination(params: FindInvestigationsParams) {
