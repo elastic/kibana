@@ -9,9 +9,9 @@
 
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
-import { ControlGroupSerializedState } from '../../common';
+import type { ControlGroupSerializedState } from '../../common';
 import {
-  SerializableControlGroupState,
+  type SerializableControlGroupState,
   controlGroupSerializedStateToSerializableRuntimeState,
   getDefaultControlGroupState,
 } from './control_group_persistence';

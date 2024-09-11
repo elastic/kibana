@@ -8,9 +8,9 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { ControlGroupSerializedState } from '../../common';
+import { type ControlGroupSerializedState } from '../../common';
 import {
-  ControlGroupTelemetry,
+  type ControlGroupTelemetry,
   controlGroupTelemetry,
   initializeControlGroupTelemetry,
 } from './control_group_telemetry';

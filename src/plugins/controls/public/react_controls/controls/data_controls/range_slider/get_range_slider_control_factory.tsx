@@ -16,13 +16,13 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { RANGE_SLIDER_CONTROL } from '../../../../../common';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory, DataControlServices } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangesliderControlApi, RangesliderControlState } from './types';
+import type { RangesliderControlApi, RangesliderControlState } from './types';
 
 export const getRangesliderControlFactory = (
   services: DataControlServices

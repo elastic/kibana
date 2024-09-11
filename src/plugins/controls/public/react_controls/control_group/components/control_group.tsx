@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
 import {
   DndContext,
   DragEndEvent,
@@ -26,13 +29,12 @@ import {
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { ControlStyle } from '../../../../common';
-import { DefaultControlApi } from '../../controls/types';
+
+import type { ControlStyle } from '../../../../common';
+import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlsInOrder } from '../init_controls_manager';
-import { ControlGroupApi } from '../types';
+import type { ControlGroupApi } from '../types';
 import { ControlClone } from './control_clone';
 import { ControlRenderer } from './control_renderer';
 
@@ -118,7 +120,7 @@ export function ControlGroup({
   return (
     <EuiPanel
       css={css`
-        display: ${isInitialized ? 'none' : 'block'};
+        display: ${isInitialized ? 'none' : 'default'};
       `}
       borderRadius="m"
       paddingSize="none"

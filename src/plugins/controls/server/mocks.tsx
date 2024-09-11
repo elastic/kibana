@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OptionsListControlState } from '../common/options_list';
-import { DefaultDataControlState } from '../common/types';
+import type { OptionsListControlState } from '../common/options_list';
+import type { DefaultDataControlState } from '../common/types';
 
 export const mockDataControlState = {
   id: 'id',

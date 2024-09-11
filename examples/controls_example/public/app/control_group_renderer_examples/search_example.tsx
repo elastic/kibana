@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useEffect, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -20,9 +24,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import React, { useEffect, useState } from 'react';
-import { lastValueFrom } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
+
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {

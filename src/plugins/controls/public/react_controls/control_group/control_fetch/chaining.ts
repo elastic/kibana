@@ -17,9 +17,9 @@ import {
   switchMap,
 } from 'rxjs';
 
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import {
-  PublishingSubject,
+  type PublishingSubject,
   apiPublishesFilters,
   apiPublishesTimeslice,
 } from '@kbn/presentation-publishing';

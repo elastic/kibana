@@ -43,7 +43,7 @@ import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_ch
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
-import { ControlGroupApi } from './types';
+import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';

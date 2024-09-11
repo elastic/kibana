@@ -19,7 +19,7 @@ import { type ControlGroupRuntimeState, type ControlPanelsState } from '../../..
 import type { OptionsListControlState } from '../../../../common/options_list';
 import { pluginServices } from '../../../services';
 import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';
-import { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
+import type { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 

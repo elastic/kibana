@@ -14,10 +14,10 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { OptionsListDisplaySettings } from '../../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '../../../../../../common/options_list';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
 import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
-import { OptionsListComponentApi } from '../types';
+import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 
 describe('Options list popover', () => {

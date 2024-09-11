@@ -10,11 +10,11 @@
 import { SerializableRecord } from '@kbn/utility-types';
 
 import {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlPanelState,
   DEFAULT_CONTROL_STYLE,
-  SerializedControlState,
+  type ControlGroupRuntimeState,
+  type ControlGroupSerializedState,
+  type ControlPanelState,
+  type SerializedControlState,
 } from '../../common';
 
 export const getDefaultControlGroupState = (): SerializableControlGroupState => ({

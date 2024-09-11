@@ -14,11 +14,11 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import dateMath from '@kbn/datemath';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { TimeRange } from '@kbn/es-query';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { TimeRange } from '@kbn/es-query';
 import { getOptionsListControlFactory } from '../react_controls/controls/data_controls/options_list_control/get_options_list_control_factory';
-import { OptionsListControlApi } from '../react_controls/controls/data_controls/options_list_control/types';
+import type { OptionsListControlApi } from '../react_controls/controls/data_controls/options_list_control/types';
 import {
   getMockedBuildApi,
   getMockedControlGroupApi,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import { registerControlGroupEmbeddable } from './react_controls/control_group/register_control_group_embeddable';
@@ -15,7 +15,7 @@ import { registerOptionsListControl } from './react_controls/controls/data_contr
 import { registerRangeSliderControl } from './react_controls/controls/data_controls/range_slider/register_range_slider_control';
 import { registerTimeSliderControl } from './react_controls/controls/timeslider_control/register_timeslider_control';
 import { controlsService } from './services/controls/controls_service';
-import {
+import type {
   ControlsPluginSetup,
   ControlsPluginSetupDeps,
   ControlsPluginStart,
