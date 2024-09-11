@@ -53,6 +53,6 @@ export async function handleHeaderError({
 
   return {
     grokPattern: pattern.grok_pattern,
-    lastExecutedChain: 'kv_error',
+    lastExecutedChain: 'kv_header_error',
   };
 }
