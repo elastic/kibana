@@ -9,7 +9,7 @@
 
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
-import { ControlGroupSerializedState } from '../../common/control_group/types';
+import { ControlGroupSerializedState } from '../../common';
 import {
   SerializableControlGroupState,
   controlGroupSerializedStateToSerializableRuntimeState,

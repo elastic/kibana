@@ -27,18 +27,15 @@ import {
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
-import {
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_STYLE,
-  type ControlStyle,
-  type ParentIgnoreSettings,
-} from '../../../common';
 import type {
   ControlGroupChainingSystem,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelsState,
-} from '../../../common/control_group';
+  ControlStyle,
+  ParentIgnoreSettings,
+} from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_STYLE } from '../../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';

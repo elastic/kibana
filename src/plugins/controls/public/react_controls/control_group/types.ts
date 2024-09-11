@@ -30,14 +30,16 @@ import {
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
-import { ControlStyle, DefaultControlState, ParentIgnoreSettings } from '../../../common';
 import {
   ControlGroupChainingSystem,
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelState,
-} from '../../../common/control_group';
+  ControlStyle,
+  DefaultControlState,
+  ParentIgnoreSettings,
+} from '../../../common';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /**

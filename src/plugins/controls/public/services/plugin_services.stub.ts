@@ -10,22 +10,22 @@
 import {
   PluginServiceProvider,
   PluginServiceProviders,
+  PluginServiceRegistry,
   PluginServices,
 } from '@kbn/presentation-util-plugin/public';
 
 import { ControlsPluginStart } from '../types';
 import { ControlsServices } from './types';
 
-import { controlsServiceFactory } from './controls/controls.story';
-import { coreServiceFactory } from './core/core.story';
-import { dataServiceFactory } from './data/data.story';
-import { dataViewsServiceFactory } from './data_views/data_views.story';
-import { embeddableServiceFactory } from './embeddable/embeddable.story';
+import { controlsServiceFactory } from './controls/controls.stub';
+import { coreServiceFactory } from './core/core.stub';
+import { dataServiceFactory } from './data/data.stub';
+import { dataViewsServiceFactory } from './data_views/data_views.stub';
+import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { httpServiceFactory } from './http/http.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
-import { registry as stubRegistry } from './plugin_services.story';
-import { settingsServiceFactory } from './settings/settings.story';
-import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
+import { settingsServiceFactory } from './settings/settings.stub';
+import { unifiedSearchServiceFactory } from './unified_search/unified_search.stub';
 import { storageServiceFactory } from './storage/storage_service.stub';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
@@ -43,10 +43,12 @@ export const providers: PluginServiceProviders<ControlsServices> = {
 
 export const pluginServices = new PluginServices<ControlsServices>();
 
+export const registry = new PluginServiceRegistry<ControlsServices>(providers);
+
 export const getStubPluginServices = (): ControlsPluginStart => {
-  pluginServices.setRegistry(stubRegistry.start({}));
+  pluginServices.setRegistry(registry.start({}));
   return {
     getControlFactory: pluginServices.getServices().controls.getControlFactory,
-    getControlTypes: pluginServices.getServices().controls.getControlTypes,
+    getAllControlTypes: pluginServices.getServices().controls.getAllControlTypes,
   };
 };

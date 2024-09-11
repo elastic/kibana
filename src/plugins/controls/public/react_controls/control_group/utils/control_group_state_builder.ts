@@ -15,10 +15,7 @@ import {
   TIME_SLIDER_CONTROL,
   type DefaultDataControlState,
 } from '../../../../common';
-import {
-  type ControlGroupRuntimeState,
-  type ControlPanelsState,
-} from '../../../../common/control_group';
+import { type ControlGroupRuntimeState, type ControlPanelsState } from '../../../../common';
 import type { OptionsListControlState } from '../../../../common/options_list';
 import { pluginServices } from '../../../services';
 import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';

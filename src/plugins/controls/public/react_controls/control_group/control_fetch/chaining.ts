@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, TimeRange } from '@kbn/es-query';
-import {
-  apiPublishesFilters,
-  apiPublishesTimeslice,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
+  Observable,
   combineLatest,
   debounceTime,
   map,
-  Observable,
   skipWhile,
   switchMap,
 } from 'rxjs';
-import { ControlGroupChainingSystem } from '../../../../common';
+
+import { Filter, TimeRange } from '@kbn/es-query';
+import {
+  PublishingSubject,
+  apiPublishesFilters,
+  apiPublishesTimeslice,
+} from '@kbn/presentation-publishing';
+
+import type { ControlGroupChainingSystem } from '../../../../common';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;

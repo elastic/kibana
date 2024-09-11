@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-export interface ControlsDataService {
-  query: DataPublicPluginStart['query'];
-  searchSource: DataPublicPluginStart['search']['searchSource'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
-}
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { ControlsSettingsService } from './types';
+
+export type SettingsServiceFactory = PluginServiceFactory<ControlsSettingsService>;
+export const settingsServiceFactory: SettingsServiceFactory = () => ({
+  getTimezone: () => 'Browser',
+  getDateFormat: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+  getDefaultTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+});

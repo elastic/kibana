@@ -8,11 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
-  ControlGroupApi,
-  ControlGroupEditorConfig,
-  ControlGroupRuntimeState,
-} from '../../react_controls/control_group/types';
+import type { ControlGroupEditorConfig, ControlGroupRuntimeState } from '../../../common';
+import type { ControlGroupApi } from '../..';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
   reload: () => void;

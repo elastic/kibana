@@ -17,9 +17,9 @@ import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-pub
 import { act, render, waitFor } from '@testing-library/react';
 
 import { ControlGroupRendererApi } from '.';
-import { getControlGroupEmbeddableFactory } from '../../react_controls/control_group/get_control_group_factory';
-import { CONTROL_GROUP_TYPE } from '../types';
+import { getControlGroupEmbeddableFactory } from '../control_group/get_control_group_factory';
 import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
+import { CONTROL_GROUP_TYPE } from '../..';
 
 type ParentApiType = PublishesUnifiedSearch & {
   unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;

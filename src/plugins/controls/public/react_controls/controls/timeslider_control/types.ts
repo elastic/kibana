@@ -10,7 +10,8 @@
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { PublishesPanelTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
-import type { DefaultControlApi, DefaultControlState } from '../types';
+import { DefaultControlState } from '../../../../common';
+import type { DefaultControlApi } from '../types';
 
 export type Timeslice = [number, number];
 

@@ -9,11 +9,13 @@
 
 import React, { useImperativeHandle } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
-import { ControlPanel } from './control_panel';
-import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
+
 import { pluginServices as presentationUtilPluginServices } from '@kbn/presentation-util-plugin/public/services';
-import { ControlStyle, ControlWidth } from '../../..';
+import { registry as presentationUtilServicesRegistry } from '@kbn/presentation-util-plugin/public/services/plugin_services.story';
+import { render, waitFor } from '@testing-library/react';
+
+import type { ControlStyle, ControlWidth } from '../../../../common';
+import { ControlPanel } from './control_panel';
 
 describe('render', () => {
   let mockApi = {};

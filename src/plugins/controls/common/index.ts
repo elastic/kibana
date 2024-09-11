@@ -26,3 +26,12 @@ export {
 } from './constants';
 
 export { CONTROL_GROUP_TYPE } from './control_group';
+
+export type {
+  ControlGroupChainingSystem,
+  ControlGroupEditorConfig,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelState,
+  ControlPanelsState,
+} from './control_group';

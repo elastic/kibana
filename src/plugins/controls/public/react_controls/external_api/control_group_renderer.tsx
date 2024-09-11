@@ -16,18 +16,18 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-publishing';
 
-import { CONTROL_GROUP_TYPE } from '../../../common';
+import type { ControlGroupApi } from '../..';
 import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '../../react_controls/control_group/types';
+  CONTROL_GROUP_TYPE,
+  type ControlGroupRuntimeState,
+  type ControlGroupSerializedState,
+} from '../../../common';
 import {
-  controlGroupStateBuilder,
   type ControlGroupStateBuilder,
-} from '../../react_controls/control_group/utils/control_group_state_builder';
-import { getDefaultControlGroupRuntimeState } from '../../react_controls/control_group/utils/initialization_utils';
-import { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
+  controlGroupStateBuilder,
+} from '../control_group/utils/control_group_state_builder';
+import { getDefaultControlGroupRuntimeState } from '../control_group/utils/initialization_utils';
+import type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
