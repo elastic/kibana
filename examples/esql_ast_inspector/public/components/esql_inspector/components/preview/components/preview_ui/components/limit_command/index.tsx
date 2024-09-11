@@ -7,7 +7,8 @@
  */
 
 import * as React from 'react';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
+import { Builder } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 
@@ -21,7 +22,7 @@ export const LimitCommand: React.FC = () => {
 
   const value = +(limit.args[0] as any)?.value;
 
-  if (!value) {
+  if (typeof value !== 'number') {
     return null;
   }
 
@@ -35,7 +36,27 @@ export const LimitCommand: React.FC = () => {
           paddingTop: 16,
         }}
       >
-        {value}
+        <EuiFormRow fullWidth>
+          <EuiFieldText
+            fullWidth
+            value={value}
+            onChange={(e) => {
+              const newValue = +e.target.value;
+
+              if (newValue !== newValue) {
+                return;
+              }
+
+              const literal = Builder.expression.literal.numeric({
+                value: newValue,
+                literalType: 'integer',
+              });
+
+              limit.args[0] = literal;
+              state.reprint();
+            }}
+          />
+        </EuiFormRow>
       </div>
     </EuiPanel>
   );

@@ -36,6 +36,8 @@ export class EsqlInspectorState {
 
         if (from) {
           this.from$.next(from as ESQLCommand);
+        } else {
+          this.from$.next(null);
         }
 
         const limit = Walker.match(query?.ast, {
@@ -45,6 +47,8 @@ export class EsqlInspectorState {
 
         if (limit) {
           this.limit$.next(limit as ESQLCommand);
+        } else {
+          this.limit$.next(null);
         }
       }
     });
