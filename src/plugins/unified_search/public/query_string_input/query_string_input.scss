@@ -1,7 +1,7 @@
 .kbnQueryBar__wrap {
   width: 100%;
   z-index: $euiZContentMenu;
-  height: $euiFormControlHeight;
+  height: $euiFormControlCompressedHeight;
   display: flex;
   border-radius: $euiFormControlBorderRadius;
   border-top-left-radius: calc($euiBorderRadius / 2);
