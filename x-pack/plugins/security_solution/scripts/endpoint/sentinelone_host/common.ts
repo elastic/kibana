@@ -11,6 +11,7 @@ import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import pRetry from 'p-retry';
+import { fetchActiveSpace } from '../common/spaces';
 import { dump } from '../common/utils';
 import { type RuleResponse } from '../../../common/api/detection_engine';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -245,8 +246,10 @@ export const createSentinelOneStackConnectorIfNeeded = async ({
   log,
   s1ApiToken,
   s1Url,
-  name = 'SentinelOne Dev instance',
+  name: _name,
 }: CreateSentinelOneStackConnectorIfNeededOptions): Promise<void> => {
+  const name =
+    _name ?? `SentinelOne Dev instance (space: ${(await fetchActiveSpace(kbnClient)).id})`;
   const connector = await fetchConnectorByType(kbnClient, SENTINELONE_CONNECTOR_ID);
 
   if (connector) {

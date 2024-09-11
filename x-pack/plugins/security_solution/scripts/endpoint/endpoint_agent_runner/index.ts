@@ -83,7 +83,7 @@ export const cli = () => {
         --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
                             and 'password' arguments are ignored.
         --spaceId           Optional. The space id where the host should be added to in kibana. The
-                            space must already exist. Default: default space
+                            space will be created if it does not exist. Default: default space.
         --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
       `,

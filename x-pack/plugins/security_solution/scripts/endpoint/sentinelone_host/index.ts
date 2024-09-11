@@ -56,6 +56,8 @@ console and pushes the data to Elasticsearch.`,
         's1Url',
         's1ApiToken',
         'vmName',
+        'spaceId',
+        'apiKey',
       ],
       boolean: ['forceFleetServer', 'forceNewS1Host'],
       default: {
@@ -63,6 +65,8 @@ console and pushes the data to Elasticsearch.`,
         username: 'elastic',
         password: 'changeme',
         policy: '',
+        spaceId: '',
+        apiKey: '',
       },
       help: `
       --s1Url             Required. The base URL for SentinelOne management console.
@@ -82,6 +86,10 @@ console and pushes the data to Elasticsearch.`,
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
+      --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
+                            and 'password' arguments are ignored.
+      --spaceId           Optional. The space id where the host should be added to in kibana. The
+                            space will be created if it does not exist. Default: default space.
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
 `,
     },
@@ -95,6 +103,8 @@ const runCli: RunFn = async ({ log, flags }) => {
   const s1Url = flags.s1Url as string;
   const s1ApiToken = flags.s1ApiToken as string;
   const policy = flags.policy as string;
+  const spaceId = flags.spaceId as string;
+  const apiKey = flags.apiKey as string;
   const forceFleetServer = flags.forceFleetServer as boolean;
   const forceNewS1Host = flags.forceNewS1Host as boolean;
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
@@ -111,6 +121,8 @@ const runCli: RunFn = async ({ log, flags }) => {
     url: kibanaUrl,
     username,
     password,
+    spaceId,
+    apiKey,
   });
 
   const runningS1VMs = (
