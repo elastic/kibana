@@ -42,14 +42,13 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'view_index_metadata',
 ];
 
-export const CONNECTOR_SERVICE_PERMISSIONS = [
-  'auto_configure',
+export const ELASTIC_CONNECTORS_INDEX_PERMISSIONS = [
   'read',
-  'create_doc',
-  'create',
   'write',
-  'index',
-  'view_index_metadata',
+  'monitor',
+  'create_index',
+  'auto_configure',
+  'maintenance',
 ];
 
 export function storedPackagePoliciesToAgentPermissions(
@@ -275,11 +274,11 @@ function connectorServicePermissions(packagePolicyId: string): [string, Security
         },
         {
           names: ['.elastic-connectors*'],
-          privileges: ['manage', 'read', 'write'],
+          privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
         },
         {
-          names: ['search-*'],
-          privileges: ['manage', 'read', 'write'],
+          names: ['content-*', '.search-acl-filter-*'],
+          privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
         },
       ],
     },

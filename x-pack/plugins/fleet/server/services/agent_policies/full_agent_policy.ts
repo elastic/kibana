@@ -239,7 +239,6 @@ export async function getFullAgentPolicy(
       agentPolicy.namespace,
       packagePolicies
     );
-    console.log(dataPermissions);
     dataPermissionsByOutputId[outputId] = {
       _elastic_agent_checks: {
         cluster: DEFAULT_CLUSTER_PERMISSIONS,
