@@ -73,6 +73,10 @@ function getCellTextContent(cell: Element) {
   // remove field tokens so field types don't get copied
   dropBySelector(cellCloned, '.kbnFieldIcon');
 
+  // for Document column
+  appendTextToSelector(cellCloned, '.unifiedDataTable__descriptionListTitle', ': ');
+  appendTextToSelector(cellCloned, '.unifiedDataTable__descriptionListDescription', ', ');
+
   return cellCloned.textContent || '';
 }
 
@@ -88,4 +92,12 @@ function replaceWithSrcTextNode(element: HTMLElement, tagName: 'img' | 'audio') 
 function dropBySelector(element: HTMLElement, selector: string) {
   const elements = element.querySelectorAll(selector);
   elements.forEach((el) => el.remove());
+}
+
+function appendTextToSelector(element: HTMLElement, selector: string, text: string) {
+  const elements = element.querySelectorAll(selector);
+  elements.forEach((el) => {
+    const textNode = document.createTextNode(text);
+    el.appendChild(textNode);
+  });
 }
