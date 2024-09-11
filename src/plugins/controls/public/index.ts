@@ -16,6 +16,8 @@ export {
 
 export type { ControlGroupApi, ControlStateTransform } from './react_controls/control_group/types';
 
+export { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './actions';
+
 export type {
   DataControlApi,
   DataControlFactory,
@@ -24,8 +26,8 @@ export type {
 
 export {
   ControlGroupRenderer,
-  type ControlGroupRendererApi,
   type ControlGroupCreationOptions,
+  type ControlGroupRendererApi,
   type ControlGroupRendererProps,
 } from './react_controls/external_api';
 

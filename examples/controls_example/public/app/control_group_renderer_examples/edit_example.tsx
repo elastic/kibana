@@ -28,11 +28,12 @@ import {
   type ControlGroupRuntimeState,
 } from '@kbn/controls-plugin/common';
 import {
+  ACTION_DELETE_CONTROL,
+  ACTION_EDIT_CONTROL,
   ControlGroupRenderer,
   ControlGroupRendererApi,
   type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
-import { ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from '@kbn/controls-plugin/public/actions';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
