@@ -1844,31 +1844,35 @@ async function getOptionArgsSuggestions(
 const sortModifierSuggestions = {
   ASC: {
     label: 'ASC',
-    text: 'ASC',
+    text: 'ASC ',
     detail: '',
     kind: 'Keyword',
     sortText: '1-ASC',
+    command: TRIGGER_SUGGESTION_COMMAND,
   } as SuggestionRawDefinition,
   DESC: {
     label: 'DESC',
-    text: 'DESC',
+    text: 'DESC ',
     detail: '',
     kind: 'Keyword',
     sortText: '1-DESC',
+    command: TRIGGER_SUGGESTION_COMMAND,
   } as SuggestionRawDefinition,
   NULLS_FIRST: {
     label: 'NULLS FIRST',
-    text: 'NULLS FIRST',
+    text: 'NULLS FIRST ',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS FIRST',
+    command: TRIGGER_SUGGESTION_COMMAND,
   } as SuggestionRawDefinition,
   NULLS_LAST: {
     label: 'NULLS LAST',
-    text: 'NULLS LAST',
+    text: 'NULLS LAST ',
     detail: '',
     kind: 'Keyword',
     sortText: '2-NULLS LAST',
+    command: TRIGGER_SUGGESTION_COMMAND,
   } as SuggestionRawDefinition,
 };
 
