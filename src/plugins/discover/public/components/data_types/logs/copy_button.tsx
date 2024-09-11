@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexItem, copyToClipboard } from '@elastic/eui';
+import { EuiButtonEmpty, copyToClipboard } from '@elastic/eui';
 import React from 'react';
 import { copyValueAriaText, copyValueText } from './translations';
 
@@ -15,16 +15,15 @@ export const CopyButton = ({ property, value }: { property: string; value: strin
   const ariaCopyValueText = copyValueAriaText(property);
 
   return (
-    <EuiFlexItem key="copyToClipboardAction">
-      <EuiButtonEmpty
-        size="s"
-        iconType="copyClipboard"
-        aria-label={ariaCopyValueText}
-        onClick={() => copyToClipboard(value)}
-        data-test-subj={`dataTableCellAction_copyToClipboardAction_${property}`}
-      >
-        {copyValueText}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+    <EuiButtonEmpty
+      key="copyToClipboardAction"
+      size="s"
+      iconType="copyClipboard"
+      aria-label={ariaCopyValueText}
+      onClick={() => copyToClipboard(value)}
+      data-test-subj={`dataTableCellAction_copyToClipboardAction_${property}`}
+    >
+      {copyValueText}
+    </EuiButtonEmpty>
   );
 };

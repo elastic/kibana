@@ -8,9 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import {
   getLogDocumentOverview,
@@ -21,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { dynamic } from '@kbn/shared-ux-utility';
 import * as constants from '../../../../../common/data_types/logs/constants';
-import { LogLevel } from '../../../data_types/logs/log_level';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_document')
@@ -31,19 +28,24 @@ const DiscoverSourcePopoverContent = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_popover_content')
 );
 
-const sourceDocumentClassName = css`
-  display: inline !important;
-  margin-left: ${euiThemeVars.euiSizeXS};
-`;
+interface ContentProps extends DataGridCellValueElementProps {
+  isSingleLine?: boolean;
+}
 
-const LogMessage = ({ field, value }: { field?: string; value: string }) => {
+const LogMessage = ({
+  field,
+  value,
+  isSingleLine,
+}: {
+  field?: string;
+  value: string;
+  isSingleLine?: boolean;
+}) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
   return (
-    <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
-      {renderFieldPrefix && <strong data-test-subj="discoverDataTableMessageKey">{field}</strong>}
-      <span data-test-subj="discoverDataTableMessageValue" style={{ marginLeft: '5px' }}>
-        {value}
-      </span>
+    <EuiText size="xs" className={isSingleLine ? 'eui-textTruncate' : ''}>
+      {renderFieldPrefix && <strong data-test-subj="discoverDataTableMessageKey">{field} </strong>}
+      <span data-test-subj="discoverDataTableMessageValue">{value}</span>
     </EuiText>
   );
 };
@@ -86,7 +88,8 @@ export const Content = ({
   isDetails,
   columnId,
   closePopover,
-}: DataGridCellValueElementProps) => {
+  isSingleLine,
+}: ContentProps) => {
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const renderLogMessage = field && value;
@@ -106,35 +109,28 @@ export const Content = ({
     );
   }
 
-  return (
-    <span>
-      {documentOverview[constants.LOG_LEVEL_FIELD] && (
-        <LogLevel level={documentOverview[constants.LOG_LEVEL_FIELD]} />
-      )}
-      {renderLogMessage ? (
-        <LogMessage field={field} value={value} />
-      ) : (
-        <SourceDocument
-          useTopLevelObjectColumns={false}
-          row={formattedRow}
-          dataView={dataView}
-          columnId={columnId}
-          fieldFormats={fieldFormats}
-          shouldShowFieldHandler={shouldShowFieldHandler}
-          maxEntries={50}
-          dataTestSubj="discoverCellDescriptionList"
-          className={sourceDocumentClassName}
-        />
-      )}
-    </span>
+  return renderLogMessage ? (
+    <LogMessage field={field} value={value} isSingleLine={isSingleLine} />
+  ) : (
+    <SourceDocument
+      useTopLevelObjectColumns={false}
+      row={formattedRow}
+      dataView={dataView}
+      columnId={columnId}
+      fieldFormats={fieldFormats}
+      shouldShowFieldHandler={shouldShowFieldHandler}
+      maxEntries={50}
+      dataTestSubj="discoverCellDescriptionList"
+    />
   );
 };
 
-const formatJsonDocumentForContent = (row: DataTableRecord) => {
+export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   const flattenedResult: DataTableRecord['flattened'] = {};
   const rawFieldResult: DataTableRecord['raw']['fields'] = {};
   const { raw, flattened } = row;
   const { fields } = raw;
+  console.log('Compute', raw._id);
 
   // We need 2 loops here for flattened and raw.fields. Flattened contains all fields,
   // whereas raw.fields only contains certain fields excluding _ignored

@@ -10,7 +10,7 @@
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { VirtualColumnServiceProvider } from '../../../../application/main/hooks/grid_customisations/use_virtual_column_services';
+import { DataGridCellServicesProvider } from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
 import { Content } from './content';
 import { Resource } from './resource';
@@ -38,8 +38,8 @@ export const renderCell =
     }
 
     return (
-      <VirtualColumnServiceProvider services={virtualColumnServices}>
+      <DataGridCellServicesProvider services={virtualColumnServices}>
         {renderedCell}
-      </VirtualColumnServiceProvider>
+      </DataGridCellServicesProvider>
     );
   };

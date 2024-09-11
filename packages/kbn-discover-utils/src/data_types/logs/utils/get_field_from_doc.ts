@@ -13,5 +13,5 @@ type Field = keyof LogDocument['flattened'];
 
 export const getFieldFromDoc = <T extends Field>(doc: LogDocument, field: T) => {
   const fieldValueArray = doc.flattened[field];
-  return fieldValueArray && fieldValueArray.length ? fieldValueArray[0] : undefined;
+  return Array.isArray(fieldValueArray) ? fieldValueArray[0] : fieldValueArray;
 };

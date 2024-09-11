@@ -22,8 +22,8 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'example-data-source-profile',
   isExperimental: true,
   profile: {
-    getCellRenderers: (prev) => () => ({
-      ...prev(),
+    getCellRenderers: (prev) => (params) => ({
+      ...prev(params),
       'log.level': (props) => {
         const level = getFieldValue(props.row, 'log.level');
 

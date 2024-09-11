@@ -23,12 +23,14 @@ import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
+import { DiscoverServices } from '../../build_services';
 
 export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
+  services,
 }: {
   rootProfileService: RootProfileService;
   dataSourceProfileService: DataSourceProfileService;
@@ -37,8 +39,9 @@ export const registerProfileProviders = ({
    * List of experimental profile Ids which are enabled in kibana config.
    * */
   enabledExperimentalProfileIds: string[];
+  services: DiscoverServices;
 }) => {
-  const providerServices = createProfileProviderServices();
+  const providerServices = createProfileProviderServices(services);
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
@@ -87,9 +90,9 @@ export const registerEnabledProfileProviders = <
   }
 };
 
-const createRootProfileProviders = (_providerServices: ProfileProviderServices) => [
+const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   exampleRootProfileProvider,
-  createSecurityRootProfileProvider(_providerServices),
+  createSecurityRootProfileProvider(providerServices),
 ];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [

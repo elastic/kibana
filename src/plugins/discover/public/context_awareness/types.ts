@@ -45,6 +45,10 @@ export interface DefaultAppStateExtension {
   rowHeight?: number;
 }
 
+export interface CellRenderersExtensionParams {
+  rowHeight: number | undefined;
+}
+
 export interface RowControlsExtensionParams {
   dataView: DataView;
 }
@@ -82,7 +86,7 @@ export interface AdditionalCellAction {
 export interface Profile {
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
   // Data grid
-  getCellRenderers: () => CustomCellRenderer;
+  getCellRenderers: (params: CellRenderersExtensionParams) => CustomCellRenderer;
   getRowIndicatorProvider: (
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;

@@ -30,8 +30,8 @@ export const createContextAwarenessMocks = ({
   const rootProfileProviderMock: RootProfileProvider = {
     profileId: 'root-profile',
     profile: {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         rootProfile: () => <>root-profile</>,
       })),
       getAdditionalCellActions: jest.fn((prev) => () => [
@@ -58,8 +58,8 @@ export const createContextAwarenessMocks = ({
   const dataSourceProfileProviderMock: DataSourceProfileProvider = {
     profileId: 'data-source-profile',
     profile: {
-      getCellRenderers: jest.fn((prev) => () => ({
-        ...prev(),
+      getCellRenderers: jest.fn((prev) => (params) => ({
+        ...prev(params),
         rootProfile: () => <>data-source-profile</>,
       })),
       getDefaultAppState: jest.fn(() => () => ({
