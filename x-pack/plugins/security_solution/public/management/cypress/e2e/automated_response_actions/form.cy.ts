@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
   addEndpointResponseAction,
-  fillUpNewEsqlRule,
   fillUpNewRule,
   focusAndOpenCommandDropdown,
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
-  selectIsolateAndSaveWithoutEnabling,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
@@ -204,22 +204,23 @@ describe(
       });
     });
 
-    describe('User should be able to add response action to ESQL rule', () => {
-      const [ruleName, ruleDescription] = generateRandomStringName(2);
-
-      beforeEach(() => {
-        login(ROLE.soc_manager);
-      });
-
-      it('create and save endpoint response action inside of a rule', () => {
-        const query = 'FROM * METADATA _index, _id {backspace}{enter}';
-        fillUpNewEsqlRule(ruleName, ruleDescription, query);
-        addEndpointResponseAction();
-        focusAndOpenCommandDropdown();
-        validateAvailableCommands();
-        selectIsolateAndSaveWithoutEnabling(ruleName);
-      });
-    });
+    // TODO: uncomment the test after another serverless release - intermediate release
+    // describe('User should be able to add response action to ESQL rule', () => {
+    //   const [ruleName, ruleDescription] = generateRandomStringName(2);
+    //
+    //   beforeEach(() => {
+    //     login(ROLE.soc_manager);
+    //   });
+    //
+    //   it('create and save endpoint response action inside of a rule', () => {
+    //     const query = 'FROM * METADATA _index, _id {backspace}{enter}';
+    //     fillUpNewEsqlRule(ruleName, ruleDescription, query);
+    //     addEndpointResponseAction();
+    //     focusAndOpenCommandDropdown();
+    //     validateAvailableCommands();
+    //     selectIsolateAndSaveWithoutEnabling(ruleName);
+    //   });
+    // });
 
     describe('User should not see endpoint action when no rbac', () => {
       const [ruleName, ruleDescription] = generateRandomStringName(2);
