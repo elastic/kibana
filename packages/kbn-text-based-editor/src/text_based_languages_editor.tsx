@@ -51,10 +51,10 @@ import {
   EDITOR_MIN_HEIGHT,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
-import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
+import { getColumnsWithMetadata } from './ecs_metadata_helper';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
@@ -92,6 +92,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    http,
   } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
@@ -112,6 +113,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  const [ecsMetadataCache, setEcsMetadataCache] = useState();
+
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -179,6 +182,26 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
     }
   }, []);
+
+  useEffect(
+    function fetchECSMetadataOnce() {
+      const fetchECSFields = async () => {
+        if (fieldsMetadata) {
+          const fieldsMetadataClient = await fieldsMetadata?.getClient();
+          if (fieldsMetadataClient) {
+            const fields = await fieldsMetadataClient.find({
+              attributes: ['source', 'type'],
+            });
+            if (fields.fields) {
+              setEcsMetadataCache(fields.fields);
+            }
+          }
+        }
+      };
+      fetchECSFields();
+    },
+    [fieldsMetadata]
+  );
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -353,7 +376,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   type: c.meta.esType as FieldType,
                 };
               }) || [];
-            return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
+
+            return getColumnsWithMetadata(columns, ecsMetadataCache);
           } catch (e) {
             // no action yet
           }
@@ -386,8 +410,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     expressions,
     abortController,
     indexManagementApiService,
-    fieldsMetadata,
     histogramBarTarget,
+    ecsMetadataCache,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

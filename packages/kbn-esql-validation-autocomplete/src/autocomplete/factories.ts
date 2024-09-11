@@ -159,8 +159,8 @@ export const buildFieldsDefinitionsWithMetadata = (
 ${description}`,
           }
         : undefined,
-      // If there is a description, it is a field from ECS, so it should be sorted to the top
-      sortText: description ? '1D' : 'D',
+      // If detected to be an ECS field, push it up to the top of the list
+      sortText: field.isEcs ? '1D' : 'D',
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
