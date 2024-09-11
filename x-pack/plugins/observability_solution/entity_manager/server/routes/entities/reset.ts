@@ -7,6 +7,9 @@
 
 import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
+import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
+import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
+import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
 import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,
@@ -22,18 +25,12 @@ import {
   deleteLatestIngestPipeline,
 } from '../../lib/entities/delete_ingest_pipeline';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
-import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
+import { startTransforms } from '../../lib/entities/start_transforms';
 import { isBackfillEnabled } from '../../lib/entities/helpers/is_backfill_enabled';
-import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
-import { startTransform } from '../../lib/entities/start_transform';
-import {
-  stopAndDeleteHistoryBackfillTransform,
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from '../../lib/entities/stop_and_delete_transform';
-import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { deleteTransforms } from '../../lib/entities/delete_transforms';
+import { stopTransforms } from '../../lib/entities/stop_transforms';
 import { UnexpectedEntityManagerError } from '../../lib/errors';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definitions/{id}/_reset',
@@ -48,11 +45,9 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
       const definition = await readEntityDefinition(soClient, params.path.id, logger);
 
       // Delete the transform and ingest pipeline
-      await stopAndDeleteHistoryTransform(esClient, definition, logger);
-      if (isBackfillEnabled(definition)) {
-        await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
-      }
-      await stopAndDeleteLatestTransform(esClient, definition, logger);
+      await stopTransforms(esClient, definition, logger);
+      await deleteTransforms(esClient, definition, logger);
+
       await deleteHistoryIngestPipeline(esClient, definition, logger);
       await deleteLatestIngestPipeline(esClient, definition, logger);
       await deleteIndices(esClient, definition, logger);
@@ -65,7 +60,7 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
         await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
       }
       await createAndInstallLatestTransform(esClient, definition, logger);
-      await startTransform(esClient, definition, logger);
+      await startTransforms(esClient, definition, logger);
 
       return response.ok({ body: { acknowledged: true } });
     } catch (e) {

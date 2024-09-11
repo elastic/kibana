@@ -18,10 +18,12 @@ import {
 } from '../../lib/auth';
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
-import { startTransform } from '../../lib/entities/start_transform';
+
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 import { UnexpectedEntityManagerError } from '../../lib/errors';
+
+import { startTransforms } from '../../lib/entities/start_transforms';
 
 /**
  * @openapi
@@ -119,7 +121,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       if (!params.query.installOnly) {
         await Promise.all(
           installedDefinitions.map((installedDefinition) =>
-            startTransform(esClient, installedDefinition, logger)
+            startTransforms(esClient, installedDefinition, logger)
           )
         );
       }

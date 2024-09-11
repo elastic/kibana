@@ -27,7 +27,9 @@ export async function handleLogFormatDetection({
     ex_answer: state.exAnswer,
     log_samples: samples,
   });
-  const samplesFormat = detectedLogFormatAnswer.log_type;
 
-  return { samplesFormat, lastExecutedChain: 'logFormatDetection' };
+  const logFormat = detectedLogFormatAnswer.log_type;
+  const header = detectedLogFormatAnswer.header;
+
+  return { samplesFormat: { name: logFormat }, header, lastExecutedChain: 'logFormatDetection' };
 }
