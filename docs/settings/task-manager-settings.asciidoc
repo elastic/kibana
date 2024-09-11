@@ -50,7 +50,7 @@ Enables event loop delay monitoring, which will log a warning when a task causes
 Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
 
 `xpack.task_manager.capacity`::
-Controls the number of tasks that can be run at one time. Can be minimum 5 and maximum 50. Defaults to 10.
+Controls the number of tasks that can be run at one time. The minimum value is 5 and the maximum is 50. Defaults to 10.
 
 [float]
 [[task-manager-health-settings]]
