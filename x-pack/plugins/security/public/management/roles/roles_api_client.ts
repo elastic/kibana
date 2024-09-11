@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
+import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { copyRole } from '../../../common/model';
@@ -35,9 +35,7 @@ export class RolesAPIClient {
 
   public bulkUpdateRoles = async ({
     rolesUpdate,
-  }: {
-    rolesUpdate: Role[];
-  }): Promise<BulkUpdateRoleResponse> => {
+  }: BulkUpdatePayload): Promise<BulkUpdateRoleResponse> => {
     return await this.http.post('/api/security/roles', {
       body: JSON.stringify({
         roles: rolesUpdate.reduce((transformed, value) => {
