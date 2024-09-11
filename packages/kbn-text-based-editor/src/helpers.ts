@@ -196,14 +196,6 @@ export const getDocumentationSections = async (language: string) => {
   }
 };
 
-export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string => {
-  const pipes = code?.split('|');
-  const codeNoLines = pipes?.map((pipe) => {
-    return pipe.replaceAll('\n', '').trim();
-  });
-  return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
-};
-
 export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   const indices = await dataViews.getIndices({
     showAllIndices: false,

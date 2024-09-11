@@ -33,10 +33,11 @@ URL::          TheHive instance URL.
 API Key::      TheHive API key for authentication.
 
 [float]
-[[TheHive-action-configuration]]
+[[thehive-action-configuration]]
 === Test connectors
 
-You can test connectors as you're creating or editing the connector in {kib}. For example:
+You can test connectors for creating a case or an alert with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/thehive-params-case-test.png[TheHive case params test]
@@ -54,10 +55,22 @@ Description:: The details about the incident.
 Severity:: Severity of the incident. This can be one of `LOW`, `MEDIUM`(default), `HIGH` or `CRITICAL`.
 TLP:: Traffic Light Protocol designation for the incident. This can be one of `CLEAR`, `GREEN`, `AMBER`(default), `AMBER+STRICT` or `RED`.
 Tags:: The keywords or tags about the incident.
-Additional comments:: Additional information about the Case. 
+Additional comments:: Additional information about the Case.
 Type:: Type of the Alert.
 Source:: Source of the Alert.
 Source Reference:: Source reference of the Alert.
+
+[float]
+[[thehive-features]]
+=== Features
+
+1. Rule base creation of alerts and cases.
+2. Create case, Update case.
+
+[NOTE]
+====
+* For update case, status of the case is not sync with the kibana case.
+====
 
 [float]
 [[thehive-connector-networking-configuration]]

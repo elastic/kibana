@@ -17,7 +17,10 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { PluginStartContract as AlertingPluginStart } from '@kbn/alerting-plugin/server';
+import {
+  PluginStartContract as AlertingPluginStart,
+  PluginSetupContract as AlertingPluginSetup,
+} from '@kbn/alerting-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -59,13 +62,14 @@ export interface SyntheticsServerSetup {
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
+  alerting: AlertingPluginSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
   features: FeaturesPluginSetup;
-  alerting: any;
+  alerting: AlertingPluginSetup;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;

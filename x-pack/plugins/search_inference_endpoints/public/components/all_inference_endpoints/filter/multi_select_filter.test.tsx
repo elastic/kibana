@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
-import '@testing-library/jest-dom/extend-expect';
 
 describe('MultiSelectFilter', () => {
   const options: MultiSelectFilterOption[] = [
