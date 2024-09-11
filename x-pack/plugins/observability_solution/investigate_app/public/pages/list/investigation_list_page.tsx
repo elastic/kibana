@@ -6,22 +6,20 @@
  */
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { InvestigationEditForm } from '../../components/investigation_edit_form/investigation_edit_form';
 import { useKibana } from '../../hooks/use_kibana';
 import { InvestigationList } from './components/investigation_list';
-import { paths } from '../../../common/paths';
 
 export function InvestigationListPage() {
   const {
-    core: {
-      http: { basePath },
-    },
     dependencies: {
       start: { observabilityShared },
     },
   } = useKibana();
 
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
+  const [isCreateFormFlyoutVisible, setCreateFormFlyoutVisible] = useState<boolean>(false);
 
   return (
     <ObservabilityPageTemplate
@@ -40,7 +38,7 @@ export function InvestigationListPage() {
           <EuiButton
             data-test-subj="investigateAppInvestigationListPageCreateButton"
             fill
-            href={basePath.prepend(paths.create)}
+            onClick={() => setCreateFormFlyoutVisible(true)}
           >
             {i18n.translate('xpack.investigateApp.investigationListPage.createButtonLabel', {
               defaultMessage: 'Create',
@@ -50,6 +48,9 @@ export function InvestigationListPage() {
       }}
     >
       <InvestigationList />
+      {isCreateFormFlyoutVisible && (
+        <InvestigationEditForm onClose={() => setCreateFormFlyoutVisible(false)} />
+      )}
     </ObservabilityPageTemplate>
   );
 }

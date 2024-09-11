@@ -286,7 +286,9 @@ describe('Event filter form', () => {
 
     it('should display the policy list when "per policy" is selected', async () => {
       render();
-      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
+      );
       rerenderWithLatestProps();
       // policy selector should show up
       expect(
@@ -298,8 +300,8 @@ describe('Event filter form', () => {
       formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
       render();
       const policyId = formProps.policies[0].id;
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
-      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
       formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       rerender();
       const expected = createOnChangeArgs({
@@ -327,8 +329,10 @@ describe('Event filter form', () => {
       render();
       const policyId = formProps.policies[0].id;
       // move to per-policy and select the first
-      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
-      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+      await userEvent.click(
+        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
+      );
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
       formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       rerender();
       expect(
@@ -337,7 +341,8 @@ describe('Event filter form', () => {
       expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
 
       // move back to global
-      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
+      await userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
+      // eslint-disable-next-line require-atomic-updates
       formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerenderWithLatestProps();
       expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
@@ -346,7 +351,10 @@ describe('Event filter form', () => {
       ).toBeFalsy();
 
       // move back to per-policy
-      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
+      );
+      // eslint-disable-next-line require-atomic-updates
       formProps.item.tags = [`policy:${policyId}`];
       rerender();
       // on change called with the previous policy
@@ -394,12 +402,12 @@ describe('Event filter form', () => {
       expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toBe('true');
     });
 
-    it("allows the user to set the event filter entry to 'Global' in the edit option", () => {
+    it("allows the user to set the event filter entry to 'Global' in the edit option", async () => {
       render();
       const globalButtonInput = renderResult.getByTestId(
         'eventFilters-form-effectedPolicies-global'
       ) as HTMLButtonElement;
-      userEvent.click(globalButtonInput);
+      await userEvent.click(globalButtonInput);
       formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerender();
       const expected = createOnChangeArgs({
@@ -473,25 +481,27 @@ describe('Event filter form', () => {
       ).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('should add process tree filtering tag to tags when filtering descendants enabled', () => {
+    it('should add process tree filtering tag to tags when filtering descendants enabled', async () => {
       formProps.item.tags = [];
       render();
 
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+      await userEvent.click(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      );
 
       expect(latestUpdatedItem.tags).toStrictEqual([FILTER_PROCESS_DESCENDANTS_TAG]);
     });
 
-    it('should remove process tree filtering tag from tags when filtering descendants disabled', () => {
+    it('should remove process tree filtering tag from tags when filtering descendants disabled', async () => {
       formProps.item.tags = [FILTER_PROCESS_DESCENDANTS_TAG];
       render();
 
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
 
       expect(latestUpdatedItem.tags).toStrictEqual([]);
     });
 
-    it('should add the tag always after policy assignment tags', () => {
+    it('should add the tag always after policy assignment tags', async () => {
       formProps.policies = createPolicies();
       const perPolicyTags = formProps.policies.map(
         (p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`
@@ -499,32 +509,38 @@ describe('Event filter form', () => {
       formProps.item.tags = perPolicyTags;
       render();
 
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+      await userEvent.click(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      );
       expect(latestUpdatedItem.tags).toStrictEqual([
         ...perPolicyTags,
         FILTER_PROCESS_DESCENDANTS_TAG,
       ]);
 
       rerenderWithLatestProps();
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
       expect(latestUpdatedItem.tags).toStrictEqual([
         GLOBAL_ARTIFACT_TAG,
         FILTER_PROCESS_DESCENDANTS_TAG,
       ]);
 
       rerenderWithLatestProps();
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
       expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG]);
 
       rerenderWithLatestProps();
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+      await userEvent.click(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+      );
       expect(latestUpdatedItem.tags).toStrictEqual([
         GLOBAL_ARTIFACT_TAG,
         FILTER_PROCESS_DESCENDANTS_TAG,
       ]);
 
       rerenderWithLatestProps();
-      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
+      await userEvent.click(
+        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
+      );
       expect(latestUpdatedItem.tags).toStrictEqual([
         ...perPolicyTags,
         FILTER_PROCESS_DESCENDANTS_TAG,
@@ -539,7 +555,7 @@ describe('Event filter form', () => {
       expect(renderResult.getByTestId(tooltipIconSelector)).toBeInTheDocument();
       expect(renderResult.queryByTestId(tooltipTextSelector)).not.toBeInTheDocument();
 
-      userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
+      await userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
 
       expect(await renderResult.findByTestId(tooltipTextSelector)).toBeInTheDocument();
     });
@@ -730,7 +746,9 @@ describe('Event filter form', () => {
           ).not.toBeInTheDocument();
 
           // switch to Process Descendant filtering
-          userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`));
+          await userEvent.click(
+            renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
+          );
           rerenderWithLatestProps();
 
           expect(
@@ -760,7 +778,7 @@ describe('Event filter form', () => {
           ).toBeInTheDocument();
 
           // switch to classic Event filtering
-          userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
+          await userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
           rerenderWithLatestProps();
 
           expect(await renderResult.findByDisplayValue('some value 6')).toBeInTheDocument();
@@ -791,7 +809,7 @@ describe('Event filter form', () => {
           ).toBeInTheDocument();
 
           // switch to classic Event filtering
-          userEvent.click(renderResult.getByTestId(`builderItemEntryDeleteButton`));
+          await userEvent.click(renderResult.getByTestId(`builderItemEntryDeleteButton`));
           rerenderWithLatestProps();
 
           expect(
