@@ -7,17 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BODY_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.inference.requiredBodyTextField',
+export const INPUT_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.inference.requiredInputTextField',
   {
-    defaultMessage: 'Body is required.',
+    defaultMessage: 'Input is required.',
   }
 );
 
-export const BODY_INVALID = i18n.translate(
-  'xpack.stackConnectors.security.inference.params.error.invalidBodyText',
+export const QUERY_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.inference.requiredQueryTextField',
   {
-    defaultMessage: 'Body does not have a valid JSON format.',
+    defaultMessage: 'Query is required.',
+  }
+);
+
+export const INPUT_TYPE_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.inference.requiredInpuTypeTextField',
+  {
+    defaultMessage: 'Input type is required.',
+  }
+);
+
+export const INPUT_INVALID = i18n.translate(
+  'xpack.stackConnectors.security.inference.params.error.invalidInputText',
+  {
+    defaultMessage: 'Input does not have a valid Array format.',
   }
 );
 
@@ -38,6 +52,13 @@ export const INVALID_ACTION = i18n.translate(
 export const BODY = i18n.translate('xpack.stackConnectors.components.inference.bodyFieldLabel', {
   defaultMessage: 'Body',
 });
+
+export const INPUT = i18n.translate(
+  'xpack.stackConnectors.components.inference.completionInputLabel',
+  {
+    defaultMessage: 'Input',
+  }
+);
 
 export const BODY_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.inference.bodyCodeEditorAriaLabel',

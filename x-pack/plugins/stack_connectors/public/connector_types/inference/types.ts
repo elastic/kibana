@@ -8,12 +8,21 @@
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/inference/constants';
-import { ChatCompleteParams } from '../../../common/inference/types';
+import {
+  ChatCompleteParams,
+  RerankParams,
+  SparseEmbeddingParams,
+  TextEmbeddingParams,
+} from '../../../common/inference/types';
 import { ConfigEntryView, ConfigProperties } from '../lib/dynamic_config/types';
 
 export interface InferenceActionParams {
-  subAction: SUB_ACTION.CHAT_COMPLETE | SUB_ACTION.TEST;
-  subActionParams: ChatCompleteParams;
+  subAction:
+    | SUB_ACTION.COMPLETION
+    | SUB_ACTION.RERANK
+    | SUB_ACTION.SPARSE_EMBEDDING
+    | SUB_ACTION.TEXT_EMBEDDING;
+  subActionParams: ChatCompleteParams | RerankParams | SparseEmbeddingParams | TextEmbeddingParams;
 }
 
 export enum ServiceProviderKeys {

@@ -6,18 +6,18 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { AxiosError, Method } from 'axios';
-import { PassThrough } from 'stream';
-import { IncomingMessage } from 'http';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { Logger } from '@kbn/core/server';
 
+import { PassThrough, Stream } from 'stream';
+import { IncomingMessage } from 'http';
+
+import { RequestBody } from '@elastic/elasticsearch';
+import { AxiosError } from 'axios';
+import { i18n } from '@kbn/i18n';
 import {
   ChatCompleteParamsSchema,
-  ChatCompleteResponseSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
-  StreamingResponseSchema,
   TextEmbeddingParamsSchema,
 } from '../../../common/inference/schema';
 import {
@@ -47,11 +47,14 @@ interface Payload {
 }
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
+  // Not using Axios
+  protected getResponseErrorMessage(error: AxiosError): string {
+    throw new Error('Method not implemented.');
+  }
+
   private provider;
   private inferenceId;
   private taskType;
-  private providerSchema;
-  private connectorTokenClient: ConnectorTokenClientContract;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -59,7 +62,6 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     this.provider = this.config.provider;
     this.taskType = this.config.taskType;
     this.inferenceId = this.config.inferenceId;
-    this.providerSchema = this.config.providerSchema;
     this.logger = this.logger;
     this.connectorID = this.connector.id;
     this.connectorTokenClient = params.services.connectorTokenClient;
@@ -69,26 +71,26 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
 
   private registerSubActions() {
     this.registerSubAction({
-      name: SUB_ACTION.CHAT_COMPLETE,
-      method: 'runApi',
+      name: SUB_ACTION.COMPLETION,
+      method: 'performApiCompletion',
       schema: ChatCompleteParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.RERANK,
-      method: 'runApi',
+      method: 'performApiRerank',
       schema: RerankParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.SPARSE_EMBEDDING,
-      method: 'runApi',
+      method: 'performApiSparseEmbedding',
       schema: SparseEmbeddingParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.TEXT_EMBEDDING,
-      method: 'runApi',
+      method: 'performApiTextEmbedding',
       schema: TextEmbeddingParamsSchema,
     });
 
@@ -99,79 +101,49 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     }); */
   }
 
-  protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
-    if (!error.response?.status) {
-      return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
-    }
-    if (
-      error.response.status === 400 &&
-      error.response?.data?.message === 'The requested operation is not recognized by the service.'
-    ) {
-      return `API Error: ${error.response.data.message}`;
-    }
-    if (error.response.status === 401) {
-      return `Unauthorized API Error${
-        error.response?.data?.message ? `: ${error.response.data.message}` : ''
-      }`;
-    }
-    return `API Error: ${error.response?.statusText}${
-      error.response?.data?.message ? ` - ${error.response.data.message}` : ''
-    }`;
+  /**
+   * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   */
+  public async performApiCompletion({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
+    const response = await this.esClient?.transport.request({
+      path: `/_inference/${this.taskType}/${this.inferenceId}`,
+      method: 'POST',
+      body: { input },
+    });
+    this.logger.info(
+      `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.inferenceId}`
+    );
+
+    // const usageMetadata = response?.data?.usageMetadata;
+    return response as ChatCompleteResponse;
   }
 
   /**
    * responsible for making a POST request to the Inference API chat completetion task endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
-   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({ input }: ChatCompleteParams): Promise<ChatCompleteResponse> {
-    // set model on per request basis
-    const currentModel = this.model;
-    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-    const token = '';
-
-    const requestArgs = {
-      url: `${this.url}${path}`,
-      method: 'post' as Method,
-      data: { input },
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      // signal,
-      // timeout,
-      responseSchema: ChatCompleteResponseSchema,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as SubActionRequestParams<any>;
-
-    const response = await this.request(requestArgs);
-    const candidate = response?.data?.candidates;
-    const usageMetadata = response?.data?.usageMetadata;
-    const completionText = candidate.content.parts[0].text;
-
-    return { completion: completionText };
+  private async performInferenceApi(body: RequestBody, isStream?: boolean): Promise<unknown> {
+    try {
+      const response = await this.esClient?.transport.request({
+        path: `/_inference/${this.taskType}/${this.config?.inferenceId}`,
+        method: 'POST',
+        body,
+      });
+      this.logger.info(
+        `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.config?.inferenceId}`
+      );
+      // const usageMetadata = response?.data?.usageMetadata;
+      return response;
+    } catch (err) {
+      return wrapErr(err.message, this.connector.id, this.logger);
+    }
   }
 
   private async streamAPI({ input }: ChatCompleteParams): Promise<StreamingResponse> {
-    const currentModel = this.model;
-    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
-    const token = '';
+    const response = await this.performInferenceApi({ input }, true);
 
-    const response = await this.request({
-      url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: StreamingResponseSchema,
-      data: { input },
-      responseType: 'stream',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      // signal,
-      // timeout,
-    });
-
-    return response.data.pipe(new PassThrough());
+    return (response as Stream).pipe(new PassThrough());
   }
 
   /**
@@ -179,8 +151,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    *  request to the Inference API with the formatted messages and model. It then returns a Transform stream
    *  that pipes the response from the API through the transformToString function,
    *  which parses the proprietary response into a string of the response text alone
-   * @param messages An array of messages to be sent to the API
-   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @param input A message to be sent to the API
    */
   public async invokeStream({ input }: ChatCompleteParams): Promise<IncomingMessage> {
     const res = (await this.streamAPI({
@@ -225,4 +196,20 @@ const formatInferencePayload = (
     previousRole = correctRole;
   }
   return payload;
+};
+
+const wrapErr = (errMessage: string, connectorId: string, logger: Logger) => {
+  const message = i18n.translate(
+    'xpack.stackConnectors.inference.errorPerformInferenceErrorMessage',
+    {
+      defaultMessage: 'error perform inference endpoint API',
+    }
+  );
+  logger.error(`error perform inference endpoint API: ${errMessage}`);
+  return {
+    status: 'error',
+    connectorId,
+    message,
+    serviceMessage: errMessage,
+  };
 };

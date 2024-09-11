@@ -16,9 +16,9 @@ export const INFERENCE_CONNECTOR_TITLE = i18n.translate(
 export const INFERENCE_CONNECTOR_ID = '.inference';
 export enum SUB_ACTION {
   TEST = 'test',
-  CHAT_COMPLETE = 'chatComplete',
+  COMPLETION = 'completion',
   RERANK = 'rerank',
-  TEXT_EMBEDDING = 'textEmbedding',
+  TEXT_EMBEDDING = 'text_embedding',
   SPARSE_EMBEDDING = 'sparse_embedding',
 }
 

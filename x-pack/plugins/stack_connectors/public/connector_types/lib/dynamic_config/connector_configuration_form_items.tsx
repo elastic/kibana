@@ -7,7 +7,15 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { ConfigEntryView, DisplayType } from './types';
@@ -116,6 +124,16 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 }}
               />
             </EuiFormRow>
+            {configEntry.sensitive ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  size="s"
+                  color="warning"
+                  title={`You will need to reenter you ${configEntry.label} each time you edit the connector`}
+                />
+              </>
+            ) : null}
           </EuiFlexItem>
         );
       })}

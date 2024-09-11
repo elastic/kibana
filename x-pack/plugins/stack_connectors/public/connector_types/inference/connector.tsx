@@ -26,6 +26,7 @@ import {
   EuiHorizontalRule,
   EuiButtonEmpty,
   EuiCopy,
+  EuiButton,
 } from '@elastic/eui';
 import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
@@ -105,7 +106,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [taskTypes, setTaskTypes] = useState<InferenceTaskType[]>([]);
-  const [selectedTaskType, setSelectedTaskType] = useState<string>(config?.taskType);
+  const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
 
   const handleClosePopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -190,7 +191,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             ...(selectedTaskTypeConfig?.configuration[k] as ConfigProperties),
           }))
     ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  }, [config, taskTypes]);
+  }, [config?.taskTypeSchema, config?.taskTypeConfig, config?.taskType, taskTypes]);
 
   const getProviderOptions = useCallback(
     (options: { providers: InferenceProvider[]; searchProviderValue: string }) => {
@@ -315,8 +316,9 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   const providerSuperSelect = useMemo(
     () => (
       <EuiFormControlLayout
-        clear={{ onClick: () => onProviderChange() }}
+        clear={isEdit || readOnly ? undefined : { onClick: () => onProviderChange() }}
         isDropdown
+        isDisabled={isEdit || readOnly}
         fullWidth
         icon={
           !config?.provider
@@ -326,6 +328,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       >
         <EuiFieldText
           onClick={handlePopover}
+          disabled={isEdit || readOnly}
           onKeyDown={handleKeyboardOpen}
           value={
             config?.provider ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].name : ''
@@ -338,12 +341,20 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         />
       </EuiFormControlLayout>
     ),
-    [config?.provider, handlePopover, handleKeyboardOpen, isPopoverOpen, onProviderChange]
+    [
+      isEdit,
+      readOnly,
+      config?.provider,
+      handlePopover,
+      handleKeyboardOpen,
+      isPopoverOpen,
+      onProviderChange,
+    ]
   );
 
   const taskTypeSettings = useMemo(
     () =>
-      selectedTaskType ? (
+      selectedTaskType || config?.taskType.length ? (
         <>
           <EuiTitle size="xxs" data-test-subj="task-type-details-label">
             <h4>
@@ -382,17 +393,23 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                     />
                   }
                 >
-                  <EuiButtonGroup
-                    data-test-subj="taskTypeSelect"
-                    legend="Task type"
-                    defaultValue={DEFAULT_TASK_TYPE}
-                    // isDisabled={readOnly || isEdit}
-                    idSelected={selectedTaskType}
-                    onChange={onTaskTypeOptionsSelect}
-                    options={taskTypeOptions}
-                    color="text"
-                    type="single"
-                  />
+                  {isEdit ? (
+                    <EuiButton href="#/navigation/button" isDisabled>
+                      {config?.taskType}
+                    </EuiButton>
+                  ) : (
+                    <EuiButtonGroup
+                      data-test-subj="taskTypeSelect"
+                      legend="Task type"
+                      defaultValue={DEFAULT_TASK_TYPE}
+                      isDisabled={readOnly}
+                      idSelected={config?.taskType}
+                      onChange={onTaskTypeOptionsSelect}
+                      options={taskTypeOptions}
+                      color="text"
+                      type="single"
+                    />
+                  )}
                 </EuiFormRow>
               );
             }}
@@ -409,8 +426,11 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       ) : null,
     [
       selectedTaskType,
+      config?.taskType,
       taskTypeForm,
       onSetTaskTypeConfigEntry,
+      isEdit,
+      readOnly,
       onTaskTypeOptionsSelect,
       taskTypeOptions,
     ]
@@ -513,15 +533,17 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
                   >
                     <EuiFieldText
                       fullWidth
-                      // readOnly={isEdit}
-                      value={config.inferenceId}
-                      onChange={() => {}}
+                      disabled={isEdit || readOnly}
+                      value={config?.inferenceId}
+                      onChange={(e) => {
+                        setFieldValue('config.inferenceId', e.target.value);
+                      }}
                       prepend={inferenceUri}
                       append={
                         <EuiCopy
                           beforeMessage={i18n.COPY_TOOLTIP}
                           afterMessage={i18n.COPIED_TOOLTIP}
-                          textToCopy={`${inferenceUri}${config.inferenceId}`}
+                          textToCopy={`${inferenceUri}${config?.inferenceId}`}
                         >
                           {(copy) => (
                             <EuiButtonEmpty
@@ -549,12 +571,15 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       ) : null,
     [
       buttonCss,
-      config,
+      config?.inferenceId,
+      config?.provider,
       euiTheme.colors.primary,
       inferenceUri,
-      // isEdit,
+      isEdit,
       onSetProviderConfigEntry,
       optionalProviderForm,
+      readOnly,
+      setFieldValue,
       taskTypeSettings,
     ]
   );

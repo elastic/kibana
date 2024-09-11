@@ -15,7 +15,7 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
   params,
   variables
 ) => {
-  if (params?.subAction !== SUB_ACTION.CHAT_COMPLETE && params?.subAction !== SUB_ACTION.TEST)
+  if (params?.subAction !== SUB_ACTION.COMPLETION && params?.subAction !== SUB_ACTION.TEST)
     return params;
 
   return {

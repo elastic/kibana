@@ -125,9 +125,7 @@ export const SparseEmbeddingResponseSchema = schema.object({
 
 export const TextEmbeddingParamsSchema = schema.object({
   input: schema.string(),
-  task_settings: schema.object({
-    input_type: schema.string(),
-  }),
+  inputType: schema.string(),
 });
 
 export const TextEmbeddingResponseSchema = schema.object({

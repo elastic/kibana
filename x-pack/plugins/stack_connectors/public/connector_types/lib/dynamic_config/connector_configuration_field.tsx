@@ -146,20 +146,22 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { required, value } = configEntry;
+  const { required, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
-    <EuiFieldPassword
-      fullWidth
-      disabled={isLoading}
-      required={required}
-      type="dual"
-      value={ensureStringType(innerValue)}
-      onChange={(event) => {
-        setInnerValue(event.target.value);
-        validateAndSetConfigValue(event.target.value);
-      }}
-    />
+    <>
+      <EuiFieldPassword
+        fullWidth
+        disabled={isLoading}
+        required={required}
+        type="dual"
+        value={ensureStringType(innerValue)}
+        onChange={(event) => {
+          setInnerValue(event.target.value);
+          validateAndSetConfigValue(event.target.value);
+        }}
+      />
+    </>
   );
 };
 
@@ -220,11 +222,13 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
       return sensitive ? (
-        <ConfigSensitiveTextArea
-          isLoading={isLoading}
-          configEntry={configEntry}
-          validateAndSetConfigValue={validateAndSetConfigValue}
-        />
+        <>
+          <ConfigSensitiveTextArea
+            isLoading={isLoading}
+            configEntry={configEntry}
+            validateAndSetConfigValue={validateAndSetConfigValue}
+          />
+        </>
       ) : (
         textarea
       );
@@ -234,20 +238,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         <EuiSwitch
           checked={ensureBooleanType(value)}
           disabled={isLoading}
-          label={
-            tooltip ? (
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <p>{label}</p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="questionInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <p>{label}</p>
-            )
-          }
+          label={<p>{label}</p>}
           onChange={(event) => {
             validateAndSetConfigValue(event.target.checked);
           }}
