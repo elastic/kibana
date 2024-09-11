@@ -17,7 +17,7 @@ import type { DefaultControlState } from '../../../../common';
 import { getControlFactory } from '../../control_factory_registry';
 import type { ControlApiRegistration, DefaultControlApi } from '../../controls/types';
 import type { ControlGroupApi } from '../types';
-import type { ControlPanel } from './control_panel';
+import { ControlPanel } from './control_panel';
 
 /**
  * Renders a component from the control registry into a Control Panel
