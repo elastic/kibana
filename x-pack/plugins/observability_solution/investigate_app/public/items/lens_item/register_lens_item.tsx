@@ -221,12 +221,13 @@ export function LensWidget({
       <lens.EmbeddableComponent
         onLoad={setChartLoading}
         id="alertDefaultChart"
-        style={{ height: 180 }}
+        style={{ height: 128 }}
         timeRange={timeRange}
         attributes={attributes}
         query={(searchConfiguration?.query as Query) || defaultQuery}
         disableTriggers={true}
         filters={filters}
+        overrides={{ axisX: { hide: true } }}
       />
     </div>
   );
