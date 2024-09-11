@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SHELL_TAB_ID } from '../main';
 import { HistoryEmptyPrompt } from './history_empty';
 import { useServicesContext } from '../../contexts';
 import { useEditorActionContext } from '../../contexts/editor_context';
@@ -82,7 +83,7 @@ interface Props {
 export function History({ containerWidth }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { history },
+    services: { history, routeHistory },
   } = useServicesContext();
   const dispatch = useEditorActionContext();
 
@@ -118,8 +119,9 @@ export function History({ containerWidth }: Props) {
           restoreMethod,
         },
       });
+      routeHistory?.push(`/console/${SHELL_TAB_ID}`);
     },
-    [viewingReq, dispatch]
+    [viewingReq, dispatch, routeHistory]
   );
 
   useEffect(() => {

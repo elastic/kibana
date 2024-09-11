@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
-import { loadTabFromURL } from './load_tab_from_url';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
@@ -57,17 +56,18 @@ import {
 } from './constants';
 
 interface MainProps {
+  currentTabProp?: string;
   isEmbeddable?: boolean;
 }
 
-export function Main({ isEmbeddable = false }: MainProps) {
+export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const dispatch = useEditorActionContext();
   const requestDispatch = useRequestActionContext();
   const { currentView } = useEditorReadContext();
+  const currentTab = currentTabProp ?? currentView;
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
-  const initialLoad = useRef(true);
 
   const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
   const containerDimensions = useResizeObserver(resizeRef);
@@ -76,37 +76,6 @@ export function Main({ isEmbeddable = false }: MainProps) {
     docLinks,
     services: { notifications, routeHistory },
   } = useServicesContext();
-
-  // Update currentView on initial load if URL contains tabs
-  useEffect(() => {
-    if (!isEmbeddable && routeHistory && initialLoad.current) {
-      loadTabFromURL(routeHistory.location.hash, currentView, (tab) =>
-        dispatch({ type: 'setCurrentView', payload: tab })
-      );
-      initialLoad.current = false;
-    }
-  }, [isEmbeddable, currentView, dispatch, routeHistory]);
-
-  // Update the currentView when URL changes
-  useEffect(() => {
-    if (!isEmbeddable && routeHistory) {
-      const unlisten = routeHistory.listen(() => {
-        window.dispatchEvent(new HashChangeEvent('hashchange'));
-        loadTabFromURL(routeHistory.location.hash, currentView, (tab) =>
-          dispatch({ type: 'setCurrentView', payload: tab })
-        );
-      });
-      return () => unlisten();
-    }
-  }, [currentView, dispatch, isEmbeddable, routeHistory]);
-
-  // Update the URL hash when currentView changes
-  useEffect(() => {
-    if (!isEmbeddable && routeHistory && routeHistory.location.hash !== `#/${currentView}`) {
-      // Preserve search as it may contain load_from param
-      routeHistory.push({ hash: `#/${currentView}`, search: routeHistory.location.search });
-    }
-  }, [currentView, isEmbeddable, routeHistory]);
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
@@ -131,6 +100,14 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   const { currentTextObject } = useEditorReadContext();
   const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
+
+  const updateTab = (tab: string) => {
+    if (routeHistory) {
+      routeHistory?.push(`/console/${tab}`);
+    } else {
+      dispatch({ type: 'setCurrentView', payload: tab });
+    }
+  };
 
   const toggleFullscreen = () => {
     const isEnabled = !isFullscreenOpen;
@@ -224,8 +201,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
               <TopNavMenu
                 disabled={!done}
                 items={getTopNavConfig({
-                  selectedTab: currentView,
-                  setSelectedTab: (tab) => dispatch({ type: 'setCurrentView', payload: tab }),
+                  selectedTab: currentTab,
+                  setSelectedTab: (tab) => updateTab(tab),
                 })}
                 tourStepProps={consoleTourStepProps}
               />
@@ -286,7 +263,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 closePopover={() => setIsHelpOpen(false)}
                 resetTour={() => {
                   setIsHelpOpen(false);
-                  dispatch({ type: 'setCurrentView', payload: SHELL_TAB_ID });
+                  updateTab(SHELL_TAB_ID);
                   actions.resetTour();
                 }}
               />
@@ -314,7 +291,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner paddingSize="none">
-          {currentView === SHELL_TAB_ID && (
+          {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
               containerWidth={containerDimensions.width}
@@ -322,8 +299,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
               setInputEditorValue={setInputEditorValue}
             />
           )}
-          {currentView === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
-          {currentView === CONFIG_TAB_ID && <Config containerWidth={containerDimensions.width} />}
+          {currentTab === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
+          {currentTab === CONFIG_TAB_ID && <Config containerWidth={containerDimensions.width} />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner
@@ -333,7 +310,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
           color="plain"
         >
           <EuiButtonEmpty
-            onClick={() => dispatch({ type: 'setCurrentView', payload: CONFIG_TAB_ID })}
+            onClick={() => updateTab(CONFIG_TAB_ID)}
             iconType="editorCodeBlock"
             size="xs"
             color="text"

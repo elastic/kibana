@@ -12,7 +12,9 @@ import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { RouteComponentProps } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Router, Route, Routes } from '@kbn/shared-ux-router';
+import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import {
   createStorage,
   createHistory,
@@ -95,7 +97,22 @@ export async function renderApp({
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
+            {history ? (
+              <Router history={history}>
+                <Routes>
+                  {[SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID].map((tab) => (
+                    <Route key={tab} path={`/console/${tab}`}>
+                      <Main currentTabProp={tab} />
+                    </Route>
+                  ))}
+                  <Route path="/console">
+                    <Redirect to={`/console/${SHELL_TAB_ID}${history.location.search}`} />
+                  </Route>
+                </Routes>
+              </Router>
+            ) : (
+              <Main />
+            )}
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

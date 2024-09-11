@@ -79,7 +79,7 @@ export class ConsoleUIPlugin
         title: i18n.translate('console.consoleDisplayName', {
           defaultMessage: 'Console',
         }),
-        enableRouting: false,
+        enableRouting: true,
         mount: async ({ element, history }) => {
           const [core] = await getStartServices();
 
