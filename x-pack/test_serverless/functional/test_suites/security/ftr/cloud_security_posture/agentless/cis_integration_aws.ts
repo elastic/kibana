@@ -10,6 +10,7 @@ import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { setupMockServer } from '../agentless_api/mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'settings',
     'common',
@@ -25,7 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
-    const mockAgentlessApiService = setupMockServer();
     let mockApiServer: http.Server;
     const previousPackageVersion = '1.9.0';
 

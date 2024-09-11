@@ -22,8 +22,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
-    let mockApiServer: http.Server;
+
     const mockAgentlessApiService = setupMockServer();
+    let mockApiServer: http.Server;
 
     before(async () => {
       mockApiServer = mockAgentlessApiService.listen(8089);
@@ -41,6 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+      mockApiServer.close();
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
