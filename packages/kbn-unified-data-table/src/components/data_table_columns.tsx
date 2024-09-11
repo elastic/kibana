@@ -102,6 +102,7 @@ function buildEuiGridColumn({
   onFilter,
   editField,
   columnCellActions,
+  cellActionsHandling,
   visibleCellActions,
   columnsMeta,
   showColumnTokens,
@@ -124,6 +125,7 @@ function buildEuiGridColumn({
   onFilter?: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
+  cellActionsHandling: 'replace' | 'append';
   visibleCellActions?: number;
   columnsMeta?: DataTableColumnsMeta;
   showColumnTokens?: boolean;
@@ -176,12 +178,16 @@ function buildEuiGridColumn({
 
   let cellActions: EuiDataGridColumnCellAction[];
 
-  if (columnCellActions?.length) {
+  if (columnCellActions?.length && cellActionsHandling === 'replace') {
     cellActions = columnCellActions;
   } else {
     cellActions = dataViewField
       ? buildCellActions(dataViewField, toastNotifications, valueToStringConverter, onFilter)
       : [];
+
+    if (columnCellActions?.length && cellActionsHandling === 'append') {
+      cellActions.push(...columnCellActions);
+    }
   }
 
   const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
@@ -278,6 +284,7 @@ export const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
 export function getEuiGridColumns({
   columns,
   columnsCellActions,
+  cellActionsHandling,
   rowsCount,
   settings,
   dataView,
@@ -298,6 +305,7 @@ export function getEuiGridColumns({
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
+  cellActionsHandling: 'replace' | 'append';
   rowsCount: number;
   settings: UnifiedDataTableSettings | undefined;
   dataView: DataView;
@@ -328,6 +336,7 @@ export function getEuiGridColumns({
       numberOfColumns,
       columnName: column,
       columnCellActions: columnsCellActions?.[columnIndex],
+      cellActionsHandling,
       columnWidth: getColWidth(column),
       dataView,
       defaultColumns,
