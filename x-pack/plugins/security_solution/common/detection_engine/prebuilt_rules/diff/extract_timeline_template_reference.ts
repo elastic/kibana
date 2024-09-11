@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { TimelineTemplateReference } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
+import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
+import type { TimelineTemplateReference } from '../../../api/detection_engine/prebuilt_rules';
 
 export const extractTimelineTemplateReference = (
-  rule: RuleResponse | PrebuiltRuleAsset
+  rule: RuleResponse
 ): TimelineTemplateReference | undefined => {
   if (rule.timeline_id == null) {
     return undefined;
