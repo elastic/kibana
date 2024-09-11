@@ -13,8 +13,8 @@ import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion } from '@elastic/eui';
 
 /**
- * does not render children before it is opened
- * once children rendered for the first time, they won't re-rerendered on subsequent accordion toggling
+ * component does not render children before it was opened
+ * once children rendered for the first time, they won't be re-rendered on subsequent accordion toggling
  */
 const OptimizedAccordionComponent: FC<EuiAccordionProps> = ({ children, ...props }) => {
   const [trigger, setTrigger] = useState<'closed' | 'open'>('closed');

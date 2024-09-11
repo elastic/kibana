@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-// import * as i18n from './translations';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { LoggedRequests } from './logged_requests';
 
