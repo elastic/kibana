@@ -40,6 +40,8 @@ import {
   parseErrors,
   parseWarning,
   useDebounceWithOptions,
+  onKeyDownResizeHandler,
+  onMouseDownResizeHandler,
   type MonacoMessage,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
@@ -48,16 +50,14 @@ import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   EDITOR_MAX_HEIGHT,
-  EDITOR_MIN_HEIGHT,
+  RESIZABLE_CONTAINER_INITIAL_HEIGHT,
+  RESIZABLE_CONTAINER_INITIAL_HEIGHT_INLINE_EDITING,
   textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
 import { getRateLimitedColumnsWithMetadata } from './ecs_metadata_helper';
 import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
-
-const KEYCODE_ARROW_UP = 38;
-const KEYCODE_ARROW_DOWN = 40;
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -101,6 +101,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorHeight, setEditorHeight] = useState(
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
+  // the resizable container is the container that holds the history component or the inline docs
+  // they are never open simultaneously
+  const [resizableContainerHeight, setResizableContainerHeight] = useState(
+    editorIsInline
+      ? RESIZABLE_CONTAINER_INITIAL_HEIGHT_INLINE_EDITING
+      : RESIZABLE_CONTAINER_INITIAL_HEIGHT
+  );
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
   const [timePickerDate, setTimePickerDate] = useState(moment());
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
@@ -128,7 +135,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     warnings: [],
   });
   const hideHistoryComponent = hideQueryHistory;
-
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -247,51 +253,50 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
-  // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback<
-    React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
-  >(
-    (mouseDownEvent) => {
-      function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
-        return e && 'pageY' in e;
-      }
-      const startSize = editorHeight;
-      const startPosition = isMouseEvent(mouseDownEvent)
-        ? mouseDownEvent?.pageY
-        : mouseDownEvent?.touches[0].pageY;
+  const editorAndResizableContainerMaxHeight = useMemo(() => {
+    const resizableContainerInitiaLHeight = editorIsInline
+      ? RESIZABLE_CONTAINER_INITIAL_HEIGHT_INLINE_EDITING
+      : RESIZABLE_CONTAINER_INITIAL_HEIGHT;
 
-      function onMouseMove(mouseMoveEvent: MouseEvent) {
-        const height = startSize - startPosition + mouseMoveEvent.pageY;
-        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
-        setEditorHeight(validatedHeight);
-      }
-      function onMouseUp() {
-        document.body.removeEventListener('mousemove', onMouseMove);
-      }
+    return EDITOR_MAX_HEIGHT + resizableContainerInitiaLHeight;
+  }, [editorIsInline]);
 
-      document.body.addEventListener('mousemove', onMouseMove);
-      document.body.addEventListener('mouseup', onMouseUp, { once: true });
-    },
-    [editorHeight]
-  );
+  const onMouseDownResize = useCallback((mouseDownEvent, height, maxHeight, setHeightCb) => {
+    onMouseDownResizeHandler(mouseDownEvent, height, maxHeight, setHeightCb);
+  }, []);
 
-  const onKeyDownResizeHandler = useCallback<
-    React.ComponentProps<typeof ResizableButton>['onKeyDownResizeHandler']
-  >(
-    (keyDownEvent) => {
-      let height = editorHeight;
-      if (
-        keyDownEvent.keyCode === KEYCODE_ARROW_UP ||
-        keyDownEvent.keyCode === KEYCODE_ARROW_DOWN
-      ) {
-        const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
-        height = height + step;
-        const validatedHeight = Math.min(Math.max(height, EDITOR_MIN_HEIGHT), EDITOR_MAX_HEIGHT);
-        setEditorHeight(validatedHeight);
-      }
-    },
-    [editorHeight]
-  );
+  const onKeyDownResize = useCallback((keyDownEvent, height, maxHeight, setHeightCb) => {
+    onKeyDownResizeHandler(keyDownEvent, height, maxHeight, setHeightCb);
+  }, []);
+
+  const resizableContainerButton = useMemo(() => {
+    return (
+      <ResizableButton
+        onMouseDownResizeHandler={(mouseDownEvent) =>
+          onMouseDownResize(
+            mouseDownEvent,
+            resizableContainerHeight,
+            editorAndResizableContainerMaxHeight - editorHeight,
+            setResizableContainerHeight
+          )
+        }
+        onKeyDownResizeHandler={(keyDownEvent) =>
+          onKeyDownResize(
+            keyDownEvent,
+            resizableContainerHeight,
+            editorAndResizableContainerMaxHeight - editorHeight,
+            setResizableContainerHeight
+          )
+        }
+      />
+    );
+  }, [
+    onMouseDownResize,
+    resizableContainerHeight,
+    editorAndResizableContainerMaxHeight,
+    editorHeight,
+    onKeyDownResize,
+  ]);
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
@@ -711,6 +716,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </div>
         </EuiOutsideClickDetector>
       </EuiFlexGroup>
+      <ResizableButton
+        onMouseDownResizeHandler={(mouseDownEvent) => {
+          onMouseDownResize(
+            mouseDownEvent,
+            editorHeight,
+            editorAndResizableContainerMaxHeight - resizableContainerHeight,
+            setEditorHeight
+          );
+        }}
+        onKeyDownResizeHandler={(keyDownEvent) =>
+          onKeyDownResize(
+            keyDownEvent,
+            editorHeight,
+            editorAndResizableContainerMaxHeight - resizableContainerHeight,
+            setEditorHeight
+          )
+        }
+      />
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
         styles={{
@@ -731,11 +754,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         setIsHistoryOpen={toggleHistory}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
-      />
-      <ResizableButton
-        onMouseDownResizeHandler={onMouseDownResizeHandler}
-        onKeyDownResizeHandler={onKeyDownResizeHandler}
-        editorIsInline={editorIsInline}
+        resizableContainerButton={resizableContainerButton}
+        resizableContainerHeight={resizableContainerHeight}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

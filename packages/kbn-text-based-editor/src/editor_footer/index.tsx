@@ -39,12 +39,13 @@ interface EditorFooterProps {
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
   measuredContainerWidth: number;
+  resizableContainerButton: JSX.Element;
+  resizableContainerHeight: number;
   hideRunQueryText?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
-  isInCompactMode?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -60,10 +61,11 @@ export const EditorFooter = memo(function EditorFooter({
   editorIsInline,
   isSpaceReduced,
   hideTimeFilterInfo,
+  resizableContainerButton,
+  resizableContainerHeight,
   isHistoryOpen,
   setIsHistoryOpen,
   hideQueryHistory,
-  isInCompactMode,
   measuredContainerWidth,
   code,
 }: EditorFooterProps) {
@@ -302,15 +304,16 @@ export const EditorFooter = memo(function EditorFooter({
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={measuredContainerWidth}
-            isInCompactMode={isInCompactMode}
+            height={resizableContainerHeight}
           />
         </EuiFlexItem>
       )}
       {isLanguageComponentOpen && editorIsInline && (
         <EuiFlexItem grow={false}>
-          <LanguageDocumentationInline searchInDescription />
+          <LanguageDocumentationInline searchInDescription height={resizableContainerHeight} />
         </EuiFlexItem>
       )}
+      {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && resizableContainerButton}
     </EuiFlexGroup>
   );
 });

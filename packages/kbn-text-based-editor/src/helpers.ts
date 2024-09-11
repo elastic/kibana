@@ -14,6 +14,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MapCache } from 'lodash';
+import { EDITOR_MIN_HEIGHT } from './text_based_languages_editor.styles';
+
+const KEYCODE_ARROW_UP = 38;
+const KEYCODE_ARROW_DOWN = 40;
 
 export type MonacoMessage = monaco.editor.IMarkerData;
 
@@ -236,4 +240,47 @@ export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core
     getIntegrations(core),
   ]);
   return [...localIndices, ...remoteIndices, ...integrations];
+};
+
+export const onMouseDownResizeHandler = (
+  mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent,
+  height: number,
+  maxHeight: number,
+  setHeight: (height: number) => void
+) => {
+  function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
+    return e && 'pageY' in e;
+  }
+
+  const startSize = height;
+  const startPosition = isMouseEvent(mouseDownEvent)
+    ? mouseDownEvent?.pageY
+    : mouseDownEvent?.touches[0].pageY;
+
+  function onMouseMove(mouseMoveEvent: MouseEvent) {
+    const h = startSize - startPosition + mouseMoveEvent.pageY;
+    const validatedHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
+    setHeight(validatedHeight);
+  }
+  function onMouseUp() {
+    document.body.removeEventListener('mousemove', onMouseMove);
+  }
+
+  document.body.addEventListener('mousemove', onMouseMove);
+  document.body.addEventListener('mouseup', onMouseUp, { once: true });
+};
+
+export const onKeyDownResizeHandler = (
+  keyDownEvent: React.KeyboardEvent,
+  height: number,
+  maxHeight: number,
+  setHeight: (height: number) => void
+) => {
+  let h = height;
+  if (keyDownEvent.keyCode === KEYCODE_ARROW_UP || keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
+    const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
+    h = h + step;
+    const validatedHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
+    setHeight(validatedHeight);
+  }
 };

@@ -28,9 +28,6 @@ import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 
-const CONTAINER_MAX_HEIGHT_EXPANDED = 190;
-const CONTAINER_MAX_HEIGHT_COMPACT = 250;
-
 export function QueryHistoryAction({
   toggleHistory,
   isHistoryOpen,
@@ -227,12 +224,12 @@ export function QueryHistory({
   containerCSS,
   containerWidth,
   onUpdateAndSubmit,
-  isInCompactMode,
+  height,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
-  isInCompactMode?: boolean;
+  height: number;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -342,7 +339,7 @@ export function QueryHistory({
     }
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
     border-top-left-radius: ${euiTheme.border.radius.medium};
-    max-height: ${isInCompactMode ? CONTAINER_MAX_HEIGHT_COMPACT : CONTAINER_MAX_HEIGHT_EXPANDED}px;
+    max-height: ${height}px;
     overflow-y: auto;
     ${scrollBarStyles}
     ${extraStyling}
