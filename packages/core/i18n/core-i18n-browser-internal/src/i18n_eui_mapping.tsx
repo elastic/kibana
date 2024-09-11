@@ -542,16 +542,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDataGridCell.focusTrapEnterPrompt',
       { defaultMessage: "Press the Enter key to interact with this cell's contents." }
     ),
+    'euiDataGridCell.focusTrapExitPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapExitPrompt',
+      { defaultMessage: 'Exited cell content.' }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
     ),
-    'euiDataGridHeaderCell.headerActions': i18n.translate(
-      'core.euiDataGridHeaderCell.headerActions',
+    'euiDataGridHeaderCell.actionsButtonAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.actionsButtonAriaLabel', {
+        defaultMessage: '{title}. Click to view column header actions.',
+        values: { title },
+      }),
+    'euiDataGridHeaderCell.actionsEnterKeyInstructions': i18n.translate(
+      'core.euiDataGridHeaderCell.actionsEnterKeyInstructions',
       {
-        defaultMessage: 'Click to view column header actions',
+        defaultMessage: "Press the Enter key to view this column's actions",
       }
     ),
     'euiDataGridHeaderCell.sortedByAscendingSingle': i18n.translate(

@@ -7004,7 +7004,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "<Record<string, any>>[]; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7028,7 +7028,7 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+                  "; removeField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -33580,7 +33580,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -33604,7 +33604,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+          "; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
