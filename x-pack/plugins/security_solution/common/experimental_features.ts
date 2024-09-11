@@ -186,7 +186,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables visualization: session viewer and analyzer in expandable flyout
    */
-  visualizationInFlyoutEnabled: false,
+  visualizationInFlyoutEnabled: true,
 
   /**
    * Enables an ability to customize Elastic prebuilt rules.
