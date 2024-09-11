@@ -36,13 +36,13 @@ import { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
-import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
 import { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
+import { createDataSource } from '../../common/data_sources';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -138,11 +138,7 @@ export function initializeFetch({
           abortController = currentAbortController;
 
           await discoverServices.profilesManager.resolveDataSourceProfile({
-            dataSource: isOfAggregateQueryType(searchSourceQuery)
-              ? createEsqlDataSource()
-              : dataView.id
-              ? createDataViewDataSource({ dataViewId: dataView.id })
-              : undefined,
+            dataSource: createDataSource({ dataView, query: searchSourceQuery }),
             dataView,
             query: searchSourceQuery,
           });

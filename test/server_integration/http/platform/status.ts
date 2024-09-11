@@ -34,7 +34,8 @@ export default function ({ getService }: FtrProviderContext) {
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(200);
 
-  describe('status service', () => {
+  describe('status service', function () {
+    this.tags('skipFIPS');
     // This test must come first because the timeout only applies to the initial emission
     it("returns a timeout for status check that doesn't emit after 30s", async () => {
       let aStatus = await getStatus('statusPluginA');
