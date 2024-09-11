@@ -7,15 +7,13 @@
 
 import expect from '@kbn/expect';
 import { SavedObjectWithMetadata } from '@kbn/saved-objects-management-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../services';
 
-export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  let roleAuthc: RoleCredentials;
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestWithAdminScope: SupertestWithRoleScopeType;
 
   const URL = '/api/kibana/management/saved_objects/_bulk_get';
   const validObject = { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' };
@@ -23,11 +21,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('_bulk_get', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+      });
     });
 
     after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await supertestWithAdminScope.destroy();
     });
 
     describe('get objects in bulk', () => {
@@ -62,32 +62,20 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       it('should return 200 for object that exists and inject metadata', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(URL)
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set(roleAuthc.apiKeyHeader)
-          .send([validObject])
-          .expect(200);
+        const { body } = await supertestWithAdminScope.post(URL).send([validObject]).expect(200);
         expect(body).to.have.length(1);
         expectSuccess(0, body);
       });
 
       it('should return error for invalid object type', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(URL)
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set(roleAuthc.apiKeyHeader)
-          .send([invalidObject])
-          .expect(200);
+        const { body } = await supertestWithAdminScope.post(URL).send([invalidObject]).expect(200);
         expect(body).to.have.length(1);
         expectBadRequest(0, body);
       });
 
       it('should return mix of successes and errors', async () => {
-        const { body } = await supertestWithoutAuth
+        const { body } = await supertestWithAdminScope
           .post(URL)
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set(roleAuthc.apiKeyHeader)
           .send([validObject, invalidObject])
           .expect(200);
         expect(body).to.have.length(2);
