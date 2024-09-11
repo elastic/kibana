@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import {
-  GetInvestigationItemsResponse,
-  InvestigationItemResponse,
-} from '@kbn/investigation-shared';
+import { i18n } from '@kbn/i18n';
+import { GetInvestigationItemsResponse } from '@kbn/investigation-shared';
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
 export interface Params {
   investigationId: string;
-  initialItems?: InvestigationItemResponse[];
 }
 
 export interface Response {
@@ -36,7 +32,7 @@ export interface Response {
   data: GetInvestigationItemsResponse | undefined;
 }
 
-export function useFetchInvestigationItems({ investigationId, initialItems }: Params): Response {
+export function useFetchInvestigationItems({ investigationId }: Params): Response {
   const {
     core: {
       http,
@@ -53,7 +49,6 @@ export function useFetchInvestigationItems({ investigationId, initialItems }: Pa
           { version: '2023-10-31', signal }
         );
       },
-      // initialData: initialItems,
       refetchOnWindowFocus: false,
       refetchInterval: 10 * 1000,
       refetchIntervalInBackground: true,

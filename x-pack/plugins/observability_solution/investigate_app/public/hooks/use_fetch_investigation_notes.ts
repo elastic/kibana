@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import {
-  GetInvestigationNotesResponse,
-  InvestigationNoteResponse,
-} from '@kbn/investigation-shared';
+import { i18n } from '@kbn/i18n';
+import { GetInvestigationNotesResponse } from '@kbn/investigation-shared';
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 
 export interface Params {
   investigationId: string;
-  initialNotes?: InvestigationNoteResponse[];
 }
 
 export interface Response {
@@ -36,7 +32,7 @@ export interface Response {
   data: GetInvestigationNotesResponse | undefined;
 }
 
-export function useFetchInvestigationNotes({ investigationId, initialNotes }: Params): Response {
+export function useFetchInvestigationNotes({ investigationId }: Params): Response {
   const {
     core: {
       http,
@@ -53,7 +49,6 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
           { version: '2023-10-31', signal }
         );
       },
-      initialData: initialNotes,
       refetchOnWindowFocus: false,
       refetchInterval: 10 * 1000,
       onError: (error: Error) => {
