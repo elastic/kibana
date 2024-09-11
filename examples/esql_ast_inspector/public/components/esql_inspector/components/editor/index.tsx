@@ -37,7 +37,19 @@ export const Editor: React.FC = (props) => {
           </EuiButton>
         </div>
         <EuiSpacer size={'m'} />
-        <EsqlEditor src={src} onChange={(newSrc) => state.src$.next(newSrc)} />
+        <EsqlEditor
+          src={src}
+          onChange={(newSrc) => state.src$.next(newSrc)}
+          highlight={[
+            [4, (text) => <span style={{ color: 'red' }}>{text}</span>],
+            1,
+            [5, (text) => <span style={{ color: 'blue' }}>{text}</span>],
+            3,
+            [5, (text) => <span style={{ color: 'red' }}>{text}</span>],
+            1,
+            [2, (text) => <span style={{ color: 'green' }}>{text}</span>],
+          ]}
+        />
       </EuiPanel>
     </>
   );

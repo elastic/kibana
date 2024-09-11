@@ -7,8 +7,25 @@
  */
 
 import * as React from 'react';
-import type { Annotation } from '../annotations';
+import { css } from '@emotion/react';
+import { Annotations, type Annotation } from '../annotations';
 import { FlexibleInput } from '../flexible_input/flexible_input';
+
+const blockCss = css({
+  display: 'inline-block',
+  position: 'relative',
+  width: '100%',
+  fontSize: '16px',
+});
+
+const overlayCss = css({
+  display: 'inline-block',
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  pointerEvents: 'none',
+  userSelect: 'none',
+});
 
 export interface EsqlEditorProps {
   src: string;
@@ -17,5 +34,16 @@ export interface EsqlEditorProps {
 }
 
 export const EsqlEditor: React.FC<EsqlEditorProps> = ({ src, highlight, onChange }) => {
-  return <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />;
+  const overlay = !!highlight && (
+    <div css={overlayCss}>
+      <Annotations value={src} annotations={highlight} />
+    </div>
+  );
+
+  return (
+    <div css={blockCss}>
+      <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />
+      {overlay}
+    </div>
+  );
 };
