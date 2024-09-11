@@ -68,6 +68,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
     base_url: true,
     cname: true,
+    csp: true,
     deployments_url: true,
     deployment_url: true,
     id: true,
