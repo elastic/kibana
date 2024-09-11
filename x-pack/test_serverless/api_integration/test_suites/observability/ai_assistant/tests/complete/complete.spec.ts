@@ -244,9 +244,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       });
     });
-    // fails in serverless in the after() to delete conversation due to mismatched users.
-    // conversation is being added as elastic_admin and deleted as elastic_serverless
-    describe.skip('when creating a new conversation', () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {

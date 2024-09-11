@@ -182,7 +182,7 @@ export async function getObservabilityAIAssistantApiClientService({
   getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantApiClient> {
   const svlSharedConfig = getService('config');
-
+  // defaults to elastic_admin user when used without auth
   return {
     slsUser: await getObservabilityAIAssistantApiClient({
       svlSharedConfig,
