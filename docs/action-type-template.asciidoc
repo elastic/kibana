@@ -24,7 +24,7 @@ or as needed when you're creating a rule.
 ////
 List of user-facing connector configurations.
 This should align with the fields available in the Create connector flyout form for this connector type.
-To include these configuration details in the API documentation, add apprpriate files in x-pack/plugins/actions/docs/openapi/components/schemas/ and reference them from oas_docs/overlays/connectors.overlays.yaml
+To include these configuration details in the API documentation, add appropriate files in x-pack/plugins/actions/docs/openapi/components/schemas/ and reference them from oas_docs/overlays/connectors.overlays.yaml
 ////
 
 Property1:: A short description of this property.
@@ -45,7 +45,7 @@ You can test connectors as you're creating or editing the connector in {kib}.
 ////
 List of user-facing action configurations.
 This should align with the fields available in the Action section of the Create/Update alert flyout.
-To include these configuration details in the API documentation, add apprpriate files in x-pack/plugins/actions/docs/openapi/components/schemas/ and reference them from oas_docs/overlays/connectors.overlays.yaml
+To include these configuration details in the API documentation, add appropriate files in x-pack/plugins/actions/docs/openapi/components/schemas/ and reference them from oas_docs/overlays/connectors.overlays.yaml
 ////
 
 Property1:: A short description of this property.
