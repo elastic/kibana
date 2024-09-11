@@ -58,7 +58,7 @@ export function useFetchInvestigationNotes({ investigationId, initialNotes }: Pa
       refetchInterval: 10 * 1000,
       onError: (error: Error) => {
         toasts.addError(error, {
-          title: i18n.translate('xpack.investigateApp.useFetchInvestigationList.errorTitle', {
+          title: i18n.translate('xpack.investigateApp.useFetchInvestigationNotes.errorTitle', {
             defaultMessage: 'Something went wrong while fetching investigation notes',
           }),
         });
