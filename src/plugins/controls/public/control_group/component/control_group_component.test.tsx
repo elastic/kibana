@@ -16,7 +16,6 @@ import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Provider } from 'react-redux';
-import { OptionsListEmbeddableFactory } from '../..';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../../../common';
 import { mockControlGroupContainer, mockControlGroupInput } from '../../../common/mocks';
 import { RangeSliderEmbeddableFactory } from '../../range_slider';
@@ -24,6 +23,7 @@ import { pluginServices } from '../../services';
 import { ControlGroupContainerContext } from '../embeddable/control_group_container';
 import { ControlGroupComponentState, ControlGroupInput } from '../types';
 import { ControlGroup } from './control_group_component';
+import { OptionsListEmbeddableFactory } from '../../options_list';
 
 jest.mock('@dnd-kit/core', () => ({
   /** DnD kit has a memory leak based on this layout measuring strategy on unmount; setting it to undefined prevents this */

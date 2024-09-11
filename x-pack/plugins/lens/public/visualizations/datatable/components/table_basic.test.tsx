@@ -172,7 +172,7 @@ describe('DatatableComponent', () => {
 
   test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
     renderDatatableComponent({ renderMode: 'view' });
-    await userEvent.click(screen.getByRole('button', { name: 'a' }));
+    await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)
       .getAllByRole('button')
