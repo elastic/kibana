@@ -23,13 +23,16 @@ import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
+import type { DiscoverStartPlugins } from '../../types';
 
-export const registerProfileProviders = ({
+export const registerProfileProviders = async ({
+  plugins,
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
 }: {
+  plugins: DiscoverStartPlugins;
   rootProfileService: RootProfileService;
   dataSourceProfileService: DataSourceProfileService;
   documentProfileService: DocumentProfileService;
@@ -38,7 +41,9 @@ export const registerProfileProviders = ({
    * */
   enabledExperimentalProfileIds: string[];
 }) => {
-  const providerServices = createProfileProviderServices();
+  const providerServices = await createProfileProviderServices({
+    logsDataAccessPlugin: plugins.logsDataAccess,
+  });
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);

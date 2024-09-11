@@ -8,6 +8,7 @@
  */
 
 import { createEsqlDataSource } from '../../../common/data_sources';
+import { DiscoverStartPlugins } from '../../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { exampleDataSourceProfileProvider } from './example_data_source_profile';
 import { exampleDocumentProfileProvider } from './example_document_profile';
@@ -68,7 +69,8 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    registerProfileProviders({
+    await registerProfileProviders({
+      plugins: {} as DiscoverStartPlugins,
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -107,7 +109,8 @@ describe('registerProfileProviders', () => {
       createContextAwarenessMocks({
         shouldRegisterProviders: false,
       });
-    registerProfileProviders({
+    await registerProfileProviders({
+      plugins: {} as DiscoverStartPlugins,
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,

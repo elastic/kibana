@@ -8,21 +8,22 @@
  */
 
 import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfileProviderDeps {
-  // We will probably soon add uiSettings as a dependency
-  // to consume user configured indices
+  logsDataAccessPlugin?: LogsDataAccessPluginStart;
 }
 
 export interface ProfileProviderServices {
   logsContextService: LogsContextService;
 }
 
-export const createProfileProviderServices = (
-  _deps: ProfileProviderDeps = {}
-): ProfileProviderServices => {
+export const createProfileProviderServices = async (
+  _deps: ProfileProviderDeps
+): Promise<ProfileProviderServices> => {
   return {
-    logsContextService: createLogsContextService(),
+    logsContextService: await createLogsContextService({
+      logsDataAccessPlugin: _deps.logsDataAccessPlugin,
+    }),
   };
 };
