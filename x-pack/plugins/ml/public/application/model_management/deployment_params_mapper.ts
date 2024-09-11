@@ -17,12 +17,6 @@ import type { DeploymentParamsUI } from './deployment_setup';
 export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploymentRequest &
   AdaptiveAllocations;
 
-/**
- * Default value of max allocation.
- * Used an upper limit for a medium vCPU level.
- */
-const DEFAULT_MAX_ALLOCATIONS = 32;
-
 const THREADS_MAX_EXPONENT = 5;
 
 type VCPUBreakpoints = Record<DeploymentParamsUI['vCPUUsage'], { min: number; max: number }>;
@@ -84,44 +78,15 @@ export class DeploymentParamsMapper {
     > {
     const threadsPerAllocation = this.getNumberOfThread(params);
 
-    const mediumValue = this.cloudInfo.isMlAutoscalingEnabled
-      ? DEFAULT_MAX_ALLOCATIONS
-      : Math.ceil(
-          Math.min(
-            DEFAULT_MAX_ALLOCATIONS,
-            (this.mlServerLimits.total_ml_processors ?? DEFAULT_MAX_ALLOCATIONS) /
-              threadsPerAllocation /
-              2
-          )
-        );
+    const levelValues = this.vCpuBreakpoints[params.vCPUUsage];
 
-    const highValue = this.cloudInfo.isMlAutoscalingEnabled
-      ? 999999
-      : Math.floor(
-          (this.mlServerLimits.total_ml_processors ?? DEFAULT_MAX_ALLOCATIONS) /
-            threadsPerAllocation
-        );
+    const maxValue = Math.floor(levelValues.max / threadsPerAllocation) || 1;
 
-    switch (params.vCPUUsage) {
-      case 'low':
-        return {
-          number_of_allocations: 1,
-          min_number_of_allocations: 1,
-          max_number_of_allocations: 2,
-        };
-      case 'medium':
-        return {
-          number_of_allocations: mediumValue,
-          min_number_of_allocations: Math.min(2, mediumValue),
-          max_number_of_allocations: mediumValue,
-        };
-      case 'high':
-        return {
-          number_of_allocations: highValue,
-          min_number_of_allocations: mediumValue,
-          max_number_of_allocations: highValue,
-        };
-    }
+    return {
+      number_of_allocations: maxValue,
+      min_number_of_allocations: Math.floor(levelValues.min / threadsPerAllocation) || 1,
+      max_number_of_allocations: maxValue,
+    };
   }
 
   /**

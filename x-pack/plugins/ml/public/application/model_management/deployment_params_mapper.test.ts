@@ -142,7 +142,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 2,
+            max_number_of_allocations: 1,
           },
         });
 
@@ -328,7 +328,7 @@ describe('DeploymentParamsMapper', () => {
           deployment_id: 'test-deployment',
           priority: 'normal',
           threads_per_allocation: 8,
-          number_of_allocations: 32,
+          number_of_allocations: 4,
         });
 
         expect(
@@ -343,7 +343,7 @@ describe('DeploymentParamsMapper', () => {
           deployment_id: 'test-deployment',
           priority: 'normal',
           threads_per_allocation: 8,
-          number_of_allocations: 999999,
+          number_of_allocations: 12499,
         });
       });
 
@@ -363,7 +363,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 2,
+            max_number_of_allocations: 1,
           },
         });
 
@@ -381,8 +381,8 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 8,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 2,
-            max_number_of_allocations: 32,
+            min_number_of_allocations: 1,
+            max_number_of_allocations: 4,
           },
         });
 
@@ -400,8 +400,8 @@ describe('DeploymentParamsMapper', () => {
           threads_per_allocation: 8,
           adaptive_allocations: {
             enabled: true,
-            min_number_of_allocations: 32,
-            max_number_of_allocations: 999999,
+            max_number_of_allocations: 12499,
+            min_number_of_allocations: 4,
           },
         });
 
@@ -420,7 +420,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 1,
-            max_number_of_allocations: 2,
+            max_number_of_allocations: 1,
           },
         });
 
@@ -458,7 +458,7 @@ describe('DeploymentParamsMapper', () => {
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: 32,
-            max_number_of_allocations: 999999,
+            max_number_of_allocations: 99999,
           },
         });
       });
