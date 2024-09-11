@@ -127,6 +127,11 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   if (onChangeSampleSize) {
     let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
 
+    console.log({
+      activeSampleSize,
+      maxAllowedSampleSize,
+      minRangeSampleSize,
+    });
     if (
       step > 1 &&
       ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||

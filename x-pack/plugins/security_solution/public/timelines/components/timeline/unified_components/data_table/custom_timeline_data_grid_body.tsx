@@ -10,12 +10,18 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
+import { CellMeasurer, List, AutoSizer, CellMeasurerCache } from 'react-virtualized';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { getEventTypeRowClassName } from './get_event_type_row_classname';
+
+const cache = new CellMeasurerCache({
+  defaultHeight: 100,
+  fixedWidth: true,
+});
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -51,22 +57,44 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
     );
 
     return (
-      <>
-        {visibleRows.map((row, rowIndex) => {
-          return (
-            <CustomDataGridSingleRow
-              rowData={row}
-              rowIndex={rowIndex}
-              key={rowIndex}
-              visibleColumns={visibleColumns}
-              rowHeight={rowHeight}
-              Cell={Cell}
-              enabledRowRenderers={enabledRowRenderers}
-              refetch={refetch}
-            />
-          );
-        })}
-      </>
+      <AutoSizer>
+        {({ width, height }) => (
+          <List
+            width={width}
+            height={height}
+            rowHeight={cache.rowHeight}
+            deferredMeasurementCache={cache}
+            rowCount={visibleRows.length}
+            overscanRowCount={2}
+            rowRenderer={({ index, key, style, parent }) => (
+              <CellMeasurer
+                cache={cache}
+                columnIndex={0}
+                key={key}
+                parent={parent}
+                rowIndex={index}
+              >
+                {({ measure, registerChild }) => {
+                  return (
+                    <div ref={registerChild} style={style}>
+                      <CustomDataGridSingleRow
+                        rowData={visibleRows[index]}
+                        rowIndex={index}
+                        visibleColumns={visibleColumns}
+                        Cell={Cell}
+                        enabledRowRenderers={enabledRowRenderers}
+                        refetch={refetch}
+                        measure={measure}
+                        registerChild={() => {}}
+                      />
+                    </div>
+                  );
+                }}
+              </CellMeasurer>
+            )}
+          />
+        )}
+      </AutoSizer>
     );
   }
 );
@@ -130,6 +158,8 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
+  measure: () => void;
+  registerChild?: (element?: Element) => void;
 } & Pick<
   CustomTimelineDataGridBodyProps,
   'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
@@ -160,11 +190,17 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     visibleColumns,
     Cell,
     rowHeight: rowHeightMultiple = 0,
+    measure,
+    registerChild,
   } = props;
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
+
+  useEffect(() => {
+    measure();
+  }, [measure]);
 
   const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple - 1);
   /**
@@ -188,6 +224,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       className={`${rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''}`}
       $cssRowHeight={cssRowHeight}
       key={rowIndex}
+      ref={registerChild}
     >
       <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {

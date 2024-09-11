@@ -49,6 +49,8 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
   }) {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
+    const eventDetailRowRef = useRef<HTMLDivElement | null>(null);
+
     /*
      * Ideally, unified data table could have handled the styling of trailing columns when a row is expanded.
      * But, a trailing column can have arbitrary design and that is why it is best for consumer to handle the styling
@@ -60,8 +62,12 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
     useEffect(() => {
       setCellProps?.({
         className: ctx.expanded?.id === event._id ? 'unifiedDataTable__cell--expanded' : '',
-        style: { width: '100%', height: 'auto' },
+        style: { width: '100%', height: eventDetailRowRef.current?.getBoundingClientRect().height },
       });
+
+      if (rowIndex === 7) {
+        console.log({ size: eventDetailRowRef.current?.getBoundingClientRect().height });
+      }
     }, [ctx.expanded?.id, setCellProps, rowIndex, event._id]);
 
     if (!enabledRowRenderers || enabledRowRenderers.length === 0) return null;
@@ -73,7 +79,7 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
         data-test-subj={`timeline-row-renderer-${rowIndex}`}
       >
         <EuiFlexItem grow={false}>
-          <EventsTrSupplement>
+          <EventsTrSupplement ref={eventDetailRowRef}>
             <StatefulRowRenderer
               ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
               containerRef={containerRef}
