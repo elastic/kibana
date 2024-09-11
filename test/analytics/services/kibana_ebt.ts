@@ -9,6 +9,7 @@
 
 import '@kbn/analytics-ftr-helpers-plugin/public/types';
 import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBTHelpersContract {
@@ -18,7 +19,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
     await supertest
       .post(`/internal/analytics_ftr_helpers/opt_in`)
       .set('kbn-xsrf', 'xxx')
-      .set('x-elastic-internal-origin', 'kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query({ consent: optIn })
       .expect(200);
   };
@@ -39,7 +40,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
           fromTimestamp,
         })
         .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       return resp.body;
@@ -50,7 +51,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
         .get(`/internal/analytics_ftr_helpers/count_events`)
         .query({ eventTypes: JSON.stringify(eventTypes), withTimeoutMs, fromTimestamp })
         .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'kibana')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
 
       return resp.body.count;

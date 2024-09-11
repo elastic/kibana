@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .then((response) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-          expect(kqlTelemetryDoc.optInCount).to.be.greaterThan(0);
+          expect(kqlTelemetryDoc.optInCount).to.be(1);
         });
     });
 
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .then((response) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-          expect(kqlTelemetryDoc.optOutCount).to.be.greaterThan(0);
+          expect(kqlTelemetryDoc.optOutCount).to.be(1);
         });
     });
 

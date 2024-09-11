@@ -30,16 +30,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not forward x-elastic-product-origin', async () => {
-        // If we pass the header and we still get the warning back, we assume that the header was not forwarded.
         return await supertest
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
           .set('kbn-xsrf', 'true')
           .set('x-elastic-product-origin', 'kibana')
           .then((response) => {
             expect(response.header).to.have.property('connection', 'close');
-            // const { warning } = response.header as { warning: string };
-            // expect(warning.startsWith('299')).to.be(true);
-            // expect(warning.includes('system indices')).to.be(true);
+            expect(response.header).to.have.property('warning');
+            const { warning } = response.header as { warning: string };
+            expect(warning.startsWith('299')).to.be(true);
+            expect(warning.includes('system indices')).to.be(true);
           });
       });
     });
