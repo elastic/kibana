@@ -45,7 +45,7 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
 }
 
 export interface ControlGroupSerializedState
-  extends Pick<ControlGroupRuntimeState, 'chainingSystem' | 'editorConfig'> {
+  extends Pick<ControlGroupRuntimeState, 'chainingSystem'> {
   panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;

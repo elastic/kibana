@@ -63,11 +63,11 @@ export const controlGroupSerializedStateToSerializableRuntimeState = (
 };
 
 export const serializableRuntimeStateToControlGroupSerializedState = (
-  serializable: SerializableControlGroupState
+  serializable: SerializableRecord // It is safe to treat this as SerializableControlGroupState
 ): ControlGroupSerializedState => {
   return {
-    controlStyle: serializable.labelPosition as ControlGroupRuntimeState['labelPosition'],
-    chainingSystem: serializable.chainingSystem as ControlGroupRuntimeState['chainingSystem'],
+    controlStyle: serializable.labelPosition as SerializableControlGroupState['labelPosition'],
+    chainingSystem: serializable.chainingSystem as SerializableControlGroupState['chainingSystem'],
     showApplySelections: !Boolean(serializable.autoApplySelections),
     ignoreParentSettingsJSON: JSON.stringify(serializable.ignoreParentSettings),
     panelsJSON: JSON.stringify(serializable.panels),

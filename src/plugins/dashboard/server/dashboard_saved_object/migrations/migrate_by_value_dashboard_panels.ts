@@ -12,7 +12,7 @@ import {
   controlGroupSerializedStateToSerializableRuntimeState,
   serializableRuntimeStateToControlGroupSerializedState,
 } from '@kbn/controls-plugin/server';
-import { Serializable } from '@kbn/utility-types';
+import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
@@ -41,7 +41,7 @@ export const migrateByValueDashboardPanels =
       const migratedControlGroupInput = migrate({
         ...controlGroupState,
         type: CONTROL_GROUP_TYPE,
-      });
+      } as SerializableRecord);
       attributes.controlGroupInput =
         serializableRuntimeStateToControlGroupSerializedState(migratedControlGroupInput);
     }

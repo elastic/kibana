@@ -39,6 +39,7 @@ export {
 } from '../common';
 export type {
   ControlGroupRuntimeState,
+  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
   DefaultDataControlState,
