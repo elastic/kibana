@@ -30,6 +30,7 @@ import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
 import { useEditSpaceServices, useEditSpaceStore } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
 
@@ -187,8 +188,9 @@ export const EditSpace: FC<PageProps> = ({
   };
 
   const { id, solution: spaceSolution } = space;
-  const solution = spaceSolution ?? 'classic';
-  const shouldShowSolutionBadge = props.allowSolutionVisibility || solution !== 'classic';
+  const solution = spaceSolution ?? SOLUTION_VIEW_CLASSIC;
+  const shouldShowSolutionBadge =
+    props.allowSolutionVisibility || solution !== SOLUTION_VIEW_CLASSIC;
 
   return (
     <div data-test-subj="spaces-view-page">

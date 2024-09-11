@@ -35,7 +35,11 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import {
+  DEFAULT_SPACE_ID,
+  ENTER_SPACE_PATH,
+  SOLUTION_VIEW_CLASSIC,
+} from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -311,7 +315,7 @@ export class SpacesGridPage extends Component<Props, State> {
       },
     ];
 
-    const shouldShowFeaturesColumn = !activeSolution || activeSolution === 'classic';
+    const shouldShowFeaturesColumn = !activeSolution || activeSolution === SOLUTION_VIEW_CLASSIC;
     if (shouldShowFeaturesColumn) {
       config.push({
         field: 'disabledFeatures',

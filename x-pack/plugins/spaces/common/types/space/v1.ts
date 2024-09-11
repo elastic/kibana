@@ -7,7 +7,9 @@
 
 import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 
-export type SolutionView = OnBoardingDefaultSolution | 'classic';
+import type { SOLUTION_VIEW_CLASSIC } from '../../constants';
+
+export type SolutionView = OnBoardingDefaultSolution | typeof SOLUTION_VIEW_CLASSIC;
 
 /**
  * A Space.

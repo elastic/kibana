@@ -23,6 +23,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
 import { EditSpaceProvider } from './provider/view_space_provider';
 import type { SolutionView } from '../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
@@ -350,7 +351,7 @@ describe('EditSpaceSettings', () => {
       color: '#aabbcc',
       initials: 'AB',
       disabledFeatures: [],
-      solution: 'classic' as SolutionView,
+      solution: SOLUTION_VIEW_CLASSIC,
     };
 
     render(

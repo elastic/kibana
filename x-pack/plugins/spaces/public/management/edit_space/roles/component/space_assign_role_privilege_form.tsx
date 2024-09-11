@@ -37,9 +37,16 @@ import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
 import type { Space } from '../../../../../common';
+import {
+  FEATURE_PRIVILEGES_ALL,
+  FEATURE_PRIVILEGES_CUSTOM,
+  FEATURE_PRIVILEGES_READ,
+} from '../../../../../common/constants';
 import { type EditSpaceServices, type EditSpaceStore, useEditSpaceServices } from '../../provider';
 
-type KibanaRolePrivilege = keyof NonNullable<KibanaFeatureConfig['privileges']> | 'custom';
+type KibanaRolePrivilege =
+  | keyof NonNullable<KibanaFeatureConfig['privileges']>
+  | typeof FEATURE_PRIVILEGES_CUSTOM;
 
 interface PrivilegesRolesFormProps {
   space: Space;
@@ -94,7 +101,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         for (let i = 0; i < selectedRole.value!.kibana.length; i++) {
           const { spaces, base } = selectedRole.value!.kibana[i];
           if (spaces.includes(space.id!)) {
-            match = (base.length ? base : ['custom']) as [KibanaRolePrivilege];
+            match = (base.length ? base : [typeof FEATURE_PRIVILEGES_CUSTOM]) as [
+              KibanaRolePrivilege
+            ];
             break;
           }
         }
@@ -108,7 +117,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
   const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>(
     !selectedRoles.length || !selectedRolesCombinedPrivileges.length
-      ? 'read'
+      ? FEATURE_PRIVILEGES_READ
       : selectedRolesCombinedPrivileges[0]
   );
   const { notifications } = useEditSpaceServices();
@@ -204,7 +213,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
   const onRoleSpacePrivilegeChange = useCallback(
     (spacePrivilege: KibanaRolePrivilege) => {
-      if (spacePrivilege === 'custom') {
+      if (spacePrivilege === FEATURE_PRIVILEGES_CUSTOM) {
         const _roleCustomizationAnchor = computeRoleCustomizationAnchor(space.id, selectedRoles);
         if (_roleCustomizationAnchor) setRoleCustomizationAnchor(_roleCustomizationAnchor);
       }
@@ -220,9 +229,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       setAssigningToRole(true);
 
       const newPrivileges = {
-        base: roleSpacePrivilege === 'custom' ? [] : [roleSpacePrivilege],
+        base: roleSpacePrivilege === FEATURE_PRIVILEGES_CUSTOM ? [] : [roleSpacePrivilege],
         feature:
-          roleSpacePrivilege === 'custom'
+          roleSpacePrivilege === FEATURE_PRIVILEGES_CUSTOM
             ? roleCustomizationAnchor.value?.kibana[roleCustomizationAnchor.privilegeIndex!]
                 .feature!
             : {},
@@ -351,7 +360,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             isDisabled={!Boolean(selectedRoles.length)}
             options={[
               {
-                id: 'all',
+                id: FEATURE_PRIVILEGES_ALL,
                 label: i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privileges.all',
                   {
@@ -360,14 +369,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 ),
               },
               {
-                id: 'read',
+                id: FEATURE_PRIVILEGES_READ,
                 label: i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privileges.read',
                   { defaultMessage: 'Read' }
                 ),
               },
               {
-                id: 'custom',
+                id: FEATURE_PRIVILEGES_CUSTOM,
                 label: i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privileges.custom',
                   { defaultMessage: 'Customize' }
@@ -384,7 +393,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
             isFullWidth
           />
         </EuiFormRow>
-        {roleSpacePrivilege === 'custom' && (
+        {roleSpacePrivilege === FEATURE_PRIVILEGES_CUSTOM && (
           <EuiFormRow
             data-test-subj="space-assign-role-privilege-customization-form"
             label={i18n.translate(

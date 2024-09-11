@@ -17,6 +17,7 @@ import { EditSpaceEnabledFeatures } from './edit_space_features_tab';
 import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
+import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeSpace } from '../components/customize_space';
@@ -239,7 +240,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         </>
       )}
 
-      {props.allowFeatureVisibility && (solution == null || solution === 'classic') && (
+      {props.allowFeatureVisibility && (solution == null || solution === SOLUTION_VIEW_CLASSIC) && (
         <>
           <EuiSpacer />
           <EditSpaceEnabledFeatures
