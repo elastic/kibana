@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
@@ -18,6 +19,8 @@ import {
   Wordcloud,
   RenderChangeListener,
   LEGACY_LIGHT_THEME,
+  ElementClickListener,
+  WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
@@ -190,13 +193,13 @@ export const TagCloudChart = ({
     []
   );
 
-  const handleWordClick = useCallback(
+  const handleWordClick = useCallback<ElementClickListener>(
     (elements) => {
       if (!bucket) {
         return;
       }
       const termsBucketId = getColumnByAccessor(bucket, visData.columns)!.id;
-      const clickedValue = elements[0][0].text;
+      const clickedValue = (elements[0] as WordCloudElementEvent)[0].text;
 
       const columnIndex = visData.columns.findIndex((col) => col.id === termsBucketId);
       if (columnIndex < 0) {

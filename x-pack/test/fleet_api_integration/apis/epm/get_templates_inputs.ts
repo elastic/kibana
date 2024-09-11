@@ -10,7 +10,6 @@ import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -18,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
@@ -36,8 +36,8 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM Templates - Get Inputs', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
     before(async () => {
+      await fleetAndAgents.setup();
       const buf = fs.readFileSync(testPkgArchiveZip);
       await supertest
         .post(`/api/fleet/epm/packages`)

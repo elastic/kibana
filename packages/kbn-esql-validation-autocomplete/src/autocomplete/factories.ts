@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -29,7 +30,11 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
 
-export const TIME_SYSTEM_PARAMS = ['?start', '?end'];
+export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+
+export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
+  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
+};
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -132,7 +137,7 @@ export function getSuggestionCommandDefinition(
 
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
     const description = field.metadata?.description;
@@ -143,7 +148,7 @@ export const buildFieldsDefinitionsWithMetadata = (
       text:
         getSafeInsertText(field.name) +
         (options?.addComma ? ',' : '') +
-        (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
+        (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
       documentation: description
@@ -156,7 +161,7 @@ ${description}`,
         : undefined,
       // If there is a description, it is a field from ECS, so it should be sorted to the top
       sortText: description ? '1D' : 'D',
-      command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
 };
@@ -187,9 +192,9 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
   }));
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
 ): SuggestionRawDefinition[] =>
-  sources.map(({ name, isIntegration, title }) => ({
+  sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
     text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
     isSnippet: isIntegration,
@@ -199,7 +204,10 @@ export const buildSourcesDefinitions = (
           defaultMessage: `Integration`,
         })
       : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-          defaultMessage: `Index`,
+          defaultMessage: '{type}',
+          values: {
+            type: type ?? 'Index',
+          },
         }),
     sortText: 'A',
     command: TRIGGER_SUGGESTION_COMMAND,

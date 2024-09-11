@@ -78,7 +78,7 @@ import {
 } from './services/security';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -118,6 +118,7 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { UnenrollInactiveAgentsTask } from './tasks/unenroll_inactive_agents_task';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
@@ -129,6 +130,8 @@ import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
+import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
+import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -150,6 +153,7 @@ export interface FleetStartDeps {
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
+  spaces: SpacesPluginStart;
 }
 
 export interface FleetAppContext {
@@ -177,13 +181,15 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
+  unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
+  taskManagerStart?: TaskManagerStartContract;
 }
 
 export type FleetSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -257,6 +263,7 @@ export class FleetPlugin
   private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
+  private spacesPluginsStart?: SpacesPluginStart;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
@@ -264,6 +271,7 @@ export class FleetPlugin
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
   private fleetMetricsTask?: FleetMetricsTask;
+  private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -517,6 +525,7 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
+        const spacesPluginsStart = this.spacesPluginsStart;
         return {
           get agentClient() {
             const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
@@ -554,7 +563,9 @@ export class FleetPlugin
           get spaceId() {
             return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           },
-
+          getAllSpaces() {
+            return spacesPluginsStart!.spacesService.createSpacesClient(request).getAll();
+          },
           get limitedToPackages() {
             if (routeAuthz && routeAuthz.granted) {
               return routeAuthz.scopeDataToPackages;
@@ -588,8 +599,17 @@ export class FleetPlugin
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    // Register task
+    registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
+    registerDeployAgentPoliciesTask(deps.taskManager);
+
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+    this.unenrollInactiveAgentsTask = new UnenrollInactiveAgentsTask({
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
@@ -600,6 +620,7 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    this.spacesPluginsStart = plugins.spaces;
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
@@ -638,12 +659,15 @@ export class FleetPlugin
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
       uninstallTokenService,
+      unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
+      taskManagerStart: plugins.taskManager,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
     this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)

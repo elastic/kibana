@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Key } from 'selenium-webdriver';
@@ -553,7 +554,7 @@ export class ConsolePageObject extends FtrService {
     await this.retry.try(async () => {
       const firstInnerHtml = await line.getAttribute('innerHTML');
       // The line number is not updated immediately after the click, so we need to wait for it.
-      this.common.sleep(500);
+      await this.common.sleep(500);
       line = await editor.findByCssSelector('.ace_active-line');
       const secondInnerHtml = await line.getAttribute('innerHTML');
       // The line number will change as the user types, but we want to wait until it's stable.
@@ -638,8 +639,41 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('a11y-overlay');
   }
 
+  public async isCopyAsButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
   public async clickCopyAsCurlButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
+    await button.click();
+  }
+
+  public async changeLanguageAndCopy(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async changeDefaultLanguage(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeDefaultLangButton = await this.testSubjects.find(
+      `changeDefaultLanguageTo-${language}`
+    );
+    await changeDefaultLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async clickCopyAsButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }
 

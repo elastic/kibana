@@ -29,7 +29,7 @@ export const OverviewContent: FC<Props> = ({
   const {
     services: {
       uiSettings,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
@@ -41,7 +41,7 @@ export const OverviewContent: FC<Props> = ({
 
   useEffect(() => {
     setAnomalyTimelineService(
-      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApiServices))
+      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApi))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

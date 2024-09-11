@@ -7,15 +7,19 @@
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { History } from 'history';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import type { InvestigateAppStartDependencies } from './types';
-import { investigateRouter } from './routes/config';
-import { InvestigateAppKibanaContext } from './hooks/use_kibana';
-import { InvestigateAppServices } from './services/types';
 import { InvestigateAppContextProvider } from './components/investigate_app_context_provider';
+import { InvestigateAppKibanaContext } from './hooks/use_kibana';
+import { getRoutes } from './routes/config';
+import { InvestigateAppServices } from './services/types';
+import type { InvestigateAppStartDependencies } from './types';
+
+const queryClient = new QueryClient();
 
 function Application({
   coreStart,
@@ -45,14 +49,32 @@ function Application({
     [coreStart, pluginsStart, services]
   );
 
+  const App = () => {
+    const routes = getRoutes();
+    return (
+      <Routes>
+        {Object.keys(routes).map((path) => {
+          const { handler, exact } = routes[path];
+          const Wrapper = () => {
+            return handler();
+          };
+          return <Route key={path} path={path} exact={exact} component={Wrapper} />;
+        })}
+      </Routes>
+    );
+  };
+
   return (
     <KibanaThemeProvider theme={theme}>
       <InvestigateAppContextProvider context={context}>
         <RedirectAppLinks coreStart={coreStart}>
           <coreStart.i18n.Context>
-            <RouterProvider history={history} router={investigateRouter as any}>
-              <RouteRenderer />
-            </RouterProvider>
+            <Router history={history}>
+              <QueryClientProvider client={queryClient}>
+                <App />
+                <ReactQueryDevtools initialIsOpen={false} />
+              </QueryClientProvider>
+            </Router>
           </coreStart.i18n.Context>
         </RedirectAppLinks>
       </InvestigateAppContextProvider>

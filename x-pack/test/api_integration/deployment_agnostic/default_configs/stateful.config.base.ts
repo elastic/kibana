@@ -18,18 +18,31 @@ import {
   systemIndicesSuperuser,
   FtrConfigProviderContext,
 } from '@kbn/test';
-import { services } from '../services';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { DeploymentAgnosticCommonServices, services } from '../services';
 
-interface CreateTestConfigOptions {
+interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
   kbnServerArgs?: string[];
+  services?: T;
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
-export function createStatefulTestConfig(options: CreateTestConfigOptions) {
+export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
+  options: CreateTestConfigOptions<T>
+) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
+    if (options.esServerArgs || options.kbnServerArgs) {
+      throw new Error(
+        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
+  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+      );
+    }
+
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
@@ -54,7 +67,8 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
       servers,
       testFiles: options.testFiles,
       security: { disableTestUser: true },
-      services,
+      // services can be customized, but must extend DeploymentAgnosticCommonServices
+      services: options.services || services,
       junit: options.junit,
       suiteTags: options.suiteTags,
 
@@ -62,7 +76,6 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
         ...xPackAPITestsConfig.get('esTestCluster'),
         serverArgs: [
           ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
-          ...(options.esServerArgs ?? []),
           'xpack.security.authc.token.enabled=true',
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
@@ -75,13 +88,16 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
         ],
+        files: [
+          // Passing the roles that are equivalent to the ones we have in serverless
+          path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
+        ],
       },
 
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-          ...(options.kbnServerArgs || []),
           '--xpack.security.authc.selector.enabled=false',
           `--xpack.security.authc.providers=${JSON.stringify({
             saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },

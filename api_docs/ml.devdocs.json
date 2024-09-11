@@ -1343,7 +1343,13 @@
         ">; getDataFrameAnalyticsStats(analyticsId?: string | undefined): Promise<",
         "GetDataFrameAnalyticsStatsResponse",
         ">; createDataFrameAnalytics(analyticsId: string, analyticsConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1373,7 +1379,13 @@
         ">; jobsExist(analyticsIds: string[], allSpaces?: boolean): Promise<",
         "JobsExistsResponse",
         ">; evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>; explainDataFrameAnalytics(jobConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1387,7 +1399,13 @@
         ">; startDataFrameAnalytics(analyticsId: string): Promise<any>; stopDataFrameAnalytics(analyticsId: string, force?: boolean): Promise<any>; getAnalyticsAuditMessages(analyticsId: string): Promise<",
         "JobMessage",
         "[]>; validateDataFrameAnalytics(analyticsConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1717,10 +1735,10 @@
           "text": "ModelConfig"
         },
         "): Promise<",
-        "InferenceModelConfigContainer",
-        ">; getAllInferenceEndpoints(): Promise<{ endpoints: ",
-        "InferenceModelConfigContainer",
-        "[]; }>; }; notifications: { findMessages(params: ",
+        "InferenceInferenceEndpointInfo",
+        ">; getAllInferenceEndpoints(): Promise<",
+        "InferenceGetResponse",
+        ">; }; notifications: { findMessages(params: ",
         "NotificationsQueryParams",
         "): Promise<",
         "NotificationsSearchResponse",

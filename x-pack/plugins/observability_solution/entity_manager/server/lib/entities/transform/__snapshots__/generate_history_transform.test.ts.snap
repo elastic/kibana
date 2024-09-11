@@ -155,7 +155,7 @@ Object {
 exports[`generateHistoryTransform(definition) should generate a valid history transform 1`] = `
 Object {
   "_meta": Object {
-    "definitionVersion": "999.999.999",
+    "definitionVersion": "1.0.0",
     "managed": false,
   },
   "defer_validation": true,
@@ -163,7 +163,7 @@ Object {
     "index": ".entities.v1.history.noop",
     "pipeline": "entities-v1-history-admin-console-services",
   },
-  "frequency": "1m",
+  "frequency": "2m",
   "pivot": Object {
     "aggs": Object {
       "_errorRate_A": Object {
@@ -286,7 +286,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-1h",
+                "gte": "now-10m",
               },
             },
           },
@@ -296,7 +296,7 @@ Object {
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "2m",
       "field": "@timestamp",
     },
   },

@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import React, { FC } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+
+const { QueryClient, QueryClientProvider } = ReactQuery;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const mockHttpClient = {
-  get: jest.fn(),
-} as unknown as HttpSetup;
+const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
+
+const mockHttpClient = httpServiceMock.createStartContract();
 
 const emptyData = { browserFields: {}, fields: [] };
 
@@ -55,6 +58,33 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     expect(mockHttpGet).toHaveBeenCalledTimes(0);
     expect(result.current.data).toEqual(emptyData);
+  });
+
+  it('should correctly override the `enabled` option', () => {
+    const { rerender } = renderHook(
+      ({
+        featureIds,
+        enabled,
+      }: React.PropsWithChildren<{ featureIds: AlertConsumers[]; enabled?: boolean }>) =>
+        useFetchAlertsFieldsQuery({ http: mockHttpClient, featureIds }, { enabled }),
+      {
+        wrapper,
+        initialProps: {
+          featureIds: ['apm'],
+          enabled: false,
+        },
+      }
+    );
+
+    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+
+    rerender({ featureIds: [], enabled: true });
+
+    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+
+    rerender({ featureIds: ['apm'] });
+
+    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
   });
 
   it('should call the api only once', async () => {

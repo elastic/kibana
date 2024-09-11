@@ -617,7 +617,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
 
@@ -635,7 +634,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
           expect(previewAlerts[1]._source).toEqual(
@@ -657,7 +655,6 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: timestamp,
               [ALERT_SUPPRESSION_END]: timestamp,

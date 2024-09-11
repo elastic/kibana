@@ -7,4 +7,3 @@
 
 export const ESQL_WIDGET_NAME = 'esql';
 export const EMBEDDABLE_WIDGET_NAME = 'embeddable';
-export const NOTE_WIDGET_NAME = 'note';

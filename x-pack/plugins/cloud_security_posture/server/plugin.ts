@@ -24,6 +24,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  CspBenchmarkRule,
+  CspSettings,
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -38,10 +42,7 @@ import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
-import {
-  isCspPackagePolicyInstalled,
-  onPackagePolicyPostCreateCallback,
-} from './fleet_integration/fleet_integration';
+import { isCspPackagePolicyInstalled } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
   removeFindingsStatsTask,
@@ -50,7 +51,6 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
-import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
 
 export class CspPlugin
   implements
@@ -168,8 +168,6 @@ export class CspPlugin
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
               await this.initialize(core, plugins.taskManager);
-              await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-
               return packagePolicy;
             }
 

@@ -10,7 +10,7 @@ import { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
-import { ServiceConfig } from '../../common/config';
+import { ServiceConfig } from '../config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';

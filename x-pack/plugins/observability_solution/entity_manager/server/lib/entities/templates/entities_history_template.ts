@@ -6,22 +6,25 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { EntityDefinition } from '@kbn/entities-schema';
-import { getEntityHistoryIndexTemplateV1 } from '../../../../common/helpers';
 import {
-  ENTITY_BASE_PREFIX,
+  ENTITY_HISTORY,
+  EntityDefinition,
+  entitiesIndexPattern,
+  entitiesAliasPattern,
+  ENTITY_SCHEMA_VERSION_V1,
+} from '@kbn/entities-schema';
+import { generateHistoryIndexTemplateId } from '../helpers/generate_component_id';
+import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-  ENTITY_HISTORY,
   ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
-  ENTITY_HISTORY_INDEX_PREFIX_V1,
 } from '../../../../common/constants_entities';
 import { getCustomHistoryTemplateComponents } from '../../../templates/components/helpers';
 
-export const getEntitiesHistoryIndexTemplateConfig = (
+export const generateEntitiesHistoryIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getEntityHistoryIndexTemplateV1(definition.id),
+  name: generateHistoryIndexTemplateId(definition),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",
@@ -36,11 +39,17 @@ export const getEntitiesHistoryIndexTemplateConfig = (
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
     ...getCustomHistoryTemplateComponents(definition.id),
   ],
-  index_patterns: [`${ENTITY_HISTORY_INDEX_PREFIX_V1}.${definition.id}.*`],
+  index_patterns: [
+    `${entitiesIndexPattern({
+      schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+      dataset: ENTITY_HISTORY,
+      definitionId: definition.id,
+    })}.*`,
+  ],
   priority: 200,
   template: {
     aliases: {
-      [`${ENTITY_BASE_PREFIX}-${definition.type}-${ENTITY_HISTORY}`]: {},
+      [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_HISTORY })]: {},
     },
     mappings: {
       _meta: {

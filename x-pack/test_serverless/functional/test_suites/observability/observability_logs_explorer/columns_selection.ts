@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('render content virtual column properly', async () => {
+    describe('render content virtual column properly', () => {
       it('should render log level and log message when present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElementExcludingControlColumns(0, 2);
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('render resource virtual column properly', async () => {
+    describe('render resource virtual column properly', () => {
       it('should render service name and host name when present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('virtual column cell actions', async () => {
+    describe('virtual column cell actions', () => {
       beforeEach(async () => {
         await navigateToLogsExplorer();
       });

@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { parseIntervalAsMillisecond } from './lib/intervals';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_CAPACITY = 10;
@@ -13,6 +14,7 @@ export const MAX_CAPACITY = 50;
 export const MIN_CAPACITY = 5;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
+export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
@@ -28,8 +30,17 @@ export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
 // At the default poll interval of 3sec, this averages over the last 15sec.
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
-export const CLAIM_STRATEGY_DEFAULT = 'default';
-export const CLAIM_STRATEGY_MGET = 'unsafe_mget';
+export const CLAIM_STRATEGY_UPDATE_BY_QUERY = 'update_by_query';
+export const CLAIM_STRATEGY_MGET = 'mget';
+
+export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
+const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
+const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
+
+export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';
+const FIVE_MIN_IN_MS = 5 * 60 * 1000;
+
+export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -69,6 +80,26 @@ export const configSchema = schema.object(
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
+    discovery: schema.object({
+      active_nodes_lookback: schema.string({
+        defaultValue: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+        validate: (duration) => {
+          try {
+            const parsedDurationMs = parseIntervalAsMillisecond(duration);
+            if (parsedDurationMs > FIVE_MIN_IN_MS) {
+              return 'active node lookback duration cannot exceed five minutes';
+            }
+          } catch (err) {
+            return 'active node lookback duration must be a valid duration string';
+          }
+        },
+      }),
+      interval: schema.number({
+        defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
+        min: MIN_DISCOVERY_INTERVAL_MS,
+        max: MAX_DISCOVERY_INTERVAL_MS,
+      }),
+    }),
     ephemeral_tasks: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       /* How many requests can Task Manager buffer before it rejects new requests. */
@@ -80,6 +111,10 @@ export const configSchema = schema.object(
       }),
     }),
     event_loop_delay: eventLoopDelaySchema,
+    kibanas_per_partition: schema.number({
+      defaultValue: DEFAULT_KIBANAS_PER_PARTITION,
+      min: 1,
+    }),
     /* The maximum number of times a task will be attempted before being abandoned as failed */
     max_attempts: schema.number({
       defaultValue: 3,
@@ -133,10 +168,18 @@ export const configSchema = schema.object(
       default: taskExecutionFailureThresholdSchema,
     }),
     /* How often, in milliseconds, the task manager will look for more work. */
-    poll_interval: schema.number({
-      defaultValue: DEFAULT_POLL_INTERVAL,
-      min: 100,
-    }),
+    poll_interval: schema.conditional(
+      schema.siblingRef('claim_strategy'),
+      CLAIM_STRATEGY_MGET,
+      schema.number({
+        defaultValue: MGET_DEFAULT_POLL_INTERVAL,
+        min: 100,
+      }),
+      schema.number({
+        defaultValue: DEFAULT_POLL_INTERVAL,
+        min: 100,
+      })
+    ),
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
       // a nice round contrived number, feel free to change as we learn how it behaves
@@ -159,7 +202,7 @@ export const configSchema = schema.object(
       max: 100,
       min: 1,
     }),
-    claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_DEFAULT }),
+    claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_UPDATE_BY_QUERY }),
     request_timeouts: requestTimeoutsConfig,
   },
   {

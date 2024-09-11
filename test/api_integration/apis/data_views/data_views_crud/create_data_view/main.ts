@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -224,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.body[config.serviceKey].fieldFormats.foo.params).to.eql({});
         });
 
-        it('can specify optional fieldFormats attribute when creating an index pattern', async () => {
+        it('can specify optional fieldFormats attributes count and customLabel when creating an index pattern', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertest.post(config.path).send({
             [config.serviceKey]: {

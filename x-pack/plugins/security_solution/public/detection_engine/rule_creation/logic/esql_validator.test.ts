@@ -111,7 +111,7 @@ describe('parseEsqlQuery', () => {
       errors: expect.arrayContaining([
         expect.objectContaining({
           message:
-            "SyntaxError: mismatched input 'aaa' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+            "SyntaxError: mismatched input 'aaa' expecting {'explain', 'from', 'meta', 'row', 'show'}",
         }),
       ]),
       isEsqlQueryAggregating: false,

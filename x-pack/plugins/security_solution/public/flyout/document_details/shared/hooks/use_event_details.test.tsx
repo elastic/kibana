@@ -8,21 +8,41 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
-import { useEventDetails } from './use_event_details';
+import { getAlertIndexAlias, useEventDetails } from './use_event_details';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { useGetFieldsData } from './use_get_fields_data';
 
 jest.mock('../../../../common/hooks/use_space_id');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../common/hooks/use_get_fields_data');
+jest.mock('./use_get_fields_data');
 
 const eventId = 'eventId';
 const indexName = 'indexName';
+
+describe('getAlertIndexAlias', () => {
+  it('should handle default alert index', () => {
+    expect(getAlertIndexAlias('.internal.alerts-security.alerts')).toEqual(
+      '.alerts-security.alerts-default'
+    );
+  });
+
+  it('should handle default preview index', () => {
+    expect(getAlertIndexAlias('.internal.preview.alerts-security.alerts')).toEqual(
+      '.preview.alerts-security.alerts-default'
+    );
+  });
+
+  it('should handle non default space id', () => {
+    expect(getAlertIndexAlias('.internal.preview.alerts-security.alerts', 'test')).toEqual(
+      '.preview.alerts-security.alerts-test'
+    );
+  });
+});
 
 describe('useEventDetails', () => {
   let hookResult: RenderHookResult<UseEventDetailsParams, UseEventDetailsResult>;
@@ -35,7 +55,7 @@ describe('useEventDetails', () => {
       indexPattern: {},
     });
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, [], {}, {}, jest.fn()]);
-    jest.mocked(useGetFieldsData).mockReturnValue((field: string) => field);
+    jest.mocked(useGetFieldsData).mockReturnValue({ getFieldsData: (field: string) => field });
 
     hookResult = renderHook(() => useEventDetails({ eventId, indexName }));
 

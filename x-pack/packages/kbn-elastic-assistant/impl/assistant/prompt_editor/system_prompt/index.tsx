@@ -13,7 +13,7 @@ import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
   conversation: Conversation | undefined;
-  editingSystemPromptId: string | undefined;
+  currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,7 +23,7 @@ interface Props {
 
 const SystemPromptComponent: React.FC<Props> = ({
   conversation,
-  editingSystemPromptId,
+  currentSystemPromptId,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
@@ -32,16 +32,16 @@ const SystemPromptComponent: React.FC<Props> = ({
 }) => {
   const [isCleared, setIsCleared] = useState(false);
   const selectedPrompt = useMemo(() => {
-    if (editingSystemPromptId !== undefined) {
+    if (currentSystemPromptId !== undefined) {
       setIsCleared(false);
-      return allSystemPrompts.find((p) => p.id === editingSystemPromptId);
+      return allSystemPrompts.find((p) => p.id === currentSystemPromptId);
     } else {
       return allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId);
     }
-  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
+  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, currentSystemPromptId]);
 
   const handleClearSystemPrompt = useCallback(() => {
-    if (editingSystemPromptId === undefined) {
+    if (currentSystemPromptId === undefined) {
       setIsCleared(false);
       onSystemPromptSelectionChange(
         allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId)?.id
@@ -53,7 +53,7 @@ const SystemPromptComponent: React.FC<Props> = ({
   }, [
     allSystemPrompts,
     conversation?.apiConfig?.defaultSystemPromptId,
-    editingSystemPromptId,
+    currentSystemPromptId,
     onSystemPromptSelectionChange,
   ]);
 
@@ -67,7 +67,6 @@ const SystemPromptComponent: React.FC<Props> = ({
       isCleared={isCleared}
       refetchConversations={refetchConversations}
       isSettingsModalVisible={isSettingsModalVisible}
-      onSystemPromptSelectionChange={onSystemPromptSelectionChange}
       selectedPrompt={selectedPrompt}
       setIsSettingsModalVisible={setIsSettingsModalVisible}
     />

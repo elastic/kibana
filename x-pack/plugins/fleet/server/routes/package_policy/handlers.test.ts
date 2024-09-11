@@ -20,15 +20,11 @@ import {
 } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
-import type {
-  CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
-} from '../../types/rest_spec';
+import type { UpdatePackagePolicyRequestSchema } from '../../types/rest_spec';
 import type { AgentPolicy, FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
-import { createPackagePolicyHandler, getPackagePoliciesHandler } from './handlers';
-
+import { getPackagePoliciesHandler } from './handlers';
 import { registerRoutes } from '.';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
@@ -171,81 +167,6 @@ describe('When calling package policy', () => {
     appContextService.stop();
   });
 
-  describe('Create api handler', () => {
-    const getCreateKibanaRequest = (
-      newData?: typeof CreatePackagePolicyRequestSchema.body
-    ): KibanaRequest<
-      undefined,
-      typeof CreatePackagePolicyRequestSchema.query,
-      typeof CreatePackagePolicyRequestSchema.body
-    > => {
-      return httpServerMock.createKibanaRequest<
-        undefined,
-        typeof CreatePackagePolicyRequestSchema.query,
-        typeof CreatePackagePolicyRequestSchema.body
-      >({
-        path: routeConfig.path,
-        method: 'post',
-        body: newData || {},
-        query: { format: 'simplified' },
-      });
-    };
-
-    const newPolicy = {
-      name: 'endpoint-1',
-      description: 'desc',
-      enabled: true,
-      policy_ids: [],
-      inputs: [],
-      namespace: 'default',
-      package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' },
-    };
-
-    beforeEach(() => {
-      // @ts-ignore
-      const postMock = routerMock.versioned.post.mock;
-      // @ts-ignore
-      routeConfig = postMock.calls.find(([{ path }]) =>
-        path.startsWith(PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN)
-      )!;
-      routeHandler = postMock.results[0].value.addVersion.mock.calls[0][1];
-    });
-
-    it('should throw if no policy_id or policy_ids is provided', async () => {
-      const request = getCreateKibanaRequest(newPolicy as any);
-      await createPackagePolicyHandler(context, request as any, response);
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: {
-          message: 'Either policy_id or policy_ids must be provided',
-        },
-      });
-    });
-
-    it('should throw if no enterprise license and multiple policy_ids is provided', async () => {
-      const request = getCreateKibanaRequest({ ...newPolicy, policy_ids: ['1', '2'] } as any);
-      await createPackagePolicyHandler(context, request as any, response);
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: {
-          message: 'Reusable integration policies are only available with an Enterprise license',
-        },
-      });
-    });
-
-    it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      const request = getCreateKibanaRequest({ ...newPolicy, policy_ids: ['1', '2'] } as any);
-      await createPackagePolicyHandler(context, request as any, response);
-      expect(response.customError).not.toHaveBeenCalledWith({
-        statusCode: 400,
-        body: {
-          message: 'Reusable integration policies are only available with an Enterprise license',
-        },
-      });
-    });
-  });
-
   describe('Update api handler', () => {
     const getUpdateKibanaRequest = (
       newData?: typeof UpdatePackagePolicyRequestSchema.body
@@ -308,6 +229,7 @@ describe('When calling package policy', () => {
     });
 
     beforeEach(() => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockClear();
       packagePolicyServiceMock.update.mockImplementation((soClient, esClient, policyId, newData) =>
         Promise.resolve(newData as PackagePolicy)
       );
@@ -333,6 +255,7 @@ describe('When calling package policy', () => {
           },
         ],
       });
+      (agentPolicyService.get as jest.Mock).mockResolvedValue({ inputs: [] });
     });
 
     it('should use existing package policy props if not provided by request', async () => {
@@ -393,63 +316,30 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should throw if no enterprise license and multiple policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
-      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
-      await routeHandler(context, request, response);
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: {
-          message: 'Reusable integration policies are only available with an Enterprise license',
-        },
+    it('should throw if policy_ids changed on agentless integration', async () => {
+      (agentPolicyService.get as jest.Mock).mockResolvedValue({
+        supports_agentless: true,
+        inputs: [],
       });
-    });
-
-    it('should not throw if enterprise license and multiple policy_ids is provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
       const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
       await routeHandler(context, request, response);
-      expect(response.ok).toHaveBeenCalled();
-    });
-
-    it('should throw if enterprise license and feature flag is disabled and multiple policy_ids is provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: false } as any);
-      const request = getUpdateKibanaRequest({ policy_ids: ['1', '2'] } as any);
-      await routeHandler(context, request, response);
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 400,
         body: {
-          message: 'Reusable integration policies are not supported',
-        },
-      });
-    });
-
-    it('should throw if empty policy_ids are provided', async () => {
-      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
-      const request = getUpdateKibanaRequest({ policy_ids: [] } as any);
-      await routeHandler(context, request, response);
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 400,
-        body: {
-          message: 'At least one agent policy id must be provided',
+          message: 'Cannot change agent policies of an agentless integration',
         },
       });
     });
 
     it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
 
       mockAgentPolicy({
         supports_agentless: true,
@@ -466,11 +356,11 @@ describe('When calling package policy', () => {
         { force: true }
       );
     });
-    it('should not rename the agentless agent policy if agentless is not enabled', async () => {
+    it('should not rename the agentless agent policy if agentless is not enabled in cloud environment', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: false },
+      } as any);
 
       mockAgentPolicy({
         supports_agentless: true,
@@ -483,9 +373,6 @@ describe('When calling package policy', () => {
     });
     it('should not rename the agentless agent policy if cloud is not enabled', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
 
       mockAgentPolicy({
         supports_agentless: true,
@@ -498,9 +385,9 @@ describe('When calling package policy', () => {
     });
     it('should not rename the agentless agent policy if the package policy name has not changed', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
 
       mockAgentPolicy({
         supports_agentless: true,
@@ -514,9 +401,9 @@ describe('When calling package policy', () => {
     });
     it('should not rename the agentless agent policy if the agent policy does not support agentless', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
 
       mockAgentPolicy({
         supports_agentless: false,

@@ -59,46 +59,20 @@ interface InMemoryPackagePolicyAndAgentPolicy {
 const IntegrationDetailsLink = memo<{
   packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
   agentPolicies: InMemoryPackagePolicyAndAgentPolicy['agentPolicies'];
-}>(({ packagePolicy, agentPolicies }) => {
+}>(({ packagePolicy }) => {
   const { getHref } = useLink();
-  const policySupportsAgentless = agentPolicies?.some((policy) => policy.supports_agentless);
   return (
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
-      {...(policySupportsAgentless
-        ? {
-            disabled: true,
-            title: i18n.translate(
-              'xpack.fleet.epm.packageDetails.integrationList.disabledEditTitle',
-              {
-                defaultMessage:
-                  'Editing an agentless integration is not supported. Add a new integration if needed.',
-              }
-            ),
-          }
-        : {
-            href: getHref('integration_policy_edit', {
-              packagePolicyId: packagePolicy.id,
-            }),
-            title: packagePolicy.name,
-          })}
+      href={getHref('integration_policy_edit', {
+        packagePolicyId: packagePolicy.id,
+      })}
     >
       {packagePolicy.name}
     </EuiLink>
   );
 });
-
-const AgentPolicyNotFound = () => (
-  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-    <EuiIcon size="m" type="warning" color="warning" />
-    &nbsp;
-    <FormattedMessage
-      id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"
-      defaultMessage="Policy not found"
-    />
-  </EuiText>
-);
 
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { search } = useLocation();
@@ -250,7 +224,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           defaultMessage: 'Agent policies',
         }),
         truncateText: true,
-        render(id, { agentPolicies, packagePolicy }) {
+        render(ids, { agentPolicies, packagePolicy }) {
           return agentPolicies.length > 0 ? (
             canShowMultiplePoliciesCell ? (
               <MultipleAgentPoliciesSummaryLine
@@ -261,8 +235,22 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             ) : (
               <AgentPolicySummaryLine policy={agentPolicies[0]} />
             )
+          ) : ids.length === 0 ? (
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="xpack.fleet.epm.packageDetails.integrationList.noAgentPolicies"
+                defaultMessage="No agent policies"
+              />
+            </EuiText>
           ) : (
-            <AgentPolicyNotFound />
+            <EuiText color="subdued" size="xs">
+              <EuiIcon size="m" type="warning" color="warning" />
+              &nbsp;
+              <FormattedMessage
+                id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"
+                defaultMessage="Policy not found"
+              />
+            </EuiText>
           );
         },
       },
@@ -297,7 +285,14 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         render({ agentPolicies, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
           if (agentPolicies.length === 0) {
-            return null;
+            return (
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.fleet.epm.packageDetails.integrationList.noAgents"
+                  defaultMessage="No agents"
+                />
+              </EuiText>
+            );
           }
           const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
           const canAddAgentsForPolicy = policyHasFleetServer(agentPolicy)

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { camelCase } from 'lodash';
@@ -286,7 +287,7 @@ export function getPolicyFields(policyName: string) {
 }
 
 export interface SuggestOptions {
-  ctx?: EditorContext;
+  triggerCharacter?: string;
   callbacks?: ESQLCallbacks;
 }
 
@@ -301,9 +302,10 @@ export const setup = async (caret = '/') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    const ctx =
-      opts.ctx ??
-      (pos > 0 ? { triggerKind: 1, triggerCharacter: query[pos - 1] } : { triggerKind: 0 });
+    const ctx: EditorContext = opts.triggerCharacter
+      ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
+      : { triggerKind: 0 };
+
     return await autocomplete.suggest(
       querySansCaret,
       pos,
@@ -318,22 +320,28 @@ export const setup = async (caret = '/') => {
     expected: Array<string | PartialSuggestionWithText>,
     opts?: SuggestOptions
   ) => {
-    const result = await suggest(query, opts);
-    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+    try {
+      const result = await suggest(query, opts);
+      const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    const expectedTexts = expected
-      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
-      .sort();
+      const expectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
 
-    expect(resultTexts).toEqual(expectedTexts);
+      expect(resultTexts).toEqual(expectedTexts);
 
-    const expectedNonStringSuggestions = expected.filter(
-      (suggestion) => typeof suggestion !== 'string'
-    ) as PartialSuggestionWithText[];
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
 
-    for (const expectedSuggestion of expectedNonStringSuggestions) {
-      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
-      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
     }
   };
 

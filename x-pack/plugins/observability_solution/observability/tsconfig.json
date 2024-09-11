@@ -110,6 +110,12 @@
     "@kbn/license-management-plugin",
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-ui-settings-server-mocks",
+    "@kbn/investigate-plugin",
+    "@kbn/investigation-shared",
+    "@kbn/grouping",
+    "@kbn/alerts-grouping",
+    "@kbn/core-http-browser",
+    "@kbn/logs-shared-plugin",
   ],
   "exclude": [
     "target/**/*"

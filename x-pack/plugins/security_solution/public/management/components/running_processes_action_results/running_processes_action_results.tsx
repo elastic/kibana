@@ -140,7 +140,7 @@ const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProp
     const wrappingClassname = useMemo(() => {
       return css({
         '.accordion-host-name-button-content': {
-          'font-size': 'inherit',
+          fontSize: 'inherit',
         },
       });
     }, []);
@@ -211,6 +211,7 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
           <ResponseActionFileDownloadLink
             action={action}
             canAccessFileDownloadLink={true}
+            showPasscode={false}
             data-test-subj={testId('download')}
           />
         ) : (
@@ -227,6 +228,7 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
                     action={action}
                     agentId={id}
                     canAccessFileDownloadLink={canGetRunningProcesses}
+                    showPasscode={false}
                     data-test-subj={testId('download')}
                   />
                 </HostProcessesAccordion>

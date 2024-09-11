@@ -124,3 +124,7 @@ export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
 
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
+
+/** The list of OS types that support. Value usually found in ECS `host.os.type` */
+export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
+export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];

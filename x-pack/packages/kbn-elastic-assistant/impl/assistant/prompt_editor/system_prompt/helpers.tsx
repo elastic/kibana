@@ -46,7 +46,7 @@ export const getOptionFromPrompt = ({
   ),
   dropdownDisplay: (
     <>
-      <Strong data-test-subj="name">{name}</Strong>
+      <Strong data-test-subj={`systemPrompt-${name}`}>{name}</Strong>
 
       {/* Empty content tooltip gets around :hover styles from SuperSelectOptionButton */}
       <EuiToolTip content={undefined}>
