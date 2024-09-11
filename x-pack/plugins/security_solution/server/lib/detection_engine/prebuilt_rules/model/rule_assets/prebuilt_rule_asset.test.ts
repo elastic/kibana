@@ -9,13 +9,13 @@ import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zo
 import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import { PrebuiltRuleAsset, TypeSpecificFields } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
-import { TypeSpecificCreateProps } from '../../../../../../common/api/detection_engine';
+import { TypeSpecificCreatePropsInternal } from '../../../../../../common/api/detection_engine';
 
 describe('Prebuilt rule asset schema', () => {
   it('can be of all rule types that are supported', () => {
     // Check that the discriminated union TypeSpecificFields, which is used to create
     // the PrebuiltRuleAsset schema, contains all the rule types that are supported.
-    const createPropsTypes = TypeSpecificCreateProps.options.map(
+    const createPropsTypes = TypeSpecificCreatePropsInternal.options.map(
       (option) => option.shape.type.value
     );
     const fieldsTypes = TypeSpecificFields.options.map((option) => option.shape.type.value);
