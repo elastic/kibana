@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns no values when provided field has no degraded values', async () => {
         const resp = await callApiAs({
-          user: 'datasetQualityLogsUser',
+          user: 'datasetQualityMonitorUser',
           dataStream: degradedFieldsDatastream,
           degradedField: regularFieldName,
         });
@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns values when provided field has degraded values', async () => {
         const resp = await callApiAs({
-          user: 'datasetQualityLogsUser',
+          user: 'datasetQualityMonitorUser',
           dataStream: degradedFieldsDatastream,
           degradedField: degradedFieldName,
         });

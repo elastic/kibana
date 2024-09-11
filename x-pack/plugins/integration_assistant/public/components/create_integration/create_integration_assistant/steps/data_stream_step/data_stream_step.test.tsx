@@ -42,7 +42,7 @@ jest.mock('./use_load_package_names', () => {
   };
 });
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>

@@ -1,0 +1,15 @@
+## MV_AVG
+
+The `MV_AVG` function converts a multivalued field into a single-valued field containing the average of all the values.
+
+### Examples
+
+```esql
+ROW a=[3, 5, 1, 6]
+| EVAL avg_a = MV_AVG(a)
+```
+
+```esql
+ROW scores=[10, 20, 30, 40]
+| EVAL average_score = MV_AVG(scores)
+```

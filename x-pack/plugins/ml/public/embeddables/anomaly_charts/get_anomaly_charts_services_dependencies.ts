@@ -23,7 +23,6 @@ export const getAnomalyChartsServiceDependencies = async (
     { mlJobServiceFactory },
     { mlResultsServiceProvider },
     { MlCapabilitiesService },
-    { toastNotificationServiceProvider },
   ] = await Promise.all([
     await import('../../application/services/anomaly_detector_service'),
     await import('../../application/services/field_format_service_factory'),
@@ -32,13 +31,11 @@ export const getAnomalyChartsServiceDependencies = async (
     await import('../../application/services/job_service'),
     await import('../../application/services/results_service'),
     await import('../../application/capabilities/check_capabilities'),
-    await import('../../application/services/toast_notification_service'),
   ]);
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
   const mlApi = mlApiProvider(httpService);
-  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
+  const mlJobService = mlJobServiceFactory(mlApi);
   const mlResultsService = mlResultsServiceProvider(mlApi);
   const mlCapabilities = new MlCapabilitiesService(mlApi);
   const anomalyExplorerService = new AnomalyExplorerChartsService(

@@ -11,14 +11,40 @@ import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
-import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
+import { SharedProviders } from '../../utils/shared_providers';
+import { ObservabilityAIAssistantAppService } from '../../service/create_app_service';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 
-export function NavControl({}: {}) {
+interface NavControlWithProviderDeps {
+  appService: ObservabilityAIAssistantAppService;
+  coreStart: CoreStart;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+}
+
+export const NavControlWithProvider = ({
+  appService,
+  coreStart,
+  pluginsStart,
+}: NavControlWithProviderDeps) => {
+  return (
+    <SharedProviders
+      coreStart={coreStart}
+      pluginsStart={pluginsStart}
+      service={appService}
+      theme$={coreStart.theme.theme$}
+    >
+      <NavControl />
+    </SharedProviders>
+  );
+};
+
+export function NavControl() {
   const service = useObservabilityAIAssistantAppService();
 
   const {
@@ -63,8 +89,6 @@ export function NavControl({}: {}) {
 
   const keyRef = useRef(v4());
 
-  const { isVisible } = useIsNavControlVisible();
-
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       keyRef.current = v4();
@@ -107,10 +131,6 @@ export function NavControl({}: {}) {
       window.removeEventListener('keypress', keyboardListener);
     };
   }, [service.conversations]);
-
-  if (!isVisible) {
-    return null;
-  }
 
   return (
     <>

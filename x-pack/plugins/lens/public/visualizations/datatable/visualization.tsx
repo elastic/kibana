@@ -81,15 +81,15 @@ export const getDatatableVisualization = ({
       id: 'lnsDatatable',
       icon: IconChartDatatable,
       label: visualizationLabel,
-      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
-        defaultMessage: 'Tabular',
-      }),
       sortPriority: 5,
+      description: i18n.translate('xpack.lens.datatable.visualizationDescription', {
+        defaultMessage: 'Organize data in structured rows and columns.',
+      }),
     },
   ],
 
   getVisualizationTypeId() {
-    return 'lnsDatatable';
+    return this.id;
   },
 
   getLayerIds(state) {
