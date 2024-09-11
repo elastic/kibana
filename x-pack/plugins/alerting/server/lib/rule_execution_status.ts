@@ -70,13 +70,23 @@ export function executionStatusFromState({
   }
 
   // Overwrite status to be error if last run reported any errors
-  const { errors: errorsFromLastRun } = ruleResultService.getLastRunResults();
+  const { errors: errorsFromLastRun, warnings: warningsFromLastRun } =
+    ruleResultService.getLastRunResults();
   if (errorsFromLastRun.length > 0) {
     status = RuleExecutionStatusValues[2];
     // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
     error = {
       reason: RuleExecutionStatusErrorReasons.Unknown,
       message: errorsFromLastRun.map((lastRunError) => lastRunError.message).join(','),
+    };
+  }
+
+  // Set warning status if last run reported any warnings and framework has not set any warnings
+  if (warningsFromLastRun.length > 0 && !warning) {
+    status = RuleExecutionStatusValues[5];
+    warning = {
+      reason: RuleExecutionStatusWarningReasons.EXECUTION,
+      message: warningsFromLastRun.join(','),
     };
   }
 

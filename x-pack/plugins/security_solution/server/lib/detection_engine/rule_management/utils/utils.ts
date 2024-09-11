@@ -9,8 +9,6 @@ import { partition, isEmpty } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
-
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -18,8 +16,6 @@ import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type {
   InvestigationFields,
-  RequiredField,
-  RequiredFieldInput,
   RuleResponse,
   RuleAction as RuleActionSchema,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -374,22 +370,6 @@ export const migrateLegacyInvestigationFields = (
 
   return investigationFields;
 };
-
-/*
-  Computes the boolean "ecs" property value for each required field based on the ECS field map.
-  "ecs" property indicates whether the required field is an ECS field or not.
-*/
-export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
-  (requiredFields ?? []).map((requiredFieldWithoutEcs) => {
-    const isEcsField = Boolean(
-      ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
-    );
-
-    return {
-      ...requiredFieldWithoutEcs,
-      ecs: isEcsField,
-    };
-  });
 
 export const separateActionsAndSystemAction = (
   actionsClient: ActionsClient,
