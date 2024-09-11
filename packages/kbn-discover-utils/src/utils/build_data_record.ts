@@ -53,9 +53,9 @@ export function buildDataTableRecordList<T extends DataTableRecord = DataTableRe
   dataView?: DataView;
   processRecord?: (record: DataTableRecord) => T;
 }): DataTableRecord[] {
-  const buildRecordOption = { flattenedFieldsComparator: getFlattenedFieldsComparator(dataView) };
+  const buildRecordOptions = { flattenedFieldsComparator: getFlattenedFieldsComparator(dataView) };
   return records.map((doc) => {
-    const record = buildDataTableRecord(doc, dataView, undefined, buildRecordOption);
+    const record = buildDataTableRecord(doc, dataView, undefined, buildRecordOptions);
     return processRecord ? processRecord(record) : record;
   });
 }
