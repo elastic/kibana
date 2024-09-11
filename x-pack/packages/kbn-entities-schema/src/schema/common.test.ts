@@ -28,7 +28,7 @@ describe('schemas', () => {
       const result = metadataSchema.safeParse({
         source: 'host.name',
         destination: 'host.name',
-        limit: 0,
+        aggregation: { type: 'terms', limit: 0 },
       });
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
