@@ -38,10 +38,9 @@ export class RolesAPIClient {
   }: BulkUpdatePayload): Promise<BulkUpdateRoleResponse> => {
     return await this.http.post('/api/security/roles', {
       body: JSON.stringify({
-        roles: rolesUpdate.reduce((transformed, value) => {
-          transformed[value.name] = this.transformRoleForSave(copyRole(value));
-          return transformed;
-        }, {} as Record<string, ReturnType<typeof this.transformRoleForSave>>),
+        roles: Object.fromEntries(
+          rolesUpdate.map((role) => [role.name, this.transformRoleForSave(copyRole(role))])
+        ),
       }),
     });
   };
