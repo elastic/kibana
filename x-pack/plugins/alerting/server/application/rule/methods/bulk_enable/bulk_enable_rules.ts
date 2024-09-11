@@ -153,8 +153,6 @@ const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
-  const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'false');
-
   const rulesFinder = await withSpan(
     {
       name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
@@ -163,7 +161,7 @@ const bulkEnableRulesWithOCC = async (
     async () =>
       await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
-          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          filter,
           type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
@@ -187,9 +185,7 @@ const bulkEnableRulesWithOCC = async (
       }
       await rulesFinder.close();
 
-      const updatedInterval = rulesFinderRules
-        .filter((rule) => !rule.attributes.enabled)
-        .map((rule) => rule.attributes.schedule?.interval);
+      const updatedInterval = rulesFinderRules.map((rule) => rule.attributes.schedule?.interval);
 
       const validationPayload = await validateScheduleLimit({
         context,

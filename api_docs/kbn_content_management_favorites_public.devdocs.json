@@ -400,7 +400,7 @@
         "label": "FavoritesContextProvider",
         "description": [],
         "signature": [
-          "({ favoritesClient, notifyError, children, }: React.PropsWithChildren<FavoritesContextValue>) => JSX.Element"
+          "({ favoritesClient, notifyError, children, }: React.PropsWithChildren<React.PropsWithChildren<FavoritesContextValue>>) => JSX.Element"
         ],
         "path": "packages/content-management/favorites/favorites_public/src/favorites_context.tsx",
         "deprecated": false,
@@ -414,7 +414,7 @@
             "label": "{\n  favoritesClient,\n  notifyError,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<FavoritesContextValue>"
+              "React.PropsWithChildren<React.PropsWithChildren<FavoritesContextValue>>"
             ],
             "path": "packages/content-management/favorites/favorites_public/src/favorites_context.tsx",
             "deprecated": false,
