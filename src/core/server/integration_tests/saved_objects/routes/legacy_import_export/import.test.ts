@@ -62,6 +62,7 @@ describe('POST /api/dashboards/import', () => {
       maxImportPayloadBytes: 26214400,
       coreUsageData,
       logger: loggerMock.create(),
+      access: 'public',
     });
 
     handlerContext.savedObjects.client.bulkCreate.mockResolvedValueOnce({
