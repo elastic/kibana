@@ -17,10 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects([
+  const { dashboard, header, timePicker, discover } = getPageObjects([
     'dashboard',
     'header',
-    'visualize',
     'timePicker',
     'discover',
   ]);
@@ -31,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
-      await PageObjects.dashboard.initTests();
-      await PageObjects.dashboard.preserveCrossAppState();
+      await dashboard.initTests();
+      await dashboard.preserveCrossAppState();
       await elasticChart.setNewChartUiDebugFlag(true);
     });
 
@@ -44,28 +43,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Visualization updated when time picker changes', async () => {
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+      await dashboard.clickNewDashboard();
+      await dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
       await pieChart.expectEmptyPieChart();
 
-      await PageObjects.timePicker.setHistoricalDataRange();
+      await timePicker.setHistoricalDataRange();
       await pieChart.expectPieSliceCount(10);
     });
 
     it('Saved search updated when time picker changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
       await dashboardVisualizations.createAndAddSavedSearch({
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
 
-      const isLegacyDefault = await PageObjects.discover.useLegacyTable();
+      const isLegacyDefault = await discover.useLegacyTable();
       if (isLegacyDefault) {
         await dashboardExpect.docTableFieldCount(150);
 
         // Set to time range with no data
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Jan 1, 2000 @ 00:00:00.000',
           'Jan 1, 2000 @ 01:00:00.000'
         );
@@ -75,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(docCount).to.above(10);
 
         // Set to time range with no data
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Jan 1, 2000 @ 00:00:00.000',
           'Jan 1, 2000 @ 01:00:00.000'
         );
@@ -85,9 +84,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       log.debug('Went to landing page');
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.clickNewDashboard();
       log.debug('Clicked new dashboard');
       await dashboardVisualizations.createAndAddSavedSearch({
         name: 'saved search',
@@ -106,9 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
       const alert = await browser.getAlert();
       await alert?.accept();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const time = await PageObjects.timePicker.getTimeConfig();
-      const refresh = await PageObjects.timePicker.getRefreshConfig();
+      await header.waitUntilLoadingHasFinished();
+      const time = await timePicker.getTimeConfig();
+      const refresh = await timePicker.getRefreshConfig();
       expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
       expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
       expect(refresh.interval).to.be('2');
@@ -122,15 +121,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await elasticChart.setNewChartUiDebugFlag(true);
 
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      await dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
       // Same date range as `timePicker.setHistoricalDataRange()`
-      await PageObjects.timePicker.setAbsoluteRange(
-        '2015-09-19 06:31:44.000',
-        '2015-09-23 18:31:44.000'
-      );
-      await PageObjects.dashboard.waitForRenderComplete();
+      await timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+      await dashboard.waitForRenderComplete();
       await pieChart.expectPieSliceCount(10);
     });
   });
