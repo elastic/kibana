@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
@@ -32,7 +32,7 @@ import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { getEditUrl } from '../../services/url';
 
 /**
- * Each component, which depends on `workspace`
+ * Each component, which depends on `worksapce`
  * should not be memoized, since it will not get updates.
  * This behaviour should be changed after migrating `worksapce` to redux
  */
@@ -184,7 +184,7 @@ export const WorkspaceLayoutComponent = ({
   }, [savedWorkspace.id, sharingSavedObjectProps, spaces, coreStart.http, search]);
 
   return (
-    <>
+    <Fragment>
       <WorkspaceTopNavMenu
         workspace={workspace}
         savedWorkspace={savedWorkspace}
@@ -243,7 +243,7 @@ export const WorkspaceLayoutComponent = ({
           />
         </div>
       )}
-    </>
+    </Fragment>
   );
 };
 
