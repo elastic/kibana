@@ -164,7 +164,7 @@ paths:
   # Outputs
   /api/fleet/outputs:
     $ref: paths/outputs.yaml
-  '/api/fleet//outputs/{outputId}':
+  '/api/fleet/outputs/{outputId}':
     $ref: paths/outputs@{output_id}.yaml
   '/api/fleet/outputs/{outputId}/health':
     $ref: paths/output_health@{output_id}.yaml
