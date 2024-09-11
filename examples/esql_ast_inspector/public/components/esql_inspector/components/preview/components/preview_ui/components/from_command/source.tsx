@@ -7,7 +7,15 @@
  */
 
 import * as React from 'react';
-import { EuiFieldText, EuiFormRow, EuiIcon, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ESQLSource } from '@kbn/esql-ast';
 import { ESQLAstBaseItem } from '@kbn/esql-ast/src/types';
 import { useEsqlInspector } from '../../../../../../context';
@@ -53,6 +61,7 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
           padding: 8,
           margin: -8,
           borderRadius: 8,
+          position: 'relative',
         }}
       >
         <EuiFormRow
@@ -79,6 +88,21 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
             }}
           />
         </EuiFormRow>
+        <div style={{ position: 'absolute', right: 0, top: 0 }}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label="Remove"
+              onClick={() => {
+                if (!query) return;
+                const from = state.from$.getValue();
+                if (!from) return;
+                from.args = from.args.filter((c) => c !== node);
+                state.reprint();
+              }}
+            />
+          </EuiFlexItem>
+        </div>
       </div>
     </>
   );

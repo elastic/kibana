@@ -26,7 +26,7 @@ const backdropCss = css({
   position: 'absolute',
   left: 0,
   width: '100%',
-  pointerEvents: 'none',
+  pointerEvents: 'all',
   userSelect: 'none',
   whiteSpace: 'pre',
   color: 'rgba(255, 255, 255, 0.01)',
@@ -50,7 +50,7 @@ const overlayCss = css({
 
 export interface EsqlEditorProps {
   src: string;
-  backdrop?: Annotation[];
+  backdrops?: Annotation[][];
   highlight?: Annotation[];
   onChange: (src: string) => void;
 }
@@ -58,11 +58,19 @@ export interface EsqlEditorProps {
 export const EsqlEditor: React.FC<EsqlEditorProps> = (props) => {
   const { src, highlight, onChange } = props;
 
-  const backdrop = !!props.backdrop && (
-    <div css={backdropCss}>
-      <Annotations value={src} annotations={props.backdrop} />
-    </div>
-  );
+  const backdrops: React.ReactNode[] = [];
+
+  if (props.backdrops) {
+    for (let i = 0; i < props.backdrops.length; i++) {
+      const backdrop = props.backdrops[i];
+
+      backdrops.push(
+        <div key={i} css={backdropCss}>
+          <Annotations value={src} annotations={backdrop} />
+        </div>
+      );
+    }
+  }
 
   const overlay = !!highlight && (
     <div css={overlayCss}>
@@ -72,7 +80,7 @@ export const EsqlEditor: React.FC<EsqlEditorProps> = (props) => {
 
   return (
     <div css={blockCss}>
-      {backdrop}
+      {backdrops}
       <div css={inputCss}>
         <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />
       </div>
