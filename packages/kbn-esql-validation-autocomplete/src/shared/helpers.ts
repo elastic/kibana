@@ -19,10 +19,10 @@ import type {
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
@@ -143,8 +143,8 @@ function buildFunctionLookup() {
   if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionDefinitions,
-        statsAggregationFunctionDefinitions,
+        scalarFunctionDefinitions,
+        aggregationFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )
