@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const EX_ANSWER_LOG_TYPE = {
-  log_type: 'structured',
-  header: true,
-};
+export interface KVProcessor {
+  field: string;
+  value_split: string;
+  field_split: string;
+  trim_key: string;
+  trim_value: string;
+  packageName: string;
+  dataStreamName: string;
+}

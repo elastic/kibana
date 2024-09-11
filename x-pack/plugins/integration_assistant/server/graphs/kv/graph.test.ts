@@ -10,14 +10,14 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { getLogFormatDetectionGraph } from './graph';
+import { getKVGraph } from './graph';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const model = new FakeLLM({
-  response: '{"log_type": "structured"}',
+  response: 'Some new response',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-describe('LogFormatDetectionGraph', () => {
+describe('KVGraph', () => {
   const client = {
     asCurrentUser: {
       ingest: {
@@ -27,12 +27,12 @@ describe('LogFormatDetectionGraph', () => {
   } as unknown as IScopedClusterClient;
   describe('Compiling and Running', () => {
     it('Ensures that the graph compiles', async () => {
-      // When getLogFormatDetectionGraph runs, langgraph compiles the graph it will error if the graph has any issues.
+      // When getKVGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
       try {
-        await getLogFormatDetectionGraph({ model, client });
+        await getKVGraph({ model, client });
       } catch (error) {
-        fail(`getLogFormatDetectionGraph threw an error: ${error}`);
+        fail(`getKVGraph threw an error: ${error}`);
       }
     });
   });
