@@ -17,7 +17,7 @@ export const flyoutContentLabel = i18n.translate('discover.logs.flyoutDetail.lab
 });
 
 export const documentLabel = i18n.translate('discover.logs.dataTable.header.popover.document', {
-  defaultMessage: 'Content',
+  defaultMessage: 'Document',
 });
 
 export const contentLabel = i18n.translate('discover.logs.dataTable.header.popover.content', {

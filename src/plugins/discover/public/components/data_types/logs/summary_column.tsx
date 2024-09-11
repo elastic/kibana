@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ROWS_HEIGHT_OPTIONS, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -25,7 +26,11 @@ import {
   DataGridCellServicesProviderProps,
   DataGridCellServicesProvider,
 } from '../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
-import { Resource } from '../../discover_grid/virtual_columns/logs/resource';
+import {
+  Resource,
+  StaticResource,
+  createResourceFields,
+} from '../../discover_grid/virtual_columns/logs/resource';
 import {
   Content,
   formatJsonDocumentForContent,
@@ -64,7 +69,6 @@ export const getSummaryColumn =
         >
           <EuiFlexItem grow={false}>
             <Resource
-              truncated
               limited={isSingleLine}
               {...(shouldCenter && { alignItems: 'center' })}
               {...props}
@@ -79,8 +83,8 @@ export const getSummaryColumn =
 const SummaryPopover = (props: SummaryColumnProps & DataGridCellServicesProviderProps) => {
   const { row, dataView, fieldFormats, services } = props;
 
-  const availableResourceFields = getAvailableResourceFields(row);
-  const shouldRenderResource = availableResourceFields.length > 0;
+  const resourceFields = createResourceFields(row);
+  const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
@@ -99,7 +103,7 @@ const SummaryPopover = (props: SummaryColumnProps & DataGridCellServicesProvider
             <EuiTitle size="xxs">
               <span>{resourceLabel}</span>
             </EuiTitle>
-            <Resource wrap {...props} />
+            <StaticResource fields={resourceFields} />
           </EuiFlexGroup>
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
