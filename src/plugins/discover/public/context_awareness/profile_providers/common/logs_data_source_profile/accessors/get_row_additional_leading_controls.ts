@@ -10,7 +10,7 @@
 import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import { AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataSourceProfileProvider } from '../../../profiles';
+import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
   (prev) => (params) => {

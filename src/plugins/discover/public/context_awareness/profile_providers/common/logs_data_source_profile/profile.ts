@@ -9,10 +9,12 @@
 
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
-import { getRowIndicatorProvider } from './accessors';
+import {
+  getCellRenderers,
+  getRowIndicatorProvider,
+  getRowAdditionalLeadingControls,
+} from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { getCellRenderers } from './accessors';
-import { getRowAdditionalLeadingControls } from './accessors/get_row_additional_leading_controls';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
