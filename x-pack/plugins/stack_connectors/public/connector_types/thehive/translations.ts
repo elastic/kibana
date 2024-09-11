@@ -21,7 +21,7 @@ export const ORGANISATION_LABEL = i18n.translate(
 export const ORGANISATION_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.thehive.organisationFieldHelpText',
   {
-    defaultMessage: `By default, it uses the default organisation of the API key owner.`,
+    defaultMessage: 'By default, it uses the default organisation of the API key owner.',
   }
 );
 
