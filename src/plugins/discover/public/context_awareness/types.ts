@@ -11,6 +11,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { OmitIndexSignature } from 'type-fest';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { DiscoverDataSource } from '../../common/data_sources';
 import { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 
 export interface DocViewerExtension {
@@ -45,6 +51,36 @@ export interface RowControlsExtensionParams {
   query?: DiscoverAppState['query'];
 }
 
+export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
+
+export interface DiscoverCellActionMetadata extends Record<string, unknown> {
+  instanceId?: string;
+  dataSource?: DiscoverDataSource;
+  dataView?: DataView;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
+
+export interface DiscoverCellActionExecutionContext extends CellActionExecutionContext {
+  metadata: DiscoverCellActionMetadata | undefined;
+}
+
+export type DiscoverCellAction = CellAction<DiscoverCellActionExecutionContext>;
+
+export type AdditionalCellActionContext = CellActionsData &
+  Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'>;
+
+export interface AdditionalCellAction {
+  id: string;
+  getDisplayName: (context: AdditionalCellActionContext) => string;
+  getIconType: (context: AdditionalCellActionContext) => EuiIconType;
+  isCompatible?: (
+    context: Omit<AdditionalCellActionContext, 'value'>
+  ) => boolean | Promise<boolean>;
+  execute: (context: AdditionalCellActionContext) => void | Promise<void>;
+}
+
 export interface Profile {
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
   // Data grid
@@ -55,6 +91,7 @@ export interface Profile {
   getRowAdditionalLeadingControls: (
     params: RowControlsExtensionParams
   ) => UnifiedDataTableProps['rowAdditionalLeadingControls'] | undefined;
+  getAdditionalCellActions: () => AdditionalCellAction[];
   // Doc viewer
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
 }

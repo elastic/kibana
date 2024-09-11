@@ -46,6 +46,8 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -74,7 +76,11 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -117,6 +123,7 @@ function DiscoverDocumentsComponent({
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
   const [
+    dataSource,
     query,
     sort,
     rowHeight,
@@ -128,6 +135,7 @@ function DiscoverDocumentsComponent({
     density,
   ] = useAppStateSelector((state) => {
     return [
+      state.dataSource,
       state.query,
       state.sort,
       state.rowHeight,
@@ -263,6 +271,21 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
+
+  const { filters } = useQuerySubscriber({ data: services.data });
+
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
 
   const renderDocumentView = useCallback(
     (
@@ -471,6 +494,9 @@ function DiscoverDocumentsComponent({
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
                 query={query}
+                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+                cellActionsMetadata={cellActionsMetadata}
+                cellActionsHandling="append"
               />
             </CellActionsProvider>
           </div>
