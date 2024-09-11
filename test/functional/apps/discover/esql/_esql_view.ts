@@ -201,6 +201,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataGrid.getHeaders()).to.eql([
           'Select column',
           'Control column',
+          'Access to degraded docs',
+          'Access to available stacktraces',
           'Numberbytes',
           'machine.ram_range',
         ]);

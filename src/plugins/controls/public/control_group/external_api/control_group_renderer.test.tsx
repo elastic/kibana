@@ -8,64 +8,70 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import {
-  ControlGroupContainer,
-  ControlGroupContainerFactory,
-  ControlGroupRenderer,
-  CONTROL_GROUP_TYPE,
-} from '..';
-import { pluginServices } from '../../services/plugin_services';
-import { ReactWrapper } from 'enzyme';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { Filter } from '@kbn/es-query';
+import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
+import { act, render, waitFor } from '@testing-library/react';
+
+import { ControlGroupRendererApi } from '.';
+import { getControlGroupEmbeddableFactory } from '../../react_controls/control_group/get_control_group_factory';
+import { CONTROL_GROUP_TYPE } from '../types';
+import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
+
+type ParentApiType = PublishesUnifiedSearch & {
+  unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
+};
 
 describe('control group renderer', () => {
-  let mockControlGroupFactory: ControlGroupContainerFactory;
-  let mockControlGroupContainer: ControlGroupContainer;
+  const core = coreMock.createStart();
+  const dataViews = dataViewPluginMocks.createStartContract();
+  const factory = getControlGroupEmbeddableFactory({ core, dataViews });
+  const buildControlGroupSpy = jest.spyOn(factory, 'buildEmbeddable');
+
+  const mountControlGroupRenderer = async (
+    props: Omit<ControlGroupRendererProps, 'onApiAvailable'> = {}
+  ) => {
+    let controlGroupApi: ControlGroupRendererApi | undefined;
+    const component = render(
+      <ControlGroupRenderer
+        {...props}
+        onApiAvailable={(newApi) => {
+          controlGroupApi = newApi;
+        }}
+      />
+    );
+    await waitFor(() => {
+      expect(controlGroupApi).toBeDefined();
+    });
+    return { component, api: controlGroupApi! as ControlGroupRendererApi };
+  };
+
+  beforeAll(() => {
+    const embeddable = embeddablePluginMock.createSetupContract();
+    embeddable.registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
+      return factory;
+    });
+  });
 
   beforeEach(() => {
-    mockControlGroupContainer = {
-      destroy: jest.fn(),
-      render: jest.fn(),
-      updateInput: jest.fn(),
-      getInput: jest.fn().mockReturnValue({}),
-    } as unknown as ControlGroupContainer;
-    mockControlGroupFactory = {
-      create: jest.fn().mockReturnValue(mockControlGroupContainer),
-    } as unknown as ControlGroupContainerFactory;
-    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-      .fn()
-      .mockReturnValue(mockControlGroupFactory);
+    buildControlGroupSpy.mockClear();
   });
 
-  test('calls create method on the Control Group embeddable factory with returned initial input', async () => {
-    await act(async () => {
-      mountWithIntl(
-        <ControlGroupRenderer
-          getCreationOptions={() => Promise.resolve({ initialInput: { controlStyle: 'twoLine' } })}
-        />
-      );
-    });
-    expect(pluginServices.getServices().embeddable.getEmbeddableFactory).toHaveBeenCalledWith(
-      CONTROL_GROUP_TYPE
-    );
-    expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
-      expect.objectContaining({ controlStyle: 'twoLine' }),
-      undefined,
-      { lastSavedInput: expect.objectContaining({ controlStyle: 'twoLine' }) },
-      undefined
-    );
+  test('calls build method from the control group embeddable factory', async () => {
+    await mountControlGroupRenderer();
+    expect(buildControlGroupSpy).toBeCalledTimes(1);
   });
 
-  test('destroys control group container on unmount', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<ControlGroupRenderer />);
+  test('calling `updateInput` forces control group to be rebuilt', async () => {
+    const { api } = await mountControlGroupRenderer();
+    expect(buildControlGroupSpy).toBeCalledTimes(1);
+    act(() => api.updateInput({ autoApplySelections: false }));
+    await waitFor(() => {
+      expect(buildControlGroupSpy).toBeCalledTimes(2);
     });
-    wrapper!.unmount();
-    expect(mockControlGroupContainer.destroy).toHaveBeenCalledTimes(1);
   });
 
   test('filter changes are dispatched to control group if they are different', async () => {
@@ -75,57 +81,36 @@ describe('control group renderer', () => {
     const updatedFilters: Filter[] = [
       { meta: { alias: 'test', disabled: false, negate: true, index: 'test' } },
     ];
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <ControlGroupRenderer
-          getCreationOptions={() => Promise.resolve({ initialInput: { filters: initialFilters } })}
-        />
-      );
-    });
-    await act(async () => {
-      await wrapper.setProps({ filters: updatedFilters });
-    });
-    expect(mockControlGroupContainer.updateInput).toHaveBeenCalledWith(
-      expect.objectContaining({ filters: updatedFilters })
+
+    const { component, api } = await mountControlGroupRenderer({ filters: initialFilters });
+    expect((api.parentApi as ParentApiType).unifiedSearchFilters$?.getValue()).toEqual(
+      initialFilters
+    );
+    component.rerender(
+      <ControlGroupRenderer onApiAvailable={jest.fn()} filters={updatedFilters} />
+    );
+    expect((api.parentApi as ParentApiType).unifiedSearchFilters$?.getValue()).toEqual(
+      updatedFilters
     );
   });
 
   test('query changes are dispatched to control group if they are different', async () => {
     const initialQuery = { language: 'kql', query: 'query' };
     const updatedQuery = { language: 'kql', query: 'super query' };
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <ControlGroupRenderer
-          getCreationOptions={() => Promise.resolve({ initialInput: { query: initialQuery } })}
-        />
-      );
-    });
-    await act(async () => {
-      await wrapper.setProps({ query: updatedQuery });
-    });
-    expect(mockControlGroupContainer.updateInput).toHaveBeenCalledWith(
-      expect.objectContaining({ query: updatedQuery })
-    );
+
+    const { component, api } = await mountControlGroupRenderer({ query: initialQuery });
+    expect((api.parentApi as ParentApiType).query$.getValue()).toEqual(initialQuery);
+    component.rerender(<ControlGroupRenderer onApiAvailable={jest.fn()} query={updatedQuery} />);
+    expect((api.parentApi as ParentApiType).query$.getValue()).toEqual(updatedQuery);
   });
 
   test('time range changes are dispatched to control group if they are different', async () => {
     const initialTime = { from: new Date().toISOString(), to: new Date().toISOString() };
     const updatedTime = { from: new Date().toISOString() + 10, to: new Date().toISOString() + 20 };
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <ControlGroupRenderer
-          getCreationOptions={() => Promise.resolve({ initialInput: { timeRange: initialTime } })}
-        />
-      );
-    });
-    await act(async () => {
-      await wrapper.setProps({ timeRange: updatedTime });
-    });
-    expect(mockControlGroupContainer.updateInput).toHaveBeenCalledWith(
-      expect.objectContaining({ timeRange: updatedTime })
-    );
+
+    const { component, api } = await mountControlGroupRenderer({ timeRange: initialTime });
+    expect((api.parentApi as ParentApiType).timeRange$.getValue()).toEqual(initialTime);
+    component.rerender(<ControlGroupRenderer onApiAvailable={jest.fn()} timeRange={updatedTime} />);
+    expect((api.parentApi as ParentApiType).timeRange$.getValue()).toEqual(updatedTime);
   });
 });
