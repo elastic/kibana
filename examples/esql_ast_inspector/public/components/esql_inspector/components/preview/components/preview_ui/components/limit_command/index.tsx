@@ -15,6 +15,7 @@ import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_s
 export const LimitCommand: React.FC = () => {
   const state = useEsqlInspector();
   const limit = useBehaviorSubject(state.limit$);
+  const focusedNode = useBehaviorSubject(state.focusedNode$);
 
   if (!limit) {
     return (
@@ -62,27 +63,39 @@ export const LimitCommand: React.FC = () => {
           paddingTop: 16,
         }}
       >
-        <EuiFormRow fullWidth>
-          <EuiFieldText
-            fullWidth
-            value={value}
-            onChange={(e) => {
-              const newValue = +e.target.value;
+        <div
+          onMouseEnter={() => {
+            state.focusedNode$.next(limit);
+          }}
+          style={{
+            background: focusedNode === limit ? 'rgb(190, 237, 224)' : 'transparent',
+            padding: 8,
+            margin: -8,
+            borderRadius: 8,
+          }}
+        >
+          <EuiFormRow fullWidth>
+            <EuiFieldText
+              fullWidth
+              value={value}
+              onChange={(e) => {
+                const newValue = +e.target.value;
 
-              if (newValue !== newValue) {
-                return;
-              }
+                if (newValue !== newValue) {
+                  return;
+                }
 
-              const literal = Builder.expression.literal.numeric({
-                value: newValue,
-                literalType: 'integer',
-              });
+                const literal = Builder.expression.literal.numeric({
+                  value: newValue,
+                  literalType: 'integer',
+                });
 
-              limit.args[0] = literal;
-              state.reprint();
-            }}
-          />
-        </EuiFormRow>
+                limit.args[0] = literal;
+                state.reprint();
+              }}
+            />
+          </EuiFormRow>
+        </div>
       </div>
     </EuiPanel>
   );
