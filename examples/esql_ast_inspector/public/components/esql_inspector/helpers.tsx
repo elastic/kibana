@@ -99,6 +99,21 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
           pos + 1,
           (text) => <span style={{ fontWeight: 'bold', opacity: 0.3 }}>{text}</span>,
         ]);
+
+        break;
+      }
+      case 34: // BY
+      case 78: {
+        // METADATA
+        const pos = token.start;
+
+        annotations.push([
+          pos,
+          pos + token.text.length,
+          (text) => <span style={{ color: colors.command, fontWeight: 'bold' }}>{text}</span>,
+        ]);
+
+        break;
       }
       default: {
         switch (token.text) {
@@ -112,8 +127,11 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
           case '>=':
           case '<':
           case '<=':
+          case 'and':
           case 'AND':
+          case 'or':
           case 'OR':
+          case 'not':
           case 'NOT': {
             annotations.push([
               token.start,

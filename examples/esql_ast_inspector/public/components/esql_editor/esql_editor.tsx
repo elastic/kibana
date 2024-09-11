@@ -20,6 +20,16 @@ const blockCss = css({
     "'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace",
 });
 
+const backdropCss = css({
+  display: 'inline-block',
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  pointerEvents: 'none',
+  userSelect: 'none',
+  whiteSpace: 'pre',
+});
+
 const inputCss = css({
   display: 'inline-block',
   color: 'rgba(255, 255, 255, 0.01)',
@@ -38,11 +48,20 @@ const overlayCss = css({
 
 export interface EsqlEditorProps {
   src: string;
+  backdrop?: Annotation[];
   highlight?: Annotation[];
   onChange: (src: string) => void;
 }
 
-export const EsqlEditor: React.FC<EsqlEditorProps> = ({ src, highlight, onChange }) => {
+export const EsqlEditor: React.FC<EsqlEditorProps> = (props) => {
+  const { src, highlight, onChange } = props;
+
+  const backdrop = !!props.backdrop && (
+    <div css={backdropCss}>
+      <Annotations value={src} annotations={props.backdrop} />
+    </div>
+  );
+
   const overlay = !!highlight && (
     <div css={overlayCss}>
       <Annotations value={src} annotations={highlight} />
@@ -51,6 +70,7 @@ export const EsqlEditor: React.FC<EsqlEditorProps> = ({ src, highlight, onChange
 
   return (
     <div css={blockCss}>
+      {backdrop}
       <div css={inputCss}>
         <FlexibleInput multiline value={src} onChange={(e) => onChange(e.target.value)} />
       </div>
