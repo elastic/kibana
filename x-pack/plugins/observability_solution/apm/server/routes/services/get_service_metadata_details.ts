@@ -33,6 +33,7 @@ import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw'
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
@@ -171,8 +172,10 @@ export async function getServiceMetadataDetails({
 
   const response = await apmEventClient.search('get_service_metadata_details', params);
 
-  const hit = response.hits.hits[0]?._source as ServiceMetadataDetailsRaw | undefined;
-  if (!hit) {
+  const fields = response.hits.hits[0]?.fields;
+  const fieldsNorm = normalizeFields(fields) as ServiceMetadataDetailsRaw | undefined;
+
+  if (!fieldsNorm) {
     return {
       service: undefined,
       container: undefined,
@@ -180,7 +183,7 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } = hit;
+  const { service, agent, host, kubernetes, container, cloud, labels } = fieldsNorm;
 
   const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),

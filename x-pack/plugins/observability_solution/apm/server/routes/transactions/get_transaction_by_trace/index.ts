@@ -7,6 +7,7 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { normalizeFields } from '../../../utils/normalize_fields';
 import { TRACE_ID, PARENT_ID } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -49,7 +50,10 @@ export async function getRootTransactionByTraceId({
   };
 
   const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);
-  return {
-    transaction: resp.hits.hits[0]?._source,
-  };
+  const fields = resp.hits.hits[0]?.fields;
+  const fields_norm = normalizeFields(fields);
+
+  console.log(fields_norm);
+
+  return fields_norm;
 }

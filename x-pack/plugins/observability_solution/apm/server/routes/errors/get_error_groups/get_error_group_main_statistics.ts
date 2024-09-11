@@ -7,6 +7,7 @@
 
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { normalizeFields } from '../../../utils/normalize_fields';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -139,6 +140,16 @@ export async function getErrorGroupMainStatistics({
                   ERROR_GROUP_ID,
                   '@timestamp',
                 ],
+                fields: [
+                  TRACE_ID,
+                  ERROR_LOG_MESSAGE,
+                  ERROR_EXC_MESSAGE,
+                  ERROR_EXC_HANDLED,
+                  ERROR_EXC_TYPE,
+                  ERROR_CULPRIT,
+                  ERROR_GROUP_ID,
+                  '@timestamp',
+                ],
                 sort: {
                   '@timestamp': 'desc',
                 },
@@ -157,15 +168,17 @@ export async function getErrorGroupMainStatistics({
 
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => {
+      const fields = bucket.sample.hits.hits[0]?.fields;
+      const fieldsNorm = normalizeFields(fields);
       return {
         groupId: bucket.key as string,
-        name: getErrorName(bucket.sample.hits.hits[0]._source),
-        lastSeen: new Date(bucket.sample.hits.hits[0]._source['@timestamp']).getTime(),
+        name: getErrorName(fieldsNorm),
+        lastSeen: new Date(fieldsNorm['@timestamp']).getTime(),
         occurrences: bucket.doc_count,
-        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
-        handled: bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
-        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
-        traceId: bucket.sample.hits.hits[0]._source.trace?.id,
+        culprit: fieldsNorm.error.culprit,
+        handled: fieldsNorm.error.exception?.[0].handled,
+        type: fieldsNorm.error.exception?.[0].type,
+        traceId: fieldsNorm.trace?.id,
       };
     }) ?? [];
 

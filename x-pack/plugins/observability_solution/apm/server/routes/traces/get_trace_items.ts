@@ -54,6 +54,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 export interface TraceItems {
   exceedsMax: boolean;
@@ -114,6 +115,17 @@ export async function getTraceItems({
         },
       },
     },
+    fields: [
+      TIMESTAMP,
+      TRACE_ID,
+      TRANSACTION_ID,
+      PARENT_ID,
+      SERVICE_NAME,
+      ERROR_ID,
+      ERROR_LOG_MESSAGE,
+      ERROR_EXCEPTION,
+      ERROR_GROUP_ID,
+    ],
   });
 
   const traceResponsePromise = getTraceDocsPaginated({
@@ -133,8 +145,9 @@ export async function getTraceItems({
 
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
-  const traceDocs = traceResponse.hits.map((hit) => hit._source);
-  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
+
+  const traceDocs = traceResponse.hits.map((hit) => normalizeFields(hit.fields));
+  const errorDocs = errorResponse.hits.hits.map((hit) => normalizeFields(hit.fields));
 
   return {
     exceedsMax,
@@ -266,6 +279,34 @@ async function getTraceDocsPerPage({
         },
       },
     },
+    fields: [
+      TIMESTAMP,
+      TRACE_ID,
+      PARENT_ID,
+      SERVICE_NAME,
+      SERVICE_ENVIRONMENT,
+      AGENT_NAME,
+      EVENT_OUTCOME,
+      PROCESSOR_EVENT,
+      TRANSACTION_DURATION,
+      TRANSACTION_ID,
+      TRANSACTION_NAME,
+      TRANSACTION_TYPE,
+      TRANSACTION_RESULT,
+      FAAS_COLDSTART,
+      SPAN_ID,
+      SPAN_TYPE,
+      SPAN_SUBTYPE,
+      SPAN_ACTION,
+      SPAN_NAME,
+      SPAN_DURATION,
+      SPAN_LINKS,
+      SPAN_COMPOSITE_COUNT,
+      SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+      SPAN_COMPOSITE_SUM,
+      SPAN_SYNC,
+      CHILD_ID,
+    ],
     sort: [
       { _score: 'asc' },
       {

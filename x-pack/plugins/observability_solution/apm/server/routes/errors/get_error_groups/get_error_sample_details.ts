@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { normalizeFields } from '../../../utils/normalize_fields';
 import { ERROR_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -64,9 +65,12 @@ export async function getErrorSampleDetails({
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
-  const error = resp.hits.hits[0]?._source;
-  const transactionId = error?.transaction?.id;
-  const traceId = error?.trace?.id;
+  // const error = resp.hits.hits[0]?._source;
+
+  const error = resp.hits.hits[0]?.fields;
+  const errorNorm = normalizeFields(error);
+  const transactionId = errorNorm?.transaction?.id;
+  const traceId = errorNorm?.trace?.id;
 
   let transaction;
   if (transactionId && traceId) {
@@ -81,6 +85,6 @@ export async function getErrorSampleDetails({
 
   return {
     transaction,
-    error,
+    error: errorNorm,
   };
 }

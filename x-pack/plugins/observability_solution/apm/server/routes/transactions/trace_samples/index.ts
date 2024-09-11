@@ -94,6 +94,7 @@ export async function getTraceSamples({
           },
         },
         size: TRACE_SAMPLES_SIZE,
+        fields: [TRANSACTION_ID, TRACE_ID, '@timestamp'],
         sort: [
           {
             _score: {
@@ -111,9 +112,9 @@ export async function getTraceSamples({
 
     const traceSamples = response.hits.hits.map((hit) => ({
       score: hit._score,
-      timestamp: hit._source['@timestamp'],
-      transactionId: hit._source.transaction.id,
-      traceId: hit._source.trace.id,
+      timestamp: hit.fields['@timestamp']?.[0],
+      transactionId: hit.fields[TRANSACTION_ID]?.[0],
+      traceId: hit.fields[TRACE_ID]?.[0],
     }));
 
     return { traceSamples };

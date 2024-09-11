@@ -13,6 +13,7 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { getTransaction } from '../get_transaction';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { normalizeFields } from '../../../utils/normalize_fields';
 
 export async function getSpan({
   spanId,
@@ -48,6 +49,7 @@ export async function getSpan({
           },
         },
       },
+      fields: ['*'],
     }),
     parentTransactionId
       ? getTransaction({
@@ -60,5 +62,8 @@ export async function getSpan({
       : undefined,
   ]);
 
-  return { span: spanResp.hits.hits[0]?._source, parentTransaction };
+  const fields = spanResp.hits.hits[0]?.fields;
+  const fieldsNorm = normalizeFields(fields);
+
+  return { span: fieldsNorm, parentTransaction };
 }

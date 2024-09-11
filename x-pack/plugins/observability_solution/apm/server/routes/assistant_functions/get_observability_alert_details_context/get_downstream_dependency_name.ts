@@ -50,9 +50,10 @@ export async function getDownstreamServiceResource({
           ],
         },
       },
+      fields: ['span.destination.service'],
     },
   });
 
   const hit = response.hits.hits[0];
-  return hit?._source?.span.destination?.service.resource;
+  return hit?.fields?.['span.destination?.service?.resource']?.[0];
 }

@@ -171,10 +171,12 @@ function getErrorItem(
     | IWaterfallSpanOrTransaction
     | undefined;
 
+  console.log('error',error);
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
-    id: error.error.id,
+    // TODO FIX ME
+    id: error?.error?.id ?? '',
     parent,
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,
@@ -440,6 +442,17 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   }
 
   const errorCountByParentId = getErrorCountByParentId(traceItems.errorDocs);
+
+  console.log(
+    'traceItems.traceDocs, traceItems.spanLinksCountById',
+    traceItems.traceDocs,
+    traceItems.spanLinksCountById
+  );
+  console.log(
+    'traceItems, traceItems.spanLinksCountById',
+    traceItems,
+    traceItems.spanLinksCountById
+  );
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     traceItems.traceDocs,

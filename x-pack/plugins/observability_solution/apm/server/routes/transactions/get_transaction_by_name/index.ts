@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { normalizeFields } from '../../../utils/normalize_fields';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
@@ -50,5 +51,8 @@ export async function getTransactionByName({
     },
   });
 
-  return resp.hits.hits[0]?._source;
+  const fields = resp.hits.hits[0]?.fields;
+  const fieldsNorm = normalizeFields(fields);
+
+  return fieldsNorm;
 }

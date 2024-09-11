@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../common/utils/maybe';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 export interface MetadataForDependencyResponse {
   spanType: string | undefined;
@@ -46,16 +47,19 @@ export async function getMetadataForDependency({
           ],
         },
       },
+      fields: ['*'],
       sort: {
         '@timestamp': 'desc',
       },
     },
   });
 
-  const sample = maybe(sampleResponse.hits.hits[0])?._source;
+  const sample = maybe(sampleResponse.hits.hits[0])?.fields;
+  const sampleNorm = sample ? normalizeFields(sample) : null;
 
+  console.log('sampleNorm', sampleNorm);
   return {
-    spanType: sample?.span.type,
-    spanSubtype: sample?.span.subtype,
+    spanType: sampleNorm?.span.type,
+    spanSubtype: sampleNorm?.span.subtype,
   };
 }

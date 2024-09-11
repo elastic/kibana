@@ -16,6 +16,7 @@ import {
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 export async function getLinkedParentsOfSpan({
   apmEventClient,
@@ -56,7 +57,9 @@ export async function getLinkedParentsOfSpan({
     },
   });
 
-  const source = response.hits.hits?.[0]?._source as TransactionRaw | SpanRaw;
+  const fields = response.hits.hits[0]?.fields;
+  const fieldsNorm = normalizeFields(fields) as TransactionRaw | SpanRaw | undefined;
+  // const source = response.hits.hits?.[0]?._source as TransactionRaw | SpanRaw;
 
-  return source?.span?.links || [];
+  return fieldsNorm?.span?.links || [];
 }
