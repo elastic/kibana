@@ -1787,7 +1787,6 @@
     "string-replace-loader": "^2.2.0",
     "style-loader": "^1.1.3",
     "stylelint": "^14.9.1",
-    "stylelint-scss": "^4.3.0",
     "superagent": "^9.0.2",
     "supertest": "^7.0.0",
     "svgo": "^2.8.0",
