@@ -98,7 +98,9 @@ export const processVersionedRouter = (
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
         ...(route.options.description ? { description: route.options.description } : {}),
         ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
-        ...(route.options.discontinued ? { discontinued: route.options.discontinued } : {}),
+        ...(route.options['x-discontinued']
+          ? { 'x-discontinued': route.options['x-discontinued'] }
+          : {}),
         requestBody: hasBody
           ? {
               content: hasVersionFilter

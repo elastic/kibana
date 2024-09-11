@@ -230,6 +230,7 @@ OK response oas-test-version-2",
         "tags": Array [
           "versioned",
         ],
+        "x-discontinued": "route x-discontinued version or date",
       },
     },
     "/foo/{id}/{path*}": Object {
