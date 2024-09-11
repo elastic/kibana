@@ -17,7 +17,7 @@ export type IDispatchAction =
     }
   | {
       type: 'string';
-      payload: any;
+      payload: unknown;
     };
 
 export interface IEditSpaceStoreState {
