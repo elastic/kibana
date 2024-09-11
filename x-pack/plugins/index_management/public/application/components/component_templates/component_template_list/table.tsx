@@ -257,6 +257,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 },
                 () => trackMetric(METRIC_TYPE.CLICK, UIM_COMPONENT_TEMPLATE_DETAILS)
               )}
+              role="button"
               data-test-subj="templateDetailsLink"
             >
               {name}
