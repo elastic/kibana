@@ -1002,7 +1002,7 @@ server log [12:41:33.672] [warn][plugins][taskManager][taskManager] taskManager 
 
 This log message tells us that Task Manager is not managing to keep up with the sheer amount of work it has been tasked with completing. This might mean that rules are not running at the frequency that was expected (instead of running every 5 minutes, it runs every 7-8 minutes, just as an example).
 
-By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the kibana.yml file using the `xpack.task_manager.capacity` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch, so only change this setting if increasing load in your environment makes sense.
+By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the `kibana.yml` file using the `xpack.task_manager.capacity` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch; only change this setting if increasing load in your environment makes sense.
 
 Another approach to addressing this might be to tell workers to run at a higher rate, rather than adding more of them, which would be configured using xpack.task_manager.poll_interval. This value dictates how often Task Manager checks to see if there’s more work to be done and uses milliseconds (by default it is 3000, which means an interval of 3 seconds).
 
