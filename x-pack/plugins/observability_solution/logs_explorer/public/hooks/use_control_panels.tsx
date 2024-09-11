@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
-import { ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { ControlGroupRuntimeState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Query, TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
@@ -27,31 +25,28 @@ export const useControlPanels = (
     return state.context.controlPanels;
   });
 
-  const getInitialInput = useCallback(
-    async (initialInput: Partial<ControlGroupInput>) => {
-      const input: Partial<ControlGroupInput> = {
-        ...initialInput,
-        viewMode: ViewMode.VIEW,
-        panels: controlPanels ?? initialInput.panels,
-        filters: filters ?? [],
-        query: query as Query,
-        timeRange: { from: fromDate!, to: toDate! },
+  const getInitialState = useCallback(
+    async (initialState: Partial<ControlGroupRuntimeState>) => {
+      const state: Partial<ControlGroupRuntimeState> = {
+        ...initialState,
+        initialChildControlState: controlPanels ?? initialState.initialChildControlState,
       };
 
-      return { initialInput: input };
+      return { initialState: state };
     },
-    [controlPanels, filters, fromDate, query, toDate]
+    [controlPanels]
   );
 
   const setControlGroupAPI = useCallback(
-    (controlGroupAPI: ControlGroupAPI) => {
-      logsExplorerControllerStateService.send({
-        type: 'INITIALIZE_CONTROL_GROUP_API',
-        controlGroupAPI,
-      });
+    (controlGroupAPI: ControlGroupRendererApi | undefined) => {
+      if (controlGroupAPI)
+        logsExplorerControllerStateService.send({
+          type: 'INITIALIZE_CONTROL_GROUP_API',
+          controlGroupAPI,
+        });
     },
     [logsExplorerControllerStateService]
   );
 
-  return { getInitialInput, setControlGroupAPI, query, filters, timeRange };
+  return { getInitialState, setControlGroupAPI, query, filters, timeRange };
 };

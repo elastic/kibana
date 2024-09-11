@@ -172,17 +172,17 @@ export function InternalDashboardTopNav({
         text:
           viewMode === ViewMode.EDIT ? (
             <>
-              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+              {dashboardTitle}
+              <EuiIcon
+                size="s"
+                type="pencil"
+                className="dshTitleBreadcrumbs__updateIcon"
+                onClick={() => dashboard.showSettings()}
+              />
             </>
           ) : (
             dashboardTitle
           ),
-        onClick:
-          viewMode === ViewMode.EDIT
-            ? () => {
-                dashboard.showSettings();
-              }
-            : undefined,
       },
     ];
 

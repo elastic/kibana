@@ -15,7 +15,6 @@ import {
   ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { MlJobService } from '../../../../services/job_service';
 import type { MlApi } from '../../../../services/ml_api_service';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
@@ -36,13 +35,12 @@ export class SingleMetricJobCreator extends JobCreator {
 
   constructor(
     mlApi: MlApi,
-    mlJobService: MlJobService,
     newJobCapsService: NewJobCapsService,
     indexPattern: DataView,
     savedSearch: SavedSearch | null,
     query: object
   ) {
-    super(mlApi, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
+    super(mlApi, newJobCapsService, indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
     this._wizardInitialized$.next(true);
   }

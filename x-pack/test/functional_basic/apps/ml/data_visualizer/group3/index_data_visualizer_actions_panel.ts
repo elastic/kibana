@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('index based actions panel on basic license', function () {
-    this.tags(['ml']);
+    this.tags(['ml', 'skipFIPS']);
 
     const indexPatternName = 'ft_farequote';
     const savedSearch = 'ft_farequote_kuery';
