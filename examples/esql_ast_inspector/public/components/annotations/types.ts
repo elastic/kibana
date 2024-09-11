@@ -8,8 +8,8 @@
 
 import * as React from 'react';
 
-export type AnnotationSkip = number;
-
-export type AnnotationMark = [length: number, annotation: (text: string) => React.ReactNode];
-
-export type Annotation = AnnotationSkip | AnnotationMark;
+export type Annotation = [
+  start: number,
+  end: number,
+  annotation: (text: string) => React.ReactNode
+];

@@ -7,4 +7,4 @@
  */
 
 export { Annotations, type AnnotationsProps } from './annotations';
-export type { Annotation, AnnotationMark, AnnotationSkip } from './types';
+export type { Annotation } from './types';

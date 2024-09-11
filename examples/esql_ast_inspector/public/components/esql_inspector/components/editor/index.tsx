@@ -41,13 +41,10 @@ export const Editor: React.FC = (props) => {
           src={src}
           onChange={(newSrc) => state.src$.next(newSrc)}
           highlight={[
-            [4, (text) => <span style={{ color: 'red' }}>{text}</span>],
-            1,
-            [5, (text) => <span style={{ color: 'blue' }}>{text}</span>],
-            3,
-            [5, (text) => <span style={{ color: 'red' }}>{text}</span>],
-            1,
-            [2, (text) => <span style={{ color: 'green' }}>{text}</span>],
+            [0, 4, (text) => <span style={{ color: 'red' }}>{text}</span>],
+            [5, 10, (text) => <span style={{ color: 'blue' }}>{text}</span>],
+            [13, 18, (text) => <span style={{ color: 'red' }}>{text}</span>],
+            [19, 21, (text) => <span style={{ color: 'green' }}>{text}</span>],
           ]}
         />
       </EuiPanel>
