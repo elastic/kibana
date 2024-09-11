@@ -1,0 +1,16 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/features-plugin",
+    "@kbn/security-plugin-types-common",
+    "@kbn/security-plugin-types-server",
+    "@kbn/licensing-plugin",
+  ]
+}

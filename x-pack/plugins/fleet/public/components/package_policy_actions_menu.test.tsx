@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { act } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies } from '../hooks';
+import { useMultipleAgentPolicies, useStartServices, useLink } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -20,6 +20,19 @@ jest.mock('../hooks', () => {
   return {
     ...jest.requireActual('../hooks'),
     useMultipleAgentPolicies: jest.fn(),
+    useStartServices: jest.fn().mockReturnValue({
+      application: {
+        navigateToApp: jest.fn(),
+      },
+      notifications: {
+        toasts: { addSuccess: jest.fn() },
+      },
+    }),
+    useLink: jest.fn().mockReturnValue({
+      getHref: jest
+        .fn()
+        .mockReturnValue('/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'),
+    }),
   };
 });
 
@@ -140,6 +153,32 @@ describe('PackagePolicyActionsMenu', () => {
     });
   });
 
+  it('Should be able to delete integration from a managed agentless policy', async () => {
+    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
+    const packagePolicy = createMockPackagePolicy();
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await act(async () => {
+      expect(utils.queryByText('Delete integration')).not.toBeNull();
+    });
+  });
+
+  it('Should navigate on delete integration when having an agentless policy', async () => {
+    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
+    const packagePolicy = createMockPackagePolicy();
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+    await act(async () => {
+      fireEvent.click(utils.getByTestId('PackagePolicyActionsDeleteItem'));
+    });
+    await act(async () => {
+      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+    });
+    expect(useStartServices().application.navigateToApp as jest.Mock).toHaveBeenCalledWith(
+      'fleet',
+      { path: '/policies' }
+    );
+  });
+
   it('Should show add button if the policy is not managed and showAddAgent=true', async () => {
     const agentPolicies = createMockAgentPolicies();
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
@@ -155,6 +194,43 @@ describe('PackagePolicyActionsMenu', () => {
     const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
     await act(async () => {
       expect(utils.queryByText('Add agent')).toBeNull();
+    });
+  });
+
+  it('Should show Edit integration with correct href when agentPolicy is defined', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy();
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await act(async () => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      expect(editButton).not.toHaveAttribute('disabled');
+      expect(editButton).toHaveAttribute('href');
+      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('edit_integration', {
+        policyId: 'some-uuid1',
+        packagePolicyId: 'some-uuid2',
+      });
+      expect(editButton).toHaveAttribute(
+        'href',
+        '/mock/app/fleet/policies/some-uuid1/edit-integration/some-uuid2'
+      );
+    });
+  });
+
+  it('Should show Edit integration with correct href when there is no agent policy', async () => {
+    const packagePolicy = createMockPackagePolicy({
+      policy_ids: [],
+    });
+    const { utils } = renderMenu({
+      agentPolicies: [],
+      packagePolicy,
+    });
+    await act(async () => {
+      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
+      expect(editButton).not.toHaveAttribute('disabled');
+      expect(editButton).toHaveAttribute('href');
+      expect(useLink().getHref as jest.Mock).toHaveBeenCalledWith('integration_policy_edit', {
+        packagePolicyId: 'some-uuid2',
+      });
     });
   });
 });

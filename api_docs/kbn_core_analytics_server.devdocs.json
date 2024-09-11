@@ -11,60 +11,39 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsClientInitContext",
+        "id": "def-server.AnalyticsClientInitContext",
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsClientInitContext",
         "description": [
           "\nGeneral settings of the analytics client"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "signature": [
+          "AnalyticsClientInitContext"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.AnalyticsClientInitContext.isDev",
+            "id": "def-server.AnalyticsClientInitContext.isDev",
             "type": "boolean",
             "tags": [],
             "label": "isDev",
             "description": [
               "\nBoolean indicating if it's running in developer mode."
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.AnalyticsClientInitContext.sendTo",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sendTo",
-            "description": [
-              "\nSpecify if the shippers should send their data to the production or staging environments."
-            ],
-            "signature": [
-              "\"production\" | \"staging\""
-            ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.AnalyticsClientInitContext.logger",
+            "id": "def-server.AnalyticsClientInitContext.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -72,15 +51,9 @@
               "\nApplication-provided logger."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              }
+              "Logger"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -89,7 +62,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ContextProviderOpts",
+        "id": "def-server.ContextProviderOpts",
         "type": "Interface",
         "tags": [],
         "label": "ContextProviderOpts",
@@ -97,35 +70,29 @@
           "\nDefinition of a context provider"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.ContextProviderOpts",
-            "text": "ContextProviderOpts"
-          },
+          "ContextProviderOpts",
           "<Context>"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ContextProviderOpts.name",
+            "id": "def-server.ContextProviderOpts.name",
             "type": "string",
             "tags": [],
             "label": "name",
             "description": [
               "\nThe name of the provider."
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ContextProviderOpts.context$",
+            "id": "def-server.ContextProviderOpts.context$",
             "type": "Object",
             "tags": [],
             "label": "context$",
@@ -136,13 +103,13 @@
               "Observable",
               "<Context>"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ContextProviderOpts.schema",
+            "id": "def-server.ContextProviderOpts.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -151,16 +118,10 @@
             ],
             "signature": [
               "{ [Key in keyof Required<Context>]: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaValue",
-                "text": "SchemaValue"
-              },
+              "SchemaValue",
               "<Context[Key]>; }"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -169,7 +130,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.Event",
+        "id": "def-server.Event",
         "type": "Interface",
         "tags": [],
         "label": "Event",
@@ -177,48 +138,42 @@
           "\nDefinition of the full event structure"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.Event",
-            "text": "Event"
-          },
+          "Event",
           "<Properties>"
         ],
-        "path": "packages/analytics/ebt/client/src/events/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.timestamp",
+            "id": "def-server.Event.timestamp",
             "type": "string",
             "tags": [],
             "label": "timestamp",
             "description": [
               "\nThe time the event was generated in ISO format."
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.event_type",
+            "id": "def-server.Event.event_type",
             "type": "string",
             "tags": [],
             "label": "event_type",
             "description": [
               "\nThe event type."
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.properties",
+            "id": "def-server.Event.properties",
             "type": "Uncategorized",
             "tags": [],
             "label": "properties",
@@ -228,13 +183,13 @@
             "signature": [
               "Properties"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.context",
+            "id": "def-server.Event.context",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -242,15 +197,9 @@
               "\nThe {@link EventContext} enriched during the processing pipeline."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.EventContext",
-                "text": "EventContext"
-              }
+              "EventContext"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -259,20 +208,23 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.EventContext",
+        "id": "def-server.EventContext",
         "type": "Interface",
         "tags": [],
         "label": "EventContext",
         "description": [
           "\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
         ],
-        "path": "packages/analytics/ebt/client/src/events/types.ts",
+        "signature": [
+          "EventContext"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.cluster_uuid",
+            "id": "def-server.EventContext.cluster_uuid",
             "type": "string",
             "tags": [],
             "label": "cluster_uuid",
@@ -282,13 +234,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.cluster_name",
+            "id": "def-server.EventContext.cluster_name",
             "type": "string",
             "tags": [],
             "label": "cluster_name",
@@ -298,13 +250,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.license_id",
+            "id": "def-server.EventContext.license_id",
             "type": "string",
             "tags": [],
             "label": "license_id",
@@ -314,13 +266,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.userId",
+            "id": "def-server.EventContext.userId",
             "type": "string",
             "tags": [],
             "label": "userId",
@@ -330,13 +282,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.cloudId",
+            "id": "def-server.EventContext.cloudId",
             "type": "string",
             "tags": [],
             "label": "cloudId",
@@ -346,13 +298,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.isElasticCloudUser",
+            "id": "def-server.EventContext.isElasticCloudUser",
             "type": "CompoundType",
             "tags": [],
             "label": "isElasticCloudUser",
@@ -362,13 +314,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.version",
+            "id": "def-server.EventContext.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -378,13 +330,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.pageName",
+            "id": "def-server.EventContext.pageName",
             "type": "string",
             "tags": [],
             "label": "pageName",
@@ -394,13 +346,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.applicationId",
+            "id": "def-server.EventContext.applicationId",
             "type": "string",
             "tags": [],
             "label": "applicationId",
@@ -410,13 +362,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.entityId",
+            "id": "def-server.EventContext.entityId",
             "type": "string",
             "tags": [],
             "label": "entityId",
@@ -426,13 +378,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.Unnamed",
+            "id": "def-server.EventContext.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: unknown",
@@ -442,7 +394,7 @@
             "signature": [
               "[key: string]:  unknown"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -451,7 +403,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.EventTypeOpts",
+        "id": "def-server.EventTypeOpts",
         "type": "Interface",
         "tags": [],
         "label": "EventTypeOpts",
@@ -459,35 +411,29 @@
           "\nDefinition of an Event Type."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.EventTypeOpts",
-            "text": "EventTypeOpts"
-          },
+          "EventTypeOpts",
           "<EventTypeData>"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventTypeOpts.eventType",
+            "id": "def-server.EventTypeOpts.eventType",
             "type": "string",
             "tags": [],
             "label": "eventType",
             "description": [
               "\nThe event type's unique name."
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventTypeOpts.schema",
+            "id": "def-server.EventTypeOpts.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -496,16 +442,10 @@
             ],
             "signature": [
               "{ [Key in keyof Required<EventTypeData>]: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaValue",
-                "text": "SchemaValue"
-              },
+              "SchemaValue",
               "<EventTypeData[Key]>; }"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -514,20 +454,23 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.IAnalyticsClient",
+        "id": "def-server.IAnalyticsClient",
         "type": "Interface",
         "tags": [],
         "label": "IAnalyticsClient",
         "description": [
           "\nAnalytics client's public APIs"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "signature": [
+          "IAnalyticsClient"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.reportEvent",
+            "id": "def-server.IAnalyticsClient.reportEvent",
             "type": "Function",
             "tags": [
               "track-adoption"
@@ -539,7 +482,7 @@
             "signature": [
               "<EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": true,
             "references": [
@@ -692,6 +635,18 @@
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
+                "plugin": "@kbn/shared-ux-chrome-navigation",
+                "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts"
+              },
+              {
+                "plugin": "@kbn/shared-ux-chrome-navigation",
+                "path": "packages/shared-ux/chrome/navigation/src/services.tsx"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/utils/recall/recall_and_score.ts"
               },
@@ -732,6 +687,14 @@
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "datasetQuality",
                 "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_client.ts"
               },
@@ -753,27 +716,23 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/helpers.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/helpers.ts"
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -985,6 +944,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
               },
               {
@@ -1012,8 +975,32 @@
                 "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "observabilityLogsExplorer",
                 "path": "x-pack/plugins/observability_solution/observability_logs_explorer/public/state_machines/observability_logs_explorer/src/telemetry_events.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/shared/feedback_buttons.tsx"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/auto_detect/use_auto_detect_telemetry.ts"
+              },
+              {
+                "plugin": "observabilityOnboarding",
+                "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/quickstart_flows/auto_detect/use_auto_detect_telemetry.ts"
               },
               {
                 "plugin": "observabilityOnboarding",
@@ -1024,152 +1011,16 @@
                 "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/management/management_service.test.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/create_chat_service.test.ts"
               },
               {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
+                "plugin": "@kbn/shared-ux-chrome-navigation",
+                "path": "packages/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1190,6 +1041,30 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1328,6 +1203,14 @@
                 "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
               },
               {
+                "plugin": "datasetQuality",
+                "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/plugins/observability_solution/dataset_quality/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/public/services/telemetry/telemetry_service.test.ts"
               },
@@ -1432,10 +1315,6 @@
                 "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
               },
               {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/mocks.ts"
-              },
-              {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.mocks.ts"
               },
@@ -1465,6 +1344,30 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_performance_measure_entries.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
@@ -1479,7 +1382,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.reportEvent.$1",
+                "id": "def-server.IAnalyticsClient.reportEvent.$1",
                 "type": "string",
                 "tags": [],
                 "label": "eventType",
@@ -1489,14 +1392,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.reportEvent.$2",
+                "id": "def-server.IAnalyticsClient.reportEvent.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "eventData",
@@ -1506,7 +1409,7 @@
                 "signature": [
                   "EventTypeData"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1516,7 +1419,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.registerEventType",
+            "id": "def-server.IAnalyticsClient.registerEventType",
             "type": "Function",
             "tags": [],
             "label": "registerEventType",
@@ -1525,22 +1428,16 @@
             ],
             "signature": [
               "<EventTypeData>(eventTypeOps: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.EventTypeOpts",
-                "text": "EventTypeOpts"
-              },
+              "EventTypeOpts",
               "<EventTypeData>) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerEventType.$1",
+                "id": "def-server.IAnalyticsClient.registerEventType.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "eventTypeOps",
@@ -1548,16 +1445,10 @@
                   "The definition of the event type {@link EventTypeOpts }."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.EventTypeOpts",
-                    "text": "EventTypeOpts"
-                  },
+                  "EventTypeOpts",
                   "<EventTypeData>"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1567,7 +1458,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.registerShipper",
+            "id": "def-server.IAnalyticsClient.registerShipper",
             "type": "Function",
             "tags": [],
             "label": "registerShipper",
@@ -1576,38 +1467,20 @@
             ],
             "signature": [
               "<Shipper extends ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.IShipper",
-                "text": "IShipper"
-              },
+              "IShipper",
               ", ShipperConfig>(Shipper: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.ShipperClassConstructor",
-                "text": "ShipperClassConstructor"
-              },
+              "ShipperClassConstructor",
               "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.RegisterShipperOpts",
-                "text": "RegisterShipperOpts"
-              },
+              "RegisterShipperOpts",
               " | undefined) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerShipper.$1",
+                "id": "def-server.IAnalyticsClient.registerShipper.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "Shipper",
@@ -1615,23 +1488,17 @@
                   "The {@link IShipper } class to instantiate the shipper."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.ShipperClassConstructor",
-                    "text": "ShipperClassConstructor"
-                  },
+                  "ShipperClassConstructor",
                   "<Shipper, ShipperConfig>"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerShipper.$2",
+                "id": "def-server.IAnalyticsClient.registerShipper.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "shipperConfig",
@@ -1641,14 +1508,14 @@
                 "signature": [
                   "ShipperConfig"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerShipper.$3",
+                "id": "def-server.IAnalyticsClient.registerShipper.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -1656,16 +1523,10 @@
                   "Additional options to register the shipper {@link RegisterShipperOpts }."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.RegisterShipperOpts",
-                    "text": "RegisterShipperOpts"
-                  },
+                  "RegisterShipperOpts",
                   " | undefined"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1675,7 +1536,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.optIn",
+            "id": "def-server.IAnalyticsClient.optIn",
             "type": "Function",
             "tags": [],
             "label": "optIn",
@@ -1684,22 +1545,16 @@
             ],
             "signature": [
               "(optInConfig: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.optIn.$1",
+                "id": "def-server.IAnalyticsClient.optIn.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "optInConfig",
@@ -1707,15 +1562,9 @@
                   "{@link OptInConfig }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.OptInConfig",
-                    "text": "OptInConfig"
-                  }
+                  "OptInConfig"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1725,7 +1574,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.registerContextProvider",
+            "id": "def-server.IAnalyticsClient.registerContextProvider",
             "type": "Function",
             "tags": [
               "track-adoption"
@@ -1736,16 +1585,10 @@
             ],
             "signature": [
               "<Context>(contextProviderOpts: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.ContextProviderOpts",
-                "text": "ContextProviderOpts"
-              },
+              "ContextProviderOpts",
               "<Context>) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": true,
             "references": [
@@ -1846,6 +1689,10 @@
                 "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/analytics/register_analytics_context.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
@@ -1862,16 +1709,8 @@
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_service.ts"
               },
               {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/analytics_client.test.ts"
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/analytics/register_service_inventory_view_type_context.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1978,10 +1817,6 @@
                 "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
-                "plugin": "@kbn/ebt",
-                "path": "packages/analytics/ebt/client/src/analytics_client/mocks.ts"
-              },
-              {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.mocks.ts"
               },
@@ -2025,7 +1860,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerContextProvider.$1",
+                "id": "def-server.IAnalyticsClient.registerContextProvider.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "contextProviderOpts",
@@ -2033,16 +1868,10 @@
                   "{@link ContextProviderOpts }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.ContextProviderOpts",
-                    "text": "ContextProviderOpts"
-                  },
+                  "ContextProviderOpts",
                   "<Context>"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2052,7 +1881,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.removeContextProvider",
+            "id": "def-server.IAnalyticsClient.removeContextProvider",
             "type": "Function",
             "tags": [],
             "label": "removeContextProvider",
@@ -2062,13 +1891,13 @@
             "signature": [
               "(contextProviderName: string) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.removeContextProvider.$1",
+                "id": "def-server.IAnalyticsClient.removeContextProvider.$1",
                 "type": "string",
                 "tags": [],
                 "label": "contextProviderName",
@@ -2078,7 +1907,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2088,7 +1917,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.telemetryCounter$",
+            "id": "def-server.IAnalyticsClient.telemetryCounter$",
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
@@ -2098,22 +1927,16 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.flush",
+            "id": "def-server.IAnalyticsClient.flush",
             "type": "Function",
             "tags": [],
             "label": "flush",
@@ -2123,7 +1946,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2131,7 +1954,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.shutdown",
+            "id": "def-server.IAnalyticsClient.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -2141,7 +1964,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2152,20 +1975,23 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.IShipper",
+        "id": "def-server.IShipper",
         "type": "Interface",
         "tags": [],
         "label": "IShipper",
         "description": [
           "\nBasic structure of a Shipper"
         ],
-        "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+        "signature": [
+          "IShipper"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.reportEvents",
+            "id": "def-server.IShipper.reportEvents",
             "type": "Function",
             "tags": [],
             "label": "reportEvents",
@@ -2174,22 +2000,16 @@
             ],
             "signature": [
               "(events: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.Event",
-                "text": "Event"
-              },
+              "Event",
               "<Record<string, unknown>>[]) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IShipper.reportEvents.$1",
+                "id": "def-server.IShipper.reportEvents.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "events",
@@ -2197,16 +2017,10 @@
                   "batched events {@link Event }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.Event",
-                    "text": "Event"
-                  },
+                  "Event",
                   "<Record<string, unknown>>[]"
                 ],
-                "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2216,7 +2030,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.optIn",
+            "id": "def-server.IShipper.optIn",
             "type": "Function",
             "tags": [],
             "label": "optIn",
@@ -2226,13 +2040,13 @@
             "signature": [
               "(isOptedIn: boolean) => void"
             ],
-            "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IShipper.optIn.$1",
+                "id": "def-server.IShipper.optIn.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
@@ -2242,7 +2056,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2252,7 +2066,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.extendContext",
+            "id": "def-server.IShipper.extendContext",
             "type": "Function",
             "tags": [],
             "label": "extendContext",
@@ -2261,22 +2075,16 @@
             ],
             "signature": [
               "((newContext: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.EventContext",
-                "text": "EventContext"
-              },
+              "EventContext",
               ") => void) | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IShipper.extendContext.$1",
+                "id": "def-server.IShipper.extendContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
@@ -2284,15 +2092,9 @@
                   "The full new context to set {@link EventContext }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.EventContext",
-                    "text": "EventContext"
-                  }
+                  "EventContext"
                 ],
-                "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2302,7 +2104,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.telemetryCounter$",
+            "id": "def-server.IShipper.telemetryCounter$",
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
@@ -2312,22 +2114,16 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               "> | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.flush",
+            "id": "def-server.IShipper.flush",
             "type": "Function",
             "tags": [],
             "label": "flush",
@@ -2337,7 +2133,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2345,7 +2141,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.shutdown",
+            "id": "def-server.IShipper.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -2355,7 +2151,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/analytics/ebt/client/src/shippers/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/shippers/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2366,20 +2162,23 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.OptInConfig",
+        "id": "def-server.OptInConfig",
         "type": "Interface",
         "tags": [],
         "label": "OptInConfig",
         "description": [
           "\nOptions for the optIn API"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "signature": [
+          "OptInConfig"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfig.global",
+            "id": "def-server.OptInConfig.global",
             "type": "Object",
             "tags": [],
             "label": "global",
@@ -2387,21 +2186,15 @@
               "\nControls the global enabled/disabled behaviour of the client and shippers."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfigPerType",
-                "text": "OptInConfigPerType"
-              }
+              "OptInConfigPerType"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfig.event_types",
+            "id": "def-server.OptInConfig.event_types",
             "type": "Object",
             "tags": [],
             "label": "event_types",
@@ -2410,16 +2203,10 @@
             ],
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfigPerType",
-                "text": "OptInConfigPerType"
-              },
+              "OptInConfigPerType",
               " | undefined> | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2428,33 +2215,36 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.OptInConfigPerType",
+        "id": "def-server.OptInConfigPerType",
         "type": "Interface",
         "tags": [],
         "label": "OptInConfigPerType",
         "description": [
           "\nSets whether a type of event is enabled/disabled globally or per shipper."
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "signature": [
+          "OptInConfigPerType"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfigPerType.enabled",
+            "id": "def-server.OptInConfigPerType.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
             "description": [
               "\nThe event type is globally enabled."
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfigPerType.shippers",
+            "id": "def-server.OptInConfigPerType.shippers",
             "type": "Object",
             "tags": [],
             "label": "shippers",
@@ -2464,7 +2254,7 @@
             "signature": [
               "Record<string, boolean | undefined> | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2473,14 +2263,17 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.RegisterShipperOpts",
+        "id": "def-server.RegisterShipperOpts",
         "type": "Interface",
         "tags": [],
         "label": "RegisterShipperOpts",
         "description": [
           "\nOptional options to register a shipper"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "signature": [
+          "RegisterShipperOpts"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2488,7 +2281,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaArray",
+        "id": "def-server.SchemaArray",
         "type": "Interface",
         "tags": [],
         "label": "SchemaArray",
@@ -2496,30 +2289,18 @@
           "\nSchema to represent an array"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaArray",
-            "text": "SchemaArray"
-          },
+          "SchemaArray",
           "<Value, Base> extends ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaMeta",
-            "text": "SchemaMeta"
-          },
+          "SchemaMeta",
           "<Base>"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaArray.type",
+            "id": "def-server.SchemaArray.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -2529,13 +2310,13 @@
             "signature": [
               "\"array\""
             ],
-            "path": "packages/analytics/ebt/client/src/schema/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaArray.items",
+            "id": "def-server.SchemaArray.items",
             "type": "CompoundType",
             "tags": [],
             "label": "items",
@@ -2544,72 +2325,24 @@
             ],
             "signature": [
               "{ type: \"pass_through\"; _meta: { description: string; } & ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaMetaOptional",
-                "text": "SchemaMetaOptional"
-              },
+              "SchemaMetaOptional",
               "<Value>; } | (unknown extends Value ? ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaArray",
-                "text": "SchemaArray"
-              },
+              "SchemaArray",
               "<Value, Value> | ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaObject",
-                "text": "SchemaObject"
-              },
+              "SchemaObject",
               "<Value> | ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaChildValue",
-                "text": "SchemaChildValue"
-              },
+              "SchemaChildValue",
               "<Value> : NonNullable<Value> extends (infer U)[] | readonly (infer U)[] ? ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaArray",
-                "text": "SchemaArray"
-              },
+              "SchemaArray",
               "<U, Value> : NonNullable<Value> extends Date ? ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaChildValue",
-                "text": "SchemaChildValue"
-              },
+              "SchemaChildValue",
               "<Value> : NonNullable<Value> extends object ? ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaObject",
-                "text": "SchemaObject"
-              },
+              "SchemaObject",
               "<Value> : ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaChildValue",
-                "text": "SchemaChildValue"
-              },
+              "SchemaChildValue",
               "<Value>)"
             ],
-            "path": "packages/analytics/ebt/client/src/schema/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2618,7 +2351,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaChildValue",
+        "id": "def-server.SchemaChildValue",
         "type": "Interface",
         "tags": [],
         "label": "SchemaChildValue",
@@ -2626,22 +2359,16 @@
           "\nSchema to define a primitive value"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaChildValue",
-            "text": "SchemaChildValue"
-          },
+          "SchemaChildValue",
           "<Value>"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaChildValue.type",
+            "id": "def-server.SchemaChildValue.type",
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
@@ -2650,37 +2377,19 @@
             ],
             "signature": [
               "NonNullable<Value> extends string | Date ? ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.AllowedSchemaStringTypes",
-                "text": "AllowedSchemaStringTypes"
-              },
+              "AllowedSchemaStringTypes",
               " : NonNullable<Value> extends number ? ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.AllowedSchemaNumberTypes",
-                "text": "AllowedSchemaNumberTypes"
-              },
+              "AllowedSchemaNumberTypes",
               " : NonNullable<Value> extends boolean ? \"boolean\" : ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.AllowedSchemaTypes",
-                "text": "AllowedSchemaTypes"
-              }
+              "AllowedSchemaTypes"
             ],
-            "path": "packages/analytics/ebt/client/src/schema/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaChildValue._meta",
+            "id": "def-server.SchemaChildValue._meta",
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
@@ -2689,16 +2398,10 @@
             ],
             "signature": [
               "{ description: string; } & ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaMetaOptional",
-                "text": "SchemaMetaOptional"
-              },
+              "SchemaMetaOptional",
               "<Value>"
             ],
-            "path": "packages/analytics/ebt/client/src/schema/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2707,7 +2410,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaMeta",
+        "id": "def-server.SchemaMeta",
         "type": "Interface",
         "tags": [],
         "label": "SchemaMeta",
@@ -2715,22 +2418,16 @@
           "\nSchema meta with optional description"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaMeta",
-            "text": "SchemaMeta"
-          },
+          "SchemaMeta",
           "<Value>"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaMeta._meta",
+            "id": "def-server.SchemaMeta._meta",
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
@@ -2739,16 +2436,10 @@
             ],
             "signature": [
               "({ description?: string | undefined; } & ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaMetaOptional",
-                "text": "SchemaMetaOptional"
-              },
+              "SchemaMetaOptional",
               "<Value>) | undefined"
             ],
-            "path": "packages/analytics/ebt/client/src/schema/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2757,7 +2448,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaObject",
+        "id": "def-server.SchemaObject",
         "type": "Interface",
         "tags": [],
         "label": "SchemaObject",
@@ -2765,30 +2456,18 @@
           "\nSchema to represent an object"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaObject",
-            "text": "SchemaObject"
-          },
+          "SchemaObject",
           "<Value> extends ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaMeta",
-            "text": "SchemaMeta"
-          },
+          "SchemaMeta",
           "<Value>"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaObject.properties",
+            "id": "def-server.SchemaObject.properties",
             "type": "Object",
             "tags": [],
             "label": "properties",
@@ -2797,16 +2476,10 @@
             ],
             "signature": [
               "{ [Key in keyof Required<Value>]: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.SchemaValue",
-                "text": "SchemaValue"
-              },
+              "SchemaValue",
               "<Value[Key]>; }"
             ],
-            "path": "packages/analytics/ebt/client/src/schema/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2815,7 +2488,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ShipperClassConstructor",
+        "id": "def-server.ShipperClassConstructor",
         "type": "Interface",
         "tags": [],
         "label": "ShipperClassConstructor",
@@ -2823,35 +2496,29 @@
           "\nConstructor of a {@link IShipper}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.ShipperClassConstructor",
-            "text": "ShipperClassConstructor"
-          },
+          "ShipperClassConstructor",
           "<Shipper, Config>"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ShipperClassConstructor.shipperName",
+            "id": "def-server.ShipperClassConstructor.shipperName",
             "type": "string",
             "tags": [],
             "label": "shipperName",
             "description": [
               "\nThe shipper's unique name"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ShipperClassConstructor.new",
+            "id": "def-server.ShipperClassConstructor.new",
             "type": "Function",
             "tags": [],
             "label": "new",
@@ -2861,13 +2528,13 @@
             "signature": [
               "any"
             ],
-            "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.ShipperClassConstructor.new.$1",
+                "id": "def-server.ShipperClassConstructor.new.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2877,14 +2544,14 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.ShipperClassConstructor.new.$2",
+                "id": "def-server.ShipperClassConstructor.new.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
@@ -2892,15 +2559,9 @@
                   "Common context {@link AnalyticsClientInitContext }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ebt",
-                    "scope": "common",
-                    "docId": "kibKbnEbtPluginApi",
-                    "section": "def-common.AnalyticsClientInitContext",
-                    "text": "AnalyticsClientInitContext"
-                  }
+                  "AnalyticsClientInitContext"
                 ],
-                "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+                "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2913,20 +2574,23 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.TelemetryCounter",
+        "id": "def-server.TelemetryCounter",
         "type": "Interface",
         "tags": [],
         "label": "TelemetryCounter",
         "description": [
           "\nShape of the events emitted by the telemetryCounter$ observable"
         ],
-        "path": "packages/analytics/ebt/client/src/events/types.ts",
+        "signature": [
+          "TelemetryCounter"
+        ],
+        "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.type",
+            "id": "def-server.TelemetryCounter.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -2936,59 +2600,59 @@
             "signature": [
               "\"succeeded\" | \"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"dropped\""
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.source",
+            "id": "def-server.TelemetryCounter.source",
             "type": "string",
             "tags": [],
             "label": "source",
             "description": [
               "\nWho emitted the event? It can be \"client\" or the name of the shipper."
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.event_type",
+            "id": "def-server.TelemetryCounter.event_type",
             "type": "string",
             "tags": [],
             "label": "event_type",
             "description": [
               "\nThe event type the success/failure/drop event refers to."
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.code",
+            "id": "def-server.TelemetryCounter.code",
             "type": "string",
             "tags": [],
             "label": "code",
             "description": [
               "\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.count",
+            "id": "def-server.TelemetryCounter.count",
             "type": "number",
             "tags": [],
             "label": "count",
             "description": [
               "\nThe number of events that this counter refers to."
             ],
-            "path": "packages/analytics/ebt/client/src/events/types.ts",
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3000,7 +2664,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaBooleanTypes",
+        "id": "def-server.AllowedSchemaBooleanTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaBooleanTypes",
@@ -3010,14 +2674,14 @@
         "signature": [
           "\"boolean\""
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaNumberTypes",
+        "id": "def-server.AllowedSchemaNumberTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaNumberTypes",
@@ -3027,14 +2691,14 @@
         "signature": [
           "\"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaStringTypes",
+        "id": "def-server.AllowedSchemaStringTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaStringTypes",
@@ -3044,14 +2708,14 @@
         "signature": [
           "\"keyword\" | \"text\" | \"date\""
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaTypes",
+        "id": "def-server.AllowedSchemaTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaTypes",
@@ -3061,14 +2725,14 @@
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsServicePreboot",
+        "id": "def-server.AnalyticsServicePreboot",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServicePreboot",
@@ -3077,63 +2741,21 @@
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.OptInConfig",
-            "text": "OptInConfig"
-          },
+          "OptInConfig",
           ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.TelemetryCounter",
-            "text": "TelemetryCounter"
-          },
+          "TelemetryCounter",
           ">; registerEventType: <EventTypeData>(eventTypeOps: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.EventTypeOpts",
-            "text": "EventTypeOpts"
-          },
+          "EventTypeOpts",
           "<EventTypeData>) => void; registerShipper: <Shipper extends ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.IShipper",
-            "text": "IShipper"
-          },
+          "IShipper",
           ", ShipperConfig>(Shipper: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.ShipperClassConstructor",
-            "text": "ShipperClassConstructor"
-          },
+          "ShipperClassConstructor",
           "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.RegisterShipperOpts",
-            "text": "RegisterShipperOpts"
-          },
+          "RegisterShipperOpts",
           " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.ContextProviderOpts",
-            "text": "ContextProviderOpts"
-          },
+          "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
         "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
@@ -3143,7 +2765,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsServiceSetup",
+        "id": "def-server.AnalyticsServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServiceSetup",
@@ -3152,63 +2774,21 @@
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.OptInConfig",
-            "text": "OptInConfig"
-          },
+          "OptInConfig",
           ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.TelemetryCounter",
-            "text": "TelemetryCounter"
-          },
+          "TelemetryCounter",
           ">; registerEventType: <EventTypeData>(eventTypeOps: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.EventTypeOpts",
-            "text": "EventTypeOpts"
-          },
+          "EventTypeOpts",
           "<EventTypeData>) => void; registerShipper: <Shipper extends ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.IShipper",
-            "text": "IShipper"
-          },
+          "IShipper",
           ", ShipperConfig>(Shipper: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.ShipperClassConstructor",
-            "text": "ShipperClassConstructor"
-          },
+          "ShipperClassConstructor",
           "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.RegisterShipperOpts",
-            "text": "RegisterShipperOpts"
-          },
+          "RegisterShipperOpts",
           " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.ContextProviderOpts",
-            "text": "ContextProviderOpts"
-          },
+          "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
         "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
@@ -3218,7 +2798,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsServiceStart",
+        "id": "def-server.AnalyticsServiceStart",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServiceStart",
@@ -3227,23 +2807,11 @@
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.OptInConfig",
-            "text": "OptInConfig"
-          },
+          "OptInConfig",
           ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
           "Observable",
           "<",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.TelemetryCounter",
-            "text": "TelemetryCounter"
-          },
+          "TelemetryCounter",
           ">; }"
         ],
         "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
@@ -3253,7 +2821,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ContextProviderName",
+        "id": "def-server.ContextProviderName",
         "type": "Type",
         "tags": [],
         "label": "ContextProviderName",
@@ -3263,14 +2831,14 @@
         "signature": [
           "string"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.EventType",
+        "id": "def-server.EventType",
         "type": "Type",
         "tags": [],
         "label": "EventType",
@@ -3280,14 +2848,14 @@
         "signature": [
           "string"
         ],
-        "path": "packages/analytics/ebt/client/src/events/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.PossibleSchemaTypes",
+        "id": "def-server.PossibleSchemaTypes",
         "type": "Type",
         "tags": [],
         "label": "PossibleSchemaTypes",
@@ -3296,38 +2864,20 @@
         ],
         "signature": [
           "Value extends string | Date ? ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.AllowedSchemaStringTypes",
-            "text": "AllowedSchemaStringTypes"
-          },
+          "AllowedSchemaStringTypes",
           " : Value extends number ? ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.AllowedSchemaNumberTypes",
-            "text": "AllowedSchemaNumberTypes"
-          },
+          "AllowedSchemaNumberTypes",
           " : Value extends boolean ? \"boolean\" : ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.AllowedSchemaTypes",
-            "text": "AllowedSchemaTypes"
-          }
+          "AllowedSchemaTypes"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.RootSchema",
+        "id": "def-server.RootSchema",
         "type": "Type",
         "tags": [],
         "label": "RootSchema",
@@ -3336,23 +2886,17 @@
         ],
         "signature": [
           "{ [Key in keyof Required<Base>]: ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaValue",
-            "text": "SchemaValue"
-          },
+          "SchemaValue",
           "<Base[Key]>; }"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaMetaOptional",
+        "id": "def-server.SchemaMetaOptional",
         "type": "Type",
         "tags": [],
         "label": "SchemaMetaOptional",
@@ -3362,14 +2906,14 @@
         "signature": [
           "unknown extends Value ? { optional?: boolean | undefined; } : undefined extends Value ? { optional: true; } : { optional?: false | undefined; }"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaValue",
+        "id": "def-server.SchemaValue",
         "type": "Type",
         "tags": [],
         "label": "SchemaValue",
@@ -3378,79 +2922,31 @@
         ],
         "signature": [
           "{ type: \"pass_through\"; _meta: { description: string; } & ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaMetaOptional",
-            "text": "SchemaMetaOptional"
-          },
+          "SchemaMetaOptional",
           "<Value>; } | (unknown extends Value ? ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaArray",
-            "text": "SchemaArray"
-          },
+          "SchemaArray",
           "<unknown, Value> | ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaObject",
-            "text": "SchemaObject"
-          },
+          "SchemaObject",
           "<Value> | ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaChildValue",
-            "text": "SchemaChildValue"
-          },
+          "SchemaChildValue",
           "<Value> : NonNullable<Value> extends (infer U)[] | readonly (infer U)[] ? ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaArray",
-            "text": "SchemaArray"
-          },
+          "SchemaArray",
           "<U, Value> : NonNullable<Value> extends Date ? ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaChildValue",
-            "text": "SchemaChildValue"
-          },
+          "SchemaChildValue",
           "<Value> : NonNullable<Value> extends object ? ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaObject",
-            "text": "SchemaObject"
-          },
+          "SchemaObject",
           "<Value> : ",
-          {
-            "pluginId": "@kbn/ebt",
-            "scope": "common",
-            "docId": "kibKbnEbtPluginApi",
-            "section": "def-common.SchemaChildValue",
-            "text": "SchemaChildValue"
-          },
+          "SchemaChildValue",
           "<Value>)"
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ShipperName",
+        "id": "def-server.ShipperName",
         "type": "Type",
         "tags": [],
         "label": "ShipperName",
@@ -3460,14 +2956,14 @@
         "signature": [
           "string"
         ],
-        "path": "packages/analytics/ebt/client/src/analytics_client/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.TelemetryCounterType",
+        "id": "def-server.TelemetryCounterType",
         "type": "Type",
         "tags": [],
         "label": "TelemetryCounterType",
@@ -3477,12 +2973,20 @@
         "signature": [
           "\"succeeded\" | \"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"dropped\""
         ],
-        "path": "packages/analytics/ebt/client/src/events/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

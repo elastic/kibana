@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
@@ -11,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
+import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -173,6 +175,50 @@ export class ChromeService {
     this.mutationObserver.observe(body, { attributes: true });
   };
 
+  // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
+    const isDev = this.params.coreContext.env.mode.name === 'development';
+    if (isDev) {
+      setEuiDevProviderWarning((providerError) => {
+        const errorObject = new Error(providerError.toString());
+        // 1. show a stack trace in the console
+        // eslint-disable-next-line no-console
+        console.error(errorObject);
+
+        // 2. store error in sessionStorage so it can be detected in testing
+        const storedError = {
+          message: providerError.toString(),
+          stack: errorObject.stack ?? 'undefined',
+          pageHref: window.location.href,
+          pageTitle: document.title,
+        };
+        sessionStorage.setItem('dev.euiProviderWarning', JSON.stringify(storedError));
+
+        // 3. error toast / popup
+        notifications.toasts.addDanger({
+          title: '`EuiProvider` is missing',
+          text: mountReactNode(
+            <p>
+              <FormattedMessage
+                id="core.chrome.euiDevProviderWarning"
+                defaultMessage="Kibana components must be wrapped in a React Context provider for full functionality and proper theming support. See {link}."
+                values={{
+                  link: (
+                    <a href="https://docs.elastic.dev/kibana-dev-docs/react-context">
+                      https://docs.elastic.dev/kibana-dev-docs/react-context
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+          ),
+          'data-test-subj': 'core-chrome-euiDevProviderWarning-toast',
+          toastLifeTimeMs: 60 * 60 * 1000, // keep message visible for up to an hour
+        });
+      });
+    }
+  };
+
   public setup({ analytics }: SetupDeps) {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
@@ -188,6 +234,7 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
+    this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []

@@ -1,7 +1,7 @@
 get:
   summary: List agent binary download sources
   tags:
-    - Agent binary download sources
+    - Elastic Agent binary download sources
   responses:
     '200':
       description: OK
@@ -26,7 +26,7 @@ get:
 post:
   summary: Create agent binary download source
   tags:
-    - Agent binary download sources
+    - Elastic Agent binary download sources
   responses:
     '200':
       description: OK

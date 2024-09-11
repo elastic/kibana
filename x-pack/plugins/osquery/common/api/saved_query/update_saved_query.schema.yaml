@@ -2,14 +2,9 @@ openapi: 3.0.0
 info:
   title: Update Saved Query Schema
   version: '2023-10-31'
-paths: { }
+paths: {}
 components:
   schemas:
-    UpdateSavedQueryRequestParams:
-      type: object
-      properties:
-        id:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
     UpdateSavedQueryRequestBody:
       type: object
       properties:

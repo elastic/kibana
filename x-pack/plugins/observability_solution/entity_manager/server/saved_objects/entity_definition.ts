@@ -49,5 +49,20 @@ export const entityDefinition: SavedObjectsType = {
         },
       ],
     },
+    '2': {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: () => {
+            return {
+              attributes: {
+                installStatus: 'installed',
+                installStartedAt: new Date().toISOString(),
+              },
+            };
+          },
+        },
+      ],
+    },
   },
 };

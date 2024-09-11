@@ -109,7 +109,7 @@ export const DataDriftDistributionChart = ({
           idSelected={comparisonChartType}
           onChange={(id: string) =>
             setComparisonChartType(
-              id as typeof DATA_DRIFT_COMPARISON_CHART_TYPE[keyof typeof DATA_DRIFT_COMPARISON_CHART_TYPE]
+              id as (typeof DATA_DRIFT_COMPARISON_CHART_TYPE)[keyof typeof DATA_DRIFT_COMPARISON_CHART_TYPE]
             )
           }
           isIconOnly

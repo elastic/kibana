@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import type { EuiSelectOption } from '@elastic/eui';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  useIsWithinMaxBreakpoint,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
@@ -15,15 +23,23 @@ import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
 interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUI['templates'];
-  onTemplateChange: (caseFields: CasesConfigurationUITemplate['caseFields']) => void;
+  initialTemplate?: CasesConfigurationUI['templates'][number];
+  onTemplateChange: ({
+    caseFields,
+    key,
+  }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => void;
 }
 
 export const TemplateSelectorComponent: React.FC<Props> = ({
   isLoading,
   templates,
+  initialTemplate,
   onTemplateChange,
 }) => {
-  const [selectedTemplate, onSelectTemplate] = useState<string>();
+  const [selectedTemplate, onSelectTemplate] = useState<string | undefined>(
+    initialTemplate?.key ?? undefined
+  );
+  const isSmallScreen = useIsWithinMaxBreakpoint('s');
 
   const options: EuiSelectOption[] = templates.map((template) => ({
     text: template.name,
@@ -32,11 +48,11 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
 
   const onChange: React.ChangeEventHandler<HTMLSelectElement> = useCallback(
     (e) => {
-      const selectedTemplated = templates.find((template) => template.key === e.target.value);
+      const updatedTemplate = templates.find((template) => template.key === e.target.value);
 
-      if (selectedTemplated) {
-        onSelectTemplate(selectedTemplated.key);
-        onTemplateChange(selectedTemplated.caseFields);
+      if (updatedTemplate) {
+        onSelectTemplate(updatedTemplate.key);
+        onTemplateChange({ key: updatedTemplate.key, caseFields: updatedTemplate.caseFields });
       }
     },
     [onTemplateChange, templates]
@@ -47,7 +63,26 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
       id="createCaseTemplate"
       fullWidth
       label={TEMPLATE_LABEL}
-      labelAppend={OptionalFieldLabel}
+      labelAppend={
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          css={css`
+            flex-grow: 0;
+          `}
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              line-height: 0;
+            `}
+          >
+            <ExperimentalBadge compact={isSmallScreen} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
+        </EuiFlexGroup>
+      }
       helpText={TEMPLATE_HELP_TEXT}
     >
       <EuiSelect

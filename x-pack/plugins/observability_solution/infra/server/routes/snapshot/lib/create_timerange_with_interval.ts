@@ -6,12 +6,15 @@
  */
 
 import { uniq } from 'lodash';
-import { MetricsUIAggregation, ESBasicMetricAggRT } from '@kbn/metrics-data-access-plugin/common';
-import { MetricsAPITimerange } from '../../../../common/http_api';
+import {
+  type MetricsUIAggregation,
+  type MetricsAPITimerange,
+  isBasicMetricAgg,
+} from '@kbn/metrics-data-access-plugin/common';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
-import { getDatasetForField } from '../../metrics_explorer/lib/get_dataset_for_field';
+import { getDatasetForField } from './get_dataset_for_field';
 
 const DEFAULT_LOOKBACK_SIZE = 5;
 const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequestOptions) => {
@@ -71,7 +74,7 @@ const aggregationsToModules = async (
 ): Promise<string[]> => {
   const uniqueFields = Object.values(aggregations)
     .reduce<Array<string | undefined>>((fields, agg) => {
-      if (ESBasicMetricAggRT.is(agg)) {
+      if (isBasicMetricAgg(agg)) {
         return uniq(fields.concat(Object.values(agg).map((a) => a?.field)));
       }
       return fields;

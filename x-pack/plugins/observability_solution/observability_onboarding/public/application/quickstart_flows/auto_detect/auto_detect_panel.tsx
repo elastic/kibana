@@ -17,33 +17,45 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiImage,
-  EuiSkeletonRectangle,
   useGeneratedHtmlId,
+  EuiIcon,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import { type DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getAutoDetectCommand } from './get_auto_detect_command';
-import { useOnboardingFlow } from './use_onboarding_flow';
+import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { AccordionWithIcon } from '../shared/accordion_with_icon';
-import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { LocatorButtonEmpty } from '../shared/locator_button_empty';
+import { GetStartedPanel } from '../shared/get_started_panel';
+import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
+import { FeedbackButtons } from '../shared/feedback_buttons';
+import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 
 export const AutoDetectPanel: FunctionComponent = () => {
-  const {
-    services: { http },
-  } = useKibana<ObservabilityOnboardingContextValue>();
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
+  const {
+    services: { share },
+  } = useKibana<ObservabilityOnboardingContextValue>();
+
+  useAutoDetectTelemetry(
+    status,
+    installedIntegrations.map(({ title, pkgName, pkgVersion, installSource }) => ({
+      title,
+      pkgName,
+      pkgVersion,
+      installSource,
+    }))
+  );
 
   if (error) {
     return <EmptyPrompt error={error} onRetryClick={refetch} />;
@@ -55,6 +67,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const customIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'custom'
   );
+  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
@@ -63,7 +76,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           {
             title: i18n.translate(
               'xpack.observability_onboarding.autoDetectPanel.runTheCommandOnLabel',
-              { defaultMessage: 'Run the command on your host' }
+              { defaultMessage: 'Install standalone Elastic Agent on your host' }
             ),
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
@@ -119,6 +132,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       { defaultMessage: 'Your data is ready to explore!' }
                     )}
                     isLoading={false}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator"
                   />
                 ) : status === 'awaitingData' ? (
                   <ProgressIndicator
@@ -126,6 +140,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.installingElasticAgentFlexItemLabel',
                       { defaultMessage: 'Waiting for data to arrive...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelAwaitingDataProgressIndicator"
                   />
                 ) : status === 'inProgress' ? (
                   <ProgressIndicator
@@ -133,6 +148,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.lookingForLogFilesFlexItemLabel',
                       { defaultMessage: 'Waiting for installation to complete...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelInProgressProgressIndicator"
                   />
                 ) : null}
                 {(status === 'awaitingData' || status === 'dataReceived') &&
@@ -143,59 +159,78 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       <AccordionWithIcon
                         key={integration.pkgName}
                         id={`${accordionId}_${integration.pkgName}`}
-                        iconType="desktop"
+                        icon={
+                          isSupportedLogo(integration.pkgName) ? (
+                            <LogoIcon size="l" logo={integration.pkgName} />
+                          ) : (
+                            <EuiIcon type="desktop" size="l" />
+                          )
+                        }
                         title={i18n.translate(
                           'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithNginxLabel',
                           {
-                            defaultMessage: 'Get started with {title} logs',
+                            defaultMessage: 'Get started with {title}',
                             values: { title: integration.title },
                           }
                         )}
                         isDisabled={status !== 'dataReceived'}
                         initialIsOpen
                       >
-                        <EuiFlexGroup responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            {status === 'dataReceived' ? (
-                              <EuiImage
-                                src={http.staticAssets.getPluginAssetHref('charts_screen.svg')}
-                                width={162}
-                                height={117}
-                                alt=""
-                                hasShadow
-                              />
-                            ) : (
-                              <EuiSkeletonRectangle width={162} height={117} />
-                            )}
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <ul>
-                              {integration.kibanaAssets
-                                .filter((asset) => asset.type === 'dashboard')
-                                .map((dashboard) => (
-                                  <li key={dashboard.id}>
-                                    <LocatorButtonEmpty<DashboardLocatorParams>
-                                      locator={DASHBOARD_APP_LOCATOR}
-                                      params={{ dashboardId: dashboard.id }}
-                                      target="_blank"
-                                      iconType="dashboardApp"
-                                      isDisabled={status !== 'dataReceived'}
-                                      flush="left"
-                                      size="s"
-                                    >
-                                      {dashboard.attributes.title}
-                                    </LocatorButtonEmpty>
-                                  </li>
-                                ))}
-                            </ul>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                        <GetStartedPanel
+                          integration={integration.pkgName}
+                          newTab
+                          isLoading={status !== 'dataReceived'}
+                          actionLinks={integration.kibanaAssets
+                            .filter((asset) => asset.type === 'dashboard')
+                            .map((asset) => {
+                              const dashboard = DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
+                              const href =
+                                dashboardLocator?.getRedirectUrl({
+                                  dashboardId: asset.id,
+                                }) ?? '';
+
+                              return {
+                                id: asset.id,
+                                title:
+                                  dashboard.type === 'metrics'
+                                    ? i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataTitle',
+                                        {
+                                          defaultMessage:
+                                            'Overview your metrics data with this pre-made dashboard',
+                                        }
+                                      )
+                                    : i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataTitle',
+                                        {
+                                          defaultMessage:
+                                            'Overview your logs data with this pre-made dashboard',
+                                        }
+                                      ),
+                                label:
+                                  dashboard.type === 'metrics'
+                                    ? i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.exploreMetricsDataLabel',
+                                        {
+                                          defaultMessage: 'Explore metrics data',
+                                        }
+                                      )
+                                    : i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataLabel',
+                                        {
+                                          defaultMessage: 'Explore logs data',
+                                        }
+                                      ),
+                                href,
+                              };
+                            })}
+                        />
                       </AccordionWithIcon>
                     ))}
                     {customIntegrations.length > 0 && (
                       <AccordionWithIcon
                         id={`${accordionId}_custom`}
-                        iconType="documents"
+                        icon={<EuiIcon type="documents" size="l" />}
                         title={i18n.translate(
                           'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithlogLabel',
                           { defaultMessage: 'Get started with custom .log files' }
@@ -234,6 +269,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           },
         ]}
       />
+      <FeedbackButtons flow="auto-detect" />
     </EuiPanel>
   );
 };

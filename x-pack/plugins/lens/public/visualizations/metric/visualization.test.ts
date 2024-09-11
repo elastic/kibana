@@ -318,9 +318,6 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
-                "icon": Array [
-                  "empty",
-                ],
                 "iconAlign": Array [
                   "left",
                 ],
@@ -393,9 +390,6 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
-                ],
-                "icon": Array [
-                  "empty",
                 ],
                 "iconAlign": Array [
                   "left",
@@ -1021,7 +1015,7 @@ describe('metric visualization', () => {
     const columnId = 'col-id';
 
     const cases: Array<{
-      groupId: typeof GROUP_ID[keyof typeof GROUP_ID];
+      groupId: (typeof GROUP_ID)[keyof typeof GROUP_ID];
       accessor: keyof MetricVisualizationState;
     }> = [
       { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },

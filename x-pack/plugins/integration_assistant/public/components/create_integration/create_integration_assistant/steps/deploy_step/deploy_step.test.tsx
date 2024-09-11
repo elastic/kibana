@@ -30,10 +30,11 @@ const parameters: BuildIntegrationRequestBody = {
         title: integrationSettings.dataStreamTitle!,
         description: integrationSettings.dataStreamDescription!,
         name: integrationSettings.dataStreamName!,
-        inputTypes: [integrationSettings.inputType!],
-        rawSamples: integrationSettings.logsSampleParsed!,
+        inputTypes: integrationSettings.inputTypes!,
+        rawSamples: integrationSettings.logSamples!,
         docs: results.docs!,
         pipeline: results.pipeline,
+        samplesFormat: results.samplesFormat!,
       },
     ],
   },
@@ -55,7 +56,7 @@ jest.mock('@elastic/filesaver', () => ({
   saveAs: (...params: unknown[]) => mockSaveAs(...params),
 }));
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>
@@ -105,7 +106,7 @@ describe('DeployStep', () => {
           integrationName,
           integrationDescription: integrationSettings.description,
           dataStreamName: integrationSettings.dataStreamName,
-          inputType: integrationSettings.inputType,
+          inputTypes: integrationSettings.inputTypes,
           model: expect.any(String),
           actionTypeId: connector.actionTypeId,
           provider: connector.apiProvider ?? 'unknown',
@@ -172,7 +173,7 @@ describe('DeployStep', () => {
             integrationName: integrationSettings.name,
             integrationDescription: integrationSettings.description,
             dataStreamName: integrationSettings.dataStreamName,
-            inputType: integrationSettings.inputType,
+            inputTypes: integrationSettings.inputTypes,
             model: expect.any(String),
             actionTypeId: connector.actionTypeId,
             provider: connector.apiProvider ?? 'unknown',
@@ -224,7 +225,7 @@ describe('DeployStep', () => {
             integrationName: integrationSettings.name,
             integrationDescription: integrationSettings.description,
             dataStreamName: integrationSettings.dataStreamName,
-            inputType: integrationSettings.inputType,
+            inputTypes: integrationSettings.inputTypes,
             model: expect.any(String),
             actionTypeId: connector.actionTypeId,
             provider: connector.apiProvider ?? 'unknown',

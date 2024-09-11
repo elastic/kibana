@@ -744,6 +744,221 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.BrowserField",
+        "type": "Interface",
+        "tags": [],
+        "label": "BrowserField",
+        "description": [],
+        "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.aggregatable",
+            "type": "boolean",
+            "tags": [],
+            "label": "aggregatable",
+            "description": [],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.example",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "example",
+            "description": [],
+            "signature": [
+              "string | number | null | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.fields",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ readonly [x: string]: Partial<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserField",
+                "text": "BrowserField"
+              },
+              ">; }"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.format",
+            "type": "Object",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.indexes",
+            "type": "Array",
+            "tags": [],
+            "label": "indexes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.searchable",
+            "type": "boolean",
+            "tags": [],
+            "label": "searchable",
+            "description": [],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.subType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "subType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.IFieldSubType",
+                "text": "IFieldSubType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.readFromDocValues",
+            "type": "boolean",
+            "tags": [],
+            "label": "readFromDocValues",
+            "description": [],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.BrowserField.runtimeField",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeField",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeField",
+                "text": "RuntimeField"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.IntervalSchedule",
         "type": "Interface",
         "tags": [],
@@ -1358,6 +1573,20 @@
                 "text": "AlertDelay"
               },
               " | null | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Rule.flapping",
+            "type": "Object",
+            "tags": [],
+            "label": "flapping",
+            "description": [],
+            "signature": [
+              "{ lookBackWindow: number; statusChangeThreshold: number; } | undefined"
             ],
             "path": "packages/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -2168,6 +2397,131 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.RuleRegistryInspect",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistryInspect",
+        "description": [],
+        "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RuleRegistryInspect.dsl",
+            "type": "Array",
+            "tags": [],
+            "label": "dsl",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.RuleRegistrySearchRequestPagination",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchRequestPagination",
+        "description": [],
+        "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.RuleRegistrySearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.RuleRegistrySearchResponse",
+            "text": "RuleRegistrySearchResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RuleRegistrySearchResponse.inspect",
+            "type": "Object",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.RuleRegistryInspect",
+                "text": "RuleRegistryInspect"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerting-types/search_strategy_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.RuleSnoozeSchedule",
         "type": "Interface",
         "tags": [],
@@ -2771,6 +3125,29 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.BrowserFields",
+        "type": "Type",
+        "tags": [],
+        "label": "BrowserFields",
+        "description": [],
+        "signature": [
+          "{ [x: string]: Partial<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.BrowserField",
+            "text": "BrowserField"
+          },
+          ">; }"
+        ],
+        "path": "packages/kbn-alerting-types/alert_fields_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.DefaultActionGroupId",
         "type": "Type",
         "tags": [],
@@ -2845,6 +3222,66 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.MAX_LOOK_BACK_WINDOW",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_LOOK_BACK_WINDOW",
+        "description": [],
+        "signature": [
+          "20"
+        ],
+        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.MAX_STATUS_CHANGE_THRESHOLD",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_STATUS_CHANGE_THRESHOLD",
+        "description": [],
+        "signature": [
+          "20"
+        ],
+        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.MIN_LOOK_BACK_WINDOW",
+        "type": "number",
+        "tags": [],
+        "label": "MIN_LOOK_BACK_WINDOW",
+        "description": [],
+        "signature": [
+          "2"
+        ],
+        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.MIN_STATUS_CHANGE_THRESHOLD",
+        "type": "number",
+        "tags": [],
+        "label": "MIN_STATUS_CHANGE_THRESHOLD",
+        "description": [],
+        "signature": [
+          "2"
+        ],
+        "path": "packages/kbn-alerting-types/rule_flapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.RecoveredActionGroupId",
         "type": "Type",
         "tags": [],
@@ -2885,9 +3322,9 @@
           "[]; } & Omit<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsResolveResponse",
+            "section": "def-server.SavedObjectsResolveResponse",
             "text": "SavedObjectsResolveResponse"
           },
           "<unknown>, \"saved_object\"> & { outcome: string; alias_target_id?: string | undefined; }"
@@ -3045,6 +3482,60 @@
           "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
         ],
         "path": "packages/kbn-alerting-types/rule_notify_when_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.RuleRegistrySearchRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleRegistrySearchRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsSearchRequest",
+            "text": "IEsSearchRequest"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.ISearchRequestParams",
+            "text": "ISearchRequestParams"
+          },
+          "> & { featureIds: ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.AlertConsumers",
+            "text": "AlertConsumers"
+          },
+          "[]; fields?: ",
+          "QueryDslFieldAndFormat",
+          "[] | undefined; query?: Pick<",
+          "QueryDslQueryContainer",
+          ", \"ids\" | \"bool\"> | undefined; sort?: ",
+          "SortCombinations",
+          "[] | undefined; pagination?: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.RuleRegistrySearchRequestPagination",
+            "text": "RuleRegistrySearchRequestPagination"
+          },
+          " | undefined; runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-alerting-types/search_strategy_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

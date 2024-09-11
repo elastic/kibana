@@ -13,7 +13,8 @@ export const templateSchema = schema.object({
   version: schema.maybe(schema.number()),
   order: schema.maybe(schema.number()),
   priority: schema.maybe(schema.number()),
-  allowAutoCreate: schema.string(),
+  // Not present for legacy templates
+  allowAutoCreate: schema.maybe(schema.string()),
   template: schema.maybe(
     schema.object({
       settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),

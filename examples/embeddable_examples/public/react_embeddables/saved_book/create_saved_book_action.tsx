@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart } from '@kbn/core/public';
@@ -21,11 +22,7 @@ import {
 import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
 import { saveBookAttributes } from './saved_book_library';
-import {
-  BookByReferenceSerializedState,
-  BookByValueSerializedState,
-  BookSerializedState,
-} from './types';
+import { BookRuntimeState } from './types';
 
 export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
@@ -43,21 +40,17 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
         parentApi: embeddable,
       });
 
-      const initialState: BookSerializedState = await (async () => {
+      const initialState: BookRuntimeState = await (async () => {
+        const bookAttributes = serializeBookAttributes(newPanelStateManager);
         // if we're adding this to the library, we only need to return the by reference state.
         if (addToLibrary) {
-          const savedBookId = await saveBookAttributes(
-            undefined,
-            serializeBookAttributes(newPanelStateManager)
-          );
-          return { savedBookId } as BookByReferenceSerializedState;
+          const savedBookId = await saveBookAttributes(undefined, bookAttributes);
+          return { savedBookId, ...bookAttributes };
         }
-        return {
-          attributes: serializeBookAttributes(newPanelStateManager),
-        } as BookByValueSerializedState;
+        return bookAttributes;
       })();
 
-      embeddable.addNewPanel<BookSerializedState>({
+      embeddable.addNewPanel<BookRuntimeState>({
         panelType: SAVED_BOOK_ID,
         initialState,
       });

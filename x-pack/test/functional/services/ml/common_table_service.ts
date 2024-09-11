@@ -50,7 +50,7 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
             .text()
             .trim();
           return acc;
-        }, {} as Record<typeof this.columns[number]['id'], string>);
+        }, {} as Record<(typeof this.columns)[number]['id'], string>);
 
         rows.push(rowObject);
       }

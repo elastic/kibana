@@ -9,8 +9,7 @@
 :frontmatter-tags-user-goals: [configure]
 
 
-The OpenAI connector uses https://github.com/axios/axios[axios] to send a POST request to an OpenAI provider, either OpenAI or Azure OpenAI. The connector uses the <<execute-connector-api,run connector API>> to send the request.
-
+The OpenAI connector uses https://github.com/axios/axios[axios] to send a POST request to an OpenAI provider, either OpenAI or Azure OpenAI.
 [float]
 [[define-gen-ai-ui]]
 === Create connectors in {kib}
@@ -48,8 +47,7 @@ API key:: The OpenAI or Azure OpenAI API key for authentication.
 [[gen-ai-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/gen-ai-params-test.png[OpenAI params test]

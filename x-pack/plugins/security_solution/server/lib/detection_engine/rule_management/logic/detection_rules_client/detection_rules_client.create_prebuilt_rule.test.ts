@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -29,6 +30,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient: jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -37,7 +39,12 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     const savedObjectsClient = savedObjectsClientMock.create();
-    detectionRulesClient = createDetectionRulesClient({ rulesClient, mlAuthz, savedObjectsClient });
+    detectionRulesClient = createDetectionRulesClient({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      savedObjectsClient,
+    });
   });
 
   it('creates a rule with the correct parameters and options', async () => {

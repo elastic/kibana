@@ -9,10 +9,10 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
-} from '@kbn/cloud-security-posture-plugin/common/types/latest';
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
 
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -32,12 +32,12 @@ export default function ({ getService }: FtrProviderContext) {
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     beforeEach(async () => {

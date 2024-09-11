@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -11,7 +12,6 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { Direction, EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 
-import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
   getCompatibleSearchTechniques,
   OptionsListSearchTechnique,
@@ -24,6 +24,8 @@ import {
 import { pluginServices } from '../../services';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
+import { OptionsListEmbeddableInput } from '..';
+import { ControlEditorProps } from '../../types';
 
 const selectionOptions = [
   {

@@ -7,6 +7,8 @@
 
 import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 
+export type SolutionView = OnBoardingDefaultSolution | 'classic';
+
 /**
  * A Space.
  */
@@ -64,7 +66,7 @@ export interface Space {
   /**
    * Solution selected for this space.
    */
-  solution?: OnBoardingDefaultSolution | 'classic';
+  solution?: SolutionView;
 }
 
 /**

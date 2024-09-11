@@ -1,25 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import { render, RenderResult, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { render, RenderResult, within } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-import { pluginServices } from '../../services';
 import { mockOptionsListEmbeddable } from '../../../common/mocks';
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { OptionsListComponentState, OptionsListReduxState } from '../types';
+import { pluginServices } from '../../services';
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
+import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
+import { OptionsListEmbeddableInput } from '..';
+import { ControlOutput } from '../../types';
 
 describe('Options list popover', () => {
+  let user: UserEvent;
+
   const defaultProps = {
     isLoading: false,
     updateSearchString: jest.fn(),
@@ -48,10 +53,28 @@ describe('Options list popover', () => {
     );
   }
 
-  const clickShowOnlySelections = (popover: RenderResult) => {
+  const clickShowOnlySelections = async (popover: RenderResult) => {
     const showOnlySelectedButton = popover.getByTestId('optionsList-control-show-only-selected');
-    userEvent.click(showOnlySelectedButton);
+    await user.click(showOnlySelectedButton);
   };
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+  });
 
   test('no available options', async () => {
     const popover = await mountComponent({ componentState: { availableOptions: [] } });
@@ -65,7 +88,7 @@ describe('Options list popover', () => {
   describe('show only selected', () => {
     test('display error message when the show only selected toggle is true but there are no selections', async () => {
       const popover = await mountComponent();
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const noSelectionsDiv = within(availableOptionsDiv).getByTestId(
         'optionsList-control-selectionsEmptyMessage'
@@ -78,7 +101,7 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         explicitInput: { selectedOptions: selections },
       });
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
       const availableOptions = within(availableOptionsList).getAllByRole('option');
@@ -98,7 +121,7 @@ describe('Options list popover', () => {
       expect(searchBox).not.toBeDisabled();
       expect(sortButton).not.toBeDisabled();
 
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       searchBox = popover.getByTestId('optionsList-control-search-input');
       sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       expect(searchBox).toBeDisabled();
@@ -168,9 +191,10 @@ describe('Options list popover', () => {
     test('clicking another option unselects "Exists"', async () => {
       const popover = await mountComponent({
         explicitInput: { existsSelected: true },
+        componentState: { field: { type: 'string' } as FieldSpec },
       });
       const woofOption = popover.getByTestId('optionsList-control-selection-woof');
-      userEvent.click(woofOption);
+      await user.click(woofOption);
 
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
@@ -185,6 +209,7 @@ describe('Options list popover', () => {
       const selections = ['woof', 'bark'];
       const popover = await mountComponent({
         explicitInput: { existsSelected: false, selectedOptions: selections },
+        componentState: { field: { type: 'number' } as FieldSpec },
       });
       const existsOption = popover.getByTestId('optionsList-control-selection-exists');
       let availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
@@ -193,7 +218,7 @@ describe('Options list popover', () => {
       expect(checkedOptions[0]).toHaveTextContent('woof. Checked option.');
       expect(checkedOptions[1]).toHaveTextContent('bark. Checked option.');
 
-      userEvent.click(existsOption);
+      await user.click(existsOption);
       availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       checkedOptions = within(availableOptionsDiv).getAllByRole('option', { checked: true });
       expect(checkedOptions).toHaveLength(1);
@@ -213,7 +238,7 @@ describe('Options list popover', () => {
       const popover = await mountComponent({
         explicitInput: { existsSelected: true },
       });
-      clickShowOnlySelections(popover);
+      await clickShowOnlySelections(popover);
       const availableOptionsDiv = popover.getByTestId('optionsList-control-available-options');
       const availableOptionsList = within(availableOptionsDiv).getByRole('listbox');
       const availableOptions = within(availableOptionsList).getAllByRole('option');
@@ -229,7 +254,9 @@ describe('Options list popover', () => {
         },
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      await user.click(sortButton);
+
+      expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
@@ -246,7 +273,9 @@ describe('Options list popover', () => {
         },
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      await user.click(sortButton);
+
+      expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
@@ -265,7 +294,9 @@ describe('Options list popover', () => {
         componentState: { field: { name: 'Test IP field', type: 'ip' } as FieldSpec },
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      await user.click(sortButton);
+
+      expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
@@ -279,7 +310,9 @@ describe('Options list popover', () => {
         componentState: { field: { name: 'Test date field', type: 'date' } as FieldSpec },
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      await user.click(sortButton);
+
+      expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
@@ -293,7 +326,9 @@ describe('Options list popover', () => {
         componentState: { field: { name: 'Test number field', type: 'number' } as FieldSpec },
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
-      userEvent.click(sortButton);
+      await user.click(sortButton);
+
+      expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
@@ -361,6 +396,58 @@ describe('Options list popover', () => {
         explicitInput: { hideSort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });
+    });
+  });
+
+  describe('field formatter', () => {
+    const mockedFormatter = jest.fn().mockImplementation((value: unknown) => `formatted:${value}`);
+
+    beforeAll(() => {
+      stubDataView.getFormatterForField = jest.fn().mockReturnValue({
+        getConverterFor: () => mockedFormatter,
+      });
+      pluginServices.getServices().dataViews.get = jest.fn().mockResolvedValue(stubDataView);
+    });
+
+    afterEach(() => {
+      mockedFormatter.mockClear();
+    });
+
+    test('uses field formatter on suggestions', async () => {
+      const popover = await mountComponent({
+        componentState: {
+          field: stubDataView.fields.getByName('bytes')?.toSpec(),
+          availableOptions: [
+            { value: 1000, docCount: 1 },
+            { value: 123456789, docCount: 4 },
+          ],
+        },
+      });
+
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1000);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, 123456789);
+      const options = await popover.findAllByRole('option');
+      expect(options[0].textContent).toEqual('Exists');
+      expect(
+        options[1].getElementsByClassName('euiSelectableListItem__text')[0].textContent
+      ).toEqual('formatted:1000');
+      expect(
+        options[2].getElementsByClassName('euiSelectableListItem__text')[0].textContent
+      ).toEqual('formatted:123456789');
+    });
+
+    test('converts string to number for date field', async () => {
+      await mountComponent({
+        componentState: {
+          field: stubDataView.fields.getByName('@timestamp')?.toSpec(),
+          availableOptions: [
+            { value: 1721283696000, docCount: 1 },
+            { value: 1721295533000, docCount: 2 },
+          ],
+        },
+      });
+      expect(mockedFormatter).toHaveBeenNthCalledWith(1, 1721283696000);
+      expect(mockedFormatter).toHaveBeenNthCalledWith(2, 1721295533000);
     });
   });
 });

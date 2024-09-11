@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { range } from 'lodash';
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
@@ -16,6 +17,7 @@ import {
   getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import {
+  combineArraysToNdJson,
   combineToNdJson,
   fetchRule,
   getCustomQueryRuleParams,
@@ -921,7 +923,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('migrate pre-8.0 action connector ids', () => {
+      describe('@skipInServerless migrate pre-8.0 action connector ids', () => {
         const defaultSpaceActionConnectorId = '61b17790-544e-11ec-a349-11361cc441c4';
         const space714ActionConnectorId = '51b17790-544e-11ec-a349-11361cc441c4';
 
@@ -1376,7 +1378,62 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should resolve exception references that include comments', async () => {
+        it('should resolve 100 or more exception references when importing into a clean slate', async () => {
+          const rules = range(150).map((idx) =>
+            getCustomQueryRuleParams({
+              rule_id: `${idx}`,
+              exceptions_list: [
+                {
+                  id: `${idx}`,
+                  list_id: `${idx}`,
+                  type: 'detection',
+                  namespace_type: 'single',
+                },
+              ],
+            })
+          );
+          const exceptionLists = range(150).map((idx) => ({
+            ...getImportExceptionsListSchemaMock(`${idx}`),
+            id: `${idx}`,
+            type: 'detection',
+            namespace_type: 'single',
+          }));
+          const exceptionItems = range(150).map((idx) => ({
+            description: 'some description',
+            entries: [
+              {
+                field: 'some.not.nested.field',
+                operator: 'included',
+                type: 'match',
+                value: 'some value',
+              },
+            ],
+            item_id: `item_id_${idx}`,
+            list_id: `${idx}`,
+            name: 'Query with a rule id',
+            type: 'simple',
+          }));
+          const importPayload = combineArraysToNdJson(rules, exceptionLists, exceptionItems);
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(importPayload), 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: true,
+            success_count: 150,
+            rules_count: 150,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 150,
+          });
+        });
+
+        it('@skipInServerless should resolve exception references that include comments', async () => {
           // So importing a rule that references an exception list
           // Keep in mind, no exception lists or rules exist yet
           const ndjson = combineToNdJson(

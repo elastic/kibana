@@ -17,10 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('/api/core/capabilities', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it(`returns a 400 when an invalid app id is provided`, async () => {
       const { body } = await supertestWithoutAuth

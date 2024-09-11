@@ -31,8 +31,10 @@ import {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
   RuleParams,
@@ -55,7 +57,6 @@ import {
   ExecutionTimeRange,
   Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -77,7 +78,6 @@ import {
   LogThresholdRuleTypeParams,
   positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
-import { Group } from '../../../../common/alerting/types';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
@@ -191,6 +191,7 @@ export const createLogThresholdExecutor =
             [ALERT_CONTEXT]: alertContext,
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
+            ...getEcsGroups(groups),
           };
 
           alertsClient.setAlertData({
@@ -202,13 +203,16 @@ export const createLogThresholdExecutor =
       }
     };
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
+      const logSourcesService =
+        logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
-        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
         .getResolvedLogView(validatedParams.logView);
 
       if (!isRatioRuleParams(validatedParams)) {

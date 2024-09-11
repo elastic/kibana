@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, FunctionParameterType } from './types';
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../shared/esql_types';
+import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 
 function createNumericAggDefinition({
   name,
   description,
+  returnType,
   args = [],
 }: {
   name: string;
   description: string;
+  returnType?: (numericType: FunctionParameterType) => FunctionReturnType;
   args?: Array<{
     name: string;
     type: FunctionParameterType;
@@ -28,11 +32,11 @@ function createNumericAggDefinition({
     name,
     type: 'agg',
     description,
-    supportedCommands: ['stats', 'metrics'],
+    supportedCommands: ['stats', 'inlinestats', 'metrics'],
     signatures: [
-      {
+      ...ESQL_NUMBER_TYPES.map((numericType) => ({
         params: [
-          { name: 'column', type: 'number', noNestingFunctions: true },
+          { name: 'column', type: numericType, noNestingFunctions: true },
           ...args.map(({ name: paramName, type, constantOnly }) => ({
             name: paramName,
             type,
@@ -40,8 +44,8 @@ function createNumericAggDefinition({
             constantOnly,
           })),
         ],
-        returnType: 'number',
-      },
+        returnType: returnType ? returnType(numericType) : numericType,
+      })),
     ],
     examples: [
       `from index | stats result = ${name}(field${extraParamsExample})`,
@@ -56,18 +60,28 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.avgDoc', {
       defaultMessage: 'Returns the average of the values in a field',
     }),
+    returnType: () => 'double' as FunctionReturnType,
   },
   {
     name: 'sum',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sumDoc', {
       defaultMessage: 'Returns the sum of the values in a field.',
     }),
+    returnType: (numericType: FunctionParameterType): FunctionReturnType => {
+      switch (numericType) {
+        case 'double':
+          return 'double';
+        default:
+          return 'long';
+      }
+    },
   },
   {
     name: 'median',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.medianDoc', {
       defaultMessage: 'Returns the 50% percentile.',
     }),
+    returnType: () => 'double' as FunctionReturnType,
   },
   {
     name: 'median_absolute_deviation',
@@ -78,35 +92,81 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           'Returns the median of each data point’s deviation from the median of the entire sample.',
       }
     ),
-  },
-  {
-    name: 'percentile',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.percentiletDoc',
-      {
-        defaultMessage: 'Returns the n percentile of a field.',
-      }
-    ),
-    args: [{ name: 'percentile', type: 'number' as const, value: '90', constantOnly: true }],
+    returnType: () => 'double' as FunctionReturnType,
   },
 ]
   .map(createNumericAggDefinition)
   .concat([
+    {
+      name: 'percentile',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definitions.percentiletDoc',
+        {
+          defaultMessage: 'Returns the n percentile of a field.',
+        }
+      ),
+      type: 'agg',
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
+      signatures: [
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType: FunctionParameterType) => {
+          return ESQL_COMMON_NUMERIC_TYPES.map((weightType: FunctionParameterType) => ({
+            params: [
+              {
+                name: 'column',
+                type: numericType,
+                noNestingFunctions: true,
+              },
+              {
+                name: 'percentile',
+                type: weightType,
+                noNestingFunctions: true,
+                constantOnly: true,
+              },
+            ],
+            returnType: 'double' as FunctionReturnType,
+          }));
+        }).flat(),
+      ],
+    },
     {
       name: 'max',
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.maxDoc', {
         defaultMessage: 'Returns the maximum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
-        {
-          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
-          returnType: 'number',
-        },
+        ...ESQL_COMMON_NUMERIC_TYPES.map((type) => ({
+          params: [{ name: 'column', type, noNestingFunctions: true }],
+          returnType: type,
+        })),
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
-          returnType: 'number',
+          returnType: 'date',
+        },
+        {
+          params: [{ name: 'column', type: 'date_period', noNestingFunctions: true }],
+          returnType: 'date_period',
+        },
+        {
+          params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
+          returnType: 'boolean',
+        },
+        {
+          params: [{ name: 'column', type: 'ip', noNestingFunctions: true }],
+          returnType: 'ip',
+        },
+        {
+          params: [{ name: 'column', type: 'version', noNestingFunctions: true }],
+          returnType: 'version',
+        },
+        {
+          params: [{ name: 'column', type: 'keyword', noNestingFunctions: true }],
+          returnType: 'keyword',
+        },
+        {
+          params: [{ name: 'column', type: 'text', noNestingFunctions: true }],
+          returnType: 'text',
         },
       ],
       examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
@@ -117,15 +177,39 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the minimum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
-        {
-          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
-          returnType: 'number',
-        },
+        ...ESQL_COMMON_NUMERIC_TYPES.map((type) => ({
+          params: [{ name: 'column', type, noNestingFunctions: true }],
+          returnType: type,
+        })),
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
-          returnType: 'number',
+          returnType: 'date',
+        },
+        {
+          params: [{ name: 'column', type: 'date_period', noNestingFunctions: true }],
+          returnType: 'date_period',
+        },
+        {
+          params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
+          returnType: 'boolean',
+        },
+        {
+          params: [{ name: 'column', type: 'ip', noNestingFunctions: true }],
+          returnType: 'ip',
+        },
+        {
+          params: [{ name: 'column', type: 'version', noNestingFunctions: true }],
+          returnType: 'version',
+        },
+        {
+          params: [{ name: 'column', type: 'keyword', noNestingFunctions: true }],
+          returnType: 'keyword',
+        },
+        {
+          params: [{ name: 'column', type: 'text', noNestingFunctions: true }],
+          returnType: 'text',
         },
       ],
       examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
@@ -138,7 +222,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         {
           params: [
@@ -150,7 +234,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
               optional: true,
             },
           ],
-          returnType: 'number',
+          returnType: 'long',
         },
       ],
       examples: [`from index | stats result = count(field)`, `from index | stats count(field)`],
@@ -164,14 +248,19 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         {
           params: [
             { name: 'column', type: 'any', noNestingFunctions: true },
-            { name: 'precision', type: 'number', noNestingFunctions: true, optional: true },
+            ...ESQL_NUMBER_TYPES.map((type) => ({
+              name: 'precision',
+              type,
+              noNestingFunctions: true,
+              optional: true,
+            })),
           ],
-          returnType: 'number',
+          returnType: 'long',
         },
       ],
       examples: [
@@ -188,7 +277,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
@@ -242,18 +331,18 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             },
             {
               name: 'limit',
-              type: 'number',
+              type: 'integer',
               noNestingFunctions: true,
               optional: false,
               constantOnly: true,
             },
             {
               name: 'order',
-              type: 'string',
+              type: 'keyword',
               noNestingFunctions: true,
               optional: false,
               constantOnly: true,
-              literalOptions: ['asc', 'desc'],
+              acceptedValues: ['asc', 'desc'],
             },
           ],
           returnType: 'any',
@@ -274,25 +363,27 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             'An aggregation that computes the weighted average of numeric values that are extracted from the aggregated documents.',
         }
       ),
-      supportedCommands: ['stats', 'metrics'],
+      supportedCommands: ['stats', 'inlinestats', 'metrics'],
       signatures: [
-        {
-          params: [
-            {
-              name: 'number',
-              type: 'number',
-              noNestingFunctions: true,
-              optional: false,
-            },
-            {
-              name: 'weight',
-              type: 'number',
-              noNestingFunctions: true,
-              optional: false,
-            },
-          ],
-          returnType: 'number',
-        },
+        ...ESQL_COMMON_NUMERIC_TYPES.map((numericType: FunctionParameterType) => {
+          return ESQL_COMMON_NUMERIC_TYPES.map((weightType: FunctionParameterType) => ({
+            params: [
+              {
+                name: 'number',
+                type: numericType,
+                noNestingFunctions: true,
+                optional: false,
+              },
+              {
+                name: 'weight',
+                type: weightType,
+                noNestingFunctions: true,
+                optional: false,
+              },
+            ],
+            returnType: 'double' as FunctionReturnType,
+          }));
+        }).flat(),
       ],
       examples: [
         `from employees | stats w_avg = weighted_avg(salary, height) by languages | eval w_avg = round(w_avg)`,

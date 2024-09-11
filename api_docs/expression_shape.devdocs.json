@@ -40,9 +40,9 @@
           "<",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.CoreTheme",
+            "section": "def-public.CoreTheme",
             "text": "CoreTheme"
           },
           ">) => () => ",
@@ -79,9 +79,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
@@ -108,9 +108,9 @@
           "<",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.CoreTheme",
+            "section": "def-public.CoreTheme",
             "text": "CoreTheme"
           },
           ">) => () => ",
@@ -147,9 +147,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
+                "section": "def-public.CoreTheme",
                 "text": "CoreTheme"
               },
               ">"
@@ -222,9 +222,9 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreSetup",
+            "section": "def-public.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -259,9 +259,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -334,9 +334,9 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreSetup",
+            "section": "def-public.CoreSetup",
             "text": "CoreSetup"
           },
           "<object, unknown>) => () => ",
@@ -371,9 +371,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>"
@@ -1583,7 +1583,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -1697,7 +1697,7 @@
         "label": "ShapeDrawerProps",
         "description": [],
         "signature": [
-          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
+          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1705,7 +1705,7 @@
             "section": "def-public.ShapeProps",
             "text": "ShapeProps"
           },
-          ") => JSX.Element; data: ",
+          ">) => JSX.Element; data: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1815,7 +1815,7 @@
         "label": "ShapeType",
         "description": [],
         "signature": [
-          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
+          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1823,7 +1823,7 @@
             "section": "def-public.ShapeProps",
             "text": "ShapeProps"
           },
-          ") => JSX.Element; data: ",
+          ">) => JSX.Element; data: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -2601,7 +2601,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"top\" | \"bottom\""
+          "\"right\" | \"top\" | \"bottom\" | \"left\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,

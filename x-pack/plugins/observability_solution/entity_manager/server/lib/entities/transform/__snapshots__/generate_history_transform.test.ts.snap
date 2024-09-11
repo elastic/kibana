@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateHistoryTransform(definition) should generate a valid latest transform 1`] = `
+exports[`generateHistoryTransform(definition) should generate a valid history backfill transform 1`] = `
 Object {
   "_meta": Object {
     "definitionVersion": "999.999.999",
@@ -9,9 +9,9 @@ Object {
   "defer_validation": true,
   "dest": Object {
     "index": ".entities.v1.history.noop",
-    "pipeline": "entities-v1-history-admin-console-services",
+    "pipeline": "entities-v1-history-admin-console-services-backfill",
   },
-  "frequency": "1m",
+  "frequency": "5m",
   "pivot": Object {
     "aggs": Object {
       "_errorRate_A": Object {
@@ -101,13 +101,13 @@ Object {
           "fixed_interval": "1m",
         },
       },
-      "entity.identityFields.event.category": Object {
+      "entity.identity.event.category": Object {
         "terms": Object {
           "field": "event.category",
           "missing_bucket": true,
         },
       },
-      "entity.identityFields.log.logger": Object {
+      "entity.identity.log.logger": Object {
         "terms": Object {
           "field": "log.logger",
           "missing_bucket": false,
@@ -123,10 +123,180 @@ Object {
     "index": Array [
       "kbn-data-forge-fake_stack.*",
     ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-72h",
+              },
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
+        ],
+      },
+    },
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "15m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "entities-v1-history-backfill-admin-console-services-backfill",
+}
+`;
+
+exports[`generateHistoryTransform(definition) should generate a valid history transform 1`] = `
+Object {
+  "_meta": Object {
+    "definitionVersion": "1.0.0",
+    "managed": false,
+  },
+  "defer_validation": true,
+  "dest": Object {
+    "index": ".entities.v1.history.noop",
+    "pipeline": "entities-v1-history-admin-console-services",
+  },
+  "frequency": "2m",
+  "pivot": Object {
+    "aggs": Object {
+      "_errorRate_A": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "log.level": "ERROR",
+                },
+              },
+            ],
+          },
+        },
+      },
+      "_logRate_A": Object {
+        "filter": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "log.level",
+                },
+              },
+            ],
+          },
+        },
+      },
+      "entity.lastSeenTimestamp": Object {
+        "max": Object {
+          "field": "@timestamp",
+        },
+      },
+      "entity.metadata.host.name": Object {
+        "terms": Object {
+          "field": "host.name",
+          "size": 1000,
+        },
+      },
+      "entity.metadata.host.os.name": Object {
+        "terms": Object {
+          "field": "host.os.name",
+          "size": 1000,
+        },
+      },
+      "entity.metadata.sourceIndex": Object {
+        "terms": Object {
+          "field": "_index",
+          "size": 1000,
+        },
+      },
+      "entity.metadata.tags": Object {
+        "terms": Object {
+          "field": "tags",
+          "size": 1000,
+        },
+      },
+      "entity.metrics.errorRate": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "A": "_errorRate_A>_count",
+          },
+          "script": Object {
+            "lang": "painless",
+            "source": "params.A",
+          },
+        },
+      },
+      "entity.metrics.logRate": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "A": "_logRate_A>_count",
+          },
+          "script": Object {
+            "lang": "painless",
+            "source": "params.A",
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+      "entity.identity.event.category": Object {
+        "terms": Object {
+          "field": "event.category",
+          "missing_bucket": true,
+        },
+      },
+      "entity.identity.log.logger": Object {
+        "terms": Object {
+          "field": "log.logger",
+          "missing_bucket": false,
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": Array [
+      "kbn-data-forge-fake_stack.*",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-10m",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "2m",
       "field": "@timestamp",
     },
   },

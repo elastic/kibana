@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,17 +23,25 @@ import {
 import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import { ESQLRealField } from '../validation/types';
+import { isNumericType } from '../shared/esql_types';
 
 const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
   .concat(groupingFunctionDefinitions);
+
+export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+
+export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
+  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
+};
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
+export function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
   return shouldBeQuotedText(text, options)
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
@@ -46,7 +55,7 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
-  const fullSignatures = getFunctionSignatures(fn);
+  const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
     label: fullSignatures[0].declaration,
     text: `${fn.name.toUpperCase()}($0)`,
@@ -66,7 +75,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
 export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
-    label: fn.name,
+    label: fn.name.toUpperCase(),
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
     kind: 'Operator',
@@ -98,7 +107,8 @@ export const getCompatibleFunctionDefinition = (
   return fnSupportedByCommand
     .filter((mathDefinition) =>
       mathDefinition.signatures.some(
-        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+        (signature) =>
+          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
       )
     )
     .map(getSuggestionFunctionDefinition);
@@ -125,8 +135,39 @@ export function getSuggestionCommandDefinition(
   };
 }
 
-export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] =>
-  fields.map((label) => ({
+export const buildFieldsDefinitionsWithMetadata = (
+  fields: ESQLRealField[],
+  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
+): SuggestionRawDefinition[] => {
+  return fields.map((field) => {
+    const description = field.metadata?.description;
+
+    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    return {
+      label: field.name,
+      text:
+        getSafeInsertText(field.name) +
+        (options?.addComma ? ',' : '') +
+        (options?.advanceCursor ? ' ' : ''),
+      kind: 'Variable',
+      detail: titleCaseType,
+      documentation: description
+        ? {
+            value: `
+---
+
+${description}`,
+          }
+        : undefined,
+      // If there is a description, it is a field from ECS, so it should be sorted to the top
+      sortText: description ? '1D' : 'D',
+      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+    };
+  });
+};
+
+export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] => {
+  return fields.map((label) => ({
     label,
     text: getSafeInsertText(label),
     kind: 'Variable',
@@ -135,7 +176,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
     }),
     sortText: 'D',
   }));
-
+};
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
   variables.map((label) => ({
     label,
@@ -151,64 +192,78 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
   }));
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
 ): SuggestionRawDefinition[] =>
-  sources.map(({ name, isIntegration, title }) => ({
+  sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name),
+    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
     isSnippet: isIntegration,
-    ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
       ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
           defaultMessage: `Integration`,
         })
       : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-          defaultMessage: `Index`,
+          defaultMessage: '{type}',
+          values: {
+            type: type ?? 'Index',
+          },
         }),
     sortText: 'A',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildConstantsDefinitions = (
   userConstants: string[],
-  detail?: string
+  detail?: string,
+  sortText?: string,
+  /**
+   * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
+   */
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] =>
   userConstants.map((label) => ({
     label,
-    text: label,
+    text:
+      label +
+      (options?.addComma ? ',' : '') +
+      (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
     kind: 'Constant',
     detail:
       detail ??
       i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.constantDefinition', {
         defaultMessage: `Constant`,
       }),
-    sortText: 'A',
+    sortText: sortText ?? 'A',
+    command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
 export const buildValueDefinitions = (
   values: string[],
-  detail?: string
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] =>
   values.map((value) => ({
     label: `"${value}"`,
-    text: `"${value}"`,
-    detail:
-      detail ??
-      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
-        defaultMessage: 'Literal value',
-      }),
+    text: `"${value}"${options?.addComma ? ',' : ''}${
+      options?.advanceCursorAndOpenSuggestions ? ' ' : ''
+    }`,
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+      defaultMessage: 'Literal value',
+    }),
     kind: 'Value',
+    command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
   return {
     label,
-    text: `${label} =`,
+    text: `${label} = `,
     kind: 'Variable',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new variable',
     }),
     sortText: '1',
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 };
 
@@ -235,7 +290,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -327,21 +382,39 @@ export function getUnitDuration(unit: number = 1) {
  * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
  * definition property...
  */
-export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
+export function getCompatibleLiterals(
+  commandName: string,
+  types: string[],
+  names?: string[],
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('number')) {
+  if (types.some(isNumericType)) {
     if (commandName === 'limit') {
       // suggest 10/100/1000 for limit
-      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+      suggestions.push(
+        ...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
+          advanceCursorAndOpenSuggestions: true,
+        })
+      );
     }
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
-    suggestions.push(...buildConstantsDefinitions(getUnitDuration(1))); // i.e. 1 year
+    suggestions.push(
+      ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options)
+    ); // i.e. 1 year
   }
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
-    suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
+    suggestions.push(
+      ...buildConstantsDefinitions(
+        timeUnitsToSuggest.map(({ name }) => name),
+        undefined,
+        undefined,
+        options
+      )
+    ); // i.e. year, month, ...
   }
   if (types.includes('string')) {
     if (names) {
@@ -352,13 +425,57 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
             [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
             i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
               defaultMessage: 'A pattern string',
-            })
+            }),
+            undefined,
+            options
           )
         );
       } else {
-        suggestions.push(...buildConstantsDefinitions(['string'], ''));
+        suggestions.push(...buildConstantsDefinitions(['string'], '', undefined, options));
       }
     }
   }
   return suggestions;
+}
+
+export function getDateLiterals(options?: {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}) {
+  return [
+    ...buildConstantsDefinitions(
+      TIME_SYSTEM_PARAMS,
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
+        defaultMessage: 'Named parameter',
+      }),
+      '1A',
+      options
+    ),
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePickerLabel',
+        {
+          defaultMessage: 'Choose from the time picker',
+        }
+      ),
+      text: '',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+        {
+          defaultMessage: 'Click to choose',
+        }
+      ),
+      sortText: '1A',
+      command: {
+        id: 'esql.timepicker.choose',
+        title: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+          {
+            defaultMessage: 'Click to choose',
+          }
+        ),
+      },
+    } as SuggestionRawDefinition,
+  ];
 }

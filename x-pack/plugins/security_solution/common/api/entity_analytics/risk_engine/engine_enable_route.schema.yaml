@@ -1,23 +1,15 @@
 openapi: 3.0.0
-
 info:
   version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
-
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
-
 paths:
   /internal/risk_score/engine/enable:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      x-codegen-enabled: true
+      operationId: EnableRiskEngine
       summary: Enable the Risk Engine
       requestBody:
         content:
@@ -28,7 +20,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineEnableResponse'
+                type: object
+                properties:
+                  success:
+                    type: boolean
         '400':
           description: Task manager is unavailable
           content:
@@ -40,16 +35,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineEnableErrorResponse'
+                $ref: '#/components/schemas/EnableRiskEngineErrorResponse'
 
 components:
   schemas:
-    RiskEngineEnableResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-    RiskEngineEnableErrorResponse:
+    EnableRiskEngineErrorResponse:
       type: object
       required:
         - message

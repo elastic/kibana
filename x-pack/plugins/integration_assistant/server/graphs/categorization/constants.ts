@@ -173,70 +173,49 @@ export const ECS_EVENT_TYPES_PER_CATEGORY: {
 export const CATEGORIZATION_EXAMPLE_PROCESSORS = `
 If condition that determines if ctx.checkpoint?.operation is not of a specific value:
 {
-  "append": {
-      "field": "event.category",
-      "value": "network",
-      "allow_duplicates": false,
-      "if": "ctx.checkpoint?.operation != 'Log In'"
-  }
+  "field": "event.category",
+  "value": ["network"],
+  "if": "ctx.checkpoint?.operation != 'Log In'"
 }
 
 If condition that determines if ctx.checkpoint?.operation is of a specific value:
 {
-  "append": {
-      "field": "event.category",
-      "value": "authentication",
-      "allow_duplicates": false,
-      "if": "ctx.checkpoint?.operation == 'Log In'"
-  }
+  "field": "event.category",
+  "value": ["authentication"],
+  "if": "ctx.checkpoint?.operation == 'Log In'"
 }
 
 Appending multiple values when either the value Accept or Allow is found in ctx.checkpoint?.rule_action:
 {
-  "append": {
-      "field": "event.type",
-      "value": [
-          "allowed",
-          "connection"
-      ],
-      "allow_duplicates": false,
-      "if": "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)"
-  }
+  "field": "event.type",
+  "value": ["allowed", "connection"],
+  "if": "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)"
 }
 `;
 
 export const CATEGORIZATION_EXAMPLE_ANSWER = [
-  { append: { field: 'event.type', value: ['access'] } },
   {
-    append: {
-      field: 'event.type',
-      value: ['allowed', 'connection'],
-      allow_duplicates: false,
-      if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
-    },
+    field: 'event.type',
+    value: ['access'],
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['network'],
-      allow_duplicates: false,
-      if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
-    },
+    field: 'event.type',
+    value: ['allowed', 'connection'],
+    if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
   },
   {
-    append: {
-      field: 'event.type',
-      value: ['start'],
-      allow_duplicates: false,
-      if: "ctx.checkpoint?.operation == 'Log In'",
-    },
+    field: 'event.category',
+    value: ['network'],
+    if: "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)",
   },
   {
-    append: {
-      field: 'event.category',
-      value: ['authentication'],
-      allow_duplicates: false,
-      if: "ctx.checkpoint?.operation == 'Log In'",
-    },
+    field: 'event.type',
+    value: ['start'],
+    if: "ctx.checkpoint?.operation == 'Log In'",
+  },
+  {
+    field: 'event.category',
+    value: ['authentication'],
+    if: "ctx.checkpoint?.operation == 'Log In'",
   },
 ];

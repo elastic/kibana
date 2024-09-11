@@ -4,31 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { kqlQuery } from '@kbn/observability-plugin/server';
-import { AGENT_NAME, DATA_STEAM_TYPE } from '../../../common/es_fields/apm';
-import {
-  ENTITY_ENVIRONMENT,
-  FIRST_SEEN,
-  LAST_SEEN,
-  ENTITY,
-} from '../../../common/es_fields/entities';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-import { EntitiesRaw, ServiceEntities } from './types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
+import { getEntityLatestServices } from './get_entity_latest_services';
+import type { EntityLatestServiceRaw } from './types';
+import { getEntityHistoryServicesMetrics } from './get_entity_history_services_metrics';
 
-export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
+export function entitiesRangeQuery(start?: number, end?: number): QueryDslQueryContainer[] {
+  if (!start || !end) {
+    return [];
+  }
+
   return [
     {
       range: {
-        [FIRST_SEEN]: {
+        [LAST_SEEN]: {
           gte: start,
         },
       },
     },
     {
       range: {
-        [LAST_SEEN]: {
+        [FIRST_SEEN]: {
           lte: end,
         },
       },
@@ -43,39 +41,50 @@ export async function getEntities({
   environment,
   kuery,
   size,
+  serviceName,
 }: {
   entitiesESClient: EntitiesESClient;
   start: number;
   end: number;
   environment: string;
-  kuery: string;
+  kuery?: string;
   size: number;
-}) {
-  const entities = (
-    await entitiesESClient.search(`get_entities`, {
-      body: {
+  serviceName?: string;
+}): Promise<EntityLatestServiceRaw[]> {
+  const entityLatestServices = await getEntityLatestServices({
+    entitiesESClient,
+    start,
+    end,
+    environment,
+    kuery,
+    size,
+    serviceName,
+  });
+
+  const serviceEntitiesHistoryMetricsMap = entityLatestServices.length
+    ? await getEntityHistoryServicesMetrics({
+        start,
+        end,
+        entitiesESClient,
+        entityIds: entityLatestServices.map((latestEntity) => latestEntity.entity.id),
         size,
-        track_total_hits: false,
-        _source: [AGENT_NAME, ENTITY, DATA_STEAM_TYPE],
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              ...environmentQuery(environment, ENTITY_ENVIRONMENT),
-              ...entitiesRangeQuery(start, end),
-            ],
-          },
+      })
+    : undefined;
+
+  return entityLatestServices.map((latestEntity) => {
+    const historyEntityMetrics = serviceEntitiesHistoryMetricsMap?.[latestEntity.entity.id];
+    return {
+      ...latestEntity,
+      entity: {
+        ...latestEntity.entity,
+        metrics: historyEntityMetrics || {
+          latency: undefined,
+          logErrorRate: undefined,
+          failedTransactionRate: undefined,
+          logRate: undefined,
+          throughput: undefined,
         },
       },
-    })
-  ).hits.hits.map((hit) => hit._source as EntitiesRaw);
-
-  return entities.map((entity): ServiceEntities => {
-    return {
-      serviceName: entity.entity.identityFields.service.name,
-      agentName: entity.agent.name[0],
-      signalTypes: entity.data_stream.type,
-      entity: entity.entity,
     };
   });
 }

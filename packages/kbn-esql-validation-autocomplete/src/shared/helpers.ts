@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -23,6 +24,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
@@ -33,17 +35,18 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import type {
+import {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
   FunctionReturnType,
+  ArrayType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { esqlToKibanaType } from './esql_to_kibana_type';
+import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -127,19 +130,21 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW'].includes(label);
+  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 let commandLookups: Map<string, CommandDefinition> | undefined;
 
 function buildFunctionLookup() {
-  if (!fnLookups) {
+  // we always refresh if we have test functions
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = builtinFunctions
       .concat(
         evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
-        groupingFunctionDefinitions
+        groupingFunctionDefinitions,
+        getTestFunctions()
       )
       .reduce((memo, def) => {
         memo.set(def.name, def);
@@ -226,6 +231,14 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return true;
   }
 
+  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
+    return true;
+  }
+
+  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
     if (argType === item.literalType) {
       return true;
@@ -234,31 +247,54 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
   }
 
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date'].includes(argType);
+  return ['string', 'date', 'date', 'date_period'].includes(argType);
 }
 
 /**
  * This function returns the variable or field matching a column
  */
-export function lookupColumn(
+export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
   const columnName = getQuotedColumnName(column);
+  return (
+    getColumnByName(columnName, { fields, variables }) ||
+    // It's possible columnName has backticks "`fieldName`"
+    // so we need to access the original name as well
+    getColumnByName(column.name, { fields, variables })
+  );
+}
+
+/**
+ * This function returns the variable or field matching a column
+ */
+export function getColumnByName(
+  columnName: string,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+): ESQLRealField | ESQLVariable | undefined {
   return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
 
-export function isArrayType(type: string) {
+export function isArrayType(type: string): type is ArrayType {
   return ARRAY_REGEXP.test(type);
 }
 
-const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
-  ['number[]', 'number'],
+const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
+  ['double[]', 'double'],
+  ['unsigned_long[]', 'unsigned_long'],
+  ['long[]', 'long'],
+  ['integer[]', 'integer'],
+  ['counter_integer[]', 'counter_integer'],
+  ['counter_long[]', 'counter_long'],
+  ['counter_double[]', 'counter_double'],
+  ['keyword[]', 'keyword'],
+  ['text[]', 'text'],
   ['date[]', 'date'],
+  ['date_period[]', 'date_period'],
   ['boolean[]', 'boolean'],
-  ['string[]', 'string'],
   ['any[]', 'any'],
 ]);
 
@@ -266,7 +302,7 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
  * Given an array type for example `string[]` it will return `string`
  */
 export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return arrayToSingularMap.get(type) ?? type;
+  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -287,13 +323,12 @@ export function areFieldAndVariableTypesCompatible(
   return fieldType === variableType;
 }
 
-export function printFunctionSignature(arg: ESQLFunction, useCaps = true): string {
+export function printFunctionSignature(arg: ESQLFunction): string {
   const fnDef = getFunctionDefinition(arg.name);
   if (fnDef) {
     const signature = getFunctionSignatures(
       {
         ...fnDef,
-        name: useCaps ? fnDef.name.toUpperCase() : fnDef.name,
         signatures: [
           {
             ...fnDef?.signatures[0],
@@ -310,7 +345,7 @@ export function printFunctionSignature(arg: ESQLFunction, useCaps = true): strin
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
@@ -356,7 +391,7 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = lookupColumn(subArg, references);
+        const hit = getColumnForASTNode(subArg, references);
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -386,8 +421,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
-    argDef.literalOptions &&
-    !argDef.literalOptions
+    argDef.acceptedValues &&
+    !argDef.acceptedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
@@ -408,7 +443,8 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    const matched = compareLiteralType(argType as string, arg);
+    return matched;
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
@@ -422,18 +458,28 @@ export function checkFunctionArgMatchesDefinition(
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
   if (arg.type === 'column') {
-    const hit = lookupColumn(arg, references);
+    const hit = getColumnForASTNode(arg, references);
     const validHit = hit;
     if (!validHit) {
       return false;
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+    return wrappedTypes.some(
+      (ct) =>
+        ['any', 'null'].includes(ct) ||
+        argType === ct ||
+        (ct === 'string' && ['text', 'keyword'].includes(argType as string))
+    );
   }
   if (arg.type === 'inlineCast') {
-    // TODO - remove with https://github.com/elastic/kibana/issues/174710
-    return argType === esqlToKibanaType(arg.castType);
+    const lowerArgType = argType?.toLowerCase();
+    const lowerArgCastType = arg.castType?.toLowerCase();
+    return (
+      lowerArgType === lowerArgCastType ||
+      // for valid shorthand casts like 321.12::int or "false"::bool
+      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
+    );
   }
 }
 
@@ -555,12 +601,41 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
+    }
+
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
+    }
+  }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
+}
+
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
+}
+
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
 }
 
 export function shouldBeQuotedSource(text: string) {
@@ -582,3 +657,8 @@ export const isParam = (x: unknown): x is ESQLParamLiteral =>
   typeof x === 'object' &&
   (x as ESQLParamLiteral).type === 'literal' &&
   (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Compares two strings in a case-insensitive manner
+ */
+export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();

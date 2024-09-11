@@ -10,6 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { queryMonitorStatusForAlert } from './query_monitor_status_alert';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
@@ -17,7 +18,6 @@ import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
 import {
   ConfigKey,
@@ -79,7 +79,7 @@ export class StatusRuleExecutor {
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
+    } = processMonitors(this.monitors);
 
     return {
       enabledMonitorQueryIds,
@@ -107,7 +107,7 @@ export class StatusRuleExecutor {
       : 'now-2m';
 
     if (enabledMonitorQueryIds.length > 0) {
-      const currentStatus = await queryMonitorStatus(
+      const currentStatus = await queryMonitorStatusForAlert(
         this.esClient,
         monitorLocationIds,
         {

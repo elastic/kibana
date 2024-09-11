@@ -9,7 +9,7 @@ import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
-import { InfraGroupByOptions } from '../../../../../lib/lib';
+import { InfraGroupByOptions } from '../../../../../common/inventory/types';
 interface Props {
   onSubmit: (field: string) => void;
   currentOptions: InfraGroupByOptions[];

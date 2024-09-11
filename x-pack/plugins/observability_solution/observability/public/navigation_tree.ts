@@ -228,6 +228,9 @@ const navTree: NavigationTreeDefinition = {
                 defaultMessage: 'Logs stream',
               }),
             },
+            { link: 'maps' },
+            { link: 'canvas' },
+            { link: 'graph' },
           ],
         },
       ],
@@ -334,6 +337,135 @@ const navTree: NavigationTreeDefinition = {
         },
         {
           link: 'fleet',
+        },
+        {
+          id: 'machine_learning-landing',
+          link: 'securitySolutionUI:machine_learning-landing',
+          renderAs: 'panelOpener',
+          spaceBefore: null,
+          children: [
+            {
+              children: [
+                {
+                  link: 'ml:overview',
+                },
+                {
+                  link: 'ml:notifications',
+                },
+                {
+                  link: 'ml:memoryUsage',
+                },
+              ],
+            },
+            {
+              id: 'category-anomaly_detection',
+              title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
+                defaultMessage: 'Anomaly detection',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:anomalyDetection',
+                  title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection.jobs', {
+                    defaultMessage: 'Jobs',
+                  }),
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                },
+                {
+                  link: 'ml:singleMetricViewer',
+                },
+                {
+                  link: 'ml:settings',
+                },
+              ],
+            },
+            {
+              id: 'category-data_frame analytics',
+              title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
+                defaultMessage: 'Data frame analytics',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:dataFrameAnalytics',
+                  title: i18n.translate(
+                    'xpack.observability.obltNav.ml.data_frame_analytics.jobs',
+                    {
+                      defaultMessage: 'Jobs',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:resultExplorer',
+                },
+                {
+                  link: 'ml:analyticsMap',
+                },
+              ],
+            },
+            {
+              id: 'category-model_management',
+              title: i18n.translate('xpack.observability.obltNav.ml.model_management', {
+                defaultMessage: 'Model management',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:nodesOverview',
+                },
+              ],
+            },
+            {
+              id: 'category-data_visualizer',
+              title: i18n.translate('xpack.observability.obltNav.ml.data_visualizer', {
+                defaultMessage: 'Data visualizer',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:fileUpload',
+                  title: i18n.translate(
+                    'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
+                    {
+                      defaultMessage: 'File data visualizer',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:indexDataVisualizer',
+                  title: i18n.translate(
+                    'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
+                    {
+                      defaultMessage: 'Data view data visualizer',
+                    }
+                  ),
+                },
+                {
+                  link: 'ml:dataDrift',
+                },
+              ],
+            },
+            {
+              id: 'category-aiops_labs',
+              title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
+                defaultMessage: 'Aiops labs',
+              }),
+              breadcrumbStatus: 'hidden',
+              children: [
+                {
+                  link: 'ml:logRateAnalysis',
+                },
+                {
+                  link: 'ml:logPatternAnalysis',
+                },
+                {
+                  link: 'ml:changePointDetections',
+                },
+              ],
+            },
+          ],
         },
         {
           id: 'cloudLinkUserAndRoles',

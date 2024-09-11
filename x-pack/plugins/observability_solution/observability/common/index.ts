@@ -37,7 +37,7 @@ export {
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
-  apmEnableMultiSignal,
+  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
@@ -88,6 +88,6 @@ export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;
-export type { AlertsLocatorParams } from './locators/alerts';
+export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
 export { observabilityAlertFeatureIds } from './constants';

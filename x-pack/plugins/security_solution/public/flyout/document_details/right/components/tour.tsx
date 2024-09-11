@@ -7,8 +7,9 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FlyoutTour } from '../../shared/components/flyout_tour';
 import {
   getRightSectionTourSteps,
   getLeftSectionTourSteps,
@@ -19,10 +20,10 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../shared/constants/panel_keys';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour/tour';
 import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useKibana } from '../../../../common/lib/kibana';
+import { FlyoutTour } from '../../shared/components/flyout_tour';
 
 /**
  * Guided tour for the right panel in details flyout
@@ -39,7 +40,7 @@ export const RightPanelTour = memo(() => {
 
   const eventKind = getField(getFieldsData('event.kind'));
   const isAlert = eventKind === EventKind.signal;
-  const isTimelineFlyoutOpen = useIsTimelineFlyoutOpen();
+  const isTimelineFlyoutOpen = useWhichFlyout() === Flyouts.timeline;
   const showTour =
     isAlert &&
     !isPreview &&

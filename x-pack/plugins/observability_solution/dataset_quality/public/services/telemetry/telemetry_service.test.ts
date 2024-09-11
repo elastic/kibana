@@ -174,4 +174,20 @@ describe('TelemetryService', () => {
       'example_field'
     );
   });
+
+  it('should report dataset details breakdown field change event', async () => {
+    const telemetry = service.start();
+    const exampleEventData: DatasetDetailsEbtProps = {
+      ...defaultEbtProps,
+      breakdown_field: 'service.name',
+    };
+
+    telemetry.trackDatasetDetailsBreakdownFieldChanged(exampleEventData);
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      datasetQualityEbtEvents.datasetDetailsBreakdownFieldChangedEventType.eventType,
+      expect.objectContaining(exampleEventData)
+    );
+  });
 });

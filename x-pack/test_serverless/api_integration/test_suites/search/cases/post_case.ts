@@ -21,11 +21,11 @@ export default ({ getService }: FtrProviderContext): void => {
     let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('403 when trying to create case', async () => {

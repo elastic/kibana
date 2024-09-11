@@ -13,8 +13,9 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { NotFoundError } from '../../../../errors';
+import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
 import { SimpleMemCache } from './simple_mem_cache';
-import { validateActionId } from '../../utils/validate_action_id';
 import {
   fetchActionResponses,
   fetchEndpointActionResponses,
@@ -65,16 +66,17 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
+  KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
   ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
@@ -329,6 +331,36 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Fetches the Action request ES document for a given action id
+   * @param actionId
+   * @protected
+   */
+  protected async fetchActionRequestEsDoc<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const cacheKey = `fetchActionRequestEsDoc-${actionId}`;
+    const cachedResponse =
+      this.cache.get<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(cacheKey);
+
+    if (cachedResponse) {
+      this.log.debug(
+        `fetchActionRequestEsDoc(): returning cached response for action id ${actionId}`
+      );
+      return cachedResponse;
+    }
+
+    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
+      this.options.esClient,
+      actionId
+    ).then((actionRequestDoc) => {
+      this.cache.set(cacheKey, actionRequestDoc);
+      return actionRequestDoc;
+    });
+  }
+
+  /**
    * Fetches the Response Action ES response documents for a given action id
    * @param actionId
    * @param agentIds
@@ -450,7 +482,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as TParameters,
         },
       },
       user: {
@@ -595,8 +627,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       (comment ? `: ${comment}` : '')
     );
   }
+
   protected async ensureValidActionId(actionId: string): Promise<void> {
-    return validateActionId(this.options.esClient, actionId, this.agentType);
+    const actionRequest = await this.fetchActionRequestEsDoc(actionId);
+
+    if (actionRequest.EndpointActions.input_type !== this.agentType) {
+      throw new NotFoundError(
+        `Action id [${actionId}] with agent type of [${this.agentType}] not found`
+      );
+    }
   }
 
   protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
@@ -678,7 +717,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');

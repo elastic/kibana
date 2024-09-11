@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
-import { FieldSelect } from './field_select';
+import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
 
@@ -22,7 +22,7 @@ export type TextBasedDimensionEditorProps =
   };
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
-  const [allColumns, setAllColumns] = useState<DatatableColumn[]>([]);
+  const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const query = props.state.layers[props.layerId]?.query;
 
   useEffect(() => {
@@ -34,43 +34,33 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           props.expressions
         );
         if (table) {
-          setAllColumns(table.columns);
+          const hasNumberTypeColumns = table.columns?.some(isNumeric);
+          const columns = table.columns.map((col) => {
+            return {
+              id: col.id,
+              name: col.name,
+              meta: col?.meta ?? { type: 'number' },
+              compatible:
+                props.isMetricDimension && hasNumberTypeColumns
+                  ? props.filterOperations({
+                      dataType: col?.meta?.type as DataType,
+                      isBucketed: Boolean(isNotNumeric(col)),
+                      scale: 'ordinal',
+                    })
+                  : true,
+            };
+          });
+          setAllColumns(columns);
         }
       }
     }
     fetchColumns();
-  }, [props.expressions, query]);
-
-  const hasNumberTypeColumns = allColumns?.some(isNumeric);
-  const fields = useMemo(() => {
-    return allColumns.map((col) => {
-      return {
-        id: col.id,
-        name: col.name,
-        meta: col?.meta ?? { type: 'number' },
-        compatible:
-          props.isMetricDimension && hasNumberTypeColumns
-            ? props.filterOperations({
-                dataType: col?.meta?.type as DataType,
-                isBucketed: Boolean(isNotNumeric(col)),
-                scale: 'ordinal',
-              })
-            : true,
-      };
-    });
-  }, [allColumns, hasNumberTypeColumns, props]);
+  }, [props, props.expressions, query]);
 
   const selectedField = useMemo(() => {
-    const field = fields?.find((column) => column.id === props.columnId);
-    if (field) {
-      return {
-        fieldName: field.name,
-        meta: field.meta,
-        columnId: field.id,
-      };
-    }
-    return undefined;
-  }, [fields, props.columnId]);
+    const layerColumns = props.state.layers[props.layerId].columns;
+    return layerColumns?.find((column) => column.columnId === props.columnId);
+  }, [props.columnId, props.layerId, props.state.layers]);
 
   return (
     <>
@@ -83,10 +73,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         className="lnsIndexPatternDimensionEditor--padded"
       >
         <FieldSelect
-          existingFields={fields ?? []}
+          existingFields={allColumns ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {
-            const meta = fields?.find((f) => f.name === choice.field)?.meta;
+            const meta = allColumns?.find((f) => f.name === choice.field)?.meta;
             const newColumn = {
               columnId: props.columnId,
               fieldName: choice.field,

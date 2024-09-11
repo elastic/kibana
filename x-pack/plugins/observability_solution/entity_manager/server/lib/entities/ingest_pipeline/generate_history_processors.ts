@@ -5,55 +5,68 @@
  * 2.0.
  */
 
-import { EntityDefinition, MetadataField } from '@kbn/entities-schema';
-import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
+import {
+  initializePathScript,
+  cleanScript,
+} from '../helpers/ingest_pipeline_script_processor_helpers';
 import { generateHistoryIndexName } from '../helpers/generate_component_id';
 
-function createIdTemplate(definition: EntityDefinition) {
-  return definition.identityFields.reduce((template, id) => {
-    return template.replaceAll(id.field, `entity.identityFields.${id.field}`);
-  }, definition.displayNameTemplate);
+function getMetadataSourceField({ aggregation, destination, source }: MetadataField) {
+  if (aggregation.type === 'terms') {
+    return `ctx.entity.metadata.${destination}.keySet()`;
+  } else if (aggregation.type === 'top_metrics') {
+    return `ctx.entity.metadata.${destination}["${source}"]`;
+  }
+
+  throw new Error(`unsupported metadata aggregation type [${aggregation.type}]`);
 }
 
 function mapDestinationToPainless(metadata: MetadataField) {
-  const destination = metadata.destination || metadata.source;
-  const fieldParts = destination.split('.');
-  return fieldParts.reduce((acc, _part, currentIndex, parts) => {
-    if (currentIndex + 1 === parts.length) {
-      if (metadata.aggregation.type === 'terms') {
-        return `${acc}\n  ctx${parts
-          .map((s) => `["${s}"]`)
-          .join('')} = ctx.entity.metadata.${destination}.keySet();`;
-      } else if (metadata.aggregation.type === 'top_metrics') {
-        return `${acc}\n  ctx${parts
-          .map((s) => `["${s}"]`)
-          .join('')} = ctx.entity.metadata.${destination}["${metadata.source}"];`;
-      }
-    }
-    return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
-      .slice(0, currentIndex + 1)
-      .map((s) => `["${s}"]`)
-      .join('')} = new HashMap();`;
-  }, '');
+  const field = metadata.destination;
+  return `
+    ${initializePathScript(field)}
+    ctx.${field} = ${getMetadataSourceField(metadata)};
+  `;
 }
 
 function createMetadataPainlessScript(definition: EntityDefinition) {
   if (!definition.metadata) {
     return '';
   }
-  return definition.metadata.reduce((script, metadata) => {
-    const destination = metadata.destination || metadata.source;
+
+  return definition.metadata.reduce((acc, metadata) => {
+    const destination = metadata.destination;
+    const optionalFieldPath = destination.replaceAll('.', '?.');
+
     if (metadata.aggregation.type === 'terms') {
-      return `${script}if (ctx.entity?.metadata?.${destination.replaceAll(
-        '.',
-        '?.'
-      )} != null) {${mapDestinationToPainless(metadata)}\n}\n`;
+      const next = `
+        if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
+          ${mapDestinationToPainless(metadata)}
+        }
+      `;
+      return `${acc}\n${next}`;
+    } else if (metadata.aggregation.type === 'top_metrics') {
+      const next = `
+        if (ctx.entity?.metadata?.${optionalFieldPath}["${metadata.source}"] != null) {
+          ${mapDestinationToPainless(metadata)}
+        }
+      `;
+      return `${acc}\n${next}`;
     }
 
-    return `${script}if (ctx.entity?.metadata?.${destination.replaceAll('.', '?.')}["${
-      metadata.source
-    }"] != null) {${mapDestinationToPainless(metadata)}\n}\n`;
+    throw new Error(`unsupported metadata aggregation [${metadata.aggregation.type}]`);
   }, '');
+}
+
+function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
+  return definition.identityFields.map((key) => ({
+    set: {
+      if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
+      field: key.field,
+      value: `{{entity.identity.${key.field}}}`,
+    },
+  }));
 }
 
 export function generateHistoryProcessors(definition: EntityDefinition) {
@@ -90,14 +103,14 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
     },
     {
       set: {
-        field: 'entity.displayName',
-        value: createIdTemplate(definition),
+        field: 'entity.identityFields',
+        value: definition.identityFields.map((identityField) => identityField.field),
       },
     },
     {
       script: {
         description: 'Generated the entity.id field',
-        source: `
+        source: cleanScript(`
         // This function will recursively collect all the values of a HashMap of HashMaps
         Collection collectValues(HashMap subject) {
           Collection values = new ArrayList();
@@ -116,9 +129,9 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         // Create the string builder
         StringBuilder entityId = new StringBuilder();
 
-        if (ctx["entity"]["identityFields"] != null) {
+        if (ctx["entity"]["identity"] != null) {
           // Get the values as a collection
-          Collection values = collectValues(ctx["entity"]["identityFields"]);
+          Collection values = collectValues(ctx["entity"]["identity"]);
 
           // Convert to a list and sort
           List sortedValues = new ArrayList(values);
@@ -130,10 +143,10 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
             entityId.append(":");
           }
 
-            // Assign the slo.instanceId
+            // Assign the entity.id
           ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
         }
-       `,
+       `),
       },
     },
     {
@@ -149,11 +162,18 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         }))
       : []),
     ...(definition.metadata != null
-      ? [{ script: { source: createMetadataPainlessScript(definition) } }]
+      ? [{ script: { source: cleanScript(createMetadataPainlessScript(definition)) } }]
       : []),
     {
       remove: {
         field: 'entity.metadata',
+        ignore_missing: true,
+      },
+    },
+    ...liftIdentityFieldsToDocumentRoot(definition),
+    {
+      remove: {
+        field: 'entity.identity',
         ignore_missing: true,
       },
     },
@@ -163,6 +183,31 @@ export function generateHistoryProcessors(definition: EntityDefinition) {
         index_name_prefix: `${generateHistoryIndexName(definition)}.`,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@platform`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@platform`,
+      },
+    },
+
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}@custom`,
+      },
+    },
+    {
+      pipeline: {
+        ignore_missing_pipeline: true,
+        name: `${definition.id}-history@custom`,
       },
     },
   ];

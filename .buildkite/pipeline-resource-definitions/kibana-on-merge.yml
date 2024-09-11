@@ -20,12 +20,12 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 7.17 8.14 8.15
+      branch_configuration: main 7.17 8.15
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge.yml

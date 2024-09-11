@@ -23,17 +23,69 @@ import {
   sendGetAgentPolicies,
   useAuthz,
   sendGetActionStatus,
+  sendBulkGetAgentPolicies,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
 
-export function useFetchAgentsData() {
+/** Allow to fetch full agent policy using a cache */
+function useFullAgentPolicyFetcher() {
   const authz = useAuthz();
+  const fetchedAgentPoliciesRef = useRef<{
+    [k: string]: AgentPolicy;
+  }>({});
+
+  const fetchPolicies = useCallback(
+    async (policiesIds: string[]) => {
+      const policiesToFetchIds = policiesIds.reduce((acc, policyId) => {
+        if (!fetchedAgentPoliciesRef.current[policyId]) {
+          acc.push(policyId);
+        }
+        return acc;
+      }, [] as string[]);
+
+      if (policiesToFetchIds.length) {
+        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPolicies(policiesToFetchIds, {
+          full: authz.fleet.readAgentPolicies,
+        });
+
+        if (bulkGetAgentPoliciesResponse.error) {
+          throw bulkGetAgentPoliciesResponse.error;
+        }
+
+        if (!bulkGetAgentPoliciesResponse.data) {
+          throw new Error('Invalid bulk GET agent policies response');
+        }
+        bulkGetAgentPoliciesResponse.data.items.forEach((agentPolicy) => {
+          fetchedAgentPoliciesRef.current[agentPolicy.id] = agentPolicy;
+        });
+      }
+
+      return policiesIds.reduce((acc, policyId) => {
+        if (fetchedAgentPoliciesRef.current[policyId]) {
+          acc.push(fetchedAgentPoliciesRef.current[policyId]);
+        }
+        return acc;
+      }, [] as AgentPolicy[]);
+    },
+    [authz.fleet.readAgentPolicies]
+  );
+
+  return useMemo(
+    () => ({
+      fetchPolicies,
+    }),
+    [fetchPolicies]
+  );
+}
+
+export function useFetchAgentsData() {
+  const fullAgentPolicyFecher = useFullAgentPolicyFetcher();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications } = useStartServices();
@@ -41,6 +93,7 @@ export function useFetchAgentsData() {
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
   const defaultKuery: string = (urlParams.kuery as string) || '';
+  const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -64,12 +117,17 @@ export function useFetchAgentsData() {
     'unhealthy',
     'updating',
     'offline',
+    ...(urlHasInactive ? ['inactive'] : []),
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
+    return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
+  }, [selectedStatus]);
+
+  const includeUnenrolled = useMemo(() => {
+    return selectedStatus.some((status) => status === 'unenrolled') || selectedStatus.length === 0;
   }, [selectedStatus]);
 
   const setSearch = useCallback(
@@ -89,7 +147,7 @@ export function useFetchAgentsData() {
   );
 
   // filters kuery
-  const kuery = useMemo(() => {
+  let kuery = useMemo(() => {
     return getKuery({
       search,
       selectedAgentPolicies,
@@ -97,6 +155,9 @@ export function useFetchAgentsData() {
       selectedStatus,
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+
+  kuery =
+    includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
 
   const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
@@ -108,6 +169,9 @@ export function useFetchAgentsData() {
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
+  const [agentPoliciesIndexedById, setAgentPoliciesIndexedByIds] = useState<{
+    [k: string]: AgentPolicy;
+  }>({});
 
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
@@ -157,7 +221,7 @@ export function useFetchAgentsData() {
               kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
             }),
             sendGetAgentPolicies({
-              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+              kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
               perPage: SO_SEARCH_LIMIT,
               full: false,
             }),
@@ -171,7 +235,6 @@ export function useFetchAgentsData() {
             }),
           ]);
 
-          isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
             return;
@@ -202,6 +265,25 @@ export function useFetchAgentsData() {
           if (!statusSummary) {
             throw new Error('Invalid GET /agents response - no status summary');
           }
+          // Fetch agent policies, use a local cache
+          const policyIds = agentsResponse.data.items.map((agent) => agent.policy_id as string);
+
+          const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
+
+          isLoadingVar.current = false;
+          // Return if a newe request has been triggerd
+          if (currentRequestRef.current !== currentRequest) {
+            return;
+          }
+
+          setAgentPoliciesIndexedByIds(
+            policies.reduce((acc, agentPolicy) => {
+              acc[agentPolicy.id] = agentPolicy;
+
+              return acc;
+            }, {} as { [k: string]: AgentPolicy })
+          );
+
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
           const newAllTags = agentTagsResponse.data.items;
@@ -255,6 +337,7 @@ export function useFetchAgentsData() {
             setLatestAgentActionErrors(allRecentActionErrors);
           }
         } catch (error) {
+          isLoadingVar.current = false;
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
               defaultMessage: 'Error fetching agents',
@@ -266,6 +349,7 @@ export function useFetchAgentsData() {
       fetchDataAsync();
     },
     [
+      fullAgentPolicyFecher,
       pagination.currentPage,
       pagination.pageSize,
       kuery,
@@ -293,20 +377,12 @@ export function useFetchAgentsData() {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    full: authz.fleet.readAgentPolicies,
   });
 
-  const agentPolicies = useMemo(
-    () => (agentPoliciesRequest.data ? agentPoliciesRequest.data.items : []),
-    [agentPoliciesRequest]
+  const allAgentPolicies = useMemo(
+    () => agentPoliciesRequest.data?.items || [],
+    [agentPoliciesRequest.data]
   );
-  const agentPoliciesIndexedById = useMemo(() => {
-    return agentPolicies.reduce((acc, agentPolicy) => {
-      acc[agentPolicy.id] = agentPolicy;
-
-      return acc;
-    }, {} as { [k: string]: AgentPolicy });
-  }, [agentPolicies]);
 
   return {
     allTags,
@@ -332,7 +408,7 @@ export function useFetchAgentsData() {
     setSelectedStatus,
     selectedTags,
     setSelectedTags,
-    agentPolicies,
+    allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
     pagination,

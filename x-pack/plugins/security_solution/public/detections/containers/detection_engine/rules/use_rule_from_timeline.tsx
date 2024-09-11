@@ -31,7 +31,7 @@ export interface RuleFromTimeline {
   onOpenTimeline: (timeline: TimelineModel) => void;
 }
 
-type SetRuleQuery = ({
+export type SetRuleQuery = ({
   index,
   queryBar,
   eqlOptions,
@@ -48,8 +48,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     SourcererScopeName.timeline
   );
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const isEql = useRef(false);
@@ -200,11 +200,11 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         queryTimelineById({
           timelineId,
           onOpenTimeline,
-          unifiedComponentsInTimelineEnabled,
+          unifiedComponentsInTimelineDisabled,
         });
       }
     },
-    [onOpenTimeline, queryTimelineById, selectedTimeline, unifiedComponentsInTimelineEnabled]
+    [onOpenTimeline, queryTimelineById, selectedTimeline, unifiedComponentsInTimelineDisabled]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

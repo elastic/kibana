@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   AnomalyThreshold,
-  ConcurrentSearches,
   EventCategoryOverride,
   HistoryWindowStart,
   InvestigationGuide,
-  ItemsPerSearch,
   MachineLearningJobId,
   MaxSignals,
   NewTermsFields,
@@ -137,8 +135,6 @@ export const DiffableThreatMatchFields = z.object({
   threat_mapping: ThreatMapping,
   data_source: RuleDataSource.optional(), // NOTE: new field
   threat_indicator_path: ThreatIndicatorPath.optional(),
-  concurrent_searches: ConcurrentSearches.optional(),
-  items_per_search: ItemsPerSearch.optional(),
 });
 
 export type DiffableThresholdFields = z.infer<typeof DiffableThresholdFields>;

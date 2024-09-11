@@ -22,6 +22,7 @@ import {
   PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { QueryObserverResult } from '@tanstack/react-query';
 import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
@@ -38,11 +39,16 @@ export interface Props {
   selectedPrompt: PromptResponse | undefined;
   clearSelectedSystemPrompt?: () => void;
   isClearable?: boolean;
+  isCleared?: boolean;
   isDisabled?: boolean;
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onSystemPromptSelectionChange?: (promptId: string | undefined) => void;
+  onSelectedConversationChange?: (result: Conversation) => void;
+  setConversationSettings?: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversationsSettingsBulkActions?: React.Dispatch<Record<string, Conversation>>;
+  refetchConversations?: () => Promise<QueryObserverResult<Record<string, Conversation>, unknown>>;
 }
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
@@ -54,11 +60,16 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   selectedPrompt,
   clearSelectedSystemPrompt,
   isClearable = false,
+  isCleared = false,
   isDisabled = false,
   isOpen = false,
+  refetchConversations,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
+  onSelectedConversationChange,
+  setConversationSettings,
+  setConversationsSettingsBulkActions,
 }) => {
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
@@ -74,18 +85,20 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (promptId?: string) => {
+    async (promptId?: string) => {
       if (conversation && conversation.apiConfig) {
-        setApiConfig({
+        const result = await setApiConfig({
           conversation,
           apiConfig: {
             ...conversation.apiConfig,
             defaultSystemPromptId: promptId,
           },
         });
+        await refetchConversations?.();
+        return result;
       }
     },
-    [conversation, setApiConfig]
+    [conversation, refetchConversations, setApiConfig]
   );
 
   const addNewSystemPrompt = useMemo(() => {
@@ -109,10 +122,13 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   }, []);
 
   // SuperSelect State/Actions
-  const options = useMemo(() => getOptions({ prompts: allSystemPrompts }), [allSystemPrompts]);
+  const options = useMemo(
+    () => getOptions({ prompts: allSystemPrompts, isCleared }),
+    [allSystemPrompts, isCleared]
+  );
 
   const onChange = useCallback(
-    (selectedSystemPromptId) => {
+    async (selectedSystemPromptId: string) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
         setIsSettingsModalVisible(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
@@ -122,10 +138,30 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       if (onSystemPromptSelectionChange != null) {
         onSystemPromptSelectionChange(selectedSystemPromptId);
       }
-      setSelectedSystemPrompt(selectedSystemPromptId);
+      const result = await setSelectedSystemPrompt(selectedSystemPromptId);
+      if (result) {
+        setConversationSettings?.((prev: Record<string, Conversation>) => {
+          const newConversationsSettings = Object.entries(prev).reduce<
+            Record<string, Conversation>
+          >((acc, [key, convo]) => {
+            if (result.title === convo.title) {
+              acc[result.id] = result;
+            } else {
+              acc[key] = convo;
+            }
+            return acc;
+          }, {});
+          return newConversationsSettings;
+        });
+        onSelectedConversationChange?.(result);
+        setConversationsSettingsBulkActions?.({});
+      }
     },
     [
+      onSelectedConversationChange,
       onSystemPromptSelectionChange,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
       setIsSettingsModalVisible,
       setSelectedSettingsTab,
       setSelectedSystemPrompt,
@@ -133,9 +169,8 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   );
 
   const clearSystemPrompt = useCallback(() => {
-    setSelectedSystemPrompt(undefined);
     clearSelectedSystemPrompt?.();
-  }, [clearSelectedSystemPrompt, setSelectedSystemPrompt]);
+  }, [clearSelectedSystemPrompt]);
 
   return (
     <EuiFlexGroup
@@ -199,10 +234,14 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
                 inline-size: 16px;
                 block-size: 16px;
                 border-radius: 16px;
-                background: ${euiThemeVars.euiColorMediumShade};
+                background: ${isCleared
+                  ? euiThemeVars.euiColorLightShade
+                  : euiThemeVars.euiColorMediumShade};
 
                 :hover:not(:disabled) {
-                  background: ${euiThemeVars.euiColorMediumShade};
+                  background: ${isCleared
+                    ? euiThemeVars.euiColorLightShade
+                    : euiThemeVars.euiColorMediumShade};
                   transform: none;
                 }
 

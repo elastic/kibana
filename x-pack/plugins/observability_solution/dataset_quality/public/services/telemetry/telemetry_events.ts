@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { SchemaObject, SchemaValue } from '@kbn/ebt';
+import { SchemaObject, SchemaValue } from '@elastic/ebt';
+
 import {
   DatasetEbtFilter,
   DatasetEbtProps,
@@ -254,8 +255,29 @@ const datasetDetailsNavigatedEventType: DatasetQualityTelemetryEvent = {
   },
 };
 
+const datasetDetailsBreakdownFieldChangedEventType: DatasetQualityTelemetryEvent = {
+  eventType: DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED,
+  schema: {
+    ...datasetCommonSchema,
+    tracking_id: {
+      type: 'keyword',
+      _meta: {
+        description: `Locally generated session tracking ID for funnel analysis`,
+      },
+    },
+    breakdown_field: {
+      type: 'keyword',
+      _meta: {
+        description: 'Field used for chart breakdown, if any',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const datasetQualityEbtEvents = {
   datasetNavigatedEventType,
   datasetDetailsOpenedEventType,
   datasetDetailsNavigatedEventType,
+  datasetDetailsBreakdownFieldChangedEventType,
 };

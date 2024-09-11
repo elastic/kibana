@@ -14,6 +14,13 @@ import { getOnboardingStatus } from './get_onboarding_status';
 import { getInstalledIntegrations } from './get_installed_integrations';
 import { type ObservabilityOnboardingContextValue } from '../../../plugin';
 
+export const DASHBOARDS = {
+  'apache-Logs-Apache-Dashboard': { type: 'logs' },
+  'docker-AV4REOpp5NkDleZmzKkE': { type: 'metrics' },
+  'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519': { type: 'logs' },
+  'system-79ffd6e0-faa0-11e6-947f-177f697178b8': { type: 'metrics' },
+};
+
 export function useOnboardingFlow() {
   const {
     services: { fleet },
@@ -60,9 +67,11 @@ export function useOnboardingFlow() {
       return [];
     }
     const assetsMetadata = await fleet.hooks.epm.getBulkAssets({
-      assetIds: installedIntegrations
-        .map((integration) => integration.kibanaAssets)
-        .flat() as AssetSOObject[],
+      assetIds: (
+        installedIntegrations
+          .map((integration) => integration.kibanaAssets)
+          .flat() as AssetSOObject[]
+      ).filter((asset) => Object.keys(DASHBOARDS).includes(asset.id)),
     });
     return installedIntegrations.map((integration) => {
       return {

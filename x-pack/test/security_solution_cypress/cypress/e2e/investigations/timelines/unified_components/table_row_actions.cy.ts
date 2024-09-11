@@ -25,15 +25,6 @@ describe(
   'Unified Timeline table Row Actions',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'unifiedComponentsInTimelineEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     beforeEach(() => {

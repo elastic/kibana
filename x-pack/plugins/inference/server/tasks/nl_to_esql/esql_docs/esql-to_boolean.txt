@@ -1,0 +1,15 @@
+## TO_BOOLEAN
+
+The `TO_BOOLEAN` function converts an input value to a boolean value. A string value of "true" will be case-insensitively converted to the Boolean `true`. For anything else, including the empty string, the function will return `false`. The numerical value of `0` will be converted to `false`, and anything else will be converted to `true`.
+
+### Examples
+
+```esql
+ROW str = ["true", "TRuE", "false", "", "yes", "1"]
+| EVAL bool = TO_BOOLEAN(str)
+```
+
+```esql
+ROW num = [0, 1, 2, -1]
+| EVAL bool = TO_BOOLEAN(num)
+```

@@ -54,12 +54,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Field preview', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await createIndex();
     });
     after(async () => {
       await deleteIndex();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('should return the script value', () => {

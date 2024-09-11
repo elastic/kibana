@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ISavedObjectsRepository } from '@kbn/core/server';
@@ -15,7 +16,7 @@ import { type UsageCountersServiceSetup } from '../usage_counters';
 
 export async function storeUiReport(
   internalRepository: ISavedObjectsRepository,
-  counters: UsageCountersServiceSetup,
+  usageCounters: UsageCountersServiceSetup,
   report: ReportSchemaType
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
@@ -61,7 +62,8 @@ export async function storeUiReport(
       const { appName, eventName, total, type } = metric;
 
       const counter =
-        counters.getUsageCounterByDomainId(appName) ?? counters.createUsageCounter(appName);
+        usageCounters.getUsageCounterByDomainId(appName) ??
+        usageCounters.createUsageCounter(appName);
 
       counter.incrementCounter({
         counterName: eventName,

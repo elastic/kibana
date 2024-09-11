@@ -89,11 +89,6 @@ export function ESQLEditor(props: Props) {
         }}
         errors={error ? [error] : undefined}
         warning={warning}
-        expandCodeEditor={(status: boolean) => {
-          // never called because hideMinimizeButton hides UI
-        }}
-        isCodeEditorExpanded
-        hideMinimizeButton
         editorIsInline
         hideRunQueryText
         isLoading={isLoading}

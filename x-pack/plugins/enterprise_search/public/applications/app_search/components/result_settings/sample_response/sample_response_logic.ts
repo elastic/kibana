@@ -53,11 +53,14 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
     getSearchResults: (query, resultFields) => ({ query, resultFields }),
   },
   reducers: {
+    // @ts-expect-error upgrade typescript v5.1.6
     query: ['', { queryChanged: (_, { query }) => query }],
     response: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         getSearchResultsSuccess: (_, { response }) => response,
+        // @ts-expect-error upgrade typescript v5.1.6
         getSearchResultsFailure: (_, { response }) => response,
       },
     ],

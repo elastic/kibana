@@ -48,7 +48,7 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
   ],
 };
 
-export const uptimeFeature = {
+export const syntheticsFeature = {
   id: PLUGIN.ID,
   name: PLUGIN.NAME,
   order: 1000,

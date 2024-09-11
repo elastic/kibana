@@ -155,6 +155,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   );
 
   const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
+  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
   const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
@@ -211,64 +212,56 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isSemanticTextEnabled, hasMLPermissions]);
 
-  const fetchInferenceData = useCallback(async () => {
-    try {
-      if (!isSemanticTextEnabled) {
-        return;
-      }
-
-      if (!hasMLPermissions) {
-        return;
-      }
-
-      await fetchInferenceToModelIdMap();
-    } catch (exception) {
-      setSaveMappingError(exception.message);
-    }
-  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, hasMLPermissions]);
-
-  const updateMappings = useCallback(async () => {
-    const hasSemanticText = hasSemanticTextField(state.fields);
-    try {
-      if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText) {
-        await fetchInferenceToModelIdMap();
-      }
-
-      const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
-
-      const denormalizedFields = deNormalize(fields);
-
-      const inferenceIdsInPendingList = Object.values(deNormalize(fields))
-        .filter(isSemanticTextField)
-        .map((field) => field.inference_id)
-        .filter(
-          (inferenceId: string) =>
-            state.inferenceToModelIdMap?.[inferenceId] &&
-            !state.inferenceToModelIdMap?.[inferenceId].isDeployed
-        );
-      setHasSavedFields(true);
-      if (inferenceIdsInPendingList.length === 0) {
-        const { error } = await updateIndexMappings(indexName, denormalizedFields);
-
-        if (!error) {
-          notificationService.showSuccessToast(
-            i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
-              defaultMessage: 'Updated index mapping',
-            })
-          );
-          refetchMapping();
-          setHasSavedFields(false);
-        } else {
-          setSaveMappingError(error.message);
+  const updateMappings = useCallback(
+    async (forceSaveMappings?: boolean) => {
+      const hasSemanticText = hasSemanticTextField(state.fields);
+      let inferenceToModelIdMap = state.inferenceToModelIdMap;
+      setIsUpdatingMappings(true);
+      try {
+        if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
+          inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
+        const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
+        const denormalizedFields = deNormalize(fields);
+        const inferenceIdsInPendingList = forceSaveMappings
+          ? []
+          : Object.values(denormalizedFields)
+              .filter(isSemanticTextField)
+              .map((field) => field.inference_id)
+              .filter(
+                (inferenceId: string) =>
+                  inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
+                  !inferenceToModelIdMap?.[inferenceId].isDeployed
+              );
+        setHasSavedFields(true);
+        if (inferenceIdsInPendingList.length === 0) {
+          const { error } = await updateIndexMappings(indexName, denormalizedFields);
+
+          if (!error) {
+            notificationService.showSuccessToast(
+              i18n.translate(
+                'xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings',
+                {
+                  defaultMessage: 'Updated index mapping',
+                }
+              )
+            );
+            refetchMapping();
+            setHasSavedFields(false);
+          } else {
+            setSaveMappingError(error.message);
+          }
+        }
+      } catch (exception) {
+        setSaveMappingError(exception.message);
       }
-    } catch (exception) {
-      setSaveMappingError(exception.message);
-    }
+      setIsUpdatingMappings(false);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.fields]);
+    [state.fields]
+  );
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -496,7 +489,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   </EuiButton>
                 ) : (
                   <EuiButton
-                    onClick={updateMappings}
+                    onClick={() => updateMappings()}
                     color="success"
                     fill
                     disabled={newFieldsLength === 0}
@@ -613,8 +606,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       </EuiFlexGroup>
       {isSemanticTextEnabled && isAddingFields && hasSavedFields && (
         <TrainedModelsDeploymentModal
-          fetchData={fetchInferenceData}
           errorsInTrainedModelDeployment={errorsInTrainedModelDeployment}
+          forceSaveMappings={() => updateMappings(true)}
+          saveMappings={() => updateMappings()}
+          saveMappingsLoading={isUpdatingMappings}
           setErrorsInTrainedModelDeployment={setErrorsInTrainedModelDeployment}
         />
       )}

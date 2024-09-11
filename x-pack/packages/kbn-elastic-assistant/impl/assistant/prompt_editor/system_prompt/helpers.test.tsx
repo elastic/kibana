@@ -16,13 +16,13 @@ import { getOptions, getOptionFromPrompt } from './helpers';
 describe('helpers', () => {
   describe('getOptionFromPrompt', () => {
     it('returns an EuiSuperSelectOption with the correct value', () => {
-      const option = getOptionFromPrompt({ ...mockSystemPrompt });
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isCleared: false });
 
       expect(option.value).toBe(mockSystemPrompt.id);
     });
 
     it('returns an EuiSuperSelectOption with the correct inputDisplay', () => {
-      const option = getOptionFromPrompt({ ...mockSystemPrompt });
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isCleared: false });
 
       render(<>{option.inputDisplay}</>);
 
@@ -30,15 +30,17 @@ describe('helpers', () => {
     });
 
     it('shows the expected name in the dropdownDisplay', () => {
-      const option = getOptionFromPrompt({ ...mockSystemPrompt });
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isCleared: false });
 
       render(<TestProviders>{option.dropdownDisplay}</TestProviders>);
 
-      expect(screen.getByTestId('name')).toHaveTextContent(mockSystemPrompt.name);
+      expect(screen.getByTestId(`systemPrompt-${mockSystemPrompt.name}`)).toHaveTextContent(
+        mockSystemPrompt.name
+      );
     });
 
     it('shows the expected prompt content in the dropdownDisplay', () => {
-      const option = getOptionFromPrompt({ ...mockSystemPrompt });
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isCleared: false });
 
       render(<TestProviders>{option.dropdownDisplay}</TestProviders>);
 
@@ -51,7 +53,7 @@ describe('helpers', () => {
       const prompts = [mockSystemPrompt, mockSuperheroSystemPrompt];
       const promptIds = prompts.map(({ id }) => id);
 
-      const options = getOptions({ prompts });
+      const options = getOptions({ prompts, isCleared: false });
       const optionValues = options.map(({ value }) => value);
 
       expect(optionValues).toEqual(promptIds);

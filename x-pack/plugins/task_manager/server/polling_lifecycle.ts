@@ -7,14 +7,14 @@
 
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map as mapOptional } from 'fp-ts/lib/Option';
+import { map as mapOptional, none } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig, CLAIM_STRATEGY_DEFAULT } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
 import {
   TaskMarkRunning,
@@ -43,6 +43,9 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
+import { TaskPartitioner } from './lib/task_partitioner';
+
+const MAX_BUFFER_OPERATIONS = 100;
 
 export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
@@ -58,6 +61,7 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
+  taskPartitioner: TaskPartitioner;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -99,7 +103,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   constructor({
     logger,
     middleware,
-    maxWorkersConfiguration$,
+    capacityConfiguration$,
     pollIntervalConfiguration$,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
@@ -109,6 +113,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     unusedTypes,
     executionContext,
     usageCounter,
+    taskPartitioner,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -121,13 +126,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
-      bufferMaxOperations: config.max_workers,
+      bufferMaxOperations: MAX_BUFFER_OPERATIONS,
       logger,
     });
 
     this.pool = new TaskPool({
       logger,
-      maxWorkers$: maxWorkersConfiguration$,
+      strategy: config.claim_strategy,
+      capacity$: capacityConfiguration$,
+      definitions: this.definitions,
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -139,17 +146,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions,
       unusedTypes,
       logger: this.logger,
-      getCapacity: (taskType?: string) =>
-        taskType && this.definitions.get(taskType)?.maxConcurrency
-          ? Math.max(
-              Math.min(
-                this.pool.availableWorkers,
-                this.definitions.get(taskType)!.maxConcurrency! -
-                  this.pool.getOccupiedWorkersByType(taskType)
-              ),
-              0
-            )
-          : this.pool.availableWorkers,
+      getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
+      taskPartitioner,
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
@@ -157,9 +155,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
 
     let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
+    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
       pollIntervalDelay$ = delayOnClaimConflicts(
-        maxWorkersConfiguration$,
+        capacityConfiguration$,
         pollIntervalConfiguration$,
         this.events$,
         config.version_conflict_threshold,
@@ -173,19 +171,22 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       pollInterval$: pollIntervalConfiguration$,
       pollIntervalDelay$,
       getCapacity: () => {
-        const capacity = this.pool.availableWorkers;
+        const capacity = this.pool.availableCapacity();
         if (!capacity) {
+          const usedCapacityPercentage = this.pool.usedCapacityPercentage;
+
           // if there isn't capacity, emit a load event so that we can expose how often
           // high load causes the poller to skip work (work isn't called when there is no capacity)
-          this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+          this.emitEvent(asTaskManagerStatEvent('load', asOk(usedCapacityPercentage)));
 
           // Emit event indicating task manager utilization
-          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage)));
         }
         return capacity;
       },
       work: this.pollForWork,
     });
+
     this.subscribeToPoller(poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
@@ -221,6 +222,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
+      strategy: this.config.claim_strategy,
     });
   };
 
@@ -258,7 +260,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
         // Emit the load after fetching tasks, giving us a good metric for evaluating how
         // busy Task manager tends to be in this Kibana instance
-        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
         return result;
       }
     );
@@ -281,16 +283,29 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
             // Emit event indicating task manager utilization % at the end of a polling cycle
             // Because there was a polling error, no tasks were claimed so this represents the number of workers busy
-            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+            this.emitEvent(
+              asTaskManagerStatEvent('workerUtilization', asOk(this.pool.usedCapacityPercentage))
+            );
           })
         )
       )
       .pipe(
         tap(
-          mapOk(() => {
+          mapOk((results: TimedFillPoolResult) => {
             // Emit event indicating task manager utilization % at the end of a polling cycle
-            // This represents the number of workers busy + number of tasks claimed in this cycle
-            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
+
+            // Get the actual utilization as a percentage
+            let tmUtilization = this.pool.usedCapacityPercentage;
+
+            // Check whether there are any tasks left unclaimed
+            // If we're not at capacity and there are unclaimed tasks, then
+            // there must be high cost tasks that need to be claimed
+            // Artificially inflate the utilization to represent the unclaimed load
+            if (tmUtilization < 100 && (results.stats?.tasksLeftUnclaimed ?? 0) > 0) {
+              tmUtilization = 100;
+            }
+
+            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(tmUtilization)));
           })
         )
       )
@@ -298,7 +313,21 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         this.emitEvent(
           map(
             result,
-            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            ({ timing, ...event }) => {
+              const anyTaskErrors = event.stats?.tasksErrors ?? 0;
+              if (anyTaskErrors > 0) {
+                return asTaskPollingCycleEvent<string>(
+                  asErr(
+                    new PollingError<string>(
+                      'Partially failed to poll for work: some tasks could not be claimed.',
+                      PollingErrorType.WorkError,
+                      none
+                    )
+                  )
+                );
+              }
+              return asTaskPollingCycleEvent<string>(asOk(event), timing);
+            },
             (event) => asTaskPollingCycleEvent<string>(asErr(event))
           )
         );

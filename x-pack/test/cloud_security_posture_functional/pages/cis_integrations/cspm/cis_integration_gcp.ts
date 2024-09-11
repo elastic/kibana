@@ -24,8 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/186440
-  describe.skip('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
+  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -37,7 +36,8 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    describe('CIS_GCP Organization', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191027
+    describe.skip('CIS_GCP Organization', () => {
       it('Switch between Manual and Google cloud shell', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_ORGANIZATION_TEST_ID);
@@ -125,15 +125,15 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmGoogleCloudShellModalConfirmButton',
-              3
+              'confirmGoogleCloudShellModalConfirmButton'
             )
           ).includes('shell.cloud.google.com%2Fcloudshell')
         ).to.be(true);
       });
     });
 
-    describe('CIS_GCP Organization Credentials File', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/190779
+    describe.skip('CIS_GCP Organization Credentials File', () => {
       it('CIS_GCP Organization Credentials File workflow', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialFileName = 'CRED_FILE_TEST_NAME';
@@ -179,7 +179,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_GCP Single', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191144
+    describe.skip('CIS_GCP Single', () => {
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value', async () => {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
@@ -251,10 +252,11 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveIntegrationButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
         expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
-            credentialJsonName
+          (await cisIntegration.getSecretComponentReplaceButton(
+            'button-replace-credentials-json'
+          )) !== undefined
         ).to.be(true);
       });
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {

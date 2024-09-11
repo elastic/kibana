@@ -1,16 +1,14 @@
 openapi: 3.0.0
 info:
-  title: Get list DS existence status API endpoint
+  title: Read list DS existence status API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/index:
     get:
       x-labels: [serverless, ess]
-      operationId: GetListIndex
+      operationId: ReadListIndex
       x-codegen-enabled: true
       summary: Get list data stream existence status
-      tags:
-        - List API
       responses:
         200:
           description: Successful response

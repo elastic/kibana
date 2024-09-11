@@ -9,9 +9,9 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type { IndexDetails } from '@kbn/cloud-security-posture-common';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { SecurityService } from '../../../../../test/common/services/security/security';
+import { SecurityService } from '@kbn/ftr-common-functional-ui-services';
 
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
@@ -19,8 +19,8 @@ export interface RoleCredentials {
   cookieHeader: { Cookie: string };
 }
 
-export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
-  Promise.all([
+export const deleteIndex = async (es: Client, indexToBeDeleted: string[]) => {
+  return Promise.all([
     ...indexToBeDeleted.map((indexes) =>
       es.deleteByQuery({
         index: indexes,
@@ -64,7 +64,7 @@ export async function createPackagePolicy(
   const title = 'Security Posture Management';
   const streams = [
     {
-      enabled: false,
+      enabled: true,
       data_stream: {
         type: 'logs',
         dataset: 'cloud_security_posture.vulnerabilities',

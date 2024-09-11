@@ -86,24 +86,33 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
     cachedServerState: [
       {} as SecurityServerProps,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, serverProps) => cloneDeep(serverProps),
+        // @ts-expect-error upgrade typescript v5.1.6
         setSourceRestrictionsUpdated: (_, serverProps) => cloneDeep(serverProps),
       },
     ],
     isEnabled: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { isEnabled }) => isEnabled,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSourceRestrictionsUpdated: (_, { isEnabled }) => isEnabled,
+        // @ts-expect-error upgrade typescript v5.1.6
         updatePrivateSourcesEnabled: (_, { isEnabled }) => isEnabled,
       },
     ],
     remote: [
       {} as PrivateSourceSection,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { remote }) => remote,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSourceRestrictionsUpdated: (_, { remote }) => remote,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateRemoteEnabled: (state, { isEnabled }) => ({ ...state, isEnabled }),
+        // @ts-expect-error upgrade typescript v5.1.6
         updateRemoteSource: (state, { sourceId, isEnabled }) =>
           updateSourceEnabled(state, sourceId, isEnabled),
       },
@@ -111,9 +120,13 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
     standard: [
       {} as PrivateSourceSection,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { standard }) => standard,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSourceRestrictionsUpdated: (_, { standard }) => standard,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateStandardEnabled: (state, { isEnabled }) => ({ ...state, isEnabled }),
+        // @ts-expect-error upgrade typescript v5.1.6
         updateStandardSource: (state, { sourceId, isEnabled }) =>
           updateSourceEnabled(state, sourceId, isEnabled),
       },

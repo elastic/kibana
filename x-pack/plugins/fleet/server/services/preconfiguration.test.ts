@@ -20,7 +20,7 @@ import type {
 } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../types';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { appContextService } from './app_context';
 
@@ -67,7 +67,7 @@ const mockDefaultDownloadService: DownloadSource = {
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
-    if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
+    if (type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
       const id = search!.replace(/"/g, '');
       const attributes = mockConfiguredPolicies.get(id);
       if (attributes) {
@@ -309,6 +309,7 @@ jest.mock('./app_context', () => ({
     getExperimentalFeatures: jest.fn().mockReturnValue({
       agentless: false,
     }),
+    getConfig: jest.fn(),
     getInternalUserSOClientForSpaceId: jest.fn(),
   },
 }));

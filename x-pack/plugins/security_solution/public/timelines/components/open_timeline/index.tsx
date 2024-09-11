@@ -153,7 +153,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested sort direction of the query results */
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
-    const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+    const [sortField, setSortField] = useState<SortFieldTimeline>(DEFAULT_SORT_FIELD);
 
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineSavedObjectId = useShallowEqualSelector(
@@ -161,8 +161,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineEnabled'
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
     );
 
     const {
@@ -194,7 +194,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         search,
         sort: {
-          sortField: sortField as SortFieldTimeline,
+          sortField,
           sortOrder: sortDirection as Direction,
         },
         onlyUserFavorite: onlyFavorites,
@@ -252,11 +252,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+              columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
-              excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+              excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
                 ? timelineDefaults.excludedRowRendererIds
                 : [],
             })
@@ -273,7 +273,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         dispatch,
         dataViewId,
         selectedPatterns,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       ]
     );
 
@@ -318,7 +318,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       if (sort != null) {
         const { field, direction } = sort;
         setSortDirection(direction);
-        setSortField(field);
+        setSortField(field as SortFieldTimeline);
       }
     }, []);
 
@@ -375,7 +375,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          unifiedComponentsInTimelineEnabled,
+          unifiedComponentsInTimelineDisabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -440,7 +440,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         hideActions={hideActions}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-        onAddTimelinesToFavorites={undefined}
         onlyFavorites={onlyFavorites}
         onOpenTimeline={openTimeline}
         onQueryChange={onQueryChange}
@@ -452,7 +451,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         pageSize={pageSize}
         query={search}
         searchResults={timelines}
-        selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}

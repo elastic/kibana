@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TimeRange } from '@kbn/es-query';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { appendToESQLQuery } from '@kbn/esql-utils';
+import { appendToESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
@@ -28,12 +28,14 @@ interface Params {
   columns: Column[];
   esqlBaseQuery: string;
   filter?: QueryDslQueryContainer;
+  timeRange?: TimeRange;
 }
 const getESQLNumericFieldStatsInChunk = async ({
   runRequest,
   columns,
   esqlBaseQuery,
   filter,
+  timeRange,
 }: Params): Promise<Array<NonSampledNumericFieldStats | FieldStatsError>> => {
   // Hashmap of agg to index/order of which is made in the ES|QL query
   // {min: 0, max: 1, p0: 2, p5: 3, ..., p100: 22}
@@ -67,10 +69,12 @@ const getESQLNumericFieldStatsInChunk = async ({
     const numericStatsQuery = '| STATS ' + numericFields.map(({ query }) => query).join(',');
 
     const query = appendToESQLQuery(esqlBaseQuery, numericStatsQuery);
+    const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
     const request = {
       params: {
         query,
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
@@ -127,6 +131,7 @@ export const getESQLNumericFieldStats = async ({
   columns,
   esqlBaseQuery,
   filter,
+  timeRange,
 }: Params): Promise<Array<NonSampledNumericFieldStats | FieldStatsError>> => {
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
@@ -142,6 +147,7 @@ export const getESQLNumericFieldStats = async ({
           filter,
           runRequest,
           esqlBaseQuery,
+          timeRange,
         })
       )
     )

@@ -13,10 +13,17 @@ export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON = getDataTestS
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutUsersDetailsTitleText'
 );
+export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_LINK = getDataTestSubjectSelector(
+  'securitySolutionFlyoutUsersDetailsTitleLink'
+);
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_RIGHT_SECTION =
   getDataTestSubjectSelector('securitySolutionFlyoutUsersDetailsRightSection');
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS = getDataTestSubjectSelector(
   'securitySolutionFlyoutUsersDetailsContent'
+);
+
+export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_LINK = getDataTestSubjectSelector(
+  'securitySolutionFlyoutHostsDetailsTitleLink'
 );
 export const DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutHostsDetailsTitleText'

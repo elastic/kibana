@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
@@ -27,6 +29,9 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
+  type DataGridDensity,
+  UnifiedDataTableProps,
+  UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -40,6 +45,9 @@ import {
 } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { useQuerySubscriber } from '@kbn/unified-field-list';
+import { map } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
@@ -68,7 +76,11 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER,
+  useAdditionalCellActions,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 
 const containerStyles = css`
   position: relative;
@@ -85,7 +97,7 @@ const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
 export const onResize = (
-  colSettings: { columnId: string; width: number },
+  colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
@@ -110,19 +122,31 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState] =
-    useAppStateSelector((state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.headerRowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.sampleSize,
-      ];
-    });
+  const [
+    dataSource,
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    sampleSizeState,
+    density,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.dataSource,
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.sampleSize,
+      state.density,
+    ];
+  });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -155,6 +179,13 @@ function DiscoverDocumentsComponent({
     stateContainer,
   });
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -166,10 +197,11 @@ function DiscoverDocumentsComponent({
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState,
     useNewFieldsApi,
     columns,
     sort,
+    settings: grid,
   });
 
   const setExpandedDoc = useCallback(
@@ -179,7 +211,7 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const onResizeDataGrid = useCallback(
+  const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => onResize(colSettings, stateContainer),
     [stateContainer]
   );
@@ -219,6 +251,13 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const onUpdateDensity = useCallback(
+    (newDensity: DataGridDensity) => {
+      stateContainer.appState.update({ density: newDensity });
+    },
+    [stateContainer]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
@@ -232,6 +271,21 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
+
+  const { filters } = useQuerySubscriber({ data: services.data });
+
+  const timeRange = useObservable(
+    services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
+    services.timefilter.getTime()
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
+  });
 
   const renderDocumentView = useCallback(
     (
@@ -259,7 +313,7 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const { customControlColumnsConfiguration } = useDiscoverCustomization('data_table') || {};
+  const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations() || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
@@ -417,6 +471,7 @@ function DiscoverDocumentsComponent({
                 onUpdateRowHeight={onUpdateRowHeight}
                 isSortEnabled={true}
                 isPlainRecord={isEsqlMode}
+                isPaginationEnabled={!isEsqlMode}
                 rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                 onUpdateRowsPerPage={onUpdateRowsPerPage}
                 maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
@@ -434,8 +489,13 @@ function DiscoverDocumentsComponent({
                 componentsTourSteps={TOUR_STEPS}
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
-                customControlColumnsConfiguration={customControlColumnsConfiguration}
+                rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 additionalFieldGroups={additionalFieldGroups}
+                dataGridDensityState={density}
+                onUpdateDataGridDensity={onUpdateDensity}
+                cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+                cellActionsMetadata={cellActionsMetadata}
+                cellActionsHandling="append"
               />
             </CellActionsProvider>
           </div>

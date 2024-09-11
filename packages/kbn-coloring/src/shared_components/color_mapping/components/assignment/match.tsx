@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -73,6 +74,7 @@ export const Match: React.FC<{
   return (
     <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
+        isClearable
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         fullWidth={true}
         aria-label={i18n.translate('coloring.colorMapping.assignments.autoAssignedTermAriaLabel', {
@@ -82,7 +84,7 @@ export const Match: React.FC<{
         placeholder={i18n.translate(
           'coloring.colorMapping.assignments.autoAssignedTermPlaceholder',
           {
-            defaultMessage: 'Auto assigned',
+            defaultMessage: 'Auto assigning term',
           }
         )}
         options={convertedOptions}
@@ -103,7 +105,6 @@ export const Match: React.FC<{
           }
         }}
         isCaseSensitive
-        isClearable={false}
         compressed
       />
     </EuiFlexItem>

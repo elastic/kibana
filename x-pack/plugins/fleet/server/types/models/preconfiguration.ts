@@ -162,6 +162,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
             }),
             description: schema.maybe(schema.string()),
             namespace: schema.maybe(PackagePolicyNamespaceSchema),
+            output_id: schema.nullable(schema.maybe(schema.string())),
             inputs: schema.maybe(
               schema.arrayOf(
                 schema.object({
@@ -188,6 +189,26 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
           }),
           SimplifiedPackagePolicyPreconfiguredSchema,
         ])
+      )
+    ),
+  }),
+  {
+    defaultValue: [],
+  }
+);
+
+export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
+  schema.object({
+    space_id: schema.string(),
+    allowed_namespace_prefixes: schema.nullable(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        })
       )
     ),
   }),

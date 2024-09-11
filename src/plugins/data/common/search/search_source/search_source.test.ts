@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
@@ -36,12 +37,14 @@ const indexPattern = {
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
+  getAllowHidden: jest.fn(),
 } as unknown as DataView;
 
 const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
+  getAllowHidden: jest.fn(),
 } as unknown as DataView;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
@@ -839,7 +842,7 @@ describe('SearchSource', () => {
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
-        expect(request.hasOwnProperty('docvalue_fields')).toBe(false);
+        expect(Object.hasOwn(request, 'docvalue_fields')).toBe(false);
         expect(request.fields).toEqual([
           { field: 'foo-bar' },
           { field: 'field1' },
@@ -1474,10 +1477,15 @@ describe('SearchSource', () => {
       return buildExpression(ast).toString();
     }
 
+    beforeEach(() => {
+      searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('index', indexPattern);
+    });
+
     test('should generate an expression AST', () => {
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1486,7 +1494,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context q={kql q=\\"something\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1504,7 +1512,7 @@ describe('SearchSource', () => {
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
           filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1517,7 +1525,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query\\\\\\"}}\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1540,7 +1548,7 @@ describe('SearchSource', () => {
       expect(toString(childSearchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context q={kql q=\\"something2\\"} q={kql q=\\"something1\\"} filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query2\\\\\\"}}\\"}
           filters={kibanaFilter query=\\"{\\\\\\"query_string\\\\\\":{\\\\\\"query\\\\\\":\\\\\\"query1\\\\\\"}}\\"}
-        | esdsl dsl=\\"{}\\""
+        | esdsl dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 
@@ -1558,7 +1566,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esdsl size=1000 dsl=\\"{}\\""
+        | esdsl size=1000 dsl=\\"{}\\" index=\\"1234\\""
       `);
     });
 

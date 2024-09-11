@@ -6,29 +6,29 @@
  */
 
 import {
-  Plugin,
   CoreSetup,
-  RequestHandlerContext,
   CoreStart,
-  PluginInitializerContext,
-  PluginConfigDescriptor,
+  KibanaRequest,
   Logger,
+  Plugin,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
 } from '@kbn/core/server';
-import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
-import { setupRoutes } from './routes';
+import { registerRoutes } from '@kbn/server-route-repository';
+import { firstValueFrom } from 'rxjs';
+import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { builtInDefinitions } from './lib/entities/built_in';
+import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
+import { EntityClient } from './lib/entity_client';
+import { installEntityManagerTemplates } from './lib/manage_index_templates';
+import { entityManagerRouteRepository } from './routes';
+import { EntityManagerRouteDependencies } from './routes/types';
+import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
 import {
   EntityManagerPluginSetupDependencies,
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
-import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { entitiesEventComponentTemplateConfig } from './templates/components/event';
-import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
-import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
-import { entitiesLatestBaseComponentTemplateConfig } from './templates/components/base_latest';
-import { entitiesHistoryBaseComponentTemplateConfig } from './templates/components/base_history';
-import { entitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
-import { entitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -65,17 +65,24 @@ export class EntityManagerServerPlugin
       attributesToIncludeInAAD: new Set(['id', 'name']),
     });
 
-    const router = core.http.createRouter();
-
     this.server = {
       config: this.config,
       logger: this.logger,
     } as EntityManagerServerSetup;
 
-    setupRoutes<RequestHandlerContext>({
-      router,
+    registerRoutes<EntityManagerRouteDependencies>({
+      repository: entityManagerRouteRepository,
+      dependencies: {
+        server: this.server,
+        getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          return new EntityClient({ esClient, soClient, logger: this.logger });
+        },
+      },
+      core,
       logger: this.logger,
-      server: this.server,
     });
 
     return {};
@@ -91,44 +98,21 @@ export class EntityManagerServerPlugin
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    // Install entities component templates and index template
-    Promise.all([
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesHistoryBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesLatestBaseComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEventComponentTemplateConfig,
-      }),
-      upsertComponent({
-        esClient,
-        logger: this.logger,
-        component: entitiesEntityComponentTemplateConfig,
-      }),
-    ])
-      .then(() =>
-        upsertTemplate({
-          esClient,
-          logger: this.logger,
-          template: entitiesHistoryIndexTemplateConfig,
-        })
-      )
-      .then(() =>
-        upsertTemplate({
-          esClient,
-          logger: this.logger,
-          template: entitiesLatestIndexTemplateConfig,
-        })
-      )
-      .catch(() => {});
+    installEntityManagerTemplates({ esClient, logger: this.logger })
+      .then(async () => {
+        // the api key validation requires a check against the cluster license
+        // which is lazily loaded. we ensure it gets loaded before the update
+        await firstValueFrom(plugins.licensing.license$);
+        const { success } = await upgradeBuiltInEntityDefinitions({
+          definitions: builtInDefinitions,
+          server: this.server!,
+        });
+
+        if (success) {
+          this.logger.info('Builtin definitions were successfully upgraded');
+        }
+      })
+      .catch((err) => this.logger.error(err));
 
     return {};
   }

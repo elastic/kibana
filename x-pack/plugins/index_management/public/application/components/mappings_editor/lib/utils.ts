@@ -8,6 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { cloneDeep } from 'lodash';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   ChildFieldName,
   ComboBoxOption,
@@ -730,6 +732,7 @@ export function getStateWithCopyToFields(state: State): State {
               : [field.path.join('.')],
           },
         };
+
         updatedState = {
           ...updatedState,
           fields: {
@@ -740,6 +743,7 @@ export function getStateWithCopyToFields(state: State): State {
             },
           },
         };
+        addChildFieldsToState(updatedTextField, updatedState);
         if (existingTextField.parentId) {
           let currentField = existingTextField;
           let hasParent = true;
@@ -755,6 +759,10 @@ export function getStateWithCopyToFields(state: State): State {
               // parent is not in state yet
               updatedState.fields.byId[currentField.parentId] =
                 updatedState.mappingViewFields.byId[currentField.parentId];
+              addChildFieldsToState(
+                updatedState.mappingViewFields.byId[currentField.parentId],
+                updatedState
+              );
               currentField = updatedState.fields.byId[currentField.parentId];
             }
           }
@@ -769,6 +777,25 @@ export function getStateWithCopyToFields(state: State): State {
   return updatedState;
 }
 
+function addChildFieldsToState(field: NormalizedField, state: State): State {
+  if (!field.childFields || field.childFields.length === 0) {
+    return state;
+  }
+  for (const childFieldId of field.childFields) {
+    if (!state.fields.byId[childFieldId]) {
+      state.fields.byId[childFieldId] = state.mappingViewFields.byId[childFieldId];
+      state = addChildFieldsToState(state.fields.byId[childFieldId], state);
+    }
+  }
+  return state;
+}
+
 export const getFieldByPathName = (fields: NormalizedFields, name: string) => {
   return Object.values(fields.byId).find((field) => field.path.join('.') === name);
 };
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
@@ -13,7 +14,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
@@ -58,7 +59,10 @@ export const getSearchSavedObject = async (
   return so;
 };
 
-export const convertToSavedSearch = async (
+export const convertToSavedSearch = async <
+  Serialized extends boolean = false,
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+>(
   {
     savedSearchId,
     attributes,
@@ -72,8 +76,9 @@ export const convertToSavedSearch = async (
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;
   },
-  { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies
-) => {
+  { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies,
+  serialized?: Serialized
+): Promise<ReturnType> => {
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
@@ -88,20 +93,32 @@ export const convertToSavedSearch = async (
     ? savedObjectsTagging.ui.getTagIdsFromReferences(references)
     : undefined;
 
+  const searchSource = serialized
+    ? searchSourceValues
+    : await searchSourceCreate(searchSourceValues);
+
   const returnVal = fromSavedSearchAttributes(
     savedSearchId,
     attributes,
     tags,
     references,
-    await searchSourceCreate(searchSourceValues),
+    searchSource,
     sharingSavedObjectProps,
-    Boolean(managed)
+    Boolean(managed),
+    serialized
   );
 
-  return returnVal;
+  return returnVal as ReturnType;
 };
 
-export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
+export const getSavedSearch = async <
+  Serialized extends boolean = false,
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+>(
+  savedSearchId: string,
+  deps: GetSavedSearchDependencies,
+  serialized?: Serialized
+): Promise<ReturnType> => {
   const so = await getSearchSavedObject(savedSearchId, deps);
   const savedSearch = await convertToSavedSearch(
     {
@@ -111,10 +128,11 @@ export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearch
       sharingSavedObjectProps: so.meta,
       managed: so.item.managed,
     },
-    deps
+    deps,
+    serialized
   );
 
-  return savedSearch;
+  return savedSearch as ReturnType;
 };
 
 /**

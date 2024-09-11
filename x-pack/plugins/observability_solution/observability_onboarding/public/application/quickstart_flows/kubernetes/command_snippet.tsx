@@ -17,6 +17,7 @@ interface Props {
   onboardingId: string;
   elasticsearchUrl: string;
   elasticAgentVersion: string;
+  isCopyPrimaryAction: boolean;
 }
 
 export function CommandSnippet({
@@ -24,6 +25,7 @@ export function CommandSnippet({
   onboardingId,
   elasticsearchUrl,
   elasticAgentVersion,
+  isCopyPrimaryAction,
 }: Props) {
   const command = buildKubectlCommand({
     encodedApiKey,
@@ -66,7 +68,7 @@ export function CommandSnippet({
 
       <EuiSpacer />
 
-      <CopyToClipboardButton textToCopy={command} fill />
+      <CopyToClipboardButton textToCopy={command} fill={isCopyPrimaryAction} />
     </>
   );
 }

@@ -64,11 +64,11 @@ export default function ({ getService }: APMFtrContextProvider) {
     before(async () => {
       synthtraceEsClient = await synthtrace.createSynthtraceEsClient();
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       return synthtraceEsClient.clean();
     });
 

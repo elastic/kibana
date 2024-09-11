@@ -10,7 +10,6 @@ import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { ClientMessage } from '../assistant_context/types';
-import { enterpriseMessaging } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
@@ -54,31 +53,6 @@ export const mergeBaseWithPersistedConversations = (
     return transformed;
   }, {});
 };
-
-export const getBlockBotConversation = (
-  conversation: Conversation,
-  isAssistantEnabled: boolean
-): Conversation => {
-  if (!isAssistantEnabled) {
-    if (
-      conversation.messages.length === 0 ||
-      conversation.messages[conversation.messages.length - 1].content !==
-        enterpriseMessaging[0].content
-    ) {
-      return {
-        ...conversation,
-        messages: [...conversation.messages, ...enterpriseMessaging],
-      };
-    }
-    return conversation;
-  }
-
-  return {
-    ...conversation,
-    messages: conversation.messages,
-  };
-};
-
 /**
  * Returns a default connector if there is only one connector
  * @param connectors
@@ -100,21 +74,14 @@ interface OptionalRequestParams {
 }
 
 export const getOptionalRequestParams = ({
-  isEnabledRAGAlerts,
   alertsIndexPattern,
   size,
 }: {
-  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
   const optionalSize = size ? { size } : undefined;
-
-  // the settings toggle must be enabled:
-  if (!isEnabledRAGAlerts) {
-    return {}; // don't send any optional params
-  }
 
   return {
     ...optionalAlertsIndexPattern,
@@ -122,10 +89,4 @@ export const getOptionalRequestParams = ({
   };
 };
 
-export const hasParsableResponse = ({
-  isEnabledRAGAlerts,
-  isEnabledKnowledgeBase,
-}: {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
-}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

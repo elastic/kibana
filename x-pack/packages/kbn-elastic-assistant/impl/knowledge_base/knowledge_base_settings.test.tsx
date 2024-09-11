@@ -40,8 +40,6 @@ jest.mock('../assistant_context', () => {
 const setUpdatedKnowledgeBaseSettings = jest.fn();
 const defaultProps = {
   knowledgeBase: {
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: false,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setUpdatedKnowledgeBaseSettings,
@@ -94,78 +92,6 @@ describe('Knowledge base settings', () => {
 
     expect(getByTestId('esql-installed')).toBeInTheDocument();
     expect(queryByTestId('install-esql')).not.toBeInTheDocument();
-    expect(getByTestId('esqlEnableButton')).toBeInTheDocument();
-  });
-  it('On click enable esql button, esql is enabled', () => {
-    (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
-      return {
-        data: {
-          elser_exists: true,
-          esql_exists: false,
-          index_exists: true,
-          pipeline_exists: true,
-        },
-        isLoading: false,
-        isFetching: false,
-      };
-    });
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-    expect(queryByTestId('esql-installed')).not.toBeInTheDocument();
-    expect(getByTestId('install-esql')).toBeInTheDocument();
-    fireEvent.click(getByTestId('esqlEnableButton'));
-    expect(mockSetup).toHaveBeenCalledWith('esql');
-  });
-  it('On disable lang chain, set isEnabledKnowledgeBase to false', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('isEnabledKnowledgeBaseSwitch'));
-    expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
-      isEnabledRAGAlerts: false,
-      isEnabledKnowledgeBase: false,
-      latestAlerts: DEFAULT_LATEST_ALERTS,
-    });
-
-    expect(mockSetup).not.toHaveBeenCalled();
-  });
-  it('On enable lang chain, set up with esql by default if ELSER exists', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings
-          {...defaultProps}
-          knowledgeBase={{
-            isEnabledKnowledgeBase: false,
-            isEnabledRAGAlerts: false,
-            latestAlerts: DEFAULT_LATEST_ALERTS,
-          }}
-        />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('isEnabledKnowledgeBaseSwitch'));
-    expect(setUpdatedKnowledgeBaseSettings).toHaveBeenCalledWith({
-      isEnabledKnowledgeBase: true,
-      isEnabledRAGAlerts: false,
-      latestAlerts: DEFAULT_LATEST_ALERTS,
-    });
-
-    expect(mockSetup).toHaveBeenCalledWith('esql');
-  });
-  it('On disable knowledge base, call delete knowledge base setup', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-    expect(queryByTestId('install-kb')).not.toBeInTheDocument();
-    expect(getByTestId('kb-installed')).toBeInTheDocument();
-    fireEvent.click(getByTestId('knowledgeBaseActionButton'));
-    expect(mockDelete).toHaveBeenCalledWith();
   });
   it('On enable knowledge base, call setup knowledge base setup', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
@@ -175,6 +101,7 @@ describe('Knowledge base settings', () => {
           esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
+          is_setup_available: true,
         },
         isLoading: false,
         isFetching: false,
@@ -187,8 +114,8 @@ describe('Knowledge base settings', () => {
     );
     expect(queryByTestId('kb-installed')).not.toBeInTheDocument();
     expect(getByTestId('install-kb')).toBeInTheDocument();
-    fireEvent.click(getByTestId('knowledgeBaseActionButton'));
-    expect(mockSetup).toHaveBeenCalledWith();
+    fireEvent.click(getByTestId('setupKnowledgeBaseButton'));
+    expect(mockSetup).toHaveBeenCalledWith('esql');
   });
   it('If elser does not exist, do not offer knowledge base', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockImplementation(() => {
@@ -209,15 +136,5 @@ describe('Knowledge base settings', () => {
       </TestProviders>
     );
     expect(queryByTestId('knowledgeBaseActionButton')).not.toBeInTheDocument();
-  });
-
-  it('renders the alerts settings', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <KnowledgeBaseSettings {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('alertsSwitch')).toBeInTheDocument();
   });
 });

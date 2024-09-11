@@ -5,22 +5,50 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { FileLayer } from '@elastic/ems-client';
 import { ChoroplethChartState } from './types';
 import { EMSFileSelect } from '../../components/ems_file_select';
+import { getEmsFileLayers } from '../../util';
 
 interface Props {
-  emsFileLayers: FileLayer[];
   state: ChoroplethChartState;
   setState: (state: ChoroplethChartState) => void;
 }
 
 export function RegionKeyEditor(props: Props) {
+  const [emsFileLayers, setEmsFileLayers] = useState<FileLayer[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    setIsLoading(true);
+    getEmsFileLayers()
+      .then((fileLayers) => {
+        if (!ignore) {
+          setEmsFileLayers(fileLayers);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `Lens region map is unable to access administrative boundaries from Elastic Maps Service (EMS). To avoid unnecessary EMS requests, set 'map.includeElasticMapsService: false' in 'kibana.yml'.`
+          );
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   function onEmsLayerSelect(emsLayerId: string) {
-    const emsFields = getEmsFields(props.emsFileLayers, emsLayerId);
+    const emsFields = getEmsFields(emsFileLayers, emsLayerId);
     props.setState({
       ...props.state,
       emsLayerId,
@@ -28,27 +56,30 @@ export function RegionKeyEditor(props: Props) {
     });
   }
 
-  function onEmsFieldSelect(selectedOptions: Array<EuiComboBoxOptionOption<string>>) {
-    if (selectedOptions.length === 0) {
-      return;
+  const emsFieldSelect = useMemo(() => {
+    const emsFields = getEmsFields(emsFileLayers, props.state.emsLayerId);
+    if (emsFields.length === 0) {
+      return null;
     }
 
-    props.setState({
-      ...props.state,
-      emsField: selectedOptions[0].value,
-    });
-  }
+    const selectedOption = props.state.emsField
+      ? emsFields.find((option: EuiComboBoxOptionOption<string>) => {
+          return props.state.emsField === option.value;
+        })
+      : undefined;
 
-  let emsFieldSelect;
-  const emsFields = getEmsFields(props.emsFileLayers, props.state.emsLayerId);
-  if (emsFields.length) {
-    let selectedOption;
-    if (props.state.emsField) {
-      selectedOption = emsFields.find((option: EuiComboBoxOptionOption<string>) => {
-        return props.state.emsField === option.value;
+    function onEmsFieldSelect(selectedOptions: Array<EuiComboBoxOptionOption<string>>) {
+      if (selectedOptions.length === 0) {
+        return;
+      }
+
+      props.setState({
+        ...props.state,
+        emsField: selectedOptions[0].value,
       });
     }
-    emsFieldSelect = (
+
+    return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.choropleth.joinFieldLabel', {
           defaultMessage: 'Join field',
@@ -64,8 +95,11 @@ export function RegionKeyEditor(props: Props) {
         />
       </EuiFormRow>
     );
-  }
-  return (
+  }, [emsFileLayers, props]);
+
+  return isLoading ? (
+    <EuiSelect isLoading />
+  ) : (
     <>
       <EMSFileSelect
         isColumnCompressed

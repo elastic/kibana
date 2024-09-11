@@ -29,7 +29,7 @@ export type RangeTypeLens = (RangeType | { from: Range['from'] | null; to: Range
 // This is a subset of RangeTypeLens which has both from and to defined
 type FullRangeTypeLens = Extract<RangeTypeLens, NonNullable<RangeType>>;
 
-export type MODES_TYPES = typeof MODES[keyof typeof MODES];
+export type MODES_TYPES = (typeof MODES)[keyof typeof MODES];
 
 export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';

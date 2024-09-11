@@ -7,8 +7,9 @@
 
 import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { getStartEndParams } from '@kbn/esql-utils';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
@@ -69,7 +70,8 @@ const getESQLDocumentCountStats = async (
   timeFieldName?: string,
   intervalMs?: number,
   searchOptions?: ISearchOptions,
-  onError?: HandleErrorCallback
+  onError?: HandleErrorCallback,
+  timeRange?: TimeRange
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number; request?: object }> => {
   if (!isESQLQuery(query)) {
     throw Error(
@@ -81,6 +83,7 @@ const getESQLDocumentCountStats = async (
   const esqlBaseQuery = query.esql;
   let earliestMs = Infinity;
   let latestMs = -Infinity;
+  const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
 
   if (timeFieldName) {
     const aggQuery = appendToESQLQuery(
@@ -95,6 +98,7 @@ const getESQLDocumentCountStats = async (
       params: {
         query: aggQuery,
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
@@ -143,6 +147,7 @@ const getESQLDocumentCountStats = async (
       params: {
         query: appendToESQLQuery(esqlBaseQuery, ' | STATS _count_ = COUNT(*)  | LIMIT 1'),
         ...(filter ? { filter } : {}),
+        ...(namedParams.length ? { params: namedParams } : {}),
       },
     };
     try {
@@ -159,7 +164,6 @@ const getESQLDocumentCountStats = async (
       handleError({
         request,
         error,
-        onError,
         title: i18n.translate('xpack.dataVisualizer.esql.docCountNoneTimeseriesError', {
           defaultMessage: `Error getting total count for ES|QL data:`,
         }),
@@ -193,6 +197,7 @@ const fieldStatsErrorTitle = i18n.translate(
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
+        id?: string;
         earliest: number | undefined;
         latest: number | undefined;
         aggInterval: TimeBucketsInterval;
@@ -204,6 +209,7 @@ export const useESQLOverallStatsData = (
         limit: number;
         filter?: QueryDslQueryContainer;
         totalCount?: number;
+        timeRange?: TimeRange;
       }
     | undefined
 ) => {
@@ -214,7 +220,10 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const previousExecutionTs = useRef<number | undefined>(undefined);
   const previousDocCountRequest = useRef('');
+  const previousError = useRef<Error | undefined>();
+
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
@@ -224,33 +233,53 @@ export const useESQLOverallStatsData = (
     getInitialProgress()
   );
   const onError = useCallback(
-    (error, title?: string) =>
+    (error: Error, title?: string) => {
+      // If a previous error already occured, no need to show the toast again
+      if (previousError.current) {
+        return;
+      }
+      previousError.current = error;
       toasts.addError(error, {
         title: title ?? fieldStatsErrorTitle,
-      }),
+      });
+    },
     [toasts]
   );
 
   const startFetch = useCallback(
     async function fetchOverallStats() {
       try {
-        cancelRequest();
-
-        if (!fieldStatsRequest) {
+        if (!fieldStatsRequest || fieldStatsRequest.lastRefresh === 0) {
           return;
         }
+
+        // Prevent requests from being called again when user clicks refresh consecutively too fast
+        // or when Discover forces a refresh right after query or filter changes
+        if (
+          fieldStatsRequest.id === undefined &&
+          previousExecutionTs.current !== undefined &&
+          (fieldStatsRequest.lastRefresh === previousExecutionTs.current ||
+            fieldStatsRequest.lastRefresh - previousExecutionTs.current < 800)
+        ) {
+          return;
+        }
+        previousExecutionTs.current = fieldStatsRequest.lastRefresh;
+
+        cancelRequest();
+
         setOverallStatsProgress({
           ...getInitialProgress(),
           isRunning: true,
           error: undefined,
         });
-
+        previousError.current = undefined;
         const {
           searchQuery,
           intervalMs,
           filter: filter,
           limit,
           totalCount: knownTotalCount,
+          timeRange,
         } = fieldStatsRequest;
 
         if (!isESQLQuery(searchQuery)) {
@@ -269,12 +298,14 @@ export const useESQLOverallStatsData = (
         // And use this one query to
         // 1) identify populated/empty fields
         // 2) gather examples for populated text fields
+        const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
         const columnsResp = (await runRequest(
           {
             params: {
               // Doing this to match with the default limit
               query: getESQLWithSafeLimit(esqlBaseQuery, ESQL_SAFE_LIMIT),
               ...(filter ? { filter } : {}),
+              ...(namedParams.length ? { params: namedParams } : {}),
               dropNullColumns: true,
             },
           },
@@ -340,7 +371,8 @@ export const useESQLOverallStatsData = (
             timeFieldName,
             intervalInMs,
             undefined,
-            onError
+            onError,
+            timeRange
           );
 
           totalCount = results.totalCount;
@@ -424,6 +456,7 @@ export const useESQLOverallStatsData = (
             limitSize: limit,
             totalCount,
             onError,
+            timeRange,
           });
           if (!stats) return;
           stats.aggregatableNotExistsFields = aggregatableNotExistsFields;
@@ -453,6 +486,11 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        setOverallStatsProgress({
+          loaded: 100,
+          isRunning: false,
+          error,
+        });
         setQueryHistoryStatus(false);
         // If error already handled in sub functions, no need to propogate
         if (error.name !== 'AbortError' && error.handled !== true) {

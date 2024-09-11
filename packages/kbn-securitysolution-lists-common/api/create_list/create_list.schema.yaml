@@ -9,8 +9,6 @@ paths:
       operationId: CreateList
       x-codegen-enabled: true
       summary: Creates a list
-      tags:
-        - List API
       requestBody:
         description: List's properties
         required: true

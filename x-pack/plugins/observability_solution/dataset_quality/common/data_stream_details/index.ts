@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './errors';
+export * from './types';

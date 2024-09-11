@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+
 import { SecretFormRow } from './output_form_secret_form_row';
 
 describe('SecretFormRow', () => {
@@ -42,8 +43,8 @@ describe('SecretFormRow', () => {
     expect(queryByText(initialValue)).not.toBeInTheDocument();
   });
 
-  it('should not enable the replace button if the row is disabled', () => {
-    const { getByText } = renderReactTestingLibraryWithI18n(
+  it('should not enable action links if the row is disabled', () => {
+    const { getByText, queryByText } = renderReactTestingLibraryWithI18n(
       <SecretFormRow
         title={title}
         initialValue={initialValue}
@@ -57,7 +58,10 @@ describe('SecretFormRow', () => {
       </SecretFormRow>
     );
 
-    expect(getByText('Replace Test Secret').closest('button')).toBeDisabled();
+    expect(getByText('The saved Test Secret is hidden.')).toBeInTheDocument();
+    expect(queryByText('Replace Test Secret')).not.toBeInTheDocument();
+    expect(queryByText('Click to use secret storage instead')).not.toBeInTheDocument();
+    expect(queryByText('Click to use plain text storage instead')).not.toBeInTheDocument();
   });
 
   it('should call the cancelEdit function when the cancel button is clicked', () => {

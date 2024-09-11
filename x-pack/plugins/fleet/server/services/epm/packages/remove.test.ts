@@ -20,6 +20,7 @@ jest.mock('../..', () => {
         error: jest.fn(),
         warn: jest.fn(),
       }),
+      getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     },
     packagePolicyService: {
       list: jest.fn().mockImplementation((soClient, params) => {

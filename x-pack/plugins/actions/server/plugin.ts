@@ -32,7 +32,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   IEventLogClientService,
@@ -478,6 +478,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
@@ -485,13 +486,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
+          logger,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
-          logger: this.logger,
+          logger,
         }),
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
@@ -754,6 +756,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
@@ -761,6 +764,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
+              logger,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,

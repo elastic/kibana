@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as t from 'io-ts';
+import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import { NamespaceType } from '../../common/default_namespace';
 import { DefaultUpdateCommentsArray } from '../../common/default_update_comments_array';
-import { EntriesArray } from '../../common/entries';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
@@ -57,7 +58,7 @@ export type UpdateExceptionListItemSchemaDecoded = Omit<
 > & {
   comments: UpdateCommentsArray;
   tags: Tags;
-  entries: EntriesArray;
+  entries: ExceptionListItemEntryArray;
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
   expire_time: ExpireTimeOrUndefined;

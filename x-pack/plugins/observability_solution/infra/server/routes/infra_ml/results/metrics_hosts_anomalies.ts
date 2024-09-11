@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
@@ -15,7 +16,6 @@ import {
   Sort,
   Pagination,
 } from '../../../../common/http_api/infra_ml';
-import { createValidationFunction } from '../../../../common/runtime_types';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
 import { isMlPrivilegesError } from '../../../lib/infra_ml/errors';
@@ -27,7 +27,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       method: 'post',
       path: INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
       validate: {
-        body: createValidationFunction(getMetricsHostsAnomaliesRequestPayloadRT),
+        body: createRouteValidationFunction(getMetricsHostsAnomaliesRequestPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   findMetricsExplorerViewResponsePayloadRT,
   metricsExplorerViewRequestQueryRT,
@@ -29,7 +29,7 @@ export const initFindMetricsExplorerViewRoute = ({
       method: 'get',
       path: METRICS_EXPLORER_VIEW_URL,
       validate: {
-        query: createValidationFunction(metricsExplorerViewRequestQueryRT),
+        query: createRouteValidationFunction(metricsExplorerViewRequestQueryRT),
       },
     },
     async (_requestContext, request, response) => {

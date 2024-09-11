@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { ProviderEnum } from '@kbn/elastic-assistant-common';
-import { mockSystemPrompts } from '../../../../mock/system_prompt';
 import { getSelectedConversations } from './utils';
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 describe('getSelectedConversations', () => {
-  const allSystemPrompts = [...mockSystemPrompts];
   const conversationSettings = {
     '8f1e3218-0b02-480a-8791-78c1ed5f3708': {
       timestamp: '2024-06-25T12:33:26.779Z',
@@ -48,22 +46,14 @@ describe('getSelectedConversations', () => {
   test('should return selected conversations', () => {
     const systemPromptId = 'mock-system-prompt-1';
 
-    const conversations = getSelectedConversations(
-      allSystemPrompts,
-      conversationSettings,
-      systemPromptId
-    );
+    const conversations = getSelectedConversations(conversationSettings, systemPromptId);
 
     expect(conversations).toEqual(Object.values(conversationSettings));
   });
   test('should return empty array if no conversations are selected', () => {
     const systemPromptId = 'ooo';
 
-    const conversations = getSelectedConversations(
-      allSystemPrompts,
-      conversationSettings,
-      systemPromptId
-    );
+    const conversations = getSelectedConversations(conversationSettings, systemPromptId);
 
     expect(conversations).toEqual([]);
   });

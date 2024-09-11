@@ -15,13 +15,15 @@ export async function deleteIndices(
   logger: Logger
 ) {
   try {
-    const response = await esClient.indices.resolveIndex({
-      name: `${generateHistoryIndexName(definition)}.*,${generateLatestIndexName(definition)}`,
+    const { indices: historyIndices } = await esClient.indices.resolveIndex({
+      name: `${generateHistoryIndexName(definition)}.*`,
+      expand_wildcards: 'all',
     });
-    const indices = response.indices.map((doc) => doc.name);
-    if (indices.length) {
-      await esClient.indices.delete({ index: indices, ignore_unavailable: true });
-    }
+    const indices = [
+      ...historyIndices.map(({ name }) => name),
+      generateLatestIndexName(definition),
+    ];
+    await esClient.indices.delete({ index: indices, ignore_unavailable: true });
   } catch (e) {
     logger.error(`Unable to remove entity definition index [${definition.id}}]`);
     throw e;

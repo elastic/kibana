@@ -1,8 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", "helpers:pinGitHubActionDigestsToSemver"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
-  "enabledManagers": ["npm"],
+  "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "7.17"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -19,6 +19,38 @@
     {
       "matchDepPatterns": [".*"],
       "enabled": false
+    },
+    {
+      "groupName": "devcontainer",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:current-major"],
+      "enabled": true,
+      "matchManagers": ["devcontainer"]
+    },
+    {
+      "groupName": "chainguard",
+      "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "operations actions",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": [
+        "actions/checkout",
+        "elastic/github-actions/project-assigner",
+        "hmarr/auto-approve-action",
+        "octokit/graphql-action",
+        "sergeysova/jq-action",
+        "sourenlouv/backport"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
+      "enabled": true
     },
     {
       "groupName": "@elastic/charts",
@@ -46,7 +78,7 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk"],
+      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk", "launchdarkly/find-code-references"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
@@ -56,6 +88,14 @@
     {
       "groupName": "APM",
       "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/ebt",
+      "matchDepNames": ["@elastic/ebt"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
@@ -75,7 +115,7 @@
       "matchDepNames": ["@redocly/cli"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:all-open"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -91,7 +131,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchDepNames": ["typescript", "@types/jsdom"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
@@ -99,8 +139,27 @@
       "enabled": true
     },
     {
+      "groupName": "prettier",
+      "matchDepNames": ["prettier", "eslint-plugin-prettier", "eslint-config-prettier"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "allowedVersions": "<3.0",
+      "enabled": true
+    },
+    {
       "groupName": "typescript-eslint",
       "matchDepPatterns": ["^@typescript-eslint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "eslint-plugin-depend",
+      "matchDepPatterns": ["eslint-plugin-depend"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
@@ -174,6 +233,18 @@
       "enabled": true
     },
     {
+      "groupName": "CodeQL",
+      "matchDepNames": [
+        "github/codeql-action/analyze",
+        "github/codeql-action/init"
+      ],
+      "reviewers": ["team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "ftr",
       "matchDepNames": [
         "@types/chromedriver",
@@ -214,8 +285,7 @@
         "@testing-library/jest-dom",
         "@testing-library/react",
         "@testing-library/react-hooks",
-        "@testing-library/user-event",
-        "@types/testing-library__jest-dom"
+        "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -312,7 +382,7 @@
     {
       "groupName": "Profiling",
       "matchDepNames": ["peggy", "@types/dagre"],
-      "reviewers": ["team:profiling-ui"],
+      "reviewers": ["team:obs-ux-infra_services-team"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip"],
       "minimumReleaseAge": "7 days",
@@ -349,7 +419,7 @@
       "groupName": "XState",
       "matchDepNames": ["xstate"],
       "matchDepPrefixes": ["@xstate/"],
-      "reviewers": ["team:obs-ux-logs"],
+      "reviewers": ["team:obs-ux-logs-team"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Obs UX Logs", "release_note:skip"],
       "minimumReleaseAge": "7 days",
@@ -358,7 +428,7 @@
     {
       "groupName": "OpenTelemetry modules",
       "matchDepPrefixes": ["@opentelemetry/"],
-      "reviewers": ["team:monitoring"],
+      "reviewers": ["team:stack-monitoring"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Monitoring"],
       "minimumReleaseAge": "7 days",
@@ -383,15 +453,6 @@
       "enabled": true
     },
     {
-      "groupName": "machine learning modules",
-      "matchDepNames": ["apidoc-markdown"],
-      "reviewers": ["team:ml-ui"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:ML", "release_note:skip", "backport:all-open"],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "Kibana ES|QL Team",
       "matchDepNames": ["recast"],
       "reviewers": ["team:kibana-esql"],
@@ -405,8 +466,59 @@
       "matchPackageNames": ["msw"],
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team: Cloud Security", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "re2js",
+      "matchDepNames": ["re2js"],
+      "reviewers": ["team:visualizations", "dej611"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:all-open", "Team:Visualizations"],
+      "enabled": true
+    },
+    {
+      "groupName": "Serve swagger docs",
+      "matchDepNames": ["express", "swagger-jsdoc", "swagger-ui-express"],
+      "reviewers": ["team:obs-entities"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "team:obs-entities"],
+      "enabled": true
+    },
+    {
+      "groupName": "Security Engineering Productivity",
+      "matchDepNames": ["dotenv", "playwright-chromium", "@playwright/test"],
+      "reviewers": ["team:security-engineering-productivity"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Sec Eng Productivity", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Update Wolfi base image",
+      "customType": "regex",
+      "fileMatch": [
+        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update pipelib image",
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition\\.sh$",
+        "^\\.buildkite/scripts/steps/checks/renovate\\.sh$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/ci-agent-images/pipelib):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }

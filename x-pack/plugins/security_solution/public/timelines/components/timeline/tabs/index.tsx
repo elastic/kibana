@@ -16,7 +16,7 @@ import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_avai
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -173,7 +173,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {timelineType === TimelineType.default && (
+        {timelineType === TimelineTypeEnum.default && (
           <HideShowContainer
             $isVisible={TimelineTabs.eql === activeTimelineTab}
             data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}
@@ -359,7 +359,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
             </StyledEuiTab>
           )}
-          {timelineType === TimelineType.default && (
+          {timelineType === TimelineTypeEnum.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
               onClick={setEqlAsActiveTab}
@@ -395,11 +395,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineType.template}
+            disabled={timelineType === TimelineTypeEnum.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && timelineType === TimelineType.default && (
+            {showTimeline && numberOfNotes > 0 && timelineType === TimelineTypeEnum.default && (
               <div>
                 <CountBadge>{numberOfNotes}</CountBadge>
               </div>
@@ -408,16 +408,18 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineType.template}
+            disabled={timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
             <span>{i18n.PINNED_TAB}</span>
-            {showTimeline && numberOfPinnedEvents > 0 && timelineType === TimelineType.default && (
-              <div>
-                <CountBadge>{numberOfPinnedEvents}</CountBadge>
-              </div>
-            )}
+            {showTimeline &&
+              numberOfPinnedEvents > 0 &&
+              timelineType === TimelineTypeEnum.default && (
+                <div>
+                  <CountBadge>{numberOfPinnedEvents}</CountBadge>
+                </div>
+              )}
           </StyledEuiTab>
         </StyledEuiTabs>
       )}

@@ -35,6 +35,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     version: '1.14.0',
   };
 
+  const defaultDataStreamPrivileges = {
+    datasetUserPrivileges: { canRead: true, canMonitor: true, canViewIntegrations: true },
+  };
+
   async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
@@ -93,17 +97,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns error when dataStream param is not provided', async () => {
         const expectedMessage = 'Data Stream name cannot be empty';
         const err = await expectToReject<DatasetQualityApiError>(() =>
-          callApiAs('datasetQualityLogsUser', encodeURIComponent(' '))
+          callApiAs('datasetQualityMonitorUser', encodeURIComponent(' '))
         );
         expect(err.res.status).to.be(400);
         expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
-      it('returns {} if matching data stream is not available', async () => {
+      it('returns only privileges if matching data stream is not available', async () => {
         const nonExistentDataSet = 'Non-existent';
         const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-        const resp = await callApiAs('datasetQualityLogsUser', nonExistentDataStream);
-        expect(resp.body).empty();
+        const resp = await callApiAs('datasetQualityMonitorUser', nonExistentDataStream);
+        expect(resp.body).eql(defaultDataStreamPrivileges);
       });
 
       it('returns "createdOn" correctly', async () => {
@@ -111,7 +115,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           esClient,
           `${type}-${dataset}-${namespace}`
         );
-        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
+        const resp = await callApiAs(
+          'datasetQualityMonitorUser',
+          `${type}-${dataset}-${namespace}`
+        );
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       });
 
@@ -121,7 +128,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           esClient,
           `${type}-${dataset}-${namespace}`
         );
-        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
+        const resp = await callApiAs(
+          'datasetQualityMonitorUser',
+          `${type}-${dataset}-${namespace}`
+        );
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       });
 
@@ -131,11 +141,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `${type}-${integrationDataset}-${namespace}`
         );
         const resp = await callApiAs(
-          'datasetQualityLogsUser',
+          'datasetQualityMonitorUser',
           `${type}-${integrationDataset}-${namespace}`
         );
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
         expect(resp.body.integration).to.be('apache');
+        expect(resp.body.datasetUserPrivileges).to.eql(
+          defaultDataStreamPrivileges.datasetUserPrivileges
+        );
       });
 
       after(async () => {

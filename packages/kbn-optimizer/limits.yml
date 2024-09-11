@@ -20,7 +20,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 55082
+  controls: 60000
   core: 435325
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -28,7 +28,7 @@ pageLoadAssetSize:
   dashboardEnhanced: 65646
   data: 454087
   dataQuality: 19384
-  datasetQuality: 50624
+  datasetQuality: 52000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
   dataViewManagement: 5300
@@ -55,7 +55,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29700
+  expressionPartitionVis: 44888
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -79,6 +79,7 @@ pageLoadAssetSize:
   imageEmbeddable: 12500
   indexLifecycleManagement: 107090
   indexManagement: 140608
+  inference: 20403
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675
@@ -86,6 +87,7 @@ pageLoadAssetSize:
   integrationAssistant: 19524
   interactiveSetup: 80000
   investigate: 17970
+  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -110,7 +112,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 76678
+  observability: 118191
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279
@@ -134,15 +136,17 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchAssistant: 19831
   searchConnectors: 30000
   searchHomepage: 19831
+  searchIndices: 20519
   searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 16573
+  securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747

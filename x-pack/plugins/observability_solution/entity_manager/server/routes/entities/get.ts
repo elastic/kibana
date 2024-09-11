@@ -5,39 +5,66 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { SetupRouteOptions } from '../types';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
+import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import { z } from '@kbn/zod';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
-export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
-  router,
-}: SetupRouteOptions<T>) {
-  router.get<unknown, { page?: number; perPage?: number }, unknown>(
-    {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
-      validate: {
-        query: schema.object({
-          page: schema.maybe(schema.number()),
-          perPage: schema.maybe(schema.number()),
-        }),
-      },
-    },
-    async (context, req, res) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const soClient = (await context.core).savedObjects.client;
-        const definitions = await findEntityDefinitions({
-          esClient,
-          soClient,
-          page: req.query.page ?? 1,
-          perPage: req.query.perPage ?? 10,
-        });
-        return res.ok({ body: definitions });
-      } catch (e) {
-        return res.customError({ body: e, statusCode: 500 });
-      }
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   get:
+ *     description: Get all installed entity definitions.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/page'
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage'
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 definitions:
+ *                   type: array
+ *                   items:
+ *                     allOf:
+ *                       - $ref: '#/components/schemas/entityDefinitionSchema'
+ *                       - type: object
+ *                         properties:
+ *                           state:
+ *                            type: object
+ *                            properties:
+ *                              installed:
+ *                                type: boolean
+ *                              running:
+ *                                type: boolean
+ */
+export const getEntityDefinitionRoute = createEntityManagerServerRoute({
+  endpoint: 'GET /internal/entities/definition',
+  params: z.object({
+    query: getEntityDefinitionQuerySchema,
+  }),
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
+    try {
+      const client = await getScopedClient({ request });
+      const result = await client.getEntityDefinitions({
+        page: params?.query?.page,
+        perPage: params?.query?.perPage,
+      });
+
+      return response.ok({ body: result });
+    } catch (e) {
+      logger.error(e);
+      return response.customError({ body: e, statusCode: 500 });
     }
-  );
-}
+  },
+});

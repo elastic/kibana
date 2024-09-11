@@ -55,7 +55,6 @@ const transformMessageWithReplacements = ({
 export const getComments = ({
   abortStream,
   currentConversation,
-  isEnabledLangChain,
   isFetchingResponse,
   refetchCurrentConversation,
   regenerateMessage,
@@ -65,9 +64,8 @@ export const getComments = ({
 }: {
   abortStream: () => void;
   currentConversation?: Conversation;
-  isEnabledLangChain: boolean;
   isFetchingResponse: boolean;
-  refetchCurrentConversation: () => void;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
   currentUserAvatar?: UserAvatar;
@@ -78,8 +76,6 @@ export const getComments = ({
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
-  // should only happen when no apiConfig is present
-  const actionTypeId = currentConversation.apiConfig?.actionTypeId ?? '';
 
   const extraLoadingComment = isFetchingResponse
     ? [
@@ -94,11 +90,9 @@ export const getComments = ({
           children: (
             <StreamComment
               abortStream={abortStream}
-              actionTypeId={actionTypeId}
               content=""
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
-              isEnabledLangChain={isEnabledLangChain}
               setIsStreaming={setIsStreaming}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
@@ -165,10 +159,8 @@ export const getComments = ({
           children: (
             <StreamComment
               abortStream={abortStream}
-              actionTypeId={actionTypeId}
               index={index}
               isControlsEnabled={isControlsEnabled}
-              isEnabledLangChain={isEnabledLangChain}
               isError={message.isError}
               reader={message.reader}
               refetchCurrentConversation={refetchCurrentConversation}
@@ -188,12 +180,11 @@ export const getComments = ({
         actions: <CommentActions message={transformedMessage} />,
         children: (
           <StreamComment
-            actionTypeId={actionTypeId}
             abortStream={abortStream}
             content={transformedMessage.content}
             index={index}
             isControlsEnabled={isControlsEnabled}
-            isEnabledLangChain={isEnabledLangChain}
+            isError={message.isError}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}

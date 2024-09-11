@@ -19,23 +19,6 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   content?: string;
   presentation?: MessagePresentation;
 }
-
-export interface ConversationTheme {
-  title?: string;
-  titleIcon?: string;
-  user?: {
-    name?: string;
-    icon?: string;
-  };
-  assistant?: {
-    name?: string;
-    icon?: string;
-  };
-  system?: {
-    name?: string;
-    icon?: string;
-  };
-}
 /**
  * Complete state to reconstruct a conversation instance.
  * Includes all messages, connector configured, and relevant UI state.
@@ -64,18 +47,12 @@ export interface AssistantTelemetry {
   reportAssistantMessageSent: (params: {
     conversationId: string;
     role: string;
-    isEnabledKnowledgeBase: boolean;
-    isEnabledRAGAlerts: boolean;
     actionTypeId: string;
     model?: string;
     provider?: string;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: {
-    isEnabledKnowledgeBase?: boolean;
-    isEnabledRAGAlerts?: boolean;
-    assistantStreamingEnabled?: boolean;
-  }) => void;
+  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
 }
 
 export interface AssistantAvailability {

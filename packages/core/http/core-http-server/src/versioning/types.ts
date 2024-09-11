@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ApiVersion } from '@kbn/core-http-common';
@@ -105,7 +106,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
 
 /**
  * A router, very similar to {@link IRouter} that will return an {@link VersionedRoute}
- * instead.
+ * instead
  *
  * @example
  * const versionedRoute = versionedRouter
@@ -274,10 +275,14 @@ export type VersionedResponseBodyValidation =
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
     /**
+     * A description of the response. This is required input for complete OAS documentation.
+     */
+    description?: string;
+    /**
      * A string representing the mime type of the response body.
      */
     bodyContentType?: string;
-    body: VersionedResponseBodyValidation;
+    body?: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };
 }

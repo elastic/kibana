@@ -8,19 +8,19 @@
 import expect from '@kbn/expect';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
-import { RoleCredentials } from '../../../../../shared/services';
-import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteIndex,
   addIndex,
   createPackagePolicy,
   createCloudDefendPackagePolicy,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { RoleCredentials } from '../../../../../shared/services';
+import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
 
 const CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS = 'metrics-cloud_defend.heartbeat-default';
 
@@ -40,7 +40,8 @@ export default function (providerContext: FtrProviderContext) {
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  describe('Intercept the usage API request sent by the metering background task manager', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/188660
+  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;
@@ -52,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
 
       await kibanaServer.savedObjects.cleanStandardList();
@@ -71,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await deleteIndex(es, [
         LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
       ]);
     });
@@ -79,18 +80,18 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       await deleteIndex(es, [
         LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
       ]);
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await deleteIndex(es, [
         LATEST_FINDINGS_INDEX_DEFAULT_NS,
-        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
       ]);
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       mockUsageApiServer.close();
     });
 
@@ -201,7 +202,7 @@ export default function (providerContext: FtrProviderContext) {
         numberOfFindings: 2,
       });
 
-      await addIndex(es, billableFindings, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+      await addIndex(es, billableFindings, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -327,7 +328,7 @@ export default function (providerContext: FtrProviderContext) {
           ],
           LATEST_FINDINGS_INDEX_DEFAULT_NS
         ),
-        addIndex(es, [...billableFindingsCNVM], LATEST_VULNERABILITIES_INDEX_DEFAULT_NS),
+        addIndex(es, [...billableFindingsCNVM], CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN),
         addIndex(
           es,
           [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],

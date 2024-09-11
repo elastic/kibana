@@ -6,10 +6,12 @@
  */
 
 import { memo, useMemo } from 'react';
-import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import type { SuspendProcessRequestBody } from '../../../../../common/api/endpoint';
+import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
   SuspendProcessActionOutputContent,
-  SuspendProcessRequestBody,
+  ResponseActionParametersWithEntityId,
+  ResponseActionParametersWithPid,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
@@ -22,7 +24,9 @@ export const SuspendProcessActionResult = memo<
 
   const actionRequestBody = useMemo<undefined | SuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const parameters = parsedPidOrEntityIdParameter(command.args.args);
+    const parameters = parsedKillOrSuspendParameter(command.args.args) as
+      | ResponseActionParametersWithPid
+      | ResponseActionParametersWithEntityId;
 
     return endpointId
       ? {

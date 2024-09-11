@@ -91,6 +91,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   const [isNativePopoverOpen, setIsNativePopoverOpen] = useState(false);
   return (
     <EuiPanel
+      element="div"
       onClick={() => {
         if (isDisabled && showNativeBadge) return;
         onConnectorSelect(showNativeBadge);
@@ -157,7 +158,8 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                               aria-label={i18n.translate(
                                 'xpack.enterpriseSearch.content.newIndex.selectConnector.openNativePopoverLabel',
                                 {
-                                  defaultMessage: 'Open native connector popover',
+                                  defaultMessage:
+                                    'Open popover with information about native connectors',
                                 }
                               )}
                               iconType="questionInCircle"
@@ -180,6 +182,14 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                     <EuiPopover
                       button={
                         <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.selectConnector.openCreateConnectorPopover',
+                            {
+                              defaultMessage:
+                                'Open menu to create a connector of type {connectorType}',
+                              values: { connectorType: name },
+                            }
+                          )}
                           data-test-subj="entSearchContent-connectors-selectConnector-nativePopoverButton"
                           data-telemetry-id="entSearchContent-connectors-selectConnector-nativePopoverButton"
                           display="base"

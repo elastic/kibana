@@ -62,6 +62,7 @@ interface DataVisualizerTableProps<T extends object> {
   totalCount?: number;
   overallStatsRunning: boolean;
   renderFieldName?: FieldStatisticTableEmbeddableProps['renderFieldName'];
+  error?: Error | string;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -76,6 +77,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   totalCount,
   overallStatsRunning,
   renderFieldName,
+  error,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -461,6 +463,21 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
     },
   });
+
+  const message = useMemo(() => {
+    if (!overallStatsRunning && error) {
+      return i18n.translate('xpack.dataVisualizer.dataGrid.errorMessage', {
+        defaultMessage: 'An error occured fetching field statistics',
+      });
+    }
+
+    if (loading) {
+      return i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
+        defaultMessage: 'Searching',
+      });
+    }
+    return undefined;
+  }, [error, loading, overallStatsRunning]);
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
@@ -470,13 +487,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
-            message={
-              loading
-                ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
-                    defaultMessage: 'Searching',
-                  })
-                : undefined
-            }
+            message={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}

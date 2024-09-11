@@ -609,7 +609,8 @@
           "Chart",
           ">, syncOptions: ",
           "ActiveCursorSyncOption",
-          ") => (cursor: any) => void"
+          ") => ",
+          "PointerUpdateListener"
         ],
         "path": "src/plugins/charts/public/services/active_cursor/use_active_cursor.ts",
         "deprecated": false,
@@ -853,7 +854,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/charts/public/index.ts",
             "deprecated": false,
@@ -1373,7 +1374,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+              ", \"columns\" | \"rows\">; cells: { column: number; row: number; }[]; relation?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2257,9 +2258,9 @@
             "<",
             {
               "pluginId": "@kbn/core-theme-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreThemeBrowserPluginApi",
-              "section": "def-common.CoreTheme",
+              "section": "def-public.CoreTheme",
               "text": "CoreTheme"
             },
             ">; useDarkMode: () => boolean; useChartsTheme: () => ",

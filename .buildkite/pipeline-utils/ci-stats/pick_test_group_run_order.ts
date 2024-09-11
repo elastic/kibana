@@ -1,22 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
+
+// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { expandAgentQueue } from '#pipeline-utils';
+
+const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -107,15 +113,50 @@ function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
 }
 
+interface FtrConfigsManifest {
+  defaultQueue?: string;
+  disabled?: string[];
+  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
+}
+
 function getEnabledFtrConfigs(patterns?: string[]) {
+  const configs: {
+    enabled: Array<string | { [configPath: string]: { queue: string } }>;
+    defaultQueue: string | undefined;
+  } = { enabled: [], defaultQueue: undefined };
+  const uniqueQueues = new Set<string>();
+
+  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+    try {
+      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+      if (!isObj(ymlData)) {
+        throw new Error('expected yaml file to parse to an object');
+      }
+      const manifest = ymlData as FtrConfigsManifest;
+
+      configs.enabled.push(...(manifest?.enabled ?? []));
+      if (manifest.defaultQueue) {
+        uniqueQueues.add(manifest.defaultQueue);
+      }
+    } catch (_) {
+      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
+    }
+  }
+
   try {
-    const configs = loadYaml(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
-    if (!isObj(configs)) {
-      throw new Error('expected yaml file to parse to an object');
+    if (configs.enabled.length === 0) {
+      throw new Error('expected yaml files to have at least 1 "enabled" key');
     }
-    if (!configs.enabled) {
-      throw new Error('expected yaml file to have an "enabled" key');
+    if (uniqueQueues.size !== 1) {
+      throw Error(
+        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
+          ...uniqueQueues,
+        ].join(' ')}`
+      );
     }
+    configs.defaultQueue = uniqueQueues.values().next().value;
+
     if (
       !Array.isArray(configs.enabled) ||
       !configs.enabled.every(
@@ -149,11 +190,10 @@ function getEnabledFtrConfigs(patterns?: string[]) {
         ftrConfigsByQueue.set(queue, [path]);
       }
     }
-
     return { defaultQueue, ftrConfigsByQueue };
   } catch (_) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to parse ftr_configs.yml file: ${error.message}`);
+    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
   }
 }
 

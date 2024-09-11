@@ -229,15 +229,15 @@ export class LegacyAlertsClient<
   public getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ) {
-    if (this.processedAlerts.hasOwnProperty(type)) {
+    if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
     }
 
     return {};
   }
 
-  public getAlertsToSerialize(shouldSetFlapping: boolean = true) {
-    if (shouldSetFlapping) {
+  public getAlertsToSerialize(shouldSetFlappingAndOptimize: boolean = true) {
+    if (shouldSetFlappingAndOptimize) {
       setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
         this.flappingSettings,
         this.processedAlerts.active,
@@ -246,7 +246,8 @@ export class LegacyAlertsClient<
     }
     return determineAlertsToReturn<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.active,
-      this.processedAlerts.recovered
+      this.processedAlerts.recovered,
+      shouldSetFlappingAndOptimize
     );
   }
 

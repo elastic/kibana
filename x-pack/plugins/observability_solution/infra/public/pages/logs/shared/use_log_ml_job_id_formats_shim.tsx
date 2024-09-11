@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { IdFormatByJobType, JobType } from '../../../../common/http_api/latest';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { callGetLogAnalysisIdFormats } from './call_get_log_analysis_id_formats';

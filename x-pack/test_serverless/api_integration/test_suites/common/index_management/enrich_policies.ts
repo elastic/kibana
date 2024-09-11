@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
     const POLICY_NAME = `policy-${Math.random()}`;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
 
       try {
         await svlEnrichPoliciesHelpers.createIndex(INDEX_NAME);
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         log.debug('[Cleanup error] Error deleting test index');
         throw err;
       }
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should list all policies', async () => {

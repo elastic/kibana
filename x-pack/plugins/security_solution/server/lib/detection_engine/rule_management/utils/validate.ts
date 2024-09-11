@@ -64,9 +64,7 @@ export const validateResponseActionsPermissions = async (
   ruleUpdate: RuleCreateProps | RuleUpdateProps,
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
-  const { experimentalFeatures } = await securitySolution.getConfig();
-
-  if (!experimentalFeatures.endpointResponseActionsEnabled || !isQueryRule(ruleUpdate.type)) {
+  if (!isQueryRule(ruleUpdate.type)) {
     return;
   }
 

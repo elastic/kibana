@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiImage,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -29,12 +30,14 @@ import {
 } from '@elastic/eui';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
-export function UnauthorisedModal({
+export function Unauthorized({
   isUnauthorizedModalVisible = false,
   onClose,
+  label,
 }: {
   isUnauthorizedModalVisible?: boolean;
   onClose: () => void;
+  label: string;
 }) {
   const servicesInventory = useKibanaUrl('/plugins/apm/assets/services_inventory.png');
 
@@ -53,6 +56,18 @@ export function UnauthorisedModal({
                 defaultMessage: 'OK',
               })}
             </EuiButton>
+          }
+          cancelButtonText={
+            <EuiLink
+              target="_blank"
+              data-test-subj="apmUnauthorizedLinkExternal"
+              href="https://ela.st/new-experience-services"
+              external
+            >
+              {i18n.translate('xpack.apm.unauthorized.linkLinkLabel', {
+                defaultMessage: 'See how to enable EEM',
+              })}
+            </EuiLink>
           }
           defaultFocusedButton="confirm"
         >
@@ -83,7 +98,8 @@ export function UnauthorisedModal({
               <p>
                 {i18n.translate('xpack.apm.unauthorised.body', {
                   defaultMessage:
-                    'To see services detected from logs and APM-instrumented services in our new service inventory, please ask an administrator to visit this page and try our new experience. ',
+                    'To see services detected from logs and APM-instrumented services in our new service inventory, please ask an administrator to visit this page and {label}. ',
+                  values: { label: label.toLowerCase() },
                 })}
               </p>
             </EuiText>

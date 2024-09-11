@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 import {
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
-  EqlRuleCreateFields,
-  EsqlRuleCreateFields,
-  MachineLearningRuleCreateFields,
-  NewTermsRuleCreateFields,
-  QueryRuleCreateFields,
-  SavedQueryRuleCreateFields,
-  ThreatMatchRuleCreateFields,
-  ThresholdRuleCreateFields,
+  TypeSpecificCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
@@ -37,28 +30,26 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
   'outcome',
 ]);
 
-// `response_actions` is only part of the optional fields in QueryRuleCreateFields and SavedQueryRuleCreateFields
-const TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<
-  QueryRuleCreateFields | SavedQueryRuleCreateFields
->()(['response_actions']);
-
-const QueryRuleAssetFields = QueryRuleCreateFields.omit(
-  TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
-);
-const SavedQueryRuleAssetFields = SavedQueryRuleCreateFields.omit(
-  TYPE_SPECIFIC_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET
-);
-
-export const RuleAssetTypeSpecificCreateProps = z.discriminatedUnion('type', [
-  EqlRuleCreateFields,
-  QueryRuleAssetFields,
-  SavedQueryRuleAssetFields,
-  ThresholdRuleCreateFields,
-  ThreatMatchRuleCreateFields,
-  MachineLearningRuleCreateFields,
-  NewTermsRuleCreateFields,
-  EsqlRuleCreateFields,
-]);
+/**
+ * Aditionally remove fields which are part only of the optional fields in the rule types that make up
+ * the TypeSpecificCreateProps discriminatedUnion, by using a Zod transformation which extracts out the
+ * necessary fields in the rules types where they exist. Fields to extract:
+ *  - response_actions: from Query and SavedQuery rules
+ */
+const TypeSpecificFields = TypeSpecificCreateProps.transform((val) => {
+  switch (val.type) {
+    case 'query': {
+      const { response_actions: _, ...rest } = val;
+      return rest;
+    }
+    case 'saved_query': {
+      const { response_actions: _, ...rest } = val;
+      return rest;
+    }
+    default:
+      return val;
+  }
+});
 
 function zodMaskFor<T>() {
   return function <U extends keyof T>(props: U[]): Record<U, true> {
@@ -85,7 +76,7 @@ function zodMaskFor<T>() {
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
 export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET)
-  .and(RuleAssetTypeSpecificCreateProps)
+  .and(TypeSpecificFields)
   .and(
     z.object({
       rule_id: RuleSignatureId,

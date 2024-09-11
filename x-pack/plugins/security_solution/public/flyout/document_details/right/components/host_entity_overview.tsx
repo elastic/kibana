@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiText,
   EuiIcon,
   useEuiTheme,
   useEuiFontSize,
@@ -20,6 +21,7 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -36,7 +38,7 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { getField } from '../../shared/utils';
-import { CellActions } from './cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import {
   FAMILY,
   LAST_SEEN,
@@ -54,7 +56,7 @@ import {
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 const HOST_ICON = 'storage';
 
@@ -78,9 +80,8 @@ export const HOST_PREVIEW_BANNER = {
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
-
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
@@ -93,18 +94,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
-
-  const openHostPreview = useCallback(() => {
-    openPreviewPanel({
-      id: HostPreviewPanelKey,
-      params: {
-        hostName,
-        scopeId,
-        banner: HOST_PREVIEW_BANNER,
-      },
-    });
-  }, [openPreviewPanel, hostName, scopeId]);
-
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -166,7 +155,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         description: (
           <FirstLastSeen
             indexPatterns={selectedPatterns}
-            field={'host.name'}
+            field={HOST_NAME_FIELD_NAME}
             value={hostName}
             type={FirstLastSeenType.LAST_SEEN}
           />
@@ -217,16 +206,34 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-              css={css`
-                font-size: ${xsFontSize};
-                font-weight: ${euiTheme.font.weight.bold};
-              `}
-              onClick={isPreviewEnabled ? openHostPreview : goToEntitiesTab}
-            >
-              {hostName}
-            </EuiLink>
+            {isPreviewEnabled ? (
+              <PreviewLink
+                field={HOST_NAME_FIELD_NAME}
+                value={hostName}
+                scopeId={scopeId}
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+              >
+                <EuiText
+                  css={css`
+                    font-size: ${xsFontSize};
+                    font-weight: ${euiTheme.font.weight.bold};
+                  `}
+                >
+                  {hostName}
+                </EuiText>
+              </PreviewLink>
+            ) : (
+              <EuiLink
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+                css={css`
+                  font-size: ${xsFontSize};
+                  font-weight: ${euiTheme.font.weight.bold};
+                `}
+                onClick={goToEntitiesTab}
+              >
+                {hostName}
+              </EuiLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

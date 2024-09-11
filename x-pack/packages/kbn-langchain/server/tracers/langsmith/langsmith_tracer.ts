@@ -32,7 +32,7 @@ export const getLangSmithTracer = ({
   logger: Logger | ToolingLog;
 }): LangChainTracer[] => {
   try {
-    if (!isLangSmithEnabled() || apiKey == null) {
+    if (!apiKey) {
       return [];
     }
     const lcTracer = new LangChainTracer({

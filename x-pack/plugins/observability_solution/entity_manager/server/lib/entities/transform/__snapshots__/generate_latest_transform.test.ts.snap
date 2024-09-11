@@ -3,7 +3,7 @@
 exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
 Object {
   "_meta": Object {
-    "definitionVersion": "999.999.999",
+    "definitionVersion": "1.0.0",
     "managed": false,
   },
   "defer_validation": true,
@@ -47,6 +47,40 @@ Object {
           "field": "@timestamp",
         },
       },
+      "entity.identity.event.category": Object {
+        "aggs": Object {
+          "top_metric": Object {
+            "top_metrics": Object {
+              "metrics": Object {
+                "field": "event.category",
+              },
+              "sort": "_score",
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "event.category",
+          },
+        },
+      },
+      "entity.identity.log.logger": Object {
+        "aggs": Object {
+          "top_metric": Object {
+            "top_metrics": Object {
+              "metrics": Object {
+                "field": "log.logger",
+              },
+              "sort": "_score",
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "log.logger",
+          },
+        },
+      },
       "entity.lastSeenTimestamp": Object {
         "max": Object {
           "field": "entity.lastSeenTimestamp",
@@ -63,8 +97,8 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -80,8 +114,8 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -97,8 +131,8 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -114,8 +148,8 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -138,26 +172,9 @@ Object {
       },
     },
     "group_by": Object {
-      "entity.displayName": Object {
-        "terms": Object {
-          "field": "entity.displayName.keyword",
-        },
-      },
       "entity.id": Object {
         "terms": Object {
           "field": "entity.id",
-        },
-      },
-      "entity.identityFields.event.category": Object {
-        "terms": Object {
-          "field": "entity.identityFields.event.category",
-          "missing_bucket": true,
-        },
-      },
-      "entity.identityFields.log.logger": Object {
-        "terms": Object {
-          "field": "entity.identityFields.log.logger",
-          "missing_bucket": false,
         },
       },
     },

@@ -7,6 +7,8 @@
 
 import { isEqual } from 'lodash';
 import { MissingVersion } from './three_way_diff';
+import type { RuleDataSource } from '../diffable_rule/diffable_field_types';
+import { DataSourceType } from '../diffable_rule/diffable_field_types';
 
 /**
  * Result of comparing three versions of a value against each other.
@@ -27,6 +29,12 @@ export enum ThreeWayDiffOutcome {
 
   /** Customized rule, the value has changed in the target version and is not equal to the current version. */
   CustomizedValueCanUpdate = 'BASE=A, CURRENT=B, TARGET=C',
+
+  /** Missing  base, the value hasn't changed in the target version. */
+  MissingBaseNoUpdate = 'BASE=-, CURRENT=A, TARGET=A',
+
+  /** Missing  base, the value changed in the target version. */
+  MissingBaseCanUpdate = 'BASE=-, CURRENT=A, TARGET=B',
 }
 
 export const determineDiffOutcome = <TValue>(
@@ -69,6 +77,33 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   });
 };
 
+/**
+ * Determines diff outcome for `data_source` field
+ *
+ * NOTE: uses order agnostic comparison for nested array fields (e.g. `index`)
+ */
+export const determineDiffOutcomeForDataSource = (
+  baseVersion: RuleDataSource | undefined | MissingVersion,
+  currentVersion: RuleDataSource | undefined,
+  targetVersion: RuleDataSource | undefined
+): ThreeWayDiffOutcome => {
+  const isBaseVersionMissing = baseVersion === MissingVersion;
+
+  if (
+    (isBaseVersionMissing || isIndexPatternDataSourceType(baseVersion)) &&
+    isIndexPatternDataSourceType(currentVersion) &&
+    isIndexPatternDataSourceType(targetVersion)
+  ) {
+    return determineOrderAgnosticDiffOutcome(
+      isBaseVersionMissing ? MissingVersion : baseVersion.index_patterns,
+      currentVersion.index_patterns,
+      targetVersion.index_patterns
+    );
+  }
+
+  return determineDiffOutcome(baseVersion, currentVersion, targetVersion);
+};
+
 interface DetermineDiffOutcomeProps {
   baseEqlCurrent: boolean;
   baseEqlTarget: boolean;
@@ -85,12 +120,12 @@ const getThreeWayDiffOutcome = ({
   if (!hasBaseVersion) {
     /**
      * We couldn't find the base version of the rule in the package so further
-     * version comparison is not possible. We assume that the rule is not
+     * version comparison is not possible. We assume that the rule is
      * customized and the value can be updated if there's an update.
      */
     return currentEqlTarget
-      ? ThreeWayDiffOutcome.StockValueNoUpdate
-      : ThreeWayDiffOutcome.StockValueCanUpdate;
+      ? ThreeWayDiffOutcome.MissingBaseNoUpdate
+      : ThreeWayDiffOutcome.MissingBaseCanUpdate;
   }
 
   if (baseEqlCurrent) {
@@ -111,6 +146,12 @@ const getThreeWayDiffOutcome = ({
 export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolean => {
   return (
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
-    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate
+    diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+    diffCase === ThreeWayDiffOutcome.MissingBaseCanUpdate
   );
 };
+
+export const isIndexPatternDataSourceType = (
+  version: RuleDataSource | undefined
+): version is Extract<RuleDataSource, { type: DataSourceType.index_patterns }> =>
+  version !== undefined && version.type === DataSourceType.index_patterns;

@@ -99,6 +99,7 @@ export function ErrorBudgetChart({ data, isLoading, slo, selectedTabId, onBrushe
           data={data}
           isLoading={isLoading}
           onBrushed={onBrushed}
+          slo={slo}
         />
       </EuiFlexItem>
     </>

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { useKibana } from '../hooks/use_kibana';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 
 const canOpenConsole = (plugin?: ConsolePluginStart): boolean => {
   if (!plugin) return false;
@@ -21,11 +22,13 @@ export const ConsoleLinkButton = () => {
   const {
     services: { console: consolePlugin },
   } = useKibana();
+  const usageTracker = useUsageTracker();
   const openConsole = useCallback(() => {
+    usageTracker.click('get_started_in_console');
     if (!canOpenConsole(consolePlugin)) return;
 
     consolePlugin!.openEmbeddedConsole!();
-  }, [consolePlugin]);
+  }, [consolePlugin, usageTracker]);
   if (consolePlugin === undefined || consolePlugin.openEmbeddedConsole === undefined) return null;
 
   return (

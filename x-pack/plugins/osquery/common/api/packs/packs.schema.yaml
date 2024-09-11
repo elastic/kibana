@@ -5,12 +5,11 @@ info:
 paths:
   /api/osquery/packs:
     get:
-      summary: Find packs
+      summary: Get packs
+      description: Get a list of all query packs.
       operationId: OsqueryFindPacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
         - name: query
           in: query
@@ -25,12 +24,11 @@ paths:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     post:
-      summary: Create a packs
+      summary: Create a pack
+      description: Create a query pack.
       operationId: OsqueryCreatePacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       requestBody:
         required: true
         content:
@@ -46,18 +44,17 @@ paths:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
   /api/osquery/packs/{id}:
     get:
-      summary: Get packs details
+      summary: Get pack details
+      description: Get the details of a query pack using the pack ID.
       operationId: OsqueryGetPacksDetails
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            $ref: './read_packs.schema.yaml#/components/schemas/ReadPacksRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
           description: OK
@@ -66,18 +63,17 @@ paths:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     delete:
-      summary: Delete packs
+      summary: Delete a pack
+      description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            $ref: './delete_packs.schema.yaml#/components/schemas/DeletePacksRequestQuery'
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       responses:
         '200':
           description: OK
@@ -86,24 +82,26 @@ paths:
               schema:
                 $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
     put:
-      summary: Update packs
+      summary: Update a pack
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
       operationId: OsqueryUpdatePacks
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
-      parameters:
-        - name: query
-          in: path
-          required: true
-          schema:
-            $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestParams'
       responses:
         '200':
           description: OK

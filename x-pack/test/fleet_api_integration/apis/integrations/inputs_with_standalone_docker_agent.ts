@@ -25,9 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/184681
-  // Failing: See https://github.com/elastic/kibana/issues/184681
-  describe.skip('inputs_with_standalone_docker_agent', () => {
+  describe('inputs_with_standalone_docker_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     let apiKey: string;
     let agent: AgentProcess;
@@ -40,8 +38,7 @@ export default function (providerContext: FtrProviderContext) {
         name: 'test standalone agent',
       });
       apiKey = `${res.id}:${res.api_key}`;
-    });
-    before(async () => {
+
       agentImage = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
       log.info(agentImage);
       await execa('docker', ['pull', agentImage]);

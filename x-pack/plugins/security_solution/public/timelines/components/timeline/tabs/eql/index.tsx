@@ -8,7 +8,6 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -17,6 +16,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import {
   DocumentDetailsLeftPanelKey,
@@ -32,7 +32,6 @@ import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { calculateTotalPages } from '../../helpers';
 import { TimelineRefetch } from '../../refetch_timeline';
-import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
@@ -43,14 +42,12 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
-import { DetailsPanel } from '../../../side_panel';
 import {
   EventsCountBadge,
   FullWidthFlexGroup,
   ScrollableFlexItem,
   StyledEuiFlyoutBody,
   StyledEuiFlyoutFooter,
-  VerticalRule,
 } from '../shared/layout';
 import {
   TIMELINE_EMPTY_EVENTS,
@@ -74,15 +71,12 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   columns,
   end,
   eqlOptions,
-  expandedDetail,
   timelineId,
   isLive,
   itemsPerPage,
   itemsPerPageOptions,
-  onEventClosed,
   renderCellValue,
   rowRenderers,
-  showExpandedDetails,
   start,
   timerangeKind,
   pinnedEventIds,
@@ -97,13 +91,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     browserFields,
     dataViewId,
     loading: loadingSourcerer,
-    runtimeMappings,
     selectedPatterns,
+    sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -138,8 +132,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: 'eql',
-    limit: unifiedComponentsInTimelineEnabled ? sampleSize : itemsPerPage,
-    runtimeMappings,
+    limit: !unifiedComponentsInTimelineDisabled ? sampleSize : itemsPerPage,
+    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,
@@ -162,6 +156,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     eventIdToNoteIds,
     refetch,
     timelineId,
+    activeTab: TimelineTabs.eql,
   });
 
   const onToggleShowNotes = useCallback(
@@ -233,10 +228,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [dataLoadingState]
   );
 
-  const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });
-  }, [onEventClosed, timelineId]);
-
   useEffect(() => {
     dispatch(
       timelineActions.updateIsLoading({
@@ -276,10 +267,12 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      {unifiedComponentsInTimelineEnabled ? (
+      {!unifiedComponentsInTimelineDisabled ? (
         <>
           <InPortal node={eqlEventsCountPortalNode}>
-            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+            {totalCount >= 0 ? (
+              <EventsCountBadge data-test-subj="eql-events-count">{totalCount}</EventsCountBadge>
+            ) : null}
           </InPortal>
           {NotesFlyoutMemo}
           <FullWidthFlexGroup>
@@ -296,9 +289,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               refetch={refetch}
               dataLoadingState={dataLoadingState}
               totalCount={isBlankTimeline ? 0 : totalCount}
-              onEventClosed={onEventClosed}
-              expandedDetail={expandedDetail}
-              showExpandedDetails={showExpandedDetails}
               onChangePage={loadPage}
               activeTab={activeTab}
               updatedAt={refreshedAt}
@@ -371,20 +361,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 </StyledEuiFlyoutFooter>
               </EventDetailsWidthProvider>
             </ScrollableFlexItem>
-            {showExpandedDetails && (
-              <>
-                <VerticalRule />
-                <ScrollableFlexItem grow={1}>
-                  <DetailsPanel
-                    browserFields={browserFields}
-                    runtimeMappings={runtimeMappings}
-                    tabType={TimelineTabs.eql}
-                    scopeId={timelineId}
-                    handleOnPanelClosed={handleOnPanelClosed}
-                  />
-                </ScrollableFlexItem>
-              </>
-            )}
           </FullWidthFlexGroup>
         </>
       )}
@@ -402,7 +378,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       eqlOptions,
-      expandedDetail,
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
@@ -414,29 +389,20 @@ const makeMapStateToProps = () => {
       columns,
       eqlOptions,
       end: input.timerange.to,
-      expandedDetail,
       timelineId,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
       eventIdToNoteIds,
-      showExpandedDetails:
-        !!expandedDetail[TimelineTabs.eql] && !!expandedDetail[TimelineTabs.eql]?.panelView,
-
       start: input.timerange.from,
       timerangeKind: input.timerange.kind,
     };
   };
   return mapStateToProps;
 };
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  onEventClosed: (args: ToggleDetailPanel) => {
-    dispatch(timelineActions.toggleDetailPanel(args));
-  },
-});
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
@@ -449,8 +415,6 @@ const EqlTabContent = connector(
       deepEqual(prevProps.eqlOptions, nextProps.eqlOptions) &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
-      prevProps.onEventClosed === nextProps.onEventClosed &&
-      prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&

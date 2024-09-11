@@ -32,17 +32,21 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('security/authorization', function () {
+    // see details: https://github.com/elastic/kibana/issues/192282
+    this.tags(['failsOnMKI']);
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('route access', () => {
       describe('internal', () => {
         describe('disabled', () => {
-          it('get all privileges', async () => {
+          // Skipped due to change in QA environment for role management and spaces
+          // TODO: revisit once the change is rolled out to all environments
+          it.skip('get all privileges', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/api/security/privileges')
               .set(svlCommonApi.getInternalRequestHeader())
@@ -50,7 +54,9 @@ export default function ({ getService }: FtrProviderContext) {
             svlCommonApi.assertApiNotFound(body, status);
           });
 
-          it('get built-in elasticsearch privileges', async () => {
+          // Skipped due to change in QA environment for role management and spaces
+          // TODO: revisit once the change is rolled out to all environments
+          it.skip('get built-in elasticsearch privileges', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/internal/security/esPrivileges/builtin')
               .set(svlCommonApi.getInternalRequestHeader())
@@ -60,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('create/update roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
-              .put('/api/security/roleAuthc/test')
+              .put('/api/security/role/test')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -68,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('get roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
-              .get('/api/security/roleAuthc/superuser')
+              .get('/api/security/role/superuser')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -76,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('get all roles', async () => {
             const { body, status } = await supertestWithoutAuth
-              .get('/api/security/roleAuthc')
+              .get('/api/security/role')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -84,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('delete roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
-              .delete('/api/security/roleAuthc/superuser')
+              .delete('/api/security/role/superuser')
               .set(svlCommonApi.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
@@ -116,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         // get auth header for Viewer roleAuthc
-        adminCredentials = await svlUserManager.getApiCredentialsForRole('admin');
+        adminCredentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('admin');
       });
 
       it('all Dashboard and Discover sub-feature privileges are disabled', async () => {

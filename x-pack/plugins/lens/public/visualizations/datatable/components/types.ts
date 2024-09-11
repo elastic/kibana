@@ -7,7 +7,6 @@
 
 import { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type {
@@ -82,9 +81,4 @@ export interface DataContextType {
     rowIndex: number,
     negate?: boolean
   ) => void;
-  getColorForValue?: (
-    value: number | undefined,
-    state: CustomPaletteState,
-    minMax: { min: number; max: number }
-  ) => string | undefined;
 }

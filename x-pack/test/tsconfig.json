@@ -2,10 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-      "@kbn/ambient-ftr-types"
-    ],
+    "types": ["node", "@kbn/ambient-ftr-types"],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this
@@ -27,12 +24,11 @@
     "*/plugins/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
-    "security_solution_api_integration/**/*"
+    "security_solution_api_integration/**/*",
+    "security_solution_endpoint/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "../../test/tsconfig.json"
-    },
+    "@kbn/test-suites-src",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/kibana-usage-collection-plugin",
@@ -130,7 +126,6 @@
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
     "@kbn/lens-plugin",
-    "@kbn/notifications-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/telemetry-tools",
     "@kbn/profiling-plugin",
@@ -172,7 +167,20 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
-    "@kbn/securitysolution-io-ts-list-types",
-    "@kbn/ml-trained-models-utils"
+    "@kbn/ml-trained-models-utils",
+    "@kbn/openapi-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-endpoint-exceptions-common",
+    "@kbn/entityManager-plugin",
+    "@kbn/osquery-plugin",
+    "@kbn/entities-schema",
+    "@kbn/actions-simulators-plugin",
+    "@kbn/cases-api-integration-test-plugin",
+    "@kbn/security-solution-plugin/public/management/cypress",
+    "@kbn/management-settings-ids",
+    "@kbn/mock-idp-utils",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/saved-objects-management-plugin"
   ]
 }

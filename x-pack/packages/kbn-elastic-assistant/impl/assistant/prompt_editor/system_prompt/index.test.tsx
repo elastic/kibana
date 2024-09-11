@@ -62,7 +62,7 @@ jest.mock('../../use_conversation', () => {
 });
 
 describe('SystemPrompt', () => {
-  const editingSystemPromptId = undefined;
+  const currentSystemPromptId = undefined;
   const isSettingsModalVisible = false;
   const onSystemPromptSelectionChange = jest.fn();
   const setIsSettingsModalVisible = jest.fn();
@@ -86,7 +86,7 @@ describe('SystemPrompt', () => {
       render(
         <SystemPrompt
           conversation={conversation}
-          editingSystemPromptId={editingSystemPromptId}
+          currentSystemPromptId={currentSystemPromptId}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -113,7 +113,7 @@ describe('SystemPrompt', () => {
       render(
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={mockSystemPrompt.id}
+          currentSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -144,7 +144,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -152,22 +152,22 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${customPromptName}[Enter]`
       );
 
-      userEvent.type(
+      await userEvent.type(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
         customPromptText
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
@@ -191,7 +191,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -199,22 +199,22 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${customPromptName}[Enter]`
       );
 
-      userEvent.type(
+      await userEvent.type(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
         customPromptText
       );
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS)
       );
 
@@ -224,7 +224,7 @@ describe('SystemPrompt', () => {
         ).toBeChecked();
       });
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
@@ -252,7 +252,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -260,22 +260,22 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${customPromptName}[Enter]`
       );
 
-      userEvent.type(
+      await userEvent.type(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
         customPromptText
       );
 
-      userEvent.click(
+      await userEvent.click(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxInput'
         )
@@ -290,11 +290,11 @@ describe('SystemPrompt', () => {
       });
 
       // select Default Conversation
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(DEFAULT_CONVERSATION_TITLE))
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).not.toBeInTheDocument();
@@ -320,7 +320,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -328,12 +328,12 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${mockSystemPrompt.name}[Enter]`
       );
@@ -344,13 +344,13 @@ describe('SystemPrompt', () => {
         )
       ).toBeVisible();
 
-      userEvent.click(
+      await userEvent.click(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxClearButton'
         )
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
@@ -403,7 +403,7 @@ describe('SystemPrompt', () => {
         <TestProviders>
           <SystemPrompt
             conversation={BASE_CONVERSATION}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -411,12 +411,12 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${mockSystemPrompt.name}[Enter]`
       );
@@ -428,21 +428,21 @@ describe('SystemPrompt', () => {
       ).toBeVisible();
 
       // removed selected conversation
-      userEvent.click(
+      await userEvent.click(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxClearButton'
         )
       );
 
       // add `second` conversation
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxInput'
         ),
         'second[Enter]'
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
@@ -473,7 +473,7 @@ describe('SystemPrompt', () => {
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={mockSystemPrompt.id}
+          currentSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}

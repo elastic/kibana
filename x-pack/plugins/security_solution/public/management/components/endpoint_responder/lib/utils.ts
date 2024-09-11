@@ -7,14 +7,25 @@
 import type {
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessName,
 } from '../../../../../common/endpoint/types';
 
-export const parsedPidOrEntityIdParameter = (parameters: {
+export const parsedKillOrSuspendParameter = (parameters: {
   pid?: string[];
   entityId?: string[];
-}): ResponseActionParametersWithPid | ResponseActionParametersWithEntityId => {
+  processName?: string[];
+}):
+  | ResponseActionParametersWithPid
+  | ResponseActionParametersWithEntityId
+  | ResponseActionParametersWithProcessName => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
+  }
+
+  if (parameters.processName) {
+    return {
+      process_name: parameters.processName[0] ?? '',
+    };
   }
 
   return {

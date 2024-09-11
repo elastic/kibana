@@ -6,11 +6,13 @@
  */
 
 import {
-  CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  LATEST_FINDINGS_INDEX_PATTERN,
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import {
+  CNVM_POLICY_TEMPLATE,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 
@@ -27,15 +29,15 @@ export const CLOUD_DEFEND = INTEGRATION_PACKAGE_NAME;
 
 export const METERING_CONFIGS = {
   [CSPM]: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     assets_identifier: 'resource.id',
   },
   [KSPM]: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     assets_identifier: 'agent.id',
   },
   [CNVM]: {
-    index: LATEST_VULNERABILITIES_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
     assets_identifier: 'cloud.instance.id',
   },
   [CLOUD_DEFEND]: {

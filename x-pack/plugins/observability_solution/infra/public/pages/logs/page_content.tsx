@@ -16,18 +16,24 @@ import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { isDevMode } from '../../utils/dev_mode';
-import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
 import { NotFoundPage } from '../404';
+
+const StateMachinePlayground = dynamic(() =>
+  import('../../observability_logs/xstate_helpers').then((mod) => ({
+    default: mod.StateMachinePlayground,
+  }))
+);
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;

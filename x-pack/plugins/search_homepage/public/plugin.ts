@@ -23,6 +23,7 @@ import {
   SearchHomepagePluginStart,
   SearchHomepageAppPluginStartDependencies,
   SearchHomepageAppInfo,
+  SearchHomepageServicesContext,
 } from './types';
 
 const appInfo: SearchHomepageAppInfo = {
@@ -56,7 +57,7 @@ export class SearchHomepagePlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: SearchHomepageAppPluginStartDependencies = {
+        const startDeps: SearchHomepageServicesContext = {
           ...depsStart,
           history,
         };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
@@ -19,6 +20,7 @@ import type {
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
+import { registerEluHistoryRoute } from './routes/elu_history';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -71,6 +73,8 @@ export class MetricsService
     }, config.interval.asMilliseconds());
 
     const metricsObservable = this.metrics$.asObservable();
+
+    registerEluHistoryRoute(http.createRouter(''), metricsObservable);
 
     this.service = {
       collectionInterval: config.interval.asMilliseconds(),

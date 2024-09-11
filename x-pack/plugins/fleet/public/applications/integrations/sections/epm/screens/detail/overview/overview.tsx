@@ -22,6 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { AVCResultsBanner2024, useIsStillYear2024 } from '@kbn/avc-banner';
+
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
@@ -39,8 +41,6 @@ import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-
-import { AVCResultsBanner2024 } from './avc_banner/avc_results_banner_2024';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -313,7 +313,7 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
-          {isElasticDefend && showAVCBanner && (
+          {useIsStillYear2024() && isElasticDefend && showAVCBanner && (
             <>
               <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
               <EuiSpacer size="s" />

@@ -105,15 +105,15 @@ export interface InfluencerAnomalyAlertDoc extends BaseAnomalyAlertDoc {
 export type AlertHitDoc = RecordAnomalyAlertDoc | BucketAnomalyAlertDoc | InfluencerAnomalyAlertDoc;
 
 export function isRecordAnomalyAlertDoc(arg: any): arg is RecordAnomalyAlertDoc {
-  return arg.hasOwnProperty('result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.RECORD;
+  return Object.hasOwn(arg, 'result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.RECORD;
 }
 
 export function isBucketAnomalyAlertDoc(arg: any): arg is BucketAnomalyAlertDoc {
-  return arg.hasOwnProperty('result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.BUCKET;
+  return Object.hasOwn(arg, 'result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.BUCKET;
 }
 
 export function isInfluencerAnomalyAlertDoc(arg: any): arg is InfluencerAnomalyAlertDoc {
-  return arg.hasOwnProperty('result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
+  return Object.hasOwn(arg, 'result_type') && arg.result_type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
 }
 
 export type MlAnomalyDetectionAlertParams = {

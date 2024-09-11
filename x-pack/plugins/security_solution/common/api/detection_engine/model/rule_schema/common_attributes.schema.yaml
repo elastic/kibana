@@ -92,7 +92,7 @@ components:
 
     RuleIntervalFrom:
       type: string
-      description: Time from which data is analyzed each time the rule executes, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+      description: Time from which data is analyzed each time the rule runs, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
       format: date-math
 
     RuleIntervalTo:
@@ -470,7 +470,7 @@ components:
         - field_names
 
     RuleActionThrottle:
-      description: Defines the interval on which a rule's actions are executed.
+      description: Defines how often rule actions are taken.
       oneOf:
         - type: string
           enum:
@@ -543,7 +543,6 @@ components:
           $ref: '#/components/schemas/RuleActionFrequency'
       required:
         - action_type_id
-        - group
         - id
         - params
 

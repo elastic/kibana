@@ -75,7 +75,7 @@ export function ActionMenuContent(): React.ReactElement {
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.synthetics.page_header.settingsLink.label', {
-          defaultMessage: 'Navigate to the Uptime settings page',
+          defaultMessage: 'Navigate to the Synthetics settings page',
         })}
         color="text"
         data-test-subj="settings-page-link"

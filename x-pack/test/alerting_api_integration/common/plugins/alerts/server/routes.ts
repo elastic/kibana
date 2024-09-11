@@ -540,8 +540,8 @@ export function defineRoutes(
 
       const emailService = notifications.getEmailService();
 
-      emailService.sendPlainTextEmail({ to, subject, message });
-      emailService.sendHTMLEmail({ to, subject, message, messageHTML });
+      await emailService.sendPlainTextEmail({ to, subject, message });
+      await emailService.sendHTMLEmail({ to, subject, message, messageHTML });
 
       return res.ok({ body: { ok: true } });
     }

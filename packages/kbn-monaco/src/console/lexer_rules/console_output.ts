@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -35,8 +36,10 @@ export const consoleOutputLexerRules: monaco.languages.IMonarchLanguage = {
       matchTokensWithEOL('status.success', /\b2\d{2}(?: \w+)*$/, 'root'),
       // Redirection messages (status codes 300 – 399)
       matchTokensWithEOL('status.redirect', /\b3\d{2}(?: \w+)*$/, 'root'),
-      // Client and server error responses (status codes 400 – 599)
-      matchTokensWithEOL('status.error', /\b[4-5]\d{2}(?: \w+)*$/, 'root'),
+      // Client error responses (status codes 400 – 499)
+      matchTokensWithEOL('status.warning', /\b4\d{2}(?: \w+)*$/, 'root'),
+      // Server error responses (status codes 500 – 599)
+      matchTokensWithEOL('status.error', /\b5\d{2}(?: \w+)*$/, 'root'),
     ],
   },
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { createContext, useMemo } from 'react';
@@ -14,14 +15,11 @@ import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  apiPublishesPanelDescription,
-  apiPublishesPanelTitle,
-  apiPublishesSavedObjectId,
   initializeTitles,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { apiIsPresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 
 import {
   CONTENT_ID,
@@ -52,14 +50,9 @@ import {
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { isParentApiCompatible } from '../actions/compatibility_check';
 
 export const LinksContext = createContext<LinksApi | null>(null);
-
-const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
-  apiIsPresentationContainer(parentApi) &&
-  apiPublishesSavedObjectId(parentApi) &&
-  apiPublishesPanelTitle(parentApi) &&
-  apiPublishesPanelDescription(parentApi);
 
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<
@@ -71,14 +64,16 @@ export const getLinksEmbeddableFactory = () => {
     deserializeState: async (serializedState) => {
       // Clone the state to avoid an object not extensible error when injecting references
       const state = cloneDeep(serializedState.rawState);
-      const { title, description } = serializedState.rawState;
+      const { title, description, hidePanelTitles } = serializedState.rawState;
 
       if (linksSerializeStateIsByReference(state)) {
-        const attributes = await deserializeLinksSavedObject(state);
+        const linksSavedObject = await linksClient.get(state.savedObjectId);
+        const runtimeState = await deserializeLinksSavedObject(linksSavedObject.item);
         return {
-          ...attributes,
+          ...runtimeState,
           title,
           description,
+          hidePanelTitles,
         };
       }
 
@@ -92,6 +87,7 @@ export const getLinksEmbeddableFactory = () => {
       return {
         title,
         description,
+        hidePanelTitles,
         links: resolvedLinks,
         layout: attributesWithInjectedIds.layout,
         defaultPanelTitle: attributesWithInjectedIds.title,
@@ -174,21 +170,18 @@ export const getLinksEmbeddableFactory = () => {
             savedObjectId$.next(undefined);
           },
           onEdit: async () => {
-            try {
-              const { openEditorFlyout } = await import('../editor/open_editor_flyout');
-              const newState = await openEditorFlyout({
-                initialState: api.snapshotRuntimeState(),
-                parentDashboard: parentApi,
-              });
-              if (newState) {
-                links$.next(newState.links);
-                layout$.next(newState.layout);
-                defaultPanelTitle.next(newState.defaultPanelTitle);
-                defaultPanelDescription.next(newState.defaultPanelDescription);
-                savedObjectId$.next(newState.savedObjectId);
-              }
-            } catch {
-              // do nothing, user cancelled
+            const { openEditorFlyout } = await import('../editor/open_editor_flyout');
+            const newState = await openEditorFlyout({
+              initialState: api.snapshotRuntimeState(),
+              parentDashboard: parentApi,
+            });
+
+            if (newState) {
+              links$.next(newState.links);
+              layout$.next(newState.layout);
+              defaultPanelTitle.next(newState.defaultPanelTitle);
+              defaultPanelDescription.next(newState.defaultPanelDescription);
+              savedObjectId$.next(newState.savedObjectId);
             }
           },
         },

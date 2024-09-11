@@ -6,15 +6,27 @@
  */
 
 import { compact, uniq } from 'lodash';
-import { MergedServiceEntities, ServiceEntities } from '../types';
+import type { EntityLatestServiceRaw } from '../types';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { EntityDataStreamType, EntityMetrics } from '../../../../common/entities/types';
+
+export interface MergedServiceEntity {
+  serviceName: string;
+  agentName: AgentName;
+  dataStreamTypes: EntityDataStreamType[];
+  environments: string[];
+  metrics: EntityMetrics[];
+  hasLogMetrics: boolean;
+}
 
 export function mergeEntities({
   entities,
 }: {
-  entities: ServiceEntities[];
-}): MergedServiceEntities[] {
+  entities: EntityLatestServiceRaw[];
+}): MergedServiceEntity[] {
   const mergedEntities = entities.reduce((map, current) => {
-    const key = current.serviceName;
+    const key = current.service.name;
     if (map.has(key)) {
       const existingEntity = map.get(key);
       map.set(key, mergeFunc(current, existingEntity));
@@ -27,25 +39,33 @@ export function mergeEntities({
   return [...mergedEntities.values()];
 }
 
-function mergeFunc(entity: ServiceEntities, existingEntity?: MergedServiceEntities) {
+function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServiceEntity) {
+  const hasLogMetrics = isFiniteNumber(entity.entity.metrics.logRate)
+    ? entity.entity.metrics.logRate > 0
+    : false;
+
+  const commonEntityFields = {
+    serviceName: entity.service.name,
+    agentName: entity.agent.name[0],
+    lastSeenTimestamp: entity.entity.lastSeenTimestamp,
+  };
+
   if (!existingEntity) {
     return {
-      serviceName: entity.serviceName,
-      agentName: entity.agentName,
-      signalTypes: entity.signalTypes,
-      environments: compact([entity.entity.identityFields.service?.environment]),
-      latestTimestamp: entity.entity.latestTimestamp,
+      ...commonEntityFields,
+      dataStreamTypes: entity.data_stream.type,
+      environments: compact([entity?.service.environment]),
       metrics: [entity.entity.metrics],
+      hasLogMetrics,
     };
   }
   return {
-    serviceName: entity.serviceName,
-    agentName: entity.agentName,
-    signalTypes: uniq(compact([...(existingEntity?.signalTypes ?? []), ...entity.signalTypes])),
-    environments: uniq(
-      compact([...existingEntity?.environments, entity.entity.identityFields?.service?.environment])
+    ...commonEntityFields,
+    dataStreamTypes: uniq(
+      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity.data_stream.type])
     ),
-    latestTimestamp: entity.entity.latestTimestamp,
+    environments: uniq(compact([...existingEntity?.environments, entity?.service.environment])),
     metrics: [...existingEntity?.metrics, entity.entity.metrics],
+    hasLogMetrics: hasLogMetrics || existingEntity.hasLogMetrics,
   };
 }

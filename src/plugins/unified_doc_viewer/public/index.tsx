@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -28,5 +29,8 @@ export const JsonCodeEditor = withSuspense<JsonCodeEditorProps>(
 export { useEsDocSearch } from './hooks';
 export { UnifiedDocViewer } from './components/lazy_doc_viewer';
 export { UnifiedDocViewerFlyout } from './components/lazy_doc_viewer_flyout';
+
+export type { LogsOverviewProps as UnifiedDocViewerLogsOverviewProps } from './components/doc_viewer_logs_overview/logs_overview';
+export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_overview';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

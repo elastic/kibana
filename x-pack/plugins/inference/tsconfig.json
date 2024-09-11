@@ -1,0 +1,39 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "typings/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "scripts/**/*",
+    ".storybook/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/actions-plugin",
+    "@kbn/config-schema",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-ast",
+    "@kbn/dev-cli-runner",
+    "@kbn/babel-register",
+    "@kbn/expect",
+    "@kbn/tooling-log",
+    "@kbn/es-types",
+    "@kbn/field-types",
+    "@kbn/expressions-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/repo-info"
+  ]
+}

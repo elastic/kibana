@@ -9,7 +9,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL, TIMELINE_COPY_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 
@@ -70,7 +70,7 @@ const timelineData = {
     filterQuery: null,
   },
   title: '',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: {
@@ -84,7 +84,7 @@ const timelineData = {
       sortDirection: 'desc',
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
   savedSearchId: null,
 };
 const mockPatchTimelineResponse = {
@@ -105,7 +105,7 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
       ...timelineData,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     };
     const mockDraftResponse = {
       data: {
@@ -177,7 +177,7 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
       ...timelineData,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     };
 
     const version = null;
@@ -388,7 +388,7 @@ describe('exportSelectedTimeline', () => {
 });
 
 describe('getDraftTimeline', () => {
-  const timelineType = { timelineType: TimelineType.default };
+  const timelineType = { timelineType: TimelineTypeEnum.default };
   const getMock = jest.fn();
 
   beforeAll(() => {
@@ -426,7 +426,7 @@ describe('cleanDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices - timeline', () => {
-    const args = { timelineType: TimelineType.default };
+    const args = { timelineType: TimelineTypeEnum.default };
 
     api.cleanDraftTimeline(args);
 
@@ -438,7 +438,7 @@ describe('cleanDraftTimeline', () => {
 
   test('should pass correct args to KibanaServices - timeline template', () => {
     const args = {
-      timelineType: TimelineType.template,
+      timelineType: TimelineTypeEnum.template,
       templateTimelineId: 'test-123',
       templateTimelineVersion: 1,
     };

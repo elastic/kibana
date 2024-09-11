@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { KueryOrUndefined, Id } from '../model/schema/common_attributes.gen';
 
@@ -26,6 +26,3 @@ export const GetAgentStatusRequestQueryParams = z.object({
   kuery: KueryOrUndefined.optional(),
   policyId: Id.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

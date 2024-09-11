@@ -6,9 +6,8 @@
  */
 
 import type { ComponentProps, FC } from 'react';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { AppMountParameters, HttpStart } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { App } from './components/stack_app';
@@ -59,16 +58,17 @@ export interface SearchHomepagePluginStart {
 }
 
 export interface SearchHomepageAppPluginStartDependencies {
-  history: AppMountParameters['history'];
-  usageCollection?: UsageCollectionStart;
-  share: SharePluginStart;
   console?: ConsolePluginStart;
+  share: SharePluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
-export interface SearchHomepageServicesContext {
-  http: HttpStart;
-  share: SharePluginStart;
-  cloud?: CloudSetup;
-  usageCollection?: UsageCollectionStart;
-  console?: ConsolePluginStart;
+export interface SearchHomepageServicesContext extends SearchHomepageAppPluginStartDependencies {
+  history: AppMountParameters['history'];
+}
+
+export interface AppUsageTracker {
+  click: (eventName: string | string[]) => void;
+  count: (eventName: string | string[]) => void;
+  load: (eventName: string | string[]) => void;
 }

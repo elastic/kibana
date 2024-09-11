@@ -136,7 +136,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -869,7 +869,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }) => void; onSelectRange: (data: { table: ",
+          ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }) => void; onSelectRange: (data: { table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -885,7 +885,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+          ", \"columns\" | \"rows\">; cells: { column: number; row: number; }[]; relation?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1671,7 +1671,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"right\" | \"left\" | \"top\" | \"bottom\")[]"
+                      "(\"right\" | \"top\" | \"bottom\" | \"left\")[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,

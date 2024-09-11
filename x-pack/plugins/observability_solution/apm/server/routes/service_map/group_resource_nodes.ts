@@ -44,7 +44,7 @@ export interface GroupResourceNodesResponse {
 export function groupResourceNodes(responseData: {
   elements: ConnectionElement[];
 }): GroupResourceNodesResponse {
-  type ElementDefinition = ValuesType<typeof responseData['elements']>;
+  type ElementDefinition = ValuesType<(typeof responseData)['elements']>;
   const isEdge = (el: ElementDefinition) => Boolean(el.data.source && el.data.target);
   const isNode = (el: ElementDefinition) => !isEdge(el);
   const isElligibleGroupNode = (el: ElementDefinition) => {

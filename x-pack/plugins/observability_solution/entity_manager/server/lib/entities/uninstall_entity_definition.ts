@@ -13,10 +13,16 @@ import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIndices } from './delete_index';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
+
 import {
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from './stop_and_delete_transform';
+  generateHistoryIndexTemplateId,
+  generateLatestIndexTemplateId,
+} from './helpers/generate_component_id';
+import { deleteTemplate } from '../manage_index_templates';
+
+import { stopTransforms } from './stop_transforms';
+
+import { deleteTransforms } from './delete_transforms';
 
 export async function uninstallEntityDefinition({
   definition,
@@ -31,14 +37,24 @@ export async function uninstallEntityDefinition({
   logger: Logger;
   deleteData?: boolean;
 }) {
-  await stopAndDeleteHistoryTransform(esClient, definition, logger);
-  await stopAndDeleteLatestTransform(esClient, definition, logger);
-  await deleteHistoryIngestPipeline(esClient, definition, logger);
-  await deleteLatestIngestPipeline(esClient, definition, logger);
-  await deleteEntityDefinition(soClient, definition, logger);
+  await stopTransforms(esClient, definition, logger);
+  await deleteTransforms(esClient, definition, logger);
+
+  await Promise.all([
+    deleteHistoryIngestPipeline(esClient, definition, logger),
+    deleteLatestIngestPipeline(esClient, definition, logger),
+  ]);
+
   if (deleteData) {
     await deleteIndices(esClient, definition, logger);
   }
+
+  await Promise.all([
+    deleteTemplate({ esClient, logger, name: generateHistoryIndexTemplateId(definition) }),
+    deleteTemplate({ esClient, logger, name: generateLatestIndexTemplateId(definition) }),
+  ]);
+
+  await deleteEntityDefinition(soClient, definition);
 }
 
 export async function uninstallBuiltInEntityDefinitions({

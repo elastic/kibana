@@ -33,7 +33,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: ADMIN_CONSOLE,
+  name: `logs-${ADMIN_CONSOLE}@template`,
   template: {
     ...template,
     composed_of: components.map(({ name }) => name),

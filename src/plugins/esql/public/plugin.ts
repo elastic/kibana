@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
@@ -12,6 +13,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
@@ -24,6 +26,7 @@ interface EsqlPluginStart {
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 interface EsqlPluginSetup {
@@ -44,11 +47,11 @@ export class EsqlPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions }: EsqlPluginStart
+    { dataViews, expressions, data, uiActions, fieldsMetadata }: EsqlPluginStart
   ): void {
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
-    setKibanaServices(core, dataViews, expressions, this.indexManagement);
+    setKibanaServices(core, dataViews, expressions, this.indexManagement, fieldsMetadata);
   }
 
   public stop() {}

@@ -7,10 +7,26 @@
 
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
+export enum MessageRole {
+  'user' = 'human',
+  'assistant' = 'assistant',
+  'system' = 'system',
+}
+
 interface ModelField {
   field: string;
   model_id: string;
   indices: string[];
+}
+
+interface ELSERQueryFields extends ModelField {
+  sparse_vector: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: MessageRole;
+  content: string;
 }
 
 interface SemanticField {
@@ -21,7 +37,7 @@ interface SemanticField {
 }
 
 export interface QuerySourceFields {
-  elser_query_fields: ModelField[];
+  elser_query_fields: ELSERQueryFields[];
   dense_vector_query_fields: ModelField[];
   bm25_query_fields: string[];
   source_fields: string[];

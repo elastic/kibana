@@ -25,13 +25,13 @@ import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { InsightsSection } from './insights_section';
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
+import { useAlertPrevalence } from '../../shared/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
+jest.mock('../../shared/hooks/use_alert_prevalence');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

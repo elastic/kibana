@@ -7,7 +7,7 @@
 
 import { metricToFormat } from './metric_to_format';
 import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
-import { InfraFormatterType } from '../../../../../lib/lib';
+import { InfraFormatterType } from '../../../../../common/inventory/types';
 describe('metricToFormat()', () => {
   it('should just work for numeric metrics', () => {
     const metric: MetricsExplorerMetric = { aggregation: 'avg', field: 'system.load.1' };

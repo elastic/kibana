@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { i18n } from '@kbn/i18n';
 import { distance } from 'fastest-levenshtein';
 import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
@@ -112,7 +114,7 @@ async function getSpellingActionForColumns(
   }
   // @TODO add variables support
   const possibleFields = await getSpellingPossibilities(async () => {
-    const availableFields = await getFieldsByType('any');
+    const availableFields = (await getFieldsByType('any')).map(({ name }) => name);
     const enrichPolicies = ast.filter(({ name }) => name === 'enrich');
     if (enrichPolicies.length) {
       const enrichPolicyNames = enrichPolicies.flatMap(({ args }) =>
@@ -209,7 +211,7 @@ async function getQuotableActionForColumns(
         )
       );
     } else {
-      const availableFields = new Set(await getFieldsByType('any'));
+      const availableFields = new Set((await getFieldsByType('any')).map(({ name }) => name));
       if (availableFields.has(errorText) || availableFields.has(solution)) {
         actions.push(
           createAction(

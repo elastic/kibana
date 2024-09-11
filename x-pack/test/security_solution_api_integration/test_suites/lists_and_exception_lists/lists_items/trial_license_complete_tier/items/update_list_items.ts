@@ -18,6 +18,7 @@ import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/sch
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
 import { getUpdateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_list_item_schema.mock';
 
+import TestAgent from 'supertest/lib/agent';
 import {
   createListsIndex,
   deleteListsIndex,
@@ -26,12 +27,17 @@ import {
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
   const log = getService('log');
   const retry = getService('retry');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_list_items', () => {
+  describe('@ess @serverless @serverlessQA update_list_items', () => {
+    let supertest: TestAgent;
+
+    before(async () => {
+      supertest = await utils.createSuperTest();
+    });
+
     describe('update list items', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

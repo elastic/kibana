@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent, FC } from 'react';
@@ -156,6 +157,11 @@ export interface CodeEditorProps {
    */
   accessibilityOverlayEnabled?: boolean;
 
+  /**
+   * Enables the Search bar functionality in the editor. Disabled by default.
+   */
+  enableFindAction?: boolean;
+
   dataTestSubj?: string;
 }
 
@@ -188,6 +194,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
   accessibilityOverlayEnabled = true,
+  enableFindAction,
   dataTestSubj,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
@@ -375,6 +382,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           monaco.languages.registerCodeActionProvider(languageId, codeActions);
         }
       });
+
+      monaco.editor.addKeybindingRule({
+        // eslint-disable-next-line no-bitwise
+        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF,
+        command: enableFindAction ? 'actions.find' : null,
+      });
     },
     [
       overrideEditorWillMount,
@@ -385,6 +398,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       hoverProvider,
       codeActions,
       languageConfiguration,
+      enableFindAction,
     ]
   );
 

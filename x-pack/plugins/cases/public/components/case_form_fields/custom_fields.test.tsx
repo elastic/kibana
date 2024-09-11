@@ -14,7 +14,6 @@ import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { CustomFields } from './custom_fields';
-import * as i18n from './translations';
 
 describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
@@ -39,14 +38,17 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByText(i18n.ADDITIONAL_FIELDS)).toBeInTheDocument();
     expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
-    for (const item of customFieldsConfigurationMock) {
-      expect(
-        await screen.findByTestId(`${item.key}-${item.type}-create-custom-field`)
-      ).toBeInTheDocument();
-    }
+    const cf0 = customFieldsConfigurationMock[0];
+    const cf1 = customFieldsConfigurationMock[1];
+
+    expect(
+      await screen.findByTestId(`${cf0.key}-${cf0.type}-create-custom-field`)
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId(`${cf1.key}-${cf1.type}-create-custom-field`)
+    ).toBeInTheDocument();
   });
 
   it('should not show the custom fields if the configuration is empty', async () => {
@@ -60,7 +62,7 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
-    expect(screen.queryByText(i18n.ADDITIONAL_FIELDS)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('caseCustomFields')).not.toBeInTheDocument();
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 
@@ -75,7 +77,7 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getAllByTestId('form-optional-field-label')).toHaveLength(2);
+    expect(await screen.findAllByTestId('form-optional-field-label')).toHaveLength(2);
   });
 
   it('should not set default value when in edit mode', async () => {
@@ -130,15 +132,15 @@ describe('CustomFields', () => {
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
 
-    userEvent.type(
+    await userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

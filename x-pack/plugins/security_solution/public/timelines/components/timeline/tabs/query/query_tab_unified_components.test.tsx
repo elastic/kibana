@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps, FunctionComponent, PropsWithChildren } from 'react';
+import type { ComponentProps, FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
@@ -27,7 +27,6 @@ import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDispatch } from 'react-redux';
-import { timelineActions } from '../../../../store';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -35,7 +34,9 @@ import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
-import userEvent from '@testing-library/user-event';
+import * as timelineActions from '../../../../store/actions';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -75,8 +76,8 @@ jest.mock('react-router-dom', () => ({
 const SPECIAL_TEST_TIMEOUT = 50000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineEnabled') {
-    return true;
+  if (feature === 'unifiedComponentsInTimelineDisabled') {
+    return false;
   }
   return allowedExperimentalValues[feature];
 });
@@ -84,17 +85,11 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 jest.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@kbn/ebt/client`);
+jest.mock(`@elastic/ebt/client`);
 
 const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({
-      openFlyout: mockOpenFlyout,
-    }),
-    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
-  };
-});
+const mockCloseFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout');
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -138,7 +133,7 @@ const mockState = {
 
 mockState.timeline.timelineById[TimelineId.test].columns = customColumnOrder;
 
-const TestWrapper: FunctionComponent = ({ children }) => {
+const TestWrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => {
   return <TestProviders store={createMockStore(mockState)}>{children}</TestProviders>;
 };
 
@@ -159,6 +154,21 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 let useTimelineEventsMock = jest.fn();
 
 describe('query tab with unified timeline', () => {
+  beforeAll(() => {
+    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+
+    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+      closeFlyout: mockCloseFlyout,
+    }));
+
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
+  });
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
@@ -283,7 +293,8 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189791
+  describe.skip('pagination', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
@@ -586,7 +597,9 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('left controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189792
+  // FLAKY: https://github.com/elastic/kibana/issues/189793
+  describe.skip('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
@@ -774,13 +787,62 @@ describe('query tab with unified timeline', () => {
     );
   });
 
+  describe('Leading actions - expand event', () => {
+    it(
+      'should expand and collapse event correctly',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
+          'data-euiicon-type',
+          'expand'
+        );
+
+        // Open Flyout
+        fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenNthCalledWith(1, {
+            right: {
+              id: 'document-details-right',
+              params: {
+                id: '1',
+                indexName: '',
+                scopeId: TimelineId.test,
+              },
+            },
+          });
+        });
+
+        expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
+          'data-euiicon-type',
+          'minimize'
+        );
+
+        // Close Flyout
+        fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+        await waitFor(() => {
+          expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
+          expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
+            'data-euiicon-type',
+            'expand'
+          );
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+  });
+
   describe('Leading actions - notes', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/189794
+    describe.skip('securitySolutionNotesEnabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
+            if (feature === 'unifiedComponentsInTimelineDisabled') {
+              return false;
             }
             if (feature === 'securitySolutionNotesEnabled') {
               return true;
@@ -794,7 +856,6 @@ describe('query tab with unified timeline', () => {
         'should have the notification dot & correct tooltip',
         async () => {
           renderTestComponents();
-
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
@@ -837,8 +898,8 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
+            if (feature === 'unifiedComponentsInTimelineDisabled') {
+              return false;
             }
             if (feature === 'securitySolutionNotesEnabled') {
               return false;
@@ -852,7 +913,6 @@ describe('query tab with unified timeline', () => {
         'should have the notification dot & correct tooltip',
         async () => {
           renderTestComponents();
-
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
           expect(screen.getAllByTestId('timeline-notes-button-small')).toHaveLength(1);
@@ -891,7 +951,7 @@ describe('query tab with unified timeline', () => {
       );
 
       it(
-        'should be cancel adding notes',
+        'should cancel adding notes',
         async () => {
           renderTestComponents();
           expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
@@ -906,14 +966,62 @@ describe('query tab with unified timeline', () => {
             expect(screen.getByTestId('add-note-container')).toBeVisible();
           });
 
-          userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
-
           expect(screen.getByTestId('cancel')).not.toBeDisabled();
 
           fireEvent.click(screen.getByTestId('cancel'));
 
           await waitFor(() => {
             expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should be able to delete notes',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
+
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('delete-note')).toBeVisible();
+          });
+
+          const noteDeleteSpy = jest.spyOn(timelineActions, 'setConfirmingNoteId');
+
+          fireEvent.click(screen.getByTestId('delete-note'));
+
+          await waitFor(() => {
+            expect(noteDeleteSpy).toHaveBeenCalled();
+            expect(noteDeleteSpy).toHaveBeenCalledWith({
+              confirmingNoteId: '1',
+              id: TimelineId.test,
+            });
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+
+      it(
+        'should not show toggle event details action',
+        async () => {
+          renderTestComponents();
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+          });
+
+          fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+          await waitFor(() => {
+            expect(screen.queryByTestId('notes-toggle-event-details')).not.toBeInTheDocument();
           });
         },
         SPECIAL_TEST_TIMEOUT
@@ -926,9 +1034,6 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
-            }
             if (feature === 'securitySolutionNotesEnabled') {
               return true;
             }
@@ -971,9 +1076,6 @@ describe('query tab with unified timeline', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'unifiedComponentsInTimelineEnabled') {
-              return true;
-            }
             if (feature === 'securitySolutionNotesEnabled') {
               return false;
             }

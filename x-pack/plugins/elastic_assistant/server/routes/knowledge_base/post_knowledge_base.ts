@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
@@ -18,10 +16,8 @@ import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { getKbResource } from './get_kb_resource';
-import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
+import { isV2KnowledgeBaseEnabled } from '../helpers';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
@@ -62,94 +58,43 @@ export const postKnowledgeBaseRoute = (
         response
       ): Promise<IKibanaResponse<CreateKnowledgeBaseResponse>> => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = ctx.elasticAssistant.logger;
         const telemetry = assistantContext.telemetry;
         const elserId = await getElser();
-        const core = await context.core;
+        const core = ctx.core;
         const esClient = core.elasticsearch.client.asInternalUser;
         const soClient = core.savedObjects.getClient();
 
-        const pluginName = getPluginNameFromRequest({
-          request,
-          defaultPluginName: DEFAULT_PLUGIN_NAME,
-          logger,
-        });
-        const enableKnowledgeBaseByDefault =
-          assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+        // FF Check for V2 KB
+        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         try {
-          // Code path for when `assistantKnowledgeBaseByDefault` FF is enabled
-          if (enableKnowledgeBaseByDefault) {
-            const knowledgeBaseDataClient =
-              await assistantContext.getAIAssistantKnowledgeBaseDataClient(true);
-            if (!knowledgeBaseDataClient) {
-              return response.custom({ body: { success: false }, statusCode: 500 });
-            }
-
-            // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
-            const esStore = new ElasticsearchStore(
-              esClient,
-              knowledgeBaseDataClient.indexTemplateAndPattern.alias,
-              logger,
-              telemetry,
-              elserId,
-              getKbResource(request),
-              knowledgeBaseDataClient
-            );
-
-            await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, soClient });
-
-            return response.ok({ body: { success: true } });
+          const knowledgeBaseDataClient =
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled);
+          if (!knowledgeBaseDataClient) {
+            return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
-          const kbResource = getKbResource(request);
+          // Continue to use esStore for loading esql docs until `semantic_text` is available and we can test the new chunking strategy
           const esStore = new ElasticsearchStore(
             esClient,
-            KNOWLEDGE_BASE_INDEX_PATTERN,
+            knowledgeBaseDataClient.indexTemplateAndPattern.alias,
             logger,
             telemetry,
             elserId,
-            kbResource
+            getKbResource(request),
+            knowledgeBaseDataClient
           );
 
-          // Pre-check on index/pipeline
-          let indexExists = await esStore.indexExists();
-          let pipelineExists = await esStore.pipelineExists();
+          await knowledgeBaseDataClient.setupKnowledgeBase({ esStore, soClient });
 
-          // Load if not exists
-          if (!pipelineExists) {
-            pipelineExists = await esStore.createPipeline();
-          }
-          if (!indexExists) {
-            indexExists = await esStore.createIndex();
-          }
-
-          // If specific resource is requested, load it
-          if (kbResource === ESQL_RESOURCE) {
-            const esqlExists = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
-            if (!esqlExists) {
-              const loadedKnowledgeBase = await loadESQL(esStore, logger);
-              return response.custom({ body: { success: loadedKnowledgeBase }, statusCode: 201 });
-            } else {
-              return response.ok({ body: { success: true } });
-            }
-          }
-
-          const wasSuccessful = indexExists && pipelineExists;
-
-          if (wasSuccessful) {
-            return response.ok({ body: { success: true } });
-          } else {
-            return response.custom({ body: { success: false }, statusCode: 500 });
-          }
-        } catch (err) {
-          logger.log(err);
-          const error = transformError(err);
-
+          return response.ok({ body: { success: true } });
+        } catch (error) {
           return resp.error({
             body: error.message,
-            statusCode: error.statusCode,
+            statusCode: 500,
           });
         }
       }

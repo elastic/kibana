@@ -12,21 +12,21 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import {
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformPromptsBulkActionRequestBody,
+  PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 export const bulkUpdatePrompts = async (
   http: HttpSetup,
-  prompts: PerformBulkActionRequestBody,
+  prompts: PerformPromptsBulkActionRequestBody,
   toasts?: IToasts
 ) => {
   try {
-    const result = await http.fetch<PerformBulkActionResponse>(
+    const result = await http.fetch<PerformPromptsBulkActionResponse>(
       ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify(prompts),
       }
     );
@@ -47,7 +47,13 @@ export const bulkUpdatePrompts = async (
     toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
       title: i18n.translate('xpack.elasticAssistant.prompts.bulkActionspromptsError', {
         defaultMessage: 'Error updating prompts {error}',
-        values: { error },
+        values: {
+          error: error.message
+            ? Array.isArray(error.message)
+              ? error.message.join(',')
+              : error.message
+            : error,
+        },
       }),
     });
   }

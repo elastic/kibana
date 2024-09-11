@@ -40,6 +40,18 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return div.getAttribute('title');
     },
 
+    async getAssetDetailsKPIMissingFieldMessageExists(type: string) {
+      const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
+      const badge = await element.findByTestSubject('lens-message-list-trigger');
+
+      await badge.click();
+
+      await testSubjects.existOrFail('lens-message-list-warning');
+      await testSubjects.existOrFail('infraLensCustomErrorHanlderText');
+
+      await badge.click();
+    },
+
     async overviewAlertsTitleExists() {
       return testSubjects.existOrFail('infraAssetDetailsAlertsTitle');
     },
@@ -168,7 +180,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async clickAddMetadataFilter() {
-      return testSubjects.click('infraAssetDetailsMetadataAddFilterButton');
+      // Make this selector tied to the field to avoid flakiness
+      // https://github.com/elastic/kibana/issues/191565
+      return testSubjects.click('infraAssetDetailsMetadataField.host.name');
     },
 
     async clickRemoveMetadataFilter() {
@@ -190,8 +204,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getMetadataAppliedFilter() {
       const filter = await testSubjects.find(
         `filter-badge-${stringHash(
-          'host.architecture: arm64'
-        )} filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0`
+          'host.name: host-1'
+        )} filter filter-enabled filter-key-host.name filter-value-host-1 filter-unpinned filter-id-0`
       );
       return filter.getVisibleText();
     },
@@ -249,6 +263,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
         'infraAssetDetailsProcessesSummaryTableItem'
       );
       return processesListElements[index].findByCssSelector('dt');
+    },
+
+    async processesContentExist() {
+      return testSubjects.existOrFail('infraAssetDetailsProcessesTabContent');
     },
 
     async getProcessesTabContentTotalValue() {
@@ -339,6 +357,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
 
       return testSubjects.click(buttonSubject);
+    },
+
+    // Callouts
+    async legacyMetricAlertCalloutExists() {
+      return testSubjects.exists('infraAssetDetailsLegacyMetricAlertCallout');
     },
   };
 }

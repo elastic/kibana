@@ -75,6 +75,11 @@ export default function Expressions(props: Props) {
     },
   } = useKibana().services;
 
+  const hasGroupBy = useMemo<boolean>(
+    () => !!ruleParams.groupBy && ruleParams.groupBy.length > 0,
+    [ruleParams.groupBy]
+  );
+
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
@@ -82,6 +87,10 @@ export default function Expressions(props: Props) {
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const [paramsWarning, setParamsWarning] = useState<string>();
+  const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
+    (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
+      (!hasGroupBy && !!ruleParams.alertOnNoData)
+  );
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -177,11 +186,15 @@ export default function Expressions(props: Props) {
     }
 
     if (typeof ruleParams.alertOnNoData === 'undefined') {
-      setRuleParams('alertOnNoData', true);
+      preFillAlertOnNoData();
     }
     if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
       preFillAlertOnGroupDisappear();
     }
+    setIsNoDataChecked(
+      (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
+        (!hasGroupBy && !!ruleParams.alertOnNoData)
+    );
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSelectDataView = useCallback(
@@ -206,7 +219,7 @@ export default function Expressions(props: Props) {
   );
 
   const updateParams = useCallback(
-    (id, e: MetricExpression) => {
+    (id: any, e: MetricExpression) => {
       const ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       ruleCriteria[id] = e;
       setRuleParams('criteria', ruleCriteria);
@@ -250,9 +263,12 @@ export default function Expressions(props: Props) {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
+      const hasGroup = !!group && group.length > 0;
       setRuleParams('groupBy', group && group.length ? group : '');
+      setRuleParams('alertOnGroupDisappear', hasGroup && isNoDataChecked);
+      setRuleParams('alertOnNoData', !hasGroup && isNoDataChecked);
     },
-    [setRuleParams]
+    [setRuleParams, isNoDataChecked]
   );
 
   const emptyError = useMemo(() => {
@@ -314,19 +330,23 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
+  const preFillAlertOnNoData = useCallback(() => {
+    const md = metadata;
+    if (md && typeof md.currentOptions?.alertOnNoData !== 'undefined') {
+      setRuleParams('alertOnNoData', md.currentOptions.alertOnNoData);
+    } else {
+      setRuleParams('alertOnNoData', false);
+    }
+  }, [metadata, setRuleParams]);
+
   const preFillAlertOnGroupDisappear = useCallback(() => {
     const md = metadata;
     if (md && typeof md.currentOptions?.alertOnGroupDisappear !== 'undefined') {
       setRuleParams('alertOnGroupDisappear', md.currentOptions.alertOnGroupDisappear);
     } else {
-      setRuleParams('alertOnGroupDisappear', true);
+      setRuleParams('alertOnGroupDisappear', false);
     }
   }, [metadata, setRuleParams]);
-
-  const hasGroupBy = useMemo(
-    () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
-    [ruleParams.groupBy]
-  );
 
   if (paramsError) {
     return (
@@ -540,30 +560,55 @@ export default function Expressions(props: Props) {
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
+        data-test-subj="thresholdRuleAlertOnNoDataCheckbox"
         label={
           <>
             {i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.alertOnGroupDisappear',
               {
-                defaultMessage: 'Alert me if a group stops reporting data',
+                defaultMessage: "Alert me if there's no data",
               }
             )}{' '}
             <EuiIconTip
               type="questionInCircle"
               color="subdued"
-              content={i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
-                {
-                  defaultMessage:
-                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                }
-              )}
+              content={
+                hasGroupBy
+                  ? i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
+                      {
+                        defaultMessage:
+                          'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText',
+                      {
+                        defaultMessage:
+                          'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                      }
+                    )
+              }
             />
           </>
         }
-        disabled={!hasGroupBy}
-        checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
-        onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
+        checked={isNoDataChecked}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setIsNoDataChecked(checked);
+          if (!checked) {
+            setRuleParams('alertOnGroupDisappear', false);
+            setRuleParams('alertOnNoData', false);
+          } else {
+            if (hasGroupBy) {
+              setRuleParams('alertOnGroupDisappear', true);
+              setRuleParams('alertOnNoData', false);
+            } else {
+              setRuleParams('alertOnGroupDisappear', false);
+              setRuleParams('alertOnNoData', true);
+            }
+          }
+        }}
       />
       <EuiSpacer size="m" />
     </>

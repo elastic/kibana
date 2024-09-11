@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { parse } from 'query-string';
 import { RouteComponentProps } from 'react-router-dom';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
+import { INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const RedirectToInventory: React.FC<RouteComponentProps> = ({ location }) => {

@@ -11,9 +11,11 @@ import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 
 export function getKibanaUrl(coreSetup: CoreSetup, cloudSetup?: CloudSetup) {
   return (
+    // falls back to local network binding
+    // then cloud id
     coreSetup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
-    cloudSetup?.kibanaUrl ?? // then cloud id
-    getFallbackKibanaUrl(coreSetup) // falls back to local network binding
+    cloudSetup?.kibanaUrl ??
+    getFallbackKibanaUrl(coreSetup)
   );
 }
 

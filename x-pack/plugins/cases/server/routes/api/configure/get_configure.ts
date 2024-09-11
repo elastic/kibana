@@ -17,7 +17,9 @@ export const getCaseConfigureRoute = createCasesRoute({
     access: 'public',
     summary: 'Get case settings',
     description:
-      'Retrieves setting details such as the closure type, custom fields, templates, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.',
+      'Retrieves setting details such as the closure type, custom fields, templates, and the default connector for cases.',
+    // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

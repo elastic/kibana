@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { isCompatible } from './is_compatible';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
-import { mockLensApi } from './mocks';
+import { getMockLensApi } from './mocks';
 
 jest.mock('../../../../common/utils/owner', () => ({
   getCaseOwnerByAppId: () => 'securitySolution',
@@ -37,7 +37,7 @@ describe('isCompatible', () => {
 
   test('should return false if error embeddable', async () => {
     const errorApi = {
-      ...mockLensApi,
+      ...getMockLensApi(),
       blockingError: new BehaviorSubject<Error | undefined>(new Error('Simulated blocking error')),
     };
     expect(isCompatible(errorApi, appId, mockCoreStart)).toBe(false);
@@ -49,10 +49,10 @@ describe('isCompatible', () => {
 
   test('should return false if no permission', async () => {
     mockCasePermissions.mockReturnValue({ create: false, update: false });
-    expect(isCompatible(mockLensApi, appId, mockCoreStart)).toBe(false);
+    expect(isCompatible(getMockLensApi(), appId, mockCoreStart)).toBe(false);
   });
 
   test('should return true if is lens embeddable', async () => {
-    expect(isCompatible(mockLensApi, appId, mockCoreStart)).toBe(true);
+    expect(isCompatible(getMockLensApi(), appId, mockCoreStart)).toBe(true);
   });
 });

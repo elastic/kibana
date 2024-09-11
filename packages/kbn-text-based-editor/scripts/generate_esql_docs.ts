@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as recast from 'recast';
@@ -20,20 +21,36 @@ import { functions } from '../src/esql_documentation_sections';
 
 function loadFunctionDocs(pathToElasticsearch: string) {
   // Define the directory path
-  const dirPath = path.join(pathToElasticsearch, '/docs/reference/esql/functions/kibana/docs');
+  const definitionsPath = path.join(
+    pathToElasticsearch,
+    '/docs/reference/esql/functions/kibana/definition'
+  );
+  const docsPath = path.join(pathToElasticsearch, '/docs/reference/esql/functions/kibana/docs');
 
   // Read the directory
-  const files = fs.readdirSync(dirPath);
+  const docsFiles = fs.readdirSync(docsPath);
+
+  const ESFunctionDefinitions = fs
+    .readdirSync(definitionsPath)
+    .map((file) => JSON.parse(fs.readFileSync(`${definitionsPath}/${file}`, 'utf-8')));
 
   // Initialize an empty map
   const functionMap = new Map<string, string>();
 
   // Iterate over each file in the directory
-  for (const file of files) {
+  for (const file of docsFiles) {
     // Ensure we only process .md files
     if (path.extname(file) === '.md') {
+      if (
+        !ESFunctionDefinitions.find(
+          (def) => def.name === path.basename(file, '.md') && def.type === 'eval'
+        )
+      ) {
+        // Exclude non-scalar functions (for now)
+        continue;
+      }
       // Read the file content
-      const content = fs.readFileSync(path.join(dirPath, file), 'utf-8');
+      const content = fs.readFileSync(path.join(docsPath, file), 'utf-8');
 
       // Get the function name from the file name by removing the .md extension
       const functionName = path.basename(file, '.md');
