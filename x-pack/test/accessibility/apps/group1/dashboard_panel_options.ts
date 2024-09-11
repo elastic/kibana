@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel - save to library', async () => {
       await dashboardPanelActions.openContextMenuMorePanel(header);
-      await testSubjects.click('embeddablePanelAction-legacySaveToLibrary');
+      await testSubjects.click('embeddablePanelAction-saveToLibrary');
       await a11y.testAppSnapshot();
       await testSubjects.click('saveCancelButton');
     });

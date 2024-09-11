@@ -343,6 +343,20 @@
             "path": "x-pack/packages/kbn-cloud-security-posture-common/types/status.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.BaseCspSetupStatus.hasVulnerabilitiesFindings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasVulnerabilitiesFindings",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture-common/types/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

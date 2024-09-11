@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
+  const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
 
   describe('dashboard empty state', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       log.debug('load kibana with no data');
       await kibanaServer.importExport.unload(kbnDirectory);
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -35,11 +35,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Opens the integrations page when there is no data', async () => {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
       await addIntegrations.click();
-      await PageObjects.common.waitUntilUrlIncludes('integrations/browse');
+      await common.waitUntilUrlIncludes('integrations/browse');
     });
 
     it('adds a new data view when no data views', async () => {
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
       // create the new data view from the dashboards/create route in order to test that the dashboard is loaded properly as soon as the data view is created...
-      await PageObjects.common.navigateToApp('dashboards', { hash: '/create' });
+      await common.navigateToApp('dashboards', { hash: '/create' });
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });
