@@ -50,7 +50,7 @@ const DetailsPanelComponent = React.memo(({ resolverComponentInstanceID }: Detai
       </div>
     </div>
   ) : resolverTreeHasNodes ? (
-    <PanelRouter id={resolverComponentInstanceID} />
+    <PanelRouter id={resolverComponentInstanceID} isSplitPanel />
   ) : (
     <ResolverNoProcessEvents />
   );

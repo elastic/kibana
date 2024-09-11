@@ -20,7 +20,13 @@ import type { State } from '../../../common/store/types';
  */
 
 // eslint-disable-next-line react/display-name
-export const PanelRouter = memo(function ({ id }: { id: string }) {
+export const PanelRouter = memo(function ({
+  id,
+  isSplitPanel,
+}: {
+  id: string;
+  isSplitPanel: boolean;
+}) {
   const params: PanelViewAndParameters = useSelector((state: State) =>
     selectors.panelViewAndParameters(state.analyzer[id])
   );
@@ -34,6 +40,7 @@ export const PanelRouter = memo(function ({ id }: { id: string }) {
         id={id}
         nodeID={params.panelParameters.nodeID}
         eventCategory={params.panelParameters.eventCategory}
+        isSplitPanel={isSplitPanel}
       />
     );
   } else if (params.panelView === 'eventDetail') {

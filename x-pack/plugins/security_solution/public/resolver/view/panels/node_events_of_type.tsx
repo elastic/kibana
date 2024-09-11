@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -30,7 +31,18 @@ import { useFormattedDate } from './use_formatted_date';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
 import { userRequestedAdditionalRelatedEvents } from '../../store/data/action';
+import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 
+const ANALYZER_PREVIEW_BANNER = {
+  title: i18n.translate(
+    'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
+    {
+      defaultMessage: 'Preview analyzer panels',
+    }
+  ),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
@@ -39,10 +51,12 @@ export const NodeEventsInCategory = memo(function ({
   id,
   nodeID,
   eventCategory,
+  isSplitPanel,
 }: {
   id: string;
   nodeID: string;
   eventCategory: string;
+  isSplitPanel: boolean;
 }) {
   const node = useSelector((state: State) => selectors.graphNodeForID(state.analyzer[id])(nodeID));
   const isLoading = useSelector((state: State) =>
@@ -84,7 +98,12 @@ export const NodeEventsInCategory = memo(function ({
             nodeID={nodeID}
           />
           <EuiSpacer size="l" />
-          <NodeEventList id={id} eventCategory={eventCategory} nodeID={nodeID} />
+          <NodeEventList
+            id={id}
+            eventCategory={eventCategory}
+            nodeID={nodeID}
+            isSplitPanel={isSplitPanel}
+          />
         </div>
       )}
     </>
@@ -100,15 +119,19 @@ const NodeEventsListItem = memo(function ({
   event,
   nodeID,
   eventCategory,
+  isSplitPanel,
 }: {
   id: string;
   event: SafeResolverEvent;
   nodeID: string;
   eventCategory: string;
+  isSplitPanel: boolean;
 }) {
   const expandedEvent = expandDottedObject(event);
   const timestamp = eventModel.eventTimestamp(expandedEvent);
   const eventID = eventModel.eventID(expandedEvent);
+  const documentId = eventModel.documentID(expandedEvent);
+  const indexName = eventModel.indexName(expandedEvent);
   const winlogRecordID = eventModel.winlogRecordID(expandedEvent);
   const date =
     useFormattedDate(timestamp) ||
@@ -125,6 +148,21 @@ const NodeEventsListItem = memo(function ({
       winlogRecordID: String(winlogRecordID),
     },
   });
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const openPreview = useCallback(() => {
+    openPreviewPanel({
+      id: DocumentDetailsPreviewPanelKey,
+      params: {
+        id: documentId,
+        indexName,
+        scopeId: id,
+        isPreviewMode: true,
+        banner: ANALYZER_PREVIEW_BANNER,
+      },
+    });
+  }, [openPreviewPanel, id, documentId, indexName]);
+
   return (
     <>
       <EuiText>
@@ -147,12 +185,21 @@ const NodeEventsListItem = memo(function ({
         </StyledTime>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiButtonEmpty
-        data-test-subj="resolver:panel:node-events-in-category:event-link"
-        {...linkProps}
-      >
-        <DescriptiveName event={expandedEvent} />
-      </EuiButtonEmpty>
+      {!isSplitPanel ? (
+        <EuiButtonEmpty
+          data-test-subj="resolver:panel:node-events-in-category:event-link"
+          {...linkProps}
+        >
+          <DescriptiveName event={expandedEvent} />
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButtonEmpty
+          data-test-subj="resolver:panel:node-events-in-category:event-link"
+          onClick={openPreview}
+        >
+          <DescriptiveName event={expandedEvent} />
+        </EuiButtonEmpty>
+      )}
     </>
   );
 });
@@ -164,10 +211,12 @@ const NodeEventList = memo(function NodeEventList({
   id,
   eventCategory,
   nodeID,
+  isSplitPanel,
 }: {
   id: string;
   eventCategory: string;
   nodeID: string;
+  isSplitPanel: boolean;
 }) {
   const events = useSelector((state: State) => selectors.nodeEventsInCategory(state.analyzer[id]));
   const dispatch = useDispatch();
@@ -184,7 +233,13 @@ const NodeEventList = memo(function NodeEventList({
     <>
       {events.map((event, index) => (
         <Fragment key={index}>
-          <NodeEventsListItem id={id} nodeID={nodeID} eventCategory={eventCategory} event={event} />
+          <NodeEventsListItem
+            id={id}
+            nodeID={nodeID}
+            eventCategory={eventCategory}
+            event={event}
+            isSplitPanel={isSplitPanel}
+          />
           {index === events.length - 1 ? null : <EuiHorizontalRule margin="m" />}
         </Fragment>
       ))}
