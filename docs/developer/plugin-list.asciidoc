@@ -649,7 +649,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/inventory/README.md[inventory]
-|undefined
+|Home of the Inventory plugin, which renders the... inventory.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
