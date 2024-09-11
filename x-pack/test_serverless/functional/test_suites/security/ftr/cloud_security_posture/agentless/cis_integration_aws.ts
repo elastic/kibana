@@ -6,8 +6,9 @@
  */
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
-
+import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { setupMockServer } from '../agentless_api/mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'settings',
@@ -24,9 +25,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
+    const mockAgentlessApiService = setupMockServer();
+    let mockApiServer: http.Server;
     const previousPackageVersion = '1.9.0';
 
     before(async () => {
+      mockApiServer = mockAgentlessApiService.listen(8089);
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
@@ -142,7 +146,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ).to.be('true');
       });
     });
-
     // FLAKY: https://github.com/elastic/kibana/issues/191017
     describe.skip('Serverless - Agentless CIS_AWS Create flow', () => {
       it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {

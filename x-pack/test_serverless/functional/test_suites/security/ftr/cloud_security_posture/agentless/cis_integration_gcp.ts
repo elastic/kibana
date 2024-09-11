@@ -7,7 +7,9 @@
 
 import expect from '@kbn/expect';
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { setupMockServer } from '../agentless_api/mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
@@ -20,8 +22,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
     let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
+    let mockApiServer: http.Server;
+    const mockAgentlessApiService = setupMockServer();
 
     before(async () => {
+      mockApiServer = mockAgentlessApiService.listen(8089);
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
