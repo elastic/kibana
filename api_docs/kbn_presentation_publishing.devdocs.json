@@ -4449,6 +4449,38 @@
           },
           {
             "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesDisabledActionIds.setDisabledActionIds",
+            "type": "Function",
+            "tags": [],
+            "label": "setDisabledActionIds",
+            "description": [],
+            "signature": [
+              "(ids: string[] | undefined) => void"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-public.PublishesDisabledActionIds.setDisabledActionIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.PublishesDisabledActionIds.getAllTriggersDisabled",
             "type": "Function",
             "tags": [],
@@ -7857,7 +7889,7 @@
         "label": "ViewMode",
         "description": [],
         "signature": [
-          "\"edit\" | \"view\" | \"preview\" | \"print\""
+          "\"edit\" | \"view\" | \"print\" | \"preview\""
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
