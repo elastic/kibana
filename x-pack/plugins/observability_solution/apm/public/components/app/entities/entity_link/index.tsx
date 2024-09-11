@@ -16,7 +16,7 @@ import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_
 import { useServiceEntitySummaryFetcher } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
 import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ApmPluginStartDeps } from '../../../../plugin';
@@ -49,7 +49,7 @@ export function EntityLink() {
 
   if (
     isPending(entityManagerEnablementStatus) ||
-    isPending(serviceEntitySummaryStatus) ||
+    serviceEntitySummaryStatus === FETCH_STATUS.LOADING ||
     isPending(hasApmDataStatus)
   ) {
     return (
