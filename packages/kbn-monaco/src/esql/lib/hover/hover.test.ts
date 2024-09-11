@@ -212,13 +212,13 @@ describe('hover', () => {
     );
     testSuggestions(`from a | stats avg(round(numberField))`, 'round', () => {
       return [
-        '**Acceptable types**: **integer** | **counter_integer** | **double** | **unsigned_long** | **long** | **counter_long** | **counter_double**',
+        '**Acceptable types**: **double** | **integer** | **long**',
         ...createFunctionContent('round'),
       ];
     });
     testSuggestions(`from a | stats avg(round(numberField))`, 'avg', createFunctionContent);
     testSuggestions(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', () => [
-      '**Acceptable types**: **integer** | **counter_integer** | **double** | **unsigned_long** | **long** | **counter_long** | **counter_double**',
+      '**Acceptable types**: **double** | **integer** | **long**',
       ...createFunctionContent('nonExistentFn'),
     ]);
     testSuggestions(`from a | where round(numberField) > 0`, 'round', createFunctionContent);
