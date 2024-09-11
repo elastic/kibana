@@ -46,7 +46,7 @@ export const JobsTabContent: FC<Props> = ({ module }) => {
               id={job.id}
               buttonContent={
                 <EuiText size="m">
-                  <p>{job.id}</p>
+                  <b>{job.id}</b>
                 </EuiText>
               }
               css={{ padding: `0 ${euiTheme.size.m}` }}
