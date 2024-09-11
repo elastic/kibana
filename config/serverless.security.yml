@@ -75,10 +75,9 @@ telemetry.labels.serverless: security
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
+xpack.fleet.internal.registry.spec.min: '3.0'
 xpack.fleet.internal.registry.spec.max: '3.2'
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
-xpack.fleet.internal.registry.spec.min: '1.0'
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
     'apm',
