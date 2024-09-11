@@ -665,12 +665,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
+    // docker container prune (1)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(9);
+    expect(execa.mock.calls).toHaveLength(10);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -806,11 +807,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
+    // docker container prune (1)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(6);
+    expect(execa.mock.calls).toHaveLength(7);
   });
 });
 
