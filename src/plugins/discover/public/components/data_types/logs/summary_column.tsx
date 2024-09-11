@@ -19,7 +19,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { getAvailableResourceFields } from '../../../utils/get_available_resource_fields';
 import {
@@ -32,10 +31,6 @@ import {
   formatJsonDocumentForContent,
 } from '../../discover_grid/virtual_columns/logs/content';
 import * as constants from '../../../../common/data_types/logs/constants';
-
-const DiscoverSourcePopoverContent = dynamic(
-  () => import('@kbn/unified-data-table/src/components/source_popover_content')
-);
 
 type SummaryColumnProps = DataGridCellValueElementProps;
 
@@ -50,7 +45,7 @@ export const getSummaryColumn =
     const virtualColumnServices = { data, dataView };
 
     const rowHeight = params.rowHeight ?? ROWS_HEIGHT_OPTIONS.single;
-    const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single;
+    const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
     const shouldCenter =
       rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
 
