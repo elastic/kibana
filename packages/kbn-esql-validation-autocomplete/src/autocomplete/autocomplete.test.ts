@@ -8,7 +8,7 @@
  */
 
 import { suggest } from './autocomplete';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
@@ -271,10 +271,23 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} |`,
     ];
     for (const subExpression of subExpressions) {
-      testSuggestions(`from a | ${subExpression} grok /`, getFieldNamesByType(ESQL_STRING_TYPES));
+      testSuggestions(
+        `from a | ${subExpression} grok /`,
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+      );
       testSuggestions(`from a | ${subExpression} grok keywordField /`, [constantPattern], ' ');
       testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} /`, ['| ']);
     }
+
+    testSuggestions(
+      'from a | grok /',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions(
+      'from a | grok key/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions('from a | grok keywordField/', []);
   });
 
   describe('dissect', () => {
@@ -286,10 +299,9 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} append_separator = ":" |`,
     ];
     for (const subExpression of subExpressions) {
-      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
-      testSuggestions.skip(
+      testSuggestions(
         `from a | ${subExpression} dissect /`,
-        getFieldNamesByType(ESQL_STRING_TYPES)
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
       );
       testSuggestions(`from a | ${subExpression} dissect keywordField /`, [constantPattern], ' ');
       testSuggestions(
@@ -306,6 +318,16 @@ describe('autocomplete', () => {
         ['| ']
       );
     }
+
+    testSuggestions(
+      'from a | dissect /',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions(
+      'from a | dissect key/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
+    testSuggestions('from a | dissect keywordField/', []);
   });
 
   describe('sort', () => {
@@ -568,7 +590,10 @@ describe('autocomplete', () => {
     ]);
 
     // DISSECT field
-    testSuggestions('FROM index1 | DISSECT b/', getFieldNamesByType(ESQL_STRING_TYPES));
+    testSuggestions(
+      'FROM index1 | DISSECT b/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+    );
 
     // DROP (first field)
     testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
@@ -600,7 +625,11 @@ describe('autocomplete', () => {
     ]);
 
     // GROK field
-    testSuggestions('FROM index1 | GROK f/', getFieldNamesByType(ESQL_STRING_TYPES), undefined);
+    testSuggestions(
+      'FROM index1 | GROK f/',
+      getFieldNamesByType(ESQL_STRING_TYPES).map((field) => `${field} `),
+      undefined
+    );
 
     // KEEP (first field)
     testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
@@ -718,8 +747,8 @@ describe('autocomplete', () => {
     describe('function arguments', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
-        evalFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0].params?.[0]
-          .literalSuggestions ?? [];
+        scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
+          .params?.[0].literalSuggestions ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)

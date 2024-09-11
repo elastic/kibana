@@ -37,7 +37,7 @@ const getProfiles$Spy = jest.spyOn(discoverServiceMock.profilesManager, 'getProf
 
 const render = () => {
   return renderHook((props) => useProfiles(props), {
-    initialProps: { record } as GetProfilesOptions,
+    initialProps: { record } as React.PropsWithChildren<GetProfilesOptions>,
     wrapper: ({ children }) => (
       <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
     ),
