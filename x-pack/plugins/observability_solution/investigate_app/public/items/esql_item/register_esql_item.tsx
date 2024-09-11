@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
@@ -22,17 +21,10 @@ import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_sugges
 import type { Options } from '../register_items';
 import { getDateHistogramResults } from './get_date_histogram_results';
 
-const lensClassName = css`
-  height: 100%;
-`;
-
 interface Props {
   suggestion: Suggestion;
   dataView: DataView;
   esqlQuery: string;
-  columns: ESQLSearchResponse['columns'];
-  allColumns: ESQLSearchResponse['all_columns'];
-  values: ESQLSearchResponse['values'];
   dateHistogramResults?: {
     query: string;
     columns: ESQLSearchResponse['columns'];
@@ -48,8 +40,6 @@ interface EsqlItemParams {
 
 interface EsqlItemData {
   dataView: DataView;
-  columns: ESQLSearchResponse['columns'];
-  values: ESQLSearchResponse['values'];
   suggestion: Suggestion;
   dateHistoResponse?: {
     query: string;
@@ -61,60 +51,20 @@ interface EsqlItemData {
 
 export const ESQL_ITEM_TYPE = 'esql';
 
-export function EsqlWidget({
-  suggestion,
-  dataView,
-  esqlQuery,
-  columns,
-  allColumns,
-  values,
-  dateHistogramResults,
-}: Props) {
+export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResults }: Props) {
   const {
     dependencies: {
       start: { lens },
     },
   } = useKibana();
 
-  const datatable = useMemo(() => {
-    return getDatatableFromEsqlResponse({
-      columns,
-      values,
-      all_columns: allColumns,
-    });
-  }, [columns, values, allColumns]);
-
   const input = useMemo(() => {
     return getLensAttrsForSuggestion({
       suggestion,
       dataView,
       query: esqlQuery,
-      table: datatable,
     });
-  }, [suggestion, dataView, esqlQuery, datatable]);
-
-  const memoizedQueryObject = useMemo(() => {
-    return { esql: esqlQuery };
-  }, [esqlQuery]);
-
-  const initialColumns = useMemo(() => {
-    const timestampColumn = datatable.columns.find((column) => column.name === '@timestamp');
-    const messageColumn = datatable.columns.find((column) => column.name === 'message');
-
-    if (datatable.columns.length > 20 && timestampColumn && messageColumn) {
-      const hasDataForBothColumns = datatable.rows.every((row) => {
-        const timestampValue = row['@timestamp'];
-        const messageValue = row.message;
-
-        return timestampValue !== null && timestampValue !== undefined && !!messageValue;
-      });
-
-      if (hasDataForBothColumns) {
-        return [timestampColumn, messageColumn];
-      }
-    }
-    return datatable.columns;
-  }, [datatable.columns, datatable.rows]);
+  }, [suggestion, dataView, esqlQuery]);
 
   const previewInput = useAbortableAsync(
     async ({ signal }) => {
@@ -194,31 +144,17 @@ export function EsqlWidget({
         >
           {innerElement}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ESQLDataGrid
-            rows={values}
-            columns={datatable.columns}
-            dataView={dataView}
-            query={memoizedQueryObject}
-            flyoutType="overlay"
-            initialColumns={initialColumns}
-            initialRowHeight={1}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
   return (
-    <EuiFlexItem
-      grow={true}
-      className={css`
-        > div {
-          height: 128px;
-        }
-      `}
-    >
-      <lens.EmbeddableComponent {...input} className={lensClassName} />
+    <EuiFlexItem grow={true}>
+      <lens.EmbeddableComponent
+        {...input}
+        style={{ height: 128 }}
+        overrides={{ axisX: { hide: true } }}
+      />
     </EuiFlexItem>
   );
 }
@@ -273,8 +209,6 @@ export function registerEsqlItem({
 
       return {
         dataView: mainResponse.meta.dataView,
-        columns: mainResponse.query.columns,
-        values: mainResponse.query.values,
         suggestion,
         dateHistoResponse,
       };
@@ -288,9 +222,6 @@ export function registerEsqlItem({
       return (
         <EsqlWidget
           dataView={data.dataView}
-          columns={data.columns}
-          allColumns={undefined}
-          values={data.values}
           suggestion={data.suggestion}
           esqlQuery={itemParams.esql}
           dateHistogramResults={data.dateHistoResponse}
