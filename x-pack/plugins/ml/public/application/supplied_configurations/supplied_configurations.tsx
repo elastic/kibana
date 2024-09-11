@@ -57,17 +57,17 @@ export const SuppliedConfigurations = () => {
    * Loads recognizer module configuration.
    */
   const loadModules = useCallback(async () => {
-    if (isMounted()) {
-      setIsLoading(true);
-      try {
-        const modulesReponse = (await getDataRecognizerModule()) as Module[];
+    setIsLoading(true);
+    try {
+      const modulesReponse = (await getDataRecognizerModule()) as Module[];
+      if (isMounted()) {
         setModules(modulesReponse);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
       }
-      setIsLoading(false);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
     }
+    setIsLoading(false);
   }, [getDataRecognizerModule, isMounted]);
 
   useMount(loadModules);

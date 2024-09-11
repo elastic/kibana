@@ -291,9 +291,9 @@ export const OverviewTabContent: FC<Props> = ({
               </EuiFlexGroup>
             ) : (
               <EuiEmptyPrompt
-                css={{ margin: `${euiTheme.size.s}` }}
+                css={{ margin: euiTheme.size.s }}
                 color="primary"
-                iconType={isLogoObject(module.logo) ? module.logo?.icon : undefined}
+                iconType={isLogoObject(module.logo) ? module.logo.icon : undefined}
                 title={
                   <h2>
                     <FormattedMessage
