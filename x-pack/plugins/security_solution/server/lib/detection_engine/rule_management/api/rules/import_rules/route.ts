@@ -21,7 +21,7 @@ import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
-import { PrebuiltRulesImporter } from '../../../../prebuilt_rules/logic/prebuilt_rules_importer';
+import { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
@@ -144,7 +144,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ? []
             : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
-          const prebuiltRulesImporter = new PrebuiltRulesImporter({
+          const prebuiltRulesImportHelper = new PrebuiltRulesImportHelper({
             config,
             context: ctx.securitySolution,
             savedObjectsClient,
@@ -158,7 +158,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             overwriteRules: request.query.overwrite,
             detectionRulesClient,
             allowMissingConnectorSecrets: !!actionConnectors.length,
-            prebuiltRulesImporter,
+            prebuiltRulesImportHelper,
             allowPrebuiltRules: prebuiltRulesCustomizationEnabled,
             savedObjectsClient,
           });

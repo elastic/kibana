@@ -15,7 +15,7 @@ import type {
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
-import type { PrebuiltRulesImporter } from '../../../prebuilt_rules/logic/prebuilt_rules_importer';
+import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
@@ -47,7 +47,7 @@ export const importRules = async ({
   rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
-  prebuiltRulesImporter,
+  prebuiltRulesImportHelper,
   allowPrebuiltRules,
   allowMissingConnectorSecrets,
   savedObjectsClient,
@@ -56,7 +56,7 @@ export const importRules = async ({
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  prebuiltRulesImporter: PrebuiltRulesImporter;
+  prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
   allowPrebuiltRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
@@ -69,7 +69,7 @@ export const importRules = async ({
     return importRuleResponse;
   }
 
-  await prebuiltRulesImporter.setup();
+  await prebuiltRulesImportHelper.setup();
 
   while (ruleChunks.length) {
     const batchParseObjects = ruleChunks.shift() ?? [];
@@ -77,10 +77,10 @@ export const importRules = async ({
       rules: batchParseObjects,
       savedObjectsClient,
     });
-    const prebuiltRuleAssets = await prebuiltRulesImporter.fetchPrebuiltRuleAssets({
+    const prebuiltRuleAssets = await prebuiltRulesImportHelper.fetchMatchingAssets({
       rules: batchParseObjects,
     });
-    const installedRuleIds = await prebuiltRulesImporter.fetchInstalledRuleIds({
+    const installedRuleIds = await prebuiltRulesImportHelper.fetchAssetRuleIds({
       rules: batchParseObjects,
     });
 

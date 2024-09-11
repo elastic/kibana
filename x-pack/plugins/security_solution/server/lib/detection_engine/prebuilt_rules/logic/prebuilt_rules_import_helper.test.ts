@@ -11,7 +11,7 @@ import type { RuleToImport } from '../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from './rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { ensureLatestRulesPackageInstalled } from './ensure_latest_rules_package_installed';
 import { configMock, createMockConfig, requestContextMock } from '../../routes/__mocks__';
-import { PrebuiltRulesImporter } from './prebuilt_rules_importer';
+import { PrebuiltRulesImportHelper } from './prebuilt_rules_import_helper';
 
 jest.mock('./ensure_latest_rules_package_installed');
 
@@ -21,7 +21,7 @@ jest.mock('./rule_assets/prebuilt_rule_assets_client', () => ({
   createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
 }));
 
-describe('PrebuiltRulesImporter', () => {
+describe('PrebuiltRulesImportHelper', () => {
   let config: ReturnType<typeof createMockConfig>;
   let context: ReturnType<typeof requestContextMock.create>['securitySolution'];
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -39,7 +39,7 @@ describe('PrebuiltRulesImporter', () => {
   });
 
   it('should initialize correctly', () => {
-    const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+    const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
 
     expect(importer).toBeDefined();
     expect(importer.enabled).toBe(true);
@@ -49,7 +49,7 @@ describe('PrebuiltRulesImporter', () => {
   describe('setup', () => {
     it('should not call ensureLatestRulesPackageInstalled if disabled', async () => {
       config = createMockConfig();
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
 
       await importer.setup();
 
@@ -58,7 +58,7 @@ describe('PrebuiltRulesImporter', () => {
     });
 
     it('should call ensureLatestRulesPackageInstalled if enabled', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
 
       await importer.setup();
 
@@ -71,26 +71,26 @@ describe('PrebuiltRulesImporter', () => {
     });
   });
 
-  describe('fetchPrebuiltRuleAssets', () => {
+  describe('fetchMatchingAssets', () => {
     it('should return an empty array if disabled', async () => {
       config = createMockConfig();
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
 
-      const result = await importer.fetchPrebuiltRuleAssets({ rules: [] });
+      const result = await importer.fetchMatchingAssets({ rules: [] });
 
       expect(result).toEqual([]);
     });
 
     it('should throw an error if latestPackagesInstalled is false', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
 
-      await expect(importer.fetchPrebuiltRuleAssets({ rules: [] })).rejects.toThrow(
+      await expect(importer.fetchMatchingAssets({ rules: [] })).rejects.toThrow(
         'Prebuilt rule assets cannot be fetched until the latest rules package is installed. Call setup() on this object first.'
       );
     });
 
     it('should fetch prebuilt rule assets correctly if latestPackagesInstalled is true', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
       importer.latestPackagesInstalled = true;
 
       const rules = [
@@ -99,7 +99,7 @@ describe('PrebuiltRulesImporter', () => {
         new Error('Invalid rule'),
       ] as Array<RuleToImport | Error>;
 
-      await importer.fetchPrebuiltRuleAssets({ rules });
+      await importer.fetchMatchingAssets({ rules });
 
       expect(mockPrebuiltRuleAssetsClient.fetchAssetsByVersion).toHaveBeenCalledWith([
         { rule_id: 'rule-1', version: 1 },
@@ -108,27 +108,27 @@ describe('PrebuiltRulesImporter', () => {
     });
   });
 
-  describe('fetchInstalledRuleIds', () => {
+  describe('fetchAssetRuleIds', () => {
     it('returns an empty array if the importer is not enabled', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
       importer.enabled = false;
 
-      const result = await importer.fetchInstalledRuleIds({ rules: [] });
+      const result = await importer.fetchAssetRuleIds({ rules: [] });
 
       expect(result).toEqual([]);
     });
 
     it('throws an error if the latest packages are not installed', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
       importer.latestPackagesInstalled = false;
 
-      await expect(importer.fetchInstalledRuleIds({ rules: [] })).rejects.toThrow(
+      await expect(importer.fetchAssetRuleIds({ rules: [] })).rejects.toThrow(
         'Installed rule IDs cannot be fetched until the latest rules package is installed. Call setup() on this object first.'
       );
     });
 
     it('fetches and return the rule IDs of installed prebuilt rules', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
       importer.latestPackagesInstalled = true;
       const rules = [
         { rule_id: 'rule-1', version: 1 },
@@ -141,7 +141,7 @@ describe('PrebuiltRulesImporter', () => {
         installedRuleAssets
       );
 
-      const result = await importer.fetchInstalledRuleIds({ rules });
+      const result = await importer.fetchAssetRuleIds({ rules });
 
       expect(mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId).toHaveBeenCalledWith([
         'rule-1',
@@ -151,13 +151,13 @@ describe('PrebuiltRulesImporter', () => {
     });
 
     it('handles rules that are instances of Error', async () => {
-      const importer = new PrebuiltRulesImporter({ config, context, savedObjectsClient });
+      const importer = new PrebuiltRulesImportHelper({ config, context, savedObjectsClient });
       importer.latestPackagesInstalled = true;
       const rules = [new Error('Invalid rule')];
 
       (mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId as jest.Mock).mockResolvedValue([]);
 
-      const result = await importer.fetchInstalledRuleIds({ rules });
+      const result = await importer.fetchAssetRuleIds({ rules });
 
       expect(mockPrebuiltRuleAssetsClient.fetchLatestAssetsByRuleId).toHaveBeenCalledWith([]);
       expect(result).toEqual([]);

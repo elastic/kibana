@@ -14,16 +14,21 @@ import { createPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_asse
 import { ensureLatestRulesPackageInstalled } from './ensure_latest_rules_package_installed';
 
 type MaybeRule = RuleToImport | Error;
-export interface IPrebuiltRulesImporter {
+
+export interface IPrebuiltRulesImportHelper {
   setup: () => Promise<void>;
-  fetchPrebuiltRuleAssets: ({ rules }: { rules: MaybeRule[] }) => Promise<PrebuiltRuleAsset[]>;
+  fetchMatchingAssets: ({ rules }: { rules: MaybeRule[] }) => Promise<PrebuiltRuleAsset[]>;
+  fetchAssetRuleIds: ({ rules }: { rules: MaybeRule[] }) => Promise<string[]>;
 }
 
 /**
  *
- * This object contains logic necessary to import prebuilt rules into the system.
+ * This class contains utilities for assisting with the importing of prebuilt
+ * rules. It ensures that the system contains the necessary assets, and also
+ * provides utilities for fetching information from them, necessary for
+ * importing prebuilt rules.
  */
-export class PrebuiltRulesImporter implements IPrebuiltRulesImporter {
+export class PrebuiltRulesImportHelper implements IPrebuiltRulesImportHelper {
   private context: SecuritySolutionApiRequestHandlerContext;
   private config: ConfigType;
   private ruleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClient>;
@@ -67,7 +72,7 @@ export class PrebuiltRulesImporter implements IPrebuiltRulesImporter {
    * rules, which are used to determine how to import those rules (create vs. update, etc.).
    * Assets match the `rule_id` and `version` of the specified rules.
    */
-  public async fetchPrebuiltRuleAssets({
+  public async fetchMatchingAssets({
     rules,
   }: {
     rules: MaybeRule[];
@@ -96,16 +101,16 @@ export class PrebuiltRulesImporter implements IPrebuiltRulesImporter {
   }
 
   /**
-   * Retrieves the rule IDs (`rule_id`s) of installed prebuilt rules matching those
-   * of the specified rules. Can be used to determine whether the rule being
-   * imported is a custom rule or a prebuilt rule.
+   * Retrieves the rule IDs (`rule_id`s) of available prebuilt rule assets matching those
+   * of the specified rules. This information can be used to determine whether
+   * the rule being imported is a custom rule or a prebuilt rule.
    *
    * @param rules - A list of rules being imported.
    *
-   * @returns A list of the rule IDs that are installed.
+   * @returns A list of the prebuilt rule IDs that are available.
    *
    */
-  public async fetchInstalledRuleIds({ rules }: { rules: MaybeRule[] }): Promise<string[]> {
+  public async fetchAssetRuleIds({ rules }: { rules: MaybeRule[] }): Promise<string[]> {
     if (!this.enabled) {
       return [];
     }

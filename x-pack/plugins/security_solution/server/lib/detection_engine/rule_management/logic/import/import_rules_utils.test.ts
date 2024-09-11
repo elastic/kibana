@@ -10,7 +10,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
-import { prebuiltRulesImporterMock } from '../../../prebuilt_rules/logic/prebuilt_rules_importer.mock';
+import { prebuiltRulesImportHelperMock } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper.mock';
 
 import { importRules } from './import_rules_utils';
 import { createBulkErrorObject } from '../../../routes/utils';
@@ -20,15 +20,15 @@ describe('importRules', () => {
   const ruleToImport = getImportRulesSchemaMock();
 
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockPrebuiltRulesImporter: ReturnType<typeof prebuiltRulesImporterMock.create>;
+  let mockPrebuiltRulesImportHelper: ReturnType<typeof prebuiltRulesImportHelperMock.create>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     savedObjectsClient = savedObjectsClientMock.create();
-    mockPrebuiltRulesImporter = prebuiltRulesImporterMock.create();
-    mockPrebuiltRulesImporter.fetchPrebuiltRuleAssets.mockResolvedValue([]);
-    mockPrebuiltRulesImporter.fetchInstalledRuleIds.mockResolvedValue([]);
+    mockPrebuiltRulesImportHelper = prebuiltRulesImportHelperMock.create();
+    mockPrebuiltRulesImportHelper.fetchMatchingAssets.mockResolvedValue([]);
+    mockPrebuiltRulesImportHelper.fetchAssetRuleIds.mockResolvedValue([]);
   });
 
   it('returns an empty rules response if no rules to import', async () => {
@@ -38,7 +38,7 @@ describe('importRules', () => {
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
-      prebuiltRulesImporter: mockPrebuiltRulesImporter,
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
     });
 
     expect(result).toEqual([]);
@@ -50,7 +50,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      prebuiltRulesImporter: mockPrebuiltRulesImporter,
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
       savedObjectsClient,
     });
 
@@ -80,7 +80,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      prebuiltRulesImporter: mockPrebuiltRulesImporter,
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
       savedObjectsClient,
     });
 
@@ -107,7 +107,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      prebuiltRulesImporter: mockPrebuiltRulesImporter,
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
       savedObjectsClient,
     });
 
@@ -132,7 +132,7 @@ describe('importRules', () => {
         rulesResponseAcc: [],
         overwriteRules: false,
         detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-        prebuiltRulesImporter: mockPrebuiltRulesImporter,
+        prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
         allowPrebuiltRules: false,
         savedObjectsClient,
       });
@@ -161,7 +161,7 @@ describe('importRules', () => {
         overwriteRules: false,
         detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
         allowPrebuiltRules: true,
-        prebuiltRulesImporter: mockPrebuiltRulesImporter,
+        prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
         savedObjectsClient,
       });
 
