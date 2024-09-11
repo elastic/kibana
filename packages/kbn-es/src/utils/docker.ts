@@ -856,9 +856,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-    await readyPromise.catch(async (e) => {
-      throw e;
-    });
+    await readyPromise;
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
       // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
       await waitForSecurityIndex({ client, log });
