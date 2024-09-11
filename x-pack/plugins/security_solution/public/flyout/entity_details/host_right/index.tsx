@@ -128,11 +128,11 @@ export const HostPanel = ({
   const openDefaultPanel = useCallback(
     () =>
       openTabPanel(
-        isRiskScoreExist && hasMisconfigurationFindings
+        isRiskScoreExist
           ? EntityDetailsLeftPanelTab.RISK_INPUTS
           : EntityDetailsLeftPanelTab.CSP_INSIGHTS
       ),
-    [hasMisconfigurationFindings, isRiskScoreExist, openTabPanel]
+    [isRiskScoreExist, openTabPanel]
   );
 
   const observedHost = useObservedHost(hostName, scopeId);

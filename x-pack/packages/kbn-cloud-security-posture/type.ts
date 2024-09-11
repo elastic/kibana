@@ -22,6 +22,9 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import type { BoolQuery } from '@kbn/es-query';
 export interface FindingsBaseEsQuery {
@@ -50,4 +53,27 @@ export interface CspClientPluginStartDeps {
 
   // optional
   usageCollection?: UsageCollectionStart;
+}
+
+export interface MisconfigurationPreviewBaseEsQuery {
+  query?: {
+    bool: {
+      filter: estypes.QueryDslQueryContainer[];
+    };
+  };
+}
+
+export interface UseMisconfigurationPreviewOptions extends MisconfigurationPreviewBaseEsQuery {
+  sort: string[][];
+  enabled: boolean;
+  pageSize: number;
+}
+
+export type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
+export type LatestFindingsResponse = IKibanaSearchResponse<
+  estypes.SearchResponse<CspFinding, FindingsAggs>
+>;
+
+export interface FindingsAggs {
+  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
