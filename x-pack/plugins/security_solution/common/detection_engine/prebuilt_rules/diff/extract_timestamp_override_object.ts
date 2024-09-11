@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { TimestampOverrideObject } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
+import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
+import type { TimestampOverrideObject } from '../../../api/detection_engine/prebuilt_rules';
 
 export const extractTimestampOverrideObject = (
-  rule: RuleResponse | PrebuiltRuleAsset
+  rule: RuleResponse
 ): TimestampOverrideObject | undefined => {
   if (rule.timestamp_override == null) {
     return undefined;
