@@ -5,29 +5,39 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FlyoutFooter } from '@kbn/security-solution-common';
-import { useRuleOverviewPanelContext } from '../context';
-import { RULE_OVERVIEW_FOOTER_TEST_ID, RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } from './test_ids';
+import { RulePanelKey } from '../right';
 
 /**
  * Footer in rule preview panel
  */
-export const RuleFooter = memo(() => {
-  const { ruleId } = useRuleOverviewPanelContext();
-  const href = useRuleDetailsLink({ ruleId });
+export const PreviewFooter = memo(({ ruleId }: { ruleId: string }) => {
+  const { openFlyout } = useExpandableFlyoutApi();
 
-  return href ? (
-    <FlyoutFooter data-test-subj={RULE_OVERVIEW_FOOTER_TEST_ID}>
+  const openRuleFlyout = useCallback(() => {
+    openFlyout({
+      right: {
+        id: RulePanelKey,
+        params: {
+          ruleId,
+        },
+      },
+    });
+  }, [openFlyout, ruleId]);
+
+  return (
+    <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={href}
+            onClick={openRuleFlyout}
             target="_blank"
-            data-test-subj={RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID}
+            data-test-subj={RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID}
           >
             {i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
               defaultMessage: 'Show full rule details',
@@ -36,7 +46,7 @@ export const RuleFooter = memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </FlyoutFooter>
-  ) : null;
+  );
 });
 
-RuleFooter.displayName = 'RuleFooter';
+PreviewFooter.displayName = 'PreviewFooter';
