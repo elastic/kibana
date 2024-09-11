@@ -12,7 +12,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
@@ -36,9 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+        await discover.waitUntilSearchingHasFinished();
       });
 
       runComparisonTests({
@@ -69,12 +74,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES|QL mode', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.selectTextBaseLang();
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+        await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 10');
         await testSubjects.click('querySubmitButton');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
       });
 
       runComparisonTests({
@@ -137,10 +142,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(fieldNames.slice(0, fullFieldNames.length)).to.eql(fullFieldNames);
       await dataGrid.openComparisonSettingsMenu();
       expect(await dataGrid.showAllFieldsSwitchExists()).to.be(false);
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('@message');
-      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await unifiedFieldList.clickFieldListItemAdd('@message');
+      await unifiedFieldList.clickFieldListItemAdd('agent');
       fieldNames = await dataGrid.getComparisonFieldNames();
       expect(fieldNames).have.length(selectedFieldNames.length);
       expect(fieldNames).to.eql(selectedFieldNames);
@@ -257,7 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow exiting comparison mode', async () => {
       await dataGrid.exitComparisonMode();
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await discover.waitForDocTableLoadingComplete();
     });
   }
 }

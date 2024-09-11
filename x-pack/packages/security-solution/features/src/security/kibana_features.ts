@@ -60,6 +60,13 @@ export const getSecurityBaseKibanaFeature = ({
     insightsAndAlerting: ['triggersActions'],
   },
   alerting: SECURITY_RULE_TYPES,
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
+    {
+      defaultMessage:
+        "Each sub-feature privilege in this group must be assigned individually. Global assignment is only supported if your pricing plan doesn't allow individual feature privileges.",
+    }
+  ),
   privileges: {
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
