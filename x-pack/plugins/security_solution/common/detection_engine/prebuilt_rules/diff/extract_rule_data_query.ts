@@ -11,14 +11,14 @@ import type {
   KqlQueryLanguage,
   RuleFilterArray,
   RuleQuery,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
+} from '../../../api/detection_engine/model/rule_schema';
 import type {
   InlineKqlQuery,
   RuleEqlQuery,
   RuleEsqlQuery,
   RuleKqlQuery,
-} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { KqlQueryType } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '../../../api/detection_engine/prebuilt_rules';
+import { KqlQueryType } from '../../../api/detection_engine/prebuilt_rules';
 
 export const extractRuleKqlQuery = (
   query: RuleQuery | undefined,
