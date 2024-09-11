@@ -1,0 +1,49 @@
+### Create Document Entry
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.username}} {{auth.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "document",
+  "name": "Favorites",
+  "kbResource": "user",
+  "source": "api",
+  "required": true,
+  "text": "My favorite food is Dan Bing"
+}
+
+### Create Index Entry
+POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+kbn-xsrf: "true"
+Content-Type: application/json
+Elastic-Api-Version: {{elasticApiVersion}}
+Authorization: Basic {{auth.username}} {{auth.password}}
+X-Kbn-Context: {{appContext.security}}
+
+{
+  "type": "index",
+  "name": "SpongBotSlackConnector",
+  "namespace": "default",
+  "index": "spongbot-slack",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages.",
+  "queryDescription":
+    "The free text search that the user wants to perform over this dataset. So if asking \"what are my slack messages from last week about failed tests\", the query would be \"A test has failed! failing test failed test\"",
+  "inputSchema": [
+    {
+      "fieldName": "author",
+      "fieldType": "string",
+      "description": "The author of the message. So if asking for recent messages from Stan, you would provide 'Stan' as the author."
+    }
+  ],
+  "outputFields": ["author", "text", "timestamp"]  
+}
+
+
+
+
+
+

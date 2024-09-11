@@ -45,9 +45,7 @@ export class ForecastsTable extends Component {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
     };
-    this.mlForecastService = forecastServiceFactory(
-      constructorContext.services.mlServices.mlApiServices
-    );
+    this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
 
   /**
@@ -91,6 +89,7 @@ export class ForecastsTable extends Component {
   async openSingleMetricView(forecast) {
     const {
       services: {
+        chrome: { recentlyAccessed },
         application: { navigateToUrl },
         share,
       },
@@ -158,7 +157,8 @@ export class ForecastsTable extends Component {
     addItemToRecentlyAccessed(
       'timeseriesexplorer',
       this.props.job.job_id,
-      singleMetricViewerForecastLink
+      singleMetricViewerForecastLink,
+      recentlyAccessed
     );
     await navigateToUrl(singleMetricViewerForecastLink);
   }

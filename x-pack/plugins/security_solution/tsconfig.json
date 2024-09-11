@@ -216,7 +216,12 @@
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
     "@kbn/config",
+    "@kbn/openapi-common",
+    "@kbn/securitysolution-lists-common",
     "@kbn/cbor",
     "@kbn/zod",
+    "@kbn/cloud-security-posture",
+    "@kbn/security-solution-distribution-bar",
+    "@kbn/cloud-security-posture-common",
   ]
 }

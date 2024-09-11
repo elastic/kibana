@@ -92,9 +92,9 @@ a| <<swimlane-action-type,{swimlane}>>
 
 | Create an incident in {swimlane}.
 
-a| <<thehive-action-type,{thehive}>>
+a| <<thehive-action-type,TheHive>>
 
-| Create cases and alerts in {thehive}.
+| Create cases and alerts in TheHive.
 
 a| <<tines-action-type,Tines>>
 

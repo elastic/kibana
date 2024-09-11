@@ -38,10 +38,10 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointExceptions,
     ],
     complete: [
+      ProductFeatureKey.endpointHostIsolationExceptions,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
       ProductFeatureKey.endpointAgentTamperProtection,
-      ProductFeatureKey.endpointExceptions,
       ProductFeatureKey.endpointProtectionUpdates,
     ],
   },
