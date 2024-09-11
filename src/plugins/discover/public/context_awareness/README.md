@@ -63,20 +63,6 @@ The `ProfilesManager` implementation is located in the [`profiles_manager.ts`](.
 The following diagram models the overall Discover context awareness framework and how each of the above concepts come together:
 ![image](./docs/architecture.png)
 
-## Registering a profile
-
-In order to register a Discover profile, follow these steps:
-
-1. Identify at which [context level](#context-levels) your profile should be implemented.
-2. Create a subfolder for your profile provider within the [`profile_providers`](./profile_providers) folder. Common Discover providers should be created within the `profile_providers/common` subfolder, while solution specific providers should be created within a `profile_providers/{SOLUTION_TYPE}` subfolder, e.g. `profile_providers/security/security_root_profile`.
-3. Create a `profile.ts(x)` file within your provider subfolder that exports a factory function which optionally accepts a `ProfileProviderServices` parameter and returns your provider implementation, e.g. `createSecurityRootProfileProvider(services: ProfileProviderServices) => RootProfileProvider`.
-4. **If your provider is not ready for GA or should only be enabled for specific configurations, make sure to set the `isExperimental` flag to true in your profile provider.** This will ensure the profile is disabled by default, and can be enabled in `kibana.yml` like this: `discover.experimental.enabledProfiles: [{YOUR_PROFILE_ID}]`.
-5. Call and return the result of your provider factory function from the corresponding factory function in [`register_profile_providers.ts`](./profile_providers/register_profile_providers.ts), e.g. `createRootProfileProviders`.
-
-Existing profiles can be extended using the [`extendProfileProvider`](./profile_providers/extend_profile_provider.ts) utility, allowing multiple sub profiles to be composed from a shared parent profile.
-
-Example profile provider implementations are located in [`profile_providers/example`](./profile_providers/example).
-
 ## Code sharing
 
 One of the core ideas of the context awareness framework is that Discover is still a single application which should know about which profiles it supports and directly import the code needed to support them. This is why profile registrations are all handled internally to the plugin instead of having a registration system exposed through the plugin contract. This approach comes with several main benefits:
@@ -91,3 +77,108 @@ This means that in an ideal situation, the code for Discover profiles should eit
 
 - When adding solution specific code directly to the Discover codebase, it should be done in an organized way in order to support shared ownership. For example, the [`profile_providers/security`](./profile_providers/security) folder contains code specific to Security Solution maintained profiles, and an override has been added to the [`CODEOWNERS`](/.github/CODEOWNERS) file to reflect the shared ownership of this folder.
 - When creating a dedicated package for some profile code, the maintaining team can retain full ownership over the package, and Discover is only responsible for importing the functionality and adding it to the associated profile registration.
+
+There are situations where neither of the above two options are viable, such as when migrating large pieces of functionality from a solution plugin to a Discover profile, which could be time consuming and involve moving huge amounts of code to packages. For these situations, we have created a [discover_shared](/src/plugins/discover_shared) plugin specifically to support inversion of control for Discover profile features (see the [`README`](/src/plugins/discover_shared/README.md) for more details).
+
+By ensuring all Discover profiles use the same IoC mechanism, we can centralize changes or improvements to the system as well as easily locating all areas where doing so was necessary. In general, this should be used as a last resort when the benefits of importing directly from packages aren't worth the effort to migrate the code, and ideally teams who use it should have a plan to later refactor the code into packages.
+
+## Registering a profile
+
+In order to register a Discover profile, follow these steps:
+
+1. Identify at which [context level](#context-levels) your profile should be implemented.
+2. Create a subfolder for your profile provider within the [`profile_providers`](./profile_providers) folder. Common Discover providers should be created within the `profile_providers/common` subfolder, while solution specific providers should be created within a `profile_providers/{SOLUTION_TYPE}` subfolder, e.g. `profile_providers/security/security_root_profile`.
+3. Create a `profile.ts(x)` file within your provider subfolder that exports a factory function which optionally accepts a `ProfileProviderServices` parameter and returns your provider implementation, e.g. `createSecurityRootProfileProvider(services: ProfileProviderServices) => RootProfileProvider`.
+4. **If your provider is not ready for GA or should only be enabled for specific configurations, make sure to set the `isExperimental` flag to true in your profile provider.** This will ensure the profile is disabled by default, and can be enabled in `kibana.yml` like this: `discover.experimental.enabledProfiles: [{YOUR_PROFILE_ID}]`.
+5. Call and return the result of your provider factory function from the corresponding factory function in [`register_profile_providers.ts`](./profile_providers/register_profile_providers.ts), e.g. `createRootProfileProviders`.
+
+Existing profiles can be extended using the [`extendProfileProvider`](./profile_providers/extend_profile_provider.ts) utility, allowing multiple sub profiles to be composed from a shared parent profile.
+
+Example profile provider implementations are located in [`profile_providers/example`](./profile_providers/example).
+
+## Example implementation
+
+```ts
+/**
+ * profile_providers/common/example_data_source_profile/profile.tsx
+ */
+
+import React from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import { ProfileProviderServices } from '../../profile_provider_services';
+
+// Export profile provider factory function, optionally accepting ProfileProviderServices
+export const createExampleDataSourceProfileProvider = (
+  services: ProfileProviderServices
+): DataSourceProfileProvider => ({
+  // All profiles must have a unique ID
+  profileId: 'example-data-source-profile',
+
+  // Set isExperimental flag to true if profile should be disabled by default
+  isExperimental: true,
+
+  // The actual composable profile definition
+  profile: {
+    // Each available method maps to a Discover extension point
+    getCellRenderers: (prev) => () => ({
+      // Calling prev() provides access to results from previous context levels,
+      // making it possible to compose a result from multiple profiles
+      ...prev(),
+
+      // Extend the previous results with a cell renderer for the message field
+      message: (props) => {
+        const message = getFieldValue(props.row, 'message');
+        return <span>Custom message cell: {message}</span>;
+      },
+    }),
+  },
+
+  // The method responsible for context resolution
+  resolve: (params) => {
+    let indexPattern: string | undefined;
+
+    // Extract the index pattern from the current ES|QL query or data view
+    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
+      if (!isOfAggregateQueryType(params.query)) {
+        return { isMatch: false };
+      }
+
+      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
+    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
+      indexPattern = params.dataView.getIndexPattern();
+    }
+
+    // If the profile is not a match, return isMatch: false in the result
+    if (indexPattern !== 'my-example-logs') {
+      return { isMatch: false };
+    }
+
+    // If the profile is a match, return isMatch: true in the result,
+    // plus a context object containing details of the current context
+    return {
+      isMatch: true,
+      context: { category: DataSourceCategory.Logs },
+    };
+  },
+});
+
+/**
+ * profile_providers/register_profile_providers.ts
+ */
+
+// Locate the factory function for the matching context level
+const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  // Call the profile provider factory function and return its result in the array
+  createExampleDataSourceProfileProvider(providerServices),
+  ...createLogsDataSourceProfileProviders(providerServices),
+];
+
+/**
+ * Navigate to Discover and execute the following ES|QL query
+ * to activate the profile: `FROM my-example-logs`
+ */
+```
