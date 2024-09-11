@@ -97,6 +97,8 @@ export const EditSpace: FC<PageProps> = ({
     }
 
     const getSpaceInfo = async () => {
+      // active space: the space that is active in the user's session
+      // current space: the space being edited by the user
       const [activeSpace, currentSpace] = await Promise.all([
         spacesManager.getActiveSpace(),
         spacesManager.getSpace(spaceId),
