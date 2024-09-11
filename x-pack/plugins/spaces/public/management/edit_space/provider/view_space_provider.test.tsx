@@ -19,7 +19,7 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './view_space_provider';
+import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './edit_space_provider';
 import { spacesManagerMock } from '../../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
