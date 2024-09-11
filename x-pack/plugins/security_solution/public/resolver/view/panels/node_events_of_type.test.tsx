@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
+import React from 'react';
+import { act, render } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
-
+import { TestProviders } from '../../../common/mock';
+import { NodeEventsListItem } from './node_events_of_type';
 import { oneNodeWithPaginatedEvents } from '../../data_access_layer/mocks/one_node_with_paginated_related_events';
 import { Simulator } from '../../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../../test_utilities/extend_jest';
 import { urlSearch } from '../../test_utilities/url_search';
+import { useLinkProps } from '../use_link_props';
+
+jest.mock('../use_link_props');
+const mockUseLinkProps = useLinkProps as jest.Mock;
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
@@ -103,6 +109,38 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
           visibleEvents: 30,
         });
       });
+    });
+  });
+});
+
+describe('<NodeEventsListItem />', () => {
+  it('should call custom node onclick when it is available', () => {
+    const nodeEventOnClick = jest.fn();
+    mockUseLinkProps.mockReturnValue({ href: '#', onClick: jest.fn() });
+    const { getByTestId } = render(
+      <TestProviders>
+        <NodeEventsListItem
+          id="test"
+          nodeID="test"
+          eventCategory="test"
+          nodeEventOnClick={nodeEventOnClick}
+          event={{
+            _id: 'test _id',
+            _index: '_index',
+            '@timestamp': 1726589803115,
+            event: {
+              id: 'event id',
+            },
+          }}
+        />
+      </TestProviders>
+    );
+    expect(getByTestId('resolver:panel:node-events-in-category:event-link')).toBeInTheDocument();
+    getByTestId('resolver:panel:node-events-in-category:event-link').click();
+    expect(nodeEventOnClick).toBeCalledWith({
+      documentId: 'test _id',
+      indexName: '_index',
+      scopeId: 'test',
     });
   });
 });
