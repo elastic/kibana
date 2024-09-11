@@ -18,19 +18,28 @@ module.exports = {
     },
     messages: {
       noDisallowedHash:
-        'Usage of createHash with "{{algorithm}}" is not allowed. Only the following algorithms are allowed: [{{allowedAlgorithms}}]. If you need to use a different algorithm, please contact the Kibana security team.',
+        'Usage of {{functionName}} with "{{algorithm}}" is not allowed. Only the following algorithms are allowed: [{{allowedAlgorithms}}]. If you need to use a different algorithm, please contact the Kibana security team.',
     },
     schema: [],
   },
   create(context) {
     let isCreateHashImported = false;
     let createHashName = 'createHash';
+    let usedFunctionName = '';
     const sourceCode = context.getSourceCode();
 
     const disallowedAlgorithmNodes = new Set();
 
     function isAllowedAlgorithm(algorithm) {
       return allowedAlgorithms.includes(algorithm);
+    }
+
+    function isHashOrCreateHash(value) {
+      if (value === 'hash' || value === 'createHash') {
+        usedFunctionName = value;
+        return true;
+      }
+      return false;
     }
 
     function getIdentifierValue(node) {
@@ -56,7 +65,10 @@ module.exports = {
       ImportDeclaration(node) {
         if (node.source.value === 'crypto' || node.source.value === 'node:crypto') {
           node.specifiers.forEach((specifier) => {
-            if (specifier.type === 'ImportSpecifier' && specifier.imported.name === 'createHash') {
+            if (
+              specifier.type === 'ImportSpecifier' &&
+              isHashOrCreateHash(specifier.imported.name)
+            ) {
               isCreateHashImported = true;
               createHashName = specifier.local.name;
             }
@@ -81,7 +93,7 @@ module.exports = {
         if (
           (node.callee.type === 'MemberExpression' &&
             node.callee.object.name === 'crypto' &&
-            node.callee.property.name === 'createHash') ||
+            isHashOrCreateHash(node.callee.property.name)) ||
           (isCreateHashImported && node.callee.name === createHashName)
         ) {
           if (node.arguments.length > 0) {
@@ -93,6 +105,7 @@ module.exports = {
                 data: {
                   algorithm: arg.value,
                   allowedAlgorithms: allowedAlgorithms.join(', '),
+                  functionName: usedFunctionName,
                 },
               });
             } else if (arg.type === 'Identifier') {
@@ -104,6 +117,7 @@ module.exports = {
                   data: {
                     algorithm: identifierValue,
                     allowedAlgorithms: allowedAlgorithms.join(', '),
+                    functionName: usedFunctionName,
                   },
                 });
               }

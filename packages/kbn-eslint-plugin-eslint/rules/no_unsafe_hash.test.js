@@ -50,6 +50,14 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
        createHash(myHash);
       `,
     },
+    // valid import and call of hash with a variable containing a compliant aglorithm
+    {
+      code: dedent`
+       import { hash } from 'crypto';
+       const myHash = 'sha256';
+       hash(myHash);
+      `,
+    },
   ],
 
   invalid: [
@@ -92,6 +100,20 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
         {
           line: 3,
           message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
+        },
+      ],
+    },
+    // invalid import and call of hash when importing directly
+    {
+      code: dedent`
+       import { hash } from 'crypto';
+
+       hash('md5');
+      `,
+      errors: [
+        {
+          line: 3,
+          message: `Usage of hash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
     },
