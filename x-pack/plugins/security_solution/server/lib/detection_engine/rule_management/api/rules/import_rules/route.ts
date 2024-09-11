@@ -23,6 +23,7 @@ import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
 import { PrebuiltRulesImportHelper } from '../../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { importRules as legacyImportRules } from '../../../logic/import/import_rules_utils';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/import_rules_utils';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
@@ -151,15 +152,27 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
-          const importRuleResponse: ImportRuleResponse[] = await detectionRulesClient.importRules({
-            ruleChunks: chunkParseObjects,
-            rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
-            overwriteRules: request.query.overwrite,
-            allowMissingConnectorSecrets: !!actionConnectors.length,
-            prebuiltRulesImportHelper,
-            allowPrebuiltRules: prebuiltRulesCustomizationEnabled,
-            savedObjectsClient,
-          });
+          let importRuleResponse: ImportRuleResponse[] = [];
+
+          if (prebuiltRulesCustomizationEnabled) {
+            importRuleResponse = await detectionRulesClient.importRules({
+              ruleChunks: chunkParseObjects,
+              rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
+              overwriteRules: request.query.overwrite,
+              allowMissingConnectorSecrets: !!actionConnectors.length,
+              prebuiltRulesImportHelper,
+              savedObjectsClient,
+            });
+          } else {
+            importRuleResponse = await legacyImportRules({
+              ruleChunks: chunkParseObjects,
+              rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
+              overwriteRules: request.query.overwrite,
+              allowMissingConnectorSecrets: !!actionConnectors.length,
+              detectionRulesClient,
+              savedObjectsClient,
+            });
+          }
 
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
           const successes = importRuleResponse.filter((resp) => {

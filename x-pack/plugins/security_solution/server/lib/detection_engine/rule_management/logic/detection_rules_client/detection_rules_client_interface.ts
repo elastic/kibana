@@ -26,6 +26,7 @@ export interface IDetectionRulesClient {
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
+  legacyImportRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<ImportRuleResponse[]>;
 }
@@ -65,7 +66,6 @@ export interface ImportRulesArgs {
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
-  allowPrebuiltRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
 }

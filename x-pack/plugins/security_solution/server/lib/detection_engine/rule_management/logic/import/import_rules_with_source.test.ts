@@ -10,8 +10,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
+import { prebuiltRulesImportHelperMock } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper.mock';
 
-import { importRules } from './import_rules_utils';
+import { importRules } from './import_rules_with_source';
 import { createBulkErrorObject } from '../../../routes/utils';
 
 describe('importRules', () => {
@@ -19,11 +20,15 @@ describe('importRules', () => {
   const ruleToImport = getImportRulesSchemaMock();
 
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockPrebuiltRulesImportHelper: ReturnType<typeof prebuiltRulesImportHelperMock.create>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     savedObjectsClient = savedObjectsClientMock.create();
+    mockPrebuiltRulesImportHelper = prebuiltRulesImportHelperMock.create();
+    mockPrebuiltRulesImportHelper.fetchMatchingAssets.mockResolvedValue([]);
+    mockPrebuiltRulesImportHelper.fetchAssetRuleIds.mockResolvedValue([]);
   });
 
   it('returns an empty rules response if no rules to import', async () => {
@@ -33,6 +38,7 @@ describe('importRules', () => {
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
       savedObjectsClient,
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
     });
 
     expect(result).toEqual([]);
@@ -44,6 +50,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
       savedObjectsClient,
     });
 
@@ -73,6 +80,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
       savedObjectsClient,
     });
 
@@ -99,34 +107,42 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       overwriteRules: false,
       detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+      prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
       savedObjectsClient,
     });
 
     expect(result).toEqual([{ rule_id: ruleToImport.rule_id, status_code: 200 }]);
   });
 
-  it('rejects a prebuilt rule specifying an immutable value of true', async () => {
-    const prebuiltRuleToImport = {
-      ...getImportRulesSchemaMock(),
-      immutable: true,
-      version: 1,
-    };
-    const result = await importRules({
-      ruleChunks: [[prebuiltRuleToImport]],
-      rulesResponseAcc: [],
-      overwriteRules: false,
-      detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-      savedObjectsClient,
+  describe('compatibility with prebuilt rules', () => {
+    let prebuiltRuleToImport: ReturnType<typeof getImportRulesSchemaMock>;
+
+    beforeEach(() => {
+      prebuiltRuleToImport = {
+        ...getImportRulesSchemaMock(),
+        immutable: true,
+        version: 1,
+      };
     });
 
-    expect(result).toEqual([
-      {
-        error: {
-          message: `Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: ${prebuiltRuleToImport.rule_id}]`,
-          status_code: 400,
-        },
+    it('imports a prebuilt rule when allowPrebuiltRules is true', async () => {
+      clients.detectionRulesClient.importRule.mockResolvedValue({
+        ...getRulesSchemaMock(),
         rule_id: prebuiltRuleToImport.rule_id,
-      },
-    ]);
+      });
+
+      const ruleChunk = [prebuiltRuleToImport];
+      const result = await importRules({
+        ruleChunks: [ruleChunk],
+        rulesResponseAcc: [],
+        overwriteRules: false,
+        detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
+        allowPrebuiltRules: true,
+        prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
+        savedObjectsClient,
+      });
+
+      expect(result).toEqual([{ rule_id: prebuiltRuleToImport.rule_id, status_code: 200 }]);
+    });
   });
 });

@@ -15,7 +15,9 @@ import type {
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
+import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 
@@ -45,6 +47,8 @@ export const importRules = async ({
   rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
+  prebuiltRulesImportHelper,
+  allowPrebuiltRules,
   allowMissingConnectorSecrets,
   savedObjectsClient,
 }: {
@@ -52,6 +56,8 @@ export const importRules = async ({
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
+  prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
+  allowPrebuiltRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
 }) => {
@@ -63,12 +69,21 @@ export const importRules = async ({
     return importRuleResponse;
   }
 
+  await prebuiltRulesImportHelper.setup();
+
   while (ruleChunks.length) {
     const batchParseObjects = ruleChunks.shift() ?? [];
     const existingLists = await getReferencedExceptionLists({
       rules: batchParseObjects,
       savedObjectsClient,
     });
+    const prebuiltRuleAssets = await prebuiltRulesImportHelper.fetchMatchingAssets({
+      rules: batchParseObjects,
+    });
+    const installedRuleIds = await prebuiltRulesImportHelper.fetchAssetRuleIds({
+      rules: batchParseObjects,
+    });
+
     const newImportRuleResponse = await Promise.all(
       batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
         const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
@@ -85,15 +100,15 @@ export const importRules = async ({
               return null;
             }
 
-            if (parsedRule.immutable) {
+            if (!parsedRule.version) {
               resolve(
                 createBulkErrorObject({
                   statusCode: 400,
                   message: i18n.translate(
-                    'xpack.securitySolution.detectionEngine.rules.importPrebuiltRulesUnsupported',
+                    'xpack.securitySolution.detectionEngine.rules.cannotImportRuleWithoutVersion',
                     {
                       defaultMessage:
-                        'Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: {ruleId}]',
+                        'Rules must specify a "version" to be imported. [rule_id: {ruleId}]',
                       values: { ruleId: parsedRule.rule_id },
                     }
                   ),
@@ -104,6 +119,14 @@ export const importRules = async ({
               return null;
             }
 
+            const { immutable, ruleSource } = calculateRuleSourceForImport({
+              rule: parsedRule,
+              prebuiltRuleAssets,
+              installedRuleIds,
+            });
+            parsedRule.rule_source = ruleSource;
+            parsedRule.immutable = immutable;
+
             try {
               const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
                 rule: parsedRule,
@@ -112,7 +135,7 @@ export const importRules = async ({
 
               importRuleResponse = [...importRuleResponse, ...exceptionErrors];
 
-              const importedRule = await detectionRulesClient.legacyImportRule({
+              const importedRule = await detectionRulesClient.importRule({
                 ruleToImport: {
                   ...parsedRule,
                   exceptions_list: [...exceptions],

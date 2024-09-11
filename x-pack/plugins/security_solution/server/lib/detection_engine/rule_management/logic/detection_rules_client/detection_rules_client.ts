@@ -14,7 +14,7 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { ImportRuleResponse } from '../../../routes/utils';
-import { importRules } from '../import/import_rules_utils';
+import { importRules } from '../import/import_rules_with_source';
 import type {
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
@@ -32,6 +32,7 @@ import { importRule } from './methods/import_rule';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
+import { importRuleWithSource } from './methods/import_rule_with_source';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
@@ -123,9 +124,21 @@ export const createDetectionRulesClient = ({
       });
     },
 
+    async legacyImportRule(args: ImportRuleArgs): Promise<RuleResponse> {
+      return withSecuritySpan('DetectionRulesClient.legacyImportRule', async () => {
+        return importRule({
+          actionsClient,
+          rulesClient,
+          importRulePayload: args,
+          mlAuthz,
+          prebuiltRuleAssetClient,
+        });
+      });
+    },
+
     async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-        return importRule({
+        return importRuleWithSource({
           actionsClient,
           rulesClient,
           importRulePayload: args,
