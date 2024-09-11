@@ -10,14 +10,14 @@ import createContainer from 'constate';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-export interface UseVirtualColumnServices {
+export interface DataGridCellServicesProviderProps {
   services: {
     data: DataPublicPluginStart;
     dataView: DataView;
   };
 }
 
-const useVirtualColumns = ({ services }: UseVirtualColumnServices) => services;
+const useDataGridCellServices = ({ services }: DataGridCellServicesProviderProps) => services;
 
-export const [VirtualColumnServiceProvider, useVirtualColumnServiceContext] =
-  createContainer(useVirtualColumns);
+export const [DataGridCellServicesProvider, useDataGridCellServicesContext] =
+  createContainer(useDataGridCellServices);

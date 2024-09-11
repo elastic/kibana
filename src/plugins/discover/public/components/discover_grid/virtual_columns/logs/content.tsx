@@ -129,6 +129,7 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   const rawFieldResult: DataTableRecord['raw']['fields'] = {};
   const { raw, flattened } = row;
   const { fields } = raw;
+  console.log('Compute', raw._id);
 
   // We need 2 loops here for flattened and raw.fields. Flattened contains all fields,
   // whereas raw.fields only contains certain fields excluding _ignored

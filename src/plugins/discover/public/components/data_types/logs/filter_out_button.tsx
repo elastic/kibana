@@ -9,12 +9,12 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { useVirtualColumnServiceContext } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
+import { useDataGridCellServicesContext } from '../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { actionFilterOutText, filterOutText } from './translations';
 
 export const FilterOutButton = ({ property, value }: { property: string; value: string }) => {
   const ariaFilterOutText = actionFilterOutText(value);
-  const serviceContext = useVirtualColumnServiceContext();
+  const serviceContext = useDataGridCellServicesContext();
   const filterManager = serviceContext?.data.query.filterManager;
   const dataView = serviceContext.dataView;
 

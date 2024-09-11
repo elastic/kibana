@@ -22,15 +22,16 @@ import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/disco
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { getAvailableResourceFields } from '../../../utils/get_available_resource_fields';
 import {
-  UseVirtualColumnServices,
-  VirtualColumnServiceProvider,
-} from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
+  DataGridCellServicesProviderProps,
+  DataGridCellServicesProvider,
+} from '../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import { Resource } from '../../discover_grid/virtual_columns/logs/resource';
 import {
   Content,
   formatJsonDocumentForContent,
 } from '../../discover_grid/virtual_columns/logs/content';
 import * as constants from '../../../../common/data_types/logs/constants';
+import { contentLabel, documentLabel, resourceLabel } from './translations';
 
 type SummaryColumnProps = DataGridCellValueElementProps;
 
@@ -54,7 +55,7 @@ export const getSummaryColumn =
     }
 
     return (
-      <VirtualColumnServiceProvider services={virtualColumnServices}>
+      <DataGridCellServicesProvider services={virtualColumnServices}>
         <EuiFlexGroup
           gutterSize="s"
           wrap={!isSingleLine}
@@ -71,11 +72,11 @@ export const getSummaryColumn =
           </EuiFlexItem>
           <Content {...props} isSingleLine={isSingleLine} />
         </EuiFlexGroup>
-      </VirtualColumnServiceProvider>
+      </DataGridCellServicesProvider>
     );
   };
 
-const SummaryPopover = (props: SummaryColumnProps & UseVirtualColumnServices) => {
+const SummaryPopover = (props: SummaryColumnProps & DataGridCellServicesProviderProps) => {
   const { row, dataView, fieldFormats, services } = props;
 
   const availableResourceFields = getAvailableResourceFields(row);
@@ -91,64 +92,62 @@ const SummaryPopover = (props: SummaryColumnProps & UseVirtualColumnServices) =>
   const shouldRenderSource = !shouldRenderContent && !shouldRenderEventOriginal;
 
   return (
-    <VirtualColumnServiceProvider services={services}>
-      <EuiPanel paddingSize="s" hasShadow={false} css={{ width: 580 }}>
+    <DataGridCellServicesProvider services={services}>
+      <EuiFlexGroup direction="column" css={{ width: 580 }}>
         {shouldRenderResource && (
-          <>
+          <EuiFlexGroup direction="column" gutterSize="s">
             <EuiTitle size="xxs">
-              <span>Resource</span>
+              <span>{resourceLabel}</span>
             </EuiTitle>
-            <EuiSpacer size="s" />
             <Resource wrap {...props} />
-            <EuiSpacer />
-          </>
+          </EuiFlexGroup>
         )}
-        <EuiSpacer size="s" />
-        <EuiTitle size="xxs">
-          <span>Content</span>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        {shouldRenderContent && (
-          <>
-            <EuiText color="subdued" size="xs">
-              {field}
-            </EuiText>
-            <EuiCodeBlock
-              overflowHeight={100}
-              paddingSize="s"
-              isCopyable
-              language="txt"
-              fontSize="s"
-            >
-              {value}
-            </EuiCodeBlock>
-          </>
-        )}
-        {shouldRenderEventOriginal && (
-          <>
-            <EuiText color="subdued" size="xs">
-              {constants.EVENT_ORIGINAL_FIELD}
-            </EuiText>
-            <EuiCodeBlock
-              overflowHeight={100}
-              paddingSize="s"
-              isCopyable
-              language="txt"
-              fontSize="s"
-            >
-              {value}
-            </EuiCodeBlock>
-          </>
-        )}
-        {shouldRenderSource && (
-          <>
-            <EuiText color="subdued" size="xs">
-              Document
-            </EuiText>
-            <JsonCodeEditor json={formatJsonDocumentForContent(row)} height={300} />
-          </>
-        )}
-      </EuiPanel>
-    </VirtualColumnServiceProvider>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiTitle size="xxs">
+            <span>{contentLabel}</span>
+          </EuiTitle>
+          {shouldRenderContent && (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiText color="subdued" size="xs">
+                {field}
+              </EuiText>
+              <EuiCodeBlock
+                overflowHeight={100}
+                paddingSize="s"
+                isCopyable
+                language="txt"
+                fontSize="s"
+              >
+                {value}
+              </EuiCodeBlock>
+            </EuiFlexGroup>
+          )}
+          {shouldRenderEventOriginal && (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiText color="subdued" size="xs">
+                {constants.EVENT_ORIGINAL_FIELD}
+              </EuiText>
+              <EuiCodeBlock
+                overflowHeight={100}
+                paddingSize="s"
+                isCopyable
+                language="txt"
+                fontSize="s"
+              >
+                {value}
+              </EuiCodeBlock>
+            </EuiFlexGroup>
+          )}
+          {shouldRenderSource && (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiText color="subdued" size="xs">
+                {documentLabel}
+              </EuiText>
+              <JsonCodeEditor json={formatJsonDocumentForContent(row).raw} height={300} />
+            </EuiFlexGroup>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    </DataGridCellServicesProvider>
   );
 };
