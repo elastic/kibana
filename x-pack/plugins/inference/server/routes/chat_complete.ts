@@ -71,6 +71,9 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
       }),
     ])
   ),
+  functionCalling: schema.maybe(
+    schema.oneOf([schema.literal('native'), schema.literal('simulated'), schema.literal('auto')])
+  ),
 });
 
 export function registerChatCompleteRoute({
@@ -96,7 +99,7 @@ export function registerChatCompleteRoute({
 
       const client = createInferenceClient({ request, actions, logger });
 
-      const { connectorId, messages, system, toolChoice, tools } = request.body;
+      const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
 
       const chatCompleteResponse = client.chatComplete({
         connectorId,
@@ -104,6 +107,7 @@ export function registerChatCompleteRoute({
         system,
         toolChoice,
         tools,
+        functionCalling,
       });
 
       return response.ok({

@@ -8,7 +8,7 @@
 import { Observable } from 'rxjs';
 import { FromToolSchema, ToolSchema } from '../chat_complete/tool_schema';
 import { InferenceTaskEventBase } from '../inference_task';
-import { Message } from '../chat_complete';
+import type { Message, FunctionCallingMode } from '../chat_complete';
 
 export enum OutputEventType {
   OutputUpdate = 'output',
@@ -56,6 +56,7 @@ export type OutputAPI = <
     input: string;
     schema?: TOutputSchema;
     previousMessages?: Message[];
+    functionCalling?: FunctionCallingMode;
   }
 ) => Observable<
   OutputEvent<TId, TOutputSchema extends ToolSchema ? FromToolSchema<TOutputSchema> : undefined>
