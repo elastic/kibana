@@ -16,8 +16,6 @@ import { context } from '@kbn/kibana-react-plugin/public';
 
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { mlJobServiceFactory } from '../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 
 import { isManagedJob } from '../../../jobs_utils';
 
@@ -46,12 +44,8 @@ class MultiJobActionsMenuUI extends Component {
     this.canResetJob = checkPermission('canResetJob') && mlNodesAvailable();
     this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
-    this.toastNoticiations = constructorContext.services.notifications.toasts;
-    const mlApi = constructorContext.services.mlServices.mlApi;
-    const toastNotificationService = toastNotificationServiceProvider(
-      constructorContext.services.notifications.toasts
-    );
-    this.mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
+    this.toastNotifications = constructorContext.services.notifications.toasts;
+    this.mlApi = constructorContext.services.mlServices.mlApi;
   }
 
   onButtonClick = () => {
@@ -116,7 +110,7 @@ class MultiJobActionsMenuUI extends Component {
             if (this.props.jobs.some((j) => isManagedJob(j))) {
               this.props.showCloseJobsConfirmModal(this.props.jobs);
             } else {
-              closeJobs(this.toastNotifications, this.mlJobService, this.props.jobs);
+              closeJobs(this.toastNotifications, this.mlApi, this.props.jobs);
             }
 
             this.closePopover();
@@ -163,7 +157,12 @@ class MultiJobActionsMenuUI extends Component {
             if (this.props.jobs.some((j) => isManagedJob(j))) {
               this.props.showStopDatafeedsConfirmModal(this.props.jobs);
             } else {
-              stopDatafeeds(this.props.jobs, this.props.refreshJobs);
+              stopDatafeeds(
+                this.toastNotifications,
+                this.mlApi,
+                this.props.jobs,
+                this.props.refreshJobs
+              );
             }
             this.closePopover();
           }}
