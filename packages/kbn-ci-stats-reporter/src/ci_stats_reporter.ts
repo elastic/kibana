@@ -170,7 +170,7 @@ export class CiStatsReporter {
       const { stdout } = await execa('git', ['config', 'user.email']);
       email = stdout;
     } catch (e) {
-      this.log.debug(e.message);
+      // no-op - we're ok with email being undefined
     }
 
     try {
@@ -181,7 +181,7 @@ export class CiStatsReporter {
     }
 
     const memUsage = process.memoryUsage();
-    const isElasticCommitter = email && email.endsWith('@elastic.co') ? true : false;
+    const isElasticCommitter = email && email.endsWith('@elastic.co');
 
     const defaultMeta = {
       kibanaUuid,
@@ -200,14 +200,16 @@ export class CiStatsReporter {
       memoryUsageHeapUsed: memUsage.heapUsed,
       memoryUsageExternal: memUsage.external,
       memoryUsageArrayBuffers: memUsage.arrayBuffers,
-      nestedTiming: process.env.CI_STATS_NESTED_TIMING ? true : false,
+      nestedTiming: !!process.env.CI_STATS_NESTED_TIMING,
       osArch: Os.arch(),
       osPlatform: Os.platform(),
       osRelease: Os.release(),
       totalMem: Os.totalmem(),
     };
 
-    this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+    if (defaultMeta.committerHash) {
+      this.log.debug('CIStatsReporter committerHash: %s', defaultMeta.committerHash);
+    }
 
     return !!(await this.req({
       auth: !!buildId,

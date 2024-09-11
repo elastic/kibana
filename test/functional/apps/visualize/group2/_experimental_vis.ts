@@ -13,23 +13,23 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const PageObjects = getPageObjects(['visualize']);
+  const { visualize } = getPageObjects(['visualize']);
 
   describe('experimental visualizations in visualize app ', function () {
     before(async () => {
-      await PageObjects.visualize.initTests();
+      await visualize.initTests();
     });
 
     describe('experimental visualizations', () => {
       beforeEach(async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewAggBasedVisualization();
-        await PageObjects.visualize.waitForVisualizationSelectPage();
+        await visualize.navigateToNewAggBasedVisualization();
+        await visualize.waitForVisualizationSelectPage();
       });
 
       it('should show an notification when creating beta visualizations', async () => {
         // Try to find a beta visualization.
-        const betaTypes = await PageObjects.visualize.getBetaTypeLinks();
+        const betaTypes = await visualize.getBetaTypeLinks();
         if (betaTypes.length === 0) {
           log.info('No beta visualization found. Skipping this test.');
           return;
@@ -38,15 +38,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Create a new visualization
         await betaTypes[0].click();
         // Select a index-pattern/search if this vis requires it
-        await PageObjects.visualize.selectVisSourceIfRequired();
+        await visualize.selectVisSourceIfRequired();
         // Check that the beta banner is there and state that this is beta
-        const info = await PageObjects.visualize.getExperimentalInfo();
+        const info = await visualize.getExperimentalInfo();
         expect(await info.getVisibleText()).to.contain('beta');
       });
 
       it('should show an notification when creating experimental visualizations', async () => {
         // Try to find a experimental visualization.
-        const experimentalTypes = await PageObjects.visualize.getExperimentalTypeLinks();
+        const experimentalTypes = await visualize.getExperimentalTypeLinks();
         if (experimentalTypes.length === 0) {
           log.info('No experimental visualization found. Skipping this test.');
           return;
@@ -55,17 +55,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Create a new visualization
         await experimentalTypes[0].click();
         // Select a index-pattern/search if this vis requires it
-        await PageObjects.visualize.selectVisSourceIfRequired();
+        await visualize.selectVisSourceIfRequired();
         // Check that the experimental banner is there and state that this is experimental
-        const info = await PageObjects.visualize.getExperimentalInfo();
+        const info = await visualize.getExperimentalInfo();
         expect(await info.getVisibleText()).to.contain('experimental');
       });
 
       it('should not show that notification for stable visualizations', async () => {
-        await PageObjects.visualize.clickAreaChart();
-        await PageObjects.visualize.clickNewSearch();
-        expect(await PageObjects.visualize.isBetaInfoShown()).to.be(false);
-        expect(await PageObjects.visualize.isExperimentalInfoShown()).to.be(false);
+        await visualize.clickAreaChart();
+        await visualize.clickNewSearch();
+        expect(await visualize.isBetaInfoShown()).to.be(false);
+        expect(await visualize.isExperimentalInfoShown()).to.be(false);
       });
     });
   });

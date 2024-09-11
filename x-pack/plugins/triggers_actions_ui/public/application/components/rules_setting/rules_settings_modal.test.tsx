@@ -182,7 +182,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
 
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -218,7 +218,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
 
     // Try cancelling
-    userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
 
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
@@ -269,7 +269,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
@@ -284,7 +284,7 @@ describe('rules_settings_modal', () => {
     await waitForModalLoad();
 
     expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
-    userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
     expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).not.toBe(null);
   });
 
@@ -356,7 +356,7 @@ describe('rules_settings_modal', () => {
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
 
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -385,7 +385,7 @@ describe('rules_settings_modal', () => {
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
