@@ -40,15 +40,15 @@
 
 # =================== System: Elasticsearch ===================
 # The URLs of the Elasticsearch instances to use for all your queries.
-elasticsearch.hosts: ['http://localhost:9200']
+#elasticsearch.hosts: ["http://localhost:9200"]
+
 # If your Elasticsearch is protected with basic authentication, these settings provide
 # the username and password that the Kibana server uses to perform maintenance on the Kibana
 # index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
 # is proxied through the Kibana server.
-elasticsearch.username: 'kibana_system'
-elasticsearch.password: 'changeme'
+#elasticsearch.username: "kibana_system"
+#elasticsearch.password: "pass"
 
-enterpriseSearch.host: 'http://localhost:3002'
 # Kibana can also authenticate to Elasticsearch via "service account tokens".
 # Service account tokens are Bearer style tokens that replace the traditional username/password based configuration.
 # Use this token instead of a username/password.
