@@ -14,7 +14,7 @@ import { formatRequest } from '@kbn/server-route-repository';
 import supertest from 'supertest';
 import { Subtract } from 'utility-types';
 import { format } from 'url';
-import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import { Config } from '@kbn/test';
 import { InheritedFtrProviderContext } from '../../../../services';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
@@ -26,12 +26,9 @@ export function getObservabilityAIAssistantApiClient({
   const kibanaServer = svlSharedConfig.get('servers.kibana');
   const cAuthorities = svlSharedConfig.get('servers.kibana.certificateAuthorities');
 
-  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username;
-  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password;
-
   const url = format({
     ...kibanaServer,
-    auth: `${username}:${password}`,
+    auth: false, // don't use auth in serverless
   });
 
   return createObservabilityAIAssistantApiClient(supertest.agent(url, { ca: cAuthorities }));
@@ -72,7 +69,6 @@ export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
       const formDataRequest = st[method](url)
         .set(headers)
         .set('Content-type', 'multipart/form-data');
-
       for (const field of fields) {
         void formDataRequest.field(field[0], field[1]);
       }

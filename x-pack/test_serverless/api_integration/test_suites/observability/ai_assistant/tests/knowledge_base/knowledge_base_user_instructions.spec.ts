@@ -20,16 +20,13 @@ import {
   LlmProxy,
   createLlmProxy,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
-import {
-  createProxyActionConnector,
-  deleteActionConnector,
-} from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/action_connectors';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
@@ -297,12 +294,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       before(async () => {
         proxy = await createLlmProxy(log);
-        connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
+        connectorId = await createProxyActionConnector({
+          supertest: supertestWithoutAuth,
+          log,
+          port: proxy.getPort(),
+          roleAuthc: editorRoleAuthc,
+          internalReqHeader,
+        });
       });
 
       after(async () => {
         proxy.close();
-        await deleteActionConnector({ supertest, connectorId, log });
+        await deleteActionConnector({
+          supertest: supertestWithoutAuth,
+          connectorId,
+          log,
+          roleAuthc: editorRoleAuthc,
+          internalReqHeader,
+        });
       });
 
       it('adds the instruction to the system prompt', async () => {
