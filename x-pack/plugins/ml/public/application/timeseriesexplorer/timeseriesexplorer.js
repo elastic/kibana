@@ -42,7 +42,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
-import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
@@ -56,18 +55,19 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
-import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
-import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
-
-import { ml } from '../services/ml_api_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
-import { mlJobService } from '../services/job_service';
+import { mlJobServiceFactory } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
+import { toastNotificationServiceProvider } from '../services/toast_notification_service';
+
+import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
+import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
+import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
+import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import {
   APP_STATE_ACTION,
@@ -99,13 +99,15 @@ const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionV
 const containerPadding = 34;
 
 export class TimeSeriesExplorer extends React.Component {
+  static contextType = context;
+
   static propTypes = {
     appStateHandler: PropTypes.func.isRequired,
     autoZoomDuration: PropTypes.number.isRequired,
     bounds: PropTypes.object.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
     lastRefresh: PropTypes.number.isRequired,
-    previousRefresh: PropTypes.number.isRequired,
+    previousRefresh: PropTypes.number,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
@@ -113,8 +115,6 @@ export class TimeSeriesExplorer extends React.Component {
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
-    toastNotificationService: PropTypes.object,
-    dataViewsService: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -141,11 +141,37 @@ export class TimeSeriesExplorer extends React.Component {
    */
   static contextType = context;
 
+  dataViewsService;
+  toastNotificationService;
+  mlApiServices;
+  mlForecastService;
+  mlIndexUtils;
+  mlJobService;
+  mlResultsService;
   mlTimeSeriesExplorer;
   mlTimeSeriesSearchService;
-  mlForecastService;
-  mlResultsService;
-  mlIndexUtils;
+
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
+    this.dataViewsService = constructorContext.services.data.dataViews;
+    this.toastNotificationService = toastNotificationServiceProvider(
+      constructorContext.services.notifications.toasts
+    );
+    this.mlApiServices = constructorContext.services.mlServices.mlApiServices;
+    this.mlForecastService = forecastServiceFactory(this.mlApiServices);
+    this.mlIndexUtils = indexServiceFactory(this.dataViewsService);
+    this.mlJobService = mlJobServiceFactory(this.toastNotificationService, this.mlApiServices);
+    this.mlResultsService = mlResultsServiceProvider(this.mlApiServices);
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      constructorContext.services.uiSettings,
+      this.mlApiServices,
+      this.mlResultsService
+    );
+    this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
+      this.mlResultsService,
+      this.mlApiServices
+    );
+  }
 
   /**
    * Returns field names that don't have a selection yet.
@@ -226,7 +252,7 @@ export class TimeSeriesExplorer extends React.Component {
 
   getFocusAggregationInterval(selection) {
     const { selectedJobId } = this.props;
-    const selectedJob = mlJobService.getJob(selectedJobId);
+    const selectedJob = this.mlJobService.getJob(selectedJobId);
 
     // Calculate the aggregation interval for the focus chart.
     const bounds = { min: moment(selection.from), max: moment(selection.to) };
@@ -245,7 +271,7 @@ export class TimeSeriesExplorer extends React.Component {
     const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
       this.props;
     const { modelPlotEnabled } = this.state;
-    const selectedJob = mlJobService.getJob(selectedJobId);
+    const selectedJob = this.mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
       return;
     }
@@ -301,9 +327,11 @@ export class TimeSeriesExplorer extends React.Component {
       tableSeverity,
       functionDescription,
     } = this.props;
+    const mlJobService = this.mlJobService;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
+    const ml = this.mlApiServices;
     return ml.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
@@ -365,13 +393,14 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   displayErrorToastMessages = (error, errorMsg) => {
-    if (this.props.toastNotificationService) {
-      this.props.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
+    if (this.toastNotificationService) {
+      this.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
     }
     this.setState({ loading: false, chartDataError: errorMsg });
   };
 
   loadSingleMetricData = (fullRefresh = true) => {
+    const mlJobService = this.mlJobService;
     const {
       autoZoomDuration,
       bounds,
@@ -653,7 +682,8 @@ export class TimeSeriesExplorer extends React.Component {
    */
   getControlsForDetector = () => {
     const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
-    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
+    const selectedJob = this.mlJobService.getJob(selectedJobId);
+    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJob);
   };
 
   /**
@@ -676,7 +706,7 @@ export class TimeSeriesExplorer extends React.Component {
   loadForJobId(jobId) {
     const { appStateHandler, selectedDetectorIndex } = this.props;
 
-    const selectedJob = mlJobService.getJob(jobId);
+    const selectedJob = this.mlJobService.getJob(jobId);
 
     if (selectedJob === undefined) {
       return;
@@ -698,8 +728,8 @@ export class TimeSeriesExplorer extends React.Component {
           },
         }
       );
-      if (this.props.toastNotificationService) {
-        this.props.toastNotificationService.displayWarningToast(warningText);
+      if (this.toastNotificationService) {
+        this.toastNotificationService.displayWarningToast(warningText);
       }
 
       detectorIndex = detectors[0].index;
@@ -715,25 +745,13 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
-    const { mlApiServices } = this.context.services.mlServices;
-    this.mlResultsService = mlResultsServiceProvider(mlApiServices);
-    this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
-      this.mlResultsService,
-      mlApiServices
-    );
-    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
-      this.context.services.uiSettings,
-      mlApiServices,
-      this.mlResultsService
-    );
-    this.mlIndexUtils = indexServiceFactory(this.context.services.data.dataViews);
-    this.mlForecastService = forecastServiceFactory(mlApiServices);
+    const mlJobService = this.mlJobService;
     // if timeRange used in the url is incorrect
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;
     if (invalidTimeRangeError) {
-      if (this.props.toastNotificationService) {
-        this.props.toastNotificationService.displayWarningToast(
+      if (this.toastNotificationService) {
+        this.toastNotificationService.displayWarningToast(
           i18n.translate('xpack.ml.timeSeriesExplorer.invalidTimeRangeInUrlCallout', {
             defaultMessage:
               'The time filter was changed to the full range for this job due to an invalid default time filter. Check the advanced settings for {field}.',
@@ -843,13 +861,9 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentDidUpdate(previousProps) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
-      const selectedJob = mlJobService.getJob(this.props.selectedJobId);
+      const selectedJob = this.mlJobService.getJob(this.props.selectedJobId);
       this.contextChartSelectedInitCallDone = false;
-      getDataViewsAndIndicesWithGeoFields(
-        [selectedJob],
-        this.props.dataViewsService,
-        this.mlIndexUtils
-      )
+      getDataViewsAndIndicesWithGeoFields([selectedJob], this.dataViewsService, this.mlIndexUtils)
         .then(({ getSourceIndicesWithGeoFieldsResp }) =>
           this.setState(
             {
@@ -931,6 +945,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   render() {
+    const mlJobService = this.mlJobService;
     const {
       autoZoomDuration,
       bounds,

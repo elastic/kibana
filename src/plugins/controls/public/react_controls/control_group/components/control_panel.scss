@@ -1,24 +1,22 @@
 .controlPanel {
   width: 100%;
   max-inline-size: 100% !important;
-  height: $euiButtonHeight;
+  height: $euiButtonHeightSmall;
   box-shadow: none !important;
   background-color: $euiFormBackgroundColor !important;
-
   border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
+
   &--roundedBorders {
     border-radius: $euiBorderRadius !important;
   }
 
   &--labelWrapper {
-    max-width: 40%;
+    height: $euiFormControlCompressedHeight;
 
     .controlPanel--label {
       @include euiTextTruncate;
-      background-color: transparent;
-      border-radius: $euiBorderRadius;
-      margin-left: 0 !important;
-      padding-left: 0 !important;
+      padding: 0;
+      height: $euiButtonHeightSmall;
     }
   }
 
@@ -35,4 +33,8 @@
       padding-left: $euiSizeM;
     }
   }
+}
+
+.controlFrame__dragHandle {
+  line-height: 0; // Vertically center the grab handle
 }

@@ -14,7 +14,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { ExperimentalFeatures } from '../../common/config';
+import type { ExperimentalFeatures } from '../../server/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';

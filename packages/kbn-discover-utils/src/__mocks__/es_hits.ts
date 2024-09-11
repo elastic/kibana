@@ -72,6 +72,8 @@ const generateFieldValue = (field: DataViewField, index: number) => {
       return Array.from(field.name).reduce((sum, char) => sum + char.charCodeAt(0) + index, 0);
     case KBN_FIELD_TYPES.STRING:
       return `${field.name}_${index}`;
+    case KBN_FIELD_TYPES._SOURCE:
+      return { [field.name]: `${field.name}_${index}` };
     default:
       throw new Error(`Unsupported type ${field.type}`);
   }

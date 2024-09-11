@@ -10,14 +10,14 @@ import { CoreSetup } from '@kbn/core/public';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
 
 export interface SamplePanelActionContext {
-  embeddable: IEmbeddable;
+  embeddable: DefaultEmbeddableApi;
 }
 
 export function createSamplePanelAction(getStartServices: CoreSetup['getStartServices']) {
@@ -37,7 +37,7 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
           <React.Fragment>
             <EuiFlyoutHeader>
               <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-                <h1>{embeddable.getTitle()}</h1>
+                <h1>{embeddable.panelTitle?.value}</h1>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>

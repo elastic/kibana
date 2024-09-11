@@ -8,7 +8,7 @@
 
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import type { XyConfig } from '../config';
+import type { XyConfig } from './config';
 
 interface PluginSetupDependencies {
   visualizations: VisualizationsServerSetup;

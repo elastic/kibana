@@ -37,7 +37,7 @@ export type ScriptedPhraseFilter = Filter & {
   meta: PhraseFilterMeta;
   query: {
     script: {
-      script: estypes.InlineScript;
+      script: estypes.Script;
     };
   };
 };
@@ -134,7 +134,7 @@ export const getPhraseScript = (field: DataViewFieldBase, value: PhraseFilterVal
       params: {
         value: convertedValue,
       },
-    } as estypes.InlineScript,
+    } as estypes.Script,
   };
 };
 

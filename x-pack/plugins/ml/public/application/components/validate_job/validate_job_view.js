@@ -26,8 +26,6 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getDocLinks } from '../../util/dependency_cache';
-
 import { parseMessages } from '../../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { Callout, statusToEuiIconType } from '../callout';
@@ -76,7 +74,7 @@ MessageList.propTypes = {
 const LoadingSpinner = () => (
   <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
+      <EuiLoadingSpinner size="xl" data-test-subj="mlValidateJobLoadingSpinner" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -120,6 +118,7 @@ export class ValidateJobUI extends Component {
   };
 
   validate = () => {
+    const docLinks = this.props.kibana.services.docLinks;
     const job = this.props.getJobConfig();
     const getDuration = this.props.getDuration;
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
@@ -131,10 +130,10 @@ export class ValidateJobUI extends Component {
       if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
         let shouldShowLoadingIndicator = true;
 
-        this.props.ml
+        this.props.kibana.services.mlServices.mlApiServices
           .validateJob({ duration, fields, job })
           .then((validationMessages) => {
-            const messages = parseMessages(validationMessages, getDocLinks());
+            const messages = parseMessages(validationMessages, docLinks);
             shouldShowLoadingIndicator = false;
 
             const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
@@ -229,7 +228,7 @@ export class ValidateJobUI extends Component {
   };
 
   render() {
-    const jobTipsUrl = getDocLinks().links.ml.anomalyDetectionJobTips;
+    const jobTipsUrl = this.props.kibana.services.docLinks.links.ml.anomalyDetectionJobTips;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true
@@ -244,7 +243,8 @@ export class ValidateJobUI extends Component {
         {embedded === false ? (
           <div>
             <EuiButton
-              onClick={this.validate}
+              data-test-subj="mlValidateJobButton"
+              onClick={(e) => this.validate(e)}
               size="s"
               fill={fill}
               iconType={isCurrentJobConfig ? this.state.ui.iconType : defaultIconType}
@@ -260,6 +260,7 @@ export class ValidateJobUI extends Component {
 
             {!isDisabled && this.state.ui.isModalVisible && (
               <Modal
+                data-test-subj="mlValidateJobModal"
                 close={this.closeModal}
                 title={
                   <FormattedMessage
@@ -321,7 +322,6 @@ ValidateJobUI.propTypes = {
   getJobConfig: PropTypes.func.isRequired,
   isCurrentJobConfig: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  ml: PropTypes.object.isRequired,
   embedded: PropTypes.bool,
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,

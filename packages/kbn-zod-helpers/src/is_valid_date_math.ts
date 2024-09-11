@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 import dateMath from '@kbn/datemath';
 
 function validateDateMath(time: string): boolean {

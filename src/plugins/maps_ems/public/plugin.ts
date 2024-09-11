@@ -15,7 +15,7 @@ import {
   getIsEnterprisePlus,
 } from './kibana_services';
 import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from '.';
-import type { MapConfig } from '../config';
+import type { MapConfig } from '../server/config';
 import { createEMSSettings } from '../common/ems_settings';
 import { createEMSClientLazy } from './lazy_load_bundle';
 

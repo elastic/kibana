@@ -67,7 +67,9 @@ xpack.actions.customHostSettings:
       certificateAuthoritiesFiles: [ 'one.crt' ]
       certificateAuthoritiesData: |
           -----BEGIN CERTIFICATE-----
-          ... multiple lines of certificate data here ...
+          MIIDTD...
+          CwUAMD...
+          ... multiple lines of certificate data ...
           -----END CERTIFICATE-----
     smtp:
       requireTLS: true
@@ -125,9 +127,8 @@ A file name or list of file names of PEM-encoded certificate files to use
 to validate the server.
 
 `xpack.actions.customHostSettings[n].ssl.certificateAuthoritiesData` {ess-icon}::
-The contents of a PEM-encoded certificate file, or multiple files appended
-into a single string.  This configuration can be used for environments where
-the files cannot be made available.
+The contents of one or more PEM-encoded certificate files in multiline format.
+This configuration can be used for environments where the files cannot be made available.
 
 [[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
@@ -140,7 +141,11 @@ A boolean value indicating that a footer with a relevant link should be added to
 `xpack.actions.enabledActionTypes` {ess-icon}::
 A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.thehive`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`, `.gemini`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 +
+--
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
+
+IMPORTANT: <<pre-configured-connectors,Preconfigured connectors>> are not affected by this setting.
+--
 
 `xpack.actions.microsoftExchangeUrl`::
 The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication. Default: `https://login.microsoftonline.com`.

@@ -109,7 +109,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]

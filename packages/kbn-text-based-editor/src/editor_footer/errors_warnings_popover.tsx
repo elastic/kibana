@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
-  EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
@@ -57,10 +56,9 @@ function ErrorsWarningsContent({
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
 }) {
-  const { label, color } = getConstsByType(type, items.length);
+  const { color } = getConstsByType(type, items.length);
   return (
     <div style={{ width: 500 }}>
-      <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
       <EuiDescriptionList>
         {items.map((item, index) => {
           return (
@@ -130,6 +128,9 @@ export function ErrorsWarningsFooterPopover({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            anchorPosition="downLeft"
+            hasArrow={false}
+            panelPaddingSize="s"
             button={
               <EuiText
                 size="xs"

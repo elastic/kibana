@@ -126,7 +126,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('Create rules flyout', async () => {
+    describe('Create rules flyout', () => {
       const ruleName = 'esQueryRule';
 
       afterEach(async () => {

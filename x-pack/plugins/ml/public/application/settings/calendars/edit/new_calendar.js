@@ -16,12 +16,10 @@ import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
-import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
 class NewCalendarUI extends Component {
@@ -73,7 +71,9 @@ class NewCalendarUI extends Component {
 
   async formSetup() {
     try {
-      const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
+      const { jobIds, groupIds, calendars } = await getCalendarSettingsData(
+        this.props.kibana.services.mlServices.mlApiServices
+      );
 
       const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
       const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
@@ -145,6 +145,7 @@ class NewCalendarUI extends Component {
   };
 
   onCreate = async () => {
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     const { formCalendarId } = this.state;
 
     if (this.isDuplicateId()) {
@@ -176,6 +177,7 @@ class NewCalendarUI extends Component {
   };
 
   onEdit = async () => {
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     const calendar = this.setUpCalendarForApi();
     this.setState({ saving: true });
 
@@ -331,7 +333,7 @@ class NewCalendarUI extends Component {
       isGlobalCalendar,
     } = this.state;
 
-    const helpLink = getDocLinks().links.ml.calendars;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.calendars;
 
     let modal = '';
 

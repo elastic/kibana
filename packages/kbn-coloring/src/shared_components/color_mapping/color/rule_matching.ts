@@ -41,7 +41,7 @@ export function rangeMatch(rule: ColorMapping.RuleRange, value: number) {
 }
 
 // TODO: move in some data/table related package
-export const SPECIAL_TOKENS_STRING_CONVERTION = new Map([
+export const SPECIAL_TOKENS_STRING_CONVERSION = new Map([
   [
     '__other__',
     i18n.translate('coloring.colorMapping.terms.otherBucketLabel', {
@@ -55,3 +55,9 @@ export const SPECIAL_TOKENS_STRING_CONVERTION = new Map([
     }),
   ],
 ]);
+
+/**
+ * Returns special string for sake of color mapping/syncing
+ */
+export const getSpecialString = (value: string) =>
+  SPECIAL_TOKENS_STRING_CONVERSION.get(value) ?? value;

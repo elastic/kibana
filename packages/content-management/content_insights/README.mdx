@@ -1,0 +1,64 @@
+---
+id: sharedUX/ContentInsights
+slug: /shared-ux/content-insights
+title: Content Insights
+description: A set of Content Management services and component to provide insights on the content of Kibana.
+tags: ['shared-ux', 'component']
+date: 2024-08-06
+---
+
+## Description
+
+The Content Insights is a set of Content Management services and components to provide insights on the content of Kibana.
+Currently, it allows to track the usage of your content and display the stats of it.
+
+- The service can count the following events:
+  - `viewed`
+- It provides the api for registering the routes to increase the count and to get the stats.
+- It provides the client to increase the count and to get the stats.
+- It provides a flyout and a component to display the stats as a total count and a weekly chart.
+- Internally it uses the usage collection plugin to store and search the data.
+
+## API
+
+// server side
+
+```ts
+import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+
+if (plugins.usageCollection) {
+  // Registers routes for tracking and fetching dashboard views
+  registerContentInsights(
+    {
+      usageCollection: plugins.usageCollection,
+      http: core.http,
+      getStartServices: () =>
+        core.getStartServices().then(([_, start]) => ({
+          usageCollection: start.usageCollection!,
+        })),
+    },
+    {
+      domainId: 'dashboard',
+      // makes sure that only users with read/all access to dashboard app can access the routes
+      routeTags: ['access:dashboardUsageStats'],
+    }
+  );
+}
+```
+
+// client side
+
+```ts
+import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+
+const contentInsightsClient = new ContentInsightsClient(
+  { http: params.coreStart.http },
+  { domainId: 'dashboard' }
+);
+
+contentInsightsClient.track(dashboardId, 'viewed');
+
+// wrap component in `ContentInsightsProvider` and use the hook to open an insights flyout
+const openInsightsFlyout = useOpenInsightsFlyout();
+openInsightsFlyout({ item });
+```

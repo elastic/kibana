@@ -64,7 +64,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     largeLists: [],
   });
   const { loading, result, start } = useFindListsBySize();
-  const getLabel = useCallback(({ name }) => name, []);
+  const getLabel = useCallback(({ name }: ListSchema) => name, []);
 
   const optionsMemo = useMemo(
     () => filterFieldToList(listData, selectedField),

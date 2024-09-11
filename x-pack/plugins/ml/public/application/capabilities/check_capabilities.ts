@@ -197,10 +197,11 @@ export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalSer
 }
 
 export function checkCreateJobsCapabilitiesResolver(
+  mlApiServices: MlApiServices,
   redirectToJobsManagementPage: () => Promise<void>
 ): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getCapabilities()
+    getCapabilities(mlApiServices)
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,

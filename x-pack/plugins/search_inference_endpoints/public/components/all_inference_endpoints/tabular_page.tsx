@@ -15,13 +15,12 @@ import {
   HorizontalAlignment,
 } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { isLocalModel } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
 import { FilterOptions, InferenceEndpointUI, ServiceProviderKeys } from './types';
-
-import { DeploymentStatusEnum } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
@@ -59,9 +58,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const tableColumns: Array<EuiBasicTableColumn<InferenceEndpointUI>> = [
     {
-      field: 'deployment',
       name: '',
-      render: (deployment: DeploymentStatusEnum) => <DeploymentStatus status={deployment} />,
+      render: ({ endpoint, deployment }: InferenceEndpointUI) =>
+        isLocalModel(endpoint) ? <DeploymentStatus status={deployment} /> : null,
       align: 'center' as HorizontalAlignment,
       width: '64px',
     },

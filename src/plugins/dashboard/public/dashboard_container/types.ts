@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
+import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { DashboardContainerInput, DashboardOptions } from '../../common';
 import { SavedDashboardPanel } from '../../common/content_management';
 
@@ -125,7 +125,7 @@ export type DashboardLocatorParams = Partial<
   panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
 
   /**
-   * Control group input
+   * Control group changes
    */
-  controlGroupInput?: SerializableControlGroupInput;
+  controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
 };

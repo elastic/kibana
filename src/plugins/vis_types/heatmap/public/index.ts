@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { HeatmapPublicConfig } from '../config';
+import type { HeatmapPublicConfig } from '../server/config';
 import { VisTypeHeatmapPlugin } from './plugin';
 
 export { heatmapVisType } from './vis_type';

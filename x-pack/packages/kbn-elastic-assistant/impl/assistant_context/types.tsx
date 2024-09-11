@@ -19,23 +19,6 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   content?: string;
   presentation?: MessagePresentation;
 }
-
-export interface ConversationTheme {
-  title?: string;
-  titleIcon?: string;
-  user?: {
-    name?: string;
-    icon?: string;
-  };
-  assistant?: {
-    name?: string;
-    icon?: string;
-  };
-  system?: {
-    name?: string;
-    icon?: string;
-  };
-}
 /**
  * Complete state to reconstruct a conversation instance.
  * Includes all messages, connector configured, and relevant UI state.

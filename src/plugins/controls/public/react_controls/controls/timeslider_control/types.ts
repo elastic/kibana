@@ -8,7 +8,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { PublishesTimeslice } from '@kbn/presentation-publishing';
+import type { PublishesPanelTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
 import type { DefaultControlApi, DefaultControlState } from '../types';
 
 export type Timeslice = [number, number];
@@ -20,7 +20,9 @@ export interface TimesliderControlState extends DefaultControlState {
   timesliceEndAsPercentageOfTimeRange?: number;
 }
 
-export type TimesliderControlApi = DefaultControlApi & PublishesTimeslice;
+export type TimesliderControlApi = DefaultControlApi &
+  Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
+  PublishesTimeslice;
 
 export interface Services {
   core: CoreStart;

@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import { timeFormatter } from '@kbn/ml-date-utils';
+import { useMlApiContext } from '../../contexts/kibana';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
-import { ml } from '../../services/ml_api_service';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../common/constants/states';
 import { CloseJobConfirm } from './close_job_confirm';
 import type {
@@ -36,6 +36,8 @@ export enum COMBINED_JOB_STATE {
 }
 
 export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
+  const ml = useMlApiContext();
+
   const [canCreateJob, canStartStopDatafeed] = usePermissionCheck([
     'canCreateJob',
     'canStartStopDatafeed',
@@ -71,7 +73,8 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
 
   const checkJobIsClosed = useCallback(
     async (snapshot: ModelSnapshot) => {
-      const state = await getCombinedJobState(job.job_id);
+      const jobs = await ml.jobs.jobs([job.job_id]);
+      const state = getCombinedJobState(jobs);
       if (state === COMBINED_JOB_STATE.UNKNOWN) {
         // this will only happen if the job has been deleted by another user
         // between the time the row has been expended and now
@@ -90,6 +93,8 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         setCloseJobModalVisible(snapshot);
       }
     },
+    // skip mlApiServices from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [job]
   );
 
@@ -101,12 +106,15 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   const forceCloseJob = useCallback(async () => {
     await ml.jobs.forceStopAndCloseJob(job.job_id);
     if (closeJobModalVisible !== null) {
-      const state = await getCombinedJobState(job.job_id);
+      const jobs = await ml.jobs.jobs([job.job_id]);
+      const state = getCombinedJobState(jobs);
       if (state === COMBINED_JOB_STATE.CLOSED) {
         setRevertSnapshot(closeJobModalVisible);
       }
     }
     hideCloseJobModalVisible();
+    // skip mlApiServices from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job, closeJobModalVisible]);
 
   const closeEditFlyout = useCallback((reload: boolean) => {
@@ -260,9 +268,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   );
 };
 
-async function getCombinedJobState(jobId: string) {
-  const jobs = await ml.jobs.jobs([jobId]);
-
+function getCombinedJobState(jobs: CombinedJobWithStats[]) {
   if (jobs.length !== 1) {
     return COMBINED_JOB_STATE.UNKNOWN;
   }

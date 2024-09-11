@@ -12,17 +12,14 @@ import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elast
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export function PalettePicker({
-  palettes,
-  activePalette,
-  setPalette,
-}: {
+interface PalettePickerProps<T> {
   palettes: PaletteRegistry;
-  activePalette?: PaletteOutput;
+  activePalette?: PaletteOutput<T>;
   setPalette: (palette: PaletteOutput) => void;
-}) {
-  const paletteName = getActivePaletteName(activePalette?.name);
+}
 
+export function PalettePicker<T>({ palettes, activePalette, setPalette }: PalettePickerProps<T>) {
+  const paletteName = getActivePaletteName(activePalette?.name);
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
     .filter(({ internal }) => !internal)
@@ -34,6 +31,7 @@ export function PalettePicker({
         palette: getCategoricalColors(10, id === paletteName ? activePalette?.params : undefined),
       };
     });
+
   return (
     <EuiFormRow
       fullWidth

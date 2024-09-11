@@ -146,6 +146,23 @@ function recordOf<K extends string, V>(
   return new RecordOfType(keyType, valueType, options);
 }
 
+function oneOf<A, B, C, D, E, F, G, H, I, J, K, L>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>
+  ],
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L>
+): Type<A | B | C | D | E | F | G | H | I | J | K | L>;
 function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
   types: [
     Type<A>,

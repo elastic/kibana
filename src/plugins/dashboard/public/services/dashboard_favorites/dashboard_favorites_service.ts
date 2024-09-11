@@ -10,6 +10,7 @@ import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardStartDependencies } from '../../plugin';
 import { DashboardFavoritesService } from './types';
+import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../../dashboard_constants';
 
 export type DashboardFavoritesServiceFactory = KibanaPluginServiceFactory<
   DashboardFavoritesService,
@@ -18,6 +19,10 @@ export type DashboardFavoritesServiceFactory = KibanaPluginServiceFactory<
 
 export const dashboardFavoritesServiceFactory: DashboardFavoritesServiceFactory = ({
   coreStart,
+  startPlugins,
 }) => {
-  return new FavoritesClient('dashboard', { http: coreStart.http });
+  return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+    http: coreStart.http,
+    usageCollection: startPlugins.usageCollection,
+  });
 };

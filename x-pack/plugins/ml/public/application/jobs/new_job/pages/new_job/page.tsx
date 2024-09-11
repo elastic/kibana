@@ -33,10 +33,10 @@ import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useDataSource } from '../../../../contexts/ml';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../../contexts/kibana';
 import type { ExistingJobsAndGroups } from '../../../../services/job_service';
-import { mlJobService } from '../../../../services/job_service';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useMlJobService } from '../../../../services/job_service';
+import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { MlPageHeader } from '../../../../components/page_header';
@@ -56,12 +56,18 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const {
     services: { maps: mapsPlugin, uiSettings },
   } = useMlKibana();
+  const ml = useMlApiContext();
+  const mlJobService = useMlJobService();
+  const newJobCapsService = useNewJobCapsService();
 
   const chartInterval = useTimeBuckets(uiSettings);
 
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
+        ml,
+        mlJobService,
+        newJobCapsService,
         dataSourceContext.selectedDataView,
         dataSourceContext.selectedSavedSearch,
         dataSourceContext.combinedQuery
@@ -202,13 +208,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
-    () => new ChartLoader(dataSourceContext.selectedDataView, jobCreator.query),
-    [dataSourceContext.selectedDataView, jobCreator.query]
+    () => new ChartLoader(ml, dataSourceContext.selectedDataView, jobCreator.query),
+    [ml, dataSourceContext.selectedDataView, jobCreator.query]
   );
 
   const mapLoader = useMemo(
-    () => new MapLoader(dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
-    [dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
+    () => new MapLoader(ml, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin),
+    [ml, dataSourceContext.selectedDataView, jobCreator.query, mapsPlugin]
   );
 
   const resultsLoader = useMemo(

@@ -9,12 +9,19 @@
 import { debounce } from 'lodash';
 import classNames from 'classnames';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -34,23 +41,11 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
 };
 
 export const DashboardViewportComponent = () => {
-  const controlsRoot = useRef(null);
-
   const dashboard = useDashboardContainer();
 
-  /**
-   * Render Control group
-   */
-  const controlGroup = dashboard.controlGroup;
-  useEffect(() => {
-    if (controlGroup && controlsRoot.current) controlGroup.render(controlsRoot.current);
-  }, [controlGroup]);
-
+  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
   const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
-  const controlCount = Object.keys(
-    controlGroup?.select((state) => state.explicitInput.panels) ?? {}
-  ).length;
-
+  const [hasControls, setHasControls] = useState(false);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
@@ -65,17 +60,59 @@ export const DashboardViewportComponent = () => {
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    const subscription = controlGroupApi.children$.subscribe((children) => {
+      setHasControls(Object.keys(children).length > 0);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
+
+  const [dashboardInitialized, setDashboardInitialized] = useState(false);
+  useEffect(() => {
+    let ignore = false;
+    dashboard.untilContainerInitialized().then(() => {
+      if (!ignore) {
+        setDashboardInitialized(true);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [dashboard]);
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
       })}
     >
-      {controlGroup && viewMode !== ViewMode.PRINT ? (
-        <div
-          className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
-          ref={controlsRoot}
-        />
+      {viewMode !== ViewMode.PRINT ? (
+        <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
+          <ReactEmbeddableRenderer<
+            ControlGroupSerializedState,
+            ControlGroupRuntimeState,
+            ControlGroupApi
+          >
+            key={dashboard.getInput().id}
+            hidePanelChrome={true}
+            panelProps={{ hideLoader: true }}
+            type={CONTROL_GROUP_TYPE}
+            maybeId={'control_group'}
+            getParentApi={() => {
+              return {
+                ...dashboard,
+                getSerializedStateForChild: dashboard.getSerializedStateForControlGroup,
+                getRuntimeStateForChild: dashboard.getRuntimeStateForControlGroup,
+              };
+            }}
+            onApiAvailable={(api) => dashboard.setControlGroupApi(api)}
+          />
+        </div>
       ) : null}
       {panelCount === 0 && <DashboardEmptyScreen />}
       <div
@@ -88,7 +125,9 @@ export const DashboardViewportComponent = () => {
       >
         {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
             otherwise, there is a race condition where the panels can end up being squashed */}
-        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
+        {viewportWidth !== 0 && dashboardInitialized && (
+          <DashboardGrid viewportWidth={viewportWidth} />
+        )}
       </div>
     </div>
   );

@@ -8,7 +8,7 @@
 
 import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { configSchema, TagcloudConfig } from '../config';
+import { configSchema, TagcloudConfig } from './config';
 
 export const config: PluginConfigDescriptor<TagcloudConfig> = {
   exposeToBrowser: {

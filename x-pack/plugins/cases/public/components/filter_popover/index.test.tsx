@@ -15,8 +15,7 @@ import { createAppMockRenderer } from '../../common/mock';
 
 import { FilterPopover } from '.';
 
-// FLAKY: https://github.com/elastic/kibana/issues/176679
-describe.skip('FilterPopover ', () => {
+describe('FilterPopover ', () => {
   let appMockRender: AppMockRenderer;
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];
@@ -24,6 +23,10 @@ describe.skip('FilterPopover ', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders button label correctly', async () => {

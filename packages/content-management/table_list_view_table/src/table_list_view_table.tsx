@@ -38,6 +38,10 @@ import type {
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { RecentlyAccessed } from '@kbn/recently-accessed';
+import {
+  ContentInsightsProvider,
+  useContentInsightsServices,
+} from '@kbn/content-management-content-insights-public';
 
 import {
   Table,
@@ -54,12 +58,10 @@ import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 import { sortByRecentlyAccessed } from './components/table_sort_select';
+import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 interface ContentEditorConfig
-  extends Pick<
-    OpenContentEditorParams,
-    'isReadonly' | 'onSave' | 'customValidators' | 'showActivityView'
-  > {
+  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
   enabled?: boolean;
 }
 
@@ -371,6 +373,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
+  const contentInsightsServices = useContentInsightsServices();
 
   const isInRouterContext = useInRouterContext();
 
@@ -567,6 +570,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
             close();
           }),
+        appendRows: contentInsightsServices && (
+          // have to "REWRAP" in the provider here because it will be rendered in a different context
+          <ContentInsightsProvider {...contentInsightsServices}>
+            <ContentEditorActivityRow item={item} />
+          </ContentInsightsProvider>
+        ),
       });
     },
     [
@@ -576,6 +585,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       contentEditor,
       tableItemsRowActions,
       fetchItems,
+      contentInsightsServices,
     ]
   );
 
@@ -713,7 +723,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: `${32 * actions.length}px`,
+        width: `72px`,
         actions,
       });
     }

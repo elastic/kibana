@@ -90,7 +90,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
   }
 
   return (
-    <span>
+    <span data-test-subj={`infraAssetDetailsMetadataField.${item.name}`}>
       <EuiToolTip
         content={i18n.translate('xpack.infra.metadataEmbeddable.setFilterByValueTooltip', {
           defaultMessage: 'Filter by value',

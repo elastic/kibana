@@ -11,7 +11,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import { setIndexPatterns, setTheme, setOverlays, setAnalytics, setI18n } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';

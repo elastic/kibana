@@ -273,8 +273,15 @@ Object {
           "keys": Object {
             "content": Object {
               "flags": Object {
+                "default": [Function],
                 "error": [Function],
+                "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -284,6 +291,33 @@ Object {
                 },
               ],
               "type": "string",
+            },
+            "rawContent": Object {
+              "flags": Object {
+                "default": [Function],
+                "error": [Function],
+                "presence": "optional",
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-any-type": true,
+                    },
+                  ],
+                  "type": "any",
+                },
+              ],
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
+              "type": "array",
             },
             "role": Object {
               "flags": Object {
@@ -300,6 +334,14 @@ Object {
               "type": "string",
             },
           },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
           "type": "object",
         },
       ],
@@ -418,6 +460,86 @@ Object {
         },
       ],
       "type": "number",
+    },
+    "toolChoice": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "name": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "type": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "auto",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "any",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "tool",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "tools": Object {
       "flags": Object {
@@ -556,8 +678,15 @@ Object {
           "keys": Object {
             "content": Object {
               "flags": Object {
+                "default": [Function],
                 "error": [Function],
+                "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -567,6 +696,33 @@ Object {
                 },
               ],
               "type": "string",
+            },
+            "rawContent": Object {
+              "flags": Object {
+                "default": [Function],
+                "error": [Function],
+                "presence": "optional",
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "metas": Array [
+                    Object {
+                      "x-oas-any-type": true,
+                    },
+                  ],
+                  "type": "any",
+                },
+              ],
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
+              "type": "array",
             },
             "role": Object {
               "flags": Object {
@@ -583,6 +739,14 @@ Object {
               "type": "string",
             },
           },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
           "type": "object",
         },
       ],
@@ -701,6 +865,86 @@ Object {
         },
       ],
       "type": "number",
+    },
+    "toolChoice": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "name": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "type": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "auto",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "any",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "tool",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "tools": Object {
       "flags": Object {
@@ -981,6 +1225,86 @@ Object {
         },
       ],
       "type": "number",
+    },
+    "toolChoice": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "name": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+        "type": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "auto",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "any",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "tool",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "tools": Object {
       "flags": Object {
@@ -4318,6 +4642,27 @@ Object {
       ],
       "type": "array",
     },
+    "systemInstruction": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -4343,6 +4688,95 @@ Object {
         },
       ],
       "type": "number",
+    },
+    "toolConfig": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "allowedFunctionNames": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "error": [Function],
+                "presence": "optional",
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "array",
+        },
+        "mode": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "AUTO",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "ANY",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "NONE",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "tools": Object {
       "flags": Object {
@@ -4463,6 +4897,27 @@ Object {
         },
       ],
       "type": "array",
+    },
+    "systemInstruction": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
     },
     "temperature": Object {
       "flags": Object {
@@ -4610,6 +5065,27 @@ Object {
       ],
       "type": "array",
     },
+    "systemInstruction": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -4635,6 +5111,95 @@ Object {
         },
       ],
       "type": "number",
+    },
+    "toolConfig": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "allowedFunctionNames": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "error": [Function],
+                "presence": "optional",
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
+          "type": "array",
+        },
+        "mode": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "AUTO",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "ANY",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "NONE",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "object",
     },
     "tools": Object {
       "flags": Object {

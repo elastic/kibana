@@ -59,5 +59,6 @@ export const useTimefilter = (props: UseTimefilterProps) => {
   return {
     refreshInterval,
     timeRange,
+    minRefreshInterval: props.timefilter.getMinRefreshInterval(),
   };
 };

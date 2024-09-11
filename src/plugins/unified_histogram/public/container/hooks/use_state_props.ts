@@ -10,7 +10,11 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/co
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
-import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
+import {
+  UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramSuggestionContext,
+} from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   breakdownFieldSelector,
@@ -150,7 +154,7 @@ export const useStateProps = ({
   );
 
   const onSuggestionContextChange = useCallback(
-    (suggestionContext) => {
+    (suggestionContext: UnifiedHistogramSuggestionContext | undefined) => {
       stateService?.setCurrentSuggestionContext(suggestionContext);
     },
     [stateService]

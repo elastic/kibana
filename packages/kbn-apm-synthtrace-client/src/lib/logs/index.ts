@@ -10,6 +10,9 @@ import { randomInt } from 'crypto';
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
+export const LONG_FIELD_NAME =
+  'thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces';
+
 const LOGSDB_DATASET_PREFIX = 'logsdb.';
 
 interface LogsOptions {
@@ -63,6 +66,13 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    test_field: string | string[];
+    date: Date;
+    severity: string;
+    msg: string;
+    svc: string;
+    hostname: string;
+    [LONG_FIELD_NAME]: string;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -121,6 +131,11 @@ class Log extends Serializable<LogDocument> {
 
   timestamp(time: number) {
     super.timestamp(time);
+    return this;
+  }
+
+  deleteField(fieldName: keyof LogDocument) {
+    delete this.fields[fieldName];
     return this;
   }
 }

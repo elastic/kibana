@@ -17,9 +17,8 @@ import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlKibana, useMlLink } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana, useMlLink } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
-import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import type { Dictionary } from '../../../../../common/types/common';
 import type {
@@ -57,6 +56,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
   const {
     services: { charts: chartsService },
   } = useMlKibana();
+  const ml = useMlApiContext();
 
   const { displayErrorToast } = useToastNotificationService();
   const { showNodeInfo } = useEnabledFeatures();

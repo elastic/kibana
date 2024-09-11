@@ -428,14 +428,12 @@ describe('MetricVisComponent', function () {
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
-      expect(visConfig!.value).toMatchInlineSnapshot(
-        `
+      expect(visConfig!.value).toMatchInlineSnapshot(`
         Array [
           "text-28.984375",
           "text-100",
         ]
-      `
-      );
+      `);
     });
 
     it('should display multi-values numeric values formatted and without quotes', () => {
@@ -451,14 +449,24 @@ describe('MetricVisComponent', function () {
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
-      expect(visConfig!.value).toMatchInlineSnapshot(
-        `
+      expect(visConfig!.value).toMatchInlineSnapshot(`
         Array [
           "number-28.984375",
           "number-100",
         ]
-      `
-      );
+      `);
+    });
+
+    it('should display an empty tile if no data is provided', () => {
+      const newTable = {
+        ...table,
+        rows: [],
+      };
+      const component = shallow(<MetricVis config={config} data={newTable} {...defaultProps} />);
+
+      const [[visConfig]] = component.find(Metric).props().data!;
+
+      expect(visConfig!.value).toMatchInlineSnapshot(`NaN`);
     });
   });
 

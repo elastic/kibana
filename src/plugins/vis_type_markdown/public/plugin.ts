@@ -12,7 +12,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import { getMarkdownVisRenderer } from './markdown_renderer';
 
 /** @internal */

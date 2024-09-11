@@ -41,6 +41,7 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
+import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 
 export interface StoreOpts {
@@ -504,6 +505,41 @@ export class TaskStore {
     }
   }
 
+  // like search(), only runs multiple searches in parallel returning the combined results
+  async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
+      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
+    );
+    const body = queries.flatMap((query) => [{}, query]);
+
+    const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
+      index: this.index,
+      ignore_unavailable: true,
+      body,
+    });
+    const { responses } = result;
+
+    const versionMap = this.createVersionMap([]);
+    let allTasks = new Array<ConcreteTaskInstance>();
+
+    for (const response of responses) {
+      if (response.status !== 200) {
+        const err = new Error(`Unexpected status code from taskStore::msearch: ${response.status}`);
+        this.errors$.next(err);
+        throw err;
+      }
+
+      const { hits } = response as estypes.MsearchMultiSearchItem<SavedObjectsRawDoc['_source']>;
+      const { hits: tasks } = hits;
+      this.addTasksToVersionMap(versionMap, tasks);
+      allTasks = allTasks.concat(this.filterTasks(tasks));
+    }
+
+    const allSortedTasks = claimSort(this.definitions, allTasks);
+
+    return { docs: allSortedTasks, versionMap };
+  }
+
   private async search(
     opts: SearchOpts = {},
     limitResponse: boolean = false
@@ -522,33 +558,54 @@ export class TaskStore {
         hits: { hits: tasks },
       } = result;
 
-      const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
-      for (const task of tasks) {
-        if (task._seq_no == null || task._primary_term == null) continue;
-
-        const esId = task._id!.startsWith('task:') ? task._id!.slice(5) : task._id!;
-        versionMap.set(esId, {
-          esId: task._id!,
-          seqNo: task._seq_no,
-          primaryTerm: task._primary_term,
-        });
-      }
-
+      const versionMap = this.createVersionMap(tasks);
       return {
-        docs: tasks
-          // @ts-expect-error @elastic/elasticsearch _source is optional
-          .filter((doc) => this.serializer.isRawSavedObject(doc))
-          // @ts-expect-error @elastic/elasticsearch _source is optional
-          .map((doc) => this.serializer.rawToSavedObject(doc))
-          .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-          .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .filter((doc): doc is ConcreteTaskInstance => !!doc),
+        docs: this.filterTasks(tasks),
         versionMap,
       };
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  private filterTasks(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): ConcreteTaskInstance[] {
+    return (
+      tasks
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => savedObjectToConcreteTaskInstance(doc))
+        .filter((doc): doc is ConcreteTaskInstance => !!doc)
+    );
+  }
+
+  private addTasksToVersionMap(
+    versionMap: Map<string, ConcreteTaskInstanceVersion>,
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): void {
+    for (const task of tasks) {
+      if (task._id == null || task._seq_no == null || task._primary_term == null) continue;
+
+      const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
+      versionMap.set(esId, {
+        esId: task._id,
+        seqNo: task._seq_no,
+        primaryTerm: task._primary_term,
+      });
+    }
+  }
+
+  private createVersionMap(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): Map<string, ConcreteTaskInstanceVersion> {
+    const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+    this.addTasksToVersionMap(versionMap, tasks);
+    return versionMap;
   }
 
   public async aggregate<TSearchRequest extends AggregationOpts>({

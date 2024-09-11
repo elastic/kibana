@@ -32,7 +32,7 @@ import {
 } from '../../../common';
 import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
-import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
+import { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './get_session_status';
 
 export interface SearchSessionDependencies {

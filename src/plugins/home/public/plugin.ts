@@ -23,7 +23,7 @@ import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,

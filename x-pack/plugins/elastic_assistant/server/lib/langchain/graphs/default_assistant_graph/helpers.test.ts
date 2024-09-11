@@ -96,12 +96,15 @@ describe('streamGraph', () => {
       const response = await streamGraph({
         apmTracer: mockApmTracer,
         assistantGraph: mockAssistantGraph,
-        inputs: { input: 'input' },
+        inputs: {
+          input: 'input',
+          bedrockChatEnabled: false,
+          llmType: 'openai',
+          responseLanguage: 'English',
+        },
         logger: mockLogger,
         onLlmResponse: mockOnLlmResponse,
         request: mockRequest,
-        bedrockChatEnabled: false,
-        llmType: 'openai',
       });
 
       expect(response).toBe(mockResponseWithHeaders);
@@ -177,12 +180,15 @@ describe('streamGraph', () => {
       const response = await streamGraph({
         apmTracer: mockApmTracer,
         assistantGraph: mockAssistantGraph,
-        inputs: { input: 'input' },
+        inputs: {
+          input: 'input',
+          bedrockChatEnabled: false,
+          responseLanguage: 'English',
+          llmType: 'gemini',
+        },
         logger: mockLogger,
         onLlmResponse: mockOnLlmResponse,
         request: mockRequest,
-        bedrockChatEnabled: false,
-        llmType: 'gemini',
       });
 
       expect(response).toBe(mockResponseWithHeaders);

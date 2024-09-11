@@ -14,23 +14,51 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
   it('renders correctly for index with no fields', () => {
     const component = shallow(<NoFieldsCallout fieldsExistInIndex={false} />);
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "1qdt3rt",
+            "next": undefined,
+            "styles": "
+                padding: 8px;
+              ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsExist"
         size="s"
-        title="No fields exist in this data view."
-      />
+      >
+        <p>
+          No fields exist in this data view.
+        </p>
+      </EuiText>
     `);
   });
   it('renders correctly when empty with no filters/timerange reasons', () => {
     const component = shallow(<NoFieldsCallout fieldsExistInIndex={true} />);
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "wd14gj",
+            "next": undefined,
+            "styles": "
+              padding: 8px;
+            ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
-        title="There are no fields."
-      />
+      >
+        <p>
+          There are no fields.
+        </p>
+      </EuiText>
     `);
   });
   it('renders correctly with passed defaultNoFieldsMessage', () => {
@@ -38,12 +66,26 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
       <NoFieldsCallout fieldsExistInIndex={true} defaultNoFieldsMessage="No empty fields" />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "wd14gj",
+            "next": undefined,
+            "styles": "
+              padding: 8px;
+            ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
-        title="No empty fields"
-      />
+      >
+        <p>
+          No empty fields
+        </p>
+      </EuiText>
     `);
   });
 
@@ -52,12 +94,25 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
       <NoFieldsCallout fieldsExistInIndex={true} isAffectedByFieldFilter={true} />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "wd14gj",
+            "next": undefined,
+            "styles": "
+              padding: 8px;
+            ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
-        title="No fields match the selected filters."
       >
+        <p>
+          No fields match the selected filters.
+        </p>
         <strong>
           Try:
         </strong>
@@ -66,7 +121,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
             Using different field filters
           </li>
         </ul>
-      </EuiCallOut>
+      </EuiText>
     `);
   });
 
@@ -80,12 +135,25 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "wd14gj",
+            "next": undefined,
+            "styles": "
+              padding: 8px;
+            ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
-        title="There are no available fields that contain data."
       >
+        <p>
+          There are no available fields that contain data.
+        </p>
         <strong>
           Try:
         </strong>
@@ -97,7 +165,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
             Changing the global filters
           </li>
         </ul>
-      </EuiCallOut>
+      </EuiText>
     `);
   });
 
@@ -111,12 +179,25 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "wd14gj",
+            "next": undefined,
+            "styles": "
+              padding: 8px;
+            ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
-        title="No fields match the selected filters."
       >
+        <p>
+          No fields match the selected filters.
+        </p>
         <strong>
           Try:
         </strong>
@@ -128,7 +209,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
             Using different field filters
           </li>
         </ul>
-      </EuiCallOut>
+      </EuiText>
     `);
   });
 
@@ -143,12 +224,25 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="warning"
+      <EuiText
+        color="subdued"
+        css={
+          Object {
+            "map": undefined,
+            "name": "wd14gj",
+            "next": undefined,
+            "styles": "
+              padding: 8px;
+            ",
+            "toString": [Function],
+          }
+        }
         data-test-subj="noFieldsCallout-noFieldsMatch"
         size="s"
-        title="No fields match the selected filters."
       >
+        <p>
+          No fields match the selected filters.
+        </p>
         <strong>
           Try:
         </strong>
@@ -163,7 +257,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
             Changing the global filters
           </li>
         </ul>
-      </EuiCallOut>
+      </EuiText>
     `);
   });
 });

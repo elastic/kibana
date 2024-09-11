@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QualityIndicators } from './types';
+import { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
-export const DEFAULT_DATASET_TYPE = 'logs';
+export const DEFAULT_DATASET_TYPE: DataStreamType = 'logs';
 export const DEFAULT_LOGS_DATA_VIEW = 'logs-*-*';
 
 export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
@@ -41,3 +41,5 @@ export const MAX_DEGRADED_FIELDS = 1000;
 
 export const MASKED_FIELD_PLACEHOLDER = '<custom field>';
 export const UNKOWN_FIELD_PLACEHOLDER = '<unkwon>';
+
+export const KNOWN_TYPES: DataStreamType[] = ['logs', 'metrics', 'traces'];

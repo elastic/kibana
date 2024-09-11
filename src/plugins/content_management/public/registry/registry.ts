@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import { validateVersion } from '@kbn/object-versioning-utils';
 
 import type { ContentTypeDefinition } from './content_type_definition';
 import { ContentType } from './content_type';

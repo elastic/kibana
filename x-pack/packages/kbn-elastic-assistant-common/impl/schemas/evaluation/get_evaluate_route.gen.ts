@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type GetEvaluateResponse = z.infer<typeof GetEvaluateResponse>;
 export const GetEvaluateResponse = z.object({

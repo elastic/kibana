@@ -55,6 +55,7 @@ export function fetchAndValidate$({
     api.field$,
     api.controlFetch$,
     api.parentApi.allowExpensiveQueries$,
+    api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
     stateManager.sort,
     stateManager.searchTechnique,
@@ -86,6 +87,7 @@ export function fetchAndValidate$({
           field,
           controlFetchContext,
           allowExpensiveQueries,
+          ignoreParentSettings,
           searchString,
           sort,
           searchTechnique,
@@ -116,6 +118,7 @@ export function fetchAndValidate$({
           field: field.toSpec(),
           size: requestSize,
           allowExpensiveQueries,
+          ignoreValidations: ignoreParentSettings?.ignoreValidations,
           ...controlFetchContext,
         };
 

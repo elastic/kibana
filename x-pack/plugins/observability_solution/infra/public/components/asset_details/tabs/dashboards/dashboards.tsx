@@ -165,7 +165,7 @@ export function Dashboards() {
   ]);
 
   const getLocatorParams = useCallback(
-    (params, isFlyoutView) => {
+    (params: any, isFlyoutView: any) => {
       const searchParams = new URLSearchParams(location.search);
       const tableProperties = searchParams.get('tableProperties');
       const flyoutParams =

@@ -21,7 +21,7 @@ import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 import { SearchUsageCollector } from '../../../../collectors';
-import { SearchSessionsConfigSchema } from '../../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 
 interface Props {
   core: CoreStart;

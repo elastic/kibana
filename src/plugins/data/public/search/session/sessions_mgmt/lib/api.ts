@@ -22,7 +22,7 @@ import {
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
 import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];
 

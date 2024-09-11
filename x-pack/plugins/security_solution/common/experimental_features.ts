@@ -84,11 +84,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
-   * Enables scan response action on Endpoint
-   */
-  responseActionScanEnabled: true,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
@@ -170,7 +165,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: false,
+  jamfDataInAnalyzerEnabled: true,
 
   /*
    * Disables discover esql tab within timeline

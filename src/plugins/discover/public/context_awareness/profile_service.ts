@@ -20,6 +20,18 @@ export type ContextWithProfileId<TContext> = TContext & { profileId: string };
 export interface BaseProfileProvider<TProfile extends PartialProfile> {
   profileId: string;
   profile: ComposableProfile<TProfile>;
+  /**
+   * isExperimental Flag can be used for any profile which is under development and should not be enabled by default.
+   *
+   * Experimental profiles can still be enabled in kibana config with option `discover.experimental.enabledProfiles` as shown in example below:
+   *
+   * ```yaml
+   * discover.experimental.enabledProfiles:
+   *   - example-root-profile
+   *   - example-data-source-profile
+   * ```
+   */
+  isExperimental?: boolean;
 }
 
 export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext>

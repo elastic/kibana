@@ -52,48 +52,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return await PageObjects.share.getSharedUrl();
   };
 
+  const unpinnedFilterIsOnlyWhenDashboardIsUnsaved = async (mode: TestingModes) => {
+    await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
+    await PageObjects.dashboard.waitForRenderComplete();
+
+    const sharedUrl = await getSharedUrl(mode);
+    const { globalState, appState } = getStateFromUrl(sharedUrl);
+    expect(globalState).to.not.contain('filters');
+    if (mode === 'snapshot') {
+      expect(appState).to.contain('filters');
+    } else {
+      expect(sharedUrl).to.not.contain('appState');
+    }
+  };
+
+  const unpinnedFilterIsRemoved = async (mode: TestingModes) => {
+    await PageObjects.dashboard.clickQuickSave();
+    await PageObjects.dashboard.waitForRenderComplete();
+
+    const sharedUrl = await getSharedUrl(mode);
+    expect(sharedUrl).to.not.contain('appState');
+  };
+
+  const pinnedFilterIsWhenDashboardInGlobalState = async (mode: TestingModes) => {
+    await filterBar.toggleFilterPinned('geo.src');
+    await PageObjects.dashboard.clickQuickSave();
+    await PageObjects.dashboard.waitForRenderComplete();
+
+    const sharedUrl = await getSharedUrl(mode);
+    const { globalState, appState } = getStateFromUrl(sharedUrl);
+    expect(globalState).to.contain('filters');
+    if (mode === 'snapshot') {
+      expect(appState).to.not.contain('filters');
+    }
+  };
+
   describe('share dashboard', () => {
-    const testFilterState = async (mode: TestingModes) => {
-      it('should not have "filters" state in either app or global state when no filters', async () => {
-        expect(await getSharedUrl(mode)).to.not.contain('filters');
-      });
-
-      it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
-        await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        const sharedUrl = await getSharedUrl(mode);
-        const { globalState, appState } = getStateFromUrl(sharedUrl);
-        expect(globalState).to.not.contain('filters');
-        if (mode === 'snapshot') {
-          expect(appState).to.contain('filters');
-        } else {
-          expect(sharedUrl).to.not.contain('appState');
-        }
-      });
-
-      it('unpinned filters should be removed from app state when dashboard is saved', async () => {
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        const sharedUrl = await getSharedUrl(mode);
-        expect(sharedUrl).to.not.contain('appState');
-      });
-
-      it('pinned filter should show up only in global state', async () => {
-        await filterBar.toggleFilterPinned('geo.src');
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        const sharedUrl = await getSharedUrl(mode);
-        const { globalState, appState } = getStateFromUrl(sharedUrl);
-        expect(globalState).to.contain('filters');
-        if (mode === 'snapshot') {
-          expect(appState).to.not.contain('filters');
-        }
-      });
-    };
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -117,8 +111,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe('snapshot share', async () => {
-      describe('test local state', async () => {
+    describe('snapshot share', () => {
+      describe('test local state', () => {
         it('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
@@ -144,8 +138,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('test filter state', async () => {
-        await testFilterState('snapshot');
+      describe('test filter state', () => {
+        const mode = 'snapshot';
+
+        it('should not have "filters" state in either app or global state when no filters', async () => {
+          expect(await getSharedUrl(mode)).to.not.contain('filters');
+        });
+
+        it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
+          await unpinnedFilterIsOnlyWhenDashboardIsUnsaved(mode);
+        });
+
+        it('unpinned filters should be removed from app state when dashboard is saved', async () => {
+          await unpinnedFilterIsRemoved(mode);
+        });
+
+        it('pinned filter should show up only in global state', async () => {
+          await pinnedFilterIsWhenDashboardInGlobalState(mode);
+        });
       });
 
       after(async () => {
@@ -155,9 +165,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved object share', async () => {
-      describe('test filter state', async () => {
-        await testFilterState('savedObject');
+    describe('saved object share', () => {
+      describe('test filter state', () => {
+        const mode = 'savedObject';
+
+        it('should not have "filters" state in either app or global state when no filters', async () => {
+          expect(await getSharedUrl(mode)).to.not.contain('filters');
+        });
+
+        it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
+          await unpinnedFilterIsOnlyWhenDashboardIsUnsaved(mode);
+        });
+
+        it('unpinned filters should be removed from app state when dashboard is saved', async () => {
+          await unpinnedFilterIsRemoved(mode);
+        });
+
+        it('pinned filter should show up only in global state', async () => {
+          await pinnedFilterIsWhenDashboardInGlobalState(mode);
+        });
       });
     });
   });

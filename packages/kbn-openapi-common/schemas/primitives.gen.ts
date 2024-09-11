@@ -15,7 +15,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
  * A string that is not empty and does not contain only whitespace

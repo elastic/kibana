@@ -39,10 +39,6 @@
     "@kbn/apm-plugin",
     "@kbn/server-route-repository",
     "@kbn/core-chrome-browser",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-management",
-    "@kbn/default-nav-devtools",
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
@@ -101,5 +97,7 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/test-suites-src",
     "@kbn/console-plugin",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/core-saved-objects-import-export-server-internal",
   ]
 }

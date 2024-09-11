@@ -15,7 +15,8 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
 
-describe('Case Owner Selection', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/188488
+describe.skip('Case Owner Selection', () => {
   const onOwnerChange = jest.fn();
   const selectedOwner = SECURITY_SOLUTION_OWNER;
 

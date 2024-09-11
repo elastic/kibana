@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import { ml } from '../../services/ml_api_service';
+import type { MlApiServices } from '../../services/ml_api_service';
 import type { FormMessage } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
 
 interface CreateKibanaDataViewResponse {
@@ -25,7 +25,7 @@ function delay(ms = 1000) {
   });
 }
 
-export async function checkIndexExists(destIndex: string) {
+export async function checkIndexExists(destIndex: string, ml: MlApiServices) {
   let resp;
   let errorMessage;
   try {
@@ -36,20 +36,23 @@ export async function checkIndexExists(destIndex: string) {
   return { resp, errorMessage };
 }
 
-export async function retryIndexExistsCheck(destIndex: string): Promise<{
+export async function retryIndexExistsCheck(
+  destIndex: string,
+  ml: MlApiServices
+): Promise<{
   success: boolean;
   indexExists: boolean;
   errorMessage?: string;
 }> {
   let retryCount = 15;
 
-  let resp = await checkIndexExists(destIndex);
+  let resp = await checkIndexExists(destIndex, ml);
   let indexExists = resp.resp && resp.resp[destIndex] && resp.resp[destIndex].exists;
 
   while (retryCount > 1 && !indexExists) {
     retryCount--;
     await delay(1000);
-    resp = await checkIndexExists(destIndex);
+    resp = await checkIndexExists(destIndex, ml);
     indexExists = resp.resp && resp.resp[destIndex] && resp.resp[destIndex].exists;
   }
 
@@ -67,12 +70,13 @@ export async function retryIndexExistsCheck(destIndex: string): Promise<{
 export const createKibanaDataView = async (
   destinationIndex: string,
   dataViewsService: DataViewsContract,
+  ml: MlApiServices,
   timeFieldName?: string,
   callback?: (response: FormMessage) => void
 ) => {
   const response: CreateKibanaDataViewResponse = { success: false, message: '' };
   const dataViewName = destinationIndex;
-  const exists = await retryIndexExistsCheck(destinationIndex);
+  const exists = await retryIndexExistsCheck(destinationIndex, ml);
   if (exists?.success === true) {
     // index exists - create data view
     if (exists?.indexExists === true) {

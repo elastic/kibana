@@ -28,6 +28,11 @@ import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
 
+export enum PlaygroundPageMode {
+  chat = 'chat',
+  search = 'search',
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
@@ -57,6 +62,9 @@ export interface AppServicesContext {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   console?: ConsolePluginStart;
+  featureFlags: {
+    searchPlaygroundEnabled: boolean;
+  };
 }
 
 export enum ChatFormFields {

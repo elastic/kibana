@@ -62,7 +62,7 @@ import {
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { ConfigSchema } from '../../config';
+import type { ConfigSchema } from '../../server/config';
 import { NowProviderInternalContract } from '../now_provider';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { AggsService } from './aggs';

@@ -16,7 +16,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { ControlStateManager } from '../controls/types';
-import { ControlGroupEditor } from './control_group_editor';
+import { ControlGroupEditor } from './components/control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 
 export const openEditControlGroupFlyout = (
@@ -72,7 +72,7 @@ export const openEditControlGroupFlyout = (
           Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
             controlGroupApi.removePanel(childId);
           });
-        ref.close();
+        closeOverlay(ref);
       });
   };
 

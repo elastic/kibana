@@ -8,6 +8,16 @@ This plugin does NOT contain UI components. See `x-pack/packages/kbn-elastic-ass
 
 Maintained by the Security Solution team
 
+## Graph structure
+
+![DefaultAssistantGraph](./docs/img/default_assistant_graph.png)
+
+## Development
+
+### Generate graph structure
+
+To generate the graph structure, run `yarn draw-graph` from the plugin directory.
+The graph will be generated in the `docs/img` directory of the plugin.
 
 ### Testing
 

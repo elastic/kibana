@@ -82,6 +82,9 @@ export abstract class Container<
     const init$ = this.getInput$().pipe(
       take(1),
       mergeMap(async (currentInput) => {
+        if (settings?.untilContainerInitialized) {
+          await settings.untilContainerInitialized();
+        }
         const initPromise = this.initializeChildEmbeddables(currentInput, settings);
         if (awaitingInitialize) await initPromise;
       })

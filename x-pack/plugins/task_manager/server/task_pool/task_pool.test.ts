@@ -18,7 +18,7 @@ import { TaskCost } from '../task';
 import * as CostCapacityModule from './cost_capacity';
 import * as WorkerCapacityModule from './worker_capacity';
 import { capacityMock } from './capacity.mock';
-import { CLAIM_STRATEGY_DEFAULT, CLAIM_STRATEGY_MGET } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
 import { mockRun, mockTask } from './test_utils';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
@@ -82,7 +82,12 @@ describe('TaskPool', () => {
     });
 
     test('uses WorkerCapacity to calculate capacity when strategy is default', () => {
-      new TaskPool({ capacity$: of(20), definitions, logger, strategy: CLAIM_STRATEGY_DEFAULT });
+      new TaskPool({
+        capacity$: of(20),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      });
 
       expect(CostCapacityModule.CostCapacity).not.toHaveBeenCalled();
       expect(WorkerCapacityModule.WorkerCapacity).toHaveBeenCalledTimes(1);
@@ -96,13 +101,13 @@ describe('TaskPool', () => {
     });
   });
 
-  describe('with CLAIM_STRATEGY_DEFAULT', () => {
+  describe('with CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
     test('usedCapacity is the number running tasks', async () => {
       const pool = new TaskPool({
         capacity$: of(10),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
@@ -116,7 +121,7 @@ describe('TaskPool', () => {
         capacity$: of(10),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
@@ -131,7 +136,7 @@ describe('TaskPool', () => {
         capacity$,
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       expect(pool.availableCapacity()).toEqual(0);
@@ -144,7 +149,7 @@ describe('TaskPool', () => {
         capacity$: of(2),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const shouldRun = mockRun();
@@ -167,7 +172,7 @@ describe('TaskPool', () => {
         capacity$: of(3),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const taskFailedToMarkAsRunning = mockTask();
@@ -191,7 +196,7 @@ describe('TaskPool', () => {
         capacity$: of(3),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const taskFailedToRun = mockTask();
@@ -215,7 +220,7 @@ describe('TaskPool', () => {
         capacity$: of(3),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const taskFailedToRun = mockTask();
@@ -238,7 +243,7 @@ describe('TaskPool', () => {
         capacity$: of(1),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const taskFailedToRun = mockTask();
@@ -257,7 +262,7 @@ describe('TaskPool', () => {
         capacity$: of(1),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const firstWork = resolvable();
@@ -304,7 +309,7 @@ describe('TaskPool', () => {
         capacity$: of(2),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const haltUntilWeAfterFirstRun = resolvable();
@@ -372,7 +377,7 @@ describe('TaskPool', () => {
         capacity$: of(1),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const taskIsRunning = resolvable();
@@ -421,7 +426,7 @@ describe('TaskPool', () => {
         capacity$: of(10),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const cancelled = resolvable();
@@ -459,7 +464,7 @@ describe('TaskPool', () => {
         capacity$: of(2),
         definitions,
         logger,
-        strategy: CLAIM_STRATEGY_DEFAULT,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
       });
 
       const shouldRun = mockRun();

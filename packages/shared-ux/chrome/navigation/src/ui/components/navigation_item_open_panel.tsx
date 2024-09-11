@@ -73,6 +73,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [`nav-item-isActive`]: isActive,
   });
   const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
+    [`panelOpener-id-${id}`]: id,
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 

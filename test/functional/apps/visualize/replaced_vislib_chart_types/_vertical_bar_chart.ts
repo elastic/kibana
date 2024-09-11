@@ -281,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('vertical bar in percent mode', async () => {
+    describe('vertical bar in percent mode', () => {
       it('should show ticks with percentage values', async function () {
         const axisId = 'ValueAxis-1';
         await PageObjects.visEditor.clickMetricsAndAxes();

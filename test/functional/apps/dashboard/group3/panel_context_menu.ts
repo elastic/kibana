@@ -137,14 +137,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before('reset dashboard', async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.get(currentUrl.toString(), false);
-      });
-
-      before('and add one panel and save to put dashboard in "view" mode', async () => {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await PageObjects.dashboard.saveDashboard(dashboardName + '2');
-      });
-
-      before('expand panel to "full screen"', async () => {
         await dashboardPanelActions.clickExpandPanelToggle();
       });
 

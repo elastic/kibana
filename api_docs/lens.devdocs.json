@@ -2510,7 +2510,7 @@
                 "section": "def-public.IncompleteColumn",
                 "text": "IncompleteColumn"
               },
-              "> | undefined"
+              " | undefined> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
@@ -8636,6 +8636,56 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.onDatasourceUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "onDatasourceUpdate",
+            "description": [],
+            "signature": [
+              "((state: T, frame?: ",
+              "FramePublicAPI",
+              " | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onDatasourceUpdate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.onDatasourceUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "frame",
+                "description": [],
+                "signature": [
+                  "FramePublicAPI",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.onIndexPatternChange",
             "type": "Function",
             "tags": [],
@@ -11726,7 +11776,7 @@
             "section": "def-public.IncompleteColumn",
             "text": "IncompleteColumn"
           },
-          "> | undefined; sampling?: number | undefined; }"
+          " | undefined> | undefined; sampling?: number | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
         "deprecated": false,

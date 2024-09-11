@@ -36,6 +36,7 @@ async function main() {
 
   const preamble = locationFileLines.slice(0, 1);
 
+  // eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
   const locationObj = jsYaml.load(
     locationFileLines.slice(1).join('\n')
   ) as BackstageLocationResource;
@@ -43,6 +44,7 @@ async function main() {
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
 
+  // eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
   const locationYaml = jsYaml.dump(locationObj, { lineWidth: 400 });
 
   fs.writeFileSync(locationFile, `${preamble.join('\n')}\n${locationYaml}`);

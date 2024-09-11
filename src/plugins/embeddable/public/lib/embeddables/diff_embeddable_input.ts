@@ -58,16 +58,19 @@ export const genericEmbeddableInputIsEqual = (
   const {
     title: currentTitle,
     hidePanelTitles: currentHidePanelTitles,
+    enhancements: currentEnhancements,
     ...current
   } = pick(currentInput as GenericEmbedableInputToCompare, genericInputKeysToCompare);
   const {
     title: lastTitle,
     hidePanelTitles: lastHidePanelTitles,
+    enhancements: lastEnhancements,
     ...last
   } = pick(lastInput as GenericEmbedableInputToCompare, genericInputKeysToCompare);
 
   if (currentTitle !== lastTitle) return false;
   if (Boolean(currentHidePanelTitles) !== Boolean(lastHidePanelTitles)) return false;
+  if (!fastIsEqual(currentEnhancements ?? {}, lastEnhancements ?? {})) return false;
   if (!fastIsEqual(current, last)) return false;
   return true;
 };

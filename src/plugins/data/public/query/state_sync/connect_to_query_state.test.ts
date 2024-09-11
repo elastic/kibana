@@ -66,7 +66,7 @@ describe('connect_to_global_state', () => {
   let aF2: Filter;
 
   beforeEach(() => {
-    const queryService = new QueryService();
+    const queryService = new QueryService(1000);
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
@@ -121,10 +121,20 @@ describe('connect_to_global_state', () => {
 
   test('when refresh interval changes, state container contains updated refresh interval', () => {
     const stop = connectToQueryGlobalState(queryServiceStart, globalState);
+    timeFilter.setRefreshInterval({ pause: true, value: 5000 });
+    expect(globalState.get().refreshInterval).toEqual({
+      pause: true,
+      value: 5000,
+    });
+    stop();
+  });
+
+  test('when refresh interval is set below min, state container contains min refresh interval', () => {
+    const stop = connectToQueryGlobalState(queryServiceStart, globalState);
     timeFilter.setRefreshInterval({ pause: true, value: 100 });
     expect(globalState.get().refreshInterval).toEqual({
       pause: true,
-      value: 100,
+      value: 1000,
     });
     stop();
   });
@@ -135,14 +145,14 @@ describe('connect_to_global_state', () => {
     globalState.set({
       ...globalState.get(),
       filters: [gF1, gF2],
-      refreshInterval: { pause: true, value: 100 },
+      refreshInterval: { pause: true, value: 5000 },
       time: { from: 'now-30m', to: 'now' },
     });
 
     expect(globalStateChangeTriggered).toBeCalledTimes(1);
 
     expect(filterManager.getGlobalFilters()).toHaveLength(2);
-    expect(timeFilter.getRefreshInterval()).toEqual({ pause: true, value: 100 });
+    expect(timeFilter.getRefreshInterval()).toEqual({ pause: true, value: 5000 });
     expect(timeFilter.getTime()).toEqual({ from: 'now-30m', to: 'now' });
     stop();
   });

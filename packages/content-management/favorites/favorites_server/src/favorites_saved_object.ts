@@ -21,13 +21,19 @@ const schemaV1 = schema.object({
   favoriteIds: schema.arrayOf(schema.string()),
 });
 
+export const favoritesSavedObjectName = 'favorites';
+
 export const favoritesSavedObjectType: SavedObjectsType = {
-  name: 'favorites',
+  name: favoritesSavedObjectName,
   hidden: true,
   namespaceType: 'single',
   mappings: {
     dynamic: false,
-    properties: {},
+    properties: {
+      userId: { type: 'keyword' },
+      type: { type: 'keyword' },
+      favoriteIds: { type: 'keyword' },
+    },
   },
   modelVersions: {
     1: {
@@ -37,6 +43,23 @@ export const favoritesSavedObjectType: SavedObjectsType = {
         // this SO to be converted to this version, since we are using
         // @kbn/config-schema we opt-in to unknowns to allow the schema to
         // successfully "downgrade" future SOs to this version.
+        forwardCompatibility: schemaV1.extends({}, { unknowns: 'ignore' }),
+        create: schemaV1,
+      },
+    },
+    2: {
+      // the model stays the same, but we added the mappings for the snapshot telemetry needs
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            userId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            favoriteIds: { type: 'keyword' },
+          },
+        },
+      ],
+      schemas: {
         forwardCompatibility: schemaV1.extends({}, { unknowns: 'ignore' }),
         create: schemaV1,
       },

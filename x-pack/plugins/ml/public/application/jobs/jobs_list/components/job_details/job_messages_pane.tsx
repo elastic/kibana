@@ -11,7 +11,6 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@el
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { ml } from '../../../../services/ml_api_service';
 import { JobMessages } from '../../../../components/job_messages';
 import type { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
@@ -38,9 +37,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
     const [isClearing, setIsClearing] = useState<boolean>(false);
 
     const toastNotificationService = useToastNotificationService();
-    const {
-      jobs: { clearJobAuditMessages },
-    } = useMlApiContext();
+    const ml = useMlApiContext();
 
     const fetchMessages = async () => {
       setIsLoading(true);
@@ -70,7 +67,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
     const clearMessages = useCallback(async () => {
       setIsClearing(true);
       try {
-        await clearJobAuditMessages(jobId, notificationIndices);
+        await ml.jobs.clearJobAuditMessages(jobId, notificationIndices);
         setIsClearing(false);
         if (typeof refreshJobList === 'function') {
           refreshJobList();

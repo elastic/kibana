@@ -35,7 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  describe('context link in discover', function () {
+    // flaky on MKI, see https://github.com/elastic/kibana/issues/191237
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({

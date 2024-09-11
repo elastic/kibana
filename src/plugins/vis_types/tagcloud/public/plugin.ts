@@ -11,7 +11,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
-import { TagcloudPublicConfig } from '../config';
+import type { TagcloudPublicConfig } from '../server/config';
 import { setDataViewsStart } from './services';
 
 /** @internal */

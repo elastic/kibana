@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { language } from '../model/language';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sortItem } from '../model/sort';

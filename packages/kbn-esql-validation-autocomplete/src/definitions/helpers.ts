@@ -41,7 +41,7 @@ function handleAdditionalArgs(
   criteria: boolean,
   additionalArgs: Array<{
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
     reference?: string;
   }>,

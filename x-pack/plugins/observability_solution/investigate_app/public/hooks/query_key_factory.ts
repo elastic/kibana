@@ -13,6 +13,9 @@ export const investigationKeys = {
   notes: ['investigation', 'notes'] as const,
   fetchNotes: (params: { investigationId: string }) =>
     [...investigationKeys.notes, 'fetch', params] as const,
+  items: ['investigation', 'items'] as const,
+  fetchItems: (params: { investigationId: string }) =>
+    [...investigationKeys.items, 'fetch', params] as const,
 };
 
 export type InvestigationKeys = typeof investigationKeys;

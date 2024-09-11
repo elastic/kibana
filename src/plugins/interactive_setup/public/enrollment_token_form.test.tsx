@@ -17,6 +17,7 @@ import type { EnrollmentToken } from '../common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 const token: EnrollmentToken = {

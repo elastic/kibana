@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             color: '#00FF00',
           });
 
-          retry.try(async () => {
+          await retry.try(async () => {
             expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(2);
           });
         });

@@ -13,6 +13,7 @@ export interface State {
   onTransition: any;
   nextState?: string;
   currentStatus?: string;
+  onPreTransition?: any;
   onPostTransition?: any;
 }
 
@@ -24,16 +25,19 @@ export type StateMachineStates<T extends string> = Record<T, State>;
  *    context: {},
  *    states: {
  *      state1: {
+ *        onPreTransition: onPreTransition,
  *        onTransition: onState1Transition,
  *        onPostTransition: onPostTransition,
  *        nextState: 'state2',
  *      },
  *      state2: {
+ *        onPreTransition: onPreTransition,
  *        onTransition: onState2Transition,
  *        onPostTransition: onPostTransition,,
  *        nextState: 'state3',
  *      },
  *      state3: {
+ *        onPreTransition: onPreTransition,
  *        onTransition: onState3Transition,
  *        onPostTransition: onPostTransition,
  *        nextState: 'end',
@@ -63,6 +67,10 @@ export async function handleState(
   let currentStatus = 'pending';
   let stateResult;
   let updatedContext = { ...context };
+
+  // execute pre transition function, if available
+  await executePreTransition(logger, updatedContext, currentState);
+
   if (typeof currentState.onTransition === 'function') {
     logger.debug(
       `Current state ${currentStateName}: running transition ${currentState.onTransition.name}`
@@ -123,6 +131,9 @@ export async function handleState(
   }
 }
 
+/*
+ * executePostTransition: function that gets executed after the execution of any step, when defined
+ */
 async function executePostTransition(
   logger: Logger,
   updatedContext: StateContext<string>,
@@ -134,6 +145,27 @@ async function executePostTransition(
       logger.debug(`Executing post transition function: ${currentState.onPostTransition.name}`);
     } catch (error) {
       logger.warn(`Error during execution of post transition function: ${error.message}`);
+    }
+  }
+}
+
+/*
+ * executePreTransition: function that gets executed before the execution of any step, when defined
+ */
+async function executePreTransition(
+  logger: Logger,
+  updatedContext: StateContext<string>,
+  currentState: State
+) {
+  if (typeof currentState.onPreTransition === 'function') {
+    try {
+      await currentState.onPreTransition.call(undefined, updatedContext);
+      logger.debug(`Executing pre transition function: ${currentState.onPreTransition.name}`);
+    } catch (error) {
+      logger.warn(`Error during execution of pre transition function: ${error.message}`);
+
+      // bubble up the error; if something goes wrong in the precondition we want to see what happened
+      throw error;
     }
   }
 }

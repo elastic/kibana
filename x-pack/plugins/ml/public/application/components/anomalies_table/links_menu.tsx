@@ -52,14 +52,13 @@ import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 
-import { mlJobService } from '../../services/job_service';
-import { ml } from '../../services/ml_api_service';
+import { useMlJobService } from '../../services/job_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
 import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
@@ -101,13 +100,24 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const kibana = useMlKibana();
   const {
-    services: { data, share, application, uiActions },
+    services: {
+      data,
+      share,
+      application,
+      uiActions,
+      uiSettings,
+      notifications: { toasts },
+    },
   } = kibana;
   const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
+  const ml = useMlApiContext();
+  const mlJobService = useMlJobService();
 
   const job = useMemo(() => {
     if (props.selectedJob !== undefined) return props.selectedJob;
     return mlJobService.getJob(props.anomaly.jobId);
+    // skip mlJobService from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.anomaly.jobId, props.selectedJob]);
 
   const categorizationFieldName = job.analysis_config.categorization_field_name;
@@ -145,7 +155,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
+      getDateFormatTz(uiSettings)
+    );
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span, 'seconds')
@@ -186,7 +198,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       sourceIndicesWithGeoFields[anomaly.jobId]
     );
     // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
-    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
+      getDateFormatTz(uiSettings)
+    );
     const anomalyBucketStart = anomalyBucketStartMoment
       .subtract(anomaly.source.bucket_span, 'seconds')
       .toISOString();
@@ -513,7 +527,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
-          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage', {
               defaultMessage:
@@ -615,7 +628,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     if (job === undefined) {
       // eslint-disable-next-line no-console
       console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
-      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage', {
           defaultMessage: 'Unable to view examples as no details could be found for job ID {jobId}',
@@ -702,7 +714,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('viewExamples(): error loading categoryDefinition:', resp);
-          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage', {
               defaultMessage:
@@ -736,7 +747,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
         datafeedIndices
       );
-      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
           defaultMessage:
@@ -809,7 +819,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key="view_series"
-            icon="visLine"
+            icon="singleMetricViewer"
             onClick={() => {
               closePopover();
               viewSeries();

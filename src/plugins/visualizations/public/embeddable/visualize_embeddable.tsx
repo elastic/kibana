@@ -91,6 +91,10 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
+/** @deprecated
+ * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
+ * used within the visualize editor.
+ */
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
   implements

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { SetStateAction, useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,7 +42,7 @@ function DefaultEditorControls({
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
   const toggleAutoApply = useCallback(
-    (nextAutoApplyEnabled) => setAutoApplyEnabled(nextAutoApplyEnabled),
+    (nextAutoApplyEnabled: SetStateAction<boolean>) => setAutoApplyEnabled(nextAutoApplyEnabled),
     []
   );
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);

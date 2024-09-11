@@ -68,7 +68,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   private async toggleYesNoSwitch(testSubj: string, value: boolean) {
     const option = await this.testSubjects.find(`${testSubj}-${value ? 'yes' : 'no'}`);
-    (await option.findByCssSelector('label')).click();
+    await (await option.findByCssSelector('label')).click();
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -577,7 +577,7 @@ export class VisualBuilderPageObject extends FtrService {
 
     if (useKibanaIndices === false) {
       const el = await this.testSubjects.find(metricsIndexPatternInput);
-      el.focus();
+      await el.focus();
       await el.clearValue();
       if (value) {
         await el.type(value, { charByChar: true });

@@ -199,7 +199,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
       };
 
       return (
-        <AlertsGroupingLevel
+        <AlertsGroupingLevel<T>
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}

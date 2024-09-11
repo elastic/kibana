@@ -28,7 +28,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<ServiceEntities> {
+  async handler(resources): Promise<ServiceEntities | undefined> {
     const { context, params, request } = resources;
     const coreContext = await context.core;
 

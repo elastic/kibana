@@ -12,13 +12,11 @@ import {
   createEntityDefinitionQuerySchema,
   CreateEntityDefinitionQuery,
 } from '@kbn/entities-schema';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { startTransform } from '../../lib/entities/start_transform';
-import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
+import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 
 /**
  * @openapi
@@ -56,41 +54,41 @@ import { installEntityDefinition } from '../../lib/entities/install_entity_defin
  */
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  server,
+  getScopedClient,
+  logger,
 }: SetupRouteOptions<T>) {
   router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
     {
       path: '/internal/entities/definition',
       validate: {
-        body: buildRouteValidationWithZod(entityDefinitionSchema.strict()),
-        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+        body: entityDefinitionSchema.strict(),
+        query: createEntityDefinitionQuerySchema,
       },
     },
-    async (context, req, res) => {
-      const { logger } = server;
-      const core = await context.core;
-      const soClient = core.savedObjects.client;
-      const esClient = core.elasticsearch.client.asCurrentUser;
+    async (context, request, res) => {
       try {
-        const definition = await installEntityDefinition({
-          soClient,
-          esClient,
-          logger,
-          definition: req.body,
+        const client = await getScopedClient({ request });
+        const definition = await client.createEntityDefinition({
+          definition: request.body,
+          installOnly: request.query.installOnly,
         });
-
-        if (!req.query.installOnly) {
-          await startTransform(esClient, definition, logger);
-        }
 
         return res.ok({ body: definition });
       } catch (e) {
+        logger.error(e);
+
+        if (e instanceof EntityDefinitionIdInvalid) {
+          return res.badRequest({ body: e });
+        }
+
         if (e instanceof EntityIdConflict) {
           return res.conflict({ body: e });
         }
+
         if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
           return res.customError({ body: e, statusCode: 400 });
         }
+
         return res.customError({ body: e, statusCode: 500 });
       }
     }

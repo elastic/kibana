@@ -18,7 +18,7 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
-import { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';

@@ -14,6 +14,7 @@ import {
   PluginInitializerContext,
   PluginConfigDescriptor,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
@@ -26,6 +27,7 @@ import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../com
 import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
 import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
 import { builtInDefinitions } from './lib/entities/built_in';
+import { EntityClient } from './lib/entity_client';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -73,6 +75,12 @@ export class EntityManagerServerPlugin
       router,
       logger: this.logger,
       server: this.server,
+      getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+        const [coreStart] = await core.getStartServices();
+        const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+        const soClient = coreStart.savedObjects.getScopedClient(request);
+        return new EntityClient({ esClient, soClient, logger: this.logger });
+      },
     });
 
     return {};

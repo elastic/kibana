@@ -12,6 +12,7 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
+  retieveMetadataColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -173,6 +174,19 @@ describe('esql query helpers', () => {
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
         )
       ).toBe('event.timefield');
+    });
+  });
+
+  describe('retieveMetadataColumns', () => {
+    it('should return metadata columns if they exist', () => {
+      expect(retieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
+        '_id',
+        '_ignored',
+      ]);
+    });
+
+    it('should return empty columns if metadata doesnt exist', () => {
+      expect(retieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
     });
   });
 });

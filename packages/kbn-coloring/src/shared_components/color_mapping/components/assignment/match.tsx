@@ -73,6 +73,7 @@ export const Match: React.FC<{
   return (
     <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
+        isClearable
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         fullWidth={true}
         aria-label={i18n.translate('coloring.colorMapping.assignments.autoAssignedTermAriaLabel', {
@@ -82,7 +83,7 @@ export const Match: React.FC<{
         placeholder={i18n.translate(
           'coloring.colorMapping.assignments.autoAssignedTermPlaceholder',
           {
-            defaultMessage: 'Auto assigned',
+            defaultMessage: 'Auto assigning term',
           }
         )}
         options={convertedOptions}
@@ -103,7 +104,6 @@ export const Match: React.FC<{
           }
         }}
         isCaseSensitive
-        isClearable={false}
         compressed
       />
     </EuiFlexItem>

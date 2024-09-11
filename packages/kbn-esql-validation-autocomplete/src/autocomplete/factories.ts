@@ -30,6 +30,7 @@ const allFunctions = statsAggregationFunctionDefinitions
   .concat(groupingFunctionDefinitions);
 
 export const TIME_SYSTEM_PARAMS = ['?t_start', '?t_end'];
+export const ADD_DATE_HISTOGRAM_SNIPPET = 'BUCKET($0, 10, ?t_start, ?t_end)';
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -132,7 +133,7 @@ export function getSuggestionCommandDefinition(
 
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
     const description = field.metadata?.description;
@@ -143,7 +144,7 @@ export const buildFieldsDefinitionsWithMetadata = (
       text:
         getSafeInsertText(field.name) +
         (options?.addComma ? ',' : '') +
-        (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
+        (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
       documentation: description
@@ -156,7 +157,7 @@ ${description}`,
         : undefined,
       // If there is a description, it is a field from ECS, so it should be sorted to the top
       sortText: description ? '1D' : 'D',
-      command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
 };

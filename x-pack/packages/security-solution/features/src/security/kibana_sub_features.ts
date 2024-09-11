@@ -673,11 +673,13 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature],
+    [SecuritySubFeatureId.scanAction, scanActionSubFeature],
   ];
 
-  if (experimentalFeatures.responseActionScanEnabled) {
-    securitySubFeaturesList.push([SecuritySubFeatureId.scanAction, scanActionSubFeature]);
-  }
+  // Use the following code to add feature based on feature flag
+  // if (experimentalFeatures.featureFlagName) {
+  //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
+  // }
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
     securitySubFeaturesList

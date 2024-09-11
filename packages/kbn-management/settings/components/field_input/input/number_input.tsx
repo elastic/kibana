@@ -12,6 +12,7 @@ import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
+import { OnInputChangeFn } from '@kbn/management-settings-types';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { useServices } from '../services';
@@ -36,7 +37,7 @@ export const NumberInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: number, onUpdateFn) => {
+    async (newValue: number, onUpdateFn: OnInputChangeFn<'number'>) => {
       const validationResponse = await validateChange(field.id, newValue);
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({

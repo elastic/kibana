@@ -69,7 +69,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
 
     async clickActionByText(text: string) {
       log.debug(`clickActionByText: "${text}"`);
-      (await this.getActionWebElementByText(text)).click();
+      await (await this.getActionWebElementByText(text)).click();
     }
 
     async getActionHrefByText(text: string) {
@@ -80,7 +80,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
 
     async openHrefByText(text: string) {
       log.debug(`openHref: "${text}"`);
-      (await this.getActionWebElementByText(text)).openHref();
+      await (await this.getActionWebElementByText(text)).openHref();
     }
 
     async getActionWebElementByText(text: string): Promise<WebElementWrapper> {

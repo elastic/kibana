@@ -17,7 +17,7 @@ import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   DETECTION_RULE_RULES_API_CURRENT_VERSION,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 // eslint-disable @kbn/imports/no_boundary_crossing
 import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 import type { FtrProviderContext } from '../ftr_provider_context';

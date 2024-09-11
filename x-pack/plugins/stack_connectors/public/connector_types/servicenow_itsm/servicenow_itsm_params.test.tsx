@@ -377,7 +377,7 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
       const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
 
-      expect(wrapper.find('.euiFormErrorText').text()).toBe('correlation_id_error');
+      expect(wrapper.find('div.euiFormErrorText').text()).toBe('correlation_id_error');
     });
 
     it('updates additional fields', async () => {

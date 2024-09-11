@@ -90,7 +90,7 @@ import {
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { ConfigSchema } from '../../config';
+import { ConfigSchema } from '../config';
 import { SearchSessionService } from './session';
 import { registerBsearchRoute } from './routes/bsearch';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';

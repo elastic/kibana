@@ -9,9 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 
-export const getManagedContentBadge: (tooltipText: string) => TopNavMenuBadgeProps = (
-  tooltipText
-) => ({
+export const getManagedContentBadge: (
+  tooltipText: string,
+  disableTooltipProps?: boolean
+) => TopNavMenuBadgeProps = (tooltipText, enableTooltipProps = true) => ({
   'data-test-subj': 'managedContentBadge',
   badgeText: i18n.translate('managedContentBadge.text', {
     defaultMessage: 'Managed',
@@ -21,8 +22,10 @@ export const getManagedContentBadge: (tooltipText: string) => TopNavMenuBadgePro
   }),
   color: 'primary',
   iconType: 'glasses',
-  toolTipProps: {
-    content: tooltipText,
-    position: 'bottom',
-  } as EuiToolTipProps,
+  toolTipProps: enableTooltipProps
+    ? ({
+        content: tooltipText,
+        position: 'bottom',
+      } as EuiToolTipProps)
+    : undefined,
 });

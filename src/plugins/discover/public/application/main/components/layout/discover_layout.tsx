@@ -423,6 +423,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                           }
                         )}
                         error={dataState.error}
+                        isEsqlMode={isEsqlMode}
                       />
                     ) : (
                       <DiscoverNoResults

@@ -15,6 +15,7 @@ import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { resolver } from '../../../jobs/new_job/job_from_map';
+import { useMlJobService } from '../../../services/job_service';
 
 export const fromMapRouteFactory = (): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP),
@@ -49,11 +50,12 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
-        { dataViews, mlApiServices, timeFilter, kibanaConfig, dashboardService },
+        { dataViews, mlApiServices, mlJobService, timeFilter, kibanaConfig, dashboardService },
         dashboard,
         dataViewId,
         embeddable,

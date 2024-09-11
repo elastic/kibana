@@ -19,7 +19,7 @@ import archiver from 'archiver';
 import globby from 'globby';
 import cpy from 'cpy';
 import del from 'del';
-import tar, { ExtractOptions } from 'tar';
+import * as tar from 'tar';
 import { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
@@ -199,7 +199,7 @@ export async function getFileHash(path: string, algo: string) {
 export async function untar(
   source: string,
   destination: string,
-  extractOptions: ExtractOptions = {}
+  extractOptions: tar.TarOptionsWithAliasesAsyncNoFile = {}
 ) {
   assertAbsolute(source);
   assertAbsolute(destination);

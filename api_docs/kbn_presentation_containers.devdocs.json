@@ -330,6 +330,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.apiPublishesSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesSettings",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.PublishesSettings",
+            "text": "PublishesSettings"
+          }
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiPublishesSettings.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.canTrackContentfulRender",
         "type": "Function",
         "tags": [],
@@ -1720,6 +1760,42 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.PublishesSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesSettings",
+        "description": [],
+        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PublishesSettings.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<boolean | undefined>; }"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.SerializedPanelState",
         "type": "Interface",
         "tags": [],
@@ -1751,9 +1827,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
+                "section": "def-server.Reference",
                 "text": "Reference"
               },
               "[] | undefined"

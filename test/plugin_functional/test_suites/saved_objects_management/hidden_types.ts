@@ -8,6 +8,7 @@
 
 import path from 'path';
 import expect from '@kbn/expect';
+import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const fixturePaths = {
@@ -47,11 +48,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .expect(200)
           .then((resp) => {
             expect(
-              resp.body.saved_objects.map((obj: any) => ({
-                id: obj.id,
-                type: obj.type,
-                hidden: obj.meta.hiddenType,
-              }))
+              resp.body.saved_objects
+                .map((obj: any) => ({
+                  id: obj.id,
+                  type: obj.type,
+                  hidden: obj.meta.hiddenType,
+                }))
+                .sort(byIdAscComparator)
             ).to.eql([
               {
                 id: 'obj_1',

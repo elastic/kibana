@@ -6,6 +6,10 @@
  */
 
 import {
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
@@ -13,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchResponse } from '@kbn/es-types';
+import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
@@ -116,6 +120,33 @@ export class SyntheticsEsClient {
 
     return res;
   }
+
+  async msearch<
+    TDocument = unknown,
+    TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest
+  >(
+    requests: MsearchMultisearchBody[]
+  ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+    const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
+    for (const request of requests) {
+      searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
+      searches.push(request);
+    }
+
+    const results = await this.baseESClient.msearch(
+      {
+        searches,
+      },
+      { meta: true }
+    );
+
+    return {
+      responses: results.body.responses as unknown as Array<
+        InferSearchResponseOf<TDocument, TSearchRequest>
+      >,
+    };
+  }
+
   async count<TParams>(params: TParams): Promise<CountResponse> {
     let res: any;
     let esError: any;

@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('version fields', async () => {
+      describe('version fields', () => {
         const es = getService('es');
         const indexPatterns = getService('indexPatterns');
         const indexTitle = 'version-test';

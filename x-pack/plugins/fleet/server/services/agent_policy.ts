@@ -1615,7 +1615,7 @@ class AgentPolicyService {
 
   public async fetchAllAgentPolicyIds(
     soClient: SavedObjectsClientContract,
-    { perPage = 1000, kuery = undefined }: FetchAllAgentPolicyIdsOptions = {}
+    { perPage = 1000, kuery = undefined, spaceId = undefined }: FetchAllAgentPolicyIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
     return createSoFindIterable<{}>({
@@ -1627,6 +1627,7 @@ class AgentPolicyService {
         sortOrder: 'asc',
         fields: ['id'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        namespaces: spaceId ? [spaceId] : undefined,
       },
       resultsMapper: (data) => {
         return data.saved_objects.map((agentPolicySO) => {

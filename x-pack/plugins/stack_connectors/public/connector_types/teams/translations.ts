@@ -27,3 +27,11 @@ export const MESSAGE_REQUIRED = i18n.translate(
     defaultMessage: 'Message is required.',
   }
 );
+
+export const WEBHOOK_DEPRECATION_WARNING = i18n.translate(
+  'xpack.stackConnectors.components.teams.warning.webhookDeprecation',
+  {
+    defaultMessage:
+      'Microsoft Teams deprecated some methods for configuring webhooks. Follow the documentation link to create a supported webhook URL. If the URL is not updated by December 31, 2024, notifications will stop.',
+  }
+);

@@ -68,6 +68,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
    * @returns jobParams
    */
   public createJob = async ({ locatorParams, ...jobParams }: JobParamsPNGV2) => {
+    // FIXME: validate that locatorParams exists, and contains an ID field and params object
     return {
       ...jobParams,
       locatorParams: [locatorParams],

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from '../config';
+import { ConfigSchema, configSchema } from './config';
 import type { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
@@ -107,6 +107,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: configDeprecationProvider,
   exposeToBrowser: {
     search: true,
+    query: true,
   },
   schema: configSchema,
 };

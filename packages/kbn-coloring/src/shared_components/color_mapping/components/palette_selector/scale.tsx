@@ -107,6 +107,7 @@ export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof ge
       >
         <EuiButtonGroup
           legend="Mode"
+          buttonSize="compressed"
           data-test-subj="lns_colorMapping_scaleSwitch"
           options={[
             {

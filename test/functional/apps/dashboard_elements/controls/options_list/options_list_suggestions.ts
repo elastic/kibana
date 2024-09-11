@@ -17,11 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { dashboardControls, dashboard, header } = getPageObjects([
     'dashboardControls',
-    'timePicker',
     'dashboard',
-    'settings',
-    'console',
-    'common',
     'header',
   ]);
 
@@ -52,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        await dashboard.clickDiscardChanges();
       });
 
       it('sort alphabetically - descending', async () => {
@@ -133,12 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (let i = 0; i < sortedSuggestions.length - 1; i++) {
           expect(sortedSuggestions[i]).to.be.lessThan(sortedSuggestions[i + 1]);
         }
-
-        // revert to the old field name to keep state consistent for other tests
-        await dashboardControls.editExistingControl(controlId);
-        await dashboardControls.controlsEditorSetfield('sound.keyword');
-        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
-        await dashboardControls.controlEditorSave();
       });
     });
 

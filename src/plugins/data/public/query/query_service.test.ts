@@ -18,6 +18,8 @@ import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from './timefilter';
 import { createNowProviderMock } from '../now_provider/mocks';
 
+const minRefreshIntervalDefault = 1000;
+
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
 
@@ -48,6 +50,7 @@ describe('query_service', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       nowProvider: createNowProviderMock(),
+      minRefreshInterval: minRefreshIntervalDefault,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -82,7 +85,7 @@ describe('query_service', () => {
     const filters = [getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1')];
     const query = { language: 'kql', query: 'query' };
     const time = { from: new Date().toISOString(), to: new Date().toISOString() };
-    const refreshInterval = { pause: false, value: 10 };
+    const refreshInterval = { pause: false, value: 2000 };
 
     filterManager.setFilters(filters);
     queryStringManager.setQuery(query);

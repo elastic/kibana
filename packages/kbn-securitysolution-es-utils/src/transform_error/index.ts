@@ -9,7 +9,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { ZodError } from 'zod';
+import { ZodError } from '@kbn/zod';
 import { BadRequestError } from '../bad_request_error';
 
 export interface OutputError {

@@ -161,9 +161,9 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
 }
 
 export function createPipeline(state: EcsMappingState): IngestPipeline {
-  const samples = JSON.parse(state.formattedSamples);
+  const samples = JSON.parse(state.combinedSamples);
 
-  const processors = generateProcessors(state.currentMapping, samples);
+  const processors = generateProcessors(state.finalMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors
     .map((p: any) => p.convert?.field)
@@ -173,7 +173,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     ecs_version: state.ecsVersion,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-    log_format: state.logFormat,
+    log_format: state.samplesFormat,
     fields_to_remove: fieldsToRemove,
   };
   const templatesPath = joinPath(__dirname, '../../templates');

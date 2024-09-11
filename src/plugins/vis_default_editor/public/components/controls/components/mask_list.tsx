@@ -63,7 +63,7 @@ const defaultConfig = {
 };
 
 function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
-  const renderInputRow = useCallback(
+  const renderInputRow = useCallback<InputListConfig['renderInputRow']>(
     ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText

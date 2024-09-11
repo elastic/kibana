@@ -158,7 +158,7 @@ export const useTimelineTypes = ({
             data-test-subj={`open-timeline-modal-body-${TimelineTabsStyle.filter}-${tab.id}`}
             isSelected={tab.id === timelineType}
             key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
-            onClick={(ev: { preventDefault: () => void }) => {
+            onClick={(ev: React.SyntheticEvent<Element, Event>) => {
               tab.onClick(ev);
               onFilterClicked(tab.id, TimelineTabsStyle.filter);
             }}

@@ -39,7 +39,8 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/console-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": [
     "target/**/*",

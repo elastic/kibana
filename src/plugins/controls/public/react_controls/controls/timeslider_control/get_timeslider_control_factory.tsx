@@ -35,16 +35,17 @@ import './components/index.scss';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
 import { TIME_SLIDER_CONTROL } from '../../../../common';
 
+const displayName = i18n.translate('controls.timesliderControl.displayName', {
+  defaultMessage: 'Time slider',
+});
+
 export const getTimesliderControlFactory = (
   services: Services
 ): ControlFactory<TimesliderControlState, TimesliderControlApi> => {
   return {
     type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
-    getDisplayName: () =>
-      i18n.translate('controls.timesliderControl.displayName', {
-        defaultMessage: 'Time slider',
-      }),
+    getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
@@ -203,6 +204,7 @@ export const getTimesliderControlFactory = (
       const api = buildApi(
         {
           ...defaultControl.api,
+          defaultPanelTitle: new BehaviorSubject<string | undefined>(displayName),
           timeslice$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();

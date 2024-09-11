@@ -461,33 +461,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    // TODO: remove this test when responseActionScanEnabled is removed
-    it('should set selected command filter options to URL params (without `responseActionScanEnabled`)', () => {
-      mockedContext.setExperimentalFlag({
-        responseActionScanEnabled: false,
-      });
-
-      const filterPrefix = 'actions-filter';
-      render();
-      const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
-
-      allFilterOptions.forEach((option) => {
-        option.style.pointerEvents = 'all';
-        userEvent.click(option);
-      });
-
-      expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
-      );
-    });
-
-    it('should set selected command filter options to URL params (with `responseActionScanEnabled`)', () => {
-      mockedContext.setExperimentalFlag({
-        responseActionScanEnabled: true,
-      });
-
+    it('should set selected command filter options to URL params', () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -631,38 +605,7 @@ describe('Response actions history page', () => {
   });
 
   describe('Clear all selected options on a filter', () => {
-    // TODO: remove this test when responseActionScanEnabled is removed
-    it('should clear all selected options on `actions` filter (without `responseActionScanEnabled`)', () => {
-      mockedContext.setExperimentalFlag({
-        responseActionScanEnabled: false,
-      });
-
-      const filterPrefix = 'actions-filter';
-      render();
-      const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
-
-      allFilterOptions.forEach((option) => {
-        option.style.pointerEvents = 'all';
-        userEvent.click(option);
-      });
-
-      expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
-      );
-
-      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
-      clearAllButton.style.pointerEvents = 'all';
-      userEvent.click(clearAllButton);
-      expect(history.location.search).toEqual('');
-    });
-
-    it('should clear all selected options on `actions` filter (with `responseActionScanEnabled`)', () => {
-      mockedContext.setExperimentalFlag({
-        responseActionScanEnabled: true,
-      });
-
+    it('should clear all selected options on `actions` filter', () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;

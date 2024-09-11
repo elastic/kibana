@@ -596,7 +596,7 @@
         "label": "ZodParamsObject",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ path?: any; query?: any; body?: any; }, Zod.UnknownKeysParam, Zod.ZodTypeAny, { query?: any; path?: any; body?: any; }, { query?: any; path?: any; body?: any; }>"
+          "Zod.ZodObject<{ path?: any; query?: any; body?: any; }, Zod.UnknownKeysParam, Zod.ZodTypeAny, { query?: any; body?: any; path?: any; }, { query?: any; body?: any; path?: any; }>"
         ],
         "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,

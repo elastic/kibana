@@ -14,7 +14,6 @@ const { REPO_ROOT } = require('@kbn/repo-info');
   await merge({
     sourceGlobs: [
       `${REPO_ROOT}/oas_docs/bundle.json`,
-      `${REPO_ROOT}/x-pack/plugins/actions/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/plugins/alerting/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/plugins/cases/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/src/plugins/data_views/docs/openapi/bundled.yaml`,

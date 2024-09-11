@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import {
-  CreateInvestigationNoteInput,
+  CreateInvestigationNoteParams,
   CreateInvestigationNoteResponse,
 } from '@kbn/investigation-shared';
 import { v4 } from 'uuid';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 
 export async function createInvestigationNote(
   investigationId: string,
-  params: CreateInvestigationNoteInput,
+  params: CreateInvestigationNoteParams,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<CreateInvestigationNoteResponse> {
   const investigation = await repository.findById(investigationId);

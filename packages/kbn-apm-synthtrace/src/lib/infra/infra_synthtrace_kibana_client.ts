@@ -70,4 +70,27 @@ export class InfraSynthtraceKibanaClient {
 
     this.logger.info(`Installed System package ${packageVersion}`);
   }
+
+  async uninstallSystemPackage(packageVersion: string) {
+    this.logger.debug(`Uninstalling System package ${packageVersion}`);
+
+    const url = join(this.target, `/api/fleet/epm/packages/system/${packageVersion}`);
+    const response = await pRetry(() => {
+      return fetch(url, {
+        method: 'DELETE',
+        headers: kibanaHeaders(),
+        body: '{"force":true}',
+      });
+    });
+
+    const responseJson = await response.json();
+
+    if (!responseJson.items) {
+      throw new Error(
+        `Failed to uninstall System package version ${packageVersion}, received HTTP ${response.status} and message: ${responseJson.message} for url ${url}`
+      );
+    }
+
+    this.logger.info(`System package ${packageVersion} uninstalled`);
+  }
 }

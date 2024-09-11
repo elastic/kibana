@@ -6,7 +6,7 @@
  */
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
-import { mlJobService } from './job_service';
+import type { MlJobService } from './job_service';
 import type { MlIndexUtils } from '../util/index_service';
 import type { MlApiServices } from './ml_api_service';
 
@@ -19,7 +19,11 @@ export class FieldFormatService {
   indexPatternIdsByJob: IndexPatternIdsByJob = {};
   formatsByJob: FormatsByJobId = {};
 
-  constructor(private mlApiServices: MlApiServices, private mlIndexUtils: MlIndexUtils) {}
+  constructor(
+    private mlApiServices: MlApiServices,
+    private mlIndexUtils: MlIndexUtils,
+    private mlJobService: MlJobService
+  ) {}
 
   // Populate the service with the FieldFormats for the list of jobs with the
   // specified IDs. List of Kibana data views is passed, with a title
@@ -40,7 +44,7 @@ export class FieldFormatService {
             const { jobs } = await this.mlApiServices.getJobs({ jobId });
             jobObj = jobs[0];
           } else {
-            jobObj = mlJobService.getJob(jobId);
+            jobObj = this.mlJobService.getJob(jobId);
           }
           return {
             jobId,
@@ -85,7 +89,7 @@ export class FieldFormatService {
       const { jobs } = await this.mlApiServices.getJobs({ jobId });
       jobObj = jobs[0];
     } else {
-      jobObj = mlJobService.getJob(jobId);
+      jobObj = this.mlJobService.getJob(jobId);
     }
     const detectors = jobObj.analysis_config.detectors || [];
     const formatsByDetector: any[] = [];

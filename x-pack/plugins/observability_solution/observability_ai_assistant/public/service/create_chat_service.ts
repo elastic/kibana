@@ -214,7 +214,7 @@ export async function createChatService({
       persist,
       disableFunctions,
       signal,
-      responseLanguage,
+
       instructions,
     }) {
       return complete(
@@ -227,7 +227,6 @@ export async function createChatService({
           disableFunctions,
           signal,
           client,
-          responseLanguage,
           instructions,
         },
         ({ params }) => {

@@ -55,7 +55,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29700
+  expressionPartitionVis: 44888
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -136,8 +136,10 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchAssistant: 19831
   searchConnectors: 30000
   searchHomepage: 19831
+  searchIndices: 20519
   searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325

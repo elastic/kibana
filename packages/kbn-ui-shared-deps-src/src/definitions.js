@@ -31,7 +31,7 @@ const jsFilename = 'kbn-ui-shared-deps-src.js';
 const cssDistFilename = 'kbn-ui-shared-deps-src.css';
 
 /**
- * Externals mapping inteded to be used in a webpack config
+ * Externals mapping intended to be used in a webpack config
  */
 const externals = {
   /**
@@ -102,6 +102,8 @@ const externals = {
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
+  '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

@@ -15,7 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type ListPrivileges = z.infer<typeof ListPrivileges>;
 export const ListPrivileges = z.object({

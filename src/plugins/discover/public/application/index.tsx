@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Observable } from 'rxjs';
-import { ExperimentalFeatures } from '../../common/config';
+import type { ExperimentalFeatures } from '../../server/config';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';

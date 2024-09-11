@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
-import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '../../../../common/constants';
 import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
 
 const onPaginate = jest.fn();

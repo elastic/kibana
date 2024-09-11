@@ -1491,7 +1491,6 @@ describe('Response actions history', () => {
     beforeEach(() => {
       featureFlags = {
         responseActionUploadEnabled: true,
-        responseActionScanEnabled: false,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1511,37 +1510,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (without `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({
-        ...featureFlags,
-        responseActionScanEnabled: false,
-      });
-      render();
-      const { getByTestId, getAllByTestId } = renderResult;
-
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-      expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1
-      );
-      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'isolate. To check this option, press Enter.',
-        'release. To check this option, press Enter.',
-        'kill-process. To check this option, press Enter.',
-        'suspend-process. To check this option, press Enter.',
-        'processes. To check this option, press Enter.',
-        'get-file. To check this option, press Enter.',
-        'execute. To check this option, press Enter.',
-        'upload. To check this option, press Enter.',
-      ]);
-    });
-
     it('should show a list of actions (with `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({
-        ...featureFlags,
-        responseActionScanEnabled: true,
-      });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 

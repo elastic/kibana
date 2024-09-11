@@ -44,6 +44,7 @@ import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/publi
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -72,7 +73,6 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import type { CheckSecurityFeaturesResponse } from '../../security_features';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
-import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
@@ -775,7 +775,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" href={cloudOrgUrl}>
-                  Manage Members
+                  {i18n.translate('xpack.security.management.roles.manageRoleUsers', {
+                    defaultMessage: 'Manage Members',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

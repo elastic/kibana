@@ -39,13 +39,15 @@ const MAX_FORECASTS = 500;
  * Table component for rendering the lists of forecasts run on an ML job.
  */
 export class ForecastsTable extends Component {
-  constructor(props) {
-    super(props);
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
     this.state = {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
     };
-    this.mlForecastService;
+    this.mlForecastService = forecastServiceFactory(
+      constructorContext.services.mlServices.mlApiServices
+    );
   }
 
   /**
@@ -54,7 +56,6 @@ export class ForecastsTable extends Component {
   static contextType = context;
 
   componentDidMount() {
-    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Get the list of all the forecasts with results at or later than the specified 'from' time.
@@ -323,7 +324,7 @@ export class ForecastsTable extends Component {
                 this.props.job.blocked !== undefined ||
                 forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED
               }
-              iconType="visLine"
+              iconType="singleMetricViewer"
               aria-label={viewForecastAriaLabel}
               data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
             />

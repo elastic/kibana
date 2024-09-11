@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('timezones', async function () {
+    describe('timezones', function () {
       it('should show round labels in default timezone', async function () {
         const expectedLabels = [
           '2015-09-20 00:00',

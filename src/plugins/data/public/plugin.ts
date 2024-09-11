@@ -14,7 +14,7 @@ import {
   IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -59,7 +59,9 @@ export class DataPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
-    this.queryService = new QueryService();
+    this.queryService = new QueryService(
+      initializerContext.config.get().query.timefilter.minRefreshInterval
+    );
 
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();

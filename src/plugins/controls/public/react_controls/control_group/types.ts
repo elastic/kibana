@@ -31,21 +31,17 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { ParentIgnoreSettings } from '../..';
 import { ControlInputTransform } from '../../../common';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
-import { ControlStyle, ControlWidth } from '../../types';
-import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
+import { ControlStyle } from '../../types';
+import { DefaultControlState } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
-/** The control display settings published by the control group are the "default" */
-type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
-  labelPosition: PublishingSubject<ControlStyle>;
-};
 export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
   [panelId: string]: ControlState;
 }
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
-  'initialChildControlState' | 'defaultControlGrow' | 'defaultControlWidth'
+  'initialChildControlState'
 > & {
   filters: Filter[] | undefined;
 };
@@ -60,7 +56,6 @@ export type ControlGroupApi = PresentationContainer &
   HasEditCapabilities &
   PublishesDataLoading &
   Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
-  PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification & PublishesReload> & {
     asyncResetUnsavedChanges: () => Promise<void>;
@@ -70,16 +65,15 @@ export type ControlGroupApi = PresentationContainer &
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
-    openAddDataControlFlyout: (settings?: {
+    openAddDataControlFlyout: (options?: {
       controlInputTransform?: ControlInputTransform;
+      onSave?: () => void;
     }) => void;
-    lastUsedDataViewId$: PublishingSubject<string | undefined>;
+    labelPosition: PublishingSubject<ControlStyle>;
   };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
-  defaultControlGrow?: boolean;
-  defaultControlWidth?: ControlWidth;
   labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;

@@ -22,17 +22,10 @@ import type {
   TaskRunResult,
 } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
-const jobTypes = [
-  CSV_JOB_TYPE,
-  CSV_JOB_TYPE_V2,
-  PDF_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE,
-  PNG_JOB_TYPE_V2,
-];
+const jobTypes = [CSV_JOB_TYPE, CSV_JOB_TYPE_V2, PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];
 
 type JobTypeDeclaration = typeof jobTypes;
 type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];

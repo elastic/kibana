@@ -10,8 +10,8 @@ import React, { Component, ReactElement } from 'react';
 import * as Rx from 'rxjs';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import {
   EuiAccordion,
@@ -248,15 +248,16 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private prettyPrintReportingType = () => {
     switch (this.props.reportType) {
-      case PDF_REPORT_TYPE:
+      case 'pdf':
       case PDF_REPORT_TYPE_V2:
         return 'PDF';
+      case 'csv':
       case CSV_REPORT_TYPE:
       case CSV_REPORT_TYPE_V2:
         return 'CSV';
       case 'png':
       case PNG_REPORT_TYPE_V2:
-        return PNG_REPORT_TYPE;
+        return 'PNG';
       default:
         return this.props.reportType;
     }

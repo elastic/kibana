@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { TablePublicConfig } from '../config';
+import type { TablePublicConfig } from '../server/config';
 import { TableVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<TablePublicConfig>) {

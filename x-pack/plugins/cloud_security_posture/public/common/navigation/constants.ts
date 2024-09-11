@@ -6,14 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import { PosturePolicyTemplate } from '../../../common/types_old';
-import type {
-  CspBenchmarksPage,
-  CspIntegrationDocNavigationItem,
-  CspPage,
-  CspPageNavigationItem,
-} from './types';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
@@ -116,10 +110,7 @@ export const findingsNavigation = {
 
 const ELASTIC_BASE_SHORT_URL = 'https://ela.st';
 
-export const cspIntegrationDocsNavigation: Record<
-  PosturePolicyTemplate,
-  CspIntegrationDocNavigationItem
-> = {
+export const cspIntegrationDocsNavigation = {
   kspm: {
     overviewPath: `${ELASTIC_BASE_SHORT_URL}/${KSPM_POLICY_TEMPLATE}`,
     getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${KSPM_POLICY_TEMPLATE}-get-started`,
@@ -127,5 +118,8 @@ export const cspIntegrationDocsNavigation: Record<
   cspm: {
     overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}`,
     getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}-get-started`,
+    awsGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+    gcpGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
+    azureGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
   },
 };

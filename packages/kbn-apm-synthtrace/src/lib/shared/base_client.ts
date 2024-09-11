@@ -53,6 +53,17 @@ export class SynthtraceEsClient<TFields extends Fields> {
       )}"`
     );
 
+    const resolvedIndices = this.indices.length
+      ? (
+          await this.client.indices.resolveIndex({
+            name: this.indices.join(','),
+            expand_wildcards: ['open', 'hidden'],
+            // @ts-expect-error ignore_unavailable is not in the type definition, but it is accepted by es
+            ignore_unavailable: true,
+          })
+        ).indices.map((index: { name: string }) => index.name)
+      : [];
+
     await Promise.all([
       ...(this.dataStreams.length
         ? [
@@ -62,10 +73,10 @@ export class SynthtraceEsClient<TFields extends Fields> {
             }),
           ]
         : []),
-      ...(this.indices.length
+      ...(resolvedIndices.length
         ? [
             this.client.indices.delete({
-              index: this.indices.join(','),
+              index: resolvedIndices.join(','),
               expand_wildcards: ['open', 'hidden'],
               ignore_unavailable: true,
               allow_no_indices: true,

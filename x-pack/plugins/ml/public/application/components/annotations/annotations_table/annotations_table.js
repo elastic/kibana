@@ -29,10 +29,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
-import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
+import { mlJobServiceFactory } from '../../../services/job_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import {
@@ -45,7 +46,6 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
@@ -90,10 +90,8 @@ class AnnotationsTableUI extends Component {
       queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
       jobId:
-        Array.isArray(this.props.jobs) &&
-        this.props.jobs.length > 0 &&
-        this.props.jobs[0] !== undefined
-          ? this.props.jobs[0].job_id
+        Array.isArray(props.jobs) && props.jobs.length > 0 && props.jobs[0] !== undefined
+          ? props.jobs[0].job_id
           : undefined,
       datafeedFlyoutVisible: false,
       modelSnapshot: null,
@@ -103,6 +101,10 @@ class AnnotationsTableUI extends Component {
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
     };
+    this.mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      props.kibana.services.mlServices.mlApiServices
+    );
   }
 
   getAnnotations() {
@@ -112,6 +114,8 @@ class AnnotationsTableUI extends Component {
     this.setState({
       isLoading: true,
     });
+
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
 
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
@@ -177,7 +181,7 @@ class AnnotationsTableUI extends Component {
       }
     }
 
-    return mlJobService.getJob(jobId);
+    return this.mlJobService.getJob(jobId);
   }
 
   annotationsRefreshSubscription = null;
@@ -554,7 +558,7 @@ class AnnotationsTableUI extends Component {
                 );
           },
           enabled: (annotation) => isTimeSeriesViewJob(this.getJob(annotation.job_id)),
-          icon: 'visLine',
+          icon: 'singleMetricViewer',
           type: 'icon',
           onClick: (annotation) => this.openSingleMetricView(annotation),
           'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,

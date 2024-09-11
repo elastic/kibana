@@ -12,28 +12,34 @@ import type { AnomalyChartsEmbeddableServices } from '..';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export const getAnomalyChartsServiceDependencies = async (
-  coreStartServices: CoreStart,
-  pluginsStartServices: MlStartDependencies
+  coreStart: CoreStart,
+  pluginsStart: MlStartDependencies
 ): Promise<AnomalyChartsEmbeddableServices> => {
   const [
     { AnomalyDetectorService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
     { mlApiServicesProvider },
+    { mlJobServiceFactory },
     { mlResultsServiceProvider },
+    { toastNotificationServiceProvider },
   ] = await Promise.all([
     await import('../../application/services/anomaly_detector_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),
     await import('../../application/services/ml_api_service'),
+    await import('../../application/services/job_service'),
     await import('../../application/services/results_service'),
+    await import('../../application/services/toast_notification_service'),
   ]);
-  const httpService = new HttpService(coreStartServices.http);
+  const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
   const mlApiServices = mlApiServicesProvider(httpService);
+  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
   const mlResultsService = mlResultsServiceProvider(mlApiServices);
   const anomalyExplorerService = new AnomalyExplorerChartsService(
-    pluginsStartServices.data.query.timefilter.timefilter,
+    pluginsStart.data.query.timefilter.timefilter,
     mlApiServices,
     mlResultsService
   );
@@ -47,12 +53,12 @@ export const getAnomalyChartsServiceDependencies = async (
   //   In the long run we should again try to get rid of it here and make it available via
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
-  const mlIndexUtils = indexServiceFactory(pluginsStartServices.data.dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+  const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils, mlJobService);
 
   const anomalyChartsEmbeddableServices: AnomalyChartsEmbeddableServices = [
-    coreStartServices,
-    pluginsStartServices as MlDependencies,
+    coreStart,
+    pluginsStart as MlDependencies,
     {
       anomalyDetectorService,
       anomalyExplorerService,

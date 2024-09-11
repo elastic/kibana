@@ -20,55 +20,16 @@ import { outputService } from '../output';
 import { appContextService } from '../app_context';
 
 export const mapPackagePolicySavedObjectToPackagePolicy = ({
-  /* eslint-disable @typescript-eslint/naming-convention */
   id,
   version,
-  attributes: {
-    name,
-    description,
-    namespace,
-    enabled,
-    is_managed,
-    policy_id,
-    policy_ids,
-    output_id,
-    // `package` is a reserved keyword
-    package: packageInfo,
-    inputs,
-    vars,
-    elasticsearch,
-    agents,
-    revision,
-    secret_references,
-    updated_at,
-    updated_by,
-    created_at,
-    created_by,
-    /* eslint-enable @typescript-eslint/naming-convention */
-  },
+  attributes,
+  namespaces,
 }: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
   return {
     id,
-    name,
-    description,
-    namespace,
-    enabled,
-    is_managed,
-    policy_id,
-    policy_ids,
-    output_id,
-    package: packageInfo,
-    inputs,
-    vars,
-    elasticsearch,
     version,
-    agents,
-    revision,
-    secret_references,
-    updated_at,
-    updated_by,
-    created_at,
-    created_by,
+    spaceIds: namespaces,
+    ...attributes,
   };
 };
 
@@ -76,10 +37,11 @@ export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy | NewPackagePolicy
 ) {
-  // If package policy has multiple agent policies, check if they can be used
+  // If package policy has multiple agent policies IDs, or no agent policies (orphaned integration policy)
+  // check if user can use multiple agent policies feature
   const { canUseReusablePolicies, errorMessage: canUseMultipleAgentPoliciesErrorMessage } =
     canUseMultipleAgentPolicies();
-  if ((packagePolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+  if (!canUseReusablePolicies && packagePolicy.policy_ids.length !== 1) {
     throw new PackagePolicyMultipleAgentPoliciesError(canUseMultipleAgentPoliciesErrorMessage);
   }
 

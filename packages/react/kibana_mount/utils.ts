@@ -17,7 +17,7 @@ export const useIfMounted = () => {
     []
   );
 
-  const ifMounted = useCallback((func) => {
+  const ifMounted = useCallback((func?: () => void) => {
     if (isMounted.current && func) {
       func();
     }

@@ -40,7 +40,7 @@ import {
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
 
-import type { TimelionPublicConfig } from '../config';
+import type { TimelionPublicConfig } from '../server/config';
 
 /** @internal */
 export interface TimelionVisDependencies extends Partial<CoreStart> {

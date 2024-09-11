@@ -81,7 +81,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       });
     });
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await es.deleteByQuery({
         index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
         query: { match_all: {} },

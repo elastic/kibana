@@ -7,7 +7,6 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { isObservable } from 'rxjs';
 import { MessageRole } from '../../common/chat_complete';
 import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
 import { ToolCall, ToolChoiceType } from '../../common/chat_complete/tools';
@@ -20,7 +19,7 @@ const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
     toolCallId: schema.string(),
     function: schema.object({
       name: schema.string(),
-      arguments: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     }),
   })
 );
@@ -57,8 +56,8 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
     schema.oneOf([
       schema.object({
         role: schema.literal(MessageRole.Assistant),
-        content: schema.string(),
-        toolCalls: toolCallSchema,
+        content: schema.oneOf([schema.string(), schema.literal(null)]),
+        toolCalls: schema.maybe(toolCallSchema),
       }),
       schema.object({
         role: schema.literal(MessageRole.User),
@@ -68,7 +67,7 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
       schema.object({
         role: schema.literal(MessageRole.Tool),
         toolCallId: schema.string(),
-        response: schema.object({}, { unknowns: 'allow' }),
+        response: schema.recordOf(schema.string(), schema.any()),
       }),
     ])
   ),
@@ -97,7 +96,7 @@ export function registerChatCompleteRoute({
 
       const { connectorId, messages, system, toolChoice, tools } = request.body;
 
-      const chatCompleteResponse = await client.chatComplete({
+      const chatCompleteResponse = client.chatComplete({
         connectorId,
         messages,
         system,
@@ -105,13 +104,9 @@ export function registerChatCompleteRoute({
         tools,
       });
 
-      if (isObservable(chatCompleteResponse)) {
-        return response.ok({
-          body: observableIntoEventSourceStream(chatCompleteResponse),
-        });
-      }
-
-      return response.ok({ body: chatCompleteResponse });
+      return response.ok({
+        body: observableIntoEventSourceStream(chatCompleteResponse),
+      });
     }
   );
 }

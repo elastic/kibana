@@ -332,6 +332,7 @@ export class WrappingPrettyPrinter {
 
     .on('visitRenameExpression', (ctx, inp: Input): Output => {
       const operator = this.keyword('AS');
+
       return this.visitBinaryExpression(ctx, operator, inp);
     })
 

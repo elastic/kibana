@@ -20,7 +20,7 @@ import { LocaleWrapper } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { SearchSessionsConfigSchema } from '../../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;

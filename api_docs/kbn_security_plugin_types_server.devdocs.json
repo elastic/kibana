@@ -4285,14 +4285,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               },
               {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
-              },
-              {
-                "plugin": "enterpriseSearch",
-                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
