@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Role } from '@kbn/security-plugin-types-common';
 
+import { handleApiError } from './handle_api_error';
 import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './provider';
 import { PrivilegesRolesForm } from './roles/component/space_assign_role_privilege_form';
 import { SpaceAssignedRolesTable } from './roles/component/space_assigned_roles_table';
@@ -41,12 +42,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
 
           dispatch({ type: 'update_roles', payload: result });
         } catch (error) {
-          console.error(error); // eslint-disable-line no-console
-
-          const message = error?.body?.message ?? error.toString();
-          notifications.toasts.addError(error, {
-            title: message,
-          });
+          handleApiError(error, { toasts: notifications.toasts });
         }
       });
     };

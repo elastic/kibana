@@ -27,6 +27,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
+import { handleApiError } from './handle_api_error';
 import { useTabs } from './hooks/use_tabs';
 import { useEditSpaceServices, useEditSpaceStore } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
@@ -57,12 +58,6 @@ interface PageProps {
   allowSolutionVisibility: boolean;
 }
 
-const handleApiError = (error: Error) => {
-  // eslint-disable-next-line no-console
-  console.error(error);
-  throw error;
-};
-
 export const EditSpace: FC<PageProps> = ({
   spaceId,
   getFeatures,
@@ -73,7 +68,7 @@ export const EditSpace: FC<PageProps> = ({
 }) => {
   const { state, dispatch } = useEditSpaceStore();
   const { invokeClient } = useEditSpaceServices();
-  const { spacesManager, capabilities, serverBasePath } = useEditSpaceServices();
+  const { spacesManager, capabilities, serverBasePath, notifications } = useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -109,8 +104,8 @@ export const EditSpace: FC<PageProps> = ({
       setIsLoadingSpace(false);
     };
 
-    getSpaceInfo().catch(handleApiError);
-  }, [spaceId, spacesManager]);
+    getSpaceInfo().catch((error) => handleApiError(error, { toasts: notifications.toasts }));
+  }, [spaceId, spacesManager, notifications.toasts]);
 
   // Load roles to show the count of assigned roles as a badge in the "Assigned roles" tab title
   useEffect(() => {
@@ -123,8 +118,6 @@ export const EditSpace: FC<PageProps> = ({
         let result: Role[] = [];
         try {
           result = await clients.spacesManager.getRolesForSpace(spaceId);
-
-          dispatch({ type: 'update_roles', payload: result });
         } catch (error) {
           const message = error?.body?.message ?? error.toString();
           const statusCode = error?.body?.statusCode ?? null;
@@ -138,9 +131,10 @@ export const EditSpace: FC<PageProps> = ({
             console.error('Encountered error while getting list of roles for space!');
             // eslint-disable-next-line no-console
             console.error(error);
-            throw error;
           }
+          handleApiError(error, { toasts: notifications.toasts });
         }
+        dispatch({ type: 'update_roles', payload: result });
       });
 
       setIsLoadingRoles(false);
@@ -148,9 +142,9 @@ export const EditSpace: FC<PageProps> = ({
 
     if (!state.roles.size) {
       // maybe we do not make this call if user can't view roles? 🤔
-      getRoles().catch(handleApiError);
+      getRoles().catch((error) => handleApiError(error, { toasts: notifications.toasts }));
     }
-  }, [dispatch, invokeClient, spaceId, state.roles]);
+  }, [dispatch, invokeClient, spaceId, state.roles, notifications.toasts]);
 
   useEffect(() => {
     const _getFeatures = async () => {
@@ -158,8 +152,8 @@ export const EditSpace: FC<PageProps> = ({
       setFeatures(result);
       setIsLoadingFeatures(false);
     };
-    _getFeatures().catch(handleApiError);
-  }, [getFeatures]);
+    _getFeatures().catch((error) => handleApiError(error, { toasts: notifications.toasts }));
+  }, [getFeatures, notifications.toasts]);
 
   useEffect(() => {
     if (space) {

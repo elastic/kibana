@@ -20,19 +20,14 @@ import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { handleApiError } from './handle_api_error';
 import { useEditSpaceServices } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 
-const handleApiError = (error: Error) => {
-  // eslint-disable-next-line no-console
-  console.error(error);
-  throw error;
-};
-
 export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
   const { id: spaceId } = space;
-  const { spacesManager, serverBasePath } = useEditSpaceServices();
+  const { spacesManager, serverBasePath, notifications } = useEditSpaceServices();
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<SpaceContentTypeSummaryItem[] | null>(null);
 
@@ -97,8 +92,10 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
       setIsLoading(false);
     };
 
-    getItems().catch(handleApiError);
-  }, [spaceId, spacesManager]);
+    getItems().catch((error) => {
+      handleApiError(error, { toasts: notifications.toasts });
+    });
+  }, [spaceId, spacesManager, notifications.toasts]);
 
   if (isLoading) {
     return (
