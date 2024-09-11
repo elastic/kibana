@@ -119,7 +119,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         );
       })}
 
-      <AddButton parentApi={pageApi} uiActions={uiActions} />
+      <AddButton pageApi={pageApi} uiActions={uiActions} />
     </div>
   );
 };
