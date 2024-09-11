@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  type ParseOptions,
-  type ParseResult,
+import * as React from 'react';
 
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
+export type AnnotationSkip = number;
 
-export { ESQLErrorListener } from './esql_error_listener';
+export type AnnotationMark = [length: number, annotation: (text: string) => React.ReactNode];
+
+export type Annotation = AnnotationSkip | AnnotationMark;

@@ -6,16 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  type ParseOptions,
-  type ParseResult,
-
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
-
-export { ESQLErrorListener } from './esql_error_listener';
+module.exports = require('@kbn/storybook').defaultConfig;

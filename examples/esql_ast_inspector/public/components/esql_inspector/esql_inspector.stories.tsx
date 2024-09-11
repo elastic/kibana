@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  type ParseOptions,
-  type ParseResult,
+import * as React from 'react';
+import { EsqlInspector } from './esql_inspector';
 
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
+export default {
+  title: '<EsqlInspector>',
+  parameters: {},
+};
 
-export { ESQLErrorListener } from './esql_error_listener';
+export const Default = () => <EsqlInspector />;

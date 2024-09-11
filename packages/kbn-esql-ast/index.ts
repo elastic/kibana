@@ -29,8 +29,11 @@ export type {
   ESQLAstNode,
 } from './src/types';
 
+export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
+
 export {
   getParser,
+  createParser,
   getLexer,
   parse,
   type ParseOptions,

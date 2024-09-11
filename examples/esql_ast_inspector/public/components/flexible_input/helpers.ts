@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  type ParseOptions,
-  type ParseResult,
-
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
-
-export { ESQLErrorListener } from './esql_error_listener';
+export const copyStyles = (from: HTMLElement, to: HTMLElement, which: string[]): void => {
+  const styles = window.getComputedStyle(from);
+  if (!styles) return;
+  for (const property of which) (to.style as any)[property] = (styles as any)[property];
+};

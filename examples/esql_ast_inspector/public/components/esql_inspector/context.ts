@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  type ParseOptions,
-  type ParseResult,
+import * as React from 'react';
+import { EsqlInspectorState } from './esql_inspector_state';
 
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
+export const context = React.createContext<EsqlInspectorState | null>(null);
 
-export { ESQLErrorListener } from './esql_error_listener';
+export const useEsqlInspector = () => React.useContext(context)!;

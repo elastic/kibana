@@ -423,7 +423,7 @@ ROW
     });
   });
 
-  describe('rename expressions expressions', () => {
+  describe('rename expressions', () => {
     test('rename expression, surrounded from three sides', () => {
       const query = `
         ROW 1 | RENAME
@@ -441,7 +441,58 @@ ROW 1
       // 2
       /* 3 */
       // 4
-      /* 5 */ /* 6 */ a AS b /* 7 */ /* 8 */ // 9`);
+      /* 5 */ /* 6 */ a AS
+        b /* 7 */ /* 8 */ // 9`);
+    });
+
+    test('rename expression, surrounded from three sides with comments, and between other expressions', () => {
+      const query = `
+        ROW 1 | RENAME
+        x AS y,
+
+        /* 1 */
+        // 2
+        /* 3 */
+        // 4
+        /* 5 */ /* 6 */ a AS b /* 7 */ /* 8 */, // 9
+        
+        x AS y
+        `;
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+ROW 1
+  | RENAME
+      x AS y,
+      /* 1 */
+      // 2
+      /* 3 */
+      // 4
+      /* 5 */ /* 6 */ a AS
+        b, /* 7 */ /* 8 */ // 9
+      x AS y`);
+    });
+
+    test('rename operands surrounds from all sides', () => {
+      const query = `
+        ROW 1 | RENAME
+        x AS y,
+        /* 1 */
+        /* 2 */ a /* 3 */ AS
+        
+        /* 4 */
+        /* 5 */ b, /* 6 */
+        x AS y`;
+      const text = reprint(query).text;
+      expect('\n' + text).toBe(`
+ROW 1
+  | RENAME
+      x AS y,
+      /* 1 */
+      /* 2 */ a /* 3 */ AS
+        /* 4 */
+        /* 5 */ b, /* 6 */
+      x AS y`);
     });
   });
 
@@ -468,9 +519,25 @@ ROW 1
           2`;
         const text = reprint(query).text;
 
-        console.log(text);
+        expect('\n' + text).toBe(`
+ROW
+  // One is important here
+  1 +
+    2`);
+      });
 
-        expect(text).toBe(`ROW /* 1 */ /* 2 */ 1 /* 3 */ /* 4 */ + 2`);
+      test('second operand with top comment', () => {
+        const query = `ROW
+        1 +
+          // Two is more important here
+          2`;
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+ROW
+  1 +
+    // Two is more important here
+    2`);
       });
     });
   });

@@ -63,7 +63,9 @@ export class Visitor<
           const isInside = location.min <= pos && location.max >= pos;
           if (isInside) return ctx.visitExpression(node);
           const isBefore = location.min > pos;
-          if (isBefore) return node;
+          if (isBefore) {
+            return ctx.visitExpression(node) || node;
+          }
         }
         return null;
       })

@@ -233,6 +233,180 @@ FROM index`;
         },
       ]);
     });
+
+    it('to first binary expression operand', () => {
+      const text = `
+        ROW
+        
+        // 1
+        1 +
+        2`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'function',
+            name: '+',
+            args: [
+              {
+                type: 'literal',
+                value: 1,
+                formatting: {
+                  top: [
+                    {
+                      type: 'comment',
+                      subtype: 'single-line',
+                      text: ' 1',
+                    },
+                  ],
+                },
+              },
+              {
+                type: 'literal',
+                value: 2,
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('to first binary expression operand, nested in function', () => {
+      const text = `
+        ROW fn(
+
+        // 1
+        1 +
+        2
+        )`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'function',
+            name: 'fn',
+            args: [
+              {
+                type: 'function',
+                name: '+',
+                args: [
+                  {
+                    type: 'literal',
+                    value: 1,
+                    formatting: {
+                      top: [
+                        {
+                          type: 'comment',
+                          subtype: 'single-line',
+                          text: ' 1',
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    type: 'literal',
+                    value: 2,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('to second binary expression operand', () => {
+      const text = `
+        ROW
+        1 +
+
+        // 2
+        2`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'function',
+            name: '+',
+            args: [
+              {
+                type: 'literal',
+                value: 1,
+              },
+              {
+                type: 'literal',
+                value: 2,
+                formatting: {
+                  top: [
+                    {
+                      type: 'comment',
+                      subtype: 'single-line',
+                      text: ' 2',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('to second binary expression operand, nested in function', () => {
+      const text = `
+        ROW fn(
+        1 +
+
+        // 2
+        2
+        )`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[0]).toMatchObject({
+        type: 'command',
+        name: 'row',
+        args: [
+          {
+            type: 'function',
+            name: 'fn',
+            args: [
+              {
+                type: 'function',
+                name: '+',
+                args: [
+                  {
+                    type: 'literal',
+                    value: 1,
+                  },
+                  {
+                    type: 'literal',
+                    value: 2,
+                    formatting: {
+                      top: [
+                        {
+                          type: 'comment',
+                          subtype: 'single-line',
+                          text: ' 2',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
   });
 
   describe('can attach "left" comment(s)', () => {

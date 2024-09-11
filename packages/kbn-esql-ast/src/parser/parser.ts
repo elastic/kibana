@@ -54,6 +54,13 @@ export const getParser = (
   };
 };
 
+export const createParser = (text: string) => {
+  const errorListener = new ESQLErrorListener();
+  const parseListener = new ESQLAstBuilderListener();
+
+  return getParser(CharStreams.fromString(text), errorListener, parseListener);
+};
+
 // These will need to be manually updated whenever the relevant grammar changes.
 const SYNTAX_ERRORS_TO_IGNORE = [
   `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
@@ -106,7 +113,12 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
     return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
   });
   const { ast: commands } = parseListener.getAst();
-  const root = Builder.expression.query(commands);
+  const root = Builder.expression.query(commands, {
+    location: {
+      min: 0,
+      max: text.length - 1,
+    },
+  });
 
   if (options.withFormatting) {
     const decorations = collectDecorations(tokens);

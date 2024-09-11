@@ -152,8 +152,11 @@ export class WrappingPrettyPrinter {
     const groupRight = binaryExpressionGroup(right);
     const continueVerticalFlattening = group && inp.flattenBinExpOfType === group;
     const suffix = inp.suffix ?? '';
+    const oneArgumentPerLine =
+      getPrettyPrintStats(left).hasLineBreakingDecorations ||
+      getPrettyPrintStats(right).hasLineBreakingDecorations;
 
-    if (continueVerticalFlattening) {
+    if (continueVerticalFlattening || oneArgumentPerLine) {
       const parent = ctx.parent?.node;
       const isLeftChild = isBinaryExpression(parent) && parent.args[0] === node;
       const leftInput: Input = {
@@ -161,17 +164,25 @@ export class WrappingPrettyPrinter {
         remaining: inp.remaining,
         flattenBinExpOfType: group,
       };
+      const rightTab = isLeftChild ? this.opts.tab : '';
+      const rightIndent = inp.indent + rightTab + (oneArgumentPerLine ? this.opts.tab : '');
       const rightInput: Input = {
-        indent: inp.indent + this.opts.tab,
+        indent: rightIndent,
         remaining: inp.remaining - this.opts.tab.length,
         flattenBinExpOfType: group,
       };
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
-      const rightTab = isLeftChild ? this.opts.tab : '';
-      const txt = `${leftOut.txt} ${operator}\n${inp.indent}${rightTab}${rightOut.txt}${suffix}`;
 
-      return { txt };
+      let txt = `${leftOut.txt} ${operator}\n`;
+
+      if (!rightOut.indented) {
+        txt += rightIndent;
+      }
+
+      txt += rightOut.txt + suffix;
+
+      return { txt, indented: leftOut.indented };
     }
 
     let txt: string = '';
@@ -188,6 +199,8 @@ export class WrappingPrettyPrinter {
 
     const length = leftFormatted.length + rightFormatted.length + operator.length + 2;
     const fitsOnOneLine = length <= inp.remaining;
+
+    let indented = false;
 
     if (fitsOnOneLine) {
       txt = `${leftFormatted} ${operator} ${rightFormatted}${suffix}`;
@@ -207,10 +220,17 @@ export class WrappingPrettyPrinter {
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
 
-      txt = `${leftOut.txt} ${operator}\n${inp.indent}${this.opts.tab}${rightOut.txt}${suffix}`;
+      txt = `${leftOut.txt} ${operator}\n`;
+
+      if (!rightOut.indented) {
+        txt += `${inp.indent}${this.opts.tab}`;
+      }
+
+      txt += `${rightOut.txt}${suffix}`;
+      indented = leftOut.indented;
     }
 
-    return { txt };
+    return { txt, indented };
   }
 
   private printArguments(
@@ -336,9 +356,9 @@ export class WrappingPrettyPrinter {
   protected decorateWithComments(
     indent: string,
     node: ESQLAstBaseItem,
-    txt: string
+    txt: string,
+    indented: boolean = false
   ): { txt: string; indented: boolean } {
-    let indented: boolean = false;
     const formatting = node.formatting;
 
     if (!formatting) {
@@ -456,8 +476,13 @@ export class WrappingPrettyPrinter {
 
     .on('visitRenameExpression', (ctx, inp: Input): Output => {
       const operator = this.keyword('AS');
-      const { txt: formatted } = this.visitBinaryExpression(ctx, operator, inp);
-      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+      const expression = this.visitBinaryExpression(ctx, operator, inp);
+      const { txt, indented } = this.decorateWithComments(
+        inp.indent,
+        ctx.node,
+        expression.txt,
+        expression.indented
+      );
 
       return { txt, indented };
     })

@@ -6,16 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  getLexer,
-  getParser,
-  createParser,
-  parse,
-  type ParseOptions,
-  type ParseResult,
-
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
-} from './parser';
-
-export { ESQLErrorListener } from './esql_error_listener';
+export { Annotations, type AnnotationsProps } from './annotations';
+export type { Annotation, AnnotationMark, AnnotationSkip } from './types';
