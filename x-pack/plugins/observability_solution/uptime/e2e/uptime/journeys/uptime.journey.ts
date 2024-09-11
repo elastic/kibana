@@ -17,7 +17,7 @@ journey('UptimeOverview', ({ page, params }) => {
   });
 
   step('Go to Kibana', async () => {
-    await page.goto(`${params.kibanaUrl}/app/uptime?dateRangeStart=now-10y&dateRangeEnd=now`, {
+    await page.goto(`${params.kibanaUrl}/app/uptime?dateRangeStart=2018-01-01&dateRangeEnd=now`, {
       waitUntil: 'networkidle',
     });
   });
