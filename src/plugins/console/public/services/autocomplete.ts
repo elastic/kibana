@@ -74,7 +74,7 @@ export class AutocompleteInfo {
   }
 
   /**
-   * Indicates if mapping fetching is in progress.
+   * Indicates if autocomplete_entities fetching is in progress.
    */
   private readonly _isLoading$ = new BehaviorSubject<boolean>(false);
   public readonly isLoading$ = this._isLoading$.asObservable();
