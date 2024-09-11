@@ -27,7 +27,7 @@ import type { SpaceContentTypeSummaryItem } from '../../types';
 
 export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
   const { id: spaceId } = space;
-  const { spacesManager, serverBasePath, notifications } = useEditSpaceServices();
+  const { spacesManager, serverBasePath, logger, notifications } = useEditSpaceServices();
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<SpaceContentTypeSummaryItem[] | null>(null);
 
@@ -93,9 +93,9 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
     };
 
     getItems().catch((error) => {
-      handleApiError(error, { toasts: notifications.toasts });
+      handleApiError(error, { logger, toasts: notifications.toasts });
     });
-  }, [spaceId, spacesManager, notifications.toasts]);
+  }, [spaceId, spacesManager, logger, notifications.toasts]);
 
   if (isLoading) {
     return (

@@ -68,7 +68,8 @@ export const EditSpace: FC<PageProps> = ({
 }) => {
   const { state, dispatch } = useEditSpaceStore();
   const { invokeClient } = useEditSpaceServices();
-  const { spacesManager, capabilities, serverBasePath, notifications } = useEditSpaceServices();
+  const { spacesManager, capabilities, serverBasePath, logger, notifications } =
+    useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -104,8 +105,10 @@ export const EditSpace: FC<PageProps> = ({
       setIsLoadingSpace(false);
     };
 
-    getSpaceInfo().catch((error) => handleApiError(error, { toasts: notifications.toasts }));
-  }, [spaceId, spacesManager, notifications.toasts]);
+    getSpaceInfo().catch((error) =>
+      handleApiError(error, { logger, toasts: notifications.toasts })
+    );
+  }, [spaceId, spacesManager, logger, notifications.toasts]);
 
   // Load roles to show the count of assigned roles as a badge in the "Assigned roles" tab title
   useEffect(() => {
@@ -122,17 +125,13 @@ export const EditSpace: FC<PageProps> = ({
           const message = error?.body?.message ?? error.toString();
           const statusCode = error?.body?.statusCode ?? null;
           if (statusCode === 403) {
-            // eslint-disable-next-line no-console
-            console.log('Insufficient permissions to get list of roles for the space');
-            // eslint-disable-next-line no-console
-            console.log(message);
+            logger.error('Insufficient permissions to get list of roles for the space');
+            logger.error(message);
           } else {
-            // eslint-disable-next-line no-console
-            console.error('Encountered error while getting list of roles for space!');
-            // eslint-disable-next-line no-console
-            console.error(error);
+            logger.error('Encountered error while getting list of roles for space!');
+            logger.error(error);
           }
-          handleApiError(error, { toasts: notifications.toasts });
+          handleApiError(error, { logger, toasts: notifications.toasts });
         }
         dispatch({ type: 'update_roles', payload: result });
       });
@@ -142,9 +141,9 @@ export const EditSpace: FC<PageProps> = ({
 
     if (!state.roles.size) {
       // maybe we do not make this call if user can't view roles? 🤔
-      getRoles().catch((error) => handleApiError(error, { toasts: notifications.toasts }));
+      getRoles().catch((error) => handleApiError(error, { logger, toasts: notifications.toasts }));
     }
-  }, [dispatch, invokeClient, spaceId, state.roles, notifications.toasts]);
+  }, [dispatch, invokeClient, spaceId, state.roles, logger, notifications.toasts]);
 
   useEffect(() => {
     const _getFeatures = async () => {
@@ -152,8 +151,10 @@ export const EditSpace: FC<PageProps> = ({
       setFeatures(result);
       setIsLoadingFeatures(false);
     };
-    _getFeatures().catch((error) => handleApiError(error, { toasts: notifications.toasts }));
-  }, [getFeatures, notifications.toasts]);
+    _getFeatures().catch((error) =>
+      handleApiError(error, { logger, toasts: notifications.toasts })
+    );
+  }, [getFeatures, logger, notifications.toasts]);
 
   useEffect(() => {
     if (space) {

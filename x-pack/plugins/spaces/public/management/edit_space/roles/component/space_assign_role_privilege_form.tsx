@@ -120,7 +120,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       ? FEATURE_PRIVILEGES_READ
       : selectedRolesCombinedPrivileges[0]
   );
-  const { notifications } = useEditSpaceServices();
+  const { logger, notifications } = useEditSpaceServices();
 
   useEffect(() => {
     async function fetchRequiredData(spaceId: string) {
@@ -277,7 +277,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         payload: updatedRoles,
       });
     } catch (error) {
-      console.error('Could not assign role to space!', error); // eslint-disable-line no-console
+      logger.error('Could not assign role to space!', error);
       const message = error?.body?.message ?? error.toString();
 
       notifications.toasts.addError(error, {
@@ -295,6 +295,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     space.id,
     roleSpacePrivilege,
     roleCustomizationAnchor,
+    logger,
     notifications.toasts,
   ]);
 

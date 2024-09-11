@@ -118,6 +118,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           getStartServices: core.getStartServices,
           spacesManager: this.spacesManager,
           config: this.config,
+          logger: this.initializerContext.logger.get(),
           getRolesAPIClient,
           eventTracker: this.eventTracker,
           getPrivilegesAPIClient,

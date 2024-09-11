@@ -30,7 +30,15 @@ interface Props {
 export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOnly }) => {
   const { dispatch, state } = useEditSpaceStore(); // no loading state because roles have already been loaded
   const services = useEditSpaceServices();
-  const { getUrlForApp, overlays, theme, i18n: i18nStart, notifications, invokeClient } = services;
+  const {
+    getUrlForApp,
+    overlays,
+    theme,
+    i18n: i18nStart,
+    logger,
+    notifications,
+    invokeClient,
+  } = services;
 
   // Roles are already loaded in app state, refresh them when user navigates to this tab
   useEffect(() => {
@@ -42,13 +50,13 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
 
           dispatch({ type: 'update_roles', payload: result });
         } catch (error) {
-          handleApiError(error, { toasts: notifications.toasts });
+          handleApiError(error, { logger, toasts: notifications.toasts });
         }
       });
     };
 
     getRoles();
-  }, [dispatch, invokeClient, space.id, notifications.toasts]);
+  }, [dispatch, invokeClient, space.id, logger, notifications.toasts]);
 
   const showRolesPrivilegeEditor = useCallback(
     (defaultSelected?: Role[]) => {

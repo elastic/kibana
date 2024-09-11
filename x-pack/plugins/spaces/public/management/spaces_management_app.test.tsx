@@ -27,7 +27,12 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import {
+  coreMock,
+  loggingSystemMock,
+  scopedHistoryMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
 import { spacesManagementApp } from './spaces_management_app';
@@ -43,6 +48,7 @@ const config: ConfigType = {
 };
 
 const eventTracker = new EventTracker({ reportEvent: jest.fn() });
+const logger = loggingSystemMock.createLogger();
 
 async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const container = document.createElement('div');
@@ -65,6 +71,7 @@ async function mountApp(basePath: string, pathname: string, spaceId?: string) {
       spacesManager,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
       config,
+      logger,
       getRolesAPIClient: jest.fn(),
       getPrivilegesAPIClient: jest.fn(),
       eventTracker,
@@ -88,6 +95,7 @@ describe('spacesManagementApp', () => {
         spacesManager: spacesManagerMock.create(),
         getStartServices: coreMock.createSetup().getStartServices as any,
         config,
+        logger,
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,

@@ -12,6 +12,7 @@ import React from 'react';
 import {
   httpServiceMock,
   i18nServiceMock,
+  loggingSystemMock,
   notificationServiceMock,
   overlayServiceMock,
   themeServiceMock,
@@ -29,6 +30,7 @@ const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
+const logger = loggingSystemMock.createLogger();
 
 const spacesManager = spacesManagerMock.create();
 
@@ -45,6 +47,7 @@ const SUTProvider = ({
     <IntlProvider locale="en">
       <EditSpaceProvider
         {...{
+          logger,
           i18n,
           http,
           theme,

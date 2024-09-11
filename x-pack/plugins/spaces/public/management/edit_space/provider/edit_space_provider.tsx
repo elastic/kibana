@@ -19,6 +19,7 @@ import React, {
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { Logger } from '@kbn/logging';
 import type {
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
@@ -33,6 +34,7 @@ import type { SpacesManager } from '../../../spaces_manager';
 
 export interface EditSpaceProviderProps
   extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
+  logger: Logger;
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
@@ -78,13 +80,14 @@ export const EditSpaceProvider = ({
     roles: new Map(),
   });
 
+  const { logger } = services;
   const resolveAPIClients = useCallback(async () => {
     try {
       [rolesAPIClientRef.current, privilegesClientRef.current] = await clients.current;
     } catch (err) {
-      console.error('Could not resolve API Clients!', err); // eslint-disable-line no-console
+      logger.error('Could not resolve API Clients!', err);
     }
-  }, []);
+  }, [logger]);
 
   useEffect(() => {
     resolveAPIClients();

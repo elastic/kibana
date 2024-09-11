@@ -11,6 +11,7 @@ import React from 'react';
 import {
   httpServiceMock,
   i18nServiceMock,
+  loggingSystemMock,
   notificationServiceMock,
   overlayServiceMock,
   themeServiceMock,
@@ -34,6 +35,8 @@ const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
+const logger = loggingSystemMock.createLogger();
+
 const space = {
   id: 'space-a',
   name: 'Space A',
@@ -66,6 +69,7 @@ describe('EditSpaceAssignedRolesTab', () => {
           getPrivilegesAPIClient={getPrivilegeAPIClient}
           theme={theme}
           i18n={i18n}
+          logger={logger}
         >
           {children}
         </EditSpaceProvider>

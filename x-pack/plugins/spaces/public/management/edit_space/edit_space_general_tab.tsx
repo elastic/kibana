@@ -51,7 +51,8 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-  const { http, overlays, notifications, navigateToUrl, spacesManager } = useEditSpaceServices();
+  const { http, overlays, logger, notifications, navigateToUrl, spacesManager } =
+    useEditSpaceServices();
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
 
@@ -149,7 +150,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           props.reloadWindow();
         }
       } catch (error) {
-        console.error('Could not save changes to space!', error); // eslint-disable-line no-console
+        logger.error('Could not save changes to space!', error);
         const message = error?.body?.message ?? error.toString();
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
@@ -161,7 +162,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         setIsLoading(false);
       }
     },
-    [backToSpacesList, notifications.toasts, formValues, spacesManager, props]
+    [backToSpacesList, notifications.toasts, formValues, spacesManager, logger, props]
   );
 
   const onClickSubmit = useCallback(() => {

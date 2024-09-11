@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import type { ManagementSection } from '@kbn/management-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
@@ -18,6 +19,7 @@ import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
 const eventTracker = new EventTracker({ reportEvent: jest.fn() });
+const logger = loggingSystemMock.createLogger();
 
 describe('ManagementService', () => {
   const config: ConfigType = {
@@ -41,6 +43,7 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        logger,
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,
@@ -63,6 +66,7 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        logger,
         getRolesAPIClient: getRolesAPIClientMock,
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,
@@ -86,6 +90,7 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        logger,
         getRolesAPIClient: jest.fn(),
         getPrivilegesAPIClient: jest.fn(),
         eventTracker,

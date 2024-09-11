@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
@@ -31,6 +32,7 @@ interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   config: ConfigType;
+  logger: Logger;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   eventTracker: EventTracker;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
@@ -42,6 +44,7 @@ export const spacesManagementApp = Object.freeze({
     getStartServices,
     spacesManager,
     config,
+    logger,
     eventTracker,
     getRolesAPIClient,
     getPrivilegesAPIClient,
@@ -150,6 +153,7 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               theme={theme}
               i18n={coreStart.i18n}
+              logger={logger}
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}

@@ -6,16 +6,22 @@
  */
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { Logger } from '@kbn/logging';
 
 interface HandleErrorDeps {
   toasts: NotificationsStart['toasts'];
+  logger: Logger;
 }
 
 export const handleApiError = (error: any, deps: HandleErrorDeps) => {
-  console.error(error); // eslint-disable-line no-console
+  const { logger, toasts } = deps;
 
   const message = error?.body?.message ?? error.toString();
-  deps.toasts.addError(error, {
+
+  logger.error(message);
+  logger.error(error);
+
+  toasts.addError(error, {
     title: message,
   });
 };
