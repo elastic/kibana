@@ -96,7 +96,7 @@ export function ControlGroup({
   const ApplyButtonComponent = useMemo(() => {
     return (
       <EuiButtonIcon
-        size="m"
+        size="s"
         disabled={!hasUnappliedSelections}
         iconSize="m"
         display="fill"
