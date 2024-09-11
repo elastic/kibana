@@ -98,7 +98,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    *
    * @default undefined
    */
-  x_discontinued?: string;
+  'x-discontinued'?: string;
 };
 
 /**
