@@ -21,7 +21,7 @@ export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCo
   }
   const ranges = Array.from({ length: selection.rangeCount }, (_, i) => selection.getRangeAt(i));
 
-  if (!ranges.length || !dataGridWrapper || !event.clipboardData?.setData) {
+  if (!ranges.length || !event.clipboardData?.setData || !dataGridWrapper) {
     return;
   }
 
@@ -31,15 +31,28 @@ export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCo
 
   const rows = dataGridWrapper.querySelectorAll('[role="row"]');
   rows.forEach((row) => {
-    const cells = row.querySelectorAll(
-      '[role="gridcell"]:not(.euiDataGridRowCell--controlColumn) .euiDataGridRowCell__content'
-    );
+    const cells = row.querySelectorAll('[role="gridcell"]');
+
     const cellsTextContent: string[] = [];
     let hasSelectedCellsInRow = false;
 
     cells.forEach((cell) => {
+      if (
+        cell.classList?.contains?.('euiDataGridRowCell--controlColumn') &&
+        cell.getAttribute('data-gridcell-column-id') !== 'timeline-event-detail-row' // in Security Solution "Event renderes" are appended as control column
+      ) {
+        // skip controls
+        return;
+      }
+
+      const cellContent = cell.querySelector('.euiDataGridRowCell__content');
+      if (!cellContent) {
+        return;
+      }
+
+      // get text content of selected cells
       if (ranges.some((range) => range?.intersectsNode(cell))) {
-        cellsTextContent.push(getCellTextContent(cell));
+        cellsTextContent.push(getCellTextContent(cellContent));
         hasSelectedCellsInRow = true;
         totalCellsCount++;
       } else {
@@ -75,7 +88,7 @@ function getCellTextContent(cell: Element) {
 
   // for Document column
   appendTextToSelector(cellCloned, '.unifiedDataTable__descriptionListTitle', ': ');
-  appendTextToSelector(cellCloned, '.unifiedDataTable__descriptionListDescription', ', ');
+  appendTextToSelector(cellCloned, '.unifiedDataTable__descriptionListDescription', ', ', true);
 
   return cellCloned.textContent || '';
 }
@@ -94,9 +107,17 @@ function dropBySelector(element: HTMLElement, selector: string) {
   elements.forEach((el) => el.remove());
 }
 
-function appendTextToSelector(element: HTMLElement, selector: string, text: string) {
+function appendTextToSelector(
+  element: HTMLElement,
+  selector: string,
+  text: string,
+  skipLast: boolean | undefined = false
+) {
   const elements = element.querySelectorAll(selector);
-  elements.forEach((el) => {
+  elements.forEach((el, index) => {
+    if (skipLast && index === elements.length - 1) {
+      return;
+    }
     const textNode = document.createTextNode(text);
     el.appendChild(textNode);
   });
