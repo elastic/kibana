@@ -16,6 +16,7 @@ import {
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable, Subject } from 'rxjs';
 import { Metrics } from '../metrics';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 
 export interface NodeMetrics {
   process_uuid: string;
@@ -39,8 +40,11 @@ const QuerySchema = schema.object({
 export function metricsRoute(params: MetricsRouteParams) {
   const { router, logger, metrics$, resetMetrics$, taskManagerId } = params;
 
-  const debugLogger = logger.get(`metrics-debugger`);
-  const additionalDebugLogger = logger.get(`metrics-subscribe-debugger`);
+  const debugLogger = createWrappedLogger({ logger, tags: [`metrics-debugger`] });
+  const additionalDebugLogger = createWrappedLogger({
+    logger,
+    tags: [`metrics-subscribe-debugger`],
+  });
   let lastMetrics: NodeMetrics | null = null;
 
   metrics$.subscribe((metrics) => {
