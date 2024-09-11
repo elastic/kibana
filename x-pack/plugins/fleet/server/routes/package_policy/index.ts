@@ -75,6 +75,14 @@ const DryRunPackagePolicySchema = schema.object({
   ),
 });
 
+const PackagePolicyStatusResponseSchema = schema.object({
+  id: schema.string(),
+  success: schema.boolean(),
+  name: schema.maybe(schema.string()),
+  statusCode: schema.maybe(schema.number()),
+  body: schema.maybe(schema.object({ message: schema.string() })),
+});
+
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
   router.versioned
@@ -286,7 +294,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-      description: 'Delete package policy',
+      description: 'Bulk delete package policies',
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -300,10 +308,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             200: {
               body: () =>
                 schema.arrayOf(
-                  schema.object({
-                    id: schema.string(),
-                    name: schema.maybe(schema.string()),
-                    success: schema.boolean(),
+                  PackagePolicyStatusResponseSchema.extends({
                     policy_id: schema.nullable(
                       schema.maybe(
                         schema.string({
@@ -317,8 +322,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                     policy_ids: schema.arrayOf(schema.string()),
                     output_id: schema.nullable(schema.maybe(schema.string())),
                     package: PackagePolicyPackageSchema,
-                    statusCode: schema.maybe(schema.number()),
-                    body: schema.maybe(schema.object({ message: schema.string() })),
                   })
                 ),
             },
@@ -382,14 +385,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpgradePackagePoliciesRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  id: schema.string(),
-                  success: schema.boolean(),
-                  name: schema.maybe(schema.string()),
-                  statusCode: schema.maybe(schema.number()),
-                  body: schema.maybe(schema.object({ message: schema.string() })),
-                }),
+              body: () => PackagePolicyStatusResponseSchema,
             },
             400: {
               body: genericErrorResponse,
