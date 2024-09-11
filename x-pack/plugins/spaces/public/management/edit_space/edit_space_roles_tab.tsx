@@ -72,20 +72,17 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
                         'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
                         {
                           defaultMessage: `Selected roles have been assigned to the "{spaceName}" space`,
-                          values: {
-                            spaceName: space.name,
-                          },
+                          values: { spaceName: space.name },
                         }
                       )
                     );
                   }
 
-for (const [roleName, error] of Object.entries(errors ?? {})) {
-                        notifications.toasts.addError(new Error(JSON.stringify(errors[roleName])), {
-                          title: `Error updating ${roleName}`,
-                        });
-                      }
-                    }
+                  // FIXME: re-test
+                  for (const [roleName, error] of Object.entries(errors ?? {})) {
+                    notifications.toasts.addError(new Error(JSON.stringify(error)), {
+                      title: `Error updating ${roleName}`,
+                    });
                   }
                   overlayRef.close();
                 },
@@ -155,14 +152,11 @@ for (const [roleName, error] of Object.entries(errors ?? {})) {
             );
           }
 
-          if (errors) {
-            for (const roleName in errors) {
-              if (Object.prototype.hasOwnProperty.call(errors, roleName)) {
-                notifications.toasts.addError(new Error(JSON.stringify(errors[roleName])), {
-                  title: `Error updating ${roleName}`,
-                });
-              }
-            }
+          // FIXME: re-test
+          for (const [roleName, error] of Object.entries(errors ?? {})) {
+            notifications.toasts.addError(new Error(JSON.stringify(error)), {
+              title: `Error updating ${roleName}`,
+            });
           }
         });
       });
