@@ -15,6 +15,7 @@
 
 import apm, { Logger } from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
@@ -105,9 +106,9 @@ async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwner
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
-  const { logger } = opts;
-  const loggerTag = claimAvailableTasksMget.name;
-  const logMeta = { tags: [loggerTag] };
+  const logger = createWrappedLogger({ logger: opts.logger, tags: [claimAvailableTasksMget.name] });
+  // const loggerTag = claimAvailableTasksMget.name;
+  // const logMeta = { tags: [loggerTag] };
   const initialCapacity = getCapacity();
   const stopTaskTimer = startTaskTimer();
 
@@ -227,10 +228,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       if (status === 409) {
         conflicts++;
       } else {
-        logger.error(
-          `Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`,
-          logMeta
-        );
+        logger.error(`Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`);
         bulkUpdateErrors++;
       }
     }
@@ -243,10 +241,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         acc.push(task.value);
       } else {
         const { id, type, error } = task.error;
-        logger.error(
-          `Error getting full task ${id}:${type} during claim: ${error.message}`,
-          logMeta
-        );
+        logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
         bulkGetErrors++;
       }
       return acc;
@@ -278,20 +273,19 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
           logger.warn(
             `Error updating task ${id}:${type} to mark as unrecognized during claim: ${JSON.stringify(
               error
-            )}`,
-            logMeta
+            )}`
           );
         }
       }
     } catch (err) {
       // swallow the error because this is unrelated to the claim cycle
-      logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`, logMeta);
+      logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`);
     }
   }
 
   // TODO: need a better way to generate stats
   const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; removed: ${removedCount};`;
-  logger.debug(message, logMeta);
+  logger.debug(message);
 
   // build results
   const finalResult = {

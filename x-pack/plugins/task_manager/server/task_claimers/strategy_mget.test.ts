@@ -2001,7 +2001,7 @@ describe('TaskClaiming', () => {
 
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
         'Background task node "test" has no assigned partitions, claiming against all partitions',
-        { tags: ['taskClaiming'] }
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(query).toMatchInlineSnapshot(`
         Object {
