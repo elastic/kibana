@@ -1347,7 +1347,8 @@ async function getFunctionArgsSuggestions(
     fnDefinition.type !== 'builtin' &&
     !alreadyHasComma &&
     !canBeBooleanCondition;
-  const shouldAdvanceCursor = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
+  const shouldAdvanceCursor =
+    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
