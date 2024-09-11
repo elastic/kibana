@@ -1335,7 +1335,9 @@ async function getFunctionArgsSuggestions(
 
   // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
-  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const isCursorFollowedByComma = fullText
+    ? fullText.slice(offset, fullText.length).trimStart().startsWith(',')
+    : false;
   const canBeBooleanCondition =
     // For `CASE()`, there can be multiple conditions, so keep suggesting fields and functions if possible
     fnDefinition.name === 'case' ||
@@ -1345,10 +1347,10 @@ async function getFunctionArgsSuggestions(
   const shouldAddComma =
     hasMoreMandatoryArgs &&
     fnDefinition.type !== 'builtin' &&
-    !alreadyHasComma &&
+    !isCursorFollowedByComma &&
     !canBeBooleanCondition;
   const shouldAdvanceCursor =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext

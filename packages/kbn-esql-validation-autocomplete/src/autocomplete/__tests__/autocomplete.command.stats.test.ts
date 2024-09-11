@@ -299,6 +299,13 @@ describe('autocomplete.suggest', () => {
             scalar: true,
           }),
         ]);
+        await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?t_start, ?t_end)', [
+          // Note there's no space or comma in the suggested field names
+          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
+            scalar: true,
+          }),
+        ]);
 
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?t_start, ?t_end)',
