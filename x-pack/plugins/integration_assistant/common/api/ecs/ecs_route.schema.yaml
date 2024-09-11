@@ -21,6 +21,7 @@ paths:
                 - packageName
                 - dataStreamName
                 - rawSamples
+                - samplesFormat
                 - connectorId
               properties:
                 packageName:
@@ -29,8 +30,14 @@ paths:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
                 rawSamples:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/RawSamples"
+                samplesFormat:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/SamplesFormat"
                 mapping:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
+                additionalProcessors:
+                  type: array
+                  items:
+                    $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
                 connectorId:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
                 langSmithOptions:

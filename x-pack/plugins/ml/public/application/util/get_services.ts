@@ -17,7 +17,6 @@ import { HttpService } from '../services/http_service';
 import { mlApiProvider } from '../services/ml_api_service';
 import { mlUsageCollectionProvider } from '../services/usage_collection';
 import { mlJobServiceFactory } from '../services/job_service';
-import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 import { indexServiceFactory } from './index_service';
 
 /**
@@ -30,8 +29,7 @@ export function getMlGlobalServices(
 ) {
   const httpService = new HttpService(coreStart.http);
   const mlApi = mlApiProvider(httpService);
-  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
+  const mlJobService = mlJobServiceFactory(mlApi);
   // Note on the following services:
   // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
   //   but it's not being made available as part of global services. Since it's just
