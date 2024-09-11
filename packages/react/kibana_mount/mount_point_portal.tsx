@@ -66,7 +66,10 @@ export const MountPointPortal: FC<PropsWithChildren<MountPointPortalProps>> = ({
   }
 };
 
-class MountPointPortalErrorBoundary extends Component<{}, { error?: unknown }> {
+class MountPointPortalErrorBoundary extends Component<
+  { children?: React.ReactNode },
+  { error?: unknown }
+> {
   state = {
     error: undefined,
   };

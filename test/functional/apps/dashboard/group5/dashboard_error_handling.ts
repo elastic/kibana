@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
+  const { dashboard, header } = getPageObjects(['dashboard', 'header']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard_error_cases.json'
       );
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -42,11 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('correctly loads default index pattern on first load with an error embeddable', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard('Dashboard with Missing Lens Panel');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.loadSavedDashboard('Dashboard with Missing Lens Panel');
+      await header.waitUntilLoadingHasFinished();
       await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
     });
 
@@ -54,9 +54,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
     describe('when the saved object is missing', () => {
       it('shows the missing data view error message', async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.loadSavedDashboard('dashboard with missing index pattern');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.loadSavedDashboard('dashboard with missing index pattern');
+        await header.waitUntilLoadingHasFinished();
         const embeddableError = await testSubjects.find('embeddableError');
         const errorMessage = await embeddableError.getVisibleText();
 

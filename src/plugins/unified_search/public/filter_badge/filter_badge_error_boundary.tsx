@@ -18,7 +18,7 @@ interface FilterBadgeErrorBoundaryState {
 }
 
 export class FilterBadgeErrorBoundary extends Component<
-  FilterBadgeErrorBoundaryProps,
+  React.PropsWithChildren<FilterBadgeErrorBoundaryProps>,
   FilterBadgeErrorBoundaryState
 > {
   constructor(props: FilterBadgeErrorBoundaryProps) {

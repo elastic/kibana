@@ -14,10 +14,9 @@ import { context as serviceContext } from './service';
 
 export const context = React.createContext<ConnectionDetailsOpts>({});
 
-export const ConnectionDetailsOptsProvider: React.FC<ConnectionDetailsOpts> = ({
-  children,
-  ...opts
-}) => {
+export const ConnectionDetailsOptsProvider: React.FC<
+  React.PropsWithChildren<ConnectionDetailsOpts>
+> = ({ children, ...opts }) => {
   const service = React.useMemo(() => new ConnectionDetailsService(opts), [opts]);
 
   return (

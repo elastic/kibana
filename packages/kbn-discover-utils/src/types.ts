@@ -42,15 +42,8 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
-type FormattedHitPair = readonly [
-  fieldDisplayName: string,
-  formattedValue: string,
-  fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
-];
-
 /**
- * If empty, types will be derived by default from the dataView field types.
- * For displaying ES|QL search results, define column types (which are available separately in the fetch request) in the following format.
+ * Custom column types per column name
  */
 export type DataTableColumnsMeta = Record<
   string,
@@ -59,6 +52,12 @@ export type DataTableColumnsMeta = Record<
     esType?: DatatableColumnMeta['esType'];
   }
 >;
+
+type FormattedHitPair = readonly [
+  fieldDisplayName: string,
+  formattedValue: string,
+  fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
+];
 
 /**
  * Pairs array for each field in the hit
