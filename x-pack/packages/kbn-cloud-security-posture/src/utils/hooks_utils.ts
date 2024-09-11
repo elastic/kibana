@@ -12,20 +12,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
-
-interface MisconfigurationPreviewBaseEsQuery {
-  query?: {
-    bool: {
-      filter: estypes.QueryDslQueryContainer[];
-    };
-  };
-}
-
-interface UseMisconfigurationPreviewOptions extends MisconfigurationPreviewBaseEsQuery {
-  sort: string[][];
-  enabled: boolean;
-  pageSize: number;
-}
+import type { UseMisconfigurationOptions } from '../../type';
 
 const RESULT_EVALUATION = {
   PASSED: 'passed',
@@ -33,7 +20,7 @@ const RESULT_EVALUATION = {
   UNKNOWN: 'unknown',
 };
 
-export const getFindingsCountAggQueryMisconfigurationPreview = () => ({
+export const getFindingsCountAggQueryMisconfiguration = () => ({
   count: {
     filters: {
       other_bucket_key: RESULT_EVALUATION.UNKNOWN,
@@ -62,7 +49,7 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query }: UseMisconfigurationPreviewOptions,
+  { query }: UseMisconfigurationOptions,
   rulesStates: CspBenchmarkRulesStates,
   isPreview = false
 ) => {
@@ -71,14 +58,14 @@ export const buildMisconfigurationsFindingsQuery = (
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: isPreview ? 0 : 500,
-    aggs: getFindingsCountAggQueryMisconfigurationPreview(),
+    aggs: getFindingsCountAggQueryMisconfiguration(),
     ignore_unavailable: false,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
   };
 };
 
 const buildMisconfigurationsFindingsQueryWithFilters = (
-  query: UseMisconfigurationPreviewOptions['query'],
+  query: UseMisconfigurationOptions['query'],
   mutedRulesFilterQuery: estypes.QueryDslQueryContainer[]
 ) => {
   return {
