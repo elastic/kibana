@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ClipboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { of } from 'rxjs';
@@ -44,6 +44,7 @@ import {
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
   getVisibleColumns,
+  overrideGridCopyEvent,
 } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -94,7 +95,6 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { useCustomBrowserCopyForGrid } from '../hooks/use_custom_browser_copy';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
@@ -490,8 +490,6 @@ export const UnifiedDataTable = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
 }: UnifiedDataTableProps) => {
-  useCustomBrowserCopyForGrid();
-
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
@@ -1051,6 +1049,16 @@ export const UnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
+  const onCopyGridCellsContent = useCallback(
+    (event: ClipboardEvent<HTMLDivElement>) => {
+      overrideGridCopyEvent({
+        event,
+        dataGridWrapper,
+      });
+    },
+    [dataGridWrapper]
+  );
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -1101,6 +1109,7 @@ export const UnifiedDataTable = ({
           data-description={searchDescription}
           data-document-number={displayedRows.length}
           className={classnames(className, 'unifiedDataTable__table')}
+          onCopy={onCopyGridCellsContent}
         >
           {isCompareActive ? (
             <CompareDocuments

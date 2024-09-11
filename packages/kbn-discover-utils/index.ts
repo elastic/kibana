@@ -56,6 +56,7 @@ export {
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  overrideGridCopyEvent,
 } from './src';
 
 export type { LogsContextService } from './src';

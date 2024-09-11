@@ -8,7 +8,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ClipboardEvent, useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
@@ -40,6 +40,7 @@ import {
   usePager,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  overrideGridCopyEvent,
 } from '@kbn/discover-utils';
 import { getTextBasedColumnIconType } from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -138,6 +139,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const [dataGridWrapper, setDataGridWrapper] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -468,6 +470,16 @@ export const DocViewerTable = ({
     [rows]
   );
 
+  const onCopyGridCellsContent = useCallback(
+    (event: ClipboardEvent<HTMLDivElement>) => {
+      overrideGridCopyEvent({
+        event,
+        dataGridWrapper,
+      });
+    },
+    [dataGridWrapper]
+  );
+
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
     : 0;
@@ -554,11 +566,13 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem
+          ref={setDataGridWrapper}
           grow={Boolean(containerHeight)}
           css={css`
             min-block-size: 0;
             display: block;
           `}
+          onCopy={onCopyGridCellsContent}
         >
           <EuiDataGrid
             key={`fields-table-${hit.id}`}

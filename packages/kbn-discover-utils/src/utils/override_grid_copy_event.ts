@@ -7,27 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
+import { ClipboardEvent } from 'react';
 
-export const useCustomBrowserCopyForGrid = () => {
-  useEffect(() => {
-    document.addEventListener('copy', handleCopy);
+interface OverrideGridCopyEventParams {
+  event: ClipboardEvent<HTMLDivElement>;
+  dataGridWrapper: HTMLElement | null;
+}
 
-    return () => {
-      document.removeEventListener('copy', handleCopy);
-    };
-  }, []);
-};
-
-function handleCopy(event: ClipboardEvent) {
+export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCopyEventParams) {
   const selection = window.getSelection();
   if (!selection) {
     return;
   }
   const ranges = Array.from({ length: selection.rangeCount }, (_, i) => selection.getRangeAt(i));
-  const grid = document.querySelector('[role="grid"]');
 
-  if (!ranges.length || !grid) {
+  if (!ranges.length || !dataGridWrapper || !event.clipboardData?.setData) {
     return;
   }
 
@@ -35,7 +29,7 @@ function handleCopy(event: ClipboardEvent) {
   let totalCellsCount = 0;
   let totalRowsCount = 0;
 
-  const rows = grid.querySelectorAll('[role="row"]');
+  const rows = dataGridWrapper.querySelectorAll('[role="row"]');
   rows.forEach((row) => {
     const cells = row.querySelectorAll(
       '[role="gridcell"]:not(.euiDataGridRowCell--controlColumn) .euiDataGridRowCell__content'
@@ -45,7 +39,7 @@ function handleCopy(event: ClipboardEvent) {
 
     cells.forEach((cell) => {
       if (ranges.some((range) => range?.intersectsNode(cell))) {
-        cellsTextContent.push(cell.textContent || '');
+        cellsTextContent.push(getCellTextContent(cell));
         hasSelectedCellsInRow = true;
         totalCellsCount++;
       } else {
@@ -63,8 +57,35 @@ function handleCopy(event: ClipboardEvent) {
     tsvData = tsvData.trim();
   }
 
-  if (totalCellsCount > 1 && tsvData && event.clipboardData) {
+  if (totalCellsCount > 1 && tsvData) {
     event.preventDefault();
     event.clipboardData.setData('text/plain', tsvData);
   }
+}
+
+function getCellTextContent(cell: Element) {
+  const cellCloned = cell.cloneNode(true) as HTMLElement;
+
+  // a field value can be formatted as an image or audio => replace it with the src
+  replaceWithSrcTextNode(cellCloned, 'img');
+  replaceWithSrcTextNode(cellCloned, 'audio');
+
+  // remove field tokens so field types don't get copied
+  dropBySelector(cellCloned, '.kbnFieldIcon');
+
+  return cellCloned.textContent || '';
+}
+
+function replaceWithSrcTextNode(element: HTMLElement, tagName: 'img' | 'audio') {
+  const tags = element.querySelectorAll('img');
+
+  tags.forEach((tag) => {
+    const textNode = document.createTextNode(tag.src);
+    tag.parentNode?.replaceChild(textNode, tag);
+  });
+}
+
+function dropBySelector(element: HTMLElement, selector: string) {
+  const elements = element.querySelectorAll(selector);
+  elements.forEach((el) => el.remove());
 }

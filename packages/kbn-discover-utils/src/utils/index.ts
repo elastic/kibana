@@ -21,4 +21,5 @@ export * from './nested_fields';
 export * from './get_field_value';
 export * from './calc_field_counts';
 export * from './get_visible_columns';
+export { overrideGridCopyEvent } from './override_grid_copy_event';
 export { isLegacyTableEnabled } from './is_legacy_table_enabled';
