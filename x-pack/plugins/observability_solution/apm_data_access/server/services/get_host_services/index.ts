@@ -14,7 +14,11 @@ import {
   SERVICE_NAME,
 } from '@kbn/apm-types/es_fields';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RollupInterval } from '../../../common';
+import {
+  TimeRangeMetadata,
+  getBucketSize,
+  getPreferredBucketSizeAndDataSource,
+} from '../../../common';
 import { ApmDocumentType } from '../../../common/document_type';
 import type { ApmDataAccessServicesParams } from '../get_services';
 
@@ -25,10 +29,18 @@ export interface HostServicesRequest {
   start: number;
   end: number;
   size?: number;
+  documentSources: TimeRangeMetadata['sources'];
 }
 
+const suitableTypes = [ApmDocumentType.TransactionMetric, ApmDocumentType.ErrorEvent];
+
 export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesParams) {
-  return async ({ start, end, size = MAX_SIZE, filters }: HostServicesRequest) => {
+  return async ({ start, end, size = MAX_SIZE, filters, documentSources }: HostServicesRequest) => {
+    const sourcesToUse = getPreferredBucketSizeAndDataSource({
+      sources: documentSources.filter((s) => suitableTypes.includes(s.documentType)),
+      bucketSizeInSeconds: getBucketSize({ start, end, numBuckets: 50 }).bucketSize,
+    });
+
     const commonFiltersList: QueryDslQueryContainer[] = [
       ...rangeQuery(start, end),
       {
@@ -54,8 +66,8 @@ export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesP
       apm: {
         sources: [
           {
-            documentType: ApmDocumentType.TransactionMetric,
-            rollupInterval: RollupInterval.OneMinute,
+            documentType: sourcesToUse.source.documentType,
+            rollupInterval: sourcesToUse.source.rollupInterval,
           },
         ],
       },
@@ -109,8 +121,8 @@ export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesP
       apm: {
         sources: [
           {
-            documentType: ApmDocumentType.ErrorEvent,
-            rollupInterval: RollupInterval.None,
+            documentType: sourcesToUse.source.documentType,
+            rollupInterval: sourcesToUse.source.rollupInterval,
           },
         ],
       },

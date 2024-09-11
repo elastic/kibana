@@ -42,21 +42,29 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         ? await apmDataAccessClient.getServices()
         : undefined;
 
-      const services = await apmDataAccessServices?.getHostServices({
+      const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
         start: from,
         end: to,
-        filters: validatedFilters!,
-        size,
       });
 
-      if (!services) {
+      if (apmDataAccessServices && apmDocumentSources) {
+        const services = await apmDataAccessServices?.getHostServices({
+          documentSources: apmDocumentSources,
+          start: from,
+          end: to,
+          filters: validatedFilters!,
+          size,
+        });
         return response.ok({
-          body: { services: [] },
+          body: ServicesAPIResponseRT.encode(services),
         });
       }
 
-      return response.ok({
-        body: ServicesAPIResponseRT.encode(services),
+      return response.customError({
+        statusCode: 403,
+        body: {
+          message: 'APM data access service is not available',
+        },
       });
     }
   );
