@@ -7,17 +7,7 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { normalizeFields } from '../../../utils/normalize_fields';
-import {
-  AGENT_NAME,
-  EVENT_OUTCOME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  SPAN_DURATION,
-  SPAN_ID,
-  SPAN_NAME,
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../common/es_fields/apm';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -67,14 +57,3 @@ export async function getTransaction({
 
   return fieldsNorm;
 }
-
-// function normalizeFields(fields: Partial<Record<string, unknown[]>>): Record<string, unknown> {
-//   const normalizedFields: Record<string, unknown> = {};
-
-//   for (const [key, value] of Object.entries(fields)) {
-//     const normalizedValue = Array.isArray(value) && value.length > 0 ? value[0] : value;
-
-//     set(normalizedFields, key, normalizedValue);
-//   }
-//   return normalizedFields;
-// }

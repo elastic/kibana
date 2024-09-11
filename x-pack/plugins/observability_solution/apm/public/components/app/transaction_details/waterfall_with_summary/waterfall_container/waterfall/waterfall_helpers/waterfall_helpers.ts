@@ -171,7 +171,8 @@ function getErrorItem(
     | IWaterfallSpanOrTransaction
     | undefined;
 
-  console.log('error',error);
+  // console.log('error',error);
+
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
@@ -442,17 +443,6 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   }
 
   const errorCountByParentId = getErrorCountByParentId(traceItems.errorDocs);
-
-  console.log(
-    'traceItems.traceDocs, traceItems.spanLinksCountById',
-    traceItems.traceDocs,
-    traceItems.spanLinksCountById
-  );
-  console.log(
-    'traceItems, traceItems.spanLinksCountById',
-    traceItems,
-    traceItems.spanLinksCountById
-  );
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     traceItems.traceDocs,

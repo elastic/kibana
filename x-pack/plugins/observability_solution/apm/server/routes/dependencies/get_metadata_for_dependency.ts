@@ -57,7 +57,7 @@ export async function getMetadataForDependency({
   const sample = maybe(sampleResponse.hits.hits[0])?.fields;
   const sampleNorm = sample ? normalizeFields(sample) : null;
 
-  console.log('sampleNorm', sampleNorm);
+  // console.log('sampleNorm', sampleNorm);
   return {
     spanType: sampleNorm?.span.type,
     spanSubtype: sampleNorm?.span.subtype,
