@@ -48,7 +48,9 @@ Let's look at the most basic example, one that only discovers entities.
 ```
 
 This definition will look inside the `logs-*` index pattern for documents that container the field `host.name` and group them based on that value to create the entities. It will run the discovery every 2 minutes.
-The documents will be of type "host" so they can be queried via `entities-host-history` or `entities-host-latest`. Beyond the basic `entity` fields, each entity document will also contain all the identify fields at the root of the document, this it is easy to find your hosts by filtering by `host.name`. An entity document for this definition will look like below.
+The documents will be of type "host" so they can be queried via `entities-host-history` or `entities-host-latest`. Beyond the basic `entity` fields, each entity document will also contain all the identify fields at the root of the document, this it is easy to find your hosts by filtering by `host.name`. Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
+
+An entity document for this definition will look like below.
 
 History:
 ```json
@@ -200,10 +202,6 @@ In case the data is not captured correctly, a common cause is due to the exact t
 If the history transform is lagging behind, then the latest transform will not have any data in its lookback window to capture.
 
 **Entity definition examples**:
-
-Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate`, `logErrorRatio` metrics and `data_stream.type`, `sourceIndex` metadata aggregated over one minute.
-
-Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
 
 __service_from_logs definition__
 <pre>
