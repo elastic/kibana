@@ -15,8 +15,11 @@ const palette = euiPaletteColorBlind();
 
 const colors = {
   command: palette[2],
+  literal: palette[0],
   source: palette[3],
-  literal: palette[6],
+  operator: palette[9],
+  column: palette[6],
+  function: palette[8],
 };
 
 export const highlight = (query: EsqlQuery): Annotation[] => {
@@ -26,10 +29,11 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
     visitCommand: (node) => {
       const location = node.location;
       if (!location) return;
+      const color = node.name === 'from' ? '#07f' : colors.command;
       annotations.push([
         location.min,
         location.min + node.name.length,
-        (text) => <span style={{ color: colors.command }}>{text}</span>,
+        (text) => <span style={{ color, fontWeight: 'bold' }}>{text}</span>,
       ]);
     },
 
@@ -41,6 +45,28 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
         location.max + 1,
         (text) => <span style={{ color: colors.source }}>{text}</span>,
       ]);
+    },
+
+    visitColumn: (node) => {
+      const location = node.location;
+      if (!location) return;
+      annotations.push([
+        location.min,
+        location.max + 1,
+        (text) => <span style={{ color: colors.column }}>{text}</span>,
+      ]);
+    },
+
+    visitFunction: (node) => {
+      const location = node.location;
+      if (!location) return;
+      if (node.subtype === 'variadic-call') {
+        annotations.push([
+          location.min,
+          location.min + node.name.length,
+          (text) => <span style={{ color: colors.function }}>{text}</span>,
+        ]);
+      }
     },
 
     visitLiteral: (node) => {
@@ -73,6 +99,29 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
           pos + 1,
           (text) => <span style={{ fontWeight: 'bold', opacity: 0.3 }}>{text}</span>,
         ]);
+      }
+      default: {
+        switch (token.text) {
+          case '+':
+          case '-':
+          case '*':
+          case '/':
+          case '%':
+          case '!=':
+          case '>':
+          case '>=':
+          case '<':
+          case '<=':
+          case 'AND':
+          case 'OR':
+          case 'NOT': {
+            annotations.push([
+              token.start,
+              token.start + token.text.length,
+              (text) => <span style={{ color: colors.operator }}>{text}</span>,
+            ]);
+          }
+        }
       }
     }
   }
