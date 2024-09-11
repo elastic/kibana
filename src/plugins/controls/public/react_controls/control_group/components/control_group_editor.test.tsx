@@ -11,8 +11,12 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { ControlGroupEditor } from './control_group_editor';
-import { ControlGroupApi, ControlStyle, ParentIgnoreSettings } from '../../..';
-import { ControlGroupChainingSystem, DEFAULT_CONTROL_STYLE } from '../../../../common';
+import { ControlGroupApi, ControlStyle } from '../../..';
+import {
+  ControlGroupChainingSystem,
+  DEFAULT_CONTROL_STYLE,
+  ParentIgnoreSettings,
+} from '../../../../common';
 import { DefaultControlApi } from '../../controls/types';
 
 describe('render', () => {

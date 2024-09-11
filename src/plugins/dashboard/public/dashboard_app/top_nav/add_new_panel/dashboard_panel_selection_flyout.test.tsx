@@ -8,7 +8,7 @@
  */
 
 import React, { type ComponentProps } from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DashboardPanelSelectionListFlyout } from './dashboard_panel_selection_flyout';
@@ -91,12 +91,10 @@ describe('DashboardPanelSelectionListFlyout', () => {
 
     expect(await screen.findByTestId(panelConfiguration[0]['data-test-subj']!)).toBeInTheDocument();
 
-    act(() => {
-      userEvent.type(
-        screen.getByTestId('dashboardPanelSelectionFlyout__searchInput'),
-        'non existent panel'
-      );
-    });
+    await userEvent.type(
+      screen.getByTestId('dashboardPanelSelectionFlyout__searchInput'),
+      'non existent panel'
+    );
 
     expect(await screen.findByTestId('dashboardPanelSelectionNoPanelMessage')).toBeInTheDocument();
   });
