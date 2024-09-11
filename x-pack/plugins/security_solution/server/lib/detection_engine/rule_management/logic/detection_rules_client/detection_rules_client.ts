@@ -13,12 +13,15 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { ImportRuleResponse } from '../../../routes/utils';
+import { importRules } from '../import/import_rules_utils';
 import type {
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
   IDetectionRulesClient,
   ImportRuleArgs,
+  ImportRulesArgs,
   PatchRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
@@ -128,6 +131,15 @@ export const createDetectionRulesClient = ({
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
+        });
+      });
+    },
+
+    async importRules(args: ImportRulesArgs): Promise<ImportRuleResponse[]> {
+      return withSecuritySpan('DetectionRulesClient.importRules', async () => {
+        return importRules({
+          ...args,
+          detectionRulesClient: this,
         });
       });
     },
