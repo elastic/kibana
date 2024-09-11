@@ -43,12 +43,19 @@ describe('getServiceNameBadgeCell', () => {
     expect(screen.getByTestId('serviceNameBadgeCell-nodejs')).toBeInTheDocument();
   });
 
-  it('does not render icon if agent name is not recognized', () => {
+  it('renders default icon with unknwon test subject if agent name is missing', () => {
     const record = buildDataTableRecord(
       { fields: { 'service.name': 'test-service' } },
       dataViewMock
     );
     renderCell('service.name', record);
     expect(screen.getByTestId('serviceNameBadgeCell-unknown')).toBeInTheDocument();
+  });
+
+  it('does not render badge if service name is missing', () => {
+    const record = buildDataTableRecord({ fields: { 'agent.name': 'nodejs' } }, dataViewMock);
+    renderCell('service.name', record);
+    expect(screen.queryByTestId('serviceNameBadgeCell-nodejs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('serviceNameBadgeCell-unknown')).not.toBeInTheDocument();
   });
 });

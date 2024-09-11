@@ -8,7 +8,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { CSSObject } from '@emotion/react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -16,8 +15,6 @@ import React from 'react';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
 const dataTestSubj = 'serviceNameBadgeCell';
-const badgeCss: CSSObject = { marginTop: '-4px' };
-
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 
 export const getServiceNameBadgeCell =
@@ -34,11 +31,7 @@ export const getServiceNameBadgeCell =
     ) as AgentName;
 
     return (
-      <EuiFlexGroup
-        gutterSize="xs"
-        css={badgeCss}
-        data-test-subj={`${dataTestSubj}-${agentName || 'unknown'}`}
-      >
+      <EuiFlexGroup gutterSize="xs" data-test-subj={`${dataTestSubj}-${agentName || 'unknown'}`}>
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName} size="m" />
         </EuiFlexItem>
