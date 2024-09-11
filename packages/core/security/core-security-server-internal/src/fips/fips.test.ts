@@ -21,22 +21,22 @@ import { isFipsEnabled, checkFipsConfig } from './fips';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('fips', () => {
-  let config: SecurityServiceConfigType;
+  let securityConfig: SecurityServiceConfigType;
   describe('#isFipsEnabled', () => {
     it('should return `true` if config.experimental.fipsMode.enabled is `true`', () => {
-      config = { experimental: { fipsMode: { enabled: true } } };
+      securityConfig = { experimental: { fipsMode: { enabled: true } } };
 
-      expect(isFipsEnabled(config)).toBe(true);
+      expect(isFipsEnabled(securityConfig)).toBe(true);
     });
 
     it('should return `false` if config.experimental.fipsMode.enabled is `false`', () => {
-      config = { experimental: { fipsMode: { enabled: false } } };
+      securityConfig = { experimental: { fipsMode: { enabled: false } } };
 
-      expect(isFipsEnabled(config)).toBe(false);
+      expect(isFipsEnabled(securityConfig)).toBe(false);
     });
 
     it('should return `false` if config.experimental.fipsMode.enabled is `undefined`', () => {
-      expect(isFipsEnabled(config)).toBe(false);
+      expect(isFipsEnabled(securityConfig)).toBe(false);
     });
   });
 
@@ -54,10 +54,10 @@ describe('fips', () => {
     });
 
     it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
-      config = { experimental: { fipsMode: { enabled: true } } };
+      securityConfig = { experimental: { fipsMode: { enabled: true } } };
       const logger = loggingSystemMock.create().get();
       try {
-        checkFipsConfig(config, logger);
+        checkFipsConfig(securityConfig, {}, {}, logger);
       } catch (e) {
         expect(mockExit).toHaveBeenNthCalledWith(1, 78);
       }
@@ -76,11 +76,11 @@ describe('fips', () => {
         return 1;
       });
 
-      config = { experimental: { fipsMode: { enabled: false } } };
+      securityConfig = { experimental: { fipsMode: { enabled: false } } };
       const logger = loggingSystemMock.create().get();
 
       try {
-        checkFipsConfig(config, logger);
+        checkFipsConfig(securityConfig, {}, {}, logger);
       } catch (e) {
         expect(mockExit).toHaveBeenNthCalledWith(1, 78);
       }
@@ -99,11 +99,11 @@ describe('fips', () => {
         return 1;
       });
 
-      config = { experimental: { fipsMode: { enabled: true } } };
+      securityConfig = { experimental: { fipsMode: { enabled: true } } };
       const logger = loggingSystemMock.create().get();
 
       try {
-        checkFipsConfig(config, logger);
+        checkFipsConfig(securityConfig, {}, {}, logger);
       } catch (e) {
         logger.error('Should not throw error!');
       }
@@ -115,6 +115,73 @@ describe('fips', () => {
                           ],
                         ]
                 `);
+    });
+
+    describe('PKCS12 Config settings', function () {
+      let serverConfig = {};
+      let elasticsearchConfig = {};
+
+      beforeAll(function () {
+        mockGetFipsFn.mockImplementationOnce(() => {
+          return 1;
+        });
+
+        securityConfig = { experimental: { fipsMode: { enabled: true } } };
+      });
+
+      afterEach(function () {
+        serverConfig = {};
+        elasticsearchConfig = {};
+      });
+
+      it('should log an error message for each PKCS12 configuration option that is set', async () => {
+        elasticsearchConfig = {
+          ssl: {
+            keystore: {
+              path: '/test',
+            },
+            truststore: {
+              path: '/test',
+            },
+          },
+        };
+
+        serverConfig = {
+          ssl: {
+            keystore: {
+              path: '/test',
+            },
+            truststore: {
+              path: '/test',
+            },
+          },
+        };
+
+        const logger = loggingSystemMock.create().get();
+
+        try {
+          checkFipsConfig(securityConfig, elasticsearchConfig, serverConfig, logger);
+        } catch (e) {
+          expect(mockExit).toHaveBeenNthCalledWith(1, 78);
+        }
+
+        expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+                        Array [
+                          Array [
+                            "Configuration mismatch error: elasticsearch.ssl.keystore.path is set, PKCS12 configurations are not allowed while running in FIPS mode.",
+                          ],
+                          Array [
+                            "Configuration mismatch error: elasticsearch.ssl.truststore.path is set, PKCS12 configurations are not allowed while running in FIPS mode.",
+                          ],
+                          Array [
+                            "Configuration mismatch error: server.ssl.keystore.path is set, PKCS12 configurations are not allowed while running in FIPS mode.",
+                          ],
+                          Array [
+                            "Configuration mismatch error: server.ssl.truststore.path is set, PKCS12 configurations are not allowed while running in FIPS mode.",
+                          ],
+                        ]
+                `);
+      });
     });
   });
 });
