@@ -7,6 +7,7 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { setupAll } from './setup';
 
 const runSetupAll: RunFn = async (cliContext) => {
@@ -20,6 +21,8 @@ const runSetupAll: RunFn = async (cliContext) => {
   const version = cliContext.flags.version as string;
   const policy = cliContext.flags.policy as string;
   const log = cliContext.log;
+
+  createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
 
   await setupAll({
     elasticUrl,

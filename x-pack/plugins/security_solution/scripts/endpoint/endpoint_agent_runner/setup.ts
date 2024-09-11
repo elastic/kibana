@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ensureSpaceIdExists } from '../common/spaces';
 import { getRuntimeServices, startRuntimeServices, stopRuntimeServices } from './runtime';
 import { checkDependencies } from './pre_check';
 import { enrollEndpointHost } from './elastic_endpoint';
@@ -15,11 +16,11 @@ import { enableFleetSpaceAwareness } from '../common/fleet_services';
 
 export const setupAll = async (options: StartRuntimeServicesOptions) => {
   await startRuntimeServices(options);
-
   const { kbnClient, log } = getRuntimeServices();
 
   if (options.spaceId && options.spaceId !== DEFAULT_SPACE_ID) {
     await enableFleetSpaceAwareness(kbnClient);
+    await ensureSpaceIdExists(kbnClient, options.spaceId);
   }
 
   await checkDependencies();
