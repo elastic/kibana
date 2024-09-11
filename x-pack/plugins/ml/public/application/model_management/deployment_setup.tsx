@@ -61,6 +61,7 @@ interface DeploymentSetupProps {
   deploymentsParams?: Record<string, DeploymentParamsUI>;
   cloudInfo: CloudInfo;
   disableAdaptiveResourcesControl?: boolean;
+  deploymentParamsMapper: DeploymentParamsMapper;
 }
 
 /**
@@ -100,10 +101,6 @@ const vCpuLevelMap = {
     label: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.lowCpuLabel', {
       defaultMessage: 'Low',
     }),
-    helpText: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.lowCpuHelp', {
-      defaultMessage:
-        'Your model is not for use in production and will be allocated limited resources. Suitable for development, testing, demos, depending on your parameters',
-    }),
     color: sliderPalette[0],
   },
   medium: {
@@ -111,20 +108,12 @@ const vCpuLevelMap = {
     label: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.mediumCpuLabel', {
       defaultMessage: 'Medium',
     }),
-    helpText: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.mediumCpuHelp', {
-      defaultMessage:
-        'Your model will scale up to 32 vCPUs. Even if the available vCPUs through the Cloud console are more than 32, this model will never scale to more than 32, always leaving resources available to other models.',
-    }),
     color: sliderPalette[1],
   },
   high: {
     value: 2.5,
     label: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.highCpuLabel', {
       defaultMessage: 'High',
-    }),
-    helpText: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.highCpuHelp', {
-      defaultMessage:
-        'Your model may scale up to the max number of vCPUs available to this deployment from the Cloud console, if it needs to. If this max is 32 vCPUs or less, this level is the same as the intermediate level.',
     }),
     color: sliderPalette[2],
   },
@@ -140,6 +129,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   isUpdate,
   deploymentsParams,
   disableAdaptiveResourcesControl,
+  deploymentParamsMapper,
 }) => {
   const deploymentIdUpdated = useRef(false);
 
@@ -213,6 +203,68 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
       'data-test-subj': `mlModelsStartDeploymentModalOptimizedForSearch`,
     },
   ];
+
+  const helperText = useMemo<string>(() => {
+    const vcpuRange = deploymentParamsMapper.getVCPURange(config.vCPUUsage);
+
+    if (config.adaptiveResources) {
+      switch (config.vCPUUsage) {
+        case 'low':
+          return i18n.translate(
+            'xpack.ml.trainedModels.modelsList.startDeployment.lowCpuAdaptiveHelp',
+            {
+              defaultMessage:
+                'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+            }
+          );
+        case 'medium':
+          return i18n.translate(
+            'xpack.ml.trainedModels.modelsList.startDeployment.mediumCpuAdaptiveHelp',
+            {
+              defaultMessage:
+                'Your model will scale up to a maximum of {maxVCPUs} vCPUs. Even if the Cloud console provides more, the model will not exceed {maxVCPUs}, leaving additional resources for other models.',
+              values: { maxVCPUs: vcpuRange.max },
+            }
+          );
+        case 'high':
+          return i18n.translate(
+            'xpack.ml.trainedModels.modelsList.startDeployment.highCpuAdaptiveHelp',
+            {
+              defaultMessage:
+                'Your model may scale up to the maximum number of vCPUs available for this deployment from the Cloud console if needed. If the maximum is {minVCPUs} vCPUs or fewer, this level is equivalent to the medium level.',
+              values: { minVCPUs: vcpuRange.min },
+            }
+          );
+      }
+    } else {
+      switch (config.vCPUUsage) {
+        case 'low':
+          return i18n.translate(
+            'xpack.ml.trainedModels.modelsList.startDeployment.lowCpuStaticHelp',
+            {
+              defaultMessage:
+                'This level limits resources to one vCPU, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+            }
+          );
+        case 'medium':
+          return i18n.translate(
+            'xpack.ml.trainedModels.modelsList.startDeployment.mediumCpuStaticHelp',
+            {
+              defaultMessage:
+                'This level limits resources to two vCPUs, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+            }
+          );
+        case 'high':
+          return i18n.translate(
+            'xpack.ml.trainedModels.modelsList.startDeployment.highCpuStaticHelp',
+            {
+              defaultMessage:
+                'This level may use the maximum number of vCPUs available for this deployment from the Cloud console. If the maximum is 2 vCPUs or fewer, this level is equivalent to the medium or low level.',
+            }
+          );
+      }
+    }
+  }, [config, deploymentParamsMapper]);
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
@@ -370,7 +422,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
           <EuiFormHelpText id={'vCpuRangeHelp'}>
             <EuiCallOut size="s">
-              <p>{vCpuLevelMap[config.vCPUUsage].helpText}</p>
+              <p>{helperText}</p>
             </EuiCallOut>
           </EuiFormHelpText>
         </EuiPanel>
@@ -423,6 +475,7 @@ interface StartDeploymentModalProps {
   initialParams?: DeploymentParamsUI;
   modelAndDeploymentIds?: string[];
   cloudInfo: CloudInfo;
+  deploymentParamsMapper: DeploymentParamsMapper;
 }
 
 /**
@@ -436,6 +489,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   initialParams,
   modelAndDeploymentIds,
   cloudInfo,
+  deploymentParamsMapper,
 }) => {
   const { showNodeInfo } = useEnabledFeatures();
 
@@ -495,6 +549,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
       <EuiModalBody>
         <DeploymentSetup
+          deploymentParamsMapper={deploymentParamsMapper}
           cloudInfo={cloudInfo}
           config={config}
           onConfigChange={setConfig}
@@ -596,11 +651,18 @@ export const getUserInputModelDeploymentParamsProvider =
     initialParams?: DeploymentParamsUI,
     deploymentIds?: string[]
   ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
+    const deploymentParamsMapper = new DeploymentParamsMapper(
+      model.model_id,
+      getNewJobLimits(),
+      cloudInfo
+    );
+
     return new Promise(async (resolve) => {
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
             <StartUpdateDeploymentModal
+              deploymentParamsMapper={deploymentParamsMapper}
               cloudInfo={cloudInfo}
               startModelDeploymentDocUrl={startModelDeploymentDocUrl}
               initialParams={initialParams}
@@ -609,13 +671,7 @@ export const getUserInputModelDeploymentParamsProvider =
               onConfigChange={(config) => {
                 modalSession.close();
 
-                const mapper = new DeploymentParamsMapper(
-                  model.model_id,
-                  getNewJobLimits(),
-                  cloudInfo
-                );
-
-                resolve(mapper.mapUiToUiDeploymentParams(config));
+                resolve(deploymentParamsMapper.mapUiToUiDeploymentParams(config));
               }}
               onClose={() => {
                 modalSession.close();

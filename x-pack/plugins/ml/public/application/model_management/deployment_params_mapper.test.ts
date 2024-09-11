@@ -26,7 +26,28 @@ describe('DeploymentParamsMapper', () => {
 
   mapper = new DeploymentParamsMapper(modelId, mlServerLimits, cloudInfo);
 
-  describe('mapUiToUiDeploymentParams', () => {
+  describe('DeploymentParamsMapper', () => {
+    describe('32 cores, 16 single', () => {
+      beforeEach(() => {
+        mapper = new DeploymentParamsMapper(
+          modelId,
+          {
+            max_single_ml_node_processors: 16,
+            total_ml_processors: 32,
+          },
+          {
+            isMlAutoscalingEnabled: false,
+          } as CloudInfo
+        );
+      });
+
+      it('should provide vCPU level', () => {
+        expect(mapper.getVCPURange('low')).toEqual({ max: 1, min: 1 });
+        expect(mapper.getVCPURange('medium')).toEqual({ max: 16, min: 2 });
+        expect(mapper.getVCPURange('high')).toEqual({ max: 32, min: 16 });
+      });
+    });
+
     describe('when autoscaling in disabled', () => {
       beforeEach(() => {
         mapper = new DeploymentParamsMapper(modelId, mlServerLimits, {

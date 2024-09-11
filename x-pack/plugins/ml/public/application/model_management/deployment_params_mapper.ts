@@ -89,6 +89,9 @@ export class DeploymentParamsMapper {
     };
   }
 
+  public getVCPURange(vCPUUsage: DeploymentParamsUI['vCPUUsage']) {
+    return this.vCpuBreakpoints[vCPUUsage];
+  }
   /**
    * Maps UI params to the actual start deployment API request
    * @param input
