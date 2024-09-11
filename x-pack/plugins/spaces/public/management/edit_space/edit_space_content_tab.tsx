@@ -116,7 +116,7 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
 
   return (
     <EuiBasicTable
-      tableCaption={i18n.translate('blipblapflapglap', {
+      tableCaption={i18n.translate('xpack.spaces.management.editSpaceContent.listTableCaption', {
         defaultMessage: 'List of saved object content within the space',
       })}
       items={items}
