@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,7 +29,9 @@ describe('Configuration button', () => {
   };
 
   beforeAll(() => {
-    wrapper = mount(<ConfigureCaseButton {...props} />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ConfigureCaseButton {...props} />, {
+      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+    });
   });
 
   test('it renders without the tooltip', () => {
@@ -59,7 +61,7 @@ describe('Configuration button', () => {
         msgTooltip={msgTooltip}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -85,7 +87,7 @@ describe('Configuration button', () => {
         msgTooltip={<>{msgTooltip}</>}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       }
     );
 
@@ -142,12 +144,21 @@ describe('CaseDetailsLink', () => {
     expect(screen.getByLabelText(`click to visit case with title my title`)).toBeInTheDocument();
   });
 
-  test('it calls navigateToCaseViewClick on click', () => {
+  test('it calls navigateToCaseViewClick on click', async () => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    jest.useFakeTimers();
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
+
     render(<CaseDetailsLink {...props} />);
-    userEvent.click(screen.getByText('test detail name'));
+    await user.click(screen.getByText('test detail name'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: props.detailName,
     });
+
+    jest.useRealTimers();
   });
 
   test('it set the href correctly', () => {

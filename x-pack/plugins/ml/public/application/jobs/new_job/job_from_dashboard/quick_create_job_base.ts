@@ -22,7 +22,6 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { MlApi } from '../../../services/ml_api_service';
-import type { MlJobService } from '../../../services/job_service';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
@@ -57,8 +56,7 @@ export class QuickJobCreatorBase {
     protected readonly kibanaConfig: IUiSettingsClient,
     protected readonly timeFilter: TimefilterContract,
     protected readonly dashboardService: DashboardStart,
-    protected readonly mlApi: MlApi,
-    protected readonly mlJobService: MlJobService
+    protected readonly mlApi: MlApi
   ) {}
 
   protected async putJobAndDataFeed({
