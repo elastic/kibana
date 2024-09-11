@@ -1,23 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
+import {
+  EuiRangeTick,
+  EuiDualRange,
+  EuiDualRangeProps,
+  EuiToken,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { ControlError } from '../../control_group/component/control_error_component';
 
-import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { rangeSliderControlStyles } from '../../react_controls/controls/data_controls/range_slider/components/range_slider.styles';
 import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderControl: FC = () => {
@@ -120,6 +128,9 @@ export const RangeSliderControl: FC = () => {
     [isLoading, displayedMin, displayedMax]
   );
 
+  const euiTheme = useEuiTheme();
+  const styles = rangeSliderControlStyles(euiTheme);
+
   const getCommonInputProps = useCallback(
     ({
       inputValue,
@@ -134,28 +145,33 @@ export const RangeSliderControl: FC = () => {
         isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
-        className: `rangeSliderAnchor__fieldNumber ${
-          isInvalid
-            ? 'rangeSliderAnchor__fieldNumber--invalid'
-            : 'rangeSliderAnchor__fieldNumber--valid'
-        }`,
+        css: [
+          styles.fieldNumbers.rangeSliderFieldNumber,
+          isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
+        ],
+        className: 'rangeSliderAnchor__fieldNumber',
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
       };
     },
-    [isInvalid, step]
+    [isInvalid, step, styles]
   );
 
   return error ? (
     <ControlError error={error} />
   ) : (
-    <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
+    <div
+      css={[styles.rangeSliderControl, isInvalid && styles.invalid]}
+      className="rangeSliderAnchor__button"
+      data-test-subj={`range-slider-control-${id}`}
+    >
       <EuiDualRange
         ref={rangeSliderRef}
         id={id}
         fullWidth
         showTicks
+        compressed
         step={step}
         ticks={ticks}
         levels={levels}
@@ -212,6 +228,6 @@ export const RangeSliderControl: FC = () => {
           debouncedOnChange([String(minSelection), String(maxSelection)]);
         }}
       />
-    </span>
+    </div>
   );
 };

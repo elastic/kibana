@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { splitIntoCommands } from './correct_common_esql_mistakes';
+import { splitIntoCommands } from '@kbn/inference-plugin/common';
 
 export async function runAndValidateEsqlQuery({
   query,

@@ -35,9 +35,6 @@ export interface OverridableTabState {
   metadata?: {
     showActionsColumn?: boolean;
   };
-  anomalies?: {
-    onClose?: () => void;
-  };
   alertRule?: {
     options?: Partial<Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>>;
   };

@@ -153,6 +153,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
       'kibana.alert.rule.uuid',
       'kibana.alert.rule.execution.uuid',
       'kibana.alert.rule.execution.timestamp',
+      'kibana.alert.intended_timestamp',
       'kibana.alert.start',
       'kibana.alert.reason',
       'kibana.alert.uuid',
@@ -1672,7 +1673,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({

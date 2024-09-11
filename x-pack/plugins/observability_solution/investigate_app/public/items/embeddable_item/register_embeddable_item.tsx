@@ -166,7 +166,7 @@ export function registerEmbeddableItem({
   services,
 }: Options) {
   investigate.registerItemDefinition<EmbeddableItemParams, {}>({
-    type: 'esql',
+    type: 'embeddable',
     generate: async (option: {
       itemParams: EmbeddableItemParams;
       globalParams: GlobalWidgetParameters;

@@ -22,14 +22,14 @@ export class Plugin implements EntityManagerPluginClass {
   }
 
   setup(core: CoreSetup) {
-    const entityClient = new EntityClient(core.http);
+    const entityClient = new EntityClient(core);
     return {
       entityClient,
     };
   }
 
   start(core: CoreStart) {
-    const entityClient = new EntityClient(core.http);
+    const entityClient = new EntityClient(core);
     return {
       entityClient,
     };

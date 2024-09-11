@@ -508,5 +508,19 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
       expect(await button.getAttribute('disabled')).to.be('true');
     },
+
+    async clickAnomalyActionMenuButton() {
+      await testSubjects.click('infraAnomalyActionMenuButton');
+    },
+
+    async clickShowAffectedHostsButton() {
+      await this.clickAnomalyActionMenuButton();
+      await testSubjects.click('infraAnomalyFlyoutShowAffectedHosts');
+    },
+
+    async getAnomalyHostName() {
+      const element = await testSubjects.find('nodeNameRow');
+      return await element.getVisibleText();
+    },
   };
 }

@@ -38,7 +38,7 @@ export const EmptyConvo: React.FC<Props> = ({
   setIsSettingsModalVisible,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center">
+    <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptyConvo">
       <EuiFlexItem grow={false}>
         <EuiPanel
           hasShadow={false}

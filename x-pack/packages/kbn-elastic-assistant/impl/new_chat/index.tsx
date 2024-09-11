@@ -6,7 +6,8 @@
  */
 
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { useAssistantContext } from '../..';
 
 import { PromptContext } from '../assistant/prompt_context/types';
 import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
@@ -29,6 +30,8 @@ export type Props = Omit<PromptContext, 'id'> & {
   asLink?: boolean;
   /** Optional callback when overlay shows */
   onShowOverlay?: () => void;
+  /** Optional callback that returns copied code block */
+  onExportCodeBlock?: (codeBlock: string) => void;
 };
 
 const NewChatComponent: React.FC<Props> = ({
@@ -45,6 +48,7 @@ const NewChatComponent: React.FC<Props> = ({
   isAssistantEnabled,
   asLink = false,
   onShowOverlay,
+  onExportCodeBlock,
 }) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
@@ -56,11 +60,24 @@ const NewChatComponent: React.FC<Props> = ({
     tooltip,
     isAssistantEnabled
   );
+  const { codeBlockRef } = useAssistantContext();
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
     onShowOverlay?.();
   }, [showAssistantOverlay, onShowOverlay]);
+
+  useEffect(() => {
+    if (onExportCodeBlock) {
+      codeBlockRef.current = onExportCodeBlock;
+    }
+
+    return () => {
+      if (onExportCodeBlock) {
+        codeBlockRef.current = () => {};
+      }
+    };
+  }, [codeBlockRef, onExportCodeBlock]);
 
   const icon = useMemo(() => {
     if (iconType === null) {

@@ -23,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('installing and updating scenarios', async () => {
+  describe('installing and updating scenarios', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

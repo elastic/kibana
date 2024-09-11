@@ -17,7 +17,7 @@ import { ErrorMessage } from '../../../../components/error_message';
 import { SuggestVisualizationList } from '../../../../components/suggest_visualization_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDateHistogramResults } from '../../../../items/esql_item/get_date_histogram_results';
-import { EsqlWidget } from '../../../../items/esql_item/register_esql_item';
+import { ESQL_ITEM_TYPE, EsqlWidget } from '../../../../items/esql_item/register_esql_item';
 import { getEsFilterFromOverrides } from '../../../../utils/get_es_filter_from_overrides';
 
 function getItemFromSuggestion({
@@ -29,7 +29,7 @@ function getItemFromSuggestion({
 }): Item {
   return {
     title: suggestion.title,
-    type: 'esql',
+    type: ESQL_ITEM_TYPE,
     params: {
       esql: query,
       suggestion,
@@ -181,9 +181,6 @@ export function EsqlWidgetPreview({
         <PreviewContainer>
           <EsqlWidget
             suggestion={selectedSuggestion}
-            columns={displayedProps.value.columns}
-            allColumns={displayedProps.value.allColumns}
-            values={displayedProps.value.values}
             dataView={displayedProps.value.dataView}
             esqlQuery={esqlQuery}
             dateHistogramResults={dateHistoResponse.value}

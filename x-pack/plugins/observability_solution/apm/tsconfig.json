@@ -128,9 +128,9 @@
     "@kbn/core-analytics-browser",
     "@kbn/apm-types",
     "@kbn/entities-schema",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/serverless",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/router-utils"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
