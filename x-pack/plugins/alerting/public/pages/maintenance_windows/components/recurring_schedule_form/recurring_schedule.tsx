@@ -34,6 +34,7 @@ import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
 import { FormProps } from '../schema';
+import { parseSchedule } from '../../helpers/parse_schedule';
 
 const UseField = getUseField({ component: Field });
 
@@ -94,6 +95,10 @@ export const RecurringSchedule: React.FC = React.memo(() => {
     };
   }, [startDate]);
 
+  const parsedSchedule = useMemo(() => {
+    return parseSchedule(recurringSchedule);
+  }, [recurringSchedule]);
+
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
       <EuiSplitPanel.Inner color="subdued">
@@ -106,10 +111,10 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             },
           }}
         />
-        {recurringSchedule?.frequency === Frequency.DAILY ||
-        recurringSchedule?.frequency === 'CUSTOM' ? (
+        {(parsedSchedule?.frequency === Frequency.DAILY ||
+          parsedSchedule?.frequency === 'CUSTOM') && (
           <CustomRecurringSchedule data-test-subj="custom-recurring-form" />
-        ) : null}
+        )}
         <UseField
           path="recurringSchedule.ends"
           componentProps={{
@@ -120,7 +125,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             },
           }}
         />
-        {recurringSchedule?.ends === EndsOptions.ON_DATE ? (
+        {parsedSchedule?.ends === EndsOptions.ON_DATE ? (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="flexEnd">
@@ -164,7 +169,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             </EuiFlexGroup>
           </>
         ) : null}
-        {recurringSchedule?.ends === EndsOptions.AFTER_X ? (
+        {parsedSchedule?.ends === EndsOptions.AFTER_X ? (
           <UseField
             path="recurringSchedule.count"
             componentProps={{
@@ -187,7 +192,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
       <EuiHorizontalRule margin="none" />
       <EuiSplitPanel.Inner>
         {i18n.CREATE_FORM_RECURRING_SUMMARY_PREFIX(
-          recurringSummary(moment(startDate), recurringSchedule, presets)
+          recurringSummary(moment(startDate), parsedSchedule, presets)
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
