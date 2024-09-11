@@ -9,7 +9,7 @@ import { journey, step, before } from '@elastic/synthetics';
 import { byTestId, waitForLoadingToFinish } from '../../helpers/utils';
 import { recordVideo } from '../../helpers/record_video';
 
-journey('uptime', ({ page, params }) => {
+journey('UptimeOverview', ({ page, params }) => {
   recordVideo(page);
 
   before(async () => {
@@ -17,7 +17,7 @@ journey('uptime', ({ page, params }) => {
   });
 
   step('Go to Kibana', async () => {
-    await page.goto(`${params.kibanaUrl}/app/uptime?dateRangeStart=now-5y&dateRangeEnd=now`, {
+    await page.goto(`${params.kibanaUrl}/app/uptime?dateRangeStart=now-10y&dateRangeEnd=now`, {
       waitUntil: 'networkidle',
     });
   });
