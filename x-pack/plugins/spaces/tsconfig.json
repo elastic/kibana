@@ -49,6 +49,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-application-common",
     "@kbn/security-authorization-core",
+    "@kbn/core-notifications-browser",
   ],
   "exclude": [
     "target/**/*",
