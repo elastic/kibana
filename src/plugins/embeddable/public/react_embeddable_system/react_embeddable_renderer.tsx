@@ -119,7 +119,6 @@ export const ReactEmbeddableRenderer = <
 
         const buildEmbeddable = async () => {
           const serializedState = parentApi.getSerializedStateForChild(uuid);
-          console.log('serializedState', serializedState);
           const lastSavedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
             : ({} as RuntimeState);
@@ -129,7 +128,6 @@ export const ReactEmbeddableRenderer = <
           const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
             ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
             : ({} as Partial<RuntimeState>);
-            console.log('partialRuntimeState', partialRuntimeState);
 
           const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
 

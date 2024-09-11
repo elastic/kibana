@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BookRuntimeState } from '../../../react_embeddables/saved_book/types';
+import { BookRuntimeState } from '../../react_embeddables/saved_book/types';
 
 const UNSAVED_CHANGES_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.stateManagementExample.unsavedChanges';

@@ -20,7 +20,7 @@ import { RenderExamples } from './render_examples';
 import { PresentationContainerExample } from './presentation_container_example/components/presentation_container_example';
 import { StartDeps } from '../plugin';
 import { Sidebar } from './sidebar';
-import { StateManagementExample } from './state_management_example/components/state_management_example';
+import { StateManagementExample } from './state_management_example/state_management_example';
 
 const App = ({
   core,
