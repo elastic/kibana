@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  MlStartTrainedModelDeploymentRequest,
+  MlTrainedModelAssignmentTaskParameters,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import type { AdaptiveAllocations } from '../../../server/lib/ml_client/types';
@@ -22,11 +25,22 @@ const DEFAULT_MAX_ALLOCATIONS = 32;
 
 const THREADS_MAX_EXPONENT = 5;
 
+type VCPUBreakpoints = Record<DeploymentParamsUI['vCPUUsage'], { min: number; max: number }>;
 /**
  * Class responsible for mapping deployment params between API and UI
  */
 export class DeploymentParamsMapper {
   private readonly threadingParamsValues: number[];
+
+  private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
+    low: { min: 1, max: 1 },
+    medium: { min: 2, max: 32 },
+    high: { min: 32, max: 99999 },
+  };
+
+  private readonly hardwareVCPUBreakpoints: VCPUBreakpoints;
+
+  private readonly vCpuBreakpoints: VCPUBreakpoints;
 
   constructor(
     private readonly modelId: string,
@@ -39,9 +53,25 @@ export class DeploymentParamsMapper {
       .fill(null)
       .map((v, i) => Math.pow(2, i))
       .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true);
+
+    const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
+
+    this.hardwareVCPUBreakpoints = {
+      low: { min: 1, max: 1 },
+      medium: { min: Math.min(2, mediumValue), max: mediumValue },
+      high: {
+        min: mediumValue,
+        max: this.mlServerLimits!.total_ml_processors!,
+      },
+    };
+
+    this.vCpuBreakpoints = this.cloudInfo.isMlAutoscalingEnabled
+      ? this.autoscalingVCPUBreakpoints
+      : this.hardwareVCPUBreakpoints;
   }
 
   private getNumberOfThread(input: DeploymentParamsUI): number {
+    if (input.vCPUUsage === 'low') return 1;
     return input.optimized === 'optimizedForIngest' ? 1 : Math.max(...this.threadingParamsValues);
   }
 
@@ -82,7 +112,7 @@ export class DeploymentParamsMapper {
       case 'medium':
         return {
           number_of_allocations: mediumValue,
-          min_number_of_allocations: 2,
+          min_number_of_allocations: Math.min(2, mediumValue),
           max_number_of_allocations: mediumValue,
         };
       case 'high':
@@ -127,13 +157,35 @@ export class DeploymentParamsMapper {
    * @param input
    */
   public mapApiToUiDeploymentParams(
-    input: MlStartTrainedModelDeploymentRequestNew
+    input: MlTrainedModelAssignmentTaskParametersAdaptive
   ): DeploymentParamsUI {
+    let optimized: DeploymentParamsUI['optimized'] = 'optimizedForIngest';
+    if (input.threads_per_allocation > 1) {
+      optimized = 'optimizedForSearch';
+    }
+    const adaptiveResources = !!input.adaptive_allocations?.enabled;
+
+    const vCPUs =
+      input.threads_per_allocation *
+      (adaptiveResources
+        ? input.adaptive_allocations!.max_number_of_allocations!
+        : input.number_of_allocations);
+
+    const [vCPUUsage] = Object.entries(this.vCpuBreakpoints)
+      .reverse()
+      .find(([key, val]) => vCPUs >= val.min) as [
+      DeploymentParamsUI['vCPUUsage'],
+      { min: number; max: number }
+    ];
+
     return {
       deploymentId: input.deployment_id,
-      optimized: input.threads_per_allocation === 1 ? 'optimizedForIngest' : 'optimizedForSearch',
-      adaptiveResources: !!input.adaptive_allocations?.enabled,
-      vCPUUsage: 'low',
+      optimized,
+      adaptiveResources,
+      vCPUUsage,
     };
   }
 }
+
+export type MlTrainedModelAssignmentTaskParametersAdaptive =
+  MlTrainedModelAssignmentTaskParameters & AdaptiveAllocations;
