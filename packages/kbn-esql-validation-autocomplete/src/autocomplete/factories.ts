@@ -438,6 +438,20 @@ export function getCompatibleLiterals(
   return suggestions;
 }
 
+export const TIME_SYSTEM_DESCRIPTIONS = {
+  '?t_start': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?t_end': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
+};
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;
   addComma?: boolean;

@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import type { RuleOverviewPanelContext } from '../context';
-
-/**
- * Mock contextValue for rule overview panel context
- */
-export const mockContextValue: RuleOverviewPanelContext = {
-  ruleId: 'rule id',
+export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
+  return `CONTEXT:\n"""\n${context}\n"""`;
 };
