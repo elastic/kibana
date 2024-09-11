@@ -172,7 +172,6 @@ export const getGaugeVisualization = ({
       label: i18n.translate('xpack.lens.gauge.label', {
         defaultMessage: 'Gauge',
       }),
-      showExperimentalBadge: true,
       sortPriority: 7,
       description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
         defaultMessage: 'Show progress to a goal in linear or arced style.',

@@ -11,12 +11,12 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const { reporting, dashboard } = getPageObjects(['reporting', 'dashboard']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
-  const reporting = getService('reporting');
+  const reportingService = getService('reporting');
   const png = getService('png');
 
   // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
@@ -25,10 +25,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
-      const url = await PageObjects.reporting.getReportURL(60000);
-      const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
+      const url = await reporting.getReportURL(60000);
+      const reportData = await reporting.getRawReportData(url ?? '');
 
-      const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+      const sessionReportPath = await reporting.writeSessionReport(
         fileName,
         'png',
         reportData,
@@ -36,11 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       expect(sessionReportPath).not.to.be(null);
 
-      const baselineReportPath = PageObjects.reporting.getBaselineReportPath(
-        fileName,
-        'png',
-        REPORTS_FOLDER
-      );
+      const baselineReportPath = reporting.getBaselineReportPath(fileName, 'png', REPORTS_FOLDER);
       log.debug(`session report path: ${sessionReportPath}`);
       log.debug(`baseline report path: ${baselineReportPath}`);
 
@@ -56,30 +52,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await reporting.deleteAllReports();
+      await reportingService.deleteAllReports();
     });
 
     it('PNG file matches the baseline image, using sample geo data', async function () {
-      await reporting.initEcommerce();
+      await reportingService.initEcommerce();
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
-      await PageObjects.reporting.openExportTab();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('Ecommerce Map');
+      await reporting.openExportTab();
       await testSubjects.click('pngV2-radioOption');
-      await PageObjects.reporting.clickGenerateReportButton();
+      await reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
       expect(percentDiff).to.be.lessThan(0.03);
 
-      await reporting.teardownEcommerce();
+      await reportingService.teardownEcommerce();
     });
 
     it('PNG file matches the baseline image, using embeddable example', async function () {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-      await PageObjects.reporting.openExportTab();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('map embeddable example');
+      await reporting.openExportTab();
       await testSubjects.click('pngV2-radioOption');
-      await PageObjects.reporting.clickGenerateReportButton();
+      await reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
       expect(percentDiff).to.be.lessThan(0.03);

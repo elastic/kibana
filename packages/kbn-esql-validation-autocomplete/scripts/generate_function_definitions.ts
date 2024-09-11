@@ -25,9 +25,13 @@ const aliasTable: Record<string, string[]> = {
 };
 const aliases = new Set(Object.values(aliasTable).flat());
 
-const evalSupportedCommandsAndOptions = {
+const scalarSupportedCommandsAndOptions = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
+};
+
+const aggregationSupportedCommandsAndOptions = {
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
 };
 
 // coalesce can be removed when a test is added for version type
@@ -40,7 +44,7 @@ const extraFunctions: FunctionDefinition[] = [
     name: 'case',
     description:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
-    ...evalSupportedCommandsAndOptions,
+    ...scalarSupportedCommandsAndOptions,
     signatures: [
       {
         params: [
@@ -194,14 +198,14 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   date_diff: {
     signatures: [
       {
-        params: [{ literalOptions: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
+        params: [{ acceptedValues: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
       },
     ],
   },
   date_extract: {
     signatures: [
       {
-        params: [{ literalOptions: dateExtractOptions }],
+        params: [{ acceptedValues: dateExtractOptions }],
       },
     ],
   },
@@ -215,8 +219,21 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   },
   mv_sort: {
     signatures: new Array(9).fill({
-      params: [{}, { literalOptions: ['asc', 'desc'] }],
+      params: [{}, { acceptedValues: ['asc', 'desc'] }],
     }),
+  },
+  percentile: {
+    signatures: new Array(9).fill({
+      params: [{}, { constantOnly: true }],
+    }),
+  },
+  top: {
+    signatures: new Array(6).fill({
+      params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
+    }),
+  },
+  count: {
+    signatures: [{ params: [{ supportsWildcard: true }] }],
   },
 };
 
@@ -233,8 +250,8 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     ...(ESFunctionDefinition.type === 'eval'
-      ? evalSupportedCommandsAndOptions
-      : { supportedCommands: ['stats'] }),
+      ? scalarSupportedCommandsAndOptions
+      : aggregationSupportedCommandsAndOptions),
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     signatures: _.uniqBy(
@@ -263,7 +280,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   return ret as FunctionDefinition;
 }
 
-function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) {
+function printGeneratedFunctionsFile(
+  functionDefinitions: FunctionDefinition[],
+  functionsType: 'aggregation' | 'scalar'
+) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
    *
@@ -341,10 +361,14 @@ function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) 
  *
  */
 
-import type { ESQLFunction } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { isLiteralItem } from '../shared/helpers';
-import type { FunctionDefinition } from './types';
+import type { FunctionDefinition } from '../types';
+${
+  functionsType === 'scalar'
+    ? `import type { ESQLFunction } from '@kbn/esql-ast';
+import { isLiteralItem } from '../../shared/helpers';`
+    : ''
+}
 
 
 `;
@@ -359,7 +383,7 @@ import type { FunctionDefinition } from './types';
     .join('\n\n');
 
   const fileContents = `${fileHeader}${functionDefinitionsString}
-  export const evalFunctionDefinitions = [${functionDefinitions
+  export const ${functionsType}FunctionDefinitions = [${functionDefinitions
     .map(({ name }) => getDefinitionName(name))
     .join(',\n')}];`;
 
@@ -379,25 +403,30 @@ import type { FunctionDefinition } from './types';
     JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
   );
 
-  const evalFunctionDefinitions: FunctionDefinition[] = [];
+  const scalarFunctionDefinitions: FunctionDefinition[] = [];
+  const aggFunctionDefinitions: FunctionDefinition[] = [];
   for (const ESDefinition of ESFunctionDefinitions) {
-    if (
-      aliases.has(ESDefinition.name) ||
-      excludedFunctions.has(ESDefinition.name) ||
-      ESDefinition.type !== 'eval'
-    ) {
+    if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
 
-    evalFunctionDefinitions.push(functionDefinition);
+    if (functionDefinition.type === 'eval') {
+      scalarFunctionDefinitions.push(functionDefinition);
+    } else if (functionDefinition.type === 'agg') {
+      aggFunctionDefinitions.push(functionDefinition);
+    }
   }
 
-  evalFunctionDefinitions.push(...extraFunctions);
+  scalarFunctionDefinitions.push(...extraFunctions);
 
   await writeFile(
-    join(__dirname, '../src/definitions/functions.ts'),
-    printGeneratedFunctionsFile(evalFunctionDefinitions)
+    join(__dirname, '../src/definitions/generated/scalar_functions.ts'),
+    printGeneratedFunctionsFile(scalarFunctionDefinitions, 'scalar')
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
+    printGeneratedFunctionsFile(aggFunctionDefinitions, 'aggregation')
   );
 })();
