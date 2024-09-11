@@ -94,5 +94,8 @@ export const isSuppressionRuleInGA = (ruleType: Type): boolean => {
   return isSuppressibleAlertRule(ruleType) && SUPPRESSIBLE_ALERT_RULES_GA.includes(ruleType);
 };
 
-export const shouldShowResponseActions = (ruleType: Type | undefined) =>
-  isQueryRule(ruleType) || isEsqlRule(ruleType) || isEqlRule(ruleType) || isNewTermsRule(ruleType);
+export const shouldShowResponseActions = (ruleType: Type | undefined) => {
+  return isQueryRule(ruleType);
+  // When adding new parameters to rules, we have to follow intermediate release steps - functionality hidden from UI
+  // || isEsqlRule(ruleType) || isEqlRule(ruleType) || isNewTermsRule(ruleType)
+};
