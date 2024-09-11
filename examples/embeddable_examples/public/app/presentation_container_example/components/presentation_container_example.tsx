@@ -46,8 +46,8 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
     <div>
       <EuiCallOut title="Presentation Container interfaces">
         <p>
-          At times, you will need to render many embeddables and allow users to add and
-          removeembeddables. Use the <strong>PresentationContainer</strong> and{' '}
+          At times, you will need to render many embeddables and allow users to add and remove
+          embeddables. Use the <strong>PresentationContainer</strong> and{' '}
           <strong>CanAddNewPanel</strong> interfaces for this functionallity.
         </p>
         <p>
