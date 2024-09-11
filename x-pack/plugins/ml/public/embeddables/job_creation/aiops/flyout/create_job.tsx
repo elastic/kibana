@@ -34,8 +34,6 @@ import {
 } from '../../../../application/jobs/new_job/job_from_pattern_analysis';
 import { useMlFromLensKibanaContext } from '../../common/context';
 import { JobDetails, type CreateADJobParams } from '../../common/job_details';
-import { mlJobServiceFactory } from '../../../../application/services/job_service';
-import { toastNotificationServiceProvider } from '../../../../application/services/toast_notification_service';
 
 interface Props {
   dataView: DataView;
@@ -51,13 +49,9 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       share,
       uiSettings,
       dashboardService,
-      notifications: { toasts },
       mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
-  const toastNotificationService = toastNotificationServiceProvider(toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApi);
-
   const [categorizationType, setCategorizationType] = useState<CategorizationType>(
     CATEGORIZATION_TYPE.COUNT
   );
@@ -96,10 +90,9 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data.query.timefilter.timefilter,
         dashboardService,
         data,
-        mlApi,
-        mlJobService
+        mlApi
       ),
-    [dashboardService, data, mlApi, mlJobService, uiSettings]
+    [dashboardService, data, mlApi, uiSettings]
   );
 
   function createADJobInWizard() {
