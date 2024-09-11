@@ -16,6 +16,7 @@ const palette = euiPaletteColorBlind();
 const colors = {
   command: palette[2],
   source: palette[3],
+  literal: palette[6],
 };
 
 export const highlight = (query: EsqlQuery): Annotation[] => {
@@ -39,6 +40,16 @@ export const highlight = (query: EsqlQuery): Annotation[] => {
         location.min,
         location.max + 1,
         (text) => <span style={{ color: colors.source }}>{text}</span>,
+      ]);
+    },
+
+    visitLiteral: (node) => {
+      const location = node.location;
+      if (!location) return;
+      annotations.push([
+        location.min,
+        location.max + 1,
+        (text) => <span style={{ color: colors.literal }}>{text}</span>,
       ]);
     },
   });
