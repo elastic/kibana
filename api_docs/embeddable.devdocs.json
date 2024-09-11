@@ -5726,6 +5726,37 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.setDisabledActionIds",
+            "type": "Function",
+            "tags": [],
+            "label": "setDisabledActionIds",
+            "description": [],
+            "signature": [
+              "(ids: string[] | undefined) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Embeddable.setDisabledActionIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.unlinkFromLibrary",
             "type": "Function",
             "tags": [],
@@ -9753,6 +9784,22 @@
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.untilContainerInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "untilContainerInitialized",
+            "description": [],
+            "signature": [
+              "(() => Promise<void>) | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10275,7 +10322,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10283,7 +10330,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -10396,7 +10443,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10404,7 +10451,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | undefined>"
+              " | TEmbeddable | undefined>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -14857,14 +14904,6 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.ts"
-            },
-            {
-              "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
             },
             {
@@ -14898,26 +14937,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",
