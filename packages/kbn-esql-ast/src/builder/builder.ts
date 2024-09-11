@@ -17,6 +17,7 @@ import {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLocation,
+  ESQLSource,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate } from './types';
 
@@ -69,6 +70,17 @@ export namespace Builder {
         commands,
         type: 'query',
         name: '',
+      };
+    };
+
+    export const source = (
+      template: AstNodeTemplate<ESQLSource>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLSource => {
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        type: 'source',
       };
     };
 

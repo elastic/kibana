@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { EuiButton, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ESQLSource } from '@kbn/esql-ast';
+import { Builder, ESQLSource } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 import { Source } from './source';
@@ -43,7 +43,20 @@ export const FromCommand: React.FC = () => {
       </div>
       <EuiSpacer size={'m'} />
       <EuiFormRow fullWidth>
-        <EuiButton fullWidth size={'s'} color="text" onClick={() => {}}>
+        <EuiButton
+          fullWidth
+          size={'s'}
+          color="text"
+          onClick={() => {
+            const length = from.args.length;
+            const source = Builder.expression.source({
+              name: `source${length + 1}`,
+              sourceType: 'index',
+            });
+            from.args.push(source);
+            state.reprint();
+          }}
+        >
           Add source
         </EuiButton>
       </EuiFormRow>
