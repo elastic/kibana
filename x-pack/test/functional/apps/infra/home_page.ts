@@ -468,7 +468,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
             await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
-            await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 
             await retry.tryForTime(5000, async () => {
