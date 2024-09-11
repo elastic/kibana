@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 
 import { getRouteRequiredAuthz } from '../../services/security';
 
@@ -22,8 +23,17 @@ import {
   DryRunPackagePoliciesRequestSchema,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
+  ConfigRecordSchema,
+  SimplifiedVarsSchema,
+  PackagePolicyBaseSchema,
+  PackagePolicyPackageSchema,
+  SimplifiedPackagePolicyInputsSchema,
+  PackagePolicySchema,
+  PackagePolicyInputsSchema,
 } from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
+
+import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
 import {
   getPackagePoliciesHandler,
@@ -38,6 +48,33 @@ import {
   bulkGetPackagePoliciesHandler,
 } from './handlers';
 
+const PackagePolicyResponseSchema = PackagePolicySchema.extends({
+  vars: schema.maybe(schema.oneOf([ConfigRecordSchema, schema.maybe(SimplifiedVarsSchema)])),
+  inputs: schema.oneOf([
+    schema.arrayOf(
+      schema.object({
+        ...PackagePolicyInputsSchema,
+        compiled_input: schema.maybe(schema.any()),
+      })
+    ),
+    SimplifiedPackagePolicyInputsSchema,
+  ]),
+});
+
+const DryRunPackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
+  id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+  errors: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        message: schema.string(),
+        key: schema.maybe(schema.string()),
+      })
+    )
+  ),
+});
+
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
   router.versioned
@@ -48,11 +85,31 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.LIST_PATTERN)
         ).granted,
+      description: 'List package policies',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetPackagePoliciesRequestSchema },
+        validate: {
+          request: GetPackagePoliciesRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  items: schema.arrayOf(PackagePolicyResponseSchema),
+                  total: schema.number(),
+                  page: schema.number(),
+                  perPage: schema.number(),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getPackagePoliciesHandler
     );
@@ -66,11 +123,31 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('post', PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN)
         ).granted,
+      description: 'Bulk get package policies',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: BulkGetPackagePoliciesRequestSchema },
+        validate: {
+          request: BulkGetPackagePoliciesRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  items: schema.arrayOf(PackagePolicyResponseSchema),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            404: {
+              body: notFoundResponse,
+            },
+          },
+        },
       },
       bulkGetPackagePoliciesHandler
     );
@@ -84,11 +161,31 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.INFO_PATTERN)
         ).granted,
+      description: 'Get package policy by ID',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetOnePackagePolicyRequestSchema },
+        validate: {
+          request: GetOnePackagePolicyRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  item: PackagePolicyResponseSchema,
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            404: {
+              body: notFoundResponse,
+            },
+          },
+        },
       },
       getOnePackagePolicyHandler
     );
@@ -112,11 +209,32 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+      // TODO missing fleetAuthz?
+      description: 'Create package policy',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: CreatePackagePolicyRequestSchema },
+        validate: {
+          request: CreatePackagePolicyRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  item: PackagePolicyResponseSchema,
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            409: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       createPackagePolicyHandler
     );
@@ -130,11 +248,32 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
         ).granted,
+      description: 'Update package policy by ID',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: UpdatePackagePolicyRequestSchema },
+        validate: {
+          request: UpdatePackagePolicyRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  item: PackagePolicyResponseSchema,
+                  success: schema.boolean(),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            403: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
 
       updatePackagePolicyHandler
@@ -147,11 +286,47 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
+      description: 'Delete package policy',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DeletePackagePoliciesRequestSchema },
+        validate: {
+          request: DeletePackagePoliciesRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.arrayOf(
+                  schema.object({
+                    id: schema.string(),
+                    name: schema.maybe(schema.string()),
+                    success: schema.boolean(),
+                    policy_id: schema.nullable(
+                      schema.maybe(
+                        schema.string({
+                          meta: {
+                            description: 'Use `policy_ids` instead',
+                            deprecated: true,
+                          },
+                        })
+                      )
+                    ),
+                    policy_ids: schema.arrayOf(schema.string()),
+                    output_id: schema.nullable(schema.maybe(schema.string())),
+                    package: PackagePolicyPackageSchema,
+                    statusCode: schema.maybe(schema.number()),
+                    body: schema.maybe(schema.object({ message: schema.string() })),
+                  })
+                ),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       deletePackagePolicyHandler
     );
@@ -162,11 +337,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
+      description: 'Delete package policy by ID',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DeleteOnePackagePolicyRequestSchema },
+        validate: {
+          request: DeleteOnePackagePolicyRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  id: schema.string(),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       deleteOnePackagePolicyHandler
     );
@@ -178,11 +370,32 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
+      description: 'Upgrade package policy to a newer package version',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: UpgradePackagePoliciesRequestSchema },
+        validate: {
+          request: UpgradePackagePoliciesRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  id: schema.string(),
+                  success: schema.boolean(),
+                  name: schema.maybe(schema.string()),
+                  statusCode: schema.maybe(schema.number()),
+                  body: schema.maybe(schema.object({ message: schema.string() })),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       upgradePackagePolicyHandler
     );
@@ -194,11 +407,100 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { readIntegrationPolicies: true },
       },
+      description: 'Dry run package policy upgrade',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DryRunPackagePoliciesRequestSchema },
+        validate: {
+          request: DryRunPackagePoliciesRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.arrayOf(
+                  schema.object({
+                    name: schema.maybe(schema.string()),
+                    statusCode: schema.maybe(schema.number()),
+                    body: schema.maybe(schema.object({ message: schema.string() })),
+                    hasErrors: schema.boolean(),
+                    diff: schema.maybe(
+                      schema.arrayOf(
+                        schema.oneOf([PackagePolicyResponseSchema, DryRunPackagePolicySchema])
+                      )
+                    ),
+                    agent_diff: schema.maybe(
+                      schema.arrayOf(
+                        schema.arrayOf(
+                          schema
+                            .object({
+                              id: schema.string(),
+                              name: schema.string(),
+                              revision: schema.number(),
+                              type: schema.string(),
+                              data_stream: schema.object({
+                                namesapce: schema.string(),
+                              }),
+                              use_output: schema.string(),
+                              package_policy_id: schema.string(),
+                              meta: schema.maybe(
+                                schema.object({
+                                  package: schema
+                                    .object({
+                                      name: schema.string(),
+                                      version: schema.string(),
+                                    })
+                                    .extendsDeep({
+                                      // equivalent of allowing extra keys like `[key: string]: any;`
+                                      unknowns: 'allow',
+                                    }),
+                                })
+                              ),
+                              streams: schema.maybe(
+                                schema.arrayOf(
+                                  schema
+                                    .object({
+                                      id: schema.string(),
+                                      data_stream: schema.object({
+                                        dataset: schema.string(),
+                                        type: schema.string(),
+                                      }),
+                                    })
+                                    .extendsDeep({
+                                      unknowns: 'allow',
+                                    })
+                                )
+                              ),
+                              processors: schema.maybe(
+                                schema.arrayOf(
+                                  schema.object({
+                                    add_fields: schema.object({
+                                      target: schema.string(),
+                                      fields: schema.recordOf(
+                                        schema.string(),
+                                        schema.oneOf([schema.string(), schema.number()])
+                                      ),
+                                    }),
+                                  })
+                                )
+                              ),
+                            })
+                            .extendsDeep({
+                              unknowns: 'allow',
+                            })
+                        )
+                      )
+                    ),
+                  })
+                ),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       dryRunUpgradePackagePolicyHandler
     );
