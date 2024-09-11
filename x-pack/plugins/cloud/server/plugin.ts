@@ -36,9 +36,11 @@ export interface CloudSetup {
    */
   cloudId?: string;
   /**
-   * The Cloud Service Provider (CSP) where the deployment is running.
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
    */
-  csp?: 'aws' | 'gcp' | 'azure' | string;
+  csp?: string;
   /**
    * The Elastic Cloud Organization that owns this deployment/project.
    */

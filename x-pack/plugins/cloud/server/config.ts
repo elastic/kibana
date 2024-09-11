@@ -22,15 +22,7 @@ const configSchema = schema.object({
   apm: schema.maybe(apmConfigSchema),
   base_url: schema.maybe(schema.string()),
   cname: schema.maybe(schema.string()),
-  // Cloud service provider
-  csp: schema.maybe(
-    schema.oneOf([
-      schema.literal('aws'),
-      schema.literal('gcp'),
-      schema.literal('azure'),
-      schema.string(), // catch all
-    ])
-  ),
+  csp: schema.maybe(schema.string()),
   deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
