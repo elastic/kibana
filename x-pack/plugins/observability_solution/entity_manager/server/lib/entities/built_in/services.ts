@@ -20,7 +20,7 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '1.0.2',
+    version: '1.0.3',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
