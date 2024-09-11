@@ -1,21 +1,20 @@
-## SORT
+# SORT
 
-The `SORT` processing command in ES|QL is used to sort a table based on one or more columns. This command is essential for organizing data in a specific order, which can be particularly useful for reporting, data analysis, and visualization. The default sort order is ascending, but you can specify descending order using `DESC`. Additionally, you can handle null values explicitly by using `NULLS FIRST` or `NULLS LAST`.
+The SORT command is used to arrange a table based on one or more columns.
 
-### Use Cases
-- **Organizing Data**: Sort data to make it easier to read and analyze.
-- **Reporting**: Generate reports where data needs to be presented in a specific order.
-- **Data Analysis**: Facilitate data analysis by sorting data based on key metrics.
-- **Visualization**: Prepare data for visualizations that require sorted input.
+## Syntax
 
-### Limitations
-- **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
-- **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.
+`SORT column1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., columnN [ASC/DESC][NULLS FIRST/NULLS LAST]]`
 
-### Examples
+### Parameters
 
-#### Basic Sorting
-Sort the `employees` table by the `height` column in ascending order:
+#### columnX
+
+The column on which the sorting is to be performed.
+
+## Examples
+
+Sort a table based on the 'height' column:
 
 ```esql
 FROM employees
@@ -23,8 +22,7 @@ FROM employees
 | SORT height
 ```
 
-#### Explicit Ascending Order
-Sort the `employees` table by the `height` column in descending order:
+Explicitly sort in ascending order with `ASC`:
 
 ```esql
 FROM employees
@@ -32,8 +30,7 @@ FROM employees
 | SORT height DESC
 ```
 
-#### Multiple Sort Expressions
-Sort the `employees` table by the `height` column in descending order and use `first_name` as a tie breaker in ascending order:
+Provide additional sort expressions to act as tie breakers:
 
 ```esql
 FROM employees
@@ -41,8 +38,7 @@ FROM employees
 | SORT height DESC, first_name ASC
 ```
 
-#### Sorting Null Values First
-Sort the `employees` table by the `first_name` column in ascending order, placing null values first:
+Sort `null` values first using `NULLS FIRST`:
 
 ```esql
 FROM employees
@@ -50,4 +46,17 @@ FROM employees
 | SORT first_name ASC NULLS FIRST
 ```
 
-These examples demonstrate the versatility of the `SORT` command in organizing data for various analytical and reporting needs.
+### Notes
+
+By default, the sorting order is ascending. You can specify an explicit sort order by using `ASC` for ascending or `DESC` for descending.
+
+If two rows have the same sort key, they are considered equal. You can provide additional sort expressions to act as tie breakers.
+
+When sorting on multivalued columns, the lowest value is used when sorting in ascending order and the highest value is used when sorting in descending order.
+
+By default, `null` values are treated as being larger than any other value. This means that with an ascending sort order, `null` values are sorted last, and with a descending sort order, `null` values are sorted first. You can change this by providing `NULLS FIRST` or `NULLS LAST`.
+
+
+### Limitations
+- **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
+- **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.
