@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,6 +26,13 @@ import { isValidIndexName } from '../../utils/indices';
 import { useCreateIndex } from './hooks/use_create_index';
 
 import { CreateIndexFormState } from './types';
+
+const CREATE_INDEX_CONTENT = i18n.translate(
+  'xpack.searchIndices.startPage.createIndex.action.text',
+  {
+    defaultMessage: 'Create my index',
+  }
+);
 
 export interface CreateIndexFormProps {
   formState: CreateIndexFormState;
@@ -69,6 +77,7 @@ export const CreateIndexForm = ({
         isInvalid={indexNameHasError}
       >
         <EuiFieldText
+          autoFocus
           fullWidth
           data-test-subj="indexNameField"
           name="indexName"
@@ -86,22 +95,41 @@ export const CreateIndexForm = ({
       </EuiFormRow>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            iconSide="left"
-            iconType="sparkles"
-            data-test-subj="createIndexBtn"
-            fill
-            disabled={
-              indexNameHasError || isLoading || userPrivileges?.privileges?.canCreateIndex === false
-            }
-            isLoading={isLoading}
-            onClick={onCreateIndex}
-          >
-            {i18n.translate('xpack.searchIndices.startPage.createIndex.action.text', {
-              defaultMessage: 'Create my index',
-            })}
-          </EuiButton>
+          {userPrivileges?.privileges?.canCreateIndex === false ? (
+            <EuiToolTip
+              content={
+                <p>
+                  {i18n.translate('xpack.searchIndices.startPage.createIndex.permissionTooltip', {
+                    defaultMessage: 'You do not have permission to create an index.',
+                  })}
+                </p>
+              }
+            >
+              <EuiButton
+                fill
+                color="primary"
+                iconSide="left"
+                iconType="sparkles"
+                data-test-subj="createIndexBtn"
+                disabled={true}
+              >
+                {CREATE_INDEX_CONTENT}
+              </EuiButton>
+            </EuiToolTip>
+          ) : (
+            <EuiButton
+              fill
+              color="primary"
+              iconSide="left"
+              iconType="sparkles"
+              data-test-subj="createIndexBtn"
+              disabled={indexNameHasError || isLoading}
+              isLoading={isLoading}
+              onClick={onCreateIndex}
+            >
+              {CREATE_INDEX_CONTENT}
+            </EuiButton>
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           {userPrivileges?.privileges?.canCreateApiKeys && (
