@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -141,6 +141,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   deploymentsParams,
   disableAdaptiveResourcesControl,
 }) => {
+  const deploymentIdUpdated = useRef(false);
+
   const defaultDeploymentId = useMemo(() => {
     return config.deploymentId;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -238,6 +240,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             isInvalid={!!errors.deploymentId}
             value={config.deploymentId ?? ''}
             onChange={(e) => {
+              deploymentIdUpdated.current = true;
               onConfigChange({ ...config, deploymentId: e.target.value });
             }}
             data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
@@ -291,7 +294,18 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                     value={v.value}
                     checked={config.optimized === v.value}
                     onChange={() => {
-                      onConfigChange({ ...config, optimized: v.value });
+                      onConfigChange({
+                        ...config,
+                        ...(deploymentIdUpdated.current
+                          ? {}
+                          : {
+                              deploymentId: config.deploymentId?.replace(
+                                /_[a-zA-Z]+$/,
+                                v.value === 'optimizedForIngest' ? '_ingest' : '_search'
+                              ),
+                            }),
+                        optimized: v.value,
+                      });
                     }}
                   />
                   <EuiSpacer size="m" />
@@ -429,7 +443,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const [config, setConfig] = useState<DeploymentParamsUI>(
     initialParams ?? {
-      deploymentId: model.model_id,
+      deploymentId: `${model.model_id}_ingest`,
       // TODO set based on the existing deployments
       optimized: 'optimizedForIngest',
       vCPUUsage: 'medium',
