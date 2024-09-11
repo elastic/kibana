@@ -16,7 +16,7 @@
     .controlPanel--label {
       @include euiTextTruncate;
       padding: 0;
-      height: $euiButtonHeightSmall;
+      height: 100%;
     }
   }
 
@@ -38,4 +38,34 @@
 
 .controlFrame__dragHandle {
   line-height: 0; // Vertically center the grab handle
+}
+
+.controlFrame__formControlLayout:not(.controlFrame__formControlLayout--edit):not(.controlFrame__formControlLayout--twoLine) {
+  .euiFormControlLayout__prepend {
+    padding-inline-start: $euiSizeS;
+  }
+}
+
+.controlFrame__formControlLayout:not(.controlFrame__formControlLayout--edit).timeSlider {
+  .euiFormControlLayout__prepend {
+    padding-inline-start: 0;
+  }
+}
+
+.controlFrame__formControlLayout.controlFrame__formControlLayout--twoLine.controlFrame__formControlLayout--edit {
+  .euiFormControlLayout__prepend {
+    padding-inline-end: 0;
+  }
+}
+
+.controlFrame__formControlLayout.controlFrame__formControlLayout--twoLine:not(.controlFrame__formControlLayout--edit) {
+  .euiFormControlLayout__prepend {
+    padding-inline: 0;
+  }
+}
+
+.controlFrame__formControlLayout:not(.controlFrame__formControlLayout--twoLine).controlFrame__formControlLayout--edit {
+  .euiFormControlLayout__prepend {
+    padding-inline-start: $euiSizeXS * .5; // skinny icon
+  }
 }
