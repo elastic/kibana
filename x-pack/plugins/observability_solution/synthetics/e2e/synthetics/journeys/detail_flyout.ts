@@ -8,12 +8,7 @@
 import { expect, journey, step } from '@elastic/synthetics';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
-const journeySkip =
-  (...params: Parameters<typeof journey>) =>
-  () =>
-    journey(...params);
-// TODO: skipped because failing on main and need to unblock CI
-journeySkip('TestMonitorDetailFlyout', async ({ page, params }) => {
+journey('TestMonitorDetailFlyout', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const monitorName = 'test-flyout-http-monitor';
 
