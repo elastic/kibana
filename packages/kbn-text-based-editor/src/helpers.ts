@@ -246,7 +246,8 @@ export const onMouseDownResizeHandler = (
   mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent,
   height: number,
   maxHeight: number,
-  setHeight: (height: number) => void
+  setHeight: (height: number) => void,
+  setSecondPanelHeight?: (height: number) => void
 ) => {
   function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
     return e && 'pageY' in e;
@@ -259,8 +260,12 @@ export const onMouseDownResizeHandler = (
 
   function onMouseMove(mouseMoveEvent: MouseEvent) {
     const h = startSize - startPosition + mouseMoveEvent.pageY;
-    const validatedHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
-    setHeight(validatedHeight);
+    const firstPanelHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
+    setHeight(firstPanelHeight);
+    if (setSecondPanelHeight) {
+      const secondPanelHeight = Math.min(Math.max(maxHeight - 34 - firstPanelHeight, 0), maxHeight);
+      setSecondPanelHeight?.(secondPanelHeight);
+    }
   }
   function onMouseUp() {
     document.body.removeEventListener('mousemove', onMouseMove);
@@ -274,13 +279,16 @@ export const onKeyDownResizeHandler = (
   keyDownEvent: React.KeyboardEvent,
   height: number,
   maxHeight: number,
-  setHeight: (height: number) => void
+  setHeight: (height: number) => void,
+  setSecondPanelHeight?: (height: number) => void
 ) => {
   let h = height;
   if (keyDownEvent.keyCode === KEYCODE_ARROW_UP || keyDownEvent.keyCode === KEYCODE_ARROW_DOWN) {
     const step = keyDownEvent.keyCode === KEYCODE_ARROW_UP ? -10 : 10;
     h = h + step;
-    const validatedHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
-    setHeight(validatedHeight);
+    const firstPanelHeight = Math.min(Math.max(h, EDITOR_MIN_HEIGHT), maxHeight);
+    setHeight(firstPanelHeight);
+    const secondPanelHeight = Math.min(Math.max(maxHeight - 34 - firstPanelHeight, 0), maxHeight);
+    setSecondPanelHeight?.(secondPanelHeight);
   }
 };

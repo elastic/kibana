@@ -38,8 +38,10 @@ interface EditorFooterProps {
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
+  isLanguageComponentOpen: boolean;
+  setIsLanguageComponentOpen: (status: boolean) => void;
   measuredContainerWidth: number;
-  resizableContainerButton: JSX.Element;
+  resizableContainerButton?: JSX.Element;
   resizableContainerHeight: number;
   hideRunQueryText?: boolean;
   editorIsInline?: boolean;
@@ -65,12 +67,13 @@ export const EditorFooter = memo(function EditorFooter({
   resizableContainerHeight,
   isHistoryOpen,
   setIsHistoryOpen,
+  isLanguageComponentOpen,
+  setIsLanguageComponentOpen,
   hideQueryHistory,
   measuredContainerWidth,
   code,
 }: EditorFooterProps) {
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
-  const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
   const onUpdateAndSubmit = useCallback(
@@ -90,12 +93,12 @@ export const EditorFooter = memo(function EditorFooter({
   const toggleHistoryComponent = useCallback(() => {
     setIsHistoryOpen(!isHistoryOpen);
     setIsLanguageComponentOpen(false);
-  }, [isHistoryOpen, setIsHistoryOpen]);
+  }, [isHistoryOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
   const toggleLanguageComponent = useCallback(async () => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsHistoryOpen(false);
-  }, [isLanguageComponentOpen, setIsHistoryOpen]);
+  }, [isLanguageComponentOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
   const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
 
@@ -313,7 +316,7 @@ export const EditorFooter = memo(function EditorFooter({
           <LanguageDocumentationInline searchInDescription height={resizableContainerHeight} />
         </EuiFlexItem>
       )}
-      {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && resizableContainerButton}
+      {resizableContainerButton}
     </EuiFlexGroup>
   );
 });

@@ -15,16 +15,11 @@ import type { LanguageDocumentationSections } from '../../types';
 import { getESQLDocsSections } from '../../sections';
 
 interface DocumentationInlineProps {
+  height: number;
   searchInDescription?: boolean;
-  height?: number;
 }
 
-const MAX_HEIGHT = 250;
-
-function DocumentationInline({
-  searchInDescription,
-  height = MAX_HEIGHT,
-}: DocumentationInlineProps) {
+function DocumentationInline({ searchInDescription, height }: DocumentationInlineProps) {
   const theme = useEuiTheme();
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();

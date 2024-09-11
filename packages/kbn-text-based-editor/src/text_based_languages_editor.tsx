@@ -115,6 +115,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
@@ -261,13 +262,36 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     return EDITOR_MAX_HEIGHT + resizableContainerInitiaLHeight;
   }, [editorIsInline]);
 
-  const onMouseDownResize = useCallback((mouseDownEvent, height, maxHeight, setHeightCb) => {
-    onMouseDownResizeHandler(mouseDownEvent, height, maxHeight, setHeightCb);
-  }, []);
+  const currentEntireContainerHeight = useMemo(() => {
+    // 34 is the height of the footer
+    return editorHeight + resizableContainerHeight + 34;
+  }, [editorHeight, resizableContainerHeight]);
 
-  const onKeyDownResize = useCallback((keyDownEvent, height, maxHeight, setHeightCb) => {
-    onKeyDownResizeHandler(keyDownEvent, height, maxHeight, setHeightCb);
-  }, []);
+  const onMouseDownResize = useCallback(
+    (mouseDownEvent, height, maxHeight, setFirstPanelHeight, setSecondPanelHeight) => {
+      onMouseDownResizeHandler(
+        mouseDownEvent,
+        height,
+        maxHeight,
+        setFirstPanelHeight,
+        setSecondPanelHeight
+      );
+    },
+    []
+  );
+
+  const onKeyDownResize = useCallback(
+    (keyDownEvent, height, maxHeight, setFirstPanelHeight, setSecondPanelHeigh) => {
+      onKeyDownResizeHandler(
+        keyDownEvent,
+        height,
+        maxHeight,
+        setFirstPanelHeight,
+        setSecondPanelHeigh
+      );
+    },
+    []
+  );
 
   const resizableContainerButton = useMemo(() => {
     return (
@@ -275,28 +299,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         onMouseDownResizeHandler={(mouseDownEvent) =>
           onMouseDownResize(
             mouseDownEvent,
-            resizableContainerHeight,
+            editorHeight,
             editorAndResizableContainerMaxHeight - editorHeight,
-            setResizableContainerHeight
+            setEditorHeight,
+            undefined
           )
         }
         onKeyDownResizeHandler={(keyDownEvent) =>
           onKeyDownResize(
             keyDownEvent,
-            resizableContainerHeight,
+            editorHeight,
             editorAndResizableContainerMaxHeight - editorHeight,
-            setResizableContainerHeight
+            setEditorHeight,
+            undefined
           )
         }
       />
     );
-  }, [
-    onMouseDownResize,
-    resizableContainerHeight,
-    editorAndResizableContainerMaxHeight,
-    editorHeight,
-    onKeyDownResize,
-  ]);
+  }, [onMouseDownResize, editorAndResizableContainerMaxHeight, editorHeight, onKeyDownResize]);
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
@@ -716,24 +736,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </div>
         </EuiOutsideClickDetector>
       </EuiFlexGroup>
-      <ResizableButton
-        onMouseDownResizeHandler={(mouseDownEvent) => {
-          onMouseDownResize(
-            mouseDownEvent,
-            editorHeight,
-            editorAndResizableContainerMaxHeight - resizableContainerHeight,
-            setEditorHeight
-          );
-        }}
-        onKeyDownResizeHandler={(keyDownEvent) =>
-          onKeyDownResize(
-            keyDownEvent,
-            editorHeight,
-            editorAndResizableContainerMaxHeight - resizableContainerHeight,
-            setEditorHeight
-          )
-        }
-      />
+      {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
+        <ResizableButton
+          onMouseDownResizeHandler={(mouseDownEvent) => {
+            onMouseDownResize(
+              mouseDownEvent,
+              editorHeight,
+              currentEntireContainerHeight,
+              setEditorHeight,
+              setResizableContainerHeight
+            );
+          }}
+          onKeyDownResizeHandler={(keyDownEvent) =>
+            onKeyDownResize(
+              keyDownEvent,
+              editorHeight,
+              currentEntireContainerHeight,
+              setEditorHeight,
+              setResizableContainerHeight
+            )
+          }
+        />
+      )}
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
         styles={{
@@ -752,6 +776,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
         setIsHistoryOpen={toggleHistory}
+        isLanguageComponentOpen={isLanguageComponentOpen}
+        setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
         resizableContainerButton={resizableContainerButton}
