@@ -68,11 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
-    });
-
     it('should open the context view with the selected document as anchor', async () => {
       // check the anchor timestamp in the context view
       await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
