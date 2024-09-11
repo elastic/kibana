@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -16,12 +17,10 @@ export default function ({
   getPageObjects,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects([
+  const { dashboard, dashboardControls, header, timePicker } = getPageObjects([
     'dashboard',
     'dashboardControls',
     'header',
-    'visualize',
-    'common',
     'timePicker',
   ]);
   const screenshot = getService('screenshots');
@@ -46,7 +45,7 @@ export default function ({
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
       // session.  If we don't do this, the colors on the visualizations are different and the screenshots won't match.
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
     });
 
     after(async function () {
@@ -55,50 +54,50 @@ export default function ({
     });
 
     it('compare TSVB snapshot', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setLogstashDataRange();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      await timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
       await toasts.dismissIfExists();
 
-      await PageObjects.dashboard.saveDashboard('tsvb');
-      await PageObjects.dashboard.clickFullScreenMode();
+      await dashboard.saveDashboard('tsvb');
+      await dashboard.clickFullScreenMode();
       await dashboardPanelActions.clickExpandPanelToggle();
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       const percentDifference = await screenshot.compareAgainstBaseline(
         'tsvb_dashboard',
         updateBaselines
       );
 
-      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+      await dashboard.clickExitFullScreenLogoButton();
       expect(percentDifference).to.be.lessThan(0.022);
     });
 
     it('compare area chart snapshot', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setLogstashDataRange();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      await timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
       await toasts.dismissIfExists();
 
-      await PageObjects.dashboard.saveDashboard('area');
-      await PageObjects.dashboard.clickFullScreenMode();
+      await dashboard.saveDashboard('area');
+      await dashboard.clickFullScreenMode();
       await dashboardPanelActions.clickExpandPanelToggle();
 
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.waitForRenderComplete();
       const percentDifference = await screenshot.compareAgainstBaseline(
         'area_chart',
         updateBaselines
       );
 
-      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+      await dashboard.clickExitFullScreenLogoButton();
       expect(percentDifference).to.be.lessThan(0.029);
     });
 
     describe('compare controls snapshot', () => {
       const waitForPageReady = async () => {
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         await retry.waitFor('page ready for screenshot', async () => {
           const queryBarVisible = await testSubjects.exists('globalQueryBar');
           const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
@@ -107,21 +106,21 @@ export default function ({
       };
 
       before(async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboardControls.createControl({
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboardControls.createControl({
           controlType: OPTIONS_LIST_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'machine.os.raw',
           title: 'Machine OS',
         });
-        await PageObjects.dashboardControls.createControl({
+        await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           title: 'Bytes',
         });
-        await PageObjects.dashboard.saveDashboard('Dashboard Controls');
+        await dashboard.saveDashboard('Dashboard Controls');
       });
 
       it('in light mode', async () => {

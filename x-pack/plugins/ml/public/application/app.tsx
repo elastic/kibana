@@ -83,6 +83,7 @@ const App: FC<AppProps> = ({
       fieldFormats: deps.fieldFormats,
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
+      licensing: deps.licensing,
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
       observabilityAIAssistant: deps.observabilityAIAssistant,
