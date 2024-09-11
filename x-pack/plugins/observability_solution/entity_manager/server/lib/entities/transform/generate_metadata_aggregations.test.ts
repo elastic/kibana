@@ -47,7 +47,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
     it('should generate metadata aggregations for object format with source and limit', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10 }],
+        metadata: [{ source: 'host.name', aggregation: { type: 'terms', limit: 10 } }],
       });
       expect(generateHistoryMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
@@ -62,13 +62,19 @@ describe('Generate Metadata Aggregations for history and latest', () => {
     it('should generate metadata aggregations for object format with source, limit, and destination', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10, destination: 'hostName' }],
+        metadata: [
+          {
+            source: 'host.name',
+            aggregation: { type: 'terms', limit: 20 },
+            destination: 'hostName',
+          },
+        ],
       });
       expect(generateHistoryMetadataAggregations(definition)).toEqual({
         'entity.metadata.hostName': {
           terms: {
             field: 'host.name',
-            size: 10,
+            size: 20,
           },
         },
       });
@@ -131,7 +137,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
     it('should generate metadata aggregations for object format with source and limit', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10 }],
+        metadata: [{ source: 'host.name', aggregation: { type: 'terms', limit: 10 } }],
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.host.name': {
@@ -157,7 +163,13 @@ describe('Generate Metadata Aggregations for history and latest', () => {
     it('should generate metadata aggregations for object format with source, limit, and destination', () => {
       const definition = entityDefinitionSchema.parse({
         ...rawEntityDefinition,
-        metadata: [{ source: 'host.name', limit: 10, destination: 'hostName' }],
+        metadata: [
+          {
+            source: 'host.name',
+            aggregation: { type: 'terms', limit: 10 },
+            destination: 'hostName',
+          },
+        ],
       });
       expect(generateLatestMetadataAggregations(definition)).toEqual({
         'entity.metadata.hostName': {
