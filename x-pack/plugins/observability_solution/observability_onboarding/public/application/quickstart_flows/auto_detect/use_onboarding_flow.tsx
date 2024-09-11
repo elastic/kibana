@@ -25,6 +25,9 @@ export const DASHBOARDS = {
   'haproxy-3560d580-aa34-11e8-9c06-877f0445e3e0': { type: 'logs' },
   'rabbitmq-AV4YobKIge1VCbKU_qVo': { type: 'metrics' },
   'kafka-943caca0-87ee-11e7-ad9c-db80de0bf8d3': { type: 'logs' },
+  'apache_tomcat-8fd54a20-1f0d-11ee-9d6b-bb41d08322c8': { type: 'logs' },
+  'mongodb-abcf35b0-0a82-11e8-bffe-ff7d4f68cf94': { type: 'logs' },
+  'prometheus-c181a040-3d96-11ed-b624-b12467b8df74': { type: 'metrics' },
 };
 
 export function useOnboardingFlow() {
