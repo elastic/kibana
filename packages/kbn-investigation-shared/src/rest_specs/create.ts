@@ -19,6 +19,7 @@ const createInvestigationParamsSchema = t.type({
       timeRange: t.type({ from: t.number, to: t.number }),
     }),
     origin: t.union([alertOriginSchema, blankOriginSchema]),
+    tags: t.array(t.string),
   }),
 });
 
