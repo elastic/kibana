@@ -140,11 +140,11 @@
 // EDITING MODE
 
 .embPanel--editing {
-  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+  transition: all $euiAnimSpeedSlow $euiAnimSlightResistance;
   outline: 1px dashed $euiColorMediumShade;
 
   .embPanel--dragHandle {
-    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+    transition: background-color $euiAnimSpeedSlow $euiAnimSlightResistance;
 
     .embPanel--dragHandle:hover {
       background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
@@ -180,7 +180,7 @@
     top: 0;
     display: flex;
     justify-content: space-between;
-    padding: 0 $euiSizeL;
+    padding: 0 $euiSize;
     flex-wrap: nowrap;
     min-width: 100%;
     z-index: -1;
@@ -188,9 +188,7 @@
   }
 
   .embPanel--dragHandle {
-    .embPanel--dragHandle:hover {
-      cursor: move;
-    }
+    cursor: move;
 
     img {
       pointer-events: all !important;
@@ -204,7 +202,7 @@
   &:hover .embPanel__hoverActionsWrapper,
   &:focus-within .embPanel__hoverActionsWrapper,
   .embPanel__hoverActionsWrapper--openContextMenu {
-    transition: opacity z-index $euiAnimSpeedFast;
+    transition: all z-index $euiAnimSpeedSlow;
     z-index: $euiZLevel9;
     top: -$euiSizeXL;
 
