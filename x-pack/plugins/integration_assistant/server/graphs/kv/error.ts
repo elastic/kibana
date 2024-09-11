@@ -42,10 +42,10 @@ export async function handleHeaderError({
   model,
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const outputParser = new JsonOutputParser();
-  const grokErrorGraph = KV_HEADER_ERROR_PROMPT.pipe(model).pipe(outputParser);
+  const kvHeaderErrorGraph = KV_HEADER_ERROR_PROMPT.pipe(model).pipe(outputParser);
   const currentPattern = state.grokPattern;
 
-  const pattern = await grokErrorGraph.invoke({
+  const pattern = await kvHeaderErrorGraph.invoke({
     current_pattern: JSON.stringify(currentPattern, null, 2),
     errors: JSON.stringify(state.errors, null, 2),
     ex_answer: JSON.stringify(KV_HEADER_ERROR_EXAMPLE_ANSWER, null, 2),
