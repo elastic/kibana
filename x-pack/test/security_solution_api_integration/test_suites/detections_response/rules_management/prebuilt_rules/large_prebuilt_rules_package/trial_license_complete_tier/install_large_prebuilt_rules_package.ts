@@ -18,7 +18,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI install_large_prebuilt_rules_package', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/192479
+  describe.skip('@ess @serverless @skipInServerlessMKI install_large_prebuilt_rules_package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
