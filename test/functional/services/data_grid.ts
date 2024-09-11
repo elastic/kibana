@@ -174,6 +174,23 @@ export class DataGridService extends FtrService {
   }
 
   /**
+   * Clicks a cell action button within the expanded cell popover
+   * @param cellActionId The ID of the registered cell action
+   */
+  public async clickCellExpandPopoverAction(cellActionId: string) {
+    await this.testSubjects.click(`*dataGridColumnCellAction-${cellActionId}`);
+  }
+
+  /**
+   * Checks if a cell action button exists within the expanded cell popover
+   * @param cellActionId The ID of the registered cell action
+   * @returns If the cell action button exists
+   */
+  public async cellExpandPopoverActionExists(cellActionId: string) {
+    return await this.testSubjects.exists(`*dataGridColumnCellAction-${cellActionId}`);
+  }
+
+  /**
    * Clicks grid cell 'filter for' action button
    * @param rowIndex data row index starting from 0 (0 means 1st row)
    * @param columnIndex column index starting from 0 (0 means 1st column)

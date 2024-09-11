@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { RuleNameOverrideObject } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
+import type { RuleResponse } from '../../../api/detection_engine/model/rule_schema';
+import type { RuleNameOverrideObject } from '../../../api/detection_engine/prebuilt_rules';
 
 export const extractRuleNameOverrideObject = (
-  rule: RuleResponse | PrebuiltRuleAsset
+  rule: RuleResponse
 ): RuleNameOverrideObject | undefined => {
   if (rule.rule_name_override == null) {
     return undefined;
