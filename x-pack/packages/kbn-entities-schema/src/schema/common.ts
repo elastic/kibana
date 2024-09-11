@@ -87,7 +87,7 @@ export type KeyMetric = z.infer<typeof keyMetricSchema>;
 export const metadataAggregation = z.union([
   z.object({ type: z.literal('terms'), limit: z.number().default(1000) }),
   z.object({
-    type: z.literal('last_value'),
+    type: z.literal('top_value'),
     sort: z.record(z.string(), z.union([z.literal('asc'), z.literal('desc')])),
   }),
 ]);

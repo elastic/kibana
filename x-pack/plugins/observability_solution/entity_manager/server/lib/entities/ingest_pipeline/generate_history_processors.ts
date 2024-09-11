@@ -15,7 +15,7 @@ import { generateHistoryIndexName } from '../helpers/generate_component_id';
 function getMetadataSourceField({ aggregation, destination, source }: MetadataField) {
   if (aggregation.type === 'terms') {
     return `ctx.entity.metadata.${destination}.keySet()`;
-  } else if (aggregation.type === 'last_value') {
+  } else if (aggregation.type === 'top_value') {
     return `ctx.entity.metadata.${destination}["${source}"]`;
   }
 }
@@ -44,7 +44,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
         }
       `;
       return `${acc}\n${next}`;
-    } else if (metadata.aggregation.type === 'last_value') {
+    } else if (metadata.aggregation.type === 'top_value') {
       const next = `
         if (ctx.entity?.metadata?.${optionalFieldPath}["${metadata.source}"] != "null") {
           ${mapDestinationToPainless(metadata)}

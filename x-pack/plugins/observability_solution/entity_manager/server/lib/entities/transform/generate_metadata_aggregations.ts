@@ -21,7 +21,7 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
           size: metadata.aggregation.limit,
         },
       };
-    } else if (metadata.aggregation.type === 'last_value') {
+    } else if (metadata.aggregation.type === 'top_value') {
       agg = {
         top_metrics: {
           metrics: [{ field: metadata.source }],
