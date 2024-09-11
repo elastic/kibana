@@ -23,7 +23,7 @@ import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active
 import { CustomizeSpace } from '../components/customize_space';
 import { SolutionView } from '../components/solution_view';
 import { SpaceValidator } from '../lib';
-import type { FormValues } from '../types';
+import type { CustomizeSpaceFormValues } from '../types';
 
 interface Props {
   space: Space;
@@ -54,7 +54,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   });
 
   const onChangeSpaceSettings = useCallback(
-    (formValues: FormValues & Partial<Space>) => {
+    (formValues: CustomizeSpaceFormValues & Partial<Space>) => {
       const {
         customIdentifier,
         avatarType,

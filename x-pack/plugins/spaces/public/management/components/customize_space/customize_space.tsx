@@ -24,7 +24,7 @@ import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import { toSpaceIdentifier } from '../../lib';
-import type { FormValues } from '../../types';
+import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
@@ -34,9 +34,9 @@ const LazySpaceAvatar = lazy(() =>
 
 interface Props {
   validator: SpaceValidator;
-  space: FormValues;
+  space: CustomizeSpaceFormValues;
   editingExistingSpace: boolean;
-  onChange: (space: FormValues) => void;
+  onChange: (space: CustomizeSpaceFormValues) => void;
   title?: string;
 }
 
@@ -258,7 +258,7 @@ export class CustomizeSpace extends Component<Props, State> {
     });
   };
 
-  public onAvatarChange = (space: FormValues) => {
+  public onAvatarChange = (space: CustomizeSpaceFormValues) => {
     this.props.onChange(space);
   };
 }

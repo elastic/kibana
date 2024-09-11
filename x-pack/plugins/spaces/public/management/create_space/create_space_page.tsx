@@ -40,7 +40,7 @@ import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
-import type { FormValues } from '../types';
+import type { CustomizeSpaceFormValues } from '../types';
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -56,7 +56,7 @@ interface Props {
 }
 
 interface State {
-  space: FormValues;
+  space: CustomizeSpaceFormValues;
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
@@ -357,7 +357,7 @@ export class CreateSpacePage extends Component<Props, State> {
     this.onSpaceChange(space);
   };
 
-  public onSpaceChange = (updatedSpace: FormValues) => {
+  public onSpaceChange = (updatedSpace: CustomizeSpaceFormValues) => {
     this.setState({
       space: updatedSpace,
     });
