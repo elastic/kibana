@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import pRetry from 'p-retry';
 import type {
   AggregationsAggregate,
   SearchResponse,
@@ -62,7 +61,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       ruleId: string;
       num: number;
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
-      return await pRetry(
+      return await retry.tryWithRetries(
+        'Alerting API - waitForAlertInIndex',
         async () => {
           const response = await esClient.search<T>({
             index: indexName,
@@ -87,12 +87,14 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
               },
             },
           });
-          if (response.hits.hits.length < num) {
+          if (response.hits.hits.length < num)
             throw new Error(`Only found ${response.hits.hits.length} / ${num} documents`);
-          }
+
           return response;
         },
-        { retries: 10 }
+        {
+          retryCount: 10,
+        }
       );
     },
 
@@ -109,7 +111,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       num?: number;
       sort?: 'asc' | 'desc';
     }): Promise<SearchResponse> {
-      return await pRetry(
+      return await retry.tryWithRetries(
+        'Alerting API - waitForDocumentInIndex',
         async () => {
           const response = await esClient.search({
             index: indexName,
@@ -133,7 +136,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           }
           return response;
         },
-        { retries: 10 }
+        { retryCount: 10 }
       );
     },
 
@@ -455,7 +458,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       testStart: Date;
     }) {
       for (let i = 0; i < numOfRuns; i++) {
-        await pRetry(
+        await retry.tryWithRetries(
+          'Alerting API - waitForNumRuleRuns',
           async () => {
             await this.runRule({ roleAuthc, ruleId });
             await this.waiting.waitForExecutionEventLog({
@@ -466,7 +470,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             });
             await this.waiting.waitForAllTasksIdle({ esClient, filter: testStart });
           },
-          { retries: 10 }
+          { retryCount: 10 }
         );
       }
     },
@@ -559,7 +563,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         num?: number;
         sort?: 'asc' | 'desc';
       }): Promise<SearchResponse> {
-        return await pRetry(
+        return await retry.tryWithRetries(
+          'Alerting API - waiting.waitForDocumentInIndex',
           async () => {
             const response = await esClient.search({
               index: indexName,
@@ -621,7 +626,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         esClient: Client;
         filter: Date;
       }): Promise<SearchResponse> {
-        return await pRetry(
+        return await retry.tryWithRetries(
+          'Alerting API - waiting.waitForAllTasksIdle',
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
@@ -658,7 +664,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retries: 10 }
+          { retryCount: 10 }
         );
       },
 
@@ -673,7 +679,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         ruleId: string;
         num?: number;
       }): Promise<SearchResponse> {
-        return await pRetry(
+        return await retry.tryWithRetries(
+          'Alerting API - waiting.waitForExecutionEventLog',
           async () => {
             const response = await esClient.search({
               index: '.kibana-event-log*',
@@ -717,7 +724,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retries: 10 }
+          { retryCount: 10 }
         );
       },
 
@@ -742,7 +749,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         taskType: string;
         attempts: number;
       }): Promise<SearchResponse> {
-        return await pRetry(
+        return await retry.tryWithRetries(
+          'Alerting API - waiting.waitForAllTasks',
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
@@ -787,7 +795,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retries: 10 }
+          { retryCount: 10 }
         );
       },
 
@@ -800,7 +808,8 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         ruleId: string;
         filter: Date;
       }): Promise<SearchResponse> {
-        return await pRetry(
+        return await retry.tryWithRetries(
+          'Alerting API - waiting.waitForDisabled',
           async () => {
             const response = await esClient.search({
               index: '.kibana_task_manager',
@@ -840,7 +849,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
             }
             return response;
           },
-          { retries: 10 }
+          { retryCount: 10 }
         );
       },
     },
