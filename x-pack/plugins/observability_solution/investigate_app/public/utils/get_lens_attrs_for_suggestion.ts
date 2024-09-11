@@ -39,6 +39,10 @@ export function getLensAttrsForSuggestion({
       yLeft: false,
       yRight: false,
     },
+    legend: {
+      isVisible: false,
+      position: 'right',
+    },
   };
 
   const lensEmbeddableInput: TypedLensByValueInput = {

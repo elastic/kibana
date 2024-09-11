@@ -148,7 +148,7 @@ export function LensWidget({
           interval,
         },
       },
-      seriesType: 'bar',
+      seriesType: 'bar_stacked',
     };
 
     if (groupBy && groupBy?.length) {
