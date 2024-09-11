@@ -1,12 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
-import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+
+import type {
+  ESQLSource,
+  ESQLFunction,
+  ESQLColumn,
+  ESQLSingleAstItem,
+  ESQLCommandOption,
+} from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -104,4 +112,27 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   }) as ESQLColumn;
 
   return column?.name;
+};
+
+export const isQueryWrappedByPipes = (query: string): boolean => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  const numberOfCommands = ast.length;
+  const pipesWithNewLine = query.split('\n  |');
+  return numberOfCommands === pipesWithNewLine?.length;
+};
+
+export const prettifyQuery = (query: string, isWrapped: boolean): string => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
+};
+
+export const retieveMetadataColumns = (esql: string): string[] => {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const options: ESQLCommandOption[] = [];
+
+  walk(ast, {
+    visitCommandOption: (node) => options.push(node),
+  });
+  const metadataOptions = options.find(({ name }) => name === 'metadata');
+  return metadataOptions?.args.map((column) => (column as ESQLColumn).name) ?? [];
 };

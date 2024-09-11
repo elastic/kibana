@@ -1,0 +1,58 @@
+## DROP
+
+The `DROP` processing command in ES|QL is used to remove one or more columns from the result set. This command is particularly useful when you want to exclude certain fields from your query results, either to simplify the output or to reduce the amount of data being processed and transferred. The `DROP` command supports the use of wildcards, allowing you to remove multiple columns that match a specific pattern.
+
+### Use Cases
+- **Simplifying Output:** Remove unnecessary columns to make the result set easier to read and analyze.
+- **Data Reduction:** Exclude large or irrelevant fields to reduce the amount of data processed and transferred.
+- **Pattern Matching:** Use wildcards to efficiently drop multiple columns that share a common naming pattern.
+
+### Limitations
+- The `DROP` command does not support nested fields.
+- It cannot be used to drop columns of unsupported types as specified in the ES|QL limitations.
+
+### Examples
+
+#### Example 1: Dropping a Single Column
+This example demonstrates how to drop a single column named `height` from the `employees` index.
+
+```esql
+FROM employees
+| DROP height
+```
+
+#### Example 2: Dropping Multiple Columns Using Wildcards
+This example shows how to use wildcards to drop all columns that start with `height`.
+
+```esql
+FROM employees
+| DROP height*
+```
+
+#### Example 3: Dropping Multiple Specific Columns
+This example demonstrates how to drop multiple specific columns by listing them in a comma-separated format.
+
+```esql
+FROM employees
+| DROP height, weight, age
+```
+
+#### Example 4: Dropping Columns with Complex Patterns
+This example shows how to drop columns that match a more complex pattern using wildcards.
+
+```esql
+FROM employees
+| DROP emp_*
+```
+
+#### Example 5: Combining DROP with Other Commands
+This example demonstrates how to use the `DROP` command in conjunction with other commands like `KEEP` and `SORT`.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height, weight
+| DROP weight
+| SORT height DESC
+```
+
+By using the `DROP` command, you can effectively manage the columns in your result set, making your ES|QL queries more efficient and easier to work with.

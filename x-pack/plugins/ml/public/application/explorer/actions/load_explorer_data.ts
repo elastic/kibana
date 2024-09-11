@@ -32,12 +32,12 @@ import {
   loadOverallAnnotations,
 } from '../explorer_utils';
 import type { ExplorerState } from '../reducers';
-import { useMlApiContext, useUiSettings } from '../../contexts/kibana';
+import { useMlApi, useUiSettings } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
-import type { MlApiServices } from '../../services/ml_api_service';
+import type { MlApi } from '../../services/ml_api_service';
 import { useMlJobService, type MlJobService } from '../../services/job_service';
 
 // Memoize the data fetching methods.
@@ -97,7 +97,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  */
 const loadExplorerDataProvider = (
   uiSettings: IUiSettingsClient,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   mlJobService: MlJobService,
   mlResultsService: MlResultsService,
   anomalyExplorerChartsService: AnomalyExplorerChartsService,
@@ -131,15 +131,10 @@ const loadExplorerDataProvider = (
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData
     return forkJoin({
-      overallAnnotations: memoizedLoadOverallAnnotations(
-        lastRefresh,
-        mlApiServices,
-        selectedJobs,
-        bounds
-      ),
+      overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, mlApi, selectedJobs, bounds),
       annotationsData: memoizedLoadAnnotationsTableData(
         lastRefresh,
-        mlApiServices,
+        mlApi,
         selectedCells,
         selectedJobs,
         bounds
@@ -167,7 +162,7 @@ const loadExplorerDataProvider = (
           : Promise.resolve({}),
       tableData: memoizedLoadAnomaliesTableData(
         lastRefresh,
-        mlApiServices,
+        mlApi,
         mlJobService,
         selectedCells,
         selectedJobs,
@@ -218,16 +213,16 @@ const loadExplorerDataProvider = (
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
   const uiSettings = useUiSettings();
   const timefilter = useTimefilter();
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const mlJobService = useMlJobService();
   const { anomalyExplorerChartsService } = useAnomalyExplorerContext();
 
   const loadExplorerData = useMemo(() => {
-    const mlResultsService = mlResultsServiceProvider(mlApiServices);
+    const mlResultsService = mlResultsServiceProvider(mlApi);
 
     return loadExplorerDataProvider(
       uiSettings,
-      mlApiServices,
+      mlApi,
       mlJobService,
       mlResultsService,
       anomalyExplorerChartsService,

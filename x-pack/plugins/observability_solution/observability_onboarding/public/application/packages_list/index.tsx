@@ -38,6 +38,7 @@ interface Props {
    * When enabled, custom and integration cards are joined into a single list.
    */
   joinCardLists?: boolean;
+  excludePackageIdList?: string[];
   onLoaded?: () => void;
 }
 
@@ -58,6 +59,7 @@ const PackageListGridWrapper = ({
   flowCategory,
   flowSearch,
   joinCardLists = false,
+  excludePackageIdList = [],
   onLoaded,
 }: WrapperProps) => {
   const customMargin = useCustomMargin();
@@ -68,6 +70,7 @@ const PackageListGridWrapper = ({
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
+    excludePackageIdList,
     customCards,
     flowCategory,
     flowSearch,

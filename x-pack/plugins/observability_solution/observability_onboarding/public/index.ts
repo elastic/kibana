@@ -30,6 +30,8 @@ export interface ConfigSchema {
 }
 
 export interface AppContext {
+  isDev: boolean;
+  isCloud: boolean;
   isServerless: boolean;
   stackVersion: string;
 }

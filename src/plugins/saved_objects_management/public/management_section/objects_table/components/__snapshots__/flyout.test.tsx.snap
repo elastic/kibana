@@ -295,11 +295,7 @@ exports[`Flyout should render import step 1`] = `
   <EuiFlyoutBody>
     <EuiForm>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         label={
           <EuiTitle
             size="xs"
@@ -312,7 +308,6 @@ exports[`Flyout should render import step 1`] = `
             </span>
           </EuiTitle>
         }
-        labelType="label"
       >
         <EuiFilePickerClass
           accept=".ndjson"
@@ -327,12 +322,7 @@ exports[`Flyout should render import step 1`] = `
         />
       </EuiFormRow>
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
         fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        labelType="label"
       >
         <ImportModeControl
           initialValues={

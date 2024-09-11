@@ -78,7 +78,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     `.internal.alerts-transform.health.alerts-default-000001`
   );
 
-  describe('rule', async () => {
+  describe('rule', () => {
     const objectRemover = new ObjectRemover(supertest);
     let connectorId: string;
     const transformId = 'test_transform_01';

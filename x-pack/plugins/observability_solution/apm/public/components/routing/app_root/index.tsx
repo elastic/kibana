@@ -20,7 +20,7 @@ import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
+import { KibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -56,7 +56,6 @@ export function ApmAppRoot({
   apmServices: ApmServices;
 }) {
   const { appMountParameters, kibanaEnvironment, core } = apmPluginContextValue;
-  const KibanaEnvironmentContextProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 

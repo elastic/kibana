@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash/fp';
 import type { RequestHandler } from '@kbn/core/server';
+import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../../../../common/endpoint/service/response_actions/constants';
 import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,
@@ -22,11 +24,14 @@ export function registerActionStateRoutes(
   endpointContext: EndpointAppContext,
   canEncrypt?: boolean
 ) {
+  const responseActionAuthzNames = uniq(
+    Object.values(RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ)
+  );
+
   router.versioned
     .get({
       access: 'public',
       path: ACTION_STATE_ROUTE,
-
       options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
@@ -36,16 +41,7 @@ export function registerActionStateRoutes(
       },
       withEndpointAuthz(
         {
-          any: [
-            'canIsolateHost',
-            'canUnIsolateHost',
-            'canKillProcess',
-            'canSuspendProcess',
-            'canGetRunningProcesses',
-            'canAccessResponseConsole',
-            'canWriteExecuteOperations',
-            'canWriteFileOperations',
-          ],
+          any: responseActionAuthzNames,
         },
         endpointContext.logFactory.get('actionState'),
         getActionStateRequestHandler(canEncrypt)
