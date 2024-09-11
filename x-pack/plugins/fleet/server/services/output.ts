@@ -300,7 +300,7 @@ async function validateTypeChanges(
   const { policiesWithFleetServer, policiesWithSynthetics } =
     await findPoliciesWithFleetServerOrSynthetics(id, mergedIsDefault);
 
-  if (true || data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
+  if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(id, mergedIsDefault);
   }
   // prevent changing an ES output to logstash or kafka if it's used by fleet server or synthetics policies

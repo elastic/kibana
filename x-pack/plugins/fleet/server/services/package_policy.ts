@@ -2957,7 +2957,8 @@ async function validateIsNotHostedPolicy(
     throw new AgentPolicyNotFoundError('Agent policy not found');
   }
 
-  const isManagedPolicyWithoutServerlessSupport = agentPolicy.is_managed && !force;
+  const isManagedPolicyWithoutServerlessSupport =
+    agentPolicy.is_managed && !agentPolicy.supports_agentless && !force;
 
   if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(
