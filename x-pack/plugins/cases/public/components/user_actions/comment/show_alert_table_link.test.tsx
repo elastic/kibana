@@ -18,7 +18,7 @@ const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 describe('case view alert table link', () => {
-  it('calls navigateToCaseView with the correct params', () => {
+  it('calls navigateToCaseView with the correct params', async () => {
     const appMockRenderer = createAppMockRenderer();
     const navigateToCaseView = jest.fn();
 
@@ -28,7 +28,7 @@ describe('case view alert table link', () => {
     const result = appMockRenderer.render(<ShowAlertTableLink />);
     expect(result.getByTestId('comment-action-show-alerts-case-id')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('comment-action-show-alerts-case-id'));
+    await userEvent.click(result.getByTestId('comment-action-show-alerts-case-id'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: 'case-id',
       tabId: 'alerts',
