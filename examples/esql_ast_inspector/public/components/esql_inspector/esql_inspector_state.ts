@@ -49,4 +49,15 @@ export class EsqlInspectorState {
       }
     });
   }
+
+  public readonly reprint = () => {
+    const query = this.query$.getValue();
+
+    if (!query) {
+      return;
+    }
+
+    const src = query.print();
+    this.src$.next(src);
+  };
 }

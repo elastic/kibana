@@ -15,8 +15,6 @@ export const LimitCommand: React.FC = () => {
   const state = useEsqlInspector();
   const limit = useBehaviorSubject(state.limit$);
 
-  console.log('limit', limit);
-
   if (!limit) {
     return null;
   }

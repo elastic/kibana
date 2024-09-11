@@ -56,7 +56,14 @@ export const Source: React.FC<SourceProps> = ({ node, index }) => {
         )
       }
     >
-      <EuiFieldText fullWidth value={node.name} onChange={(e) => {}} />
+      <EuiFieldText
+        fullWidth
+        value={node.name}
+        onChange={(e) => {
+          node.name = e.target.value;
+          state.reprint();
+        }}
+      />
     </EuiFormRow>
   );
 };
