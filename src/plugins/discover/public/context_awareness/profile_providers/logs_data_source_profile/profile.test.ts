@@ -160,4 +160,18 @@ describe('logsDataSourceProfileProvider', () => {
       expect(cellRenderers?.['log_level.keyword']).toBeDefined();
     });
   });
+
+  describe('getRowAdditionalLeadingControls', () => {
+    it('should return the passed additional controls', () => {
+      const getRowAdditionalLeadingControls =
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined);
+      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        dataView: dataViewWithLogLevel,
+      });
+
+      expect(rowAdditionalLeadingControls).toHaveLength(2);
+      expect(rowAdditionalLeadingControls?.[0].id).toBe('connectedDegradedDocs');
+      expect(rowAdditionalLeadingControls?.[1].id).toBe('connectedStacktraceDocs');
+    });
+  });
 });
