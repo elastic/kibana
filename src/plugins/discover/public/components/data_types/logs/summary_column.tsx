@@ -90,10 +90,7 @@ const SummaryPopover = (props: SummaryColumnProps & DataGridCellServicesProvider
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const shouldRenderContent = Boolean(field && value);
 
-  const eventOriginalValue = documentOverview[constants.EVENT_ORIGINAL_FIELD];
-  const shouldRenderEventOriginal = Boolean(eventOriginalValue);
-
-  const shouldRenderSource = !shouldRenderContent && !shouldRenderEventOriginal;
+  const shouldRenderSource = !shouldRenderContent;
 
   return (
     <DataGridCellServicesProvider services={services}>
@@ -114,22 +111,6 @@ const SummaryPopover = (props: SummaryColumnProps & DataGridCellServicesProvider
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiText color="subdued" size="xs">
                 {field}
-              </EuiText>
-              <EuiCodeBlock
-                overflowHeight={100}
-                paddingSize="s"
-                isCopyable
-                language="txt"
-                fontSize="s"
-              >
-                {value}
-              </EuiCodeBlock>
-            </EuiFlexGroup>
-          )}
-          {shouldRenderEventOriginal && (
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiText color="subdued" size="xs">
-                {constants.EVENT_ORIGINAL_FIELD}
               </EuiText>
               <EuiCodeBlock
                 overflowHeight={100}
