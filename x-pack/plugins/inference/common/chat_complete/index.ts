@@ -78,7 +78,7 @@ export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> 
   | ChatCompletionTokenCountEvent
   | ChatCompletionMessageEvent<TToolOptions>;
 
-export type FunctionCallingMode = 'native' | 'simulated' | 'auto';
+export type FunctionCallingMode = 'native' | 'simulated';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
