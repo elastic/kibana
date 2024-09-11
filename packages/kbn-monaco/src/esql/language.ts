@@ -107,6 +107,35 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
           suggestions: wrapAsMonacoSuggestions(suggestions),
         };
       },
+      async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
+        const fieldsMetadataClient = await callbacks?.getFieldsMetadata();
+
+        if (
+          // If not a field, no need to fetch metadata
+          item.kind !== 4 ||
+          typeof item.label !== 'string' ||
+          !fieldsMetadataClient
+        )
+          return item;
+
+        const ecsMetadata = await fieldsMetadataClient.find({
+          fieldNames: [item.label],
+          attributes: ['description'],
+        });
+
+        const fieldMetadata = ecsMetadata.fields[item.label as string];
+        if (fieldMetadata) {
+          const completionItem: monaco.languages.CompletionItem = {
+            ...item,
+            documentation: {
+              value: fieldMetadata.description,
+            },
+          };
+          return completionItem;
+        }
+
+        return item;
+      },
     };
   },
 

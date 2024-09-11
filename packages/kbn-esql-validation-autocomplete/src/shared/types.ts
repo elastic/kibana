@@ -30,6 +30,7 @@ export interface ESQLCallbacks {
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
+  getFieldsMetadata: IFieldsMetadataClient;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

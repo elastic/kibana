@@ -397,6 +397,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           histogramBarTarget,
         };
       },
+      getFieldsMetadata: async () => {
+        const client = await fieldsMetadata?.getClient();
+        return client;
+      },
     };
     return callbacks;
   }, [
@@ -412,6 +416,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     indexManagementApiService,
     histogramBarTarget,
     ecsMetadataCache,
+    fieldsMetadata,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
