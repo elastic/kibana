@@ -47,6 +47,7 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
     }
     const subscription = bookApi.unsavedChanges.subscribe((unsavedChanges) => {
       setHasUnsavedChanges(unsavedChanges !== undefined);
+      unsavedChangesSessionStorage.save(unsavedChanges ?? {});
     });
 
     return () => {
@@ -84,11 +85,24 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
           The page persists embeddable state in session storage. The page provides last saved state
           to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
         </p>
+
+        <p>
+          <EuiButtonEmpty
+            color={'warning'}
+            onClick={() => {
+              lastSavedStateSessionStorage.clear();
+              unsavedChangesSessionStorage.clear();
+              window.location.reload();
+            }}
+          >
+            Reset example
+          </EuiButtonEmpty>
+        </p>
       </EuiCallOut>
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup alignItems="flexEnd">
+      <EuiFlexGroup justifyContent="flexEnd">
         {hasUnsavedChanges && (
           <>
             <EuiFlexItem grow={false}>
@@ -116,11 +130,12 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
 
               setIsSaving(true);
               const bookSerializedState = await bookApi.serializeState();
-              if (isMounted()) {
+              if (!isMounted()) {
                 return;
               }
               lastSavedStateSessionStorage.save(bookSerializedState);
               saveNotification$.next(); // signals embeddable unsaved change tracking to update last saved state
+              setHasUnsavedChanges(false);
               setIsSaving(false);
             }}
           >
