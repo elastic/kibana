@@ -72,7 +72,7 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
     ])
   ),
   functionCalling: schema.maybe(
-    schema.oneOf([schema.literal('native'), schema.literal('simulated'), schema.literal('auto')])
+    schema.oneOf([schema.literal('native'), schema.literal('simulated')])
   ),
 });
 
