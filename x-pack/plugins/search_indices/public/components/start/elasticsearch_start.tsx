@@ -136,6 +136,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
                         'xpack.searchIndices.startPage.createIndex.viewSelect.ui',
                         { defaultMessage: 'UI' }
                       ),
+                      'data-test-subj': 'createIndexUIViewBtn',
                     },
                     {
                       id: CreateIndexView.Code,
@@ -143,6 +144,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
                         'xpack.searchIndices.startPage.createIndex.viewSelect.code',
                         { defaultMessage: 'Code' }
                       ),
+                      'data-test-subj': 'createIndexCodeViewBtn',
                     },
                   ]}
                   buttonSize="compressed"
