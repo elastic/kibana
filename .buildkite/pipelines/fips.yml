@@ -48,6 +48,8 @@ steps:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
       LIMIT_CONFIG_TYPE: 'functional'
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
     retry:
       automatic:
         - exit_status: '*'
