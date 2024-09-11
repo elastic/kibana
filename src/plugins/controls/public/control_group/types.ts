@@ -36,12 +36,6 @@ export type ControlGroupReduxState = ReduxEmbeddableState<
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
-export interface ControlGroupCreationOptions {
-  initialInput?: Partial<ControlGroupInput>;
-  settings?: ControlGroupSettings;
-  fieldFilterPredicate?: FieldFilterPredicate;
-}
-
 export interface ControlGroupSettings {
   showAddButton?: boolean;
   staticDataViewId?: string;

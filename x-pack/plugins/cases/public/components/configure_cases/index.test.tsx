@@ -695,13 +695,13 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      await userEvent.click(screen.getByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -754,13 +754,13 @@ describe('ConfigureCases', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      await userEvent.click(screen.getByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -811,18 +811,17 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(await screen.findByTestId(`add-custom-field`));
+      await userEvent.click(await screen.findByTestId(`add-custom-field`));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'New custom field');
-      userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.paste(
-        screen.getByTestId('text-custom-field-default-value'),
-        'This is a default value'
-      );
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('New custom field');
+      await userEvent.click(screen.getByTestId('text-custom-field-required'));
+      await userEvent.click(screen.getByTestId('text-custom-field-default-value'));
+      await userEvent.paste('This is a default value');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -897,15 +896,16 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
-      userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('!!');
+      await userEvent.click(screen.getByTestId('text-custom-field-required'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -938,7 +938,7 @@ describe('ConfigureCases', () => {
     it('opens fly out for when click on add field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
     });
@@ -946,11 +946,11 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on cancel', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('common-flyout-cancel'));
+      await userEvent.click(screen.getByTestId('common-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
@@ -959,13 +959,14 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on save field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('Summary');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -1022,7 +1023,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('add-template'));
+      await userEvent.click(await screen.findByTestId('add-template'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
       expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
@@ -1036,20 +1037,20 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('add-template'));
+      await userEvent.click(await screen.findByTestId('add-template'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
-      userEvent.paste(
-        await screen.findByTestId('template-description-input'),
-        'Template description'
-      );
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Template name');
+      await userEvent.click(await screen.findByTestId('template-description-input'));
+      await userEvent.paste('Template description');
 
       const caseTitle = await screen.findByTestId('caseTitle');
-      userEvent.paste(within(caseTitle).getByTestId('input'), 'Case using template');
+      await userEvent.click(within(caseTitle).getByTestId('input'));
+      await userEvent.paste('Case using template');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -1127,13 +1128,13 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('templates-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${templatesConfigurationMock[0].key}-template-delete`)
       );
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      await userEvent.click(screen.getByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -1170,16 +1171,17 @@ describe('ConfigureCases', () => {
 
       const list = screen.getByTestId('templates-list');
 
-      userEvent.click(
+      await userEvent.click(
         within(list).getByTestId(`${templatesConfigurationMock[0].key}-template-edit`)
       );
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.clear(await screen.findByTestId('template-name-input'));
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Updated template name');
+      await userEvent.clear(await screen.findByTestId('template-name-input'));
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Updated template name');
 
-      userEvent.click(screen.getByTestId('common-flyout-save'));
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({

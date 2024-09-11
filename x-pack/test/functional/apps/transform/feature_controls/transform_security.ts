@@ -39,10 +39,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Stack" section', async () => {
-        await pageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Stack" section', function () {
+        this.tags('skipFIPS');
+
+        it('should not render', async () => {
+          await pageObjects.common.navigateToApp('management');
+          const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
+          expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+        });
       });
     });
 
@@ -58,13 +62,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Data" section with Transform', async () => {
-        await pageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
-        expect(sections[0]).to.eql({
-          sectionId: 'data',
-          sectionLinks: ['transform'],
+      describe('"Data" section with Transform', function () {
+        this.tags('skipFIPS');
+        it('should render', async () => {
+          await pageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          expect(sections).to.have.length(1);
+          expect(sections[0]).to.eql({
+            sectionId: 'data',
+            sectionLinks: ['transform'],
+          });
         });
       });
     });
