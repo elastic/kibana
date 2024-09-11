@@ -58,8 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('without conversations', () => {
-      // TODO: this fails in serverless only.  tests in public_complete is creating a conversation and not cleaning up and appearing here when expecting none.
-      it.skip('returns no conversations when listing', async () => {
+      it('returns no conversations when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
           .slsUser({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
@@ -166,7 +165,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           namespace: 'default',
           public: conversationCreate.public,
           user: {
-            name: 'elastic_serverless',
+            name: 'elastic_admin', // TODO: serverless always uses the elastic_admin username to make the reqest
           },
         });
       });
