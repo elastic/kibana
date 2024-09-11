@@ -329,7 +329,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       return supertest
         .delete(replaceParams('/api/entity_store/engines/{entityType}', props.params))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
@@ -692,14 +692,14 @@ finalize it.
       return supertest
         .get(replaceParams('/api/entity_store/engines/{entityType}', props.params))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     getEntityStoreStats(props: GetEntityStoreStatsProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/stats', props.params))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
@@ -802,7 +802,7 @@ finalize it.
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/init', props.params))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -845,7 +845,7 @@ finalize it.
       return supertest
         .get('/api/entity_store/engines')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
@@ -1071,14 +1071,14 @@ detection engine rules.
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/start', props.params))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     stopEntityStore(props: StopEntityStoreProps) {
       return supertest
         .post(replaceParams('/api/entity_store/engines/{entityType}/stop', props.params))
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**

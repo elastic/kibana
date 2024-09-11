@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Delete the entity store engine
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';

@@ -653,7 +653,7 @@ Migrations are initiated per index. While the process is neither destructive nor
       .request<DeleteEntityStoreResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
 
@@ -1202,7 +1202,7 @@ finalize it.
       .request<GetEntityStoreEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
       })
@@ -1214,7 +1214,7 @@ finalize it.
       .request<GetEntityStoreStatsResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
       })
@@ -1382,7 +1382,7 @@ finalize it.
       .request<InitEntityStoreResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -1451,7 +1451,7 @@ finalize it.
       .request<ListEntityStoreEnginesResponse>({
         path: '/api/entity_store/engines',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
       })
@@ -1795,7 +1795,7 @@ detection engine rules.
       .request<StartEntityStoreResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/start', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
       })
@@ -1807,7 +1807,7 @@ detection engine rules.
       .request<StopEntityStoreResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/stop', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
       })
