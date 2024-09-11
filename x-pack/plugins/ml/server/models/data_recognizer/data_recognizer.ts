@@ -334,18 +334,12 @@ export class DataRecognizer {
         }
 
         if (match === true) {
-          let logo: Logo = null;
-          if (moduleConfig.logo) {
-            logo = moduleConfig.logo;
-          } else if (moduleConfig.logoFile) {
-            logo = await this._loadLogoFile(moduleConfig.id, i.dirName, moduleConfig.logoFile);
-          }
           results.push({
             id: moduleConfig.id,
             title: moduleConfig.title,
             query: moduleConfig.query,
             description: moduleConfig.description,
-            logo,
+            logo: await this._loadLogoFile(moduleConfig, i.dirName),
           });
         }
       })
@@ -356,14 +350,27 @@ export class DataRecognizer {
     return results;
   }
 
-  private async _loadLogoFile(id: string, dirName: string | null | undefined, logoFile: string) {
+  private async _loadLogoFile(
+    moduleConfig: FileBasedModule | Module,
+    dirName: string | null | undefined
+  ) {
     let logo: Logo = null;
-    try {
-      const logoFileString = await this._readFile(`${this._modulesDir}/${dirName}/${logoFile}`);
-      logo = JSON.parse(logoFileString);
-    } catch (error) {
-      mlLog.warn(`Data recognizer error loading logo file ${logoFile} for module ${id}. ${error}`);
+
+    if (moduleConfig.logo) {
+      logo = moduleConfig.logo;
+    } else if (moduleConfig.logoFile) {
+      try {
+        const logoFileString = await this._readFile(
+          `${this._modulesDir}/${dirName}/${moduleConfig.logoFile}`
+        );
+        logo = JSON.parse(logoFileString);
+      } catch (error) {
+        mlLog.warn(
+          `Data recognizer error loading logo file ${moduleConfig.logoFile} for module ${moduleConfig.id}. ${error}`
+        );
+      }
     }
+
     return logo;
   }
 
@@ -489,9 +496,7 @@ export class DataRecognizer {
       datafeeds.push(...(await Promise.all(tempDatafeed)).filter(isDefined));
     }
 
-    if (module.logoFile !== undefined) {
-      module.logo = await this._loadLogoFile(id, dirName, module.logoFile);
-    }
+    module.logo = await this._loadLogoFile(module, dirName);
 
     // load all of the kibana saved objects
     if (module.kibana !== undefined) {
