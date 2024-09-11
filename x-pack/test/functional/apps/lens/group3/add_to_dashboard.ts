@@ -276,27 +276,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hasPrompt).to.eql(false);
         });
 
-        it('should not display add-to-dashboard options', async () => {
-          await visualize.navigateToNewVisualization();
-          await visualize.clickVisType('lens');
-          await lens.goToTimeRange();
+        describe('add-to-dashboard options', function () {
+          this.tags('skipFIPS');
+          it('should not display', async () => {
+            await visualize.navigateToNewVisualization();
+            await visualize.clickVisType('lens');
+            await lens.goToTimeRange();
 
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'average',
-            field: 'bytes',
+            await lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'average',
+              field: 'bytes',
+            });
+
+            await lens.switchToVisualization('lnsLegacyMetric');
+
+            await lens.waitForVisualization('legacyMtrVis');
+            await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+
+            await lens.waitForVisualization('legacyMtrVis');
+            await testSubjects.click('lnsApp_saveButton');
+
+            const hasOptions = await testSubjects.exists('add-to-dashboard-options');
+            expect(hasOptions).to.eql(false);
           });
-
-          await lens.switchToVisualization('lnsLegacyMetric');
-
-          await lens.waitForVisualization('legacyMtrVis');
-          await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-
-          await lens.waitForVisualization('legacyMtrVis');
-          await testSubjects.click('lnsApp_saveButton');
-
-          const hasOptions = await testSubjects.exists('add-to-dashboard-options');
-          expect(hasOptions).to.eql(false);
         });
       });
 
@@ -322,27 +325,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hasPrompt).to.eql(false);
         });
 
-        it('should not display add-to-dashboard options', async () => {
-          await visualize.navigateToNewVisualization();
-          await visualize.clickVisType('lens');
-          await lens.goToTimeRange();
+        describe('add-to-dashboard options', function () {
+          this.tags('skipFIPS');
+          it('should not display', async () => {
+            await visualize.navigateToNewVisualization();
+            await visualize.clickVisType('lens');
+            await lens.goToTimeRange();
 
-          await lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'average',
-            field: 'bytes',
+            await lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'average',
+              field: 'bytes',
+            });
+
+            await lens.switchToVisualization('lnsLegacyMetric');
+
+            await lens.waitForVisualization('legacyMtrVis');
+            await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+
+            await lens.waitForVisualization('legacyMtrVis');
+            await testSubjects.click('lnsApp_saveButton');
+
+            const hasOptions = await testSubjects.exists('add-to-dashboard-options');
+            expect(hasOptions).to.eql(false);
           });
-
-          await lens.switchToVisualization('lnsLegacyMetric');
-
-          await lens.waitForVisualization('legacyMtrVis');
-          await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-
-          await lens.waitForVisualization('legacyMtrVis');
-          await testSubjects.click('lnsApp_saveButton');
-
-          const hasOptions = await testSubjects.exists('add-to-dashboard-options');
-          expect(hasOptions).to.eql(false);
         });
       });
     });

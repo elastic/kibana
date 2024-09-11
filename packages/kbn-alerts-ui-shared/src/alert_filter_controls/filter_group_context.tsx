@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupContainer, ControlGroupInput } from '@kbn/controls-plugin/public';
+import type {
+  ControlGroupRendererApi,
+  ControlGroupRuntimeState,
+} from '@kbn/controls-plugin/public';
 import { createContext } from 'react';
 import type { FilterControlConfig } from './types';
 
 export interface FilterGroupContextType {
   initialControls: FilterControlConfig[];
   dataViewId: string;
-  controlGroup: ControlGroupContainer | undefined;
-  controlGroupInputUpdates: ControlGroupInput | undefined;
+  controlGroup: ControlGroupRendererApi | undefined;
+  controlGroupStateUpdates: ControlGroupRuntimeState | undefined;
   isViewMode: boolean;
   hasPendingChanges: boolean;
   pendingChangesPopoverOpen: boolean;
