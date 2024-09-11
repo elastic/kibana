@@ -22,6 +22,7 @@ export enum EntityDetailsLeftPanelTab {
   RISK_INPUTS = 'risk_inputs',
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
+  CSP_INSIGHTS = 'csp_insights',
 }
 
 export interface PanelHeaderProps {

@@ -47,7 +47,7 @@ interface CspFindingCloud {
   region?: string;
 }
 
-interface CspFindingResult {
+export interface CspFindingResult {
   evaluation: 'passed' | 'failed';
   expected?: Record<string, unknown>;
   evidence: Record<string, unknown>;
