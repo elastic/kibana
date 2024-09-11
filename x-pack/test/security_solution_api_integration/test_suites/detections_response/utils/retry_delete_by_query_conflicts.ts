@@ -35,7 +35,7 @@ export async function retryIfDeleteByQueryConflicts(
 
     const failureCause = operationResult.failures.map((failure) => failure.cause).join(', ');
 
-    logger.warning(`Unable to delete by query ${name} caused by ${failureCause}, retrying ...`);
+    logger.warning(`Unable to delete by query ${name}. Caused by: "${failureCause}". Retrying ...`);
 
     await waitBeforeNextRetry(retryDelay);
   }
