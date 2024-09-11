@@ -74,7 +74,6 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   } catch (e) {
     logger.error(`Error scheduling ${TASK_ID}, received ${e.message}`);
   }
-  await taskManager.runSoon(TASK_ID);
 }
 
 export function telemetryTaskRunner(
