@@ -58,9 +58,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        await testSubjects.missingOrFail('userImpactWarning');
+        await testSubjects.missingOrFail('space-edit-page-user-impact-warning');
         await PageObjects.spaceSelector.changeSolutionView('classic');
-        await testSubjects.existOrFail('userImpactWarning'); // Warn that the change will impact other users
+        await testSubjects.existOrFail('space-edit-page-user-impact-warning'); // Warn that the change will impact other users
 
         await PageObjects.spaceSelector.clickSaveSpaceCreation();
         await PageObjects.spaceSelector.confirmModal();

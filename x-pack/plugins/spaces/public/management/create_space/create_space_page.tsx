@@ -183,7 +183,7 @@ export class CreateSpacePage extends Component<Props, State> {
     const { showAlteringActiveSpaceDialog } = this.state;
 
     return (
-      <div data-test-subj="spaces-edit-page">
+      <div data-test-subj="spaces-create-page">
         <CustomizeSpace
           title={i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
             defaultMessage: 'General',

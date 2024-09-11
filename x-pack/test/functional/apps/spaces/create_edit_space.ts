@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('spaces-grid-page');
 
         await PageObjects.spaceSelector.clickCreateSpace();
-        await testSubjects.existOrFail('spaces-edit-page');
+        await testSubjects.existOrFail('spaces-create-page');
       });
 
       after(async () => {

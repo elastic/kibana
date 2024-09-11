@@ -193,11 +193,15 @@ describe('PrivilegesRolesForm', () => {
 
       await waitFor(() => null);
 
-      expect(screen.queryByTestId('rolePrivilegeCustomizationForm')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('space-assign-role-privilege-customization-form')
+      ).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
-      expect(screen.getByTestId('rolePrivilegeCustomizationForm')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
     });
 
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
@@ -224,11 +228,15 @@ describe('PrivilegesRolesForm', () => {
 
       await waitFor(() => null);
 
-      expect(screen.queryByTestId('rolePrivilegeCustomizationForm')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('space-assign-role-privilege-customization-form')
+      ).not.toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
-      expect(screen.getByTestId('rolePrivilegeCustomizationForm')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('space-assign-role-privilege-customization-form')
+      ).toBeInTheDocument();
 
       expect(screen.queryByTestId(`${featureIds[0]}_read`)).not.toHaveAttribute(
         'aria-pressed',

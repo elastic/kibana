@@ -299,7 +299,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           )}
         >
           <EuiComboBox
-            data-test-subj="roleSelectionComboBox"
+            data-test-subj="space-assign-role-selection-combo-box"
             aria-label={i18n.translate('xpack.spaces.management.spaceDetails.roles.selectRoles', {
               defaultMessage: 'Select role to assign to the "{spaceName}" space',
               values: { spaceName: space.name },
@@ -346,7 +346,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           )}
         >
           <EuiButtonGroup
-            data-test-subj="privilegeSelectionSwitch"
+            data-test-subj="space-assign-role-privilege-selection-switch"
             legend="select the privilege for the features enabled in this space"
             isDisabled={!Boolean(selectedRoles.length)}
             options={[
@@ -386,7 +386,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         </EuiFormRow>
         {roleSpacePrivilege === 'custom' && (
           <EuiFormRow
-            data-test-subj="rolePrivilegeCustomizationForm"
+            data-test-subj="space-assign-role-privilege-customization-form"
             label={i18n.translate(
               'xpack.spaces.management.spaceDetails.roles.assign.privileges.customizeLabelText',
               { defaultMessage: 'Customize by feature' }
@@ -451,7 +451,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         fill
         isLoading={assigningToRole}
         onClick={() => assignRolesToSpace()}
-        data-test-subj={'createRolesPrivilegeButton'}
+        data-test-subj="space-assign-role-create-roles-privilege-button"
       >
         {i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
           defaultMessage: 'Assign roles',
@@ -489,7 +489,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               iconType="cross"
               onClick={closeFlyout}
               flush="left"
-              data-test-subj={'cancelRolesPrivilegeButton'}
+              data-test-subj="space-assign-role-cancel-roles-privilege-button"
             >
               {i18n.translate('xpack.spaces.management.spaceDetails.roles.cancelRoleButton', {
                 defaultMessage: 'Cancel',

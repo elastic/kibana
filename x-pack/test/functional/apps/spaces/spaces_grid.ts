@@ -65,11 +65,13 @@ export default function spaceDetailsViewFunctionalTests({
       expect(currentSpaceTitle).to.equal('default');
 
       await testSubjects.click('default-hyperlink');
-      await testSubjects.existOrFail('spaceDetailsHeader');
+      await testSubjects.existOrFail('space-view-page-details-header');
       expect(
-        (await testSubjects.getVisibleText('spaceDetailsHeader')).toLowerCase().includes('default')
+        (await testSubjects.getVisibleText('space-view-page-details-header'))
+          .toLowerCase()
+          .includes('default')
       ).to.be(true);
-      await testSubjects.missingOrFail('spaceSwitcherButton');
+      await testSubjects.missingOrFail('spaces-view-page-switcher-button');
     });
 
     it("displays the space switcher button when viewing the details page of the space that's not the current selected one", async () => {
@@ -82,13 +84,13 @@ export default function spaceDetailsViewFunctionalTests({
       expect(currentSpaceTitle).to.equal('default');
 
       await testSubjects.click(`${testSpaceId}-hyperlink`);
-      await testSubjects.existOrFail('spaceDetailsHeader');
+      await testSubjects.existOrFail('space-view-page-details-header');
       expect(
-        (await testSubjects.getVisibleText('spaceDetailsHeader'))
+        (await testSubjects.getVisibleText('space-view-page-details-header'))
           .toLowerCase()
           .includes(`${testSpaceId}-name`)
       ).to.be(true);
-      await testSubjects.existOrFail('spaceSwitcherButton');
+      await testSubjects.existOrFail('spaces-view-page-switcher-button');
     });
 
     it('switches to a new space using the space switcher button', async () => {
@@ -101,11 +103,11 @@ export default function spaceDetailsViewFunctionalTests({
       const testSpaceId = testSpacesIds[Math.floor(Math.random() * testSpacesIds.length)];
 
       await testSubjects.click(`${testSpaceId}-hyperlink`);
-      await testSubjects.click('spaceSwitcherButton');
+      await testSubjects.click('spaces-view-page-switcher-button');
 
       await retry.try(async () => {
         const detailsTitle = (
-          await testSubjects.getVisibleText('spaceDetailsHeader')
+          await testSubjects.getVisibleText('space-view-page-details-header')
         ).toLowerCase();
 
         const currentSwitchSpaceTitle = (

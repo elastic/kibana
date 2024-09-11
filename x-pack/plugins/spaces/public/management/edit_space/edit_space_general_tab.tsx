@@ -199,7 +199,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
             color="warning"
             iconType="help"
             title="Warning"
-            data-test-subj="userImpactWarning"
+            data-test-subj="space-edit-page-user-impact-warning"
           >
             {i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',

@@ -192,13 +192,13 @@ export const EditSpace: FC<PageProps> = ({
 
   return (
     <div data-test-subj="spaces-view-page">
-      <EuiFlexGroup data-test-subj="spaceDetailsHeader" alignItems="flexStart">
+      <EuiFlexGroup data-test-subj="space-view-page-details-header" alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <HeaderAvatar />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiTitle size="l">
-            <h1 data-test-subj="spaceTitle">
+            <h1 data-test-subj="spaces-view-page-title">
               {space.name}
               {shouldShowSolutionBadge ? (
                 <>
@@ -244,7 +244,7 @@ export const EditSpace: FC<PageProps> = ({
                 id,
                 `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${id}`
               )}
-              data-test-subj="spaceSwitcherButton"
+              data-test-subj="spaces-view-page-switcher-button"
             >
               <FormattedMessage
                 id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"

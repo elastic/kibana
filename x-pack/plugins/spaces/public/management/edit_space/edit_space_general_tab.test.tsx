@@ -183,7 +183,7 @@ describe('EditSpaceSettings', () => {
       const nameInput = screen.getByTestId('addSpaceName');
       fireEvent.change(nameInput, { target: { value: 'Updated Name Of Space' } });
 
-      expect(screen.queryByTestId('userImpactWarning')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('space-edit-page-user-impact-warning')).not.toBeInTheDocument();
       expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
       const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
@@ -310,7 +310,7 @@ describe('EditSpaceSettings', () => {
       const esSolutionOption = await screen.findByTestId('solutionViewEsOption'); // appears via re-render
       fireEvent.click(esSolutionOption);
 
-      expect(screen.getByTestId('userImpactWarning')).toBeInTheDocument();
+      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
       expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
       const updateButton = screen.getByTestId('save-space-button');
@@ -376,7 +376,7 @@ describe('EditSpaceSettings', () => {
         expect(feature1Checkbox).not.toBeChecked();
       });
 
-      expect(screen.getByTestId('userImpactWarning')).toBeInTheDocument();
+      expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
       expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
 
       const updateButton = screen.getByTestId('save-space-button');
