@@ -24,7 +24,6 @@
       "esql",
       "kibanaReact",
       "kibanaUtils",
-      "esqlDataGrid",
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

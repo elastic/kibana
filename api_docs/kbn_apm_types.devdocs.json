@@ -3634,6 +3634,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.LOG_LEVEL",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_LEVEL",
+        "description": [],
+        "signature": [
+          "\"log.level\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.Metric",
         "type": "Type",
         "tags": [],
