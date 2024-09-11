@@ -10,7 +10,12 @@ import { byTestId } from '../../helpers/utils';
 import { cleanTestParams } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
-journey(`GlobalParameters`, async ({ page, params }) => {
+const journeySkip =
+  (...params: Parameters<typeof journey>) =>
+  () =>
+    journey(...params);
+// See details: https://github.com/elastic/kibana/issues/191961
+journeySkip(`GlobalParameters`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   before(async () => {

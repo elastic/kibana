@@ -15,7 +15,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
-import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
+import { asInteger } from '../../../../../common/utils/formatters';
 import { TooltipContent } from '../../service_inventory/multi_signal_inventory/table/tooltip_content';
 import { Popover } from '../../service_inventory/multi_signal_inventory/table/popover';
 import {
@@ -35,8 +35,7 @@ export function LogRateChart({ height }: { height: number }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
     path: { serviceName },
-  } = useApmParams('/logs-services/{serviceName}');
-
+  } = useApmParams('/services/{serviceName}');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -137,7 +136,7 @@ export function LogRateChart({ height }: { height: number }) {
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={asDecimalOrInteger}
+        yLabelFormat={asInteger}
       />
     </EuiPanel>
   );

@@ -22,7 +22,7 @@ export async function updateInvestigationNote(
   }
 
   if (note.createdBy !== user.username) {
-    throw new Error('User does not have permission to delete note');
+    throw new Error('User does not have permission to update note');
   }
 
   investigation.notes = investigation.notes.filter((currNote) => {

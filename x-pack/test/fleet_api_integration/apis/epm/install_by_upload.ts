@@ -69,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('Installs packages from direct upload', async () => {
+  describe('Installs packages from direct upload', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {

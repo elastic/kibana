@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
@@ -21,6 +22,10 @@ import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
+/** @deprecated
+ * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
+ * used within the visualize editor.
+ */
 export const createVisEmbeddableFromObject =
   (deps: VisualizeEmbeddableFactoryDeps) =>
   async (

@@ -13,10 +13,10 @@ Object {
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+            class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
               style="--euiFormControlRightIconsCount: 2;"
             >
               <div
@@ -39,22 +39,22 @@ Object {
                 />
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <button
                   aria-label="Clear input"
-                  class="euiFormControlLayoutClearButton"
+                  class="euiFormControlLayoutClearButton emotion-euiFormControlLayoutClearButton"
                   data-test-subj="comboBoxClearButton"
                   type="button"
                 >
                   <span
-                    class="euiFormControlLayoutClearButton__icon"
+                    class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
                     data-euiicon-type="cross"
                   />
                 </button>
                 <button
                   aria-label="Open list of options"
-                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                   data-test-subj="comboBoxToggleListButton"
                   tabindex="-1"
                   type="button"
@@ -81,10 +81,10 @@ Object {
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
             style="--euiFormControlRightIconsCount: 2;"
           >
             <div
@@ -107,22 +107,22 @@ Object {
               />
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
             >
               <button
                 aria-label="Clear input"
-                class="euiFormControlLayoutClearButton"
+                class="euiFormControlLayoutClearButton emotion-euiFormControlLayoutClearButton"
                 data-test-subj="comboBoxClearButton"
                 type="button"
               >
                 <span
-                  class="euiFormControlLayoutClearButton__icon"
+                  class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
                   data-euiicon-type="cross"
                 />
               </button>
               <button
                 aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                 data-test-subj="comboBoxToggleListButton"
                 tabindex="-1"
                 type="button"
@@ -206,10 +206,10 @@ Object {
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+            class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
             >
               <div
                 class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
@@ -246,10 +246,10 @@ Object {
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
           >
             <div
               class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
@@ -343,10 +343,10 @@ Object {
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+            class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
               style="--euiFormControlRightIconsCount: 1;"
             >
               <div
@@ -369,11 +369,11 @@ Object {
                 />
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <button
                   aria-label="Open list of options"
-                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                   data-test-subj="comboBoxToggleListButton"
                   tabindex="-1"
                   type="button"
@@ -400,10 +400,10 @@ Object {
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
             style="--euiFormControlRightIconsCount: 1;"
           >
             <div
@@ -426,11 +426,11 @@ Object {
               />
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
             >
               <button
                 aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                 data-test-subj="comboBoxToggleListButton"
                 tabindex="-1"
                 type="button"
@@ -514,10 +514,10 @@ Object {
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+            class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
               style="--euiFormControlRightIconsCount: 1;"
             >
               <div
@@ -541,7 +541,7 @@ Object {
                 />
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right-disabled"
               >
                 <span
                   aria-label="Loading"
@@ -564,10 +564,10 @@ Object {
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth emotion-euiComboBox__formControlLayout"
+          class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
             style="--euiFormControlRightIconsCount: 1;"
           >
             <div
@@ -591,7 +591,7 @@ Object {
               />
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right-disabled"
             >
               <span
                 aria-label="Loading"

@@ -3418,6 +3418,9 @@
             "$ref": "#/components/parameters/kuery"
           },
           {
+            "$ref": "#/components/parameters/format"
+          },
+          {
             "schema": {
               "type": "boolean"
             },
@@ -3488,6 +3491,9 @@
           "name": "agentPolicyId",
           "in": "path",
           "required": true
+        },
+        {
+          "$ref": "#/components/parameters/format"
         }
       ],
       "get": {
@@ -3576,6 +3582,9 @@
           "name": "agentPolicyId",
           "in": "path",
           "required": true
+        },
+        {
+          "$ref": "#/components/parameters/format"
         }
       ],
       "post": {
@@ -3830,7 +3839,11 @@
         },
         "operationId": "bulk-get-agent-policies",
         "security": [],
-        "parameters": []
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       }
     },
     "/agent_policies/delete": {
@@ -7595,6 +7608,7 @@
           },
           "policy_id": {
             "type": "string",
+            "nullable": true,
             "deprecated": true
           },
           "policy_ids": {
@@ -8285,11 +8299,18 @@
             "description": "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
             "example": "customnamespace"
           },
+          "output_id": {
+            "type": "string",
+            "description": "Output ID to send package data to",
+            "example": "output-id",
+            "nullable": true
+          },
           "policy_id": {
             "type": "string",
             "description": "Agent policy ID where that package policy will be added",
             "example": "agent-policy-id",
-            "deprecated": true
+            "deprecated": true,
+            "nullable": true
           },
           "policy_ids": {
             "type": "array",
