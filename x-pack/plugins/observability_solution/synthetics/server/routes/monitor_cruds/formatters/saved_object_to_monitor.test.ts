@@ -98,7 +98,7 @@ describe('mergeSourceMonitor', () => {
           label: 'North America - US Central',
         },
       ],
-      max_redirects: '0',
+      max_redirects: 0,
       mode: 'any',
       name: 'Todos Lightweight',
       namespace: 'default',
