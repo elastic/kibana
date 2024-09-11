@@ -52,7 +52,7 @@ describe('render', () => {
       await waitFor(() => {
         const controlFrame = controlPanel.getByTestId('control-frame');
         expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
-        expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--grow');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
       });
     });
 
