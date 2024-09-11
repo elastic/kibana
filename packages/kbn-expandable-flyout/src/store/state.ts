@@ -44,13 +44,42 @@ export const initialPanelsState: PanelsState = {
   needsSync: false,
 };
 
+export interface PushVsOverlayState {
+  /**
+   * Stores the flyout type (push or overlay)
+   */
+  byId: {
+    [id: string]: 'push' | 'overlay';
+  };
+}
+
+export const pushVsOverlayInitialState: PushVsOverlayState = {
+  byId: {},
+};
+
+export interface UiState {
+  /**
+   * All push vs overlay information
+   */
+  pushVsOverlay: PushVsOverlayState;
+}
+
+export const initialUiState: UiState = {
+  pushVsOverlay: pushVsOverlayInitialState,
+};
+
 export interface State {
   /**
    * All panels related information
    */
   panels: PanelsState;
+  /**
+   * All ui related information
+   */
+  ui: UiState;
 }
 
 export const initialState: State = {
   panels: initialPanelsState,
+  ui: initialUiState,
 };

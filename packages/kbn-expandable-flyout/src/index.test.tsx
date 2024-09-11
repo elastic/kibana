@@ -36,6 +36,11 @@ describe('ExpandableFlyout', () => {
       panels: {
         byId: {},
       },
+      ui: {
+        pushVsOverlay: {
+          byId: {},
+        },
+      },
     };
 
     const result = render(
@@ -60,6 +65,11 @@ describe('ExpandableFlyout', () => {
           },
         },
       },
+      ui: {
+        pushVsOverlay: {
+          byId: {},
+        },
+      },
     };
 
     const { getByTestId } = render(
@@ -82,6 +92,11 @@ describe('ExpandableFlyout', () => {
             },
             preview: undefined,
           },
+        },
+      },
+      ui: {
+        pushVsOverlay: {
+          byId: {},
         },
       },
     };
@@ -110,6 +125,11 @@ describe('ExpandableFlyout', () => {
           },
         },
       },
+      ui: {
+        pushVsOverlay: {
+          byId: {},
+        },
+      },
     };
 
     const { getByTestId } = render(
@@ -132,6 +152,11 @@ describe('ExpandableFlyout', () => {
             left: undefined,
             preview: undefined,
           },
+        },
+      },
+      ui: {
+        pushVsOverlay: {
+          byId: {},
         },
       },
     };
@@ -157,6 +182,11 @@ describe('ExpandableFlyout', () => {
             left: undefined,
             preview: undefined,
           },
+        },
+      },
+      ui: {
+        pushVsOverlay: {
+          byId: {},
         },
       },
     };

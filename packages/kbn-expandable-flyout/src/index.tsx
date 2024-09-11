@@ -11,8 +11,9 @@ import React, { useMemo } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
-import { useFlyoutType } from './hooks/use_flyout_type';
-import { SettingsMenu } from './components/settings_menu';
+import { useInitializeFromLocalStorage } from './hooks/use_initialize_from_local_storage';
+import { useExpandableFlyoutContext } from './context';
+import { FlyoutCustomProps, SettingsMenu } from './components/settings_menu';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
 import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
@@ -22,6 +23,7 @@ import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
 import { LeftSection } from './components/left_section';
 import { isPreviewBanner } from './components/preview_section';
+import { selectPushVsOverlayById, useSelector } from './store/redux';
 
 const flyoutInnerStyles = { height: '100%' };
 
@@ -41,19 +43,7 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * Set of properties that drive a settings menu
    */
-  flyoutCustomProps?: {
-    /**
-     * Hide the gear icon and settings menu if true
-     */
-    hideSettings?: boolean;
-    /**
-     * Control if the option to render in overlay or push mode is enabled or not
-     */
-    pushVsOverlay?: {
-      disabled: boolean;
-      tooltip: string;
-    };
-  };
+  flyoutCustomProps?: FlyoutCustomProps;
 }
 
 /**
@@ -70,7 +60,12 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   ...flyoutProps
 }) => {
   const windowWidth = useWindowSize();
-  const { flyoutType, flyoutTypeChange } = useFlyoutType();
+
+  useInitializeFromLocalStorage();
+
+  const { urlKey } = useExpandableFlyoutContext();
+  const flyoutType = useSelector(selectPushVsOverlayById(urlKey || 'memory'));
+
   const { left, right, preview } = useExpandableFlyoutState();
   const { closeFlyout } = useExpandableFlyoutApi();
 
@@ -157,14 +152,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       ) : null}
 
       {!flyoutCustomProps?.hideSettings && (
-        <SettingsMenu
-          flyoutTypeProps={{
-            type: flyoutType,
-            onChange: flyoutTypeChange,
-            disabled: flyoutCustomProps?.pushVsOverlay?.disabled || false,
-            tooltip: flyoutCustomProps?.pushVsOverlay?.tooltip || '',
-          }}
-        />
+        <SettingsMenu urlKey={urlKey} flyoutCustomProps={flyoutCustomProps} />
       )}
     </EuiFlyout>
   );
