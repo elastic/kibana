@@ -54,6 +54,8 @@ export {
   LogLevelCoalescedValue,
   LogLevelBadge,
   getFieldValue,
+  getVisibleColumns,
+  canPrependTimeFieldColumn,
 } from './src';
 
 export type { LogsContextService } from './src';

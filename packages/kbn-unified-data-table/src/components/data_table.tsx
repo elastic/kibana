@@ -39,7 +39,12 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { RowControlColumn, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  RowControlColumn,
+  getShouldShowFieldHandler,
+  canPrependTimeFieldColumn,
+  getVisibleColumns,
+} from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -61,8 +66,6 @@ import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
-  getVisibleColumns,
-  canPrependTimeFieldColumn,
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
