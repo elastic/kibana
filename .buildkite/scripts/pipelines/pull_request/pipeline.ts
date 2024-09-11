@@ -245,22 +245,35 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^package.json/,
+        /^packages\/kbn-doc-links/,
+        /^packages\/kbn-es-query/,
+        /^packages\/kbn-i18n-react/,
+        /^packages\/kbn-i18n/,
+        /^packages\/kbn-expandable-flyout/,
         /^packages\/kbn-securitysolution-.*/,
+        /^packages\/kbn-securitysolution-io-ts-list-types/,
+        /^packages\/shared-ux/,
+        /^src\/core/,
+        /^src\/plugins\/data/,
+        /^src\/plugins\/kibana_utils/,
+        /^src\/plugins\/inspector/,
+        /^x-pack\/packages\/kbn-elastic-assistant/,
+        /^x-pack\/packages\/kbn-elastic-assistant-common/,
+        /^x-pack\/packages\/security-solution/,
         /^x-pack\/plugins\/alerting/,
+        /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/data_views\/common/,
+        /^x-pack\/plugins\/elastic_assistant/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry\/common/,
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/plugins\/threat_intelligence/,
         /^x-pack\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/alerts_table/,
         /^x-pack\/plugins\/usage_collection\/public/,
-        /^x-pack\/plugins\/elastic_assistant/,
-        /^x-pack\/packages\/security-solution/,
-        /^x-pack\/packages\/kbn-elastic-assistant/,
-        /^x-pack\/packages\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
@@ -268,36 +281,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
-      );
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^package.json/,
-        /^src\/plugins\/data/,
-        /^src\/plugins\/kibana_utils/,
-        /^src\/plugins\/inspector/,
-        /^src\/plugins\/data_views/,
-        /^src\/core/,
-        /^packages\/kbn-securitysolution-.*/,
-        /^packages\/kbn-es-query/,
-        /^packages\/kbn-securitysolution-io-ts-list-types/,
-        /^packages\/kbn-i18n-react/,
-        /^packages\/kbn-i18n/,
-        /^packages\/shared-ux/,
-        /^packages\/kbn-doc-links/,
-        /^packages\/kbn-securitysolution-io-ts-list-types/,
-        /^x-pack\/plugins\/threat_intelligence/,
-        /^x-pack\/packages\/security-solution/,
-        /^x-pack\/plugins\/cases/,
-        /^x-pack\/plugins\/timelines/,
-        /^x-pack\/plugins\/triggers_actions_ui/,
-        /^x-pack\/plugins\/rule_registry/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/threat_intelligence.yml')
       );
     }
 
