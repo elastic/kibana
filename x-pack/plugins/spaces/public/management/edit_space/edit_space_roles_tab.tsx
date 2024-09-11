@@ -78,7 +78,6 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
                     );
                   }
 
-                  // FIXME: re-test
                   for (const [roleName, error] of Object.entries(errors ?? {})) {
                     notifications.toasts.addError(new Error(JSON.stringify(error)), {
                       title: `Error updating ${roleName}`,
@@ -117,6 +116,9 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
 
   const removeRole = useCallback(
     async (payload: Role[]) => {
+      // To remove the role from the space in bulk-edit, we take the payload of roles to edit, loop over
+      // each role, and modify the kibana.spaces field of each role by stripping them of the space to
+      // disassociate
       const updateDoc = structuredClone(payload).map((roleDef) => {
         roleDef.kibana = roleDef.kibana.filter(({ spaces }) => {
           let spaceIdIndex: number;
@@ -152,7 +154,6 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
             );
           }
 
-          // FIXME: re-test
           for (const [roleName, error] of Object.entries(errors ?? {})) {
             notifications.toasts.addError(new Error(JSON.stringify(error)), {
               title: `Error updating ${roleName}`,
