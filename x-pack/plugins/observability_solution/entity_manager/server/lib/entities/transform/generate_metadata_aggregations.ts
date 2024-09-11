@@ -21,11 +21,12 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
           size: metadata.aggregation.limit,
         },
       };
-    } else if (metadata.aggregation.type === 'top_metrics') {
+    } else if (metadata.aggregation.type === 'last_value') {
       agg = {
         top_metrics: {
           metrics: [{ field: metadata.source }],
           sort: metadata.aggregation.sort,
+          size: 1,
         },
       };
     }
@@ -59,7 +60,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
           data: {
             terms: {
               field: metadata.destination,
-              size: metadata.aggregation.limit,
+              size: metadata.aggregation.type === 'terms' ? metadata.aggregation.limit : 1,
             },
           },
         },

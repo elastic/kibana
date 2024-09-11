@@ -46,7 +46,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
     metadata: [
       { source: '_index', destination: 'sourceIndex' },
-      { source: 'agent.name', limit: 100 },
+      { source: 'agent.name', aggregation: { type: 'terms', limit: 100 } },
       'data_stream.type',
       'service.environment',
       'service.name',

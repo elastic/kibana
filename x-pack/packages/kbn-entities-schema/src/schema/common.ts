@@ -87,9 +87,8 @@ export type KeyMetric = z.infer<typeof keyMetricSchema>;
 export const metadataAggregation = z.union([
   z.object({ type: z.literal('terms'), limit: z.number().default(1000) }),
   z.object({
-    type: z.literal('top_metrics'),
+    type: z.literal('last_value'),
     sort: z.record(z.string(), z.union([z.literal('asc'), z.literal('desc')])),
-    limit: z.number(),
   }),
 ]);
 
@@ -97,13 +96,15 @@ export const metadataSchema = z
   .object({
     source: z.string(),
     destination: z.optional(z.string()),
-    aggregation: z.optional(metadataAggregation).default({ type: 'terms', limit: 1000 }),
+    aggregation: z
+      .optional(metadataAggregation)
+      .default({ type: z.literal('terms').value, limit: 1000 }),
   })
   .or(
     z.string().transform((value) => ({
       source: value,
       destination: value,
-      aggregation: { type: z.literal('terms'), limit: 1000 },
+      aggregation: { type: z.literal('terms').value, limit: 1000 },
     }))
   )
   .transform((metadata) => ({
@@ -111,11 +112,11 @@ export const metadataSchema = z
     destination: metadata.destination ?? metadata.source,
   }))
   .superRefine((value, ctx) => {
-    if (value.aggregation.limit < 1) {
+    if (value.aggregation.type === 'terms' && value.aggregation.limit < 1) {
       ctx.addIssue({
         path: ['limit'],
         code: z.ZodIssueCode.custom,
-        message: 'limit should be greater than 1',
+        message: 'limit for terms aggregation should be greater than 1',
       });
     }
     if (value.source.length === 0) {
