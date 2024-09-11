@@ -13,7 +13,7 @@ import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, RouteComponentProps, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import {
@@ -30,6 +30,11 @@ import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
 import { ConsoleStartServices } from '../types';
+
+const RedirectToShell = () => {
+  const location = useLocation();
+  return <Redirect to={`/console/shell${location.search}`} />;
+};
 
 export interface BootDependencies extends ConsoleStartServices {
   http: HttpSetup;
@@ -106,8 +111,8 @@ export async function renderApp({
                       <Main currentTabProp={tab} />
                     </Route>
                   ))}
-                  <Route path="/console">
-                    <Redirect to={`/console/${SHELL_TAB_ID}${history.location.search}`} />
+                  <Route key="redirect" path="/console">
+                    <RedirectToShell />
                   </Route>
                 </Routes>
               </Router>
