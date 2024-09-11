@@ -259,6 +259,7 @@ export class TaskManagerPlugin
       savedObjectsRepository,
       logger: this.logger,
       currentNode: this.taskManagerId!,
+      config: this.config.discovery,
     });
 
     if (this.shouldRunBackgroundTasks) {
@@ -315,7 +316,13 @@ export class TaskManagerPlugin
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
 
-      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
+      const taskPartitioner = new TaskPartitioner({
+        logger: this.logger,
+        podName: this.taskManagerId!,
+        kibanaDiscoveryService: this.kibanaDiscoveryService,
+        kibanasPerPartition: this.config.kibanas_per_partition,
+      });
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,

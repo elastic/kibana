@@ -40,8 +40,15 @@ export const executeActionRoute = (
         tags: ['oas-tag:connectors'],
       },
       validate: {
-        body: bodySchema,
-        params: paramSchema,
+        request: {
+          body: bodySchema,
+          params: paramSchema,
+        },
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {

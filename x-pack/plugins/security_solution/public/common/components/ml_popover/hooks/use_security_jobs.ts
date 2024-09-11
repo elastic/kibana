@@ -47,7 +47,7 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
   const isMlEnabled = isMlAdmin && isLicensed;
 
   const onError = useCallback(
-    (error) => {
+    (error: unknown) => {
       addError(error, { title: i18n.SIEM_JOB_FETCH_FAILURE });
     },
     [addError]

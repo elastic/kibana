@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests", "helpers:pinGitHubActionDigestsToSemver"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
-  "enabledManagers": ["npm", "github-actions", "custom.regex"],
+  "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "7.17"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -19,6 +19,14 @@
     {
       "matchDepPatterns": [".*"],
       "enabled": false
+    },
+    {
+      "groupName": "devcontainer",
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:current-major"],
+      "enabled": true,
+      "matchManagers": ["devcontainer"]
     },
     {
       "groupName": "chainguard",
@@ -277,8 +285,7 @@
         "@testing-library/jest-dom",
         "@testing-library/react",
         "@testing-library/react-hooks",
-        "@testing-library/user-event",
-        "@types/testing-library__jest-dom"
+        "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -459,7 +466,8 @@
       "matchPackageNames": ["msw"],
       "reviewers": ["team:kibana-cloud-security-posture"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team: Cloud Security", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
@@ -476,6 +484,15 @@
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "team:obs-entities"],
+      "enabled": true
+    },
+    {
+      "groupName": "Security Engineering Productivity",
+      "matchDepNames": ["dotenv", "playwright-chromium", "@playwright/test"],
+      "reviewers": ["team:security-engineering-productivity"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Sec Eng Productivity", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     }
   ],

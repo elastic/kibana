@@ -3507,6 +3507,18 @@
                 "path": "src/plugins/usage_collection/server/routes/stats/stats.ts"
               },
               {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
+              },
+              {
                 "plugin": "licensing",
                 "path": "x-pack/plugins/licensing/server/routes/info.ts"
               },
@@ -3549,18 +3561,6 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
               },
               {
                 "plugin": "security",
@@ -4571,6 +4571,14 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
               },
               {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
+              },
+              {
                 "plugin": "searchInferenceEndpoints",
                 "path": "x-pack/plugins/search_inference_endpoints/server/routes.ts"
               },
@@ -4773,14 +4781,6 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/get.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/check.ts"
               },
               {
                 "plugin": "profiling",
@@ -7221,6 +7221,10 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
+              },
+              {
                 "plugin": "searchPlayground",
                 "path": "x-pack/plugins/search_playground/server/routes.ts"
               },
@@ -7351,14 +7355,6 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/create.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/reset.ts"
               },
               {
                 "plugin": "profiling",
@@ -8531,6 +8527,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/update.ts"
               },
@@ -8879,10 +8879,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9013,6 +9009,10 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/put.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/set_solution_space.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9809,14 +9809,6 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/delete.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",
@@ -14288,6 +14280,10 @@
               },
               {
                 "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/has_es_data.ts"
+              },
+              {
+                "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
               },
               {
@@ -15741,6 +15737,10 @@
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
               },
@@ -16169,6 +16169,10 @@
                 "path": "x-pack/plugins/integration_assistant/server/routes/pipeline_routes.ts"
               },
               {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/routes/analyze_logs_routes.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -16443,6 +16447,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/schedule_now.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19578,7 +19586,7 @@
             "section": "def-server.RouteValidatorFullConfigRequest",
             "text": "RouteValidatorFullConfigRequest"
           },
-          "<P, Q, B> | ",
+          "<P, Q, B> | (",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -19586,7 +19594,7 @@
             "section": "def-server.RouteValidatorRequestAndResponses",
             "text": "RouteValidatorRequestAndResponses"
           },
-          "<P, Q, B>"
+          "<P, Q, B> & NotRouteValidatorFullConfigRequest)"
         ],
         "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
         "deprecated": false,

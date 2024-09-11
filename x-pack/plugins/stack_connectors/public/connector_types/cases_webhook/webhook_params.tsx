@@ -73,7 +73,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
     [comments, editAction, incident, index]
   );
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       return editAction(
         'subActionParams',
         {

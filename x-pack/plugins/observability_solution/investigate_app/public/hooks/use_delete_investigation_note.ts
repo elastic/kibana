@@ -25,7 +25,7 @@ export function useDeleteInvestigationNote() {
     { investigationId: string; noteId: string },
     { investigationId: string }
   >(
-    ['addInvestigationNote'],
+    ['deleteInvestigationNote'],
     ({ investigationId, noteId }) => {
       return http.delete<void>(
         `/api/observability/investigations/${investigationId}/notes/${noteId}`,

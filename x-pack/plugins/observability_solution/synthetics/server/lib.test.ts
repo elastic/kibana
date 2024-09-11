@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MsearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsEsClient } from './lib';
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -20,6 +21,73 @@ describe('SyntheticsEsClient', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('msearch', () => {
+    it('should call baseESClient.msearch with correct parameters', async () => {
+      esClient.msearch.mockResolvedValueOnce({
+        body: {
+          responses: [
+            { aggregations: { aggName: { value: 'str' } } },
+            { aggregations: { aggName: { value: 'str' } } },
+          ],
+        },
+      } as unknown as MsearchResponse);
+
+      const mockSearchParams = [
+        {
+          query: {
+            match_all: {},
+          },
+        },
+        {
+          query: {
+            match_all: {},
+          },
+        },
+      ];
+
+      const result = await syntheticsEsClient.msearch(mockSearchParams);
+
+      expect(esClient.msearch).toHaveBeenCalledWith(
+        {
+          searches: [
+            {
+              index: 'synthetics-*',
+              ignore_unavailable: true,
+            },
+            mockSearchParams[0],
+            {
+              index: 'synthetics-*',
+              ignore_unavailable: true,
+            },
+            mockSearchParams[1],
+          ],
+        },
+        { meta: true }
+      );
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "responses": Array [
+            Object {
+              "aggregations": Object {
+                "aggName": Object {
+                  "value": "str",
+                },
+              },
+            },
+            Object {
+              "aggregations": Object {
+                "aggName": Object {
+                  "value": "str",
+                },
+              },
+            },
+          ],
+        }
+      `);
+    });
   });
 
   describe('search', () => {

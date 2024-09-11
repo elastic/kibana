@@ -162,7 +162,7 @@ interface PreventableEvent {
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-interface LensBaseEmbeddableInput extends EmbeddableInput {
+export interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;

@@ -253,6 +253,28 @@
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthorizationServiceSetup.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [
+              "\nA set of methods to work with Kibana role privileges"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientPublicContract",
+                "text": "PrivilegesAPIClientPublicContract"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5891,14 +5913,6 @@
               "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
             },
             {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-            },
-            {
               "plugin": "serverlessSearch",
               "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
@@ -5919,18 +5933,6 @@
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
             },
             {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
-            },
-            {
               "plugin": "entityManager",
               "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
@@ -5949,6 +5951,18 @@
             {
               "plugin": "entityManager",
               "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
               "plugin": "synthetics",

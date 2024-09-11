@@ -219,7 +219,7 @@ export default function Expressions(props: Props) {
   );
 
   const updateParams = useCallback(
-    (id, e: MetricExpression) => {
+    (id: any, e: MetricExpression) => {
       const ruleCriteria = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       ruleCriteria[id] = e;
       setRuleParams('criteria', ruleCriteria);

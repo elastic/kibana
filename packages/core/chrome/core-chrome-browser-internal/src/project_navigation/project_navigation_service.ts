@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -20,6 +21,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
+  Subject,
   BehaviorSubject,
   combineLatest,
   map,
@@ -32,6 +34,7 @@ import {
   of,
   type Observable,
   type Subscription,
+  timer,
 } from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -326,18 +329,48 @@ export class ProjectNavigationService {
         }
 
         const { sideNavComponent, homePage = '' } = definition;
-        const homePageLink = this.navLinksService?.get(homePage);
 
         if (sideNavComponent) {
           this.setSideNavComponent(sideNavComponent);
         }
 
-        if (homePageLink) {
-          this.setProjectHome(homePageLink.href);
-        }
+        this.waitForLink(homePage, (navLink: ChromeNavLink) => {
+          this.setProjectHome(navLink.href);
+        });
 
         this.initNavigation(nextId, definition.navigationTree$);
       });
+  }
+
+  /**
+   * This method waits for the chrome nav link to be available and then calls the callback.
+   * This is necessary to avoid race conditions when we register the solution navigation
+   * before the deep links are available (plugins can register them later).
+   *
+   * @param linkId The chrome nav link id
+   * @param cb The callback to call when the link is found
+   * @returns
+   */
+  private waitForLink(linkId: string, cb: (chromeNavLink: ChromeNavLink) => undefined): void {
+    if (!this.navLinksService) return;
+
+    let navLink: ChromeNavLink | undefined = this.navLinksService.get(linkId);
+    if (navLink) {
+      cb(navLink);
+      return;
+    }
+
+    const stop$ = new Subject<void>();
+    const tenSeconds = timer(10000);
+
+    this.deepLinksMap$.pipe(takeUntil(tenSeconds), takeUntil(stop$)).subscribe((navLinks) => {
+      navLink = navLinks[linkId];
+
+      if (navLink) {
+        cb(navLink);
+        stop$.next();
+      }
+    });
   }
 
   private setProjectHome(homeHref: string) {

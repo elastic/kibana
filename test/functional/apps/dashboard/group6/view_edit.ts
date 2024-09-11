@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
+  const { dashboard, common, visualize, timePicker } = getPageObjects([
+    'dashboard',
+    'common',
+    'visualize',
+    'timePicker',
+  ]);
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
   const security = getService('security');
@@ -29,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
     });
 
     after(async () => {
@@ -39,47 +45,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('existing dashboard opens in last used view mode', async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-      expect(await PageObjects.dashboard.getIsInViewMode()).to.equal(true);
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.loadSavedDashboard(dashboardName);
+      expect(await dashboard.getIsInViewMode()).to.equal(true);
 
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
 
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-      expect(await PageObjects.dashboard.getIsInViewMode()).to.equal(false);
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.loadSavedDashboard(dashboardName);
+      expect(await dashboard.getIsInViewMode()).to.equal(false);
 
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-      expect(await PageObjects.dashboard.getIsInViewMode()).to.equal(false);
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.loadSavedDashboard('few panels');
+      expect(await dashboard.getIsInViewMode()).to.equal(false);
 
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await dashboard.clickCancelOutOfEditMode();
     });
 
     it('create new dashboard opens in edit mode', async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      const isInViewMode = await PageObjects.dashboard.getIsInViewMode();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      const isInViewMode = await dashboard.getIsInViewMode();
       expect(isInViewMode).to.be(false);
     });
 
     describe('save as new', () => {
       it('keeps duplicated dashboard in edit mode', async () => {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.duplicateDashboard('edit');
-        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+        await dashboard.gotoDashboardEditMode(dashboardName);
+        await dashboard.duplicateDashboard('edit');
+        const isViewMode = await dashboard.getIsInViewMode();
         expect(isViewMode).to.equal(false);
       });
     });
 
     describe('save', function () {
       it('keeps dashboard in edit mode', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName, {
+        await dashboard.gotoDashboardEditMode(dashboardName);
+        await dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
           saveAsNew: false,
         });
-        const isViewMode = await PageObjects.dashboard.getIsInViewMode();
+        const isViewMode = await dashboard.getIsInViewMode();
         expect(isViewMode).to.equal(false);
       });
     });
@@ -87,26 +93,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('shows lose changes warning', function () {
       describe('and loses changes on confirmation', function () {
         beforeEach(async function () {
-          await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+          await dashboard.gotoDashboardEditMode(dashboardName);
         });
 
         it('when time changed is stored with dashboard', async function () {
-          await PageObjects.timePicker.setDefaultDataRange();
+          await timePicker.setDefaultDataRange();
 
-          const originalTime = await PageObjects.timePicker.getTimeConfig();
+          const originalTime = await timePicker.getTimeConfig();
 
-          await PageObjects.dashboard.saveDashboard(dashboardName, {
+          await dashboard.saveDashboard(dashboardName, {
             storeTimeWithDashboard: true,
             saveAsNew: false,
           });
 
-          await PageObjects.timePicker.setAbsoluteRange(
+          await timePicker.setAbsoluteRange(
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          await dashboard.clickCancelOutOfEditMode();
 
-          const newTime = await PageObjects.timePicker.getTimeConfig();
+          const newTime = await timePicker.getTimeConfig();
 
           expect(newTime.start).to.equal(originalTime.start);
           expect(newTime.end).to.equal(originalTime.end);
@@ -117,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.setQuery(`${originalQuery}and extra stuff`);
           await queryBar.submitQuery();
 
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          await dashboard.clickCancelOutOfEditMode();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal(originalQuery);
@@ -126,8 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('when a filter is deleted', async function () {
           // This may seem like a pointless line but there was a bug that only arose when the dashboard
           // was loaded initially
-          await PageObjects.dashboard.loadSavedDashboard(dashboardName);
-          await PageObjects.dashboard.switchToEditMode();
+          await dashboard.loadSavedDashboard(dashboardName);
+          await dashboard.switchToEditMode();
 
           let hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(true);
@@ -137,69 +143,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(false);
 
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          await dashboard.clickCancelOutOfEditMode();
 
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(true);
         });
 
         it('when a new vis is added', async function () {
-          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+          const originalPanelCount = await dashboard.getPanelCount();
           await dashboardAddPanel.clickEditorMenuButton();
           await dashboardAddPanel.clickAggBasedVisualizations();
-          await PageObjects.visualize.clickAreaChart();
-          await PageObjects.visualize.clickNewSearch();
-          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {
+          await visualize.clickAreaChart();
+          await visualize.clickNewSearch();
+          await visualize.saveVisualizationExpectSuccess('new viz panel', {
             saveAsNew: false,
             redirectToOrigin: true,
           });
 
-          await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+          await dashboard.clickCancelOutOfEditMode(false);
           // for this sleep see https://github.com/elastic/kibana/issues/22299
-          await PageObjects.common.sleep(500);
+          await common.sleep(500);
 
           // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await common.clickConfirmOnModal();
 
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount);
         });
 
         it('when an existing vis is added', async function () {
-          const originalPanelCount = await PageObjects.dashboard.getPanelCount();
+          const originalPanelCount = await dashboard.getPanelCount();
 
           await dashboardAddPanel.addVisualization('new viz panel');
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          await dashboard.clickCancelOutOfEditMode();
 
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount);
         });
       });
 
       describe('and preserves edits on cancel', function () {
         it('when time changed is stored with dashboard', async function () {
-          await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-          await PageObjects.timePicker.setAbsoluteRange(
+          await dashboard.gotoDashboardEditMode(dashboardName);
+          await timePicker.setAbsoluteRange(
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
-          await PageObjects.dashboard.switchToEditMode();
-          await PageObjects.timePicker.setAbsoluteRange(
+          await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
+          await dashboard.switchToEditMode();
+          await timePicker.setAbsoluteRange(
             'Sep 19, 2015 @ 06:31:44.000',
             'Sep 19, 2015 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+          await dashboard.clickCancelOutOfEditMode(false);
 
-          await PageObjects.common.clickCancelOnModal();
-          await PageObjects.dashboard.saveDashboard(dashboardName, {
+          await common.clickCancelOnModal();
+          await dashboard.saveDashboard(dashboardName, {
             saveAsNew: false,
             storeTimeWithDashboard: true,
           });
 
-          await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+          await dashboard.loadSavedDashboard(dashboardName);
 
-          const time = await PageObjects.timePicker.getTimeConfig();
+          const time = await timePicker.getTimeConfig();
 
           expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
           expect(time.end).to.equal('Sep 19, 2015 @ 06:31:44.000');
@@ -209,26 +215,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('and preserves edits on cancel', function () {
       it('when time changed is stored with dashboard', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.timePicker.setDefaultDataRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
-        await PageObjects.timePicker.setAbsoluteRange(
+        await dashboard.gotoDashboardEditMode(dashboardName);
+        await timePicker.setDefaultDataRange();
+        await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
+        await timePicker.setAbsoluteRange(
           'Sep 19, 2013 @ 06:31:44.000',
           'Sep 19, 2013 @ 06:31:44.000'
         );
-        const newTime = await PageObjects.timePicker.getTimeConfig();
+        const newTime = await timePicker.getTimeConfig();
 
-        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+        await dashboard.clickCancelOutOfEditMode(false);
 
-        await PageObjects.common.clickCancelOnModal();
-        await PageObjects.dashboard.saveDashboard(dashboardName, {
+        await common.clickCancelOnModal();
+        await dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
           saveAsNew: false,
         });
 
-        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+        await dashboard.loadSavedDashboard(dashboardName);
 
-        const time = await PageObjects.timePicker.getTimeConfig();
+        const time = await timePicker.getTimeConfig();
 
         expect(time.start).to.equal(newTime.start);
         expect(time.end).to.equal(newTime.end);
@@ -237,32 +243,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Does not show lose changes warning', function () {
       it('when time changed is not stored with dashboard', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.saveDashboard(dashboardName, {
+        await dashboard.gotoDashboardEditMode(dashboardName);
+        await dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: false,
           saveAsNew: false,
         });
-        await PageObjects.timePicker.setAbsoluteRange(
+        await timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',
           'Dec 19, 2014 @ 06:31:44.000'
         );
-        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+        await dashboard.clickCancelOutOfEditMode(false);
 
-        await PageObjects.common.expectConfirmModalOpenState(false);
+        await common.expectConfirmModalOpenState(false);
       });
 
       // See https://github.com/elastic/kibana/issues/10110 - this is intentional.
       it('when the query is edited but not applied', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        await dashboard.gotoDashboardEditMode(dashboardName);
 
         const originalQuery = await queryBar.getQueryString();
         await queryBar.setQuery(`${originalQuery}extra stuff`);
 
-        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
+        await dashboard.clickCancelOutOfEditMode(false);
 
-        await PageObjects.common.expectConfirmModalOpenState(false);
+        await common.expectConfirmModalOpenState(false);
 
-        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+        await dashboard.loadSavedDashboard(dashboardName);
         const query = await queryBar.getQueryString();
         expect(query).to.equal(originalQuery);
       });

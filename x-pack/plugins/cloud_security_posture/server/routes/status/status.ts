@@ -6,6 +6,18 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import {
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  STATUS_ROUTE_PATH,
+  LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import type {
+  CspSetupStatus,
+  IndexStatus,
+  CspStatusCode,
+} from '@kbn/cloud-security-posture-common';
 import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -19,20 +31,16 @@ import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  STATUS_ROUTE_PATH,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
   POSTURE_TYPES,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
-  LATEST_FINDINGS_RETENTION_POLICY,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
@@ -40,12 +48,7 @@ import type {
   CspRouter,
   StatusResponseInfo,
 } from '../../types';
-import type {
-  CspSetupStatus,
-  CspStatusCode,
-  IndexStatus,
-  PostureTypes,
-} from '../../../common/types_old';
+import type { PostureTypes } from '../../../common/types_old';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
@@ -192,6 +195,7 @@ export const getCspStatus = async ({
 }: CspStatusDependencies): Promise<CspSetupStatus> => {
   const [
     hasMisconfigurationsFindings,
+    hasVulnerabilitiesFindings,
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
@@ -214,6 +218,12 @@ export const getCspStatus = async ({
       esClient,
       CDR_MISCONFIGURATIONS_INDEX_PATTERN,
       LATEST_FINDINGS_RETENTION_POLICY,
+      logger
+    ),
+    checkIndexHasFindings(
+      esClient,
+      CDR_VULNERABILITIES_INDEX_PATTERN,
+      LATEST_VULNERABILITIES_RETENTION_POLICY,
       logger
     ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
@@ -255,7 +265,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger, {
       postureType: VULN_MGMT_POLICY_TEMPLATE,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -340,7 +350,7 @@ export const getCspStatus = async ({
       status: scoreIndexStatus,
     },
     {
-      index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
       status: vulnerabilitiesLatestIndexStatus,
     },
   ];
@@ -403,6 +413,7 @@ export const getCspStatus = async ({
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
     hasMisconfigurationsFindings,
+    hasVulnerabilitiesFindings,
   };
 
   assertResponse(response, logger);

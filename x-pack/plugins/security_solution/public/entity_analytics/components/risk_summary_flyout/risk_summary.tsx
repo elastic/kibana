@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
 
@@ -32,7 +33,6 @@ import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constan
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
@@ -95,7 +95,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 
   const onToggle = useCallback(
-    (isOpen) => {
+    (isOpen: boolean) => {
       const entity = isUserRiskData(riskData) ? 'user' : 'host';
 
       telemetry.reportToggleRiskSummaryClicked({

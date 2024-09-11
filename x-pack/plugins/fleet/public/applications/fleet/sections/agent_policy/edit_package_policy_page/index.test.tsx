@@ -31,6 +31,15 @@ import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
+jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),
+    useAllNonManagedAgentPolicies: jest
+      .fn()
+      .mockReturnValue([{ id: 'agent-policy-1', name: 'Agent policy 1' }]),
+  };
+});
+
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
@@ -515,7 +524,7 @@ describe('edit package policy page', () => {
       jest.clearAllMocks();
     });
 
-    it('should create agent policy with sys monitoring when new hosts is selected', async () => {
+    it('should create agent policy with sys monitoring when new agent policy button is clicked', async () => {
       await act(async () => {
         render();
       });
@@ -528,7 +537,7 @@ describe('edit package policy page', () => {
       });
 
       await act(async () => {
-        fireEvent.click(renderResult.getByTestId('newHostsTab'));
+        fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
       });
 
       await act(async () => {

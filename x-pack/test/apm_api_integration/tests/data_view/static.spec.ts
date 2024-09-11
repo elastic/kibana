@@ -86,6 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/177120
   registry.when('mappings and APM data exists', { config: 'basic', archives: [] }, () => {
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       await generateApmData(synthtrace);
     });
@@ -123,7 +124,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when fetching the data view', async () => {
+    describe('when fetching the data view', () => {
       let dataViewResponse: request.Response;
 
       before(async () => {
@@ -210,7 +211,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating data view in "default" space', async () => {
+    describe('when creating data view in "default" space', () => {
       it('can be retrieved from the "default" space', async () => {
         await createDataViewWithWriteUser({ spaceId: 'default' });
         const res = await getDataView({ spaceId: 'default' });
@@ -225,7 +226,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating data view in "foo" space', async () => {
+    describe('when creating data view in "foo" space', () => {
       it('can be retrieved from the "foo" space', async () => {
         await createDataViewWithWriteUser({ spaceId: 'foo' });
         const res = await getDataView({ spaceId: 'foo' });

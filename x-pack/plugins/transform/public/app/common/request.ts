@@ -14,19 +14,19 @@ import {
   type SavedSearchQuery,
 } from '@kbn/ml-query-utils';
 
-import {
-  DEFAULT_CONTINUOUS_MODE_DELAY,
-  DEFAULT_TRANSFORM_FREQUENCY,
-  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
-  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
-} from '../../../common/constants';
 import type {
   PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
-} from '../../../common/api_schemas/transforms';
+} from '../../../server/routes/api_schemas/transforms';
+import {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../common/constants';
 import type {
   DateHistogramAgg,
   HistogramAgg,
