@@ -29,27 +29,27 @@ export const createSpaceRolesReducer: Reducer<IEditSpaceStoreState, IDispatchAct
   state,
   action
 ) => {
-  const _state = structuredClone(state);
+  const clonedState = structuredClone(state);
 
   switch (action.type) {
     case 'update_roles': {
       if (action.payload) {
         action.payload.forEach((role) => {
-          _state.roles.set(role.name, role);
+          clonedState.roles.set(role.name, role);
         });
       }
 
-      return _state;
+      return clonedState;
     }
     case 'remove_roles': {
       action.payload.forEach((role) => {
-        _state.roles.delete(role.name);
+        clonedState.roles.delete(role.name);
       });
 
-      return _state;
+      return clonedState;
     }
     default: {
-      return _state;
+      return clonedState;
     }
   }
 };
