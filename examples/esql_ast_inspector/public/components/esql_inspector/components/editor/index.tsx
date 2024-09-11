@@ -28,7 +28,19 @@ export const Editor: React.FC = (props) => {
       backdrop.push([
         location.min,
         location.max + 1,
-        (text) => <span style={{ background: 'rgb(190, 237, 224)' }}>{text}</span>,
+        (text) => (
+          <span
+            style={{
+              display: 'inline-block',
+              margin: -4,
+              padding: 4,
+              borderRadius: 4,
+              background: 'rgb(190, 237, 224)',
+            }}
+          >
+            {text}
+          </span>
+        ),
       ]);
     }
   }

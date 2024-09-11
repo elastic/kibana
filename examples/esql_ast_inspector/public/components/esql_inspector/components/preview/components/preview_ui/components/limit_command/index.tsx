@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { EuiFieldText, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
 import { Builder } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
@@ -17,7 +17,33 @@ export const LimitCommand: React.FC = () => {
   const limit = useBehaviorSubject(state.limit$);
 
   if (!limit) {
-    return null;
+    return (
+      <EuiPanel hasShadow={false} hasBorder style={{ maxWidth: 360 }}>
+        <EuiFormRow fullWidth>
+          <EuiButton
+            fullWidth
+            size={'s'}
+            color="text"
+            onClick={() => {
+              const query = state.query$.getValue();
+              if (!query) return;
+              const literal = Builder.expression.literal.numeric({
+                value: 10,
+                literalType: 'integer',
+              });
+              const command = Builder.command({
+                name: 'limit',
+                args: [literal],
+              });
+              query.ast.commands.push(command);
+              state.reprint();
+            }}
+          >
+            Add limit
+          </EuiButton>
+        </EuiFormRow>
+      </EuiPanel>
+    );
   }
 
   const value = +(limit.args[0] as any)?.value;
