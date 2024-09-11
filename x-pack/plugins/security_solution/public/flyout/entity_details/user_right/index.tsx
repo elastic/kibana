@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -15,7 +16,7 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -23,34 +24,41 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { UserPreviewPanelFooter } from '../user_preview/footer';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
   isDraggable?: boolean;
+  isPreviewMode?: boolean;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'user-panel';
+  key: 'user-panel' | 'user-preview-panel';
   params: UserPanelProps;
 }
 
 export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
+export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
 };
 
-export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPanelProps) => {
+export const UserPanel = ({
+  contextID,
+  scopeId,
+  userName,
+  isDraggable,
+  isPreviewMode,
+}: UserPanelProps) => {
   const { telemetry } = useKibana().services;
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -106,6 +114,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         id: UserDetailsPanelKey,
         params: {
           isRiskScoreExist: !!userRiskData?.user?.risk,
+          scopeId,
           user: {
             name: userName,
             email,
@@ -114,7 +123,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         path: tab ? { tab } : undefined,
       });
     },
-    [telemetry, email, openLeftPanel, userName, userRiskData]
+    [telemetry, openLeftPanel, userRiskData?.user?.risk, userName, email, scopeId]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
@@ -147,7 +156,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={hasUserDetailsData}
+              flyoutIsExpandable={!isPreviewMode && hasUserDetailsData}
               expandDetails={openPanelFirstTab}
             />
             <UserPanelHeader
@@ -165,8 +174,17 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={openPanelTab}
+              openDetailsPanel={!isPreviewMode ? openPanelTab : undefined}
+              isPreviewMode={isPreviewMode}
             />
+            {isPreviewMode && (
+              <UserPreviewPanelFooter
+                userName={userName}
+                contextID={contextID}
+                scopeId={scopeId}
+                isDraggable={!!isDraggable}
+              />
+            )}
           </>
         );
       }}

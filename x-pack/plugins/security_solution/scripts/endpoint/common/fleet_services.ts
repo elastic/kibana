@@ -11,6 +11,7 @@ import type {
   Agent,
   AgentPolicy,
   AgentStatus,
+  CopyAgentPolicyResponse,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
@@ -24,12 +25,11 @@ import type {
   GetPackagePoliciesResponse,
   PackagePolicy,
   PostFleetSetupResponse,
-  CopyAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   agentPolicyRouteService,
   agentRouteService,
   AGENTS_INDEX,
@@ -37,8 +37,8 @@ import {
   APP_API_ROUTES,
   epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
-  SETUP_API_ROUTE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SETUP_API_ROUTE,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -49,6 +49,7 @@ import {
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
+  CopyAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
   GenerateServiceTokenResponse,
@@ -56,12 +57,12 @@ import type {
   GetEnrollmentAPIKeysResponse,
   GetOutputsResponse,
   PostAgentUnenrollResponse,
-  CopyAgentPolicyRequest,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
+import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
@@ -72,7 +73,6 @@ import {
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
-import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -525,24 +525,6 @@ export const getAgentDownloadUrl = async (
 };
 
 /**
- * Fetches the latest version of the Elastic Agent available for download
- * @param kbnClient
- */
-
-export const fetchFleetAvailableVersions = async (kbnClient: KbnClient): Promise<string> => {
-  return kbnClient
-    .request<{ items: string[] }>({
-      method: 'GET',
-      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
-      headers: {
-        'elastic-api-version': '2023-10-31',
-      },
-    })
-    .then((response) => response.data.items[0])
-    .catch(catchAxiosErrorFormatAndThrow);
-};
-
-/**
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
@@ -868,7 +850,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
   policyName = DEFAULT_AGENT_POLICY_NAME,
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
+    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
   });
 
   if (existingPolicy.items[0]) {
@@ -1029,7 +1011,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '1m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1057,7 +1039,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1085,7 +1067,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1113,7 +1095,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1141,7 +1123,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {

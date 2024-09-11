@@ -30,7 +30,7 @@ describe('useGetIncidentTypes', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getIncidentTypes');
-    const { waitFor } = renderHook(
+    const { result, waitFor } = renderHook(
       () =>
         useGetIncidentTypes({
           http,
@@ -39,9 +39,7 @@ describe('useGetIncidentTypes', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitFor(() => {
-      expect(spy).toHaveBeenCalled();
-    });
+    await waitFor(() => result.current.isSuccess);
 
     expect(spy).toHaveBeenCalledWith({
       http,

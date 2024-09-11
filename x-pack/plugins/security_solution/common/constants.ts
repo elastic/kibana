@@ -20,6 +20,7 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
+export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
@@ -121,20 +122,7 @@ export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
-export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
-export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
-export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
-
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
-export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
-export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
-
-export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
-export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
-export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
-export const APP_KUBERNETES_PATH = `${APP_PATH}${KUBERNETES_PATH}` as const;
-export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
 export const APP_POLICIES_PATH = `${APP_PATH}${POLICIES_PATH}` as const;
@@ -145,8 +133,7 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
-export const APP_ENTITY_ANALYTICS_PATH = `${APP_PATH}${ENTITY_ANALYTICS_PATH}` as const;
-export const APP_DATA_QUALITY_PATH = `${APP_PATH}${DATA_QUALITY_PATH}` as const;
+export const NOTES_MANAGEMENT_PATH = `/notes_management` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -207,6 +194,10 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
+
+/** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
+export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
+  'securitySolution:excludedDataTiersForRuleExecution' as const;
 
 /**
  * Id for the notifications alerting type
@@ -443,7 +434,8 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
   ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  INVESTIGATION_FIELDS_FEATURE = 'INVESTIGATION_FIELDS_FEATURE',
+  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
+  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
 }
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
@@ -507,3 +499,9 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Cases external attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+
+/**
+ * Rule gaps
+ */
+export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;

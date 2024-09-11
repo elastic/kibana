@@ -6,35 +6,49 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import {
   getCreateEqlRuleSchemaMock,
   getCreateRulesSchemaMock,
+  getRulesEqlSchemaMock,
+  getRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-
-import { readRules } from './read_rules';
+import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
-
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
-jest.mock('./read_rules');
+jest.mock('./methods/get_rule_by_rule_id');
 
 describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
+    actionsClient = {
+      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as jest.Mocked<ActionsClient>;
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    const savedObjectsClient = savedObjectsClientMock.create();
+    detectionRulesClient = createDetectionRulesClient({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      savedObjectsClient,
+    });
   });
 
   it('throws if no matching rule_id is found', async () => {
@@ -44,7 +58,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rule_id: 'rule-id',
     };
 
-    (readRules as jest.Mock).mockResolvedValue(null);
+    (getRuleByRuleId as jest.Mock).mockResolvedValue(null);
     await expect(detectionRulesClient.upgradePrebuiltRule({ ruleAsset })).rejects.toThrow(
       `Failed to find rule ${ruleAsset.rule_id}`
     );
@@ -80,29 +94,27 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rule_id: 'rule-id',
     };
     // Installed version is "query"
-    const installedRule = getRuleMock({
-      ...getQueryRuleParams({
-        exceptionsList: [
-          { id: 'test_id', list_id: 'hi', type: 'detection', namespace_type: 'agnostic' },
-        ],
-      }),
-      actions: [
-        {
-          group: 'default',
-          id: 'test_id',
-          action_type_id: '.index',
-          config: {
-            index: ['index-1', 'index-2'],
-          },
-        },
-      ],
-      ruleId: 'rule-id',
-    });
+    const installedRule = getRulesSchemaMock();
+    installedRule.exceptions_list = [
+      { id: 'test_id', list_id: 'hi', type: 'detection', namespace_type: 'agnostic' },
+    ];
+    installedRule.actions = [
+      {
+        group: 'default',
+        id: 'test_id',
+        action_type_id: '.index',
+        params: {},
+      },
+    ];
+    installedRule.rule_id = 'rule-id';
+
     beforeEach(() => {
-      (readRules as jest.Mock).mockResolvedValue(installedRule);
+      jest.resetAllMocks();
+      rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+      (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
     });
 
-    it('deletes the old rule ', async () => {
+    it('deletes the old rule', async () => {
       await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.delete).toHaveBeenCalled();
     });
@@ -115,16 +127,23 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
             name: ruleAsset.name,
             tags: ruleAsset.tags,
             // enabled and actions are kept from original rule
-            actions: installedRule.actions,
+            actions: [
+              expect.objectContaining({
+                actionTypeId: '.index',
+                group: 'default',
+                id: 'test_id',
+                params: {},
+              }),
+            ],
             enabled: installedRule.enabled,
             params: expect.objectContaining({
               index: ruleAsset.index,
               description: ruleAsset.description,
               immutable: true,
               // exceptions_lists, actions, timeline_id and timeline_title are maintained
-              timelineTitle: installedRule.params.timelineTitle,
-              timelineId: installedRule.params.timelineId,
-              exceptionsList: installedRule.params.exceptionsList,
+              timelineTitle: installedRule.timeline_title,
+              timelineId: installedRule.timeline_id,
+              exceptionsList: installedRule.exceptions_list,
             }),
           }),
           options: {
@@ -145,14 +164,14 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rule_id: 'rule-id',
     };
     // Installed version is "eql"
-    const installedRule = getRuleMock({
-      ...getEqlRuleParams(),
-    });
+    const installedRule = getRulesEqlSchemaMock();
     beforeEach(() => {
-      (readRules as jest.Mock).mockResolvedValue(installedRule);
+      (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
     });
 
     it('patches the existing rule with the new params from the rule asset', async () => {
+      rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
+
       await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({

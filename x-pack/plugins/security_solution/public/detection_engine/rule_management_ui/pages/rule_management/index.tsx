@@ -9,7 +9,6 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -55,9 +54,6 @@ const RulesPageComponent: React.FC = () => {
     invalidateFetchRuleManagementFilters,
     invalidateFetchCoverageOverviewQuery,
   ]);
-  const isPerFieldPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
-    'perFieldPrebuiltRulesDiffingEnabled'
-  );
 
   const [
     {
@@ -177,7 +173,7 @@ const RulesPageComponent: React.FC = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
-          {isPerFieldPrebuiltRulesDiffingEnabled && <RuleFeatureTour />}
+          <RuleFeatureTour />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

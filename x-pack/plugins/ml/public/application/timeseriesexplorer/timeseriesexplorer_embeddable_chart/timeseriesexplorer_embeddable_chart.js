@@ -9,7 +9,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { get, has, isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import moment from 'moment-timezone';
 import {
   Subject,
@@ -28,10 +28,10 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
+import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 
 import {
   EuiCallOut,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -45,9 +45,11 @@ import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
+  mlFunctionToESAggregation,
 } from '../../../../common/util/job_utils';
 
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
+import { ForecastingModal } from '../components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
 
 import {
@@ -57,13 +59,13 @@ import {
 } from '../timeseriesexplorer_constants';
 import { getControlsForDetector } from '../get_controls_for_detector';
 import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMetricDetector } from '../get_function_description';
 import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
+import { forecastServiceFactory } from '../../services/forecast_service';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -78,9 +80,12 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     autoZoomDuration: PropTypes.number.isRequired,
     bounds: PropTypes.object.isRequired,
     chartWidth: PropTypes.number.isRequired,
+    chartHeight: PropTypes.number,
     lastRefresh: PropTypes.number.isRequired,
     onRenderComplete: PropTypes.func,
     previousRefresh: PropTypes.number.isRequired,
+    selectedJob: PropTypes.object.isRequired,
+    selectedJobStats: PropTypes.object.isRequired,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
@@ -90,6 +95,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
     dataViewsService: PropTypes.object,
+    onForecastComplete: PropTypes.func,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -110,6 +116,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
   getBoundsRoundedToInterval;
   mlTimeSeriesExplorer;
+  mlForecastService;
 
   /**
    * Returns field names that don't have a selection yet.
@@ -265,7 +272,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     } = this.props;
     const entityControls = this.getControlsForDetector();
 
-    return this.context.services.mlServices.mlApiServices.results
+    return this.context.services.mlServices.mlApi.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
         this.getCriteriaFields(selectedDetectorIndex, entityControls),
@@ -282,15 +289,13 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       )
       .pipe(
         map((resp) => {
-          const { mlJobService } = this.context.services.mlServices;
           const anomalies = resp.anomalies;
-          const detectorsByJob = mlJobService.detectorsByJob;
           anomalies.forEach((anomaly) => {
             // Add a detector property to each anomaly.
             // Default to functionDescription if no description available.
             // TODO - when job_service is moved server_side, move this to server endpoint.
-            const jobId = anomaly.jobId;
-            const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+            const jobDetectors = selectedJob.analysis_config.detectors;
+            const detector = jobDetectors[anomaly.detectorIndex];
             anomaly.detector = get(
               detector,
               ['detector_description'],
@@ -305,8 +310,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
             // Add properties used for building the links menu.
             // TODO - when job_service is moved server_side, move this to server endpoint.
-            if (has(mlJobService.customUrlsByJob, jobId)) {
-              anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
+            if (selectedJob.custom_settings && selectedJob.custom_settings.custom_urls) {
+              anomaly.customUrls = selectedJob.custom_settings.custom_urls;
             }
           });
 
@@ -338,6 +343,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       autoZoomDuration,
       bounds,
       selectedDetectorIndex,
+      selectedForecastId,
       zoom,
       functionDescription,
       selectedJob,
@@ -558,6 +564,46 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               })
             );
           });
+
+        // Plus query for forecast data if there is a forecastId stored in the appState.
+        if (selectedForecastId !== undefined) {
+          awaitingCount++;
+          const detector = selectedJob.analysis_config.detectors[detectorIndex];
+          const esAgg = mlFunctionToESAggregation(detector.function);
+          const aggType =
+            modelPlotEnabled === false &&
+            (esAgg === ML_JOB_AGGREGATION.SUM || esAgg === ML_JOB_AGGREGATION.COUNT)
+              ? { avg: 'sum', max: 'sum', min: 'sum' }
+              : undefined;
+
+          this.mlForecastService
+            .getForecastData(
+              selectedJob,
+              detectorIndex,
+              selectedForecastId,
+              nonBlankEntities,
+              searchBounds.min.valueOf(),
+              searchBounds.max.valueOf(),
+              stateUpdate.contextAggregationInterval.asMilliseconds(),
+              aggType
+            )
+            .toPromise()
+            .then((resp) => {
+              stateUpdate.contextForecastData = this.mlTimeSeriesExplorer.processForecastResults(
+                resp.results
+              );
+              finish(counter);
+            })
+            .catch((err) => {
+              this.displayErrorToastMessages(
+                err,
+                i18n.translate('xpack.ml.timeSeriesExplorer.forecastDataErrorMessage', {
+                  defaultMessage: 'Error loading forecast data for forecast ID {forecastId}',
+                  values: { forecastId: selectedForecastId },
+                })
+              );
+            });
+        }
       }
     );
   };
@@ -567,13 +613,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    * @param callback to invoke after a state update.
    */
   getControlsForDetector = () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJobId, selectedJob } = this.props;
-    return getControlsForDetector(
-      selectedDetectorIndex,
-      selectedEntities,
-      selectedJobId,
-      selectedJob
-    );
+    const { selectedDetectorIndex, selectedEntities, selectedJob } = this.props;
+    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJob);
   };
 
   /**
@@ -600,9 +641,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlApi,
       this.context.services.mlServices.mlResultsService
     );
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApi);
 
     // Listen for context chart updates.
     this.subscriptions.add(
@@ -752,9 +794,14 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       autoZoomDuration,
       bounds,
       chartWidth,
+      chartHeight,
       lastRefresh,
+      onForecastComplete,
+      selectedEntities,
       selectedDetectorIndex,
       selectedJob,
+      selectedJobStats,
+      shouldShowForecastButton,
     } = this.props;
 
     const {
@@ -798,6 +845,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       focusForecastData,
       focusAggregationInterval,
       svgWidth: chartWidth,
+      svgHeight: chartHeight,
       zoomFrom,
       zoomTo,
       zoomFromFocusLoaded,
@@ -848,6 +896,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             <EuiSpacer size="m" />
           </>
         )}
+        <EuiSpacer size="m" />
 
         {fullRefresh && loading === true && (
           <LoadingIndicator
@@ -940,7 +989,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   <TimeSeriesExplorerHelpPopover embeddableMode />
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiFlexGroup style={{ float: 'right' }}>
+              <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
                 {showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleModelBoundsCheckbox"
@@ -965,7 +1014,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
                 {showForecastCheckbox && (
                   <EuiFlexItem grow={false}>
-                    <EuiCheckbox
+                    <TimeseriesExplorerCheckbox
                       id="toggleShowForecastCheckbox"
                       label={
                         <span data-test-subj={'mlForecastCheckbox'}>
@@ -979,6 +1028,27 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                     />
                   </EuiFlexItem>
                 )}
+
+                {arePartitioningFieldsProvided &&
+                  selectedJob &&
+                  shouldShowForecastButton === true && (
+                    <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
+                      <ForecastingModal
+                        buttonMode={'empty'}
+                        job={selectedJob}
+                        jobState={selectedJobStats.state}
+                        earliestRecordTimestamp={
+                          selectedJobStats.data_counts.earliest_record_timestamp
+                        }
+                        latestRecordTimestamp={selectedJobStats.data_counts.latest_record_timestamp}
+                        detectorIndex={selectedDetectorIndex}
+                        entities={entityControls}
+                        setForecastId={this.setForecastId}
+                        className="forecast-controls"
+                        onForecastComplete={onForecastComplete}
+                      />
+                    </EuiFlexItem>
+                  )}
               </EuiFlexGroup>
 
               <TimeSeriesChartWithTooltips
@@ -989,7 +1059,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 embeddableMode
                 renderFocusChartOnly={renderFocusChartOnly}
                 selectedJob={selectedJob}
-                selectedEntities={this.props.selectedEntities}
+                selectedEntities={selectedEntities}
                 showAnnotations={showAnnotations}
                 showForecast={showForecast}
                 showModelBounds={showModelBounds}

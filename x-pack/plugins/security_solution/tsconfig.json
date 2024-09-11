@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -89,6 +93,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-exception-list-components",
+    "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/saved-objects-tagging-plugin",
@@ -145,7 +150,6 @@
     "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/security-solution-side-nav",
     "@kbn/ml-anomaly-utils",
     "@kbn/discover-plugin",
@@ -206,5 +210,18 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/integration-assistant-plugin",
+    "@kbn/avc-banner",
+    "@kbn/security-solution-common",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/config",
+    "@kbn/openapi-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/cbor",
+    "@kbn/zod",
+    "@kbn/cloud-security-posture",
+    "@kbn/security-solution-distribution-bar",
+    "@kbn/cloud-security-posture-common",
   ]
 }

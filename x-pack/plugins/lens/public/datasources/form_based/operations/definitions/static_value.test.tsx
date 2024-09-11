@@ -6,30 +6,20 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { EuiFieldNumber } from '@elastic/eui';
 import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { shallow, mount } from 'enzyme';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { staticValueOperation } from '.';
 import { FormBasedLayer } from '../../types';
 import { IndexPattern } from '../../../../types';
 import { StaticValueIndexPatternColumn } from './static_value';
 import { TermsIndexPatternColumn } from './terms';
-
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 const dateRange = {
@@ -90,6 +80,12 @@ describe('static_value', () => {
         } as StaticValueIndexPatternColumn,
       },
     };
+  });
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   function getLayerWithStaticValue(newValue: string | null | undefined): FormBasedLayer {
@@ -346,7 +342,7 @@ describe('static_value', () => {
     const ParamEditor = staticValueOperation.paramEditor!;
     it('should render current static_value', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      render(
         <ParamEditor
           {...defaultProps}
           layer={layer}
@@ -355,10 +351,8 @@ describe('static_value', () => {
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
       );
-
-      const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
-
-      expect(input.prop('value')).toEqual('23');
+      const input = screen.getByRole('spinbutton');
+      expect(input).toHaveValue(23);
     });
 
     it('should allow 0 as initial value', () => {
@@ -377,7 +371,7 @@ describe('static_value', () => {
           } as StaticValueIndexPatternColumn,
         },
       } as FormBasedLayer;
-      const instance = shallow(
+      render(
         <ParamEditor
           {...defaultProps}
           layer={zeroLayer}
@@ -386,14 +380,14 @@ describe('static_value', () => {
           currentColumn={zeroLayer.columns.col2 as StaticValueIndexPatternColumn}
         />
       );
-
-      const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
-      expect(input.prop('value')).toEqual('0');
+      expect(screen.getByRole('spinbutton')).toHaveValue(0);
     });
 
     it('should update state on change', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <ParamEditor
           {...defaultProps}
           layer={layer}
@@ -402,21 +396,9 @@ describe('static_value', () => {
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
       );
-
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-static_value-input"]')
-        .find(EuiFieldNumber);
-
-      await act(async () => {
-        input.prop('onChange')!({
-          currentTarget: { value: '27' },
-        } as React.ChangeEvent<HTMLInputElement>);
-      });
-
-      instance.update();
-
-      expect(updateLayerSpy.mock.calls[0]).toEqual([expect.any(Function)]);
-      // check that the result of the setter call is correct
+      await user.type(screen.getByRole('spinbutton'), '{backspace}{backspace}27');
+      jest.advanceTimersByTime(256);
+      expect(updateLayerSpy).toHaveBeenCalledTimes(1);
       expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual({
         ...layer,
         columns: {
@@ -433,8 +415,10 @@ describe('static_value', () => {
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <ParamEditor
           {...defaultProps}
           layer={layer}
@@ -444,25 +428,10 @@ describe('static_value', () => {
         />
       );
 
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-static_value-input"]')
-        .find(EuiFieldNumber);
-
-      await act(async () => {
-        input.prop('onChange')!({
-          currentTarget: { value: '' },
-        } as React.ChangeEvent<HTMLInputElement>);
-      });
-
-      instance.update();
-
+      await user.type(screen.getByRole('spinbutton'), '{backspace}{backspace}');
+      jest.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
-      expect(
-        instance
-          .find('[data-test-subj="lns-indexPattern-static_value-input"]')
-          .find(EuiFieldNumber)
-          .prop('value')
-      ).toEqual('');
+      expect(screen.getByRole('spinbutton')).toHaveValue(null);
     });
   });
 });

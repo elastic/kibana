@@ -38,6 +38,7 @@ describe('Dependencies', () => {
   describe('top-level dependencies page', () => {
     it('has a list of dependencies and you can navigate to the page for one', () => {
       cy.visitKibana(`/app/apm/services?${new URLSearchParams(timeRange)}`);
+      cy.getByTestSubj('superDatePickerstartDatePopoverButton');
       cy.contains('nav a', 'Dependencies').click();
 
       // `force: true` because Cypress says the element is 0x0
@@ -112,8 +113,7 @@ describe('Dependencies', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/179083
-describe.skip('Dependencies with high volume of data', () => {
+describe('Dependencies with high volume of data', () => {
   before(() => {
     synthtrace.index(
       generateManyDependencies({

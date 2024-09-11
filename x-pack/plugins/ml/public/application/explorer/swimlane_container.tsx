@@ -83,7 +83,7 @@ const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
-  return arg && arg.hasOwnProperty('cardinality');
+  return arg && Object.hasOwn(arg, 'cardinality');
 }
 
 /**

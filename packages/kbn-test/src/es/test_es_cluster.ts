@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -202,6 +203,7 @@ export function createTestEsCluster<
     license,
     basePath,
     esArgs,
+    resources: files,
   };
 
   return new (class TestCluster {
@@ -297,7 +299,7 @@ export function createTestEsCluster<
             // If we have multiple nodes, we shouldn't try setting up the native realm
             // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
-            skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipSecuritySetup: this.nodes.length > 1 && i < this.nodes.length - 1,
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
             onEarlyExit,
             writeLogsToPath,

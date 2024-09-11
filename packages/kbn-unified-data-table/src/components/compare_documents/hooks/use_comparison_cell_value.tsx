@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiDataGridCellValueElementProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -39,7 +40,7 @@ export interface UseComparisonCellValueProps {
   dataView: DataView;
   comparisonFields: string[];
   fieldColumnId: string;
-  selectedDocs: string[];
+  selectedDocIds: string[];
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
@@ -50,13 +51,13 @@ export const useComparisonCellValue = ({
   dataView,
   comparisonFields,
   fieldColumnId,
-  selectedDocs,
+  selectedDocIds,
   diffMode,
   fieldFormats,
   getDocById,
   additionalFieldGroups,
 }: UseComparisonCellValueProps) => {
-  const baseDocId = selectedDocs[0];
+  const baseDocId = selectedDocIds[0];
   const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
   const [calculateDiffMemoized] = useState(() => createCalculateDiffMemoized());
 
@@ -92,7 +93,7 @@ export const useComparisonCellValue = ({
   );
 };
 
-type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocs'> &
+type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
   EuiDataGridCellValueElementProps & {
     baseDocId: string;
     baseDoc: DataTableRecord['flattened'] | undefined;

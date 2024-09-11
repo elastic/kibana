@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -60,6 +60,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -102,6 +103,7 @@ export interface SetupPlugins {
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
   cases?: CasesPublicSetup;
+  data: DataPublicPluginSetup;
 }
 
 /**
@@ -152,6 +154,7 @@ export interface StartPlugins {
   savedSearch: SavedSearchPublicPluginStart;
   alerting: PluginStartContract;
   core: CoreStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

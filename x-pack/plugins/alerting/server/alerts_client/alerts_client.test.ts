@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -22,6 +23,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
@@ -33,6 +35,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -75,7 +78,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
 const maxAlerts = 1000;
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -235,6 +238,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SEVERITY_IMPROVING]: false,
   [ALERT_START]: date,
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: date },
@@ -253,6 +257,8 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+  [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: undefined,
   ...overrides,
 });
 
@@ -267,6 +273,8 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: date },
   [ALERT_STATUS]: 'recovered',
   [ALERT_CONSECUTIVE_MATCHES]: 0,
+  [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: true,
   ...overrides,
 });
 
@@ -278,6 +286,9 @@ const defaultExecutionOpts = {
   recoveredAlertsFromState: {},
   startedAt: null,
 };
+
+const ruleInfo = `for test.rule-type:1 'rule-name'`;
+const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
@@ -476,7 +487,8 @@ describe('Alerts Client', () => {
           });
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error searching for tracked alerts by UUID - search failed!`
+            `Error searching for tracked alerts by UUID ${ruleInfo} - search failed!`,
+            logTags
           );
 
           spy.mockRestore();
@@ -682,6 +694,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -769,7 +782,8 @@ describe('Alerts Client', () => {
           expect(spy).toHaveBeenNthCalledWith(2, 'recoveredCurrent');
 
           expect(logger.error).toHaveBeenCalledWith(
-            "Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts"
+            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
+            logTags
           );
           spy.mockRestore();
 
@@ -964,6 +978,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1013,6 +1028,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1023,6 +1039,7 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',
@@ -1334,7 +1351,8 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alerts: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`
+            `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
+            { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
           );
         });
 
@@ -1411,7 +1429,8 @@ describe('Alerts Client', () => {
           });
 
           expect(logger.warn).toHaveBeenCalledWith(
-            `Could not update alert abc in partial-.internal.alerts-test.alerts-default-000001. Partial and restored alert indices are not supported.`
+            `Could not update alert abc in partial-.internal.alerts-test.alerts-default-000001. Partial and restored alert indices are not supported ${ruleInfo}.`,
+            logTags
           );
         });
 
@@ -1436,7 +1455,8 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing 2 alerts to .alerts-test.alerts-default - fail`
+            `Error writing 2 alerts to .alerts-test.alerts-default ${ruleInfo} - fail`,
+            logTags
           );
         });
 
@@ -1466,7 +1486,8 @@ describe('Alerts Client', () => {
           });
 
           expect(logger.debug).toHaveBeenCalledWith(
-            `Resources registered and installed for test context but "shouldWrite" is set to false.`
+            `Resources registered and installed for test context but "shouldWrite" is set to false ${ruleInfo}.`,
+            logTags
           );
           expect(clusterClient.bulk).not.toHaveBeenCalled();
         });
@@ -2014,7 +2035,8 @@ describe('Alerts Client', () => {
           ).rejects.toBe('something went wrong!');
 
           expect(logger.warn).toHaveBeenCalledWith(
-            'Error updating alert maintenance window IDs: something went wrong!'
+            `Error updating alert maintenance window IDs for test.rule-type:1 'rule-name': something went wrong!`,
+            logTags
           );
         });
       });

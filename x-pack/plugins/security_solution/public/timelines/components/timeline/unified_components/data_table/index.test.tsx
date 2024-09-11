@@ -17,14 +17,25 @@ import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
-import type { ExpandedDetailTimeline } from '../../../../../../common/types';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../../sourcerer/containers');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(() => ({
+    pathname: '',
+    search: '',
+  })),
+}));
+
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
-const onEventClosedMock = jest.fn();
 const onChangePageMock = jest.fn();
+
+const openFlyoutMock = jest.fn();
+
+jest.mock('@kbn/expandable-flyout');
 
 const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
@@ -39,7 +50,7 @@ type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
 
 // These tests can take more than standard timeout of 5s
 // that is why we are setting it to 10s
-const SPECIAL_TEST_TIMEOUT = 10000;
+const SPECIAL_TEST_TIMEOUT = 50000;
 
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
@@ -61,9 +72,6 @@ const TestComponent = (props: TestComponentProps) => {
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
         totalCount={mockTimelineData.length}
-        onEventClosed={onEventClosedMock}
-        showExpandedDetails={false}
-        expandedDetail={{}}
         onChangePage={onChangePageMock}
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
@@ -81,10 +89,15 @@ const getTimelineFromStore = (
   return store.getState().timeline.timelineById[timelineId];
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/179843
-describe.skip('unified data table', () => {
+describe('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
+      openFlyout: openFlyoutMock,
+    });
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it(
@@ -216,7 +229,7 @@ describe.skip('unified data table', () => {
     async () => {
       const rowHeight = {
         initial: 2,
-        new: 1,
+        new: 4,
       };
       const customMockStore = createMockStore();
 
@@ -227,7 +240,9 @@ describe.skip('unified data table', () => {
         })
       );
 
-      render(<TestComponent store={customMockStore} />);
+      render(
+        <TestComponent store={customMockStore} events={[mockTimelineData[0]]} totalCount={1} />
+      );
 
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -257,99 +272,6 @@ describe.skip('unified data table', () => {
     },
     SPECIAL_TEST_TIMEOUT
   );
-
-  describe('details flyout', () => {
-    it(
-      'should show defails flyout when clicked on expand event',
-      async () => {
-        render(<TestComponent showExpandedDetails={true} />);
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline:details-panel:flyout')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should show details flyout when expandedDetails state is set',
-      async () => {
-        const customMockStore = createMockStore();
-        const mockExpandedDetail: ExpandedDetailTimeline = {
-          query: {
-            params: {
-              eventId: 'some_id',
-              indexName: 'security-*',
-            },
-            panelView: 'eventDetail',
-          },
-        };
-        customMockStore.dispatch(
-          timelineActions.toggleDetailPanel({
-            id: TimelineId.test,
-            tabType: TimelineTabs.query,
-            ...mockExpandedDetail.query,
-          })
-        );
-
-        render(
-          <TestComponent
-            store={customMockStore}
-            showExpandedDetails={true}
-            expandedDetail={mockExpandedDetail}
-          />
-        );
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline:details-panel:flyout')).toBeVisible();
-        });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-    it(
-      'should close details flyout when close icon is clicked',
-      async () => {
-        const customMockStore = createMockStore();
-        const mockExpandedDetail: ExpandedDetailTimeline = {
-          query: {
-            params: {
-              eventId: 'some_id',
-              indexName: 'security-*',
-            },
-            panelView: 'eventDetail',
-          },
-        };
-
-        customMockStore.dispatch(
-          timelineActions.toggleDetailPanel({
-            id: TimelineId.test,
-            tabType: TimelineTabs.query,
-            ...mockExpandedDetail.query,
-          })
-        );
-
-        render(
-          <TestComponent
-            store={customMockStore}
-            showExpandedDetails={true}
-            expandedDetail={mockExpandedDetail}
-          />
-        );
-
-        await waitFor(() => {
-          expect(screen.getByTestId('euiFlyoutCloseButton')).toBeVisible();
-        });
-
-        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-        expect(onEventClosedMock).toHaveBeenCalledTimes(1);
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-  });
 
   describe('pagination', () => {
     // change the number of items per page

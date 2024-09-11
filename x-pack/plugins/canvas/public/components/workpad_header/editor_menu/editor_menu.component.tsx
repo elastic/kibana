@@ -158,14 +158,14 @@ export const EditorMenu: FC<Props> = ({
       items: [
         ...visTypeAliases.map(getVisTypeAliasMenuItem),
         ...getAddPanelActionMenuItems(closePopover),
+        ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
+        ...promotedVisTypes.map(getVisTypeMenuItem),
         ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
           name: appName,
           icon,
           panel: panelId,
           'data-test-subj': `canvasEditorMenu-${id}Group`,
         })),
-        ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
-        ...promotedVisTypes.map(getVisTypeMenuItem),
       ],
     },
     ...Object.values(factoryGroupMap).map(

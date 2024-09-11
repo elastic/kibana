@@ -11,17 +11,22 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
+import type { AgentPolicy } from '../../../common';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
-
 import { agentPolicyService } from '../agent_policy';
 import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
 
-import { deleteEnrollmentApiKey, generateEnrollmentAPIKey } from './enrollment_api_key';
+import {
+  deleteEnrollmentApiKey,
+  generateEnrollmentAPIKey,
+  getEnrollmentAPIKey,
+} from './enrollment_api_key';
 
 jest.mock('../audit_logging');
 jest.mock('../agent_policy');
 jest.mock('../app_context');
+jest.mock('../spaces/helpers');
 
 jest.mock('uuid', () => {
   return {
@@ -94,8 +99,8 @@ describe('enrollment api keys', () => {
 
       mockedAgentPolicyService.get.mockResolvedValue({
         id: 'test-agent-policy',
-        space_id: 'test123',
-      } as any);
+        space_ids: ['test123'],
+      } as AgentPolicy);
 
       await generateEnrollmentAPIKey(soClient, esClient, {
         name: 'test-api-key',
@@ -108,6 +113,40 @@ describe('enrollment api keys', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             namespaces: ['test123'],
+          }),
+        })
+      );
+    });
+
+    it('should set namespaces if agent policy specify mulitple space IDs', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+        space_ids: ['test123', 'test456'],
+      } as AgentPolicy);
+
+      await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        expiration: '7d',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
+      });
+
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            namespaces: ['test123', 'test456'],
           }),
         })
       );
@@ -145,6 +184,51 @@ describe('enrollment api keys', () => {
         message:
           'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id]',
       });
+    });
+  });
+
+  describe('getEnrollementApiKey', () => {
+    it('should not allow to retrieve a key in the current space', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: ENROLLMENT_API_KEYS_INDEX,
+        _source: {
+          active: true,
+          created_at: new Date().toISOString(),
+          api_key_id: 'test-enrollment-api-key-id',
+          namespaces: ['test'],
+        },
+        found: true,
+      });
+
+      const enrollmentKey = await getEnrollmentAPIKey(
+        esClient,
+        'test-enrollment-api-key-id',
+        'test'
+      );
+      expect(enrollmentKey).toBeDefined();
+    });
+    it('should not allow to retrieve a key in a different space', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue({
+        _id: 'test-id',
+        _index: ENROLLMENT_API_KEYS_INDEX,
+        _source: {
+          active: true,
+          created_at: new Date().toISOString(),
+          api_key_id: 'test-enrollment-api-key-id',
+        },
+        found: true,
+      });
+
+      await expect(
+        getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id', 'test')
+      ).rejects.toThrowError(
+        'Enrollment api key test-enrollment-api-key-id not found in namespace'
+      );
     });
   });
 });

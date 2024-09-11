@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -12,6 +13,7 @@ import type {
   RuntimeField,
   SerializedFieldFormat,
   RuntimePrimitiveTypes,
+  DataViewField,
 } from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 import type { PreviewController } from './preview_controller';
@@ -69,6 +71,8 @@ export interface PreviewState {
   isPreviewAvailable: boolean;
   isPanelVisible: boolean;
   isSaving: boolean;
+  concreteFields: Array<{ name: string; type: string }>;
+  fieldMap: Record<string, DataViewField>;
 }
 
 export interface FetchDocError {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -769,7 +770,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(result.saved_objects).toHaveLength(4);
       generatedResults.hits.hits.forEach((doc, i) => {
         expect(result.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
           type: doc._source!.type,
           originId: doc._source!.originId,
           ...mockTimestampFields,
@@ -825,7 +826,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       generatedResults.hits.hits.forEach((doc, i) => {
         expect(result.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
           type: doc._source!.type,
           originId: doc._source!.originId,
           ...mockTimestampFields,
@@ -882,7 +883,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       generatedResults.hits.hits.forEach((doc, i) => {
         expect(result.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
           type: doc._source!.type,
           originId: doc._source!.originId,
           ...mockTimestampFields,
@@ -927,7 +928,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         objects: generatedResults.hits.hits.map((obj) => {
           return {
             type: obj._source?.type,
-            id: obj._id.slice(obj._id.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
+            id: obj._id!.slice(obj._id!.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
             existingNamespaces:
               obj._source?.namespaces ?? obj._source?.namespace ? [obj._source?.namespace] : [],
           };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { PublishingSubject } from '../publishing_subject';
@@ -34,7 +35,7 @@ interface LibraryTransformGuards {
  * APIs that inherit this interface can be linked to and unlinked from the library in place without
  * re-initialization.
  */
-export interface HasInPlaceLibraryTransforms
+export interface HasInPlaceLibraryTransforms<RuntimeState extends object = object>
   extends Partial<LibraryTransformGuards>,
     DuplicateTitleCheck {
   /**
@@ -48,6 +49,11 @@ export interface HasInPlaceLibraryTransforms
    * @returns {Promise<string>} id of persisted library item
    */
   saveToLibrary: (title: string) => Promise<string>;
+
+  /**
+   * gets a snapshot of this embeddable's runtime state without any state that links it to a library item.
+   */
+  getByValueRuntimeSnapshot: () => RuntimeState;
 
   /**
    * Un-links this embeddable from the library. This method is optional, and only needed if the Embeddable
@@ -69,6 +75,7 @@ export const apiHasInPlaceLibraryTransforms = (
 };
 
 /**
+ * @deprecated use HasInPlaceLibraryTransforms instead
  * APIs that inherit this interface can be linked to and unlinked from the library. After the save or unlink
  * operation, the embeddable will be reinitialized.
  */

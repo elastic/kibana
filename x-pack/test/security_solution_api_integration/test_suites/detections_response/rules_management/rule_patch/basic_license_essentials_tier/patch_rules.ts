@@ -29,8 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless patch_rules', () => {
     describe('patch rules', () => {
@@ -54,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -100,17 +99,21 @@ export default ({ getService }: FtrProviderContext) => {
         expect(patchedRule).toMatchObject(expectedRule);
       });
 
-      it('@skipInServerless should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
-        await createRule(supertest, log, getSimpleRule('rule-1'));
+      describe('@skipInServerless ', function () {
+        /* Wrapped in `describe` block, because `this.tags` only works in `describe` blocks */
+        this.tags('skipFIPS');
+        it('should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
+          await createRule(supertest, log, getSimpleRule('rule-1'));
 
-        // patch a simple rule's type to machine learning
-        const { body } = await securitySolutionApi
-          .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
-          .expect(403);
+          // patch a simple rule's type to machine learning
+          const { body } = await securitySolutionApi
+            .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
+            .expect(403);
 
-        expect(body).toEqual({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
+          expect(body).toEqual({
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 403,
+          });
         });
       });
 
@@ -128,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -145,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -161,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -179,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);
@@ -205,7 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
         outputRule.revision = 2;
-        const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(outputRule, await utils.getUsername());
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).toEqual(expectedRule);

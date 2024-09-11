@@ -7,8 +7,6 @@
 
 import {
   DEFAULT_DATASET_TYPE,
-  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
   DEFAULT_SORT_DIRECTION,
   DEFAULT_SORT_FIELD,
 } from '../../../../common/constants';
@@ -16,8 +14,15 @@ import { DefaultDatasetQualityControllerState } from './types';
 
 const ONE_MINUTE_IN_MS = 60000;
 
+export const DEFAULT_DICTIONARY_TYPE = {
+  logs: [],
+  metrics: [],
+  traces: [],
+  synthetics: [],
+  profiling: [],
+};
+
 export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
-  type: DEFAULT_DATASET_TYPE,
   table: {
     page: 0,
     rowsPerPage: 10,
@@ -26,6 +31,13 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       direction: DEFAULT_SORT_DIRECTION,
     },
   },
+  datasetUserPrivileges: {
+    canRead: true,
+    canMonitor: true,
+    canViewIntegrations: true,
+  },
+  dataStreamStats: [],
+  degradedDocStats: DEFAULT_DICTIONARY_TYPE,
   filters: {
     inactive: true,
     fullNames: false,
@@ -40,18 +52,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     integrations: [],
     namespaces: [],
     qualities: [],
-  },
-  flyout: {
-    degradedFields: {
-      table: {
-        page: 0,
-        rowsPerPage: 10,
-        sort: {
-          field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
-          direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
-        },
-      },
-    },
+    types: [DEFAULT_DATASET_TYPE],
   },
   datasets: [],
   isSizeStatsAvailable: true,

@@ -42,7 +42,6 @@ export default {
             <Story />
           </PluginContext.Provider>
         </KibanaContextProvider>
-        //
       );
     },
   ],

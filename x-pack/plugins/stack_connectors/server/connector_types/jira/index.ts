@@ -95,7 +95,15 @@ async function executor(
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<JiraExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
+  const {
+    actionId,
+    config,
+    params,
+    secrets,
+    configurationUtilities,
+    logger,
+    connectorUsageCollector,
+  } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: JiraExecutorResultData | null = null;
 
@@ -105,7 +113,8 @@ async function executor(
       secrets,
     },
     logger,
-    configurationUtilities
+    configurationUtilities,
+    connectorUsageCollector
   );
 
   if (!api[subAction]) {

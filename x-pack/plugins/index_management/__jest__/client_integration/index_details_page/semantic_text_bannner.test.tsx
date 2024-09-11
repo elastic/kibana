@@ -20,7 +20,7 @@ describe('When semantic_text is enabled', () => {
     getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
     setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
     const setup = registerTestBed(SemanticTextBanner, {
-      defaultProps: { isSemanticTextEnabled: true },
+      defaultProps: { isSemanticTextEnabled: true, isPlatinumLicense: true },
       memoryRouter: { wrapComponent: false },
     });
     const testBed = setup();
@@ -53,6 +53,21 @@ describe('When semantic_text is enabled', () => {
 
     expect(setItemSpy).toHaveBeenCalledWith('semantic-text-banner-display', 'false');
     expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(false);
+  });
+});
+
+describe('when user does not have ML permissions', () => {
+  const setupWithNoMlPermission = registerTestBed(SemanticTextBanner, {
+    defaultProps: { isSemanticTextEnabled: true, isPlatinumLicense: false },
+    memoryRouter: { wrapComponent: false },
+  });
+
+  const { find } = setupWithNoMlPermission();
+
+  it('should contain content related to semantic_text', () => {
+    expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
+      'Semantic text now available for platinum license'
+    );
   });
 });
 

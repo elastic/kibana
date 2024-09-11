@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiLoadingChart } from '@elastic/eui';
@@ -64,14 +65,15 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     useLayoutEffect(() => {
       if (typeof ref !== 'function' && ref?.current) {
+        const panelRef = ref.current;
         if (scrollToPanelId === id) {
-          container.scrollToPanel(ref.current);
+          container.scrollToPanel(panelRef);
         }
         if (highlightPanelId === id) {
-          container.highlightPanel(ref.current);
+          container.highlightPanel(panelRef);
         }
 
-        ref.current.querySelectorAll('*').forEach((e) => {
+        panelRef.querySelectorAll('*').forEach((e) => {
           if (blurPanel) {
             // remove blurred panels and nested elements from tab order
             e.setAttribute('tabindex', '-1');

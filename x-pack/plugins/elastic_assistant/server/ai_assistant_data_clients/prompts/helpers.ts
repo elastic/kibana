@@ -9,9 +9,10 @@ import { estypes } from '@elastic/elasticsearch';
 import {
   PromptCreateProps,
   PromptResponse,
+  PromptType,
   PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
 
 export const transformESToPrompts = (response: EsPromptsSchema[]): PromptResponse[] => {
@@ -31,8 +32,10 @@ export const transformESToPrompts = (response: EsPromptsSchema[]): PromptRespons
       namespace: promptSchema.namespace,
       id: promptSchema.id,
       name: promptSchema.name,
-      promptType: promptSchema.prompt_type,
-      isShared: promptSchema.is_shared,
+      promptType: promptSchema.prompt_type as unknown as PromptType,
+      color: promptSchema.color,
+      categories: promptSchema.categories,
+      consumer: promptSchema.consumer,
       createdBy: promptSchema.created_by,
       updatedBy: promptSchema.updated_by,
     };
@@ -62,10 +65,13 @@ export const transformESSearchToPrompts = (
         isNewConversationDefault: promptSchema.is_new_conversation_default,
         updatedAt: promptSchema.updated_at,
         namespace: promptSchema.namespace,
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
         name: promptSchema.name,
-        promptType: promptSchema.prompt_type,
-        isShared: promptSchema.is_shared,
+        promptType: promptSchema.prompt_type as unknown as PromptType,
+        color: promptSchema.color,
+        categories: promptSchema.categories,
+        consumer: promptSchema.consumer,
         createdBy: promptSchema.created_by,
         updatedBy: promptSchema.updated_by,
       };
@@ -77,14 +83,15 @@ export const transformESSearchToPrompts = (
 export const transformToUpdateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { content, isNewConversationDefault, isShared, id }: PromptUpdateProps
+  { content, isNewConversationDefault, categories, color, id }: PromptUpdateProps
 ): UpdatePromptSchema => {
   return {
     id,
     updated_at: updatedAt,
     content: content ?? '',
     is_new_conversation_default: isNewConversationDefault,
-    is_shared: isShared,
+    categories,
+    color,
     users: [
       {
         id: user.profile_uid,
@@ -97,13 +104,25 @@ export const transformToUpdateScheme = (
 export const transformToCreateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { content, isDefault, isNewConversationDefault, isShared, name, promptType }: PromptCreateProps
+  {
+    content,
+    isDefault,
+    isNewConversationDefault,
+    categories,
+    color,
+    consumer,
+    name,
+    promptType,
+  }: PromptCreateProps
 ): CreatePromptSchema => {
   return {
+    '@timestamp': updatedAt,
     updated_at: updatedAt,
     content: content ?? '',
     is_new_conversation_default: isNewConversationDefault,
-    is_shared: isShared,
+    color,
+    consumer,
+    categories,
     name,
     is_default: isDefault,
     prompt_type: promptType,
@@ -131,8 +150,11 @@ export const getUpdateScript = ({
     if (params.assignEmpty == true || params.containsKey('is_new_conversation_default')) {
       ctx._source.is_new_conversation_default = params.is_new_conversation_default;
     }
-    if (params.assignEmpty == true || params.containsKey('is_shared')) {
-      ctx._source.is_shared = params.is_shared;
+    if (params.assignEmpty == true || params.containsKey('color')) {
+      ctx._source.color = params.color;
+    }
+    if (params.assignEmpty == true || params.containsKey('categories')) {
+      ctx._source.categories = params.categories;
     }
     ctx._source.updated_at = params.updated_at;
   `,

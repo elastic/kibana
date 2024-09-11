@@ -1,13 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLLocation, ESQLMessage } from '@kbn/esql-ast';
+import type {
+  ESQLColumn,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLLocation,
+  ESQLMessage,
+} from '@kbn/esql-ast';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
@@ -370,6 +377,46 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'error',
       };
+    case 'noAggFunction':
+      return {
+        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.noAggFunction', {
+          defaultMessage:
+            'At least one aggregation function required in [{command}], found [{expression}]',
+          values: {
+            command: out.commandName.toUpperCase(),
+            expression: out.expression,
+          },
+        }),
+        type: 'error',
+      };
+    case 'expressionNotAggClosed':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.expressionNotAggClosed',
+          {
+            defaultMessage:
+              'Cannot combine aggregation and non-aggregation values in [{command}], found [{expression}]',
+            values: {
+              command: out.commandName.toUpperCase(),
+              expression: out.expression,
+            },
+          }
+        ),
+        type: 'error',
+      };
+    case 'aggInAggFunction':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.aggInAggFunction',
+          {
+            defaultMessage:
+              'The aggregation function [{nestedAgg}] cannot be used as an argument in another aggregation function',
+            values: {
+              nestedAgg: out.nestedAgg,
+            },
+          }
+        ),
+      };
   }
   return { message: '' };
 }
@@ -391,7 +438,7 @@ export function createMessage(
   message: string,
   location: ESQLLocation,
   messageId: string
-) {
+): ESQLMessage {
   return {
     type,
     text: message,
@@ -399,6 +446,65 @@ export function createMessage(
     code: messageId,
   };
 }
+
+const createError = (messageId: string, location: ESQLLocation, message: string = '') =>
+  createMessage('error', message, location, messageId);
+
+export const errors = {
+  unexpected: (
+    location: ESQLLocation,
+    message: string = i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.validation.errors.unexpected.message',
+      {
+        defaultMessage: 'Unexpected error, this should never happen.',
+      }
+    )
+  ): ESQLMessage => {
+    return createError('unexpected', location, message);
+  },
+
+  byId: <K extends ErrorTypes>(
+    id: K,
+    location: ESQLLocation,
+    values: ErrorValues<K>
+  ): ESQLMessage =>
+    getMessageFromId({
+      messageId: id,
+      values,
+      locations: location,
+    }),
+
+  unknownFunction: (fn: ESQLFunction): ESQLMessage =>
+    errors.byId('unknownFunction', fn.location, fn),
+
+  unknownColumn: (column: ESQLColumn): ESQLMessage =>
+    errors.byId('unknownColumn', column.location, {
+      name: column.name,
+    }),
+
+  noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
+    errors.byId('noAggFunction', fn.location, {
+      commandName: cmd.name,
+      expression: fn.text,
+    }),
+
+  expressionNotAggClosed: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
+    errors.byId('expressionNotAggClosed', fn.location, {
+      commandName: cmd.name,
+      expression: fn.text,
+    }),
+
+  unknownAggFunction: (col: ESQLColumn, type: string = 'FieldAttribute'): ESQLMessage =>
+    errors.byId('unknownAggregateFunction', col.location, {
+      value: col.name,
+      type,
+    }),
+
+  aggInAggFunction: (fn: ESQLFunction): ESQLMessage =>
+    errors.byId('aggInAggFunction', fn.location, {
+      nestedAgg: fn.name,
+    }),
+};
 
 export function getUnknownTypeLabel() {
   return i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownColumnType', {

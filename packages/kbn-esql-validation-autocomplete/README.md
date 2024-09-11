@@ -39,7 +39,7 @@ const myCallbacks = {
 const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", getAstAndSyntaxErrors, undefined, myCallbacks);
 ```
 
-If not all callbacks are available it is possible to gracefully degradate the validation experience with the `ignoreOnMissingCallbacks` option:
+If not all callbacks are available it is possible to gracefully degrade the validation experience with the `ignoreOnMissingCallbacks` option:
 
 ```js
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -61,7 +61,7 @@ const { errors, warnings } = await validateQuery(
 
 #### Autocomplete
 
-This is the complete logic for the ES|QL autocomplete language, it is completely indepedent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
+This is the complete logic for the ES|QL autocomplete language, it is completely independent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
 
 ```js
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -207,14 +207,145 @@ The autocomplete/suggest task takes a query as input together with the current c
 Note that autocomplete works most of the time with incomplete/invalid queries, so some logic to manipulate the query into something valid (see the `EDITOR_MARKER` or the `countBracketsUnclosed` functions for more).
 
 Once the AST is produced there's a `getAstContext` function that finds the cursor position node (and its parent command), together with some hint like the type of current context: `expression`, `function`, `newCommand`, `option`.
-The most complex case is the `expression` as it can cover a moltitude of cases. The function is highly commented in order to identify the specific cases, but there's probably some obscure area still to comment/clarify.
+The most complex case is the `expression` as it can cover a multitude of cases. The function is highly commented in order to identify the specific cases, but there's probably some obscure area still to comment/clarify.
 
-### Adding new commands/options/functions/erc...
+### Automated testing
 
-To update the definitions:
+Both the validation and autocomplete engine are covered by extensive suites of tests.
 
-1. open either approriate definition file within the `definitions` folder and add a new entry to the relative array
-2. if you are adding a function, run `yarn maketests` to add a set of fundamental validation tests for the new definition. If any of the suggested tests are wrong, feel free to correct them by hand. If it seems like a general problem, open an issue with the details so that we can update the generator code.
-3. write new tests for validation and autocomplete
+#### Running the tests
 
-- if a new function requires a new type of test, make sure to write it manually
+All the tests can be run using the `yarn jest:tests packages/kbn-esql-validation-autocomplete/path/to/test/file` command at the root of the repository.
+
+To run all autocomplete and validation tests you can specifically run
+
+`yarn test:jest packages/kbn-esql-validation-autocomplete/`
+
+#### Ongoing refactor
+
+The test suites are in a state of transition from an older pattern to a newer pattern and so they are more complicated than we would like. We aim to improve and simplify the DX over time.
+
+The older pattern is
+
+- a single test file for each engine, one for validation, one for autocomplete. These were always large files and have only grown.
+- custom test methods: `testSuggestions` / `testErrorsAndWarnings`
+- validation cases are recorded in a JSON file which is then used to check our results against a live Elasticsearch instance in a functional test
+
+The newer pattern is
+
+- splitting the tests into multiple smaller files, all found in `__tests__` directories
+- standard test methods (`it`, `test`) with custom _assertion_ helpers
+- validation cases are checked against Elasticsearch by injecting assertion helpers run API integration tests. This does not require a JSON file.
+
+#### Validation
+
+##### The new way
+
+Validation test logic is found in `packages/kbn-esql-validation-autocomplete/src/validation/__tests__`.
+
+Tests are found in files named with the following convention: `validation.some-description.test.ts`.
+
+Here is an example of a block in the new test format.
+
+```ts
+describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
+  test('errors on invalid command start', async () => {
+    const { expectErrors } = await setup();
+
+    await expectErrors('m', [
+      "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+    ]);
+    await expectErrors('metrics ', [
+      "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+    ]);
+  });
+});
+```
+
+`expectErrors` is created in the `setup()` factory. It has a very similar API to `testErrorsAndWarnings` however it is not itself a Jest test case. It is simply an assertion that is wrapped in a test case defined with the standard `test` or `it` function.
+
+##### The old way
+
+The old validation tests look like this
+
+```ts
+testErrorsAndWarnings(`ROW var = NOT 5 LIKE "?a"`, [
+  `Argument of [LIKE] must be [text], found value [5] type [integer]`,
+]);
+```
+
+and are found in `packages/kbn-esql-validation-autocomplete/src/validation/validation.test.ts`.
+
+`testErrorsAndWarnings` supports `skip` and `only` modifiers e.g. `testErrorsAndWarnings.only('...')`.
+
+It accepts
+
+1. a query
+2. a list of expected errors (can be empty)
+3. a list of expected warnings (can be empty or omitted)
+
+Running the tests in `validation.test.ts` populates `packages/kbn-esql-validation-autocomplete/src/validation/esql_validation_meta_tests.json` which is then used in `test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
+
+#### Autocomplete
+
+##### The new way
+
+The new tests are found in `packages/kbn-esql-validation-autocomplete/src/autocomplete/__tests__`.
+
+They look like this.
+
+```ts
+test('lists possible aggregations on space after command', async () => {
+  const { assertSuggestions } = await setup();
+  const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
+
+  await assertSuggestions('from a | stats /', expected);
+  await assertSuggestions('FROM a | STATS /', expected);
+});
+```
+
+`assertSuggestions` is created by the `setup` factory. It does not set up a Jest test case internally, so it needs to be wrapped in `test` or `it`.
+
+The suggestion position is calculated from the placement of `/` in the query.
+
+The arguments are as follows
+
+1. the query
+2. the expected suggestions (`Array<string | PartialSuggestionWithText>`)
+3. options
+
+Options is
+
+```ts
+export interface SuggestOptions {
+  triggerCharacter?: string;
+  callbacks?: ESQLCallbacks;
+}
+```
+
+So, that allows you to customize the [trigger kind](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html) in the `ctx` object and the field list and other callback results in `callbacks`.
+
+##### The old way
+
+All the legacy autocomplete tests are found in `packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.test.ts`.
+
+They look like this
+
+```ts
+testSuggestions('from a | eval a = 1 year /', [
+  ',',
+  '| ',
+  ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+    'time_interval',
+  ]),
+]);
+```
+
+Similarly to `testErrorsAndWarnings`, `testSuggestions` is an all-in-one utility that sets up a Jest test case internally.
+
+Its parameters are as follows
+
+1. the query
+2. the expected suggestions (can be strings or `Partial<SuggestionRawDefinition>`)
+3. the trigger character. This should only be included if the test is intended to validate a "Trigger Character" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#TriggerCharacter))
+4. custom callback data such as a list of indicies or a field list

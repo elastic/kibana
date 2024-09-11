@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -19,7 +19,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common';
 import { getAttackDiscoveryMarkdown } from '../../../get_attack_discovery_markdown/get_attack_discovery_markdown';
 import * as i18n from './translations';
-import type { AttackDiscovery } from '../../../types';
 import { useAddToNewCase } from '../use_add_to_case';
 import { useAddToExistingCase } from '../use_add_to_existing_case';
 import { useViewInAiAssistant } from '../../view_in_ai_assistant/use_view_in_ai_assistant';

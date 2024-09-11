@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CorrelationsDetails } from './correlations_details';
 import { TestProviders } from '../../../../common/mock';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
@@ -26,9 +26,9 @@ import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_rel
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '@kbn/security-solution-common';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -52,9 +52,9 @@ const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
 const renderCorrelationDetails = () => {
   return render(
     <TestProviders>
-      <LeftPanelContext.Provider value={mockContextValue}>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
         <CorrelationsDetails />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 };

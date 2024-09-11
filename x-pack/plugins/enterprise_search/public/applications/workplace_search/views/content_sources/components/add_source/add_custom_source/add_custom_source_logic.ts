@@ -75,12 +75,14 @@ export const AddCustomSourceLogic = kea<
     customSourceNameValue: [
       props.initialValue || '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
       },
     ],
     newCustomSource: [
       {} as CustomSource,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNewCustomSource: (_, newCustomSource) => newCustomSource,
       },
     ],

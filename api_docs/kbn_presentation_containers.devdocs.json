@@ -2,26 +2,10 @@
   "id": "@kbn/presentation-containers",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiCanAddNewPanel",
+        "id": "def-public.apiCanAddNewPanel",
         "type": "Function",
         "tags": [],
         "label": "apiCanAddNewPanel",
@@ -32,9 +16,9 @@
           "(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.CanAddNewPanel",
+            "section": "def-public.CanAddNewPanel",
             "text": "CanAddNewPanel"
           }
         ],
@@ -44,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiCanAddNewPanel.$1",
+            "id": "def-public.apiCanAddNewPanel.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -63,7 +47,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiCanDuplicatePanels",
+        "id": "def-public.apiCanDuplicatePanels",
         "type": "Function",
         "tags": [],
         "label": "apiCanDuplicatePanels",
@@ -72,9 +56,9 @@
           "(unknownApi: unknown) => unknownApi is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.CanDuplicatePanels",
+            "section": "def-public.CanDuplicatePanels",
             "text": "CanDuplicatePanels"
           }
         ],
@@ -84,7 +68,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiCanDuplicatePanels.$1",
+            "id": "def-public.apiCanDuplicatePanels.$1",
             "type": "Unknown",
             "tags": [],
             "label": "unknownApi",
@@ -103,7 +87,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiCanExpandPanels",
+        "id": "def-public.apiCanExpandPanels",
         "type": "Function",
         "tags": [],
         "label": "apiCanExpandPanels",
@@ -112,9 +96,9 @@
           "(unknownApi: unknown) => unknownApi is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.CanExpandPanels",
+            "section": "def-public.CanExpandPanels",
             "text": "CanExpandPanels"
           }
         ],
@@ -124,7 +108,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiCanExpandPanels.$1",
+            "id": "def-public.apiCanExpandPanels.$1",
             "type": "Unknown",
             "tags": [],
             "label": "unknownApi",
@@ -143,7 +127,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiHasRuntimeChildState",
+        "id": "def-public.apiHasRuntimeChildState",
         "type": "Function",
         "tags": [],
         "label": "apiHasRuntimeChildState",
@@ -152,9 +136,9 @@
           "<RuntimeState extends object = object>(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasRuntimeChildState",
+            "section": "def-public.HasRuntimeChildState",
             "text": "HasRuntimeChildState"
           },
           "<RuntimeState>"
@@ -165,7 +149,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiHasRuntimeChildState.$1",
+            "id": "def-public.apiHasRuntimeChildState.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -184,7 +168,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiHasSaveNotification",
+        "id": "def-public.apiHasSaveNotification",
         "type": "Function",
         "tags": [],
         "label": "apiHasSaveNotification",
@@ -193,9 +177,9 @@
           "(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSaveNotification",
+            "section": "def-public.HasSaveNotification",
             "text": "HasSaveNotification"
           }
         ],
@@ -205,7 +189,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiHasSaveNotification.$1",
+            "id": "def-public.apiHasSaveNotification.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -224,7 +208,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiHasSerializableState",
+        "id": "def-public.apiHasSerializableState",
         "type": "Function",
         "tags": [],
         "label": "apiHasSerializableState",
@@ -233,9 +217,9 @@
           "(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializableState",
+            "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
           "<object>"
@@ -246,7 +230,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiHasSerializableState.$1",
+            "id": "def-public.apiHasSerializableState.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -265,7 +249,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiHasSerializedChildState",
+        "id": "def-public.apiHasSerializedChildState",
         "type": "Function",
         "tags": [],
         "label": "apiHasSerializedChildState",
@@ -274,9 +258,9 @@
           "<SerializedState extends object = object>(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializedChildState",
+            "section": "def-public.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
           "<SerializedState>"
@@ -287,7 +271,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiHasSerializedChildState.$1",
+            "id": "def-public.apiHasSerializedChildState.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -306,7 +290,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.apiIsPresentationContainer",
+        "id": "def-public.apiIsPresentationContainer",
         "type": "Function",
         "tags": [],
         "label": "apiIsPresentationContainer",
@@ -315,9 +299,9 @@
           "(api: unknown) => api is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
+            "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           }
         ],
@@ -327,7 +311,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.apiIsPresentationContainer.$1",
+            "id": "def-public.apiIsPresentationContainer.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -346,7 +330,47 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.canTrackContentfulRender",
+        "id": "def-public.apiPublishesSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesSettings",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.PublishesSettings",
+            "text": "PublishesSettings"
+          }
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.apiPublishesSettings.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.canTrackContentfulRender",
         "type": "Function",
         "tags": [],
         "label": "canTrackContentfulRender",
@@ -355,9 +379,9 @@
           "(root: unknown) => root is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.TrackContentfulRender",
+            "section": "def-public.TrackContentfulRender",
             "text": "TrackContentfulRender"
           }
         ],
@@ -367,7 +391,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.canTrackContentfulRender.$1",
+            "id": "def-public.canTrackContentfulRender.$1",
             "type": "Unknown",
             "tags": [],
             "label": "root",
@@ -386,7 +410,59 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.combineCompatibleChildrenApis",
+        "id": "def-public.childrenUnsavedChanges$",
+        "type": "Function",
+        "tags": [],
+        "label": "childrenUnsavedChanges$",
+        "description": [
+          "\n Create an observable stream of unsaved changes from all react embeddable children"
+        ],
+        "signature": [
+          "(children$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ [key: string]: unknown; }>) => ",
+          "Observable",
+          "<{ [key: string]: object; } | undefined>"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.childrenUnsavedChanges$.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "children$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<{ [key: string]: unknown; }>"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.combineCompatibleChildrenApis",
         "type": "Function",
         "tags": [],
         "label": "combineCompatibleChildrenApis",
@@ -402,7 +478,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.combineCompatibleChildrenApis.$1",
+            "id": "def-public.combineCompatibleChildrenApis.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -417,7 +493,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.combineCompatibleChildrenApis.$2",
+            "id": "def-public.combineCompatibleChildrenApis.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "observableKey",
@@ -432,7 +508,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.combineCompatibleChildrenApis.$3",
+            "id": "def-public.combineCompatibleChildrenApis.$3",
             "type": "Function",
             "tags": [],
             "label": "isCompatible",
@@ -447,7 +523,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.combineCompatibleChildrenApis.$4",
+            "id": "def-public.combineCompatibleChildrenApis.$4",
             "type": "Uncategorized",
             "tags": [],
             "label": "emptyState",
@@ -462,7 +538,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.combineCompatibleChildrenApis.$5",
+            "id": "def-public.combineCompatibleChildrenApis.$5",
             "type": "Function",
             "tags": [],
             "label": "flattenMethod",
@@ -481,7 +557,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.getContainerParentFromAPI",
+        "id": "def-public.getContainerParentFromAPI",
         "type": "Function",
         "tags": [],
         "label": "getContainerParentFromAPI",
@@ -490,9 +566,9 @@
           "(api: unknown) => ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
+            "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
           " | undefined"
@@ -503,7 +579,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.getContainerParentFromAPI.$1",
+            "id": "def-public.getContainerParentFromAPI.$1",
             "type": "Unknown",
             "tags": [],
             "label": "api",
@@ -522,7 +598,101 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.listenForCompatibleApi",
+        "id": "def-public.initializeUnsavedChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeUnsavedChanges",
+        "description": [],
+        "signature": [
+          "<RuntimeState extends {} = {}>(initialLastSavedState: RuntimeState, parentApi: unknown, comparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.StateComparators",
+            "text": "StateComparators"
+          },
+          "<RuntimeState>) => { api: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<RuntimeState> & ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasSnapshottableState",
+            "text": "HasSnapshottableState"
+          },
+          "<RuntimeState>; cleanup: () => void; }"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.initializeUnsavedChanges.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialLastSavedState",
+            "description": [],
+            "signature": [
+              "RuntimeState"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.initializeUnsavedChanges.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.initializeUnsavedChanges.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.StateComparators",
+                "text": "StateComparators"
+              },
+              "<RuntimeState>"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.listenForCompatibleApi",
         "type": "Function",
         "tags": [],
         "label": "listenForCompatibleApi",
@@ -536,7 +706,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.listenForCompatibleApi.$1",
+            "id": "def-public.listenForCompatibleApi.$1",
             "type": "Unknown",
             "tags": [],
             "label": "parent",
@@ -551,7 +721,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.listenForCompatibleApi.$2",
+            "id": "def-public.listenForCompatibleApi.$2",
             "type": "Function",
             "tags": [],
             "label": "isCompatible",
@@ -566,7 +736,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.listenForCompatibleApi.$3",
+            "id": "def-public.listenForCompatibleApi.$3",
             "type": "Function",
             "tags": [],
             "label": "apiFound",
@@ -585,7 +755,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.tracksOverlays",
+        "id": "def-public.tracksOverlays",
         "type": "Function",
         "tags": [],
         "label": "tracksOverlays",
@@ -594,9 +764,9 @@
           "(root: unknown) => root is ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.TracksOverlays",
+            "section": "def-public.TracksOverlays",
             "text": "TracksOverlays"
           }
         ],
@@ -606,7 +776,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.tracksOverlays.$1",
+            "id": "def-public.tracksOverlays.$1",
             "type": "Unknown",
             "tags": [],
             "label": "root",
@@ -627,7 +797,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.CanAddNewPanel",
+        "id": "def-public.CanAddNewPanel",
         "type": "Interface",
         "tags": [],
         "label": "CanAddNewPanel",
@@ -640,7 +810,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.CanAddNewPanel.addNewPanel",
+            "id": "def-public.CanAddNewPanel.addNewPanel",
             "type": "Function",
             "tags": [],
             "label": "addNewPanel",
@@ -649,9 +819,9 @@
               "<SerializedState extends object, ApiType extends unknown = unknown>(panel: ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
+                "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
               "<SerializedState>, displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
@@ -662,7 +832,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.CanAddNewPanel.addNewPanel.$1",
+                "id": "def-public.CanAddNewPanel.addNewPanel.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "panel",
@@ -670,9 +840,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PanelPackage",
+                    "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
                   "<SerializedState>"
@@ -684,7 +854,7 @@
               },
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.CanAddNewPanel.addNewPanel.$2",
+                "id": "def-public.CanAddNewPanel.addNewPanel.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "displaySuccessMessage",
@@ -705,7 +875,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.CanDuplicatePanels",
+        "id": "def-public.CanDuplicatePanels",
         "type": "Interface",
         "tags": [],
         "label": "CanDuplicatePanels",
@@ -716,7 +886,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.CanDuplicatePanels.duplicatePanel",
+            "id": "def-public.CanDuplicatePanels.duplicatePanel",
             "type": "Function",
             "tags": [],
             "label": "duplicatePanel",
@@ -730,7 +900,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.CanDuplicatePanels.duplicatePanel.$1",
+                "id": "def-public.CanDuplicatePanels.duplicatePanel.$1",
                 "type": "string",
                 "tags": [],
                 "label": "panelId",
@@ -751,7 +921,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.CanExpandPanels",
+        "id": "def-public.CanExpandPanels",
         "type": "Interface",
         "tags": [],
         "label": "CanExpandPanels",
@@ -762,13 +932,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.CanExpandPanels.expandPanel",
+            "id": "def-public.CanExpandPanels.expandPanel",
             "type": "Function",
             "tags": [],
             "label": "expandPanel",
             "description": [],
             "signature": [
-              "(panelId?: string | undefined) => void"
+              "(panelId: string) => void"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
@@ -776,25 +946,25 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.CanExpandPanels.expandPanel.$1",
+                "id": "def-public.CanExpandPanels.expandPanel.$1",
                 "type": "string",
                 "tags": [],
                 "label": "panelId",
                 "description": [],
                 "signature": [
-                  "string | undefined"
+                  "string"
                 ],
                 "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.CanExpandPanels.expandedPanelId",
+            "id": "def-public.CanExpandPanels.expandedPanelId",
             "type": "Object",
             "tags": [],
             "label": "expandedPanelId",
@@ -802,7 +972,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => string | undefined; closed: boolean; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -934,7 +1104,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; closed: boolean; observers: ",
+              "<unknown>; }; observers: ",
               "Observer",
               "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -961,7 +1131,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.HasRuntimeChildState",
+        "id": "def-public.HasRuntimeChildState",
         "type": "Interface",
         "tags": [],
         "label": "HasRuntimeChildState",
@@ -969,9 +1139,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasRuntimeChildState",
+            "section": "def-public.HasRuntimeChildState",
             "text": "HasRuntimeChildState"
           },
           "<RuntimeState>"
@@ -982,7 +1152,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.HasRuntimeChildState.getRuntimeStateForChild",
+            "id": "def-public.HasRuntimeChildState.getRuntimeStateForChild",
             "type": "Function",
             "tags": [],
             "label": "getRuntimeStateForChild",
@@ -996,7 +1166,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.HasRuntimeChildState.getRuntimeStateForChild.$1",
+                "id": "def-public.HasRuntimeChildState.getRuntimeStateForChild.$1",
                 "type": "string",
                 "tags": [],
                 "label": "childId",
@@ -1017,7 +1187,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.HasSaveNotification",
+        "id": "def-public.HasSaveNotification",
         "type": "Interface",
         "tags": [],
         "label": "HasSaveNotification",
@@ -1028,7 +1198,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.HasSaveNotification.saveNotification$",
+            "id": "def-public.HasSaveNotification.saveNotification$",
             "type": "Object",
             "tags": [],
             "label": "saveNotification$",
@@ -1046,7 +1216,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.HasSerializableState",
+        "id": "def-public.HasSerializableState",
         "type": "Interface",
         "tags": [],
         "label": "HasSerializableState",
@@ -1054,9 +1224,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializableState",
+            "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
           "<State>"
@@ -1067,7 +1237,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.HasSerializableState.serializeState",
+            "id": "def-public.HasSerializableState.serializeState",
             "type": "Function",
             "tags": [],
             "label": "serializeState",
@@ -1086,9 +1256,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.SerializedPanelState",
+                "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
               "<State>>"
@@ -1104,7 +1274,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.HasSerializedChildState",
+        "id": "def-public.HasSerializedChildState",
         "type": "Interface",
         "tags": [],
         "label": "HasSerializedChildState",
@@ -1112,9 +1282,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializedChildState",
+            "section": "def-public.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
           "<SerializedState>"
@@ -1125,7 +1295,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.HasSerializedChildState.getSerializedStateForChild",
+            "id": "def-public.HasSerializedChildState.getSerializedStateForChild",
             "type": "Function",
             "tags": [],
             "label": "getSerializedStateForChild",
@@ -1134,12 +1304,12 @@
               "(childId: string) => ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.SerializedPanelState",
+                "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
-              "<SerializedState>"
+              "<SerializedState> | undefined"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
@@ -1147,7 +1317,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.HasSerializedChildState.getSerializedStateForChild.$1",
+                "id": "def-public.HasSerializedChildState.getSerializedStateForChild.$1",
                 "type": "string",
                 "tags": [],
                 "label": "childId",
@@ -1168,7 +1338,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.HasSnapshottableState",
+        "id": "def-public.HasSnapshottableState",
         "type": "Interface",
         "tags": [],
         "label": "HasSnapshottableState",
@@ -1176,9 +1346,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSnapshottableState",
+            "section": "def-public.HasSnapshottableState",
             "text": "HasSnapshottableState"
           },
           "<RuntimeState>"
@@ -1189,12 +1359,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.HasSnapshottableState.snapshotRuntimeState",
+            "id": "def-public.HasSnapshottableState.snapshotRuntimeState",
             "type": "Function",
             "tags": [],
             "label": "snapshotRuntimeState",
             "description": [
-              "\nSerializes all runtime state exactly as it appears. This could be used\nto rehydrate a component's state without needing to deserialize it."
+              "\nSerializes all runtime state exactly as it appears. This can be used\nto rehydrate a component's state without needing to serialize then deserialize it."
             ],
             "signature": [
               "() => RuntimeState"
@@ -1210,7 +1380,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.PanelPackage",
+        "id": "def-public.PanelPackage",
         "type": "Interface",
         "tags": [],
         "label": "PanelPackage",
@@ -1218,9 +1388,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PanelPackage",
+            "section": "def-public.PanelPackage",
             "text": "PanelPackage"
           },
           "<SerializedState>"
@@ -1231,7 +1401,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PanelPackage.panelType",
+            "id": "def-public.PanelPackage.panelType",
             "type": "string",
             "tags": [],
             "label": "panelType",
@@ -1242,7 +1412,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PanelPackage.initialState",
+            "id": "def-public.PanelPackage.initialState",
             "type": "Uncategorized",
             "tags": [],
             "label": "initialState",
@@ -1259,7 +1429,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.PresentationContainer",
+        "id": "def-public.PresentationContainer",
         "type": "Interface",
         "tags": [],
         "label": "PresentationContainer",
@@ -1267,17 +1437,17 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
+            "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
           " extends ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.CanAddNewPanel",
+            "section": "def-public.CanAddNewPanel",
             "text": "CanAddNewPanel"
           }
         ],
@@ -1287,7 +1457,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.removePanel",
+            "id": "def-public.PresentationContainer.removePanel",
             "type": "Function",
             "tags": [],
             "label": "removePanel",
@@ -1303,7 +1473,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.removePanel.$1",
+                "id": "def-public.PresentationContainer.removePanel.$1",
                 "type": "string",
                 "tags": [],
                 "label": "panelId",
@@ -1321,7 +1491,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.canRemovePanels",
+            "id": "def-public.PresentationContainer.canRemovePanels",
             "type": "Function",
             "tags": [],
             "label": "canRemovePanels",
@@ -1339,7 +1509,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.replacePanel",
+            "id": "def-public.PresentationContainer.replacePanel",
             "type": "Function",
             "tags": [],
             "label": "replacePanel",
@@ -1350,9 +1520,9 @@
               "<SerializedState extends object = object>(idToRemove: string, newPanel: ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
+                "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
               "<SerializedState>) => Promise<string>"
@@ -1363,7 +1533,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.replacePanel.$1",
+                "id": "def-public.PresentationContainer.replacePanel.$1",
                 "type": "string",
                 "tags": [],
                 "label": "idToRemove",
@@ -1378,7 +1548,7 @@
               },
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.replacePanel.$2",
+                "id": "def-public.PresentationContainer.replacePanel.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "newPanel",
@@ -1386,9 +1556,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PanelPackage",
+                    "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
                   "<SerializedState>"
@@ -1403,7 +1573,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.getPanelCount",
+            "id": "def-public.PresentationContainer.getPanelCount",
             "type": "Function",
             "tags": [],
             "label": "getPanelCount",
@@ -1421,7 +1591,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.children$",
+            "id": "def-public.PresentationContainer.children$",
             "type": "Object",
             "tags": [],
             "label": "children$",
@@ -1431,7 +1601,7 @@
             "signature": [
               "{ source: ",
               "Observable",
-              "<any> | undefined; readonly value: { [key: string]: unknown; }; error: (err: any) => void; forEach: { (next: (value: { [key: string]: unknown; }) => void): Promise<void>; (next: (value: { [key: string]: unknown; }) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => { [key: string]: unknown; }; pipe: { (): ",
+              "<any> | undefined; readonly value: { [key: string]: unknown; }; error: (err: any) => void; forEach: { (next: (value: { [key: string]: unknown; }) => void): Promise<void>; (next: (value: { [key: string]: unknown; }) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => { [key: string]: unknown; }; closed: boolean; pipe: { (): ",
               "Observable",
               "<{ [key: string]: unknown; }>; <A>(op1: ",
               "OperatorFunction",
@@ -1563,7 +1733,7 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; closed: boolean; observers: ",
+              "<unknown>; }; observers: ",
               "Observer",
               "<{ [key: string]: unknown; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
@@ -1590,7 +1760,43 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.SerializedPanelState",
+        "id": "def-public.PublishesSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesSettings",
+        "description": [],
+        "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PublishesSettings.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<boolean | undefined>; }"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/publishes_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.SerializedPanelState",
         "type": "Interface",
         "tags": [],
         "label": "SerializedPanelState",
@@ -1600,9 +1806,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.SerializedPanelState",
+            "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
           "<RawStateType>"
@@ -1613,7 +1819,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.SerializedPanelState.references",
+            "id": "def-public.SerializedPanelState.references",
             "type": "Array",
             "tags": [],
             "label": "references",
@@ -1621,9 +1827,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
+                "section": "def-server.Reference",
                 "text": "Reference"
               },
               "[] | undefined"
@@ -1634,7 +1840,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.SerializedPanelState.rawState",
+            "id": "def-public.SerializedPanelState.rawState",
             "type": "Uncategorized",
             "tags": [],
             "label": "rawState",
@@ -1651,7 +1857,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.TrackContentfulRender",
+        "id": "def-public.TrackContentfulRender",
         "type": "Interface",
         "tags": [],
         "label": "TrackContentfulRender",
@@ -1662,7 +1868,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TrackContentfulRender.trackContentfulRender",
+            "id": "def-public.TrackContentfulRender.trackContentfulRender",
             "type": "Function",
             "tags": [],
             "label": "trackContentfulRender",
@@ -1683,7 +1889,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.TracksOverlays",
+        "id": "def-public.TracksOverlays",
         "type": "Interface",
         "tags": [],
         "label": "TracksOverlays",
@@ -1694,7 +1900,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TracksOverlays.openOverlay",
+            "id": "def-public.TracksOverlays.openOverlay",
             "type": "Function",
             "tags": [],
             "label": "openOverlay",
@@ -1703,9 +1909,9 @@
               "(ref: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               },
               ", options?: TracksOverlaysOptions | undefined) => void"
@@ -1716,7 +1922,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.TracksOverlays.openOverlay.$1",
+                "id": "def-public.TracksOverlays.openOverlay.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "ref",
@@ -1724,9 +1930,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.OverlayRef",
+                    "section": "def-public.OverlayRef",
                     "text": "OverlayRef"
                   }
                 ],
@@ -1737,7 +1943,7 @@
               },
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.TracksOverlays.openOverlay.$2",
+                "id": "def-public.TracksOverlays.openOverlay.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1755,7 +1961,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TracksOverlays.clearOverlays",
+            "id": "def-public.TracksOverlays.clearOverlays",
             "type": "Function",
             "tags": [],
             "label": "clearOverlays",
@@ -1774,7 +1980,7 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.TracksQueryPerformance",
+        "id": "def-public.TracksQueryPerformance",
         "type": "Interface",
         "tags": [],
         "label": "TracksQueryPerformance",
@@ -1785,7 +1991,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TracksQueryPerformance.firstLoad",
+            "id": "def-public.TracksQueryPerformance.firstLoad",
             "type": "boolean",
             "tags": [],
             "label": "firstLoad",
@@ -1796,7 +2002,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TracksQueryPerformance.creationStartTime",
+            "id": "def-public.TracksQueryPerformance.creationStartTime",
             "type": "number",
             "tags": [],
             "label": "creationStartTime",
@@ -1810,7 +2016,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TracksQueryPerformance.creationEndTime",
+            "id": "def-public.TracksQueryPerformance.creationEndTime",
             "type": "number",
             "tags": [],
             "label": "creationEndTime",
@@ -1824,7 +2030,7 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.TracksQueryPerformance.lastLoadStartTime",
+            "id": "def-public.TracksQueryPerformance.lastLoadStartTime",
             "type": "number",
             "tags": [],
             "label": "lastLoadStartTime",
@@ -1840,6 +2046,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

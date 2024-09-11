@@ -22,6 +22,18 @@ export function getShardCapacityDeprecationInfo({
   details: any;
   symptom: any;
 }) {
+  // When we dont have a details field for our indicator, we can only report
+  // the symptom to the user given that's the only information about the deprecation
+  // we have.
+  if (!details) {
+    return {
+      details: symptom,
+      message: symptom,
+      url: null,
+      resolveDuringUpgrade: false,
+    };
+  }
+
   const causes = [];
   if (details.indices_with_readonly_block > 0) {
     causes.push(

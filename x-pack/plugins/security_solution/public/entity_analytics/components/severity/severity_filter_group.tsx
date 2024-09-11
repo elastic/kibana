@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { FilterChecked } from '@elastic/eui';
+import type { FilterChecked, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -67,8 +67,10 @@ export const SeverityFilterGroup: React.FC<{
     }));
   }, [severityCount, selectedSeverities]);
 
-  const updateSeverityFilter = useCallback(
-    (newSelection: SeverityItems[], _, changedSeverity: SeverityItems) => {
+  const updateSeverityFilter = useCallback<
+    NonNullable<EuiSelectableProps<SeverityItems>['onChange']>
+  >(
+    (newSelection, _, changedSeverity) => {
       if (changedSeverity.checked === 'on') {
         telemetry.reportEntityRiskFiltered({
           entity: riskEntity,

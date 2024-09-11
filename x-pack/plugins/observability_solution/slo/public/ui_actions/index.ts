@@ -5,31 +5,34 @@
  * 2.0.
  */
 
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
-import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
-import { createEditSloOverviewPanelAction } from './edit_slo_overview_panel';
 import { createOverviewPanelAction } from './create_overview_panel_action';
 import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
 import { createAddAlertsPanelAction } from './create_alerts_panel_action';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { SloPublicPluginsStart, SloPublicStart, SloPublicPluginsSetup } from '..';
+import { createBurnRatePanelAction } from './create_burn_rate_panel_action';
 
 export function registerSloUiActions(
-  uiActions: UiActionsSetup,
-  core: CoreSetup<SloPublicPluginsStart, SloPublicStart>
+  core: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
+  pluginsSetup: SloPublicPluginsSetup,
+  pluginsStart: SloPublicPluginsStart
 ) {
+  const { uiActions } = pluginsSetup;
+  const { serverless, cloud } = pluginsStart;
+
   // Initialize actions
-  const editSloAlertsPanelAction = createEditSloAlertsPanelAction(core.getStartServices);
-  const editSloOverviewPanelAction = createEditSloOverviewPanelAction(core.getStartServices);
   const addOverviewPanelAction = createOverviewPanelAction(core.getStartServices);
   const addErrorBudgetPanelAction = createAddErrorBudgetPanelAction(core.getStartServices);
   const addAlertsPanelAction = createAddAlertsPanelAction(core.getStartServices);
+  const addBurnRatePanelAction = createBurnRatePanelAction(core.getStartServices);
 
   // Assign triggers
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction);
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloOverviewPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addOverviewPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addErrorBudgetPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAlertsPanelAction);
+  // Only register these actions in stateful kibana, and the serverless observability project
+  if (Boolean((serverless && cloud?.serverless.projectType === 'observability') || !serverless)) {
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addOverviewPanelAction);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addErrorBudgetPanelAction);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAlertsPanelAction);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addBurnRatePanelAction);
+  }
 }

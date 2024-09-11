@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { URL } from 'url';
@@ -119,8 +120,10 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
 
 const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
+  created: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),
+  multiStatus: jest.fn(),
   notModified: jest.fn(),
   custom: jest.fn(),
   redirected: jest.fn(),
@@ -129,6 +132,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
+  unprocessableContent: jest.fn(),
   customError: jest.fn(),
   file: jest.fn(),
 });

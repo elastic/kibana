@@ -9,7 +9,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 
-const indexName = 'basic_index';
+import {
+  createLlmProxy,
+  LlmProxy,
+} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function (ftrContext: FtrProviderContext) {
@@ -18,76 +22,165 @@ export default function (ftrContext: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+
+  const log = getService('log');
+  const browser = getService('browser');
+
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
+
+  let proxy: LlmProxy;
   let removeOpenAIConnector: () => Promise<void>;
   const createConnector = async () => {
     removeOpenAIConnector = await createOpenAIConnector({
       supertest,
       requestHeader: commonAPI.getCommonRequestHeader(),
+      proxy,
     });
   };
 
-  describe('Playground Overview', () => {
+  describe('Playground', () => {
     before(async () => {
+      proxy = await createLlmProxy(log);
       await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
     });
 
     after(async () => {
       await esArchiver.unload(esArchiveIndex);
-      await removeOpenAIConnector?.();
+      proxy.close();
     });
 
-    describe('start chat page', () => {
-      it('playground app is loaded', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
+    describe('setup Page', () => {
+      it('is loaded successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexButtonExists();
       });
 
-      it('show no index callout', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+      describe('with gen ai connectors', () => {
+        before(async () => {
+          await createConnector();
+          await browser.refresh();
+        });
+
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await browser.refresh();
+        });
+        it('show success llm button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
+        });
       });
 
-      it('hide no index callout when index added', async () => {
-        await createIndex();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectIndex(indexName);
+      describe('without gen ai connectors', () => {
+        it('should display the set up connectors button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectAddConnectorButtonExists();
+        });
+
+        it('creates a connector successfully', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
+            createConnector
+          );
+        });
+
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await browser.refresh();
+        });
       });
 
-      it('show add connector button', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectAddConnectorButtonExists();
+      describe('without any indices', () => {
+        it('show create index button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+        });
+
+        it('show success button when index added', async () => {
+          await createIndex();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
+        });
+
+        after(async () => {
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+        });
       });
 
-      it('click add connector button opens connector flyout', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-      });
+      describe('with existing indices', () => {
+        before(async () => {
+          await createConnector();
+          await createIndex();
+          await browser.refresh();
+        });
 
-      it('hide gen ai panel when connector exists', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectHideGenAIPanelConnector(
-          createConnector
-        );
-      });
+        it('can select index from dropdown and load chat page', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+        });
 
-      it('show chat page', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectIndex(indexName);
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToStartChatPage();
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+        });
       });
     });
 
     describe('chat page', () => {
-      it('chat works', async () => {
-        await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWorks();
+      before(async () => {
+        await createConnector();
+        await createIndex();
+        await browser.refresh();
+        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
+      });
+      it('loads successfully', async () => {
+        await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
       });
 
-      it('open view code', async () => {
-        await pageObjects.searchPlayground.PlaygroundChatPage.expectOpenViewCode();
+      describe('chat', () => {
+        it('works', async () => {
+          const conversationInterceptor = proxy.intercept(
+            'conversation',
+            (body) =>
+              body.tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
+          );
+
+          await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
+
+          const conversationSimulator = await conversationInterceptor.waitForIntercept();
+
+          await conversationSimulator.next('My response');
+
+          await conversationSimulator.complete();
+
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWorks();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectTokenTooltipExists();
+        });
+
+        it('open view code', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectOpenViewCode();
+        });
+
+        it('show fields and code in view query', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectViewQueryHasFields();
+        });
+
+        it('show edit context', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+        });
+
+        it('save selected fields between modes', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
+        });
       });
 
-      it('show fields and code in view query', async () => {
-        await pageObjects.searchPlayground.PlaygroundChatPage.expectViewQueryHasFields();
-      });
-
-      it('show edit context', async () => {
-        await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+      after(async () => {
+        await removeOpenAIConnector?.();
+        await esArchiver.unload(esArchiveIndex);
+        await browser.refresh();
       });
     });
   });

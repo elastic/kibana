@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +17,6 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
@@ -27,17 +25,14 @@ import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hoo
 import { PrereleaseCallout } from '../overview/overview';
 
 import { isPackagePrerelease } from '../../../../../../../../common/services';
-
-const FlexItemWithMaxWidth = styled(EuiFlexItem)`
-  max-width: 1000px;
-`;
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
 }
 
 export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
-  const { notifications, docLinks } = useStartServices();
+  const { docLinks } = useStartServices();
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
   const notInstalled = packageInfo.status !== 'installing';
 
@@ -51,78 +46,100 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
     { format: 'yaml', prerelease: isPrerelease }
   );
 
-  if (error) {
-    notifications.toasts.addError(error, {
-      title: i18n.translate('xpack.fleet.epm.InputTemplates.loadingErro', {
-        defaultMessage: 'Error input templates',
-      }),
-    });
-  }
-
   return (
     <EuiFlexGroup data-test-subj="epm.Configs" alignItems="flexStart">
-      <EuiFlexItem grow={1} />
-      <FlexItemWithMaxWidth grow={6}>
-        {isLoading && !configs ? (
-          <EuiSkeletonText lines={10} />
-        ) : (
-          <>
-            {isPrerelease && (
-              <>
-                <EuiSpacer size="s" />
-                <PrereleaseCallout
-                  packageName={packageInfo.name}
-                  packageTitle={packageInfo.title}
-                />
-              </>
-            )}
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.epm.InputTemplates.mainText"
-                  defaultMessage="View sample configurations for each of the {name} integration's data streams below. Copy/paste this YML into your {elasticAgentYml} file or into a file within your {inputsDir} directory. For more information, see the {userGuideLink}"
-                  values={{
-                    name: pkgTitle,
-                    elasticAgentYml: <EuiCode>elastic-agent.yml</EuiCode>,
-                    inputsDir: <EuiCode>inputs.d</EuiCode>,
-                    userGuideLink: (
-                      <EuiLink
-                        href={docLinks.links.fleet.elasticAgentInputConfiguration}
-                        external
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.epm.InputTemplates.guideLink"
-                          defaultMessage="Fleet and Elastic Agent Guide"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-            {notInstalled && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiCallOut
-                  title={
-                    <FormattedMessage
-                      id="xpack.fleet.epm.InputTemplates.installCallout"
-                      defaultMessage="Install the integration to use the following configs."
-                    />
-                  }
-                  color="warning"
-                  iconType="warning"
-                />
-              </>
-            )}
-            <EuiSpacer size="s" />
-            <EuiCodeBlock language="yaml" isCopyable={true} paddingSize="s" overflowHeight={1000}>
-              {configs}
-            </EuiCodeBlock>
-          </>
-        )}
-      </FlexItemWithMaxWidth>
+      <SideBarColumn grow={1} />
+      {error ? (
+        <EuiFlexItem grow={7}>
+          <EuiCallOut
+            data-test-subj="configsTab.errorCallout"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.epm.InputTemplates.errorTitle"
+                defaultMessage="Unsupported"
+              />
+            }
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.epm.InputTemplates.error"
+                defaultMessage="This integration doesn't support automatic generation of sample configurations."
+              />
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={7}>
+          {isLoading && !configs ? (
+            <EuiSkeletonText lines={10} />
+          ) : (
+            <>
+              {isPrerelease && (
+                <>
+                  <EuiSpacer size="s" />
+                  <PrereleaseCallout
+                    packageName={packageInfo.name}
+                    packageTitle={packageInfo.title}
+                  />
+                </>
+              )}
+              <EuiText>
+                <p data-test-subj="configsTab.info">
+                  <FormattedMessage
+                    id="xpack.fleet.epm.InputTemplates.mainText"
+                    defaultMessage="View sample configurations for each of the {name} integration's data streams below. Copy/paste this YML into your {elasticAgentYml} file or into a file within your {inputsDir} directory. For more information, see the {userGuideLink}"
+                    values={{
+                      name: pkgTitle,
+                      elasticAgentYml: <EuiCode>elastic-agent.yml</EuiCode>,
+                      inputsDir: <EuiCode>inputs.d</EuiCode>,
+                      userGuideLink: (
+                        <EuiLink
+                          href={docLinks.links.fleet.elasticAgentInputConfiguration}
+                          external
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.epm.InputTemplates.guideLink"
+                            defaultMessage="Fleet and Elastic Agent Guide"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+              {notInstalled && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut
+                    data-test-subj="configsTab.notInstalled"
+                    title={
+                      <FormattedMessage
+                        id="xpack.fleet.epm.InputTemplates.installCallout"
+                        defaultMessage="Install the integration to use the following configs."
+                      />
+                    }
+                    color="warning"
+                    iconType="warning"
+                  />
+                </>
+              )}
+              <EuiSpacer size="s" />
+              <EuiCodeBlock
+                language="yaml"
+                isCopyable={true}
+                paddingSize="s"
+                overflowHeight={1000}
+                data-test-subj="configsTab.codeblock"
+              >
+                {configs}
+              </EuiCodeBlock>
+            </>
+          )}
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

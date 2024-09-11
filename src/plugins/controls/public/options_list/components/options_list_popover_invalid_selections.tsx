@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -19,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { getSelectionAsFieldType } from '../../../common/options_list/options_list_selections';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
@@ -39,7 +41,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     /* This useEffect makes selectableOptions responsive to unchecking options */
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
-        key,
+        key: String(key),
         label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
@@ -91,8 +93,15 @@ export const OptionsListPopoverInvalidSelections = () => {
         options={selectableOptions}
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
+          if (!fieldSpec || !changedOption.key) {
+            // this should never happen, but early return for type safety
+            // eslint-disable-next-line no-console
+            console.warn(OptionsListStrings.popover.getInvalidSelectionMessage());
+            return;
+          }
           setSelectableOptions(newSuggestions);
-          optionsList.dispatch.deselectOption(changedOption.key ?? changedOption.label);
+          const key = getSelectionAsFieldType(fieldSpec, changedOption.key);
+          optionsList.dispatch.deselectOption(key);
         }}
       >
         {(list) => list}

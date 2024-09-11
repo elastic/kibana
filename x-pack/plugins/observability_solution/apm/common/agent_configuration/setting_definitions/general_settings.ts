@@ -546,7 +546,7 @@ export const generalSettings: RawSettingDefinition[] = [
         'as it can lead to an explosion of transaction groups.\n' +
         'Take a look at the `transaction_name_groups` option on how to mitigate this problem by grouping URLs together.',
     }),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet'],
   },
 
   {
@@ -565,6 +565,6 @@ export const generalSettings: RawSettingDefinition[] = [
         'such as `GET /users/42/cart` and `GET /users/73/cart` into a single transaction name `GET /users/*/cart`,\n' +
         'hence reducing the transaction name cardinality.',
     }),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet'],
   },
 ];

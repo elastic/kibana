@@ -17,14 +17,18 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts, AggregationOpts } from './task_store';
+import {
+  ElasticsearchClientMock,
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+} from '@kbn/core/server/mocks';
+import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
-import { asErr } from './lib/result_type';
+import { asErr, asOk } from './lib/result_type';
 import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
@@ -160,6 +164,7 @@ describe('TaskStore', () => {
           taskType: 'report',
           user: undefined,
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
         {
           id: 'id',
@@ -183,6 +188,7 @@ describe('TaskStore', () => {
         user: undefined,
         version: '123',
         traceparent: 'apmTraceparent',
+        partition: 225,
       });
     });
 
@@ -290,12 +296,16 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: Array<estypes.SearchHit<unknown>> = []) {
+    async function testFetch(
+      opts?: SearchOpts,
+      hits: Array<estypes.SearchHit<unknown>> = [],
+      limitResponse: boolean = false
+    ) {
       childEsClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
-      const result = await store.fetch(opts);
+      const result = await store.fetch(opts, limitResponse);
 
       expect(childEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -339,6 +349,153 @@ describe('TaskStore', () => {
       childEsClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('excludes state and params from source when limitResponse is true', async () => {
+      const { args } = await testFetch({}, [], true);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: {
+          sort: [{ 'task.runAt': 'asc' }],
+          query: { term: { type: 'task' } },
+        },
+        _source_excludes: ['task.state', 'task.params'],
+      });
+    });
+  });
+
+  describe('msearch', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    async function testMsearch(
+      optsArray: SearchOpts[],
+      hitsArray: Array<estypes.SearchHitsMetadata<unknown>> = []
+    ) {
+      childEsClient.msearch.mockResponse({
+        took: 0,
+        responses: hitsArray.map((hits) => ({
+          hits,
+          took: 0,
+          _shards: {
+            failed: 0,
+            successful: 1,
+            total: 1,
+          },
+          timed_out: false,
+          status: 200,
+        })),
+      });
+
+      const result = await store.msearch(optsArray);
+
+      expect(childEsClient.msearch).toHaveBeenCalledTimes(1);
+
+      return {
+        result,
+        args: childEsClient.msearch.mock.calls[0][0],
+      };
+    }
+
+    test('empty call filters by type, sorts by runAt and id', async () => {
+      const { args } = await testMsearch([{}], []);
+      expect(args).toMatchObject({
+        index: 'tasky',
+        body: [
+          {},
+          {
+            sort: [{ 'task.runAt': 'asc' }],
+            query: { term: { type: 'task' } },
+          },
+        ],
+      });
+    });
+
+    test('allows multiple custom queries', async () => {
+      const { args } = await testMsearch(
+        [
+          {
+            query: {
+              term: { 'task.taskType': 'foo' },
+            },
+          },
+          {
+            query: {
+              term: { 'task.taskType': 'bar' },
+            },
+          },
+        ],
+        []
+      );
+
+      expect(args).toMatchObject({
+        body: [
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'foo' } }],
+              },
+            },
+          },
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'bar' } }],
+              },
+            },
+          },
+        ],
+      });
+    });
+
+    test('pushes error from call cluster to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      childEsClient.msearch.mockResponse({
+        took: 0,
+        responses: [
+          {
+            took: 0,
+            _shards: {
+              failed: 0,
+              successful: 1,
+              total: 1,
+            },
+            timed_out: false,
+            status: 429,
+          },
+        ],
+      } as estypes.MsearchResponse);
+      await expect(store.msearch([{}])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unexpected status code from taskStore::msearch: 429"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(
+        `[Error: Unexpected status code from taskStore::msearch: 429]`
+      );
     });
   });
 
@@ -490,6 +647,7 @@ describe('TaskStore', () => {
         version: '123',
         ownerId: null,
         traceparent: 'myTraceparent',
+        partition: 99,
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -532,6 +690,7 @@ describe('TaskStore', () => {
           user: undefined,
           ownerId: null,
           traceparent: 'myTraceparent',
+          partition: 99,
         },
         { version: '123', refresh: false }
       );
@@ -611,10 +770,11 @@ describe('TaskStore', () => {
 
   describe('bulkUpdate', () => {
     let store: TaskStore;
+    const logger = mockLogger();
 
     beforeAll(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -667,6 +827,70 @@ describe('TaskStore', () => {
       expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
         validate: false,
       });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: taskInstanceToAttributes(task, task.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test(`validates whenever validate:true is passed-in`, async () => {
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id: 'task:324242',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+        traceparent: '',
+      };
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...task,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([task], { validate: true });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: true,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: task.id,
+            type: 'task',
+            version: task.version,
+            attributes: taskInstanceToAttributes(task, task.id),
+          },
+        ],
+        { refresh: false }
+      );
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -691,6 +915,373 @@ describe('TaskStore', () => {
       await expect(
         store.bulkUpdate([task], { validate: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
+  describe('bulkPartialUpdate', () => {
+    let store: TaskStore;
+    let esClient: ElasticsearchClientMock;
+    const logger = mockLogger();
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      store = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    test(`should return immediately if no docs to update`, async () => {
+      await store.bulkPartialUpdate([]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test(`should perform partial update using esClient`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        ownerId: 'testtest',
+        traceparent: '',
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          {
+            doc: {
+              task: {
+                attempts: 3,
+                ownerId: 'testtest',
+                params: '{"hello":"world"}',
+                retryAt: null,
+                runAt: '2019-02-12T21:01:22.479Z',
+                scheduledAt: '2019-02-12T21:01:22.479Z',
+                startedAt: null,
+                state: '{"foo":"bar"}',
+                status: 'idle',
+                taskType: 'report',
+                traceparent: '',
+              },
+            },
+          },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([asOk(task)]);
+    });
+
+    test(`should perform partial update with minimal fields`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([asOk(task)]);
+    });
+
+    test(`should perform partial update with no version`, async () => {
+      const task = {
+        id: '324242',
+        attempts: 3,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [{ update: { _id: 'task:324242' } }, { doc: { task: { attempts: 3 } } }],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([asOk(task)]);
+    });
+
+    test(`should gracefully handle errors within the response`, async () => {
+      const task1 = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const task2 = {
+        id: '45343254',
+        version: 'WzQsMV0=',
+        status: 'running' as TaskStatus,
+      };
+
+      const task3 = {
+        id: '7845',
+        version: 'WzQsMV0=',
+        runAt: mockedDate,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:45343254',
+              _version: 2,
+              error: {
+                type: 'document_missing_exception',
+                reason: '[5]: document missing',
+                index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+                shard: '0',
+                index: '.kibana_task_manager_8.16.0_001',
+              },
+              status: 404,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:7845',
+              _version: 2,
+              status: 409,
+              error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task1, task2, task3]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+          { update: { _id: 'task:45343254', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { status: 'running' } } },
+          { update: { _id: 'task:7845', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { runAt: mockedDate.toISOString() } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([
+        asOk(task1),
+        asErr({
+          type: 'task',
+          id: '45343254',
+          status: 404,
+          error: {
+            type: 'document_missing_exception',
+            reason: '[5]: document missing',
+            index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+            shard: '0',
+            index: '.kibana_task_manager_8.16.0_001',
+          },
+        }),
+        asErr({
+          type: 'task',
+          id: '7845',
+          status: 409,
+          error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+        }),
+      ]);
+    });
+
+    test(`should gracefully handle malformed errors within the response`, async () => {
+      const task1 = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const task2 = {
+        id: '45343254',
+        version: 'WzQsMV0=',
+        status: 'running' as TaskStatus,
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _version: 2,
+              error: {
+                type: 'document_missing_exception',
+                reason: '[5]: document missing',
+                index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
+                shard: '0',
+                index: '.kibana_task_manager_8.16.0_001',
+              },
+              status: 404,
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkPartialUpdate([task1, task2]);
+
+      expect(mockGetValidatedTaskInstanceForUpdating).not.toHaveBeenCalled();
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+          { update: { _id: 'task:45343254', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { status: 'running' } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      expect(result).toEqual([
+        asOk(task1),
+        asErr({
+          type: 'task',
+          id: 'unknown',
+          error: { type: 'malformed response' },
+        }),
+      ]);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      esClient.bulk.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkPartialUpdate([task])).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
   });
@@ -1050,6 +1641,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
             references: [],
             version: '123',
@@ -1089,6 +1681,7 @@ describe('TaskStore', () => {
               status: 'idle',
               taskType: 'report',
               traceparent: 'apmTraceparent',
+              partition: 225,
             },
           },
         ],
@@ -1113,6 +1706,7 @@ describe('TaskStore', () => {
           user: undefined,
           version: '123',
           traceparent: 'apmTraceparent',
+          partition: 225,
         },
       ]);
     });
@@ -1263,10 +1857,207 @@ describe('TaskStore', () => {
       childEsClient.updateByQuery.mockResponse({
         hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
       } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: '' }, { max_docs: 10 });
+      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
       expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
         requestTimeout: 1000,
       });
+    });
+  });
+
+  describe('bulkGetVersions', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    test('should return the version of the tasks when found', async () => {
+      childEsClient.mget.mockResponse({
+        docs: [
+          {
+            _index: 'ignored-1',
+            _id: 'task:some-task-a',
+            _version: 424242,
+            _seq_no: 123,
+            _primary_term: 1,
+            found: true,
+          },
+          {
+            _index: 'ignored-2',
+            _id: 'task:some-task-b',
+            _version: 31415,
+            _seq_no: 456,
+            _primary_term: 2,
+            found: true,
+          },
+        ],
+      });
+
+      const result = await store.bulkGetVersions(['task:some-task-a', 'task:some-task-b']);
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "esId": "task:some-task-a",
+            "primaryTerm": 1,
+            "seqNo": 123,
+          },
+          Object {
+            "esId": "task:some-task-b",
+            "primaryTerm": 2,
+            "seqNo": 456,
+          },
+        ]
+      `);
+    });
+
+    test('should handle errors and missing tasks', async () => {
+      childEsClient.mget.mockResponse({
+        docs: [
+          {
+            _index: 'ignored-1',
+            _id: 'task:some-task-a',
+            _version: 424242,
+            _seq_no: 123,
+            _primary_term: 1,
+            found: true,
+          },
+          {
+            _index: 'ignored-2',
+            _id: 'task:some-task-b',
+            found: false,
+          },
+          {
+            _index: 'ignored-3',
+            _id: 'task:some-task-c',
+            error: {
+              type: 'index_not_found_exception',
+              reason: 'no such index "ignored-4"',
+            },
+          },
+        ],
+      });
+
+      const result = await store.bulkGetVersions([
+        'task:some-task-a',
+        'task:some-task-b',
+        'task:some-task-c',
+      ]);
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "esId": "task:some-task-a",
+            "primaryTerm": 1,
+            "seqNo": 123,
+          },
+          Object {
+            "error": "task \\"task:some-task-b\\" not found",
+            "esId": "task:some-task-b",
+          },
+          Object {
+            "error": "error getting version for task:some-task-c: index_not_found_exception: no such index \\"ignored-4\\"",
+            "esId": "task:some-task-c",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('getDocVersions', () => {
+    let store: TaskStore;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+    let childEsClient: ReturnType<
+      typeof elasticsearchServiceMock.createClusterClient
+    >['asInternalUser'];
+
+    beforeAll(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.child.mockReturnValue(childEsClient as unknown as Client);
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+      });
+    });
+
+    test('should return the version as expected, with errors included', async () => {
+      childEsClient.mget.mockResponse({
+        docs: [
+          {
+            _index: 'ignored-1',
+            _id: 'task:some-task-a',
+            _version: 424242,
+            _seq_no: 123,
+            _primary_term: 1,
+            found: true,
+          },
+          {
+            _index: 'ignored-2',
+            _id: 'task:some-task-b',
+            found: false,
+          },
+          {
+            _index: 'ignored-3',
+            _id: 'task:some-task-c',
+            error: {
+              type: 'index_not_found_exception',
+              reason: 'no such index "ignored-4"',
+            },
+          },
+        ],
+      });
+
+      const result = await store.getDocVersions([
+        'task:some-task-a',
+        'task:some-task-b',
+        'task:some-task-c',
+      ]);
+      expect(result).toMatchInlineSnapshot(`
+        Map {
+          "task:some-task-a" => Object {
+            "esId": "task:some-task-a",
+            "primaryTerm": 1,
+            "seqNo": 123,
+          },
+          "task:some-task-b" => Object {
+            "error": "task \\"task:some-task-b\\" not found",
+            "esId": "task:some-task-b",
+          },
+          "task:some-task-c" => Object {
+            "error": "error getting version for task:some-task-c: index_not_found_exception: no such index \\"ignored-4\\"",
+            "esId": "task:some-task-c",
+          },
+        }
+      `);
     });
   });
 });

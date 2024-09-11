@@ -10,6 +10,7 @@
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_ANNOTATION_INDEX } from '../common/annotations';
 import type { ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
@@ -36,7 +37,7 @@ export * from './types';
 const configSchema = schema.object({
   annotations: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    index: schema.string({ defaultValue: 'observability-annotations' }),
+    index: schema.string({ defaultValue: DEFAULT_ANNOTATION_INDEX }),
   }),
   unsafe: schema.object({
     alertDetails: schema.object({
@@ -84,6 +85,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ unused }) => [
     unused('unsafe.thresholdRule.enabled', { level: 'warning' }),
     unused('unsafe.alertDetails.logs.enabled', { level: 'warning' }),
+    unused('unsafe.alertDetails.metrics.enabled', { level: 'warning' }),
     unused('unsafe.alertDetails.observability.enabled', { level: 'warning' }),
   ],
 };

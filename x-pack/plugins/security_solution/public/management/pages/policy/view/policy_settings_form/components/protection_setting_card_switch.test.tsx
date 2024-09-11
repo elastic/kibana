@@ -67,11 +67,15 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));
   });
 
-  it('should be able to disable it', () => {
+  it('should be able to disable it', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode(expectedUpdatedPolicy, true, true, false);
+    setMalwareMode({
+      policy: expectedUpdatedPolicy,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -79,12 +83,20 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
   });
 
-  it('should be able to enable it', () => {
-    setMalwareMode(formProps.policy, true, true, false);
+  it('should be able to enable it', async () => {
+    setMalwareMode({
+      policy: formProps.policy,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setMalwareMode(expectedUpdatedPolicy, false, true, false);
+    setMalwareMode({
+      policy: expectedUpdatedPolicy,
+      turnOff: false,
+      includeSubfeatures: false,
+    });
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -92,7 +104,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
   });
 
-  it('should invoke `additionalOnSwitchChange` callback if one was defined', () => {
+  it('should invoke `additionalOnSwitchChange` callback if one was defined', async () => {
     formProps.additionalOnSwitchChange = jest.fn(({ policyConfigData }) => {
       const updated = cloneDeep(policyConfigData);
       updated.windows.popup.malware.message = 'foo';
@@ -100,13 +112,17 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
 
     const expectedPolicyDataBeforeAdditionalCallback = cloneDeep(formProps.policy);
-    setMalwareMode(expectedPolicyDataBeforeAdditionalCallback, true, true, false);
+    setMalwareMode({
+      policy: expectedPolicyDataBeforeAdditionalCallback,
+      turnOff: true,
+      includeSubfeatures: false,
+    });
 
     const expectedUpdatedPolicy = cloneDeep(expectedPolicyDataBeforeAdditionalCallback);
     expectedUpdatedPolicy.windows.popup.malware.message = 'foo';
 
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.additionalOnSwitchChange).toHaveBeenCalledWith({
       value: false,
@@ -132,11 +148,16 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       useLicenseMock.mockReturnValue(licenseServiceMocked);
     });
 
-    it('should NOT update notification settings when disabling', () => {
+    it('should NOT update notification settings when disabling', async () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-      setMalwareMode(expectedUpdatedPolicy, true, false, false);
+      setMalwareMode({
+        policy: expectedUpdatedPolicy,
+        turnOff: true,
+        includePopup: false,
+        includeSubfeatures: false,
+      });
       render();
-      userEvent.click(renderResult.getByTestId('test'));
+      await userEvent.click(renderResult.getByTestId('test'));
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,
@@ -144,11 +165,16 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       });
     });
 
-    it('should NOT update notification settings when enabling', () => {
+    it('should NOT update notification settings when enabling', async () => {
       const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-      setMalwareMode(formProps.policy, true, false, false);
+      setMalwareMode({
+        policy: formProps.policy,
+        turnOff: true,
+        includePopup: false,
+        includeSubfeatures: false,
+      });
       render();
-      userEvent.click(renderResult.getByTestId('test'));
+      await userEvent.click(renderResult.getByTestId('test'));
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,
@@ -176,7 +202,11 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     });
 
     it('should show option when unchecked', () => {
-      setMalwareMode(formProps.policy, true, true, false);
+      setMalwareMode({
+        policy: formProps.policy,
+        turnOff: true,
+        includeSubfeatures: false,
+      });
       render();
 
       expect(renderResult.getByTestId('test-label')).toHaveTextContent(exactMatchText('Malware'));

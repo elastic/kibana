@@ -29,6 +29,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
 import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
@@ -71,13 +72,16 @@ export const JobsListPage: FC<Props> = ({
 }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [isUpgradeInProgress, setIsUpgradeInProgress] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+  // callback to allow import flyout to refresh jobs list
+  const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
-    [coreStart.http, data.dataViews, usageCollection]
+    () => getMlGlobalServices(coreStart, data.dataViews, usageCollection),
+    [coreStart, data.dataViews, usageCollection]
   );
 
   const check = async () => {
@@ -86,6 +90,8 @@ export const JobsListPage: FC<Props> = ({
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
+      } else if (e.isUpgradeInProgress) {
+        setIsUpgradeInProgress(true);
       } else {
         setAccessDenied(true);
       }
@@ -109,7 +115,32 @@ export const JobsListPage: FC<Props> = ({
   }
 
   function onCloseSyncFlyout() {
+    if (typeof refreshJobs === 'function') {
+      refreshJobs();
+    }
     setShowSyncFlyout(false);
+  }
+
+  if (isUpgradeInProgress) {
+    return (
+      <I18nProvider>
+        <KibanaRenderContextProvider {...coreStart}>
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              share,
+              data,
+              usageCollection,
+              fieldFormats,
+              spacesApi,
+              mlServices,
+            }}
+          >
+            <UpgradeWarning />
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>
+      </I18nProvider>
+    );
   }
 
   if (accessDenied) {
@@ -203,10 +234,14 @@ export const JobsListPage: FC<Props> = ({
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ImportJobsFlyout isDisabled={false} />
+                        <ImportJobsFlyout isDisabled={false} onImportComplete={refreshJobs} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
+                    <SpaceManagement
+                      spacesApi={spacesApi}
+                      onTabChange={setCurrentTabId}
+                      onReload={setRefreshJobs}
+                    />
                   </EuiPageTemplate.Section>
                 </Router>
               </EnabledFeaturesContextProvider>

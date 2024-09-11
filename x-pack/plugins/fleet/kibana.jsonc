@@ -24,7 +24,8 @@
       "files",
       "uiActions",
       "dashboard",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "features",
@@ -37,6 +38,7 @@
       "ingestPipelines",
       "spaces",
       "guidedOnboarding",
+      "integrationAssistant",
     ],
     "requiredBundles": [
       "kibanaReact",

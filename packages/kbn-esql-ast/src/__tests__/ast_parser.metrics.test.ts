@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getAstAndSyntaxErrors as parse } from '../ast_parser';
@@ -19,7 +20,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',
@@ -30,7 +31,7 @@ describe('METRICS', () => {
       ]);
     });
 
-    it('can parse multiple "indices"', () => {
+    it('can parse multiple "sources"', () => {
       const text = 'METRICS foo ,\nbar\t,\t\nbaz \n';
       const { ast, errors } = parse(text);
 
@@ -39,7 +40,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',
@@ -69,7 +70,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',
@@ -99,7 +100,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',

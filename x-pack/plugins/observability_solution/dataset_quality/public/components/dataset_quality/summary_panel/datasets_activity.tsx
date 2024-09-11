@@ -16,7 +16,8 @@ import {
 import { DataPlaceholder } from './data_placeholder';
 
 export function DatasetsActivity() {
-  const { datasetsActivity, isDatasetsActivityLoading } = useSummaryPanelContext();
+  const { datasetsActivity, isDatasetsActivityLoading, isUserAuthorizedForDataset } =
+    useSummaryPanelContext();
   const text = `${datasetsActivity.active} ${tableSummaryOfText} ${datasetsActivity.total}`;
 
   return (
@@ -25,6 +26,7 @@ export function DatasetsActivity() {
       tooltip={summaryPanelDatasetsActivityTooltipText}
       value={text}
       isLoading={isDatasetsActivityLoading}
+      isUserAuthorizedForDataset={isUserAuthorizedForDataset}
     />
   );
 }

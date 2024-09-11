@@ -12,7 +12,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { EsConversationSchema } from './types';
 import { getConversation } from './get_conversation';
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),

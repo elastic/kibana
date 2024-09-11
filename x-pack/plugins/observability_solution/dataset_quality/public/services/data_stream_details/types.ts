@@ -6,16 +6,19 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   GetDataStreamSettingsParams,
   DataStreamSettings,
   GetDataStreamDetailsParams,
   DataStreamDetails,
   GetIntegrationDashboardsParams,
-  GetIntegrationDashboardsResponse,
   GetDataStreamDegradedFieldsParams,
   DegradedFieldResponse,
+  GetDataStreamDegradedFieldValuesPathParams,
 } from '../../../common/data_streams_stats';
+import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
+import { Dashboard, DegradedFieldValues } from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;
 
@@ -33,7 +36,11 @@ export interface IDataStreamDetailsClient {
   getDataStreamDegradedFields(
     params: GetDataStreamDegradedFieldsParams
   ): Promise<DegradedFieldResponse>;
-  getIntegrationDashboards(
-    params: GetIntegrationDashboardsParams
-  ): Promise<GetIntegrationDashboardsResponse>;
+  getDataStreamDegradedFieldValues(
+    params: GetDataStreamDegradedFieldValuesPathParams
+  ): Promise<DegradedFieldValues>;
+  getIntegrationDashboards(params: GetIntegrationDashboardsParams): Promise<Dashboard[]>;
+  getDataStreamIntegration(
+    params: GetDataStreamIntegrationParams
+  ): Promise<Integration | undefined>;
 }

@@ -19,6 +19,7 @@ import { getEndpointConsoleCommands } from '../../lib/console_commands_definitio
 import React from 'react';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { GET_FILE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type {
@@ -36,6 +37,7 @@ import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_
 jest.mock('../../../../../common/components/user_privileges');
 
 describe('When using get-file action from response actions console', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -48,7 +50,17 @@ describe('When using get-file action from response actions console', () => {
   let getConsoleCommandsOptions: GetEndpointConsoleCommandsOptions;
   let mockedContext: AppContextTestRender;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
@@ -78,7 +90,10 @@ describe('When using get-file action from response actions console', () => {
         />
       );
 
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
+      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+        user,
+        renderResult
+      );
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -89,7 +104,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if the `get_file` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'get-file')
@@ -99,7 +114,7 @@ describe('When using get-file action from response actions console', () => {
   it('should show an error if the `get-file` is not authorized', async () => {
     endpointPrivileges.canWriteFileOperations = false;
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -108,7 +123,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show an error if `get-file` is entered without `--path` argument', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'get-file');
+    await enterConsoleCommand(renderResult, user, 'get-file');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --path'
@@ -117,7 +132,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should show error if `--path` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path=""');
+    await enterConsoleCommand(renderResult, user, 'get-file --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --path. Argument cannot be empty'
@@ -126,7 +141,7 @@ describe('When using get-file action from response actions console', () => {
 
   it('should call the `get_file` api with the expected payload', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
@@ -139,7 +154,11 @@ describe('When using get-file action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two" --comment "one" --comment "two"');
+    await enterConsoleCommand(
+      renderResult,
+      user,
+      'get-file --path="one/two" --comment "one" --comment "two"'
+    );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -161,7 +180,7 @@ describe('When using get-file action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -189,11 +208,20 @@ describe('When using get-file action from response actions console', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
-    pendingDetailResponse.data.agents = ['a.b.c'];
+
+    pendingDetailResponse.data.command = 'get-file';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['not found'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     pendingDetailResponse.data.outputs = {
-      'a.b.c': {
+      'agent-a': {
         type: 'json',
         content: {
           code: outputCode,
@@ -202,7 +230,7 @@ describe('When using get-file action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'get-file --path one');
+    await enterConsoleCommand(renderResult, user, 'get-file --path one');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getFile-actionFailure').textContent).toMatch(
@@ -225,7 +253,7 @@ describe('When using get-file action from response actions console', () => {
         responseActionsSentinelOneGetFileEnabled: false,
       });
       await render();
-      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
         UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', 'get-file')
@@ -234,7 +262,7 @@ describe('When using get-file action from response actions console', () => {
 
     it('should call API with `agent_type` set to `sentinel_one`', async () => {
       await render();
-      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
@@ -247,7 +275,7 @@ describe('When using get-file action from response actions console', () => {
 
     it('should not look at `capabilities` to determine compatibility', async () => {
       await render([]);
-      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       await waitFor(() => {
         expect(apiMocks.responseProvider.getFile).toHaveBeenCalled();
@@ -257,7 +285,7 @@ describe('When using get-file action from response actions console', () => {
 
     it('should display pending message', async () => {
       await render();
-      enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('getFile-pending'));

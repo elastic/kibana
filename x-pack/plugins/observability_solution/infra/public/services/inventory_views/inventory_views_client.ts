@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   CreateInventoryViewAttributesRequestPayload,
   createInventoryViewRequestPayloadRT,
@@ -23,7 +24,6 @@ import {
   FetchInventoryViewError,
   UpsertInventoryViewError,
 } from '../../../common/inventory_views';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import { IInventoryViewsClient } from './types';
 
 export class InventoryViewsClient implements IInventoryViewsClient {

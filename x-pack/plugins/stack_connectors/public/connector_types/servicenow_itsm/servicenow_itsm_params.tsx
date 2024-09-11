@@ -34,6 +34,7 @@ import {
 } from '../lib/servicenow/helpers';
 
 import * as i18n from '../lib/servicenow/translations';
+import { AdditionalFields } from '../lib/servicenow/additional_fields';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -60,7 +61,7 @@ const CorrelationIdField: React.FunctionComponent<
       error={errors['subActionParams.incident.correlation_id']}
       isInvalid={
         errors['subActionParams.incident.correlation_id'] !== undefined &&
-        errors['subActionParams.incident.correlation_id'].length > 0 &&
+        Number(errors['subActionParams.incident.correlation_id'].length) > 0 &&
         !correlationId &&
         isRequired
       }
@@ -130,9 +131,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
-  const showAllIncidentDetails =
-    (selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED) ||
-    isTestTriggerAction;
   const showOnlyCorrelationId =
     (selectedActionGroupId && selectedActionGroupId === ACTION_GROUP_RECOVERED) ||
     isTestResolveAction;
@@ -169,7 +167,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
   );
 
   const editComment = useCallback(
-    (key, value) => {
+    (key: string, value: string) => {
       editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
@@ -263,6 +261,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector, isTestResolveAction, isTestTriggerAction]);
 
+  const additionalFieldsOnChange = useCallback(
+    (value: string | null) => editSubActionProperty('additional_fields', value),
+    [editSubActionProperty]
+  );
+
   return (
     <>
       {executionMode === ActionConnectorMode.Test ? (
@@ -281,7 +284,16 @@ const ServiceNowParamsFields: React.FunctionComponent<
         <h3>{i18n.INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {showAllIncidentDetails && (
+      {showOnlyCorrelationId ? (
+        <CorrelationIdField
+          index={index}
+          messageVariables={messageVariables}
+          correlationId={incident.correlation_id}
+          editSubActionProperty={editSubActionProperty}
+          isRequired={showOnlyCorrelationId}
+          errors={errors}
+        />
+      ) : (
         <>
           <EuiFormRow fullWidth label={i18n.URGENCY_LABEL}>
             <EuiSelect
@@ -413,7 +425,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
                 error={errors['subActionParams.incident.short_description']}
                 isInvalid={
                   errors['subActionParams.incident.short_description'] !== undefined &&
-                  errors['subActionParams.incident.short_description'].length > 0 &&
+                  Number(errors['subActionParams.incident.short_description'].length) > 0 &&
                   incident.short_description !== undefined
                 }
                 label={i18n.SHORT_DESCRIPTION_LABEL}
@@ -451,17 +463,15 @@ const ServiceNowParamsFields: React.FunctionComponent<
             inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
             label={i18n.COMMENTS_LABEL}
           />
+          {!isDeprecatedActionConnector && (
+            <AdditionalFields
+              value={actionParams.subActionParams?.incident.additional_fields}
+              messageVariables={messageVariables}
+              errors={errors['subActionParams.incident.additional_fields'] as string[]}
+              onChange={additionalFieldsOnChange}
+            />
+          )}
         </>
-      )}
-      {showOnlyCorrelationId && (
-        <CorrelationIdField
-          index={index}
-          messageVariables={messageVariables}
-          correlationId={incident.correlation_id}
-          editSubActionProperty={editSubActionProperty}
-          isRequired={showOnlyCorrelationId}
-          errors={errors}
-        />
       )}
     </>
   );

@@ -31,7 +31,7 @@ export const selectKafkaOutput = () => {
   visit('/app/fleet/settings');
   cy.getBySel(SETTINGS_OUTPUTS.ADD_BTN).click();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
-  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).find('label').click();
 };
 
 export const shouldDisplayError = (handler: string) => {
@@ -190,8 +190,8 @@ export const fillInKafkaOutputForm = (create?: boolean) => {
   );
   cy.get('[placeholder="Specify certificate authority"]').clear().type('testCA');
 
-  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SCRAM_256_OPTION).click();
-  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).click();
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_SASL_SCRAM_256_OPTION).find('label').click();
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.PARTITIONING_HASH_OPTION).find('label').click();
 
   cy.getBySel(kafkaOutputFormValues.hash.selector).type(kafkaOutputFormValues.hash.value);
   cy.getBySel(kafkaOutputFormValues.defaultTopic.selector).type(
@@ -265,7 +265,7 @@ export const validateOutputTypeChangeToKafka = (outputId: string) => {
   visit(`/app/fleet/settings/outputs/${outputId}`);
   cy.getBySel(kafkaOutputFormValues.name.selector).clear();
   cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('kafka');
-  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).click();
+  cy.getBySel(SETTINGS_OUTPUTS_KAFKA.AUTHENTICATION_USERNAME_PASSWORD_OPTION).find('label').click();
 
   fillInKafkaOutputForm(true);
   cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');

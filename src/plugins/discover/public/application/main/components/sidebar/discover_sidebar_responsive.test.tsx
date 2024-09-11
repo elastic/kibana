@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -20,10 +21,7 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import {
-  AvailableFields$,
-  DataDocuments$,
-} from '../../state_management/discover_data_state_container';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -68,6 +66,15 @@ jest.mock('../../../../customizations', () => ({
     }
   }),
 }));
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -130,7 +137,7 @@ const mockCalcFieldCounts = jest.fn(() => {
   return mockfieldCounts;
 });
 
-jest.mock('../../utils/calc_field_counts', () => ({
+jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
 }));
 
@@ -154,10 +161,6 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
       fetchStatus: FetchStatus.COMPLETE,
       result: hits,
     }) as DataDocuments$,
-    availableFields$: new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: [] as string[],
-    }) as AvailableFields$,
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -311,11 +314,6 @@ describe('discover responsive sidebar', function () {
     expect(unmappedFieldsCount.exists()).toBe(false);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
 
-    expect(props.availableFields$.getValue()).toEqual({
-      fetchStatus: 'complete',
-      fields: ['extension'],
-    });
-
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
       '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
     );
@@ -373,11 +371,6 @@ describe('discover responsive sidebar', function () {
     expect(emptyFieldsCount.text()).toBe('20');
     expect(metaFieldsCount.text()).toBe('2');
     expect(unmappedFieldsCount.exists()).toBe(false);
-
-    expect(propsWithoutColumns.availableFields$.getValue()).toEqual({
-      fetchStatus: 'complete',
-      fields: ['bytes', 'extension', '_id', 'phpmemory'],
-    });
 
     expect(findTestSubject(compWithoutSelected, 'fieldListGrouped__ariaDescription').text()).toBe(
       '4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
@@ -104,7 +105,7 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
-  private invalidSelectionsState: { [childId: string]: boolean };
+  private invalidSelectionsState: { [childId: string]: boolean } = {};
 
   public diffingSubscription: Subscription = new Subscription();
 
@@ -170,12 +171,12 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
-    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
-      return { ...prev, [id]: false };
-    }, {});
-
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
+      this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+        return { ...prev, [id]: false };
+      }, {});
+
       this.recalculateDataViews();
       this.setupSubscriptions();
       const { filters, timeslice } = this.recalculateFilters();
@@ -324,7 +325,13 @@ export class ControlGroupContainer extends Container<
     this.subscriptions = new Subscription();
     this.initialized$.next(false);
     this.updateInput(newInput);
+
     this.untilAllChildrenReady().then(() => {
+      this.dispatch.setControlWithInvalidSelectionsId(undefined);
+      this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+        return { ...prev, [id]: false };
+      }, {});
+
       this.recalculateDataViews();
       const { filters, timeslice } = this.recalculateFilters();
       this.publishFilters({ filters, timeslice });

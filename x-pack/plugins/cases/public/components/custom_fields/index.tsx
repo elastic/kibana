@@ -21,7 +21,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFieldsList } from './custom_fields_list';
-import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
 export interface Props {
   customFields: CustomFieldsConfiguration;
@@ -68,14 +67,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
       fullWidth
-      title={
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem grow={false}>{i18n.TITLE}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ExperimentalBadge />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      title={<h3>{i18n.TITLE}</h3>}
       description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="custom-fields-form-group"
     >

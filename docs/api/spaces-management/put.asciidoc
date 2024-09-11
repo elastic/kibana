@@ -37,7 +37,7 @@ experimental[] Update an existing {kib} space.
   For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
 
 `solution`::
-  (Optional, string) The solution defined for the space. Can be one of `security`, `observability`, `search`, `classic`.
+  (Optional, string) The solution defined for the space. Can be one of `security`, `oblt`, `es`, `classic`.
 
 [[spaces-api-put-response-codes]]
 ==== Response codes

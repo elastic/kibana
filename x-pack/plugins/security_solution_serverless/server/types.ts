@@ -6,7 +6,7 @@
  */
 import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
@@ -21,6 +21,7 @@ import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant-plugin/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -35,16 +36,17 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   securitySolution: SecuritySolutionPluginSetup;
   securitySolutionEss: SecuritySolutionEssPluginSetup;
   serverless: ServerlessPluginSetup;
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
   actions: ActionsPluginSetupContract;
+  integrationAssistant?: IntegrationAssistantPluginSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
-  features: PluginStartContract;
+  features: FeaturesPluginStart;
   taskManager: TaskManagerStartContract;
   fleet: FleetStartContract;
 }
@@ -63,17 +65,13 @@ export interface UsageMetrics {
   quantity: number;
   period_seconds?: number;
   cause?: string;
-  metadata?: unknown;
+  metadata?: ResourceSubtypeCounter;
 }
 
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  metadata?: UsageSourceMetadata;
-}
-
-export interface UsageSourceMetadata {
-  tier?: Tier;
+  metadata?: { tier?: Tier };
 }
 
 export type Tier = ProductTier | 'none';
@@ -122,4 +120,7 @@ export interface MetringTaskProperties {
   interval: string;
   periodSeconds: number;
   version: string;
+}
+export interface ResourceSubtypeCounter {
+  [key: string]: string;
 }

@@ -24,7 +24,7 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
   const userName = useCurrentUser();
 
   // Full name could be null, user name should always exist
-  const name = userName?.fullName ?? userName?.username;
+  const name = userName?.fullName || userName?.username;
 
   const projectFeaturesUrl = useProjectFeaturesUrl();
 

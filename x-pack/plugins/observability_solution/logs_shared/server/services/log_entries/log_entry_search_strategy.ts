@@ -82,7 +82,16 @@ export const logEntrySearchStrategyProvider = ({
 
         return concat(recoveredRequest$, initialRequest$).pipe(
           take(1),
-          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies)),
+          concatMap((esRequest) =>
+            esSearchStrategy.search(
+              esRequest,
+              {
+                ...options,
+                retrieveResults: true, // without it response will not contain progress information
+              },
+              dependencies
+            )
+          ),
           map((esResponse) => ({
             ...esResponse,
             rawResponse: decodeOrThrow(getLogEntryResponseRT)(esResponse.rawResponse),

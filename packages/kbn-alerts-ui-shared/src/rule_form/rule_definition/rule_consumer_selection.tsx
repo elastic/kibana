@@ -1,16 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { FEATURE_NAME_MAP, CONSUMER_SELECT_COMBO_BOX_TITLE } from '../translations';
-import { RuleFormErrors } from '../types';
+import {
+  CONSUMER_SELECT_TITLE,
+  FEATURE_NAME_MAP,
+  CONSUMER_SELECT_COMBO_BOX_TITLE,
+} from '../translations';
+import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { getValidatedMultiConsumer } from '../utils';
 
 export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
@@ -20,10 +26,7 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 ];
 
 export interface RuleConsumerSelectionProps {
-  consumers: RuleCreationValidConsumer[];
-  selectedConsumer?: RuleCreationValidConsumer | null;
-  errors?: RuleFormErrors;
-  onChange: (property: string, value: unknown) => void;
+  validConsumers: RuleCreationValidConsumer[];
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
@@ -31,26 +34,23 @@ const SINGLE_SELECTION = { asPlainText: true };
 type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
-  const { consumers, selectedConsumer, errors = {}, onChange } = props;
+  const { validConsumers } = props;
+  const { multiConsumerSelection, baseErrors } = useRuleFormState();
 
-  const isInvalid = (errors.consumer?.length || 0) > 0;
+  const dispatch = useRuleFormDispatch();
 
   const validatedSelectedConsumer = useMemo(() => {
-    if (
-      selectedConsumer &&
-      consumers.includes(selectedConsumer) &&
-      FEATURE_NAME_MAP[selectedConsumer]
-    ) {
-      return selectedConsumer;
-    }
-    return null;
-  }, [selectedConsumer, consumers]);
+    return getValidatedMultiConsumer({
+      multiConsumerSelection,
+      validConsumers,
+    });
+  }, [multiConsumerSelection, validConsumers]);
 
   const selectedOptions = useMemo(() => {
     if (validatedSelectedConsumer) {
       return [
         {
-          value: validatedSelectedConsumer,
+          value: validatedSelectedConsumer as RuleCreationValidConsumer,
           label: FEATURE_NAME_MAP[validatedSelectedConsumer],
         },
       ];
@@ -59,7 +59,7 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   }, [validatedSelectedConsumer]);
 
   const formattedSelectOptions = useMemo(() => {
-    return consumers
+    return validConsumers
       .reduce<ComboBoxOption[]>((result, consumer) => {
         if (FEATURE_NAME_MAP[consumer]) {
           result.push({
@@ -71,29 +71,36 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
         return result;
       }, [])
       .sort((a, b) => a.value!.localeCompare(b.value!));
-  }, [consumers]);
+  }, [validConsumers]);
 
   const onConsumerChange = useCallback(
     (selected: ComboBoxOption[]) => {
       if (selected.length > 0) {
         const newSelectedConsumer = selected[0];
-        onChange('consumer', newSelectedConsumer.value);
+        dispatch({
+          type: 'setMultiConsumer',
+          payload: newSelectedConsumer.value!,
+        });
       } else {
-        onChange('consumer', null);
+        dispatch({
+          type: 'setMultiConsumer',
+          payload: 'alerts',
+        });
       }
     },
-    [onChange]
+    [dispatch]
   );
 
-  if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {
+  if (validConsumers.length <= 1 || validConsumers.includes(AlertConsumers.OBSERVABILITY)) {
     return null;
   }
 
   return (
     <EuiFormRow
       fullWidth
-      isInvalid={isInvalid}
-      error={errors?.consumer ?? ''}
+      label={CONSUMER_SELECT_TITLE}
+      isInvalid={!!baseErrors?.consumer?.length}
+      error={baseErrors?.consumer}
       data-test-subj="ruleConsumerSelection"
     >
       <EuiComboBox

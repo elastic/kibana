@@ -7,10 +7,8 @@
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertSummaryField } from '@kbn/observability-plugin/public';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
-import { SLOGroupings } from '../../../../pages/slos/components/common/slo_groupings';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
@@ -19,7 +17,6 @@ import { BurnRateAlert, BurnRateRule } from './types';
 interface AppSectionProps {
   alert: BurnRateAlert;
   rule: BurnRateRule;
-  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
@@ -27,7 +24,6 @@ interface AppSectionProps {
 export default function AlertDetailsAppSection({
   alert,
   rule,
-  ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
   const {
@@ -45,7 +41,7 @@ export default function AlertDetailsAppSection({
     const fields = [
       {
         label: i18n.translate('xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.slo', {
-          defaultMessage: 'Source SLO',
+          defaultMessage: 'SLO',
         }),
         value: (
           <EuiLink data-test-subj="sloLink" href={basePath.prepend(alertLink!)}>
@@ -53,30 +49,10 @@ export default function AlertDetailsAppSection({
           </EuiLink>
         ),
       },
-      {
-        label: i18n.translate('xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.rule', {
-          defaultMessage: 'Rule',
-        }),
-        value: (
-          <EuiLink data-test-subj="ruleLink" href={ruleLink}>
-            {rule.name}
-          </EuiLink>
-        ),
-      },
     ];
 
-    if (instanceId !== ALL_VALUE) {
-      fields.push({
-        label: i18n.translate(
-          'xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.instanceId',
-          { defaultMessage: 'SLO Instance' }
-        ),
-        value: <SLOGroupings direction="column" slo={slo} gutterSize="none" truncate={false} />,
-      });
-    }
-
     setAlertSummaryFields(fields);
-  }, [alertLink, rule, ruleLink, setAlertSummaryFields, basePath, slo, instanceId]);
+  }, [alertLink, rule, setAlertSummaryFields, basePath, slo, instanceId]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">

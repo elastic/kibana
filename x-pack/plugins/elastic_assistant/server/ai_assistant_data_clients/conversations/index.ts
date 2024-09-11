@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   ConversationCreateProps,
   ConversationResponse,
@@ -43,7 +43,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
       id,
-      user: authenticatedUser,
+      user: authenticatedUser ?? this.options.currentUser,
     });
   };
 
@@ -84,18 +84,19 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
    */
   public createConversation = async ({
     conversation,
-    authenticatedUser,
   }: {
     conversation: ConversationCreateProps;
-    authenticatedUser: AuthenticatedUser;
   }): Promise<ConversationResponse | null> => {
+    if (!this.options.currentUser) {
+      throw new Error('AIAssistantConversationsDataClient currentUser is not defined.');
+    }
     const esClient = await this.options.elasticsearchClientPromise;
     return createConversation({
       esClient,
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
       spaceId: this.spaceId,
-      user: authenticatedUser,
+      user: this.options.currentUser,
       conversation,
     });
   };
@@ -128,7 +129,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
       conversationIndex: this.indexTemplateAndPattern.alias,
       conversationUpdateProps,
       isPatch,
-      user: authenticatedUser,
+      user: authenticatedUser ?? this.options.currentUser ?? undefined,
     });
   };
 

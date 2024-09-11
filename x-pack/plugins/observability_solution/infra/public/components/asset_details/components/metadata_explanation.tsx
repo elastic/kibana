@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
@@ -15,45 +16,53 @@ import { useMetadataStateContext } from '../hooks/use_metadata_state';
 const HOSTNAME_DOCS_LINK =
   'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name';
 
-const MetadataExplanationTooltipContent = React.memo(() => {
-  const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-  };
+const CONTAINER_ID_DOCS_LINK =
+  'https://www.elastic.co/guide/en/ecs/current/ecs-container.html#field-container-id';
 
-  return (
-    <EuiText size="xs" onClick={onClick} style={{ width: 200 }}>
-      <FormattedMessage
-        id="xpack.infra.assetDetails.metadata.tooltip.documentationLabel"
-        defaultMessage="{metadata} is populated from the last event detected for this {hostName} for the selected date period."
-        values={{
-          metadata: (
-            <i>
-              <FormattedMessage
-                id="xpack.infra.assetDetails.metadata.tooltip.metadata"
-                defaultMessage="Metadata"
-              />
-            </i>
-          ),
-          hostName: (
-            <EuiLink
-              data-test-subj="infraAssetDetailsTooltipDocumentationLink"
-              href={HOSTNAME_DOCS_LINK}
-              target="_blank"
-            >
-              <FormattedMessage
-                id="xpack.infra.assetDetails.metadata.tooltip.documentationLink"
-                defaultMessage="host.name"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiText>
-  );
-});
+const MetadataExplanationTooltipContent = React.memo(
+  ({ docsLink, metadataField }: { docsLink: string; metadataField: string }) => {
+    const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.stopPropagation();
+    };
 
-export const MetadataExplanationMessage = () => {
+    return (
+      <EuiText size="xs" onClick={onClick} style={{ width: 200 }}>
+        <FormattedMessage
+          id="xpack.infra.assetDetails.metadata.tooltip.documentationLabel"
+          defaultMessage="{metadata} is populated from the last event detected for this {metadataField} for the selected date period."
+          values={{
+            metadata: (
+              <i>
+                <FormattedMessage
+                  id="xpack.infra.assetDetails.metadata.tooltip.metadata"
+                  defaultMessage="Metadata"
+                />
+              </i>
+            ),
+            metadataField: (
+              <EuiLink
+                data-test-subj="infraAssetDetailsTooltipDocumentationLink"
+                href={docsLink}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.infra.assetDetails.metadata.tooltip.documentationLink"
+                  defaultMessage="{metadataField}"
+                  values={{ metadataField }}
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    );
+  }
+);
+
+export const MetadataExplanationMessage = ({ assetType }: { assetType: InventoryItemType }) => {
   const { metadata, loading } = useMetadataStateContext();
+  const docsLink = assetType === 'host' ? HOSTNAME_DOCS_LINK : CONTAINER_ID_DOCS_LINK;
+  const metadataField = assetType === 'host' ? 'host.name' : 'container.id';
 
   return loading && !metadata ? (
     <EuiLoadingSpinner />
@@ -93,7 +102,7 @@ export const MetadataExplanationMessage = () => {
           icon="iInCircle"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
-          <MetadataExplanationTooltipContent />
+          <MetadataExplanationTooltipContent docsLink={docsLink} metadataField={metadataField} />
         </Popover>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
-import { pick, take } from 'lodash';
+import { last, pick, take } from 'lodash';
 import {
   catchError,
   concat,
@@ -28,12 +28,12 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { UserInstruction } from '../../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
 import type { ChatFunctionClient } from '../../chat_function_client';
-import type { ChatFunctionWithoutConnector } from '../../types';
+import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../../util/replace_system_message';
@@ -53,15 +53,17 @@ function executeFunctionAndCatchError({
   signal,
   logger,
   tracer,
+  connectorId,
 }: {
   name: string;
   args: string | undefined;
   functionClient: ChatFunctionClient;
   messages: Message[];
-  chat: ChatFunctionWithoutConnector;
+  chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   logger: Logger;
   tracer: LangTracer;
+  connectorId: string;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
@@ -75,11 +77,13 @@ function executeFunctionAndCatchError({
             return chat(operationName, {
               ...params,
               tracer: nextTracer,
+              connectorId,
             }).pipe(hide());
           },
           args,
           signal,
           messages,
+          connectorId,
         })
       );
 
@@ -133,13 +137,17 @@ function getFunctionDefinitions({
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
-  disableFunctions: boolean;
+  disableFunctions:
+    | boolean
+    | {
+        except: string[];
+      };
 }) {
-  if (functionLimitExceeded || disableFunctions) {
+  if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
-  const systemFunctions = functionClient
+  let systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
     .filter(
@@ -147,6 +155,10 @@ function getFunctionDefinitions({
         !def.visibility ||
         [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
     );
+
+  if (typeof disableFunctions === 'object') {
+    systemFunctions = systemFunctions.filter((fn) => disableFunctions.except.includes(fn.name));
+  }
 
   const actions = functionClient.getActions();
 
@@ -163,22 +175,28 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  requestInstructions,
+  adHocInstructions,
   userInstructions,
   logger,
   disableFunctions,
   tracer,
+  connectorId,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
-  chat: ChatFunctionWithoutConnector;
+  chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  requestInstructions: Array<string | UserInstruction>;
-  userInstructions: UserInstruction[];
+  adHocInstructions: AdHocInstruction[];
+  userInstructions: Instruction[];
   logger: Logger;
-  disableFunctions: boolean;
+  disableFunctions:
+    | boolean
+    | {
+        except: string[];
+      };
   tracer: LangTracer;
+  connectorId: string;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -192,18 +210,16 @@ export function continueConversation({
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      registeredInstructions: functionClient.getInstructions(),
+      applicationInstructions: functionClient.getInstructions(),
       userInstructions,
-      requestInstructions,
+      adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
     initialMessages
   );
 
-  const lastMessage =
-    messagesWithUpdatedSystemMessage[messagesWithUpdatedSystemMessage.length - 1].message;
-
-  const isUserMessage = lastMessage.role === MessageRole.User;
+  const lastMessage = last(messagesWithUpdatedSystemMessage)?.message;
+  const isUserMessage = lastMessage?.role === MessageRole.User;
 
   return executeNextStep().pipe(handleEvents());
 
@@ -218,10 +234,11 @@ export function continueConversation({
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
         tracer,
+        connectorId,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
-    const functionCallName = lastMessage.function_call?.name;
+    const functionCallName = lastMessage?.function_call?.name;
 
     if (!functionCallName) {
       // reply from the LLM without a function request,
@@ -292,6 +309,7 @@ export function continueConversation({
       signal,
       logger,
       tracer,
+      connectorId,
     });
   }
 
@@ -315,10 +333,11 @@ export function continueConversation({
               functionClient,
               signal,
               userInstructions,
-              requestInstructions,
+              adHocInstructions,
               logger,
               disableFunctions,
               tracer,
+              connectorId,
             });
           })
         )

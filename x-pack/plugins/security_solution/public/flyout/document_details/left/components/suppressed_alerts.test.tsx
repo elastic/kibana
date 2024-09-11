@@ -17,9 +17,9 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
-import { LeftPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+} from '@kbn/security-solution-common';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 jest.mock('../../../../../common/detection_engine/utils', () => ({
@@ -43,15 +43,16 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 );
 const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`;
 
-const renderSuppressedAlerts = (alertSuppressionCount: number) =>
+const renderSuppressedAlerts = (alertSuppressionCount: number, isPreview: boolean = false) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={mockContextValue}>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
         <SuppressedAlerts
           alertSuppressionCount={alertSuppressionCount}
           dataAsNestedObject={mockDataAsNestedObject}
+          isPreview={isPreview}
         />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -93,5 +94,14 @@ describe('<SuppressedAlerts />', () => {
     expect(
       queryByTestId(SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID)
     ).not.toBeInTheDocument();
+  });
+
+  it('should not render investigate in timeline if in rule creation alert preview', () => {
+    const { getByTestId, queryByTestId } = renderSuppressedAlerts(5, true);
+
+    expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT)).toHaveTextContent('5 suppressed alert');
+    expect(queryByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TOGGLE_ICON)).not.toBeInTheDocument();
   });
 });

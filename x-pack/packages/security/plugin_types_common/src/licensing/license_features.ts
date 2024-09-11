@@ -83,4 +83,10 @@ export interface SecurityLicenseFeatures {
    * Describes the layout of the login form if it's displayed.
    */
   readonly layout?: LoginLayout;
+
+  /**
+   * Indicates whether we allow FIPS mode
+   */
+
+  readonly allowFips: boolean;
 }

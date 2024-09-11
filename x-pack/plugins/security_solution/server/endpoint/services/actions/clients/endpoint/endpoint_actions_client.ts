@@ -24,18 +24,20 @@ import type {
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
   ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  KillProcessRequestBody,
+  UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
@@ -43,7 +45,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   UploadedFileInfo,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
   ResponseActionScanOutputContent,
 } from '../../../../../../common/endpoint/types';
 import type {
@@ -51,6 +53,13 @@ import type {
   GetFileDownloadMethodResponse,
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
+
+const getInvalidAgentsWarning = (invalidAgents: string[]) =>
+  invalidAgents.length
+    ? `The following agent ids are not valid: ${JSON.stringify(
+        invalidAgents
+      )} and will not be included in action request`
+    : '';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
@@ -61,14 +70,15 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     allValid: boolean;
     hosts: HostMetadata[];
   }> {
+    const uniqueIds = [...new Set(ids)];
     const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService()
-      .getMetadataForEndpoints(this.options.esClient, [...new Set(ids)]);
+      .getMetadataForEndpoints(this.options.esClient, uniqueIds);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
     const invalidIds = ids.filter((id) => !validIds.includes(id));
 
     if (invalidIds.length) {
-      this.log.debug(`The following agent ids are not valid: ${JSON.stringify(invalidIds)}`);
+      this.log.warn(getInvalidAgentsWarning(invalidIds));
     }
 
     return {
@@ -88,23 +98,27 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionReq: TOptions,
     options?: TMethodOptions
   ): Promise<TResponse> {
-    const agentIds = await this.checkAgentIds(actionReq.endpoint_ids);
+    const validatedAgents = await this.checkAgentIds(actionReq.endpoint_ids);
     const actionId = uuidv4();
     const { error: validationError } = await this.validateRequest({
       ...actionReq,
       command,
-      endpoint_ids: agentIds.valid || [],
+      endpoint_ids: validatedAgents.valid || [],
     });
 
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
+
+    if (actionError && !this.options.isAutomated) {
+      throw new ResponseActionsClientError(actionError, 400);
+    }
 
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
       try {
         await this.dispatchActionViaFleet({
           actionId,
-          agents: agentIds.valid,
+          agents: validatedAgents.valid,
           data: {
             command,
             comment: actionReq.comment,
@@ -122,29 +136,40 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
+    // Append warning message to comment if there are invalid agents
+    const commentMessage = actionReq.comment ? actionReq.comment : '';
+    const warningMessage = `(WARNING: ${getInvalidAgentsWarning(validatedAgents.invalid)})`;
+    const comment = validatedAgents.invalid.length
+      ? commentMessage
+        ? `${commentMessage}. ${warningMessage}`
+        : warningMessage
+      : actionReq.comment;
+
     // Write action to endpoint index
     await this.writeActionRequestToEndpointIndex({
       ...actionReq,
+      endpoint_ids: validatedAgents.valid,
       error: actionError,
       ruleId,
       ruleName,
       hosts,
       actionId,
       command,
+      comment,
     });
 
     // Update cases
     await this.updateCases({
       command,
       actionId,
-      comment: actionReq.comment,
+      comment,
       caseIds: actionReq.case_ids,
       alertIds: actionReq.alert_ids,
-      hosts: actionReq.endpoint_ids.map((hostId) => {
+      hosts: validatedAgents.valid.map((hostId) => {
         return {
           hostId,
           hostname:
-            agentIds.hosts.find((host) => host.agent.id === hostId)?.host.hostname ??
+            validatedAgents.hosts.find((host) => host.agent.id === hostId)?.host.hostname ??
             hosts?.[hostId].name ??
             '',
         };
@@ -212,10 +237,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>(
+    return this.handleResponseAction<UnisolationRouteRequestBody, ActionDetails>(
       'unisolate',
       actionRequest,
       options
@@ -223,26 +248,26 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     return this.handleResponseAction<
-      KillOrSuspendProcessRequestBody,
-      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+      KillProcessRequestBody,
+      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
     >('kill-process', actionRequest, options);
   }
 
   async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     return this.handleResponseAction<
-      KillOrSuspendProcessRequestBody,
-      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+      SuspendProcessRequestBody,
+      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
     >('suspend-process', actionRequest, options);
   }
 
@@ -292,10 +317,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   async scan(
     actionRequest: ScanActionRequestBody,
     options: CommonResponseActionMethodOptions = {}
-  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
     return this.handleResponseAction<
       ScanActionRequestBody,
-      ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>
+      ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>
     >('scan', actionRequest, options);
   }
 

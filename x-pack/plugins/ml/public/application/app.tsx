@@ -22,7 +22,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { clearCache, setDependencyCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
@@ -84,8 +83,10 @@ const App: FC<AppProps> = ({
       fieldFormats: deps.fieldFormats,
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
+      licensing: deps.licensing,
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
+      observabilityAIAssistant: deps.observabilityAIAssistant,
       presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
@@ -96,7 +97,7 @@ const App: FC<AppProps> = ({
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
 
@@ -159,18 +160,6 @@ export const renderApp = (
   mlFeatures: MlFeatures,
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  setDependencyCache({
-    timefilter: deps.data.query.timefilter,
-    fieldFormats: deps.fieldFormats,
-    config: coreStart.uiSettings!,
-    docLinks: coreStart.docLinks!,
-    toastNotifications: coreStart.notifications.toasts,
-    recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    application: coreStart.application,
-    http: coreStart.http,
-    maps: deps.maps,
-  });
-
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
@@ -186,7 +175,6 @@ export const renderApp = (
   );
 
   return () => {
-    clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
     deps.data.search.session.clear();
   };

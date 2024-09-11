@@ -8,7 +8,8 @@
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { CustomCard, FeaturedCard } from '../packages_list/types';
+import { ObservabilityOnboardingAppServices } from '../..';
+import { CustomCard, FeaturedCard, VirtualCard } from '../packages_list/types';
 import { Category } from './types';
 
 function toFeaturedCard(name: string): FeaturedCard {
@@ -22,12 +23,41 @@ export function useCustomCardsForCategory(
   const history = useHistory();
   const location = useLocation();
   const {
-    services: { application, http },
-  } = useKibana();
+    services: {
+      application,
+      http,
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
-  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
+  const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
+  const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
+
+  const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
+  const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
+
+  const otelCard: VirtualCard = {
+    id: 'otel-logs',
+    type: 'virtual',
+    release: 'preview',
+    title: 'OpenTelemetry',
+    description:
+      'Collect logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
+    name: 'custom-logs-virtual',
+    categories: ['observability'],
+    icons: [
+      {
+        type: 'svg',
+        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+      },
+    ],
+    url: otelLogsUrl,
+    version: '',
+    integration: '',
+  };
 
   switch (category) {
     case 'apm':
@@ -45,7 +75,7 @@ export function useCustomCardsForCategory(
               src: 'apmApp',
             },
           ],
-          url: `${getUrlForApp?.('apm')}/onboarding` ?? '',
+          url: apmUrl,
           version: '',
           integration: '',
         },
@@ -62,7 +92,7 @@ export function useCustomCardsForCategory(
               src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
             },
           ],
-          url: `${getUrlForApp?.('apm')}/onboarding?agent=openTelemetry` ?? '',
+          url: otelApmUrl,
           version: '',
           integration: '',
         },
@@ -86,9 +116,26 @@ export function useCustomCardsForCategory(
       ];
     case 'infra':
       return [
-        toFeaturedCard('kubernetes'),
-        toFeaturedCard('prometheus'),
+        {
+          id: 'kubernetes-quick-start',
+          type: 'virtual',
+          title: 'Kubernetes',
+          release: 'preview',
+          description: 'Collect logs and metrics from Kubernetes using minimal configuration',
+          name: 'kubernetes-quick-start',
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: http?.staticAssets.getPluginAssetHref('kubernetes.svg') ?? '',
+            },
+          ],
+          url: kubernetesUrl,
+          version: '',
+          integration: '',
+        },
         toFeaturedCard('docker'),
+        otelCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -135,19 +182,20 @@ export function useCustomCardsForCategory(
     case 'logs':
       return [
         {
-          id: 'system-logs',
+          id: 'auto-detect-logs',
           type: 'virtual',
-          title: 'Stream host system logs',
-          description: 'Collect system logs from your machine or server',
-          name: 'system-logs-virtual',
+          title: 'Auto-detect logs and metrics',
+          release: 'preview',
+          description: 'This installation scans your host and auto-detects log files and metrics',
+          name: 'auto-detect-logs-virtual',
           categories: ['observability'],
           icons: [
             {
-              type: 'svg',
-              src: http?.staticAssets.getPluginAssetHref('system.svg') ?? '',
+              type: 'eui',
+              src: 'consoleApp',
             },
           ],
-          url: systemLogsUrl,
+          url: autoDetectUrl,
           version: '',
           integration: '',
         },
@@ -168,7 +216,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        toFeaturedCard('nginx'),
+        otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',

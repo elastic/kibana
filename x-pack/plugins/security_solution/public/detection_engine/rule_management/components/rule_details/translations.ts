@@ -28,6 +28,13 @@ export const UPDATES_TAB_LABEL = i18n.translate(
   }
 );
 
+export const DIFF_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.diffTabLabel',
+  {
+    defaultMessage: 'Diff',
+  }
+);
+
 export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
   {
@@ -171,7 +178,7 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
-    defaultMessage: 'MITRE ATT&CK\\u2122',
+    defaultMessage: 'MITRE ATT&CK\u2122',
   }
 );
 
@@ -347,5 +354,47 @@ export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
   {
     defaultMessage: 'Max alerts per run',
+  }
+);
+
+export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
+  {
+    defaultMessage: 'Customized Elastic rule',
+  }
+);
+
+export const QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.queryLanguageLabel',
+  {
+    defaultMessage: 'Custom query language',
+  }
+);
+
+export const THREAT_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.threatQueryLanguageLabel',
+  {
+    defaultMessage: 'Indicator index query language',
+  }
+);
+
+export const SAVED_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.savedQueryLanguageLabel',
+  {
+    defaultMessage: 'Saved query language',
+  }
+);
+
+export const KUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.kqlLanguageLabel',
+  {
+    defaultMessage: 'KQL',
+  }
+);
+
+export const LUCENE_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.luceneLanguageLabel',
+  {
+    defaultMessage: 'Lucene',
   }
 );

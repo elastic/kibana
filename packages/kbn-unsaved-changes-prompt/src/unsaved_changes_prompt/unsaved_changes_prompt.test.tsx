@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, cleanup } from '@testing-library/react-hooks';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -23,6 +24,20 @@ const navigateToUrl = jest.fn().mockImplementation(async (url) => {
 });
 
 describe('useUnsavedChangesPrompt', () => {
+  let addSpy: jest.SpiedFunction<Window['addEventListener']>;
+  let removeSpy: jest.SpiedFunction<Window['removeEventListener']>;
+
+  beforeEach(() => {
+    addSpy = jest.spyOn(window, 'addEventListener');
+    removeSpy = jest.spyOn(window, 'removeEventListener');
+  });
+
+  afterEach(() => {
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
+    jest.resetAllMocks();
+  });
+
   it('should not block if not edited', () => {
     renderHook(() =>
       useUnsavedChangesPrompt({
@@ -39,6 +54,7 @@ describe('useUnsavedChangesPrompt', () => {
     expect(history.location.pathname).toBe('/test');
     expect(history.location.search).toBe('');
     expect(coreStart.overlays.openConfirm).not.toBeCalled();
+    expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
   });
 
   it('should block if edited', async () => {
@@ -61,5 +77,23 @@ describe('useUnsavedChangesPrompt', () => {
 
     expect(navigateToUrl).toBeCalledWith('/mock/test', expect.anything());
     expect(coreStart.overlays.openConfirm).toBeCalled();
+    expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
+  });
+
+  it('beforeunload event should be cleaned up', async () => {
+    coreStart.overlays.openConfirm.mockResolvedValue(true);
+
+    renderHook(() =>
+      useUnsavedChangesPrompt({
+        hasUnsavedChanges: true,
+        http: coreStart.http,
+        openConfirm: coreStart.overlays.openConfirm,
+        history,
+        navigateToUrl,
+      })
+    );
+    cleanup();
+    expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
+    expect(removeSpy).toBeCalledWith('beforeunload', expect.anything());
   });
 });

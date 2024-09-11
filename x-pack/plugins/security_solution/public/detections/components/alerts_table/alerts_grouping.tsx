@@ -12,6 +12,7 @@ import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { GroupingArgs } from '@kbn/grouping/src';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -89,7 +90,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [telemetry]
   );
 
-  const onOptionsChange = useCallback(
+  const onOptionsChange = useCallback<NonNullable<GroupingArgs<{}>['onOptionsChange']>>(
     (options) => {
       dispatch(
         updateGroups({
@@ -104,7 +105,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
-      groupStatsRenderer: getStats,
+      getGroupStats: getStats,
       onGroupToggle,
       unit: defaultUnit,
     },

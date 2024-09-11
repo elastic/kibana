@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     let createSLOInput: CreateSLOInput;
 
     before(async () => {
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await loadTestData(getService);
     });
@@ -146,24 +147,15 @@ export default function ({ getService }: FtrProviderContext) {
                   ],
                 },
               },
-              runtime_mappings: {
-                'slo.id': {
-                  type: 'keyword',
-                  script: { source: `emit('${id}')` },
-                },
-                'slo.revision': { type: 'long', script: { source: 'emit(2)' } },
-              },
             },
             dest: {
-              index: '.slo-observability.sli-v3.2',
-              pipeline: '.slo-observability.sli.pipeline-v3.2',
+              index: '.slo-observability.sli-v3.3',
+              pipeline: `.slo-observability.sli.pipeline-${id}-2`,
             },
             frequency: '1m',
             sync: { time: { field: '@timestamp', delay: '1m' } },
             pivot: {
               group_by: {
-                'slo.id': { terms: { field: 'slo.id' } },
-                'slo.revision': { terms: { field: 'slo.revision' } },
                 'slo.groupings.hosts': { terms: { field: 'hosts' } },
                 '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
               },
@@ -188,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Rolled-up SLI data for SLO: Test SLO for api integration [id: ${id}, revision: 2]`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3.2, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.3, managed: true, managed_by: 'observability' },
           },
         ],
       });
@@ -210,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
             version: '10.0.0',
             create_time: summaryTransform.body.transforms[0].create_time,
             source: {
-              index: ['.slo-observability.sli-v3.2*'],
+              index: ['.slo-observability.sli-v3.3*'],
               query: {
                 bool: {
                   filter: [
@@ -222,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.summary-v3.2',
+              index: '.slo-observability.summary-v3.3',
               pipeline: `.slo-observability.summary.pipeline-${id}-2`,
             },
             frequency: '1m',
@@ -306,11 +298,77 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                 },
                 latestSliTimestamp: { max: { field: '@timestamp' } },
+                fiveMinuteBurnRate: {
+                  filter: {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-480s/m',
+                        lte: 'now-180s/m',
+                      },
+                    },
+                  },
+                  aggs: {
+                    goodEvents: {
+                      sum: {
+                        field: 'slo.numerator',
+                      },
+                    },
+                    totalEvents: {
+                      sum: {
+                        field: 'slo.denominator',
+                      },
+                    },
+                  },
+                },
+                oneHourBurnRate: {
+                  filter: {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-3780s/m',
+                        lte: 'now-180s/m',
+                      },
+                    },
+                  },
+                  aggs: {
+                    goodEvents: {
+                      sum: {
+                        field: 'slo.numerator',
+                      },
+                    },
+                    totalEvents: {
+                      sum: {
+                        field: 'slo.denominator',
+                      },
+                    },
+                  },
+                },
+                oneDayBurnRate: {
+                  filter: {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-86580s/m',
+                        lte: 'now-180s/m',
+                      },
+                    },
+                  },
+                  aggs: {
+                    goodEvents: {
+                      sum: {
+                        field: 'slo.numerator',
+                      },
+                    },
+                    totalEvents: {
+                      sum: {
+                        field: 'slo.denominator',
+                      },
+                    },
+                  },
+                },
               },
             },
             description: `Summarise the rollup data of SLO: Test SLO for api integration [id: ${id}, revision: 2].`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3.2, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.3, managed: true, managed_by: 'observability' },
           },
         ],
       });

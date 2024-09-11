@@ -102,7 +102,8 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     if (isTaskRunEvent(taskEvent)) {
       this.processTaskRunEvent(taskEvent);
       this.logger.debug(
-        `Collected metrics after processing lifecycle event - ${JSON.stringify(this.collect())}`
+        () =>
+          `Collected metrics after processing lifecycle event - ${JSON.stringify(this.collect())}`
       );
     } else if (isTaskManagerStatEvent(taskEvent)) {
       this.processTaskManagerStatEvent(taskEvent);

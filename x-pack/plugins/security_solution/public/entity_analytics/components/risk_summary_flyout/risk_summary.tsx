@@ -22,17 +22,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
@@ -51,14 +51,16 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
-const RiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
   recalculatingScore,
   queryId,
   openDetailsPanel,
+  isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -93,7 +95,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 
   const onToggle = useCallback(
-    (isOpen) => {
+    (isOpen: boolean) => {
       const entity = isUserRiskData(riskData) ? 'user' : 'host';
 
       telemetry.reportToggleRiskSummaryClicked({
@@ -189,7 +191,9 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           link: riskScoreData.loading
             ? undefined
             : {
-                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                callback: openDetailsPanel
+                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                  : undefined,
                 tooltip: (
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
@@ -197,7 +201,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   />
                 ),
               },
-          iconType: 'arrowStart',
+          iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,
@@ -283,5 +287,5 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 };
 
-export const RiskSummary = React.memo(RiskSummaryComponent);
-RiskSummary.displayName = 'RiskSummary';
+export const FlyoutRiskSummary = React.memo(FlyoutRiskSummaryComponent);
+FlyoutRiskSummary.displayName = 'RiskSummary';

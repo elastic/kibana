@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-browser",
-        "id": "def-common.DeprecationsServiceStart",
+        "id": "def-public.DeprecationsServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "DeprecationsServiceStart",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.getAllDeprecations",
+            "id": "def-public.DeprecationsServiceStart.getAllDeprecations",
             "type": "Function",
             "tags": [],
             "label": "getAllDeprecations",
@@ -61,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.getDeprecations",
+            "id": "def-public.DeprecationsServiceStart.getDeprecations",
             "type": "Function",
             "tags": [],
             "label": "getDeprecations",
@@ -85,7 +69,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
-                "id": "def-common.DeprecationsServiceStart.getDeprecations.$1",
+                "id": "def-public.DeprecationsServiceStart.getDeprecations.$1",
                 "type": "string",
                 "tags": [],
                 "label": "domainId",
@@ -103,7 +87,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.isDeprecationResolvable",
+            "id": "def-public.DeprecationsServiceStart.isDeprecationResolvable",
             "type": "Function",
             "tags": [],
             "label": "isDeprecationResolvable",
@@ -127,7 +111,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
-                "id": "def-common.DeprecationsServiceStart.isDeprecationResolvable.$1",
+                "id": "def-public.DeprecationsServiceStart.isDeprecationResolvable.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "details",
@@ -151,7 +135,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.resolveDeprecation",
+            "id": "def-public.DeprecationsServiceStart.resolveDeprecation",
             "type": "Function",
             "tags": [],
             "label": "resolveDeprecation",
@@ -170,9 +154,9 @@
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-common.ResolveDeprecationResponse",
+                "section": "def-public.ResolveDeprecationResponse",
                 "text": "ResolveDeprecationResponse"
               },
               ">"
@@ -183,7 +167,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
-                "id": "def-common.DeprecationsServiceStart.resolveDeprecation.$1",
+                "id": "def-public.DeprecationsServiceStart.resolveDeprecation.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "details",
@@ -213,7 +197,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-deprecations-browser",
-        "id": "def-common.ResolveDeprecationResponse",
+        "id": "def-public.ResolveDeprecationResponse",
         "type": "Type",
         "tags": [],
         "label": "ResolveDeprecationResponse",
@@ -229,6 +213,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

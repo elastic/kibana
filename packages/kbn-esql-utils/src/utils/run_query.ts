@@ -1,16 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { i18n } from '@kbn/i18n';
+import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { TimeRange } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
+
+export const hasStartEndParams = (query: string) => /\?t_start|\?t_end/i.test(query);
+
+export const getStartEndParams = (query: string, time?: TimeRange) => {
+  const startNamedParams = /\?t_start/i.test(query);
+  const endNamedParams = /\?t_end/i.test(query);
+  if (time && (startNamedParams || endNamedParams)) {
+    const timeParams = {
+      start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
+      end: endNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+    };
+    const namedParams = [];
+    if (timeParams?.start) {
+      namedParams.push({ t_start: timeParams.start });
+    }
+    if (timeParams?.end) {
+      namedParams.push({ t_end: timeParams.end });
+    }
+    return namedParams;
+  }
+  return [];
+};
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
   return columns.map(({ name, type }) => {
@@ -29,17 +55,21 @@ export async function getESQLQueryColumnsRaw({
   esqlQuery,
   search,
   signal,
+  timeRange,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  timeRange?: TimeRange;
 }): Promise<ESQLColumn[]> {
   try {
+    const namedParams = getStartEndParams(esqlQuery, timeRange);
     const response = await lastValueFrom(
       search(
         {
           params: {
             query: `${esqlQuery} | limit 0`,
+            ...(namedParams.length ? { params: namedParams } : {}),
           },
         },
         {
@@ -66,13 +96,15 @@ export async function getESQLQueryColumns({
   esqlQuery,
   search,
   signal,
+  timeRange,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  timeRange?: TimeRange;
 }): Promise<DatatableColumn[]> {
   try {
-    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal });
+    const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal, timeRange });
     const columns = formatESQLColumns(rawColumns) ?? [];
     return columns;
   } catch (error) {
@@ -93,16 +125,19 @@ export async function getESQLResults({
   signal,
   filter,
   dropNullColumns,
+  timeRange,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
   filter?: unknown;
   dropNullColumns?: boolean;
+  timeRange?: TimeRange;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
+  const namedParams = getStartEndParams(esqlQuery, timeRange);
   const result = await lastValueFrom(
     search(
       {
@@ -110,6 +145,7 @@ export async function getESQLResults({
           ...(filter ? { filter } : {}),
           query: esqlQuery,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
+          ...(namedParams.length ? { params: namedParams } : {}),
         },
       },
       {

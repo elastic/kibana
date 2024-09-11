@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { IKibanaResponse } from '@kbn/core-http-server';
-import {
-  getJourneyScreenshot,
-  ScreenshotReturnTypesUnion,
-} from '../legacy_uptime/lib/requests/get_journey_screenshot';
+import { getJourneyScreenshot, ScreenshotReturnTypesUnion } from './get_journey_screenshot';
 import { isRefResult, RefResult } from '../../common/runtime_types';
 import { RouteContext, UptimeRouteContext } from '../routes/types';
 
@@ -27,12 +24,12 @@ function getSharedHeaders(stepName: string, totalSteps: number) {
 export const journeyScreenshotHandler = async ({
   response,
   request,
-  uptimeEsClient,
+  syntheticsEsClient,
 }: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { checkGroup, stepIndex } = request.params;
 
   const result: ScreenshotReturnTypesUnion | null = await getJourneyScreenshot({
-    uptimeEsClient,
+    syntheticsEsClient,
     checkGroup,
     stepIndex,
   });

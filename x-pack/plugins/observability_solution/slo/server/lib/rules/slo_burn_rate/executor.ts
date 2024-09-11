@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -36,6 +38,7 @@ import {
   BurnRateAllowedActionGroups,
   BurnRateRuleParams,
   BurnRateRuleTypeState,
+  Group,
   WindowSchema,
 } from './types';
 import {
@@ -49,6 +52,10 @@ import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
 import { getSloSummary } from './lib/summary_repository';
+
+export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
+  [ALERT_GROUP]?: Group[];
+};
 
 export const getRuleExecutor = ({
   basePath,
@@ -64,7 +71,7 @@ export const getRuleExecutor = ({
       BurnRateAlertState,
       BurnRateAlertContext,
       BurnRateAllowedActionGroups,
-      ObservabilitySloAlert
+      BurnRateAlert
     >
   ): ReturnType<
     ExecutorType<
@@ -123,6 +130,15 @@ export const getRuleExecutor = ({
           window: windowDef,
         } = result;
 
+        const instances = instanceId.split(',');
+        const groups =
+          instanceId !== ALL_VALUE
+            ? [slo.groupBy].flat().reduce<Group[]>((resultGroups, groupByItem, index) => {
+                resultGroups.push({ field: groupByItem, value: instances[index].trim() });
+                return resultGroups;
+              }, [])
+            : undefined;
+
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
@@ -165,9 +181,11 @@ export const getRuleExecutor = ({
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+              [ALERT_GROUP]: groups,
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
+              ...getEcsGroups(groups),
             },
           });
 

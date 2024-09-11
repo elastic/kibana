@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -46,7 +47,11 @@ import { contentManagementServiceFactory } from './content_management/content_ma
 import { serverlessServiceFactory } from './serverless/serverless_service';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
+import { observabilityAIAssistantServiceFactory } from './observability_ai_assistant/observability_ai_assistant_service';
 import { userProfileServiceFactory } from './user_profile/user_profile_service';
+import { dashboardRecentlyAccessedFactory } from './dashboard_recently_accessed/dashboard_recently_accessed';
+import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service';
+import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
@@ -93,7 +98,11 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   serverless: new PluginServiceProvider(serverlessServiceFactory),
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
+  observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedFactory, ['http']),
+  dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
+  dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

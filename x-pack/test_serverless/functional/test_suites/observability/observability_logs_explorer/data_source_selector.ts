@@ -40,12 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="dataSourceSelectorPopoverButton"])
     this.tags(['failsOnMKI']);
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('as consistent behavior', () => {
@@ -438,7 +434,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
 
               expect(await menuEntries[0].getVisibleText()).to.be('access');
-              menuEntries[0].click();
+              await menuEntries[0].click();
             });
 
             await retry.try(async () => {
@@ -574,7 +570,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedUncategorized[0]);
-            menuEntries[0].click();
+            await menuEntries[0].click();
           });
 
           await retry.try(async () => {
@@ -687,7 +683,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
 
             expect(await menuEntries[0].getVisibleText()).to.be(expectedDataViews[0]);
-            menuEntries[0].click();
+            await menuEntries[0].click();
           });
 
           await retry.try(async () => {
@@ -710,7 +706,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
 
             expect(await menuEntries[1].getVisibleText()).to.be(expectedDataViews[1]);
-            menuEntries[1].click();
+            await menuEntries[1].click();
           });
 
           await retry.try(async () => {
@@ -805,7 +801,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const { nodes, integrations } =
               await PageObjects.observabilityLogsExplorer.getIntegrations();
             expect(integrations).to.eql([initialPackageMap.apache]);
-            nodes[0].click();
+            await nodes[0].click();
           });
 
           await retry.try(async () => {
@@ -838,7 +834,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const panelTitleNode = await PageObjects.observabilityLogsExplorer
             .getIntegrationsContextMenu()
             .then((menu) => PageObjects.observabilityLogsExplorer.getPanelTitle(menu));
-          panelTitleNode.click();
+          await panelTitleNode.click();
 
           await retry.try(async () => {
             const { nodes, integrations } =
@@ -848,7 +844,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const searchValue = await PageObjects.observabilityLogsExplorer.getSearchFieldValue();
             expect(searchValue).to.eql('apache');
 
-            nodes[0].click();
+            await nodes[0].click();
           });
 
           await retry.try(async () => {

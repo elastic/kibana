@@ -6,22 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import { AgentStatus } from '../../../../../../common/components/agents/agent_status';
-import { useAgentStatusHook } from '../../../../../hooks/agents/use_get_agent_status';
-import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
+import type { ResponseActionAgentType } from '../../../../../../../common/endpoint/service/response_actions/constants';
+import { AgentStatus } from '../../../../../../common/components/endpoint/agents/agent_status';
+import { useGetAgentStatus } from '../../../../../hooks/agents/use_get_agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import type { Platform } from '../platforms';
 
 interface AgentInfoProps {
-  agentId: ThirdPartyAgentInfo['agent']['id'];
-  agentType: ThirdPartyAgentInfo['agent']['type'];
-  platform: ThirdPartyAgentInfo['host']['os']['family'];
-  hostName: ThirdPartyAgentInfo['host']['name'];
+  agentId: string;
+  agentType: ResponseActionAgentType;
+  platform: string;
+  hostName: string;
 }
 
 export const AgentInfo = memo<AgentInfoProps>(({ agentId, platform, hostName, agentType }) => {
-  const getAgentStatus = useAgentStatusHook();
-  const { data } = getAgentStatus([agentId], agentType);
+  const { data } = useGetAgentStatus(agentId, agentType);
   const agentStatus = data?.[agentId];
   const lastCheckin = agentStatus ? agentStatus.lastSeen : '';
 
@@ -30,6 +29,8 @@ export const AgentInfo = memo<AgentInfoProps>(({ agentId, platform, hostName, ag
       platform={platform.toLowerCase() as Platform}
       hostName={hostName}
       lastCheckin={lastCheckin}
+      agentType={agentType}
+      data-test-subj="responseConsole"
     >
       <AgentStatus
         agentId={agentId}

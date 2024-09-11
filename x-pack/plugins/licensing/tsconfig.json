@@ -12,9 +12,8 @@
     "@kbn/config-schema",
     "@kbn/std",
     "@kbn/i18n",
-    "@kbn/analytics-client",
     "@kbn/logging-mocks",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
   ],
   "exclude": ["target/**/*"]
 }

@@ -15,6 +15,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { PersistedLogViewReference, ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -26,7 +27,6 @@ import {
   ThresholdType,
   timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
@@ -105,7 +105,10 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogViewProvider logViews={logsShared.logViews.client}>
+        <LogViewProvider
+          logViews={logsShared.logViews.client}
+          initialLogViewReference={props.ruleParams.logView}
+        >
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
@@ -190,7 +193,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   }, [resolvedLogView]);
 
   const updateThreshold = useCallback(
-    (thresholdParams) => {
+    (thresholdParams: any) => {
       const nextThresholdParams = { ...ruleParams.count, ...thresholdParams };
       setRuleParams('count', nextThresholdParams);
     },

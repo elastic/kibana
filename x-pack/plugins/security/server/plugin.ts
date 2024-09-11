@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -18,10 +18,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   AuditServiceSetup,
@@ -52,6 +49,8 @@ import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
+import type { FipsServiceSetupInternal } from './fips';
+import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
@@ -75,7 +74,9 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
   /**
    * @deprecated Use `authc` methods from the `SecurityServiceStart` contract instead.
    */
-  authc: { getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null };
+  authc: {
+    getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  };
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
@@ -88,6 +89,7 @@ export interface PluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -107,6 +109,7 @@ export class SecurityPlugin
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;
+
   private configSubscription?: Subscription;
 
   private config?: ConfigType;
@@ -176,6 +179,9 @@ export class SecurityPlugin
     return this.userProfileStart;
   };
 
+  private readonly fipsService: FipsService;
+  private fipsServiceSetup?: FipsServiceSetupInternal;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -183,6 +189,7 @@ export class SecurityPlugin
       this.initializerContext.logger.get('authentication')
     );
     this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+
     this.elasticsearchService = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
     );
@@ -198,6 +205,8 @@ export class SecurityPlugin
     );
 
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
+
+    this.fipsService = new FipsService(this.initializerContext.logger.get('fips'));
   }
 
   public setup(
@@ -279,6 +288,9 @@ export class SecurityPlugin
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
+    this.fipsServiceSetup = this.fipsService.setup({ config, license });
+    this.fipsServiceSetup.validateLicenseForFips();
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
@@ -329,7 +341,9 @@ export class SecurityPlugin
 
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
-      authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
+      authc: {
+        getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      },
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
@@ -410,8 +424,8 @@ export class SecurityPlugin
 
     return Object.freeze<SecurityPluginStart>({
       authc: {
-        apiKeys: this.authenticationStart.apiKeys,
         getCurrentUser: this.authenticationStart.getCurrentUser,
+        apiKeys: this.authenticationStart.apiKeys,
       },
       authz: {
         actions: this.authorizationSetup!.actions,

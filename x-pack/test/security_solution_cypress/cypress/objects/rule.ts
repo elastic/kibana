@@ -361,8 +361,8 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
-    'Unusual Linux Network Activity',
-    'Anomalous Process for a Linux Population',
+    'v3_linux_anomalous_network_activity',
+    'v3_linux_anomalous_process_all_hosts',
   ],
   anomaly_threshold: 20,
   name: 'New ML Rule Test',

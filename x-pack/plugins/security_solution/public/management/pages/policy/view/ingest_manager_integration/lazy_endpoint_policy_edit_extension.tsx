@@ -10,7 +10,7 @@ import type {
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import type { FleetUiExtensionGetterOptions } from './types';
+import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
 
 export const getLazyEndpointPolicyEditExtension = ({
   coreStart,
@@ -19,7 +19,7 @@ export const getLazyEndpointPolicyEditExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyEditExtension }] = await Promise.all([
-      import('./components/with_security_context/with_security_context'),
+      import('../../../../../common/components/with_security_context/with_security_context'),
       import('./endpoint_policy_edit_extension/endpoint_policy_edit_extension'),
     ]);
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import {
   SINGLE_DATASET_LOCATOR_ID,
   SingleDatasetLocatorParams,
@@ -15,60 +16,89 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
-import { useSelector } from '@xstate/react';
-import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { FlyoutDataset, TimeRangeConfig } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
+import { BasicDataStream, TimeRangeConfig } from '../../common/types';
+import { SendTelemetryFn } from './use_redirect_link_telemetry';
 
-export const useRedirectLink = ({
+export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,
   query,
   timeRangeConfig,
   breakdownField,
+  sendTelemetry,
 }: {
-  dataStreamStat: DataStreamStat | FlyoutDataset;
+  dataStreamStat: T;
   query?: Query | AggregateQuery;
-  timeRangeConfig?: TimeRangeConfig;
+  timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
+  sendTelemetry: SendTelemetryFn;
 }) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
 
-  const { service } = useDatasetQualityContext();
-  const { timeRange } = useSelector(service, (state) => state.context.filters);
-  const { from, to } = timeRangeConfig || timeRange;
+  const { from, to } = timeRangeConfig;
 
   const logsExplorerLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
-  const config = logsExplorerLocator
-    ? buildLogsExplorerConfig({
-        locator: logsExplorerLocator,
-        dataStreamStat,
-        query,
-        from,
-        to,
-        breakdownField,
-      })
-    : buildDiscoverConfig({
-        locatorClient: share.url.locators,
-        dataStreamStat,
-        query,
-        from,
-        to,
-        breakdownField,
-      });
+  return useMemo<{
+    linkProps: RouterLinkProps;
+    navigate: () => void;
+    isLogsExplorerAvailable: boolean;
+  }>(() => {
+    const isLogsExplorerAvailable = !!logsExplorerLocator && dataStreamStat.type === 'logs';
+    const config = isLogsExplorerAvailable
+      ? buildLogsExplorerConfig({
+          locator: logsExplorerLocator,
+          dataStreamStat,
+          query,
+          from,
+          to,
+          breakdownField,
+        })
+      : buildDiscoverConfig({
+          locatorClient: share.url.locators,
+          dataStreamStat,
+          query,
+          from,
+          to,
+          breakdownField,
+        });
 
-  return {
-    ...config.routerLinkProps,
-    navigate: config.navigate,
-    isLogsExplorerAvailable: !!logsExplorerLocator,
-  };
+    const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
+      sendTelemetry();
+      if (config.routerLinkProps.onClick) {
+        config.routerLinkProps.onClick(event);
+      }
+    };
+
+    const navigateWithTelemetry = () => {
+      sendTelemetry();
+      config.navigate();
+    };
+
+    return {
+      linkProps: {
+        ...config.routerLinkProps,
+        onClick: onClickWithTelemetry,
+      },
+      navigate: navigateWithTelemetry,
+      isLogsExplorerAvailable,
+    };
+  }, [
+    breakdownField,
+    dataStreamStat,
+    from,
+    to,
+    logsExplorerLocator,
+    query,
+    sendTelemetry,
+    share.url.locators,
+  ]);
 };
 
-const buildLogsExplorerConfig = ({
+const buildLogsExplorerConfig = <T extends BasicDataStream>({
   locator,
   dataStreamStat,
   query,
@@ -77,7 +107,7 @@ const buildLogsExplorerConfig = ({
   breakdownField,
 }: {
   locator: LocatorPublic<SingleDatasetLocatorParams>;
-  dataStreamStat: DataStreamStat | FlyoutDataset;
+  dataStreamStat: T;
   query?: Query | AggregateQuery;
   from: string;
   to: string;
@@ -117,7 +147,7 @@ const buildLogsExplorerConfig = ({
   return { routerLinkProps: logsExplorerLinkProps, navigate: navigateToLogsExplorer };
 };
 
-const buildDiscoverConfig = ({
+const buildDiscoverConfig = <T extends BasicDataStream>({
   locatorClient,
   dataStreamStat,
   query,
@@ -126,7 +156,7 @@ const buildDiscoverConfig = ({
   breakdownField,
 }: {
   locatorClient: LocatorClient;
-  dataStreamStat: DataStreamStat | FlyoutDataset;
+  dataStreamStat: T;
   query?: Query | AggregateQuery;
   from: string;
   to: string;
@@ -152,11 +182,12 @@ const buildDiscoverConfig = ({
     dataViewId,
     dataViewSpec: {
       id: dataViewId,
-      title: dataViewTitle,
+      title: dataViewId,
+      timeFieldName: '@timestamp',
     },
     query,
     breakdownField,
-    columns: ['@timestamp', 'message'],
+    columns: [],
     filters: [
       buildPhraseFilter(
         {

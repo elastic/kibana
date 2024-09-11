@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assertQueryStructure, hasFilters } from './utils';
+import { assertQueryStructure } from './utils';
 
 const query = { bool: { must_not: [], filter: [], should: [], must: [] } };
 
@@ -34,28 +34,6 @@ describe('utils', () => {
     test('should fail to parse query object without any filter clause', () => {
       const anyObject = { bool: {} };
       expect(() => assertQueryStructure(anyObject)).toThrow();
-    });
-  });
-  describe('hasFilters', () => {
-    test('should return true if there is any filter', () => {
-      const result = hasFilters({
-        ...query,
-        bool: {
-          filter: [
-            {
-              term: {
-                'host.name': 'host',
-              },
-            },
-          ],
-        },
-      });
-      expect(result).toEqual(true);
-    });
-
-    test('should return false when there is not filter', () => {
-      const result = hasFilters(query);
-      expect(result).toEqual(false);
     });
   });
 });

@@ -107,8 +107,8 @@ describe('Table Helpers', () => {
           values={items}
           fieldName="attrName"
           idPrefix="idPrefix"
-          maxOverflowItems={1}
           overflowIndexStart={1}
+          maxOverflowItems={1}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -158,6 +158,26 @@ describe('Table Helpers', () => {
         />
       );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
+    });
+
+    test('it shows correct number of overflow items when maxOverflowItems are exceeded', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={1}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
+
+      expect(
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
+      ).toBe(1);
     });
   });
 

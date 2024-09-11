@@ -1,0 +1,15 @@
+## TO_DEGREES
+
+Converts a number in radians to degrees.
+
+### Examples
+
+```esql
+ROW rad = [1.57, 3.14, 4.71]
+| EVAL deg = TO_DEGREES(rad)
+```
+
+```esql
+ROW angle_in_radians = 1.0
+| EVAL angle_in_degrees = TO_DEGREES(angle_in_radians)
+```

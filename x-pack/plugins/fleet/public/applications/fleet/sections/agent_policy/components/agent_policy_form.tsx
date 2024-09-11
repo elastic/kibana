@@ -75,13 +75,14 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
 
   const generalSettingsWrapper = (children: JSX.Element[]) => (
     <EuiDescribedFormGroup
+      fullWidth
       title={
-        <h4>
+        <h3>
           <FormattedMessage
             id="xpack.fleet.policyForm.generalSettingsGroupTitle"
             defaultMessage="General settings"
           />
-        </h4>
+        </h3>
       }
       description={
         <FormattedMessage

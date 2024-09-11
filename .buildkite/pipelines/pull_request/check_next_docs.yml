@@ -2,9 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/next_docs/build_and_validate_docs.sh
     label: 'Build and Validate Next Docs'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-4
       preemptible: true
     timeout_in_minutes: 30

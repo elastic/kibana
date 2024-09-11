@@ -39,7 +39,7 @@ export const SelectedNodeItem = ({
   const offset = fixIconOffset(node);
 
   return (
-    <div aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
+    <button aria-hidden="true" className={fieldClasses} onClick={() => onSelectedFieldClick(node)}>
       <svg width="24" height="24">
         <circle
           className="gphNode__circle"
@@ -60,6 +60,6 @@ export const SelectedNodeItem = ({
       </svg>
       <span>{node.label}</span>
       {node.numChildren > 0 && <span> (+{node.numChildren})</span>}
-    </div>
+    </button>
   );
 };

@@ -38,12 +38,6 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
         });
 
-        // Skipped: see https://github.com/elastic/kibana/issues/179208
-        it.skip('should report that alerts index does not exist', async () => {
-          const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
-          expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-        });
-
         it('should return 200 for create_index', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_INDEX_URL)

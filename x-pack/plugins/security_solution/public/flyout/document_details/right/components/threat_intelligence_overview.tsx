@@ -6,14 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
@@ -25,7 +25,8 @@ import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelli
  * and the SummaryPanel component for data rendering.
  */
 export const ThreatIntelligenceOverview: FC = () => {
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreviewMode } =
+    useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToThreatIntelligenceTab = useCallback(() => {
@@ -47,6 +48,22 @@ export const ThreatIntelligenceOverview: FC = () => {
     dataFormattedForFieldBrowser,
   });
 
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToThreatIntelligenceTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
+                defaultMessage="Show all threat intelligence"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToThreatIntelligenceTab]
+  );
+
   return (
     <ExpandablePanel
       header={{
@@ -56,16 +73,8 @@ export const ThreatIntelligenceOverview: FC = () => {
             defaultMessage="Threat intelligence"
           />
         ),
-        link: {
-          callback: goToThreatIntelligenceTab,
-          tooltip: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
-              defaultMessage="Show all threat intelligence"
-            />
-          ),
-        },
-        iconType: 'arrowStart',
+        link,
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
       content={{ loading }}

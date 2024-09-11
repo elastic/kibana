@@ -116,7 +116,11 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   );
 
   return (
-    <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+    <ReactEmbeddableRenderer<
+      AnomalySwimLaneEmbeddableState,
+      AnomalySwimLaneEmbeddableState,
+      AnomalySwimLaneEmbeddableApi
+    >
       maybeId={id}
       type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}

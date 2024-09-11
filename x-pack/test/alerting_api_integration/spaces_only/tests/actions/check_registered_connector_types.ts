@@ -46,6 +46,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.observability-ai-assistant',
           '.resilient',
           '.teams',
+          '.thehive',
           '.tines',
           '.torq',
           '.opsgenie',

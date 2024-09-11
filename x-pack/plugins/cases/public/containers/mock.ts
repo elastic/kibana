@@ -45,6 +45,7 @@ import type {
   AttachmentUI,
   CaseUICustomField,
   CasesConfigurationUICustomField,
+  CasesConfigurationUITemplate,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -1176,4 +1177,85 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
   },
   { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
+];
+
+export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
+  {
+    key: 'test_template_1',
+    name: 'First test template',
+    description: 'This is a first test template',
+    caseFields: null,
+  },
+  {
+    key: 'test_template_2',
+    name: 'Second test template',
+    description: 'This is a second test template',
+    tags: [],
+    caseFields: {},
+  },
+  {
+    key: 'test_template_3',
+    name: 'Third test template',
+    description: 'This is a third test template with few case fields',
+    tags: ['foo'],
+    caseFields: {
+      title: 'This is case title using a test template',
+      severity: CaseSeverity.MEDIUM,
+      tags: ['third-template', 'medium'],
+    },
+  },
+  {
+    key: 'test_template_4',
+    name: 'Fourth test template',
+    description: 'This is a fourth test template',
+    tags: ['foo', 'bar'],
+    caseFields: {
+      title: 'Case with sample template 4',
+      description: 'case desc',
+      severity: CaseSeverity.LOW,
+      category: null,
+      tags: ['sample-4'],
+      assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        },
+      ],
+      connector: {
+        id: 'none',
+        name: 'My Connector',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+    },
+  },
+  {
+    key: 'test_template_5',
+    name: 'Fifth test template',
+    description: 'This is a fifth test template',
+    tags: ['foo', 'bar'],
+    caseFields: {
+      title: 'Case with sample template 5',
+      description: 'case desc',
+      severity: CaseSeverity.HIGH,
+      category: 'my category',
+      tags: ['sample-4'],
+      assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        },
+      ],
+      connector: {
+        id: 'jira-1',
+        name: 'Jira',
+        type: ConnectorTypes.jira,
+        fields: { issueType: 'Task', priority: 'Low', parent: null },
+      },
+    },
+  },
 ];

@@ -41,6 +41,8 @@ export function createAddSwimlanePanelAction(
         getIconType: () => PLUGIN_ICON,
       },
     ],
+    order: 40,
+    getIconType: () => 'anomalySwimLane',
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
         defaultMessage: 'Anomaly swim lane',

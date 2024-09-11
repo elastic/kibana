@@ -10,6 +10,7 @@ import { screen, fireEvent, render, within, act, waitFor } from '@testing-librar
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
 import { StepDefineRule, aggregatableFields } from '.';
+import type { StepDefineRuleProps } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { TestProviders } from '../../../../common/mock';
@@ -31,6 +32,18 @@ jest.mock('../../../../common/components/query_bar', () => {
   return {
     QueryBar: jest.fn(({ filterQuery }) => {
       return <div data-test-subj="query-bar">{`${filterQuery.query} ${filterQuery.language}`}</div>;
+    }),
+  };
+});
+
+jest.mock('../../../rule_creation/components/pick_timeline', () => ({
+  PickTimeline: 'pick-timeline',
+}));
+
+jest.mock('../ai_assistant', () => {
+  return {
+    AiAssistant: jest.fn(() => {
+      return <div data-test-subj="ai-assistant" />;
     }),
   };
 });
@@ -610,6 +623,66 @@ describe('StepDefineRule', () => {
       );
     });
   });
+
+  describe('AI assistant', () => {
+    it('renders assistant when query is not valid and not empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
+    });
+
+    it('does not render assistant when query is not valid and empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+
+    it('does not render assistant when query is valid', () => {
+      render(<TestForm formProps={{ isQueryBarValid: true, ruleType: 'query' }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+
+    it('does not render assistant for ML rule type', () => {
+      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'machine_learning' }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+  });
 });
 
 interface TestFormProps {
@@ -617,6 +690,7 @@ interface TestFormProps {
   ruleType?: RuleType;
   indexPattern?: DataViewBase;
   onSubmit?: FormSubmitHandler<DefineStepRule>;
+  formProps?: Partial<StepDefineRuleProps>;
 }
 
 function TestForm({
@@ -624,6 +698,7 @@ function TestForm({
   ruleType = stepDefineDefaultValue.ruleType,
   indexPattern = { fields: [], title: '' },
   onSubmit,
+  formProps,
 }: TestFormProps): JSX.Element {
   const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
   const { form } = useForm({
@@ -644,7 +719,6 @@ function TestForm({
         setOptionsSelected={setSelectedEqlOptions}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
-        browserFields={{}}
         isQueryBarValid={true}
         setIsQueryBarValid={jest.fn()}
         setIsThreatQueryBarValid={jest.fn()}
@@ -658,6 +732,7 @@ function TestForm({
         queryBarSavedId=""
         thresholdFields={[]}
         enableThresholdSuppression={false}
+        {...formProps}
       />
       <button type="button" onClick={form.submit}>
         {'Submit'}

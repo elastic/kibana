@@ -6,20 +6,19 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type {
-  RequestHandler,
-  ResponseHeaders,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
+
+import { isEmpty } from 'lodash';
+
+import { inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
-import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
+import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -33,6 +32,7 @@ import type {
   FleetRequestHandler,
   BulkGetAgentPoliciesRequestSchema,
   AgentPolicy,
+  FleetRequestHandlerContext,
 } from '../../types';
 
 import type {
@@ -52,29 +52,35 @@ import {
   defaultFleetErrorHandler,
   AgentPolicyNotFoundError,
   FleetUnauthorizedError,
+  FleetError,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
+import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export async function populateAssignedAgentsCount(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
+  agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
 ) {
   await pMap(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) => {
-      const totalAgents = getAgentsByKuery(esClient, soClient, {
-        showInactive: true,
-        perPage: 0,
-        page: 1,
-        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-      }).then(({ total }) => (agentPolicy.agents = total));
-      const unprivilegedAgents = getAgentsByKuery(esClient, soClient, {
-        showInactive: true,
-        perPage: 0,
-        page: 1,
-        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
-      }).then(({ total }) => (agentPolicy.unprivileged_agents = total));
+      const totalAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+        })
+        .then(({ total }) => (agentPolicy.agents = total));
+      const unprivilegedAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
+        })
+        .then(({ total }) => (agentPolicy.unprivileged_agents = total));
       return Promise.all([totalAgents, unprivilegedAgents]);
     },
     { concurrency: 10 }
@@ -99,6 +105,24 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
   };
 }
 
+export async function checkAgentPoliciesAllPrivilegesForSpaces(
+  request: KibanaRequest,
+  context: FleetRequestHandlerContext,
+  spaceIds: string[]
+) {
+  const security = appContextService.getSecurity();
+  const spaces = await (await context.fleet).getAllSpaces();
+  const allSpaceId = spaces.map((s) => s.id);
+  const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(allSpaceId, {
+    kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
+  });
+
+  return allSpaceId.filter(
+    (id) =>
+      res.privileges.kibana.find((privilege) => privilege.resource === id)?.authorized ?? false
+  );
+}
+
 export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
@@ -110,6 +134,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     const {
       full: withPackagePolicies = false,
       noAgentCount = false,
+      format,
       ...restOfQuery
     } = request.query;
     if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
@@ -117,17 +142,36 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
         'full query parameter require agent policies read permissions'
       );
     }
-    const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
+    const agentPoliciesResponse = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
       ...restOfQuery,
-      withAgentCount: !noAgentCount,
     });
+    let { items } = agentPoliciesResponse;
+    const { total, page, perPage } = agentPoliciesResponse;
+
+    if (fleetContext.authz.fleet.readAgents && !noAgentCount) {
+      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
+    }
+
+    if (!fleetContext.authz.fleet.readAgentPolicies) {
+      items = items.map(sanitizeItemForReadAgentOnly);
+    } else if (withPackagePolicies && format === inputsFormat.Simplified) {
+      items.map((item) => {
+        if (isEmpty(item.package_policies)) {
+          return item;
+        }
+        return {
+          ...item,
+          package_policies: item.package_policies!.map((packagePolicy) =>
+            packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+          ),
+        };
+      });
+    }
 
     const body: GetAgentPoliciesResponse = {
-      items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForReadAgentOnly)
-        : items,
+      items,
       total,
       page,
       perPage,
@@ -140,25 +184,39 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 
 export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof BulkGetAgentPoliciesRequestSchema.query>,
   TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
-    const items = await agentPolicyService.getByIDs(soClient, ids, {
+    let items = await agentPolicyService.getByIDs(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
     });
-    const body: BulkGetAgentPoliciesResponse = {
-      items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForReadAgentOnly)
-        : items,
-    };
+    if (!fleetContext.authz.fleet.readAgentPolicies) {
+      items = items.map(sanitizeItemForReadAgentOnly);
+    } else if (withPackagePolicies && request.query.format === inputsFormat.Simplified) {
+      items.map((item) => {
+        if (isEmpty(item.package_policies)) {
+          return item;
+        }
+        return {
+          ...item,
+          package_policies: item.package_policies!.map((packagePolicy) =>
+            packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+          ),
+        };
+      });
+    }
 
-    await populateAssignedAgentsCount(esClient, soClient, items);
+    const body: BulkGetAgentPoliciesResponse = {
+      items,
+    };
+    if (fleetContext.authz.fleet.readAgents) {
+      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
+    }
 
     return response.ok({ body });
   } catch (error) {
@@ -175,20 +233,34 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
 };
 
 export const getOneAgentPolicyHandler: FleetRequestHandler<
-  TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
+  TypeOf<typeof GetOneAgentPolicyRequestSchema.params>,
+  TypeOf<typeof GetOneAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   try {
     const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = coreContext.savedObjects.client;
 
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
-      await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
+      if (fleetContext.authz.fleet.readAgents) {
+        await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
+      }
+      let item: any = agentPolicy;
+      if (!fleetContext.authz.fleet.readAgentPolicies) {
+        item = sanitizeItemForReadAgentOnly(agentPolicy);
+      } else if (
+        request.query.format === inputsFormat.Simplified &&
+        !isEmpty(agentPolicy.package_policies)
+      ) {
+        item = {
+          ...agentPolicy,
+          package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+            packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+          ),
+        };
+      }
       const body: GetOneAgentPolicyResponse = {
-        item: !fleetContext.authz.fleet.readAgentPolicies
-          ? sanitizeItemForReadAgentOnly(agentPolicy)
-          : agentPolicy,
+        item,
       };
       return response.ok({
         body,
@@ -213,28 +285,56 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
-  const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
+  const {
+    has_fleet_server: hasFleetServer,
+    force,
+    space_ids: spaceIds,
+    ...newPolicy
+  } = request.body;
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   try {
+    let authorizedSpaces: string[] | undefined;
+    if (spaceIds?.length) {
+      authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(request, context, spaceIds);
+      for (const requestedSpaceId of spaceIds) {
+        if (!authorizedSpaces.includes(requestedSpaceId)) {
+          throw new FleetError(
+            `No enough permissions to create policies in space ${requestedSpaceId}`
+          );
+        }
+      }
+    }
+
+    const agentPolicy = await createAgentPolicyWithPackages({
+      soClient,
+      esClient,
+      newPolicy,
+      hasFleetServer,
+      withSysMonitoring,
+      monitoringEnabled,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    });
+
     const body: CreateAgentPolicyResponse = {
-      item: await createAgentPolicyWithPackages({
-        soClient,
-        esClient,
-        newPolicy,
-        hasFleetServer,
-        withSysMonitoring,
-        monitoringEnabled,
-        spaceId,
-        user,
-        authorizationHeader,
-        force,
-      }),
+      item: agentPolicy,
     };
+
+    if (spaceIds && spaceIds.length > 1 && authorizedSpaces) {
+      await updateAgentPolicySpaces({
+        agentPolicyId: agentPolicy.id,
+        currentSpaceId: spaceId,
+        newSpaceIds: spaceIds,
+        authorizedSpaces,
+      });
+    }
 
     return response.ok({
       body,
@@ -252,30 +352,55 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 
 export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
-  unknown,
+  TypeOf<typeof UpdateAgentPolicyRequestSchema.query>,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
-  const { force, ...data } = request.body;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const { force, space_ids: spaceIds, ...data } = request.body;
 
-  const spaceId = fleetContext.spaceId;
+  let spaceId = fleetContext.spaceId;
+
   try {
+    if (spaceIds?.length) {
+      const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
+        request,
+        context,
+        spaceIds
+      );
+      await updateAgentPolicySpaces({
+        agentPolicyId: request.params.agentPolicyId,
+        currentSpaceId: spaceId,
+        newSpaceIds: spaceIds,
+        authorizedSpaces,
+      });
+
+      spaceId = spaceIds[0];
+    }
     const agentPolicy = await agentPolicyService.update(
-      soClient,
+      appContextService.getInternalUserSOClientForSpaceId(spaceId),
       esClient,
       request.params.agentPolicyId,
       data,
-      {
-        force,
-        user: user || undefined,
-        spaceId,
-      }
+      { force, user, spaceId }
     );
-    const body: UpdateAgentPolicyResponse = { item: agentPolicy };
+
+    let item: any = agentPolicy;
+    if (
+      request.query.format === inputsFormat.Simplified &&
+      !isEmpty(agentPolicy.package_policies)
+    ) {
+      item = {
+        ...agentPolicy,
+        package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+        ),
+      };
+    }
+
+    const body: UpdateAgentPolicyResponse = { item };
     return response.ok({
       body,
     });
@@ -292,25 +417,36 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
 
 export const copyAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CopyAgentPolicyRequestSchema.params>,
-  unknown,
+  TypeOf<typeof CopyAgentPolicyRequestSchema.query>,
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const agentPolicy = await agentPolicyService.copy(
       soClient,
       esClient,
       request.params.agentPolicyId,
       request.body,
-      {
-        user: user || undefined,
-      }
+      { user }
     );
 
-    const body: CopyAgentPolicyResponse = { item: agentPolicy };
+    let item: any = agentPolicy;
+    if (
+      request.query.format === inputsFormat.Simplified &&
+      !isEmpty(agentPolicy.package_policies)
+    ) {
+      item = {
+        ...agentPolicy,
+        package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+        ),
+      };
+    }
+
+    const body: CopyAgentPolicyResponse = { item };
     return response.ok({
       body,
     });
@@ -327,16 +463,13 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
       esClient,
       request.body.agentPolicyId,
-      {
-        user: user || undefined,
-        force: request.body.force,
-      }
+      { user, force: request.body.force }
     );
     return response.ok({
       body,
@@ -384,7 +517,9 @@ export const getFullAgentPolicy: FleetRequestHandler<
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
         soClient,
         request.params.agentPolicyId,
-        { standalone: request.query.standalone === true }
+        {
+          standalone: request.query.standalone === true,
+        }
       );
       if (fullAgentPolicy) {
         const body: GetFullAgentPolicyResponse = {

@@ -48,7 +48,7 @@ export const InfraMetadataContainerRT = rt.partial({
   name: rt.string,
   id: rt.string,
   runtime: rt.string,
-  imageName: rt.string,
+  image: rt.partial({ name: rt.string }),
 });
 
 export const InfraMetadataInstanceRT = rt.partial({
@@ -111,6 +111,7 @@ const InfraMetadataRequiredRT = rt.type({
 
 const InfraMetadataOptionalRT = rt.partial({
   info: InfraMetadataInfoResponseRT,
+  hasSystemIntegration: rt.boolean,
 });
 
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);

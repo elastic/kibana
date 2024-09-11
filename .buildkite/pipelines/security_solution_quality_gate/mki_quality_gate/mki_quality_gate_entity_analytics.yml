@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics
-    label: 'Serverless MKI QA Entity Analytics - Security Solution Cypress Tests'
+    label: 'Cypress MKI - Entity Analytics'
     key: test_entity_analytics
     env:
       BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
@@ -18,7 +18,7 @@ steps:
           - exit_status: '-1'
             limit: 1
 
-  - group: "Serverless MKI QA Entity Analytics - API Integration"
+  - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
     steps:
       - label: Running entity_analytics:qa:serverless:release

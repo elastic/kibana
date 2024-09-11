@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import { resolve } from 'path';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { readCloudUsersFromFile } from './helper';
-import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
+import {
+  createCloudSAMLSession,
+  createLocalSAMLSession,
+  getSecurityProfile,
+  Session,
+} from './saml_auth';
 import { Role, User } from './types';
 
 export interface HostOptions {
@@ -27,31 +30,32 @@ export interface HostOptions {
 export interface SamlSessionManagerOptions {
   hostOptions: HostOptions;
   isCloud: boolean;
-  supportedRoles?: string[];
+  supportedRoles?: SupportedRoles;
+  cloudUsersFilePath: string;
   log: ToolingLog;
+}
+
+export interface SupportedRoles {
+  sourcePath: string;
+  roles: string[];
 }
 
 /**
  * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
-  private readonly DEFAULT_ROLES_FILE_NAME: string = 'role_users.json';
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
-  private readonly supportedRoles: string[];
-  private readonly userRoleFilePath: string;
+  private readonly supportedRoles?: SupportedRoles;
+  private readonly cloudUsersFilePath: string;
 
-  constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
+  constructor(options: SamlSessionManagerOptions) {
     this.isCloud = options.isCloud;
     this.log = options.log;
-    // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
-    const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
-    this.log.info(`Using the file ${rolesFile} for the role users`);
-    this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
@@ -65,9 +69,10 @@ export class SamlSessionManager {
         auth: `${options.hostOptions.username}:${options.hostOptions.password}`,
       }),
     });
+    this.cloudUsersFilePath = options.cloudUsersFilePath;
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
-    this.supportedRoles = options.supportedRoles ?? [];
+    this.supportedRoles = options.supportedRoles;
   }
 
   /**
@@ -76,7 +81,8 @@ export class SamlSessionManager {
    */
   private getCloudUsers = () => {
     if (this.roleToUserMap.size === 0) {
-      const data = readCloudUsersFromFile(this.userRoleFilePath);
+      this.log.info(`Reading cloud user credentials from ${this.cloudUsersFilePath}`);
+      const data = readCloudUsersFromFile(this.cloudUsersFilePath);
       for (const [roleName, user] of data) {
         this.roleToUserMap.set(roleName, user);
       }
@@ -99,11 +105,11 @@ export class SamlSessionManager {
     }
 
     // Validate role before creating SAML session
-    if (this.supportedRoles.length && !this.supportedRoles.includes(role)) {
+    if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
       throw new Error(
-        `Role '${role}' is not defined in the supported list: ${this.supportedRoles.join(
+        `Role '${role}' is not in the supported list: ${this.supportedRoles.roles.join(
           ', '
-        )}. Update roles resource file in ${SERVERLESS_ROLES_ROOT_PATH} to enable it for testing`
+        )}. Add role descriptor in ${this.supportedRoles.sourcePath} to enable it for testing`
       );
     }
 
@@ -141,13 +147,19 @@ export class SamlSessionManager {
     return { Cookie: `sid=${session.getCookieValue()}` };
   }
 
-  async getSessionCookieForRole(role: string) {
+  async getInteractiveUserSessionCookieWithRoleScope(role: string) {
     const session = await this.getSessionByRole(role);
     return session.getCookieValue();
   }
 
+  async getEmail(role: string) {
+    const session = await this.getSessionByRole(role);
+    return session.email;
+  }
+
   async getUserData(role: string) {
-    const { email, fullname } = await this.getSessionByRole(role);
-    return { email, fullname };
+    const { cookie } = await this.getSessionByRole(role);
+    const profileData = await getSecurityProfile({ kbnHost: this.kbnHost, cookie, log: this.log });
+    return profileData;
   }
 }

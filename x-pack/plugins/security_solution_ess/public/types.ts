@@ -9,7 +9,6 @@ import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/public';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ManagementStart } from '@kbn/management-plugin/public';
@@ -26,7 +25,6 @@ export interface SecuritySolutionEssPluginSetupDeps {
 
 export interface SecuritySolutionEssPluginStartDeps {
   securitySolution: SecuritySolutionPluginStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
   licensing: LicensingPluginStart;
   navigation: NavigationPublicPluginStart;
   management: ManagementStart;

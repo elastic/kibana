@@ -6,20 +6,21 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiComboBox euiComboBox--fullWidth"
+        class="euiComboBox emotion-euiComboBox-fullWidth"
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+            class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 2;"
             >
               <div
-                class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
                 data-test-subj="comboBoxInput"
                 tabindex="-1"
               >
@@ -28,7 +29,8 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
-                  class="euiComboBox__input"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
                   role="combobox"
@@ -37,22 +39,22 @@ Object {
                 />
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <button
                   aria-label="Clear input"
-                  class="euiFormControlLayoutClearButton"
+                  class="euiFormControlLayoutClearButton emotion-euiFormControlLayoutClearButton"
                   data-test-subj="comboBoxClearButton"
                   type="button"
                 >
                   <span
-                    class="euiFormControlLayoutClearButton__icon"
+                    class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
                     data-euiicon-type="cross"
                   />
                 </button>
                 <button
                   aria-label="Open list of options"
-                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                   data-test-subj="comboBoxToggleListButton"
                   tabindex="-1"
                   type="button"
@@ -72,20 +74,21 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiComboBox euiComboBox--fullWidth"
+      class="euiComboBox emotion-euiComboBox-fullWidth"
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 2;"
           >
             <div
-              class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -94,7 +97,8 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
-                class="euiComboBox__input"
+                autocomplete="off"
+                class="euiComboBox__input emotion-euiComboBoxInput"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
                 role="combobox"
@@ -103,22 +107,22 @@ Object {
               />
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
             >
               <button
                 aria-label="Clear input"
-                class="euiFormControlLayoutClearButton"
+                class="euiFormControlLayoutClearButton emotion-euiFormControlLayoutClearButton"
                 data-test-subj="comboBoxClearButton"
                 type="button"
               >
                 <span
-                  class="euiFormControlLayoutClearButton__icon"
+                  class="euiFormControlLayoutClearButton__icon emotion-euiFormControlLayoutClearButton__icon-m"
                   data-euiicon-type="cross"
                 />
               </button>
               <button
                 aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                 data-test-subj="comboBoxToggleListButton"
                 tabindex="-1"
                 type="button"
@@ -195,20 +199,20 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiComboBox euiComboBox--fullWidth euiComboBox-isDisabled"
+        class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+            class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
             >
               <div
-                class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
                 data-test-subj="comboBoxInput"
                 tabindex="-1"
               >
@@ -217,7 +221,8 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
-                  class="euiComboBox__input"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
                   id="generated-id__eui-combobox-id"
@@ -234,20 +239,20 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiComboBox euiComboBox--fullWidth euiComboBox-isDisabled"
+      class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
           >
             <div
-              class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -256,7 +261,8 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
-                class="euiComboBox__input"
+                autocomplete="off"
+                class="euiComboBox__input emotion-euiComboBoxInput"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
                 id="generated-id__eui-combobox-id"
@@ -330,20 +336,21 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiComboBox euiComboBox--fullWidth"
+        class="euiComboBox emotion-euiComboBox-fullWidth"
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+            class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <div
-                class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
                 data-test-subj="comboBoxInput"
                 tabindex="-1"
               >
@@ -352,7 +359,8 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
-                  class="euiComboBox__input"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
                   role="combobox"
@@ -361,11 +369,11 @@ Object {
                 />
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
               >
                 <button
                   aria-label="Open list of options"
-                  class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                   data-test-subj="comboBoxToggleListButton"
                   tabindex="-1"
                   type="button"
@@ -385,20 +393,21 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiComboBox euiComboBox--fullWidth"
+      class="euiComboBox emotion-euiComboBox-fullWidth"
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 1;"
           >
             <div
-              class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -407,7 +416,8 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
-                class="euiComboBox__input"
+                autocomplete="off"
+                class="euiComboBox__input emotion-euiComboBoxInput"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
                 role="combobox"
@@ -416,11 +426,11 @@ Object {
               />
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
             >
               <button
                 aria-label="Open list of options"
-                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
                 data-test-subj="comboBoxToggleListButton"
                 tabindex="-1"
                 type="button"
@@ -497,20 +507,21 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiComboBox euiComboBox--fullWidth euiComboBox-isDisabled"
+        class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
         data-test-subj="fieldAutocompleteComboBox"
       >
         <div
           class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
         >
           <div
-            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+            class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
           >
             <div
-              class="euiFormControlLayout__childrenWrapper"
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <div
-                class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+                class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
                 data-test-subj="comboBoxInput"
                 tabindex="-1"
               >
@@ -519,7 +530,8 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
-                  class="euiComboBox__input"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
                   id="generated-id__eui-combobox-id"
@@ -529,7 +541,7 @@ Object {
                 />
               </div>
               <div
-                class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right-disabled"
               >
                 <span
                   aria-label="Loading"
@@ -545,20 +557,21 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiComboBox euiComboBox--fullWidth euiComboBox-isDisabled"
+      class="euiComboBox euiComboBox-isDisabled emotion-euiComboBox-fullWidth"
       data-test-subj="fieldAutocompleteComboBox"
     >
       <div
         class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
       >
         <div
-          class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          class="euiFormControlLayout euiFormControlLayout-isDisabled emotion-euiFormControlLayout-fullWidth-euiComboBox__formControlLayout"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 1;"
           >
             <div
-              class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--plainText emotion-euiComboBoxInputWrapper-plainText-disabled"
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
@@ -567,7 +580,8 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
-                class="euiComboBox__input"
+                autocomplete="off"
+                class="euiComboBox__input emotion-euiComboBoxInput"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
                 id="generated-id__eui-combobox-id"
@@ -577,7 +591,7 @@ Object {
               />
             </div>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right-disabled"
             >
               <span
                 aria-label="Loading"

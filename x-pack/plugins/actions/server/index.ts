@@ -61,8 +61,8 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (
         customHostSettings.find(
           (customHostSchema: CustomHostSettings) =>
-            customHostSchema.hasOwnProperty('ssl') &&
-            customHostSchema.ssl?.hasOwnProperty('rejectUnauthorized')
+            Object.hasOwn(customHostSchema, 'ssl') &&
+            Object.hasOwn(customHostSchema.ssl ?? {}, 'rejectUnauthorized')
         )
       ) {
         addDeprecation({
@@ -93,7 +93,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
-      if (actions?.hasOwnProperty('rejectUnauthorized')) {
+      if (Object.hasOwn(actions ?? {}, 'rejectUnauthorized')) {
         addDeprecation({
           level: 'warning',
           configPath: `${fromPath}.rejectUnauthorized`,
@@ -121,7 +121,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
     (settings, fromPath, addDeprecation) => {
       const actions = get(settings, fromPath);
-      if (actions?.hasOwnProperty('proxyRejectUnauthorizedCertificates')) {
+      if (Object.hasOwn(actions ?? {}, 'proxyRejectUnauthorizedCertificates')) {
         addDeprecation({
           level: 'warning',
           configPath: `${fromPath}.proxyRejectUnauthorizedCertificates`,

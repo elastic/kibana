@@ -16,7 +16,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/security-solution-plugin",
-    "@kbn/cloud-experiments-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/security-solution-features",
     "@kbn/cases-plugin",

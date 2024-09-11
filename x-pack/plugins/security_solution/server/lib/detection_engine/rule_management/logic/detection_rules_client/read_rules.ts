@@ -30,6 +30,8 @@ export interface ReadRuleOptions {
  * be returned as a not-found or a thrown error that is not 404.
  * @param ruleId - This is a close second to being fast as long as it can find the rule_id from
  * a filter query against the ruleId property in params using `alert.attributes.params.ruleId: "${ruleId}"`
+ *
+ * @deprecated Should be replaced with DetectionRulesClient.getRuleById once it's implemented
  */
 export const readRules = async ({
   rulesClient,

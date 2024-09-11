@@ -49,4 +49,5 @@ export const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: VULNERABILITY_FIELDS.PACKAGE_NAME },
   { id: VULNERABILITY_FIELDS.PACKAGE_VERSION },
   { id: VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION },
+  { id: VULNERABILITY_FIELDS.SOURCE },
 ];

@@ -9,10 +9,10 @@ import React, { memo, useMemo } from 'react';
 import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutTitle } from '@kbn/security-solution-common';
 import { DocumentSeverity } from './severity';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { useRightPanelContext } from '../context';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { getField } from '../../shared/utils';
@@ -22,7 +22,7 @@ import { EVENT_CATEGORY_TO_FIELD } from '../utils/event_utils';
  * Event details flyout right section header
  */
 export const EventHeaderTitle = memo(() => {
-  const { dataFormattedForFieldBrowser, getFieldsData } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, getFieldsData } = useDocumentDetailsContext();
   const { timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const eventKind = getField(getFieldsData('event.kind'));

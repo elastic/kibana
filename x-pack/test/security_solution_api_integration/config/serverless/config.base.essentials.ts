@@ -11,12 +11,12 @@ export interface CreateTestConfigOptions {
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from '../../../../test_serverless/api_integration/services';
+import { services } from './services';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../../test_serverless/shared/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
     return {
       ...svlSharedConfig.getAll(),

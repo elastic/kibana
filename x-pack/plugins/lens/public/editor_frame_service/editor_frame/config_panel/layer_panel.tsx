@@ -91,7 +91,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
 
   const registerLayerRef = useCallback(
-    (el) => registerNewLayerRef(layerId, el),
+    (el: HTMLDivElement | null) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
   );
 

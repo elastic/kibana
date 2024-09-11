@@ -100,7 +100,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         let dataStreamsStats;
         let dataStreamsPrivileges;
 
-        if (includeStats) {
+        if (includeStats && config.isDataStreamStatsEnabled !== false) {
           ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client));
         }
 
@@ -137,9 +137,14 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
     async (context, request, response) => {
       const { name } = request.params as TypeOf<typeof paramsSchema>;
       const { client } = (await context.core).elasticsearch;
+      let dataStreamsStats;
+
       try {
-        const [{ data_streams: dataStreams }, { data_streams: dataStreamsStats }] =
-          await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);
+        const { data_streams: dataStreams } = await getDataStreams(client, name);
+
+        if (config.isDataStreamStatsEnabled !== false) {
+          ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
+        }
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;

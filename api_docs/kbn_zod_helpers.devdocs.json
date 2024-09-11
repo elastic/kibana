@@ -60,6 +60,49 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.buildRouteValidationWithZod",
+        "type": "Function",
+        "tags": [],
+        "label": "buildRouteValidationWithZod",
+        "description": [
+          "\nZod validation factory for Kibana route's request validation.\nIt allows to pass a Zod schema for parameters, query and/or body validation.\n\nExample:\n\n```ts\nrouter.versioned\n  .post({\n    access: 'public',\n    path: MY_URL,\n  })\n  .addVersion(\n    {\n      version: 'my-version',\n      validate: {\n        request: {\n          params: buildRouteValidationWithZod(MyRequestParamsZodSchema),\n          query: buildRouteValidationWithZod(MyRequestQueryZodSchema),\n          body: buildRouteValidationWithZod(MyRequestBodyZodSchema),\n        },\n      },\n    },\n```"
+        ],
+        "signature": [
+          "(schema: ZodSchema) => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteValidationFunction",
+            "text": "RouteValidationFunction"
+          },
+          "<Type>"
+        ],
+        "path": "packages/kbn-zod-helpers/src/build_route_validation_with_zod.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.buildRouteValidationWithZod.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodSchema"
+            ],
+            "path": "packages/kbn-zod-helpers/src/build_route_validation_with_zod.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.expectParseError",
         "type": "Function",
         "tags": [],

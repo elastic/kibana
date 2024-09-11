@@ -15,6 +15,7 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {
   isExpanded: boolean;
+  isLoading: boolean;
   setIsExpanded?: (value: boolean) => void;
   children: React.ReactNode;
   onConversationCreate?: () => Promise<void>;
@@ -35,7 +36,14 @@ const VerticalSeparator = styled.div`
  */
 
 export const FlyoutNavigation = memo<FlyoutNavigationProps>(
-  ({ isExpanded, setIsExpanded, children, onConversationCreate, isAssistantEnabled }) => {
+  ({
+    isLoading,
+    isExpanded,
+    setIsExpanded,
+    children,
+    onConversationCreate,
+    isAssistantEnabled,
+  }) => {
     const onToggle = useCallback(
       () => setIsExpanded && setIsExpanded(!isExpanded),
       [isExpanded, setIsExpanded]
@@ -44,10 +52,11 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
     const toggleButton = useMemo(
       () => (
         <EuiButtonIcon
-          disabled={!isAssistantEnabled}
+          disabled={isLoading || !isAssistantEnabled}
           onClick={onToggle}
           iconType={isExpanded ? 'arrowEnd' : 'arrowStart'}
           size="xs"
+          data-test-subj="aiAssistantFlyoutNavigationToggle"
           aria-label={
             isExpanded
               ? i18n.translate(
@@ -65,7 +74,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           }
         />
       ),
-      [isAssistantEnabled, isExpanded, onToggle]
+      [isAssistantEnabled, isExpanded, isLoading, onToggle]
     );
 
     return (
@@ -97,8 +106,9 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
                       size="xs"
                       color="primary"
                       iconType="newChat"
+                      data-test-subj="newChatFromOverlay"
                       onClick={onConversationCreate}
-                      disabled={!isAssistantEnabled}
+                      disabled={isLoading || !isAssistantEnabled}
                     >
                       {NEW_CHAT}
                     </EuiButtonEmpty>

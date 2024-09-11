@@ -6,13 +6,13 @@
  */
 
 import { get } from 'lodash';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
@@ -24,7 +24,7 @@ import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
@@ -42,8 +42,15 @@ import {
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
-    useRightPanelContext();
+  const {
+    dataAsNestedObject,
+    eventId,
+    indexName,
+    getFieldsData,
+    scopeId,
+    isPreview,
+    isPreviewMode,
+  } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { isTourShown, activeStep } = useTourContext();
 
@@ -95,6 +102,22 @@ export const CorrelationsOverview: React.FC = () => {
 
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
 
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToCorrelationsTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+                defaultMessage="Show all correlations"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToCorrelationsTab]
+  );
+
   return (
     <ExpandablePanel
       header={{
@@ -104,16 +127,8 @@ export const CorrelationsOverview: React.FC = () => {
             defaultMessage="Correlations"
           />
         ),
-        link: {
-          callback: goToCorrelationsTab,
-          tooltip: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
-              defaultMessage="Show all correlations"
-            />
-          ),
-        },
-        iconType: 'arrowStart',
+        link,
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
     >

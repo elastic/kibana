@@ -56,7 +56,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
-    const getCurrentUser = () => startPlugins.security?.authc.getCurrentUser(request);
+    const getCurrentUser = () => coreContext.security.authc.getCurrentUser();
 
     return {
       core: coreContext,
@@ -83,13 +83,22 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
       // Remove `initializeKnowledgeBase` once 'assistantKnowledgeBaseByDefault' feature flag is removed
-      getAIAssistantKnowledgeBaseDataClient: memoize((initializeKnowledgeBase = false) => {
+      getAIAssistantKnowledgeBaseDataClient: memoize((v2KnowledgeBaseEnabled = false) => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
           spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
-          initializeKnowledgeBase,
+          v2KnowledgeBaseEnabled,
+        });
+      }),
+
+      getAttackDiscoveryDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createAttackDiscoveryDataClient({
+          spaceId: getSpaceId(),
+          logger: this.logger,
+          currentUser,
         });
       }),
 

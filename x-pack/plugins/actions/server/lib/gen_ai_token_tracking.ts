@@ -16,7 +16,11 @@ import {
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { ActionTypeExecutorRawResult } from '../../common';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
-import { getTokenCountFromInvokeStream, InvokeBody } from './get_token_count_from_invoke_stream';
+import {
+  getTokenCountFromInvokeStream,
+  InvokeBody,
+  parseGeminiStreamForUsageMetadata,
+} from './get_token_count_from_invoke_stream';
 
 interface OwnProps {
   actionTypeId: string;
@@ -80,8 +84,37 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
+  // this is a streamed Gemini response, using the subAction invokeStream to stream the response as a simple string
+  if (
+    validatedParams.subAction === 'invokeStream' &&
+    result.data instanceof Readable &&
+    actionTypeId === '.gemini'
+  ) {
+    try {
+      const { totalTokenCount, promptTokenCount, candidatesTokenCount } =
+        await parseGeminiStreamForUsageMetadata({
+          responseStream: result.data.pipe(new PassThrough()),
+          logger,
+        });
+
+      return {
+        total_tokens: totalTokenCount,
+        prompt_tokens: promptTokenCount,
+        completion_tokens: candidatesTokenCount,
+      };
+    } catch (e) {
+      logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
+      logger.error(e);
+      // silently fail and null is returned at bottom of fuction
+    }
+  }
+
   // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
-  if (validatedParams.subAction === 'invokeStream' && result.data instanceof Readable) {
+  if (
+    validatedParams.subAction === 'invokeStream' &&
+    result.data instanceof Readable &&
+    actionTypeId !== '.gemini'
+  ) {
     try {
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),

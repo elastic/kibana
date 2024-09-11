@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
@@ -14,6 +15,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
@@ -82,7 +84,11 @@ export const PresentationPanelError = ({
         searchErrorDisplay?.body ?? (
           <EuiText size="s">
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-              {error.message}
+              {error.message?.length
+                ? error.message
+                : i18n.translate('presentationPanel.emptyErrorMessage', {
+                    defaultMessage: 'Error',
+                  })}
             </Markdown>
           </EuiText>
         )

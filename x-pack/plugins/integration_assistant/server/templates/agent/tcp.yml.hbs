@@ -1,0 +1,19 @@
+host: {{listen_address}}:{{listen_port}}
+{{#if max_message_size}}
+max_message_size: {{max_message_size}}
+{{/if}}
+{{#if framing}}
+framing: {{framing}}
+{{/if}}
+{{#if line_delimiter}}
+line_delimiter: {{line_delimiter}}
+{{/if}}
+{{#if max_connections}}
+max_connections: {{max_connections}}
+{{/if}}
+{{#if timeout}}
+timeout: {{timeout}}
+{{/if}}
+{{#if keep_null}}
+keep_null: {{keep_null}}
+{{/if}}

@@ -31,6 +31,10 @@ export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSumm
   defaultMessage: 'of',
 });
 
+export const notAvailableLabel = i18n.translate('xpack.datasetQuality.notAvailableLabel', {
+  defaultMessage: 'N/A',
+});
+
 /*
 Flyout
 */
@@ -39,15 +43,15 @@ export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCance
   defaultMessage: 'Cancel',
 });
 
-export const flyoutOpenInLogsExplorerText = i18n.translate(
-  'xpack.datasetQuality.flyoutOpenInLogsExplorerText',
+export const openInLogsExplorerText = i18n.translate(
+  'xpack.datasetQuality.details.openInLogsExplorerText',
   {
     defaultMessage: 'Open in Logs Explorer',
   }
 );
 
-export const flyoutOpenInDiscoverText = i18n.translate(
-  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+export const openInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.details.openInDiscoverText',
   {
     defaultMessage: 'Open in Discover',
   }
@@ -60,31 +64,10 @@ export const flyoutDatasetDetailsText = i18n.translate(
   }
 );
 
-export const flyoutDatasetLastActivityText = i18n.translate(
-  'xpack.datasetQuality.flyoutDatasetLastActivityText',
-  {
-    defaultMessage: 'Last Activity',
-  }
-);
-
-export const flyoutDatasetCreatedOnText = i18n.translate(
-  'xpack.datasetQuality.flyoutDatasetCreatedOnText',
-  {
-    defaultMessage: 'Created on',
-  }
-);
-
 export const flyoutIntegrationDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutIntegrationDetailsText',
   {
     defaultMessage: 'Integration details',
-  }
-);
-
-export const flyoutIntegrationVersionText = i18n.translate(
-  'xpack.datasetQuality.flyoutIntegrationVersionText',
-  {
-    defaultMessage: 'Version',
   }
 );
 
@@ -99,7 +82,7 @@ export const flyoutSummaryText = i18n.translate('xpack.datasetQuality.flyoutSumm
   defaultMessage: 'Summary',
 });
 
-export const flyoutDegradedDocsText = i18n.translate(
+export const overviewDegradedDocsText = i18n.translate(
   'xpack.datasetQuality.flyout.degradedDocsTitle',
   {
     defaultMessage: 'Degraded docs',
@@ -143,34 +126,6 @@ export const flyoutHostsText = i18n.translate('xpack.datasetQuality.flyoutHostsT
 export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShowAllText', {
   defaultMessage: 'Show all',
 });
-
-export const flyoutImprovementText = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
-  {
-    defaultMessage: 'Degraded fields',
-  }
-);
-
-export const flyoutImprovementTooltip = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
-  {
-    defaultMessage: 'A partial list of degraded fields found in your data set.',
-  }
-);
-
-export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
-  {
-    defaultMessage: 'Loading degraded fields',
-  }
-);
-
-export const flyoutDegradedFieldsTableNoData = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
-  {
-    defaultMessage: 'No degraded fields found',
-  }
-);
 /*
 Summary Panel
 */
@@ -265,5 +220,185 @@ export const fullDatasetNameDescription = i18n.translate(
   'xpack.datasetQuality.fullDatasetNameDescription',
   {
     defaultMessage: 'Turn on to show the actual data set names used to store the documents.',
+  }
+);
+
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of degraded fields found in your data set.',
+  }
+);
+
+/*
+Dataset Quality Details
+*/
+
+export const overviewHeaderTitle = i18n.translate('xpack.datasetQuality.details.overviewTitle', {
+  defaultMessage: 'Overview',
+});
+
+export const overviewTitleTooltip = i18n.translate(
+  'xpack.datasetQuality.details.overviewTitleTooltip',
+  {
+    defaultMessage: 'Stats of the data set within the selected time range.',
+  }
+);
+
+export const overviewPanelTitleDocuments = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.documents.title',
+  {
+    defaultMessage: 'Documents',
+  }
+);
+
+export const overviewPanelDocumentsIndicatorTotalCount = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.documents.totalCount',
+  {
+    defaultMessage: 'Total count',
+  }
+);
+
+export const overviewPanelDocumentsIndicatorSize = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.documents.size',
+  {
+    defaultMessage: 'Size',
+  }
+);
+
+export const overviewPanelTitleResources = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.resources.title',
+  {
+    defaultMessage: 'Resources',
+  }
+);
+
+export const overviewPanelResourcesIndicatorServices = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.resources.services',
+  {
+    defaultMessage: 'Services',
+  }
+);
+
+export const overviewPanelResourcesIndicatorSize = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.resources.hosts',
+  {
+    defaultMessage: 'Hosts',
+  }
+);
+
+export const overviewPanelTitleDatasetQuality = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.title',
+  {
+    defaultMessage: 'Data set quality',
+  }
+);
+
+export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.degradedDocs',
+  {
+    defaultMessage: 'Degraded docs',
+  }
+);
+
+export const overviewDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const overviewDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
+
+export const overviewDegradedFieldsSectionTitle = i18n.translate(
+  'xpack.datasetQuality.detail.degradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Quality issues',
+  }
+);
+
+export const overviewDegradedFieldsSectionTitleTooltip = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of quality issues found in your data set.',
+  }
+);
+
+export const overviewQualityIssuesAccordionTechPreviewBadge = i18n.translate(
+  'xpack.datasetQuality.details.overviewQualityIssuesAccordionTechPreviewBadge',
+  {
+    defaultMessage: 'TECH PREVIEW',
+  }
+);
+
+export const detailsHeaderTitle = i18n.translate('xpack.datasetQuality.details.detailsTitle', {
+  defaultMessage: 'Details',
+});
+
+export const datasetLastActivityText = i18n.translate(
+  'xpack.datasetQuality.details.datasetLastActivityText',
+  {
+    defaultMessage: 'Last Activity',
+  }
+);
+
+export const datasetCreatedOnText = i18n.translate(
+  'xpack.datasetQuality.details.datasetCreatedOnText',
+  {
+    defaultMessage: 'Created on',
+  }
+);
+
+export const integrationNameText = i18n.translate(
+  'xpack.datasetQuality.details.integrationnameText',
+  {
+    defaultMessage: 'Integration',
+  }
+);
+
+export const integrationVersionText = i18n.translate(
+  'xpack.datasetQuality.details.integrationVersionText',
+  {
+    defaultMessage: 'Version',
+  }
+);
+export const fieldColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.field', {
+  defaultMessage: 'Field',
+});
+
+export const countColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.count', {
+  defaultMessage: 'Docs count',
+});
+
+export const lastOccurrenceColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.lastOccurrence',
+  {
+    defaultMessage: 'Last occurrence',
+  }
+);
+
+export const degradedFieldValuesColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.values',
+  {
+    defaultMessage: 'Values',
+  }
+);
+
+export const fieldIgnoredText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.fieldIgnored',
+  {
+    defaultMessage: 'field ignored',
   }
 );

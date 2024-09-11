@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
+import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-
+import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
@@ -21,6 +22,9 @@ import {
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import {
   createRule,
@@ -46,8 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
   // TODO: add a new service for loading archiver files similar to "getService('es')"
+  const utils = getService('securitySolutionUtils');
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
@@ -80,8 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
     return testId;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/180236
-  describe.skip('@ess @serverless @serverlessQA New terms type rules', () => {
+  describe('@ess @serverless @serverlessQA New terms type rules', () => {
     before(async () => {
       await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
@@ -100,6 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
     // suricata-sensor-san-francisco appears in a document at 2019-02-19T20:42:08.230Z, but also appears
     // in earlier documents so is not new. An alert should not be generated for that term.
     it('should generate 1 alert with 1 selected field', async () => {
+      const username = await utils.getUsername();
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
@@ -110,8 +114,8 @@ export default ({ getService }: FtrProviderContext) => {
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
 
-      expect(alerts.hits.hits.length).eql(1);
-      expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).eql({
+      expect(alerts.hits.hits).toHaveLength(1);
+      expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).toEqual({
         'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
         'kibana.alert.rule.consumer': 'siem',
@@ -145,12 +149,17 @@ export default ({ getService }: FtrProviderContext) => {
             version: '18.10 (Cosmic Cuttlefish)',
           },
         },
-        message:
-          'Login by user root (UID: 0) on pts/0 (PID: 20638) from 8.42.77.171 (IP: 8.42.77.171)',
+        message: expect.stringMatching(
+          /Login by user (root|bob) \(UID: (0|1)\) on pts\/0 \(PID: 20638\) from 8\.42\.77\.171 \(IP: 8\.42\.77\.171\)/
+        ),
         process: { pid: 20638 },
         service: { type: 'system' },
         source: { ip: '8.42.77.171' },
-        user: { id: 0, name: 'root', terminal: 'pts/0' },
+        user: {
+          id: expect.any(Number),
+          name: expect.stringMatching(/(root|bob)/),
+          terminal: 'pts/0',
+        },
         'event.action': 'user_login',
         'event.category': 'authentication',
         'event.dataset': 'login',
@@ -162,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.original_time': '2019-02-19T20:42:08.230Z',
         'kibana.alert.ancestors': [
           {
-            id: 'x07wJ2oB9v5HJNSHhyxi',
+            id: expect.any(String),
             type: 'event',
             index: 'auditbeat-8.0.0-2019.02.19-000001',
             depth: 0,
@@ -173,8 +182,9 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_tags': [],
         'kibana.alert.workflow_assignee_ids': [],
         'kibana.alert.depth': 1,
-        'kibana.alert.reason':
-          'authentication event with source 8.42.77.171 by root on zeek-newyork-sha-aa8df15 created high alert Query with a rule id.',
+        'kibana.alert.reason': expect.stringMatching(
+          /authentication event with source 8\.42\.77\.171 by (root|bob) on zeek-newyork-sha-aa8df15 created high alert Query with a rule id\./
+        ),
         'kibana.alert.severity': 'high',
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.parameters': {
@@ -203,10 +213,13 @@ export default ({ getService }: FtrProviderContext) => {
           history_window_start: '2019-01-19T20:42:00.000Z',
           index: ['auditbeat-*'],
           language: 'kuery',
+          rule_source: {
+            type: 'internal',
+          },
         },
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': ELASTICSEARCH_USERNAME,
+        'kibana.alert.rule.created_by': username,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -224,7 +237,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'new_terms',
-        'kibana.alert.rule.updated_by': ELASTICSEARCH_USERNAME,
+        'kibana.alert.rule.updated_by': username,
         'kibana.alert.rule.version': 1,
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
@@ -249,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { logs } = await previewRule({ supertest, rule });
 
-      expect(logs[0].warnings).contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).toContain(getMaxAlertsWarning());
     });
 
     it("doesn't generate max alerts warning when circuit breaker is met but not exceeded", async () => {
@@ -262,7 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { logs } = await previewRule({ supertest, rule });
 
-      expect(logs[0].warnings).not.contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
     it('should generate 3 alerts when 1 document has 3 new values', async () => {
@@ -276,19 +289,19 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(3);
+      expect(previewAlerts.length).toEqual(3);
       const previewAlertsOrderedByHostIp = orderBy(
         previewAlerts,
         '_source.kibana.alert.new_terms',
         'asc'
       );
-      expect(previewAlertsOrderedByHostIp[0]._source?.['kibana.alert.new_terms']).eql([
+      expect(previewAlertsOrderedByHostIp[0]._source?.['kibana.alert.new_terms']).toEqual([
         '10.10.0.6',
       ]);
-      expect(previewAlertsOrderedByHostIp[1]._source?.['kibana.alert.new_terms']).eql([
+      expect(previewAlertsOrderedByHostIp[1]._source?.['kibana.alert.new_terms']).toEqual([
         '157.230.208.30',
       ]);
-      expect(previewAlertsOrderedByHostIp[2]._source?.['kibana.alert.new_terms']).eql([
+      expect(previewAlertsOrderedByHostIp[2]._source?.['kibana.alert.new_terms']).toEqual([
         'fe80::24ce:f7ff:fede:a571',
       ]);
     });
@@ -304,14 +317,14 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(3);
+      expect(previewAlerts.length).toEqual(3);
 
       const newTerms = orderBy(
         previewAlerts.map((item) => item._source?.['kibana.alert.new_terms']),
         ['0', '1']
       );
 
-      expect(newTerms).eql([
+      expect(newTerms).toEqual([
         ['zeek-newyork-sha-aa8df15', '10.10.0.6'],
         ['zeek-newyork-sha-aa8df15', '157.230.208.30'],
         ['zeek-newyork-sha-aa8df15', 'fe80::24ce:f7ff:fede:a571'],
@@ -359,7 +372,7 @@ export default ({ getService }: FtrProviderContext) => {
         es,
         previewId: hostIpPreview.previewId,
       });
-      expect(hostIpPreviewAlerts.length).eql(0);
+      expect(hostIpPreviewAlerts.length).toEqual(0);
 
       // shouldn't be terms for 'host.name'
       const hostNamePreview = await previewRule({
@@ -370,14 +383,14 @@ export default ({ getService }: FtrProviderContext) => {
         es,
         previewId: hostNamePreview.previewId,
       });
-      expect(hostNamePreviewAlerts.length).eql(0);
+      expect(hostNamePreviewAlerts.length).toEqual(0);
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts.length).toEqual(1);
 
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['host-0', '127.0.0.2']);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['host-0', '127.0.0.2']);
     });
 
     it('should generate 5 alerts, 1 for each new unique combination in 2 fields', async () => {
@@ -416,14 +429,14 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(5);
+      expect(previewAlerts.length).toEqual(5);
 
       const newTerms = orderBy(
         previewAlerts.map((item) => item._source?.['kibana.alert.new_terms']),
         ['0', '1']
       );
 
-      expect(newTerms).eql([
+      expect(newTerms).toEqual([
         ['192.168.1.1', 'tag-new-1'],
         ['192.168.1.1', 'tag-new-3'],
         ['192.168.1.2', 'tag-2'],
@@ -456,8 +469,8 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(1);
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', '1']);
+      expect(previewAlerts.length).toEqual(1);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['user-0', 1]);
     });
 
     it('should generate 1 alert for unique combination of terms, one of which is a boolean', async () => {
@@ -472,8 +485,8 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(1);
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', false]);
+      expect(previewAlerts.length).toEqual(1);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['user-0', false]);
     });
 
     it('should generate alerts for every term when history window is small', async () => {
@@ -488,15 +501,15 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(5);
+      expect(previewAlerts.length).toEqual(5);
       const hostNames = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
-      expect(hostNames[0]).eql(['suricata-sensor-amsterdam']);
-      expect(hostNames[1]).eql(['suricata-sensor-san-francisco']);
-      expect(hostNames[2]).eql(['zeek-newyork-sha-aa8df15']);
-      expect(hostNames[3]).eql(['zeek-sensor-amsterdam']);
-      expect(hostNames[4]).eql(['zeek-sensor-san-francisco']);
+      expect(hostNames[0]).toEqual(['suricata-sensor-amsterdam']);
+      expect(hostNames[1]).toEqual(['suricata-sensor-san-francisco']);
+      expect(hostNames[2]).toEqual(['zeek-newyork-sha-aa8df15']);
+      expect(hostNames[3]).toEqual(['zeek-sensor-amsterdam']);
+      expect(hostNames[4]).toEqual(['zeek-sensor-san-francisco']);
     });
 
     // github.com/elastic/kibana/issues/149920
@@ -538,9 +551,9 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts.length).toEqual(1);
 
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['host-0', '127.0.0.2']);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).toEqual(['host-0', '127.0.0.2']);
     });
     describe('null values', () => {
       it('should not generate alerts with null values for single field', async () => {
@@ -555,7 +568,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).eql(0);
+        expect(previewAlerts.length).toEqual(0);
       });
 
       it('should not generate alerts with null values for multiple fields', async () => {
@@ -570,7 +583,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).eql(0);
+        expect(previewAlerts.length).toEqual(0);
       });
     });
 
@@ -587,7 +600,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
 
-        expect(previewAlerts.length).eql(20);
+        expect(previewAlerts.length).toEqual(20);
       });
 
       // There is a limit in ES for a number of emitted values in runtime field (100)
@@ -605,7 +618,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        expect(previewAlerts.length).eql(100);
+        expect(previewAlerts.length).toEqual(100);
       });
 
       // There is a limit in ES for a number of emitted values in runtime field (100)
@@ -624,7 +637,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        expect(previewAlerts.length).eql(100);
+        expect(previewAlerts.length).toEqual(100);
       });
 
       it('should not miss alerts if rule execution value combinations number is greater than 100', async () => {
@@ -672,7 +685,7 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
         // 10 alerts (with host.names a-[0-9]) should be generated
-        expect(previewAlerts.length).eql(10);
+        expect(previewAlerts.length).toEqual(10);
       });
 
       it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size', async () => {
@@ -731,7 +744,7 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
         // only 1 alert should be generated
-        expect(previewAlerts.length).eql(1);
+        expect(previewAlerts.length).toEqual(1);
       });
 
       it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size spread over multiple pages', async () => {
@@ -817,7 +830,7 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
         // only 4 alerts should be generated
-        expect(previewAlerts.length).eql(4);
+        expect(previewAlerts.length).toEqual(4);
       });
 
       it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have more than 100', async () => {
@@ -867,7 +880,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        expect(previewAlerts.length).eql(0);
+        expect(previewAlerts.length).toEqual(0);
       });
 
       it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have precisely 100', async () => {
@@ -911,7 +924,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
 
-        expect(previewAlerts.length).eql(0);
+        expect(previewAlerts.length).toEqual(0);
       });
     });
 
@@ -949,16 +962,16 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).eql(2);
+        expect(previewAlerts.length).toEqual(2);
         const hostNames = previewAlerts
           .map((signal) => signal._source?.['kibana.alert.new_terms'])
           .sort();
-        expect(hostNames[0]).eql(['host-3']);
-        expect(hostNames[1]).eql(['host-4']);
+        expect(hostNames[0]).toEqual(['host-3']);
+        expect(hostNames[1]).toEqual(['host-4']);
       });
     });
 
-    describe('with exceptions', async () => {
+    describe('with exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
@@ -989,14 +1002,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts.length).eql(4);
+        expect(previewAlerts.length).toEqual(4);
         const hostNames = previewAlerts
           .map((signal) => signal._source?.['kibana.alert.new_terms'])
           .sort();
-        expect(hostNames[0]).eql(['suricata-sensor-amsterdam']);
-        expect(hostNames[1]).eql(['suricata-sensor-san-francisco']);
-        expect(hostNames[2]).eql(['zeek-newyork-sha-aa8df15']);
-        expect(hostNames[3]).eql(['zeek-sensor-amsterdam']);
+        expect(hostNames[0]).toEqual(['suricata-sensor-amsterdam']);
+        expect(hostNames[1]).toEqual(['suricata-sensor-san-francisco']);
+        expect(hostNames[2]).toEqual(['zeek-newyork-sha-aa8df15']);
+        expect(hostNames[3]).toEqual(['zeek-sensor-amsterdam']);
       });
     });
 
@@ -1014,11 +1027,11 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
 
-      expect(previewAlerts.length).eql(maxAlerts);
+      expect(previewAlerts.length).toEqual(maxAlerts);
       const processPids = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
-      expect(processPids[0]).eql([1]);
+      expect(processPids[0]).toEqual([1]);
     });
 
     describe('alerts should be be enriched', () => {
@@ -1041,13 +1054,14 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(23);
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Low');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(23);
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({
           [ENABLE_ASSET_CRITICALITY_SETTING]: true,
@@ -1055,23 +1069,297 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
         await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
       });
 
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
       it('should be enriched alert with criticality_level', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+
+        const firstExecutionDocuments = [
+          {
+            host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
+            user: { name: 'root' },
+            id,
+            '@timestamp': timestamp,
+          },
+        ];
+
+        await indexListOfDocuments([...firstExecutionDocuments]);
+
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           new_terms_fields: ['host.name'],
-          from: '2019-02-19T20:42:00.000Z',
-          history_window_start: '2019-01-19T20:42:00.000Z',
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: '2019-10-13T05:00:04.000Z',
+          from: 'now-35m',
+          interval: '30m',
         };
 
-        const { previewId } = await previewRule({ supertest, rule });
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+        });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(1);
         const fullAlert = previewAlerts[0]._source;
 
-        expect(fullAlert?.['host.asset.criticality']).to.eql('medium_impact');
-        expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
+        expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
+        expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
+      });
+    });
+
+    // skipped on MKI since feature flags are not supported there
+    describe('@skipInServerlessMKI manual rule run', () => {
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await deleteAllRules(supertest, log);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      it('alerts when run on a time range that the rule has not previously seen, and deduplicates if run there more than once', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': moment().subtract(5, 'm').toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument]);
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['agent.name'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: 'now-1h',
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(2);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+      });
+
+      it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date());
+
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument]);
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['agent.name'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: 'now-1h',
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
+      });
+
+      it('supression per rule execution should work for manual rule runs', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const secondDocument = {
+          id,
+          '@timestamp': moment(firstTimestamp).add(1, 'm').toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        const thirdDocument = {
+          id,
+          '@timestamp': moment(firstTimestamp).add(3, 'm').toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument, secondDocument, thirdDocument]);
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['agent.name'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: 'now-1h',
+          from: 'now-35m',
+          interval: '30m',
+          alert_suppression: {
+            group_by: ['agent.name'],
+          },
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(0);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(10, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
+      });
+
+      it('supression with time window should work for manual rule runs and update alert', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp.toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+
+        await indexListOfDocuments([firstDocument]);
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          new_terms_fields: ['agent.name'],
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: 'now-31m',
+          from: 'now-30m',
+          interval: '30m',
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 500,
+              unit: 'm',
+            },
+          },
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits).toHaveLength(0);
+
+        // generate alert in the past
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
+
+        // now we will ingest new event, and manual rule run should update original alert
+        const secondDocument = {
+          id,
+          '@timestamp': moment(firstTimestamp).add(40, 'm').toISOString(),
+          agent: {
+            name: 'agent-1',
+          },
+        };
+
+        await indexListOfDocuments([secondDocument]);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).add(39, 'm'),
+          endDate: moment(firstTimestamp).add(120, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
+
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
+        expect(updatedAlerts.hits.hits[0]._source).toEqual({
+          ...updatedAlerts.hits.hits[0]._source,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
       });
     });
   });

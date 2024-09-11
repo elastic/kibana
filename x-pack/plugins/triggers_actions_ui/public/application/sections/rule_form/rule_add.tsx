@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { createRule, CreateRuleBody } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
 import {
   Rule,
   RuleTypeParams,
@@ -27,7 +29,6 @@ import {
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { InitialRule, getRuleReducer } from './rule_reducer';
-import { createRule } from '../../lib/rule_api/create';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmRuleSave } from './confirm_rule_save';
@@ -36,10 +37,10 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import RuleAddFooter from './rule_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../../common/constants';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
-import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
 import { ShowRequestModal } from './show_request_modal';
@@ -77,7 +78,7 @@ const RuleAdd = <
 }: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback((newMetadata: any) => setMetadata(newMetadata), []);
 
   const initialRule: InitialRule = useMemo(() => {
     return {
@@ -253,12 +254,14 @@ const RuleAdd = <
 
   async function onSaveRule(): Promise<Rule | undefined> {
     try {
+      const { flapping, ...restRule } = rule;
       const newRule = await createRule({
         http,
         rule: {
-          ...rule,
+          ...restRule,
           ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
-        } as RuleUpdates,
+          ...(IS_RULE_SPECIFIC_FLAPPING_ENABLED ? { flapping } : {}),
+        } as CreateRuleBody,
       });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveSuccessNotificationText', {

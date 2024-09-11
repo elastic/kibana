@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getSystemMessageFromInstructions } from './get_system_message_from_instructions';
+import {
+  getSystemMessageFromInstructions,
+  USER_INSTRUCTIONS_HEADER,
+} from './get_system_message_from_instructions';
 
 describe('getSystemMessageFromInstructions', () => {
   it('handles plain instructions', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: ['first', 'second'],
+        applicationInstructions: ['first', 'second'],
         userInstructions: [],
-        requestInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first\n\nsecond`);
@@ -21,56 +24,58 @@ describe('getSystemMessageFromInstructions', () => {
   it('handles callbacks', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: [
+        applicationInstructions: [
           'first',
           ({ availableFunctionNames }) => {
             return availableFunctionNames[0];
           },
         ],
         userInstructions: [],
-        requestInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: ['myFunction'],
       })
     ).toEqual(`first\n\nmyFunction`);
   });
 
-  it('overrides kb instructions with request instructions', () => {
+  it('overrides kb instructions with adhoc instructions', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: ['first'],
-        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
-        requestInstructions: [{ doc_id: 'second', text: 'second_request' }],
+        applicationInstructions: ['first'],
+        userInstructions: [{ doc_id: 'second', text: 'second from kb' }],
+        adHocInstructions: [
+          {
+            doc_id: 'second',
+            text: 'second from adhoc instruction',
+            instruction_type: 'user_instruction',
+          },
+        ],
         availableFunctionNames: [],
       })
-    ).toEqual(
-      `first\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nsecond_request`
-    );
+    ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond from adhoc instruction`);
   });
 
   it('includes kb instructions if there is no request instruction', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: ['first'],
+        applicationInstructions: ['first'],
         userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
-        requestInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: [],
       })
-    ).toEqual(
-      `first\n\nWhat follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n\nsecond_kb`
-    );
+    ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
   });
 
   it('handles undefined values', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: [
+        applicationInstructions: [
           'first',
           ({ availableFunctionNames }) => {
             return undefined;
           },
         ],
         userInstructions: [],
-        requestInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first`);

@@ -11,6 +11,7 @@ import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base_tool';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { loggerMock } from '@kbn/logging-mocks';
 
 describe('EsqlLanguageKnowledgeBaseTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -27,9 +28,11 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
       size: 20,
     },
   } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  const logger = loggerMock.create();
   const rest = {
     chain,
     esClient,
+    logger,
     request,
   };
 

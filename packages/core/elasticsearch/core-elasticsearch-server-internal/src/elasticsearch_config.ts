@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
+import { readFileSync } from 'fs';
+import { Duration } from 'moment';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
-import { Duration } from 'moment';
-import { readFileSync } from 'fs';
+import { schema, offeringBasedSchema, ByteSizeValue, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type {
@@ -42,6 +43,9 @@ export const configSchema = schema.object({
   }),
   maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
+  maxResponseSize: schema.oneOf([schema.literal(false), schema.byteSize()], {
+    defaultValue: false,
+  }),
   idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
@@ -187,6 +191,7 @@ export const configSchema = schema.object({
     { defaultValue: [] }
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
+  publicBaseUrl: schema.maybe(hostURISchema),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -333,6 +338,12 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly maxIdleSockets: number;
 
   /**
+   * The maximum allowed response size (both compressed and uncompressed).
+   * When defined, responses with a size higher than the set limit will be aborted with an error.
+   */
+  public readonly maxResponseSize?: ByteSizeValue;
+
+  /**
    * The timeout for idle sockets kept open between Kibana and Elasticsearch. If the socket is idle for longer than this timeout, it will be closed.
    */
   public readonly idleSocketTimeout: Duration;
@@ -455,6 +466,8 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.customHeaders = rawConfig.customHeaders;
     this.maxSockets = rawConfig.maxSockets;
     this.maxIdleSockets = rawConfig.maxIdleSockets;
+    this.maxResponseSize =
+      rawConfig.maxResponseSize !== false ? rawConfig.maxResponseSize : undefined;
     this.idleSocketTimeout = rawConfig.idleSocketTimeout;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;

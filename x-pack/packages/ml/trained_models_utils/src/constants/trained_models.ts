@@ -7,20 +7,32 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ELSER_MODEL_ID = '.elser_model_2';
+export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
+export const E5_MODEL_ID = '.multilingual-e5-small';
+export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
+export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
+export const ELSER_ID_V1 = '.elser_model_1' as const;
+export const LATEST_ELSER_VERSION: ElserVersion = 2;
+export const LATEST_ELSER_MODEL_ID = ELSER_LINUX_OPTIMIZED_MODEL_ID;
+export const LATEST_E5_MODEL_ID = E5_LINUX_OPTIMIZED_MODEL_ID;
+
+export const ElserModels = [ELSER_MODEL_ID, ELSER_LINUX_OPTIMIZED_MODEL_ID, ELSER_ID_V1];
+
 export const DEPLOYMENT_STATE = {
   STARTED: 'started',
   STARTING: 'starting',
   STOPPING: 'stopping',
 } as const;
 
-export type DeploymentState = typeof DEPLOYMENT_STATE[keyof typeof DEPLOYMENT_STATE];
+export type DeploymentState = (typeof DEPLOYMENT_STATE)[keyof typeof DEPLOYMENT_STATE];
 
 export const TRAINED_MODEL_TYPE = {
   PYTORCH: 'pytorch',
   TREE_ENSEMBLE: 'tree_ensemble',
   LANG_IDENT: 'lang_ident',
 } as const;
-export type TrainedModelType = typeof TRAINED_MODEL_TYPE[keyof typeof TRAINED_MODEL_TYPE];
+export type TrainedModelType = (typeof TRAINED_MODEL_TYPE)[keyof typeof TRAINED_MODEL_TYPE];
 
 export const SUPPORTED_PYTORCH_TASKS = {
   NER: 'ner',
@@ -33,7 +45,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
   TEXT_EXPANSION: 'text_expansion',
 } as const;
 export type SupportedPytorchTasksType =
-  typeof SUPPORTED_PYTORCH_TASKS[keyof typeof SUPPORTED_PYTORCH_TASKS];
+  (typeof SUPPORTED_PYTORCH_TASKS)[keyof typeof SUPPORTED_PYTORCH_TASKS];
 
 export const BUILT_IN_MODEL_TYPE = i18n.translate(
   'xpack.ml.trainedModels.modelsList.builtInModelLabel',
@@ -46,10 +58,11 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
 
-export const ELSER_ID_V1 = '.elser_model_1' as const;
-
-export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
-  '.elser_model_1': {
+export const ELASTIC_MODEL_DEFINITIONS: Record<
+  string,
+  Omit<ModelDefinition, 'supported'>
+> = Object.freeze({
+  [ELSER_ID_V1]: {
     modelName: 'elser',
     hidden: true,
     version: 1,
@@ -63,7 +76,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     }),
     type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.elser_model_2': {
+  [ELSER_MODEL_ID]: {
     modelName: 'elser',
     version: 2,
     default: true,
@@ -77,7 +90,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     }),
     type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.elser_model_2_linux-x86_64': {
+  [ELSER_LINUX_OPTIMIZED_MODEL_ID]: {
     modelName: 'elser',
     version: 2,
     os: 'Linux',
@@ -92,7 +105,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     }),
     type: ['elastic', 'pytorch', 'text_expansion'],
   },
-  '.multilingual-e5-small': {
+  [E5_MODEL_ID]: {
     modelName: 'e5',
     version: 1,
     default: true,
@@ -108,7 +121,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
     licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
     type: ['pytorch', 'text_embedding'],
   },
-  '.multilingual-e5-small_linux-x86_64': {
+  [E5_LINUX_OPTIMIZED_MODEL_ID]: {
     modelName: 'e5',
     version: 1,
     os: 'Linux',
@@ -146,6 +159,8 @@ export interface ModelDefinition {
   default?: boolean;
   /** Indicates if model version is recommended for deployment based on the cluster configuration */
   recommended?: boolean;
+  /** Indicates if model version is supported by the cluster */
+  supported: boolean;
   hidden?: boolean;
   /** Software license of a model, e.g. MIT */
   license?: string;
@@ -170,7 +185,7 @@ export const MODEL_STATE = {
   NOT_DOWNLOADED: 'notDownloaded',
 } as const;
 
-export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;
+export type ModelState = (typeof MODEL_STATE)[keyof typeof MODEL_STATE] | null;
 
 export type ElserVersion = 1 | 2;
 
@@ -178,29 +193,69 @@ export interface GetModelDownloadConfigOptions {
   version?: ElserVersion;
 }
 
+export interface LocalInferenceServiceSettings {
+  service: 'elser' | 'elasticsearch';
+  service_settings: {
+    num_allocations: number;
+    num_threads: number;
+    model_id: string;
+  };
+}
+
 export type InferenceServiceSettings =
-  | {
-      service: 'elser';
-      service_settings: {
-        num_allocations: number;
-        num_threads: number;
-        model_id: string;
-      };
-    }
-  | {
-      service: 'elasticsearch';
-      service_settings: {
-        num_allocations: number;
-        num_threads: number;
-        model_id: string;
-      };
-    }
+  | LocalInferenceServiceSettings
   | {
       service: 'openai';
       service_settings: {
         api_key: string;
         organization_id: string;
         url: string;
+        model_id: string;
+      };
+    }
+  | {
+      service: 'mistral';
+      service_settings: {
+        api_key: string;
+        model: string;
+        max_input_tokens: string;
+        rate_limit: {
+          requests_per_minute: number;
+        };
+      };
+    }
+  | {
+      service: 'cohere';
+      service_settings: {
+        similarity: string;
+        dimensions: string;
+        model_id: string;
+        embedding_type: string;
+      };
+    }
+  | {
+      service: 'azureaistudio';
+      service_settings: {
+        target: string;
+        provider: string;
+        embedding_type: string;
+      };
+    }
+  | {
+      service: 'azureopenai';
+      service_settings: {
+        resource_name: string;
+        deployment_id: string;
+        api_version: string;
+      };
+    }
+  | {
+      service: 'googleaistudio';
+      service_settings: {
+        model_id: string;
+        rate_limit: {
+          requests_per_minute: number;
+        };
       };
     }
   | {
@@ -209,13 +264,29 @@ export type InferenceServiceSettings =
         api_key: string;
         url: string;
       };
+    }
+  | {
+      service: 'amazonbedrock';
+      service_settings: {
+        access_key: string;
+        secret_key: string;
+        region: string;
+        provider: string;
+        model: string;
+      };
     };
 
 export type InferenceAPIConfigResponse = {
   // Refers to a deployment id
-  model_id: string;
+  inference_id: string;
   task_type: 'sparse_embedding' | 'text_embedding';
   task_settings: {
     model?: string;
   };
 } & InferenceServiceSettings;
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
+}

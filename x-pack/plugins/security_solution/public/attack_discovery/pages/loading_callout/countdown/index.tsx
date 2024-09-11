@@ -18,10 +18,10 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimerPrefix } from './last_times_popover/helpers';
 
-import type { GenerationInterval } from '../../../types';
 import { InfoPopoverBody } from '../info_popover_body';
 
 const TEXT_COLOR = '#343741';
@@ -48,17 +48,21 @@ const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorI
 
   useEffect(() => {
     // periodically update the formatted date as time passes:
+    if (approximateFutureTime === null) {
+      return;
+    }
     const intervalId = setInterval(() => {
-      const now = moment();
-
-      const duration = moment(approximateFutureTime).isSameOrAfter(now)
-        ? moment.duration(moment(approximateFutureTime).diff(now))
-        : moment.duration(now.diff(approximateFutureTime));
-
-      const text = moment.utc(duration.asMilliseconds()).format('mm:ss');
-
       setPrefix(getTimerPrefix(approximateFutureTime));
-      setTimerText(text);
+      if (approximateFutureTime !== null) {
+        const now = moment();
+
+        const duration = moment(approximateFutureTime).isSameOrAfter(now)
+          ? moment.duration(moment(approximateFutureTime).diff(now))
+          : moment.duration(now.diff(approximateFutureTime));
+
+        const text = moment.utc(duration.asMilliseconds()).format('mm:ss');
+        setTimerText(text);
+      }
     }, 1000);
 
     return () => clearInterval(intervalId);

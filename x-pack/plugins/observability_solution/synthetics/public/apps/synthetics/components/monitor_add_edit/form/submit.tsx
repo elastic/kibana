@@ -36,9 +36,7 @@ export const ActionBar = ({
     formState: { defaultValues, isValid },
   } = useFormContext();
 
-  const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
-    null
-  );
+  const [monitorsPendingDeletion, setMonitorsPendingDeletion] = useState<string[]>([]);
 
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
@@ -66,7 +64,7 @@ export const ActionBar = ({
                 data-test-subj="syntheticsActionBarButton"
                 color="danger"
                 onClick={() => {
-                  setMonitorPendingDeletion(defaultValues as SyntheticsMonitor);
+                  setMonitorsPendingDeletion([monitorId]);
                 }}
                 isDisabled={!canEditSynthetics || !canUsePublicLocations}
               >
@@ -107,14 +105,14 @@ export const ActionBar = ({
           </NoPermissionsTooltip>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {monitorPendingDeletion && (
+      {monitorsPendingDeletion.length > 0 && (
         <DeleteMonitor
-          configId={monitorId}
+          configIds={monitorsPendingDeletion}
           name={defaultValues?.[ConfigKey.NAME] ?? ''}
           reloadPage={() => {
             history.push(MONITORS_ROUTE);
           }}
-          setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingDeletion={setMonitorsPendingDeletion}
           isProjectMonitor={defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
         />
       )}

@@ -16,6 +16,9 @@ jest.mock('../../services', () => ({
     get: jest.fn(),
     getByIDs: jest.fn(),
   },
+  appContextService: {
+    getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+  },
   downloadSourceService: {
     list: jest.fn().mockResolvedValue({
       items: [

@@ -27,6 +27,7 @@ import { StatsQuery } from '../queries/stats';
  * resolver tree.
  */
 export interface TreeOptions {
+  agentId?: string;
   descendantLevels: number;
   descendants: number;
   ancestors: number;
@@ -96,6 +97,7 @@ export class Fetcher {
       schema: options.schema,
       timeRange: options.timeRange,
       isInternalRequest,
+      agentId: options.agentId,
     });
 
     const { eventStats, alertIds } = await query.search(
@@ -171,6 +173,7 @@ export class Fetcher {
       timeRange: options.timeRange,
       isInternalRequest,
       shouldExcludeColdAndFrozenTiers: !!options.shouldExcludeColdAndFrozenTiers,
+      agentId: options.agentId,
     });
 
     let nodes = options.nodes;
@@ -222,6 +225,7 @@ export class Fetcher {
       timeRange: options.timeRange,
       isInternalRequest,
       shouldExcludeColdAndFrozenTiers: !!options.shouldExcludeColdAndFrozenTiers,
+      agentId: options.agentId,
     });
 
     let nodes: NodeID[] = options.nodes;

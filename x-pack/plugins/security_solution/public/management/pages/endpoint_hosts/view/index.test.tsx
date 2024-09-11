@@ -25,7 +25,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_con
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
-import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import {
   isFailedResourceState,
   isLoadedResourceState,
@@ -55,6 +55,8 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../common/components
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
+import { useGetAgentStatus as _useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
+import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -79,6 +81,9 @@ jest.mock('../../../services/policies/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
+
+jest.mock('../../../hooks/agents/use_get_agent_status');
+const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
 
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 const timepickerRanges = [
@@ -325,6 +330,18 @@ describe('when on the endpoint list page', () => {
             endpointsResults: hostListData,
             endpointPackagePolicies: ingestPackagePolicies,
           });
+
+          useGetAgentStatusMock.mockImplementation((agentId, agentType) => {
+            return {
+              data: {
+                [agentId]: agentStatusMocks.generateAgentStatus({
+                  agentType,
+                }),
+              },
+              isLoading: false,
+              isFetched: true,
+            };
+          });
         });
       });
       afterEach(() => {
@@ -347,18 +364,19 @@ describe('when on the endpoint list page', () => {
         const total = await renderResult.findByTestId('endpointListTableTotal');
         expect(total.textContent).toEqual('Showing 5 endpoints');
       });
-      it('should display correct status', async () => {
+      it('should agent status', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
+
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
-        expect(hostStatuses[0].textContent).toEqual('Unhealthy');
+        expect(hostStatuses[0].textContent).toEqual('Healthy');
         expect(hostStatuses[1].textContent).toEqual('Healthy');
-        expect(hostStatuses[2].textContent).toEqual('Offline');
-        expect(hostStatuses[3].textContent).toEqual('Updating');
-        expect(hostStatuses[4].textContent).toEqual('Inactive');
+        expect(hostStatuses[2].textContent).toEqual('Healthy');
+        expect(hostStatuses[3].textContent).toEqual('Healthy');
+        expect(hostStatuses[4].textContent).toEqual('Healthy');
       });
 
       it('should display correct policy status', async () => {
@@ -385,12 +403,11 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
+        const outOfDates = await renderResult.findAllByTestId('policyNameCellLink-outdatedMsg');
         expect(outOfDates).toHaveLength(4);
 
         outOfDates.forEach((item) => {
           expect(item.textContent).toEqual('Out-of-date');
-          expect(item.querySelector(`[data-euiicon-type][color=warning]`)).not.toBeNull();
         });
       });
 
@@ -399,7 +416,7 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
+        const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink-link'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}/settings`
@@ -452,7 +469,9 @@ describe('when on the endpoint list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const firstPolicyRevElement = (await renderResult.findAllByTestId('policyListRevNo'))[0];
+        const firstPolicyRevElement = (
+          await renderResult.findAllByTestId('policyNameCellLink-revision')
+        )[0];
         expect(firstPolicyRevElement).not.toBeNull();
         expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
@@ -589,7 +608,7 @@ describe('when on the endpoint list page', () => {
 
     it('should display policy name value as a link', async () => {
       const renderResult = render();
-      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
         `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostInfo.metadata.Endpoint.policy.applied.id}/settings`
@@ -598,7 +617,9 @@ describe('when on the endpoint list page', () => {
 
     it('should display policy revision number', async () => {
       const renderResult = render();
-      const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
+      const policyDetailsRevElement = await renderResult.findByTestId(
+        'policyNameCellLink-revision'
+      );
       expect(policyDetailsRevElement).not.toBeNull();
       expect(policyDetailsRevElement.textContent).toEqual(
         `rev. ${hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}`
@@ -607,7 +628,7 @@ describe('when on the endpoint list page', () => {
 
     it('should update the URL when policy name link is clicked', async () => {
       const renderResult = render();
-      const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
+      const policyDetailsLink = await renderResult.findByTestId('policyNameCellLink-link');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
         reactTestingLibrary.fireEvent.click(policyDetailsLink);
@@ -704,7 +725,7 @@ describe('when on the endpoint list page', () => {
             'endpoint-details-flyout-tab-activity_log'
           );
 
-          userEvent.click(activityLogTab);
+          await userEvent.click(activityLogTab);
           expect(detailsTab).toHaveAttribute('aria-selected', 'false');
           expect(activityLogTab).toHaveAttribute('aria-selected', 'true');
           expect(renderResult.getByTestId('endpointActivityLogFlyoutBody')).not.toBeNull();

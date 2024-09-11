@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
+
+export type TelemetryServiceStart = ITelemetryClient;
 
 export enum InfraTelemetryEventTypes {
   HOSTS_VIEW_QUERY_SUBMITTED = 'Hosts View Query Submitted',

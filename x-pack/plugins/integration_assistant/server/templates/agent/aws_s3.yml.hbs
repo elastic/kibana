@@ -1,0 +1,130 @@
+{{! start SQS queue }}
+{{#unless bucket_arn}}
+{{#unless non_aws_bucket_name}}
+{{#if queue_url }}
+queue_url: {{ queue_url }}
+{{/if}}
+{{/unless}}
+{{/unless}}
+{{! end SQS queue }}
+
+{{#unless queue_url}}{{! start S3 bucket polling }}
+
+{{!
+When using an S3 bucket, you can specify only one of the following options:
+- An AWS bucket ARN
+- A non-AWS bucket name
+}}
+
+{{! shared S3 bucket polling options }}
+{{#if number_of_workers }}
+number_of_workers: {{ number_of_workers }}
+{{/if}}
+{{#if bucket_list_prefix }}
+bucket_list_prefix: {{ bucket_list_prefix }}
+{{/if}}
+{{#if bucket_list_interval }}
+bucket_list_interval: {{ bucket_list_interval }}
+{{/if}}
+
+{{! AWS S3 bucket ARN options }}
+{{#unless non_aws_bucket_name}}
+{{#if bucket_arn }}
+bucket_arn: {{ bucket_arn }}
+{{/if}}
+{{/unless}}{{! end AWS S3 bucket ARN options }}
+
+{{! non-AWS S3 bucket ARN options }}
+{{#unless bucket_arn}}
+{{#if non_aws_bucket_name }}
+non_aws_bucket_name: {{ non_aws_bucket_name }}
+{{/if}}
+{{/unless}}{{! end non-AWS S3 bucket ARN options }}
+
+{{/unless}}{{! end S3 bucket polling }}
+
+{{#if buffer_size }}
+buffer_size: {{ buffer_size }}
+{{/if}}
+{{#if content_type }}
+content_type: {{ content_type }}
+{{/if}}
+{{#if encoding }}
+encoding: {{ encoding }}
+{{/if}}
+{{#if expand_event_list_from_field }}
+expand_event_list_from_field: {{ expand_event_list_from_field }}
+{{/if}}
+{{#if buffer_size }}
+buffer_size: {{ buffer_size }}
+{{/if}}
+{{#if fips_enabled }}
+fips_enabled: {{ fips_enabled }}
+{{/if}}
+{{#if include_s3_metadata }}
+include_s3_metadata: {{ include_s3_metadata }}
+{{/if}}
+{{#if max_bytes }}
+max_bytes: {{ max_bytes }}
+{{/if}}
+{{#if max_number_of_messages }}
+max_number_of_messages: {{ max_number_of_messages }}
+{{/if}}
+{{#if path_style }}
+path_style: {{ path_style }}
+{{/if}}
+{{#if provider }}
+provider: {{ provider }}
+{{/if}}
+{{#if sqs.max_receive_count }}
+sqs.max_receive_count: {{ sqs.max_receive_count }}
+{{/if}}
+{{#if sqs.wait_time }}
+sqs.wait_time: {{ sqs.wait_time }}
+{{/if}}
+
+{{#if file_selectors}}
+file_selectors:
+{{file_selectors}}
+{{/if}}
+
+{{#if credential_profile_name}}
+credential_profile_name: {{credential_profile_name}}
+{{/if}}
+{{#if shared_credential_file}}
+shared_credential_file: {{shared_credential_file}}
+{{/if}}
+{{#if visibility_timeout}}
+visibility_timeout: {{visibility_timeout}}
+{{/if}}
+{{#if api_timeout}}
+api_timeout: {{api_timeout}}
+{{/if}}
+{{#if endpoint}}
+endpoint: {{endpoint}}
+{{/if}}
+{{#if default_region}}
+default_region: {{default_region}}
+{{/if}}
+{{#if access_key_id}}
+access_key_id: {{access_key_id}}
+{{/if}}
+{{#if secret_access_key}}
+secret_access_key: {{secret_access_key}}
+{{/if}}
+{{#if session_token}}
+session_token: {{session_token}}
+{{/if}}
+{{#if role_arn}}
+role_arn: {{role_arn}}
+{{/if}}
+{{#if fips_enabled}}
+fips_enabled: {{fips_enabled}}
+{{/if}}
+{{#if proxy_url }}
+proxy_url: {{proxy_url}}
+{{/if}}
+{{#if parsers}}
+parsers:
+{{parsers}}
+{{/if}}

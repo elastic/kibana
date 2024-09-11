@@ -26,6 +26,7 @@ export const OverviewPingCodec = t.intersection([
   }),
   t.partial({
     error: PingErrorType,
+    tags: t.array(t.string),
   }),
 ]);
 
@@ -43,7 +44,7 @@ export const OverviewPendingStatusMetaDataCodec = t.intersection([
     monitorQueryId: t.string,
     configId: t.string,
     status: t.string,
-    location: t.string,
+    locationId: t.string,
   }),
   t.partial({
     timestamp: t.string,

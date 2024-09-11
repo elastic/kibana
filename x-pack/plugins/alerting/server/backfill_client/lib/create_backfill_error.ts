@@ -7,6 +7,10 @@
 
 import { ScheduleBackfillError } from '../../application/backfill/methods/schedule/types';
 
-export function createBackfillError(error: string, message: string): ScheduleBackfillError {
-  return { error: { error, message } };
+export function createBackfillError(
+  message: string,
+  ruleId: string,
+  ruleName?: string
+): ScheduleBackfillError {
+  return { error: { message, rule: { id: ruleId, ...(ruleName ? { name: ruleName } : {}) } } };
 }

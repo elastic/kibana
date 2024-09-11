@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -113,16 +114,16 @@ describe('Doc table row component', () => {
   describe('details row', () => {
     it('should be empty by default', () => {
       const component = mountComponent(defaultProps);
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeFalsy();
     });
 
     it('should expand the detail row when the toggle arrow is clicked', () => {
       const component = mountComponent(defaultProps);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
 
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeFalsy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeFalsy();
       toggleButton.simulate('click');
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').exists()).toBeTruthy();
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').exists()).toBeTruthy();
     });
 
     it('should hide the single/surrounding views for ES|QL mode', () => {
@@ -133,7 +134,7 @@ describe('Doc table row component', () => {
       const component = mountComponent(props);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
       toggleButton.simulate('click');
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').text()).toBe('Expanded result');
+      expect(findTestSubject(component, 'docViewerRowDetailsTitle').text()).toBe('Expanded result');
       expect(findTestSubject(component, 'docTableRowAction').length).toBeFalsy();
     });
   });

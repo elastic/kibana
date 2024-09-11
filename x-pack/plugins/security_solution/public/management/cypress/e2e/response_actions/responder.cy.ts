@@ -43,7 +43,8 @@ describe(
       login();
     });
 
-    describe('from Cases', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169894
+    describe.skip('from Cases', () => {
       let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
       let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
       let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
@@ -53,7 +54,7 @@ describe(
 
       const openCaseAlertDetails = () => {
         cy.getByTestSubj(`comment-action-show-alert-${caseAlertActions.comments[alertId]}`).click();
-        return cy.getByTestSubj('take-action-dropdown-btn').click();
+        return cy.getByTestSubj('securitySolutionFlyoutFooterDropdownButton').click();
       };
 
       before(() => {

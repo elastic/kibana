@@ -11,7 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import z from 'zod';
+import z from '@kbn/zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -28,6 +28,7 @@ import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { AlertsHealth } from '@kbn/alerting-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -50,7 +51,6 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertsHealth,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
@@ -102,7 +102,6 @@ export interface RuleExecutorServices<
   ActionGroupIds extends string = never,
   AlertData extends RuleAlertData = RuleAlertData
 > {
-  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -121,8 +120,9 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
   share: SharePluginStart;
-  dataViews: DataViewsContract;
   ruleResultService?: PublicRuleResultService;
+  getDataViews: () => Promise<DataViewsContract>;
+  getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
 }
 
 export interface RuleExecutorOptions<

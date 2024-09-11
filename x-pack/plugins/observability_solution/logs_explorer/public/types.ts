@@ -12,6 +12,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { LogsExplorerLocators } from '../common/locators';
 import type { LogsExplorerProps } from './components/logs_explorer';
 import type { CreateLogsExplorerController } from './controller';
@@ -37,4 +38,5 @@ export interface LogsExplorerStartDeps {
   navigation: NavigationPublicPluginStart;
   share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  discoverShared: DiscoverSharedPublicStart;
 }

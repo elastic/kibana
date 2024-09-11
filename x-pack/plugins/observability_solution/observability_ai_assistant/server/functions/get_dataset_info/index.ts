@@ -41,14 +41,14 @@ export function registerGetDatasetInfoFunction({
     async ({ arguments: { index }, messages, chat }, signal) => {
       const coreContext = await resources.context.core;
 
-      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const esClient = coreContext.elasticsearch.client;
       const savedObjectsClient = coreContext.savedObjects.client;
 
       let indices: string[] = [];
 
       try {
-        const body = await esClient.indices.resolveIndex({
-          name: index === '' ? '*' : index,
+        const body = await esClient.asCurrentUser.indices.resolveIndex({
+          name: index === '' ? '*' : index.split(','),
           expand_wildcards: 'open',
         });
         indices = [
@@ -81,17 +81,17 @@ export function registerGetDatasetInfoFunction({
       const relevantFieldNames = await getRelevantFieldNames({
         index,
         messages,
-        esClient,
+        esClient: esClient.asCurrentUser,
         dataViews: await resources.plugins.dataViews.start(),
         savedObjectsClient,
         signal,
         chat,
       });
-
       return {
         content: {
           indices: [index],
           fields: relevantFieldNames.fields,
+          stats: relevantFieldNames.stats,
         },
       };
     }

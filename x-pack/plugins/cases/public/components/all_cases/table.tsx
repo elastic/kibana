@@ -35,6 +35,7 @@ interface CasesTableProps {
   tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
   isLoadingColumns: boolean;
+  rowHeader?: string;
 }
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
@@ -52,12 +53,13 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   isLoadingColumns,
+  rowHeader,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       if (goToCreateCase != null) {
         goToCreateCase();
@@ -81,6 +83,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}
+        rowHeader={rowHeader}
         data-test-subj="cases-table"
         itemId="id"
         items={data.cases}

@@ -27,7 +27,7 @@
       "kibanaUtils",
       "kibanaReact",
       "data",
-      "textBasedLanguages"
+      "esql"
     ]
   }
 }

@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless Risk Scoring Task Execution', () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('@skipInServerlessMKI starts the latest transform', async () => {
+          it('@skipInServerlessMKI @skipInServerless starts the latest transform', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({

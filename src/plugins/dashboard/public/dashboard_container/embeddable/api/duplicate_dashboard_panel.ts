@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import {
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+  apiPublishesPanelTitle,
+  getPanelTitle,
+  stateHasTitles,
+} from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { DashboardPanelState, prefixReferencesFromPanel } from '../../../../common';
@@ -52,18 +60,45 @@ const duplicateReactEmbeddableInput = async (
   panelToClone: DashboardPanelState,
   idToDuplicate: string
 ) => {
+  const id = uuidv4();
   const child = dashboard.children$.value[idToDuplicate];
   const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
-  const id = uuidv4();
-  if (panelToClone.references) {
-    dashboard.savedObjectReferences.push(...prefixReferencesFromPanel(id, panelToClone.references));
+
+  /**
+   * For react embeddables that have library transforms, we need to ensure
+   * to clone them with serialized state and references.
+   *
+   * TODO: remove this section once all by reference capable react embeddables
+   * use in-place library transforms
+   */
+  if (apiHasLibraryTransforms(child)) {
+    const byValueSerializedState = await child.getByValueState();
+    if (panelToClone.references) {
+      dashboard.savedObjectReferences.push(
+        ...prefixReferencesFromPanel(id, panelToClone.references)
+      );
+    }
+    return {
+      type: panelToClone.type,
+      explicitInput: {
+        ...byValueSerializedState,
+        title: newTitle,
+        id,
+      },
+    };
   }
+
+  const runtimeSnapshot = (() => {
+    if (apiHasInPlaceLibraryTransforms(child)) return child.getByValueRuntimeSnapshot();
+    return apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
+  })();
+  if (stateHasTitles(runtimeSnapshot)) runtimeSnapshot.title = newTitle;
+
+  dashboard.setRuntimeStateForChild(id, runtimeSnapshot);
   return {
     type: panelToClone.type,
     explicitInput: {
-      ...panelToClone.explicitInput,
-      title: newTitle,
       id,
     },
   };

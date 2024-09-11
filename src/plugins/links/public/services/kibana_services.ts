@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -14,6 +15,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
+import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { CONTENT_ID } from '../../common';
 import { LinksStartDependencies } from '../plugin';
 
@@ -22,6 +24,7 @@ export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
 export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
+export let uiActions: UiActionsPublicStart;
 export let trackUiMetric: (
   type: string,
   eventNames: string | string[],
@@ -48,6 +51,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   embeddableService = deps.embeddable;
   presentationUtil = deps.presentationUtil;
   contentManagement = deps.contentManagement;
+  uiActions = deps.uiActions;
   if (deps.usageCollection)
     trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
 

@@ -14,11 +14,16 @@ import {
   ElasticAssistantRequestHandlerContext,
 } from '../types';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { conversationsDataClientMock, dataClientMock } from './data_clients.mock';
+import {
+  attackDiscoveryDataClientMock,
+  conversationsDataClientMock,
+  dataClientMock,
+} from './data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -36,6 +41,7 @@ export const createMockClients = () => {
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
       getAIAssistantKnowledgeBaseDataClient: dataClientMock.create(),
       getAIAssistantPromptsDataClient: dataClientMock.create(),
+      getAttackDiscoveryDataClient: attackDiscoveryDataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
@@ -109,14 +115,18 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAIAssistantPromptsDataClient
     ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
       (() => Promise<AIAssistantDataClient | null>),
+    getAttackDiscoveryDataClient: jest.fn(
+      () => clients.elasticAssistant.getAttackDiscoveryDataClient
+    ) as unknown as jest.MockInstance<Promise<AttackDiscoveryDataClient | null>, [], unknown> &
+      (() => Promise<AttackDiscoveryDataClient | null>),
     getAIAssistantKnowledgeBaseDataClient: jest.fn(
       () => clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient
     ) as unknown as jest.MockInstance<
       Promise<AIAssistantKnowledgeBaseDataClient | null>,
-      [boolean],
+      [boolean | undefined],
       unknown
     > &
-      ((initializeKnowledgeBase: boolean) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
+      ((v2KnowledgeBaseEnabled?: boolean) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),

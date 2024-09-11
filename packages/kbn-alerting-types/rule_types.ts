@@ -1,20 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectAttributes } from '@kbn/core/server';
+import type {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
 export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
+export type RuleActionParam = SavedObjectAttribute;
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
-export type IsoWeekday = typeof ISO_WEEKDAYS[number];
+export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -97,10 +103,11 @@ export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
   MAX_QUEUED_ACTIONS = 'maxQueuedActions',
+  EXECUTION = 'ruleExecution',
 }
 
-export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
-export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+export type RuleExecutionStatuses = (typeof RuleExecutionStatusValues)[number];
+export type RuleLastRunOutcomes = (typeof RuleLastRunOutcomeValues)[number];
 
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
@@ -232,10 +239,20 @@ export interface Rule<Params extends RuleTypeParams = never> {
   revision: number;
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
-  alertDelay?: AlertDelay;
+  alertDelay?: AlertDelay | null;
+  flapping?: {
+    lookBackWindow: number;
+    statusChangeThreshold: number;
+  };
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,
   'apiKey' | 'actions'
 > & { actions: SanitizedRuleAction[] };
+
+export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };

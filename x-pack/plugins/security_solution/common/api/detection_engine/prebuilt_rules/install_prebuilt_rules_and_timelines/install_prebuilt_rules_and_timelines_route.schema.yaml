@@ -5,9 +5,11 @@ info:
 paths:
   /api/detection_engine/rules/prepackaged:
     put:
-      operationId: InstallPrebuiltRulesAndTimelines
+      x-labels: [ess]
       x-codegen-enabled: true
-      summary: Installs all Elastic prebuilt rules and timelines
+      operationId: InstallPrebuiltRulesAndTimelines
+      summary: Install prebuilt detection rules and Timelines
+      description: Install and update all Elastic prebuilt detection rules and Timelines.
       tags:
         - Prebuilt Rules API
       responses:

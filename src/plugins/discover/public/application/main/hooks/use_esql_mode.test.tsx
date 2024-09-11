@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
@@ -23,6 +25,7 @@ import { DiscoverAppState } from '../state_management/discover_app_state_contain
 import { DiscoverStateContainer } from '../state_management/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
+import { buildDataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -150,10 +153,11 @@ describe('useEsqlMode', () => {
     });
   });
 
-  test('changing an ES|QL query with same result columns should not change state when loading and finished', async () => {
+  test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
+    replaceUrlState.mockReset();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -166,7 +170,54 @@ describe('useEsqlMode', () => {
       ],
       query: { esql: 'from the-data-view-2' },
     });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: [],
+      });
+    });
+  });
+
+  test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern is the same', async () => {
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    stateContainer.dataState.data$.documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      // non transformational command
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      // non transformational command
+      query: { esql: 'from the-data-view-title2 | where field1 > 0' },
+    });
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: [],
+      });
+    });
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {
@@ -268,7 +319,13 @@ describe('useEsqlMode', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        columns: ['field1', 'field2'],
+      });
+    });
+    replaceUrlState.mockReset();
 
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -432,5 +489,96 @@ describe('useEsqlMode', () => {
         columns: ['field1'],
       });
     });
+  });
+
+  it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
+    const { stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern1' },
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      })
+    );
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern1' },
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      })
+    );
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern2' },
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      })
+    );
+  });
+
+  it('should call setResetDefaultProfileState correctly when columns change', async () => {
+    const { stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
+    const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
+    expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern' },
+      result: result1,
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: true,
+      })
+    );
+    stateContainer.internalState.transitions.setResetDefaultProfileState({
+      columns: false,
+      rowHeight: false,
+    });
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern' },
+      result: result1,
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: false,
+        rowHeight: false,
+      })
+    );
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      query: { esql: 'from pattern' },
+      result: result2,
+    });
+    await waitFor(() =>
+      expect(stateContainer.internalState.get().resetDefaultProfileState).toEqual({
+        columns: true,
+        rowHeight: false,
+      })
+    );
   });
 });

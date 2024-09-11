@@ -27,6 +27,8 @@ interface Props {
   rawData?: string | Record<string, string[]>;
   inline?: boolean;
   replacements?: Replacements;
+  titleSize?: 's' | 'l' | 'xs' | 'm' | 'xxxs' | 'xxs' | undefined;
+  gap?: string;
 }
 
 const StatsComponent: React.FC<Props> = ({
@@ -35,6 +37,8 @@ const StatsComponent: React.FC<Props> = ({
   rawData,
   inline,
   replacements,
+  titleSize,
+  gap,
 }) => {
   const { allowed, anonymized, total } = useMemo(
     () =>
@@ -50,7 +54,13 @@ const StatsComponent: React.FC<Props> = ({
     <EuiFlexGroup alignItems="center" data-test-subj="stats" gutterSize="none">
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
-          <AllowedStat allowed={allowed} total={total} inline={inline} />
+          <AllowedStat
+            allowed={allowed}
+            gap={gap}
+            total={total}
+            inline={inline}
+            titleSize={titleSize}
+          />
         </StatFlexItem>
       )}
 
@@ -59,12 +69,14 @@ const StatsComponent: React.FC<Props> = ({
           anonymized={anonymized}
           isDataAnonymizable={isDataAnonymizable || anonymized > 0}
           inline={inline}
+          titleSize={titleSize}
+          gap={gap}
         />
       </StatFlexItem>
 
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
-          <AvailableStat total={total} inline={inline} />
+          <AvailableStat total={total} inline={inline} titleSize={titleSize} gap={gap} />
         </StatFlexItem>
       )}
     </EuiFlexGroup>

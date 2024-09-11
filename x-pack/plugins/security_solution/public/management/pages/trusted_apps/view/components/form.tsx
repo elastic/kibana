@@ -7,7 +7,7 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -28,7 +28,6 @@ import {
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type {
   TrustedAppConditionEntry,
@@ -43,6 +42,7 @@ import {
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
+  getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
@@ -67,12 +67,7 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
 interface FieldValidationState {
@@ -253,13 +248,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
 
@@ -309,9 +304,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = change.isGlobal
-          ? [GLOBAL_ARTIFACT_TAG]
-          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+        const tags = getArtifactTagsByPolicySelection(change);
 
         const nextItem = { ...item, tags };
         // Preserve old selected policies when switching to global
@@ -339,7 +332,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [item, processChanged]
     );
 
-    const handleOnNameBlur = useCallback(
+    const handleOnNameBlur = useCallback<NonNullable<EuiFieldTextProps['onBlur']>>(
       ({ target: { name } }) => {
         processChanged(item);
         setVisited((prevVisited) => ({ ...prevVisited, [name]: true }));

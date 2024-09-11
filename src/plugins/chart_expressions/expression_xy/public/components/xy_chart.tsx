@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -828,6 +829,8 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
+            legendValues={isHistogramViz ? legend.legendStats : []}
+            legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
             theme={[
               {
                 barSeriesStyle: {
@@ -877,7 +880,6 @@ export function XYChart({
                   )
                 : undefined
             }
-            legendValues={isHistogramViz ? legend.legendStats : []}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={
@@ -1037,4 +1039,24 @@ export function XYChart({
       </LegendColorPickerWrapperContext.Provider>
     </div>
   );
+}
+
+const defaultLegendTitle = i18n.translate('expressionXY.xyChart.legendTitle', {
+  defaultMessage: 'Legend',
+});
+
+function getLegendTitle(
+  title: string | undefined,
+  layer?: CommonXYDataLayerConfig,
+  isTitleVisible?: boolean
+) {
+  if (!isTitleVisible) {
+    return undefined;
+  }
+  if (typeof title === 'string' && title.length > 0) {
+    return title;
+  }
+  return layer?.splitAccessors?.[0]
+    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+    : defaultLegendTitle;
 }

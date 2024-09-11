@@ -13,7 +13,9 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { validateActionId } from '../../utils/validate_action_id';
+import { NotFoundError } from '../../../../errors';
+import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
+import { SimpleMemCache } from './simple_mem_cache';
 import {
   fetchActionResponses,
   fetchEndpointActionResponses,
@@ -49,17 +51,16 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
@@ -70,14 +71,28 @@ import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
+  KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
   ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
+
+const ELASTIC_RESPONSE_ACTION_MESSAGE = (
+  username: string = 'system',
+  command: ResponseActionsApiCommandNames,
+  responseActionId: string
+): string => {
+  return i18n.translate('xpack.securitySolution.responseActions.comment.message', {
+    values: { username, command, responseActionId },
+    defaultMessage: `Action triggered from Elastic Security by user [{username}] for action [{command} (action id: {responseActionId})]`,
+  });
+};
 
 const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
@@ -176,6 +191,8 @@ export interface ResponseActionsClientPendingAction<
 export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
 
+  protected readonly cache = new SimpleMemCache();
+
   protected abstract readonly agentType: ResponseActionAgentType;
 
   constructor(protected readonly options: ResponseActionsClientOptions) {
@@ -242,7 +259,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return;
     }
 
-    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
+    this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
     const attachments: CaseAttachments = [
       {
@@ -283,7 +300,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       })
     );
 
-    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
+    this.log.debug(() => `Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
   protected getMethodOptions<
@@ -311,6 +328,36 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       this.options.endpointService.getEndpointMetadataService(),
       actionId
     );
+  }
+
+  /**
+   * Fetches the Action request ES document for a given action id
+   * @param actionId
+   * @protected
+   */
+  protected async fetchActionRequestEsDoc<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const cacheKey = `fetchActionRequestEsDoc-${actionId}`;
+    const cachedResponse =
+      this.cache.get<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(cacheKey);
+
+    if (cachedResponse) {
+      this.log.debug(
+        `fetchActionRequestEsDoc(): returning cached response for action id ${actionId}`
+      );
+      return cachedResponse;
+    }
+
+    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
+      this.options.esClient,
+      actionId
+    ).then((actionRequestDoc) => {
+      this.cache.set(cacheKey, actionRequestDoc);
+      return actionRequestDoc;
+    });
   }
 
   /**
@@ -435,7 +482,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as TParameters,
         },
       },
       user: {
@@ -527,7 +574,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     const doc = this.buildActionResponseEsDoc(options);
 
-    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
+    this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
       .index<LogsEndpointActionResponse<TOutputContent>>({
@@ -560,8 +607,35 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
+  /**
+   * Builds a comment for use in response action requests sent to external EDR systems
+   * @protected
+   */
+  protected buildExternalComment(
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): string {
+    const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
+
+    // If the action request index options does not yet have an actionId assigned to it, then do it now.
+    // Need to ensure we have an action id for cross-reference.
+    if (!actionRequestIndexOptions.actionId) {
+      actionRequestIndexOptions.actionId = actionId;
+    }
+
+    return (
+      ELASTIC_RESPONSE_ACTION_MESSAGE(this.options.username, command, actionId) +
+      (comment ? `: ${comment}` : '')
+    );
+  }
+
   protected async ensureValidActionId(actionId: string): Promise<void> {
-    return validateActionId(this.options.esClient, actionId, this.agentType);
+    const actionRequest = await this.fetchActionRequestEsDoc(actionId);
+
+    if (actionRequest.EndpointActions.input_type !== this.agentType) {
+      throw new NotFoundError(
+        `Action id [${actionId}] with agent type of [${this.agentType}] not found`
+      );
+    }
   }
 
   protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
@@ -643,26 +717,26 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   public async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('kill-process');
   }
 
   public async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('suspend-process');
   }
@@ -698,7 +772,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   public async scan(
     actionRequest: ScanActionRequestBody,
     options?: CommonResponseActionMethodOptions
-  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
     throw new ResponseActionsNotSupportedError('scan');
   }
 

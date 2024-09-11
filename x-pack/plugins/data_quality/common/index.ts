@@ -12,7 +12,8 @@ export const PLUGIN_NAME = i18n.translate('xpack.dataQuality.name', {
   defaultMessage: 'Data Set Quality',
 });
 
-export { DATA_QUALITY_URL_STATE_KEY, datasetQualityUrlSchemaV1 } from './url_schema';
-
-export { DATA_QUALITY_LOCATOR_ID } from './locators';
-export type { DataQualityLocatorParams } from './locators';
+export {
+  DATA_QUALITY_URL_STATE_KEY,
+  datasetQualityUrlSchemaV1,
+  datasetQualityDetailsUrlSchemaV1,
+} from './url_schema';

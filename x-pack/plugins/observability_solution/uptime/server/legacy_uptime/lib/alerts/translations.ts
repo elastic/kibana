@@ -51,6 +51,15 @@ export const commonMonitorStateI18 = [
     ),
   },
   {
+    name: 'monitorTags',
+    description: i18n.translate(
+      'xpack.uptime.alertRules.monitorStatus.actionVariables.state.monitorTags',
+      {
+        defaultMessage: 'Tags associated with the monitor.',
+      }
+    ),
+  },
+  {
     name: 'statusMessage',
     description: i18n.translate(
       'xpack.uptime.alerts.monitorStatus.actionVariables.state.statusMessage',

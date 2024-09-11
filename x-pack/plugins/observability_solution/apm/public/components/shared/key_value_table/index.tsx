@@ -8,7 +8,7 @@ import { castArray } from 'lodash';
 import React, { TableHTMLAttributes } from 'react';
 import { EuiTable, EuiTableProps, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { FormattedValue } from './formatted_value';
-import { KeyValuePair } from '../../../utils/flatten_object';
+import { KeyValuePair } from '../../../../common/utils/flatten_object';
 
 export function KeyValueTable({
   keyValuePairs,

@@ -26,7 +26,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
     const end2 = moment().utc().startOf('day').subtract(10, 'day').toISOString();
 
     afterEach(async () => {
-      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+      await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
           .set('kbn-xsrf', 'foo');
@@ -135,7 +135,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      describe(scenario.id, () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/181862
+      describe.skip(scenario.id, () => {
         const apiOptions = {
           spaceId: space.id,
           username: user.username,

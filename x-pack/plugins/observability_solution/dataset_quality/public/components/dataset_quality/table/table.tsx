@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
@@ -14,8 +15,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { dynamic } from '@kbn/shared-ux-utility';
-import React from 'react';
 import {
   fullDatasetNameDescription,
   fullDatasetNameLabel,
@@ -27,8 +26,6 @@ import {
 import { useDatasetQualityTable } from '../../../hooks';
 import { DescriptiveSwitch } from '../../common/descriptive_switch';
 
-const Flyout = dynamic(() => import('../../flyout/flyout'));
-
 export const Table = () => {
   const {
     sort,
@@ -38,10 +35,10 @@ export const Table = () => {
     columns,
     loading,
     resultsCount,
-    selectedDataset,
-    closeFlyout,
     showInactiveDatasets,
     showFullDatasetNames,
+    canUserMonitorDataset,
+    canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
   } = useDatasetQualityTable();
@@ -60,17 +57,21 @@ export const Table = () => {
         </EuiText>
         <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
           <DescriptiveSwitch
+            testSubject="datasetQualityFullDatasetNameSwitch"
             label={fullDatasetNameLabel}
             checked={showFullDatasetNames}
             tooltipText={fullDatasetNameDescription}
             onToggle={toggleFullDatasetNames}
           />
-          <DescriptiveSwitch
-            label={inactiveDatasetsLabel}
-            checked={showInactiveDatasets}
-            tooltipText={inactiveDatasetsDescription}
-            onToggle={toggleInactiveDatasets}
-          />
+          {canUserMonitorDataset && canUserMonitorAnyDataStream && (
+            <DescriptiveSwitch
+              testSubject="datasetQualityInactiveDatasetsSwitch"
+              label={inactiveDatasetsLabel}
+              checked={showInactiveDatasets}
+              tooltipText={inactiveDatasetsDescription}
+              onToggle={toggleInactiveDatasets}
+            />
+          )}
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -101,7 +102,6 @@ export const Table = () => {
           )
         }
       />
-      {selectedDataset && <Flyout dataset={selectedDataset} closeFlyout={closeFlyout} />}
     </>
   );
 };

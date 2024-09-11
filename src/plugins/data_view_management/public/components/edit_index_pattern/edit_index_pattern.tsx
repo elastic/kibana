@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
@@ -31,6 +32,7 @@ import {
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type * as CSS from 'csstype';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -292,6 +294,10 @@ export const EditIndexPattern = withRouter(
                   >
                     {tag.name}
                   </EuiBadge>
+                ) : tag.key === 'rollup' ? (
+                  <RollupDeprecationTooltip>
+                    <EuiBadge color="warning">{tag.name}</EuiBadge>
+                  </RollupDeprecationTooltip>
                 ) : (
                   <EuiBadge color="hollow">{tag.name}</EuiBadge>
                 )}

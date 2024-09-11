@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -93,6 +95,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       {
         path: this.path,
         validate: passThroughValidation,
+        // @ts-expect-error upgrade typescript v5.1.6
         options: this.getRouteConfigOptions(),
       },
       this.requestHandler,
@@ -191,13 +194,13 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, req, res);
 
-    if (this.router.isDev && validation?.response?.[response.status]) {
+    if (this.router.isDev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         validate(
           { body: response.payload },
           {
-            body: unwrapVersionedResponseBodyValidation(responseValidation.body),
+            body: unwrapVersionedResponseBodyValidation(responseValidation.body!),
             unsafe: { body: unsafe?.body },
           }
         );

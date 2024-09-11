@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import {
+  useEuiTheme,
   EuiFlexItem,
   EuiSpacer,
   EuiTextColor,
@@ -24,18 +25,25 @@ import {
   EuiFlyoutFooter,
   EuiToolTip,
   EuiDescriptionListProps,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import {
+  CSP_MISCONFIGURATIONS_DATASET,
+  getDatasetDisplayName,
+} from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { TakeAction } from '../../../components/take_action';
 import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
@@ -80,11 +88,13 @@ const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.pagin
   defaultMessage: 'Finding navigation',
 });
 
-type FindingsTab = typeof tabs[number];
+type FindingsTab = (typeof tabs)[number];
+
+export const EMPTY_VALUE = '-';
 
 interface FindingFlyoutProps {
   onClose(): void;
-  findings: CspFinding;
+  finding: CspFinding;
   flyoutIndex?: number;
   findingsCount?: number;
   onPaginate?: (pageIndex: number) => void;
@@ -98,7 +108,7 @@ export const CspFlyoutMarkdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (p
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-export const CisKubernetesIcons = ({
+export const BenchmarkIcons = ({
   benchmarkId,
   benchmarkName,
 }: {
@@ -106,16 +116,40 @@ export const CisKubernetesIcons = ({
   benchmarkName: BenchmarkName;
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content="Center for Internet Security">
-        <EuiIcon type={cisLogoIcon} size="xl" />
-      </EuiToolTip>
-    </EuiFlexItem>
+    {benchmarkId.startsWith('cis') && (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Center for Internet Security">
+          <EuiIcon type={cisLogoIcon} size="xl" />
+        </EuiToolTip>
+      </EuiFlexItem>
+    )}
     <EuiFlexItem grow={false}>
       <CISBenchmarkIcon type={benchmarkId} name={benchmarkName} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+export const RuleNameLink = ({
+  ruleFlyoutLink,
+  ruleName,
+}: {
+  ruleFlyoutLink?: string;
+  ruleName: string;
+}) => {
+  return ruleFlyoutLink && ruleName ? (
+    <EuiToolTip
+      position="top"
+      content={i18n.translate(
+        'xpack.csp.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip',
+        { defaultMessage: 'Manage Rule' }
+      )}
+    >
+      <EuiLink href={ruleFlyoutLink}>{ruleName}</EuiLink>
+    </EuiToolTip>
+  ) : (
+    <>{ruleName}</>
+  );
+};
 
 const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps['listItems'] =>
   [
@@ -134,34 +168,72 @@ const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps[
     },
   ].filter(truthy);
 
-const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
+const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }) => {
   const { application } = useKibana().services;
 
-  const ruleFlyoutLink = application.getUrlForApp('security', {
-    path: generatePath(benchmarksNavigation.rules.path, {
-      benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
-      benchmarkId: findings.rule.benchmark.id,
-      ruleId: findings.rule.id,
-    }),
-  });
+  const ruleFlyoutLink =
+    // currently we only support rule linking for native CSP findings
+    finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET &&
+    finding.rule?.benchmark?.version &&
+    finding.rule?.benchmark?.id &&
+    finding.rule?.id
+      ? application.getUrlForApp('security', {
+          path: generatePath(benchmarksNavigation.rules.path, {
+            benchmarkVersion: finding.rule.benchmark.version.split('v')[1], // removing the v from the version
+            benchmarkId: finding.rule.benchmark.id,
+            ruleId: finding.rule.id,
+          }),
+        })
+      : undefined;
 
   switch (tab.id) {
     case 'overview':
-      return <OverviewTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
+      return <OverviewTab data={finding} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'rule':
-      return <RuleTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
+      return <RuleTab data={finding} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'table':
-      return <TableTab data={findings} />;
+      return <TableTab data={finding} />;
     case 'json':
-      return <JsonTab data={findings} />;
+      return <JsonTab data={finding} />;
     default:
       assertNever(tab);
   }
 };
 
+const isNativeCspFinding = (finding: CspFinding) =>
+  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET;
+
+const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
+  const { euiTheme } = useEuiTheme();
+  const datasetDisplayName =
+    getDatasetDisplayName(finding.data_stream.dataset) || finding.data_stream.dataset;
+
+  return (
+    <EuiCallOut
+      style={{
+        borderRadius: 4,
+        overflow: 'hidden',
+      }}
+      size="s"
+      iconType="iInCircle"
+      title={
+        <span style={{ color: euiTheme.colors.text }}>
+          <FormattedMessage
+            id="xpack.csp.findings.findingsFlyout.calloutTitle"
+            defaultMessage="Some fields not provided by {datasource}"
+            values={{
+              datasource: datasetDisplayName || 'the data source',
+            }}
+          />
+        </span>
+      }
+    />
+  );
+};
+
 export const FindingsRuleFlyout = ({
   onClose,
-  findings,
+  finding,
   flyoutIndex,
   findingsCount,
   onPaginate,
@@ -169,19 +241,19 @@ export const FindingsRuleFlyout = ({
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromBenchmarkRule(http, findings.rule);
+    await createDetectionRuleFromBenchmarkRule(http, finding.rule);
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <CspEvaluationBadge type={findings.result.evaluation} />
+            <CspEvaluationBadge type={finding.result?.evaluation} />
           </EuiFlexItem>
           <EuiFlexItem grow style={{ minWidth: 0 }}>
             <EuiTitle size="m" className="eui-textTruncate">
-              <EuiTextColor color="primary" title={findings.rule.name}>
-                {findings.rule.name}
+              <EuiTextColor color="primary" title={finding.rule?.name}>
+                {finding.rule?.name}
               </EuiTextColor>
             </EuiTitle>
           </EuiFlexItem>
@@ -194,7 +266,7 @@ export const FindingsRuleFlyout = ({
         >
           <CspInlineDescriptionList
             testId={FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST}
-            listItems={getFlyoutDescriptionList(findings)}
+            listItems={getFlyoutDescriptionList(finding)}
           />
         </div>
         <EuiSpacer />
@@ -212,7 +284,12 @@ export const FindingsRuleFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
-        <FindingsTab tab={tab} findings={findings} />
+        {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
+          <div style={{ marginBottom: 16 }}>
+            <MissingFieldsCallout finding={finding} />
+          </div>
+        )}
+        <FindingsTab tab={tab} finding={finding} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup

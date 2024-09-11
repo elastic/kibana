@@ -35,6 +35,10 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('@ess @serverless @serverlessQA query_signals_route and find_alerts_route', () => {
+    beforeEach(async () => {
+      await deleteAllAlerts(supertest, log, es);
+    });
+
     describe('validation checks', () => {
       it('should not give errors when querying and the alerts index does exist and is empty', async () => {
         await createAlertsIndex(supertest, log);
@@ -61,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('runtime fields', () => {
-      before(async () => {
+      beforeEach(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
           {
@@ -71,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await createAlertsIndex(supertest, log);
       });
-      after(async () => {
+      afterEach(async () => {
         await deleteAllAlerts(supertest, log, es);
       });
 

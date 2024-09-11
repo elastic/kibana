@@ -90,12 +90,6 @@ export {
   WELCOME_CONVERSATION_TITLE,
 } from './impl/assistant/use_conversation/translations';
 
-/** i18n translations of system prompts */
-export * as SYSTEM_PROMPTS from './impl/content/prompts/system/translations';
-
-/** i18n translations of user prompts */
-export * as USER_PROMPTS from './impl/content/prompts/user/translations';
-
 export type {
   /** for rendering results in a code block */
   CodeBlockDetails,
@@ -113,9 +107,6 @@ export type {
   /** Message interface on the client */
   ClientMessage,
 } from './impl/assistant_context/types';
-
-/** Interface for defining system/user prompts */
-export type { Prompt } from './impl/assistant/types';
 
 /**
  * This interface is used to pass context to the assistant,
@@ -139,12 +130,6 @@ export type { PromptContext } from './impl/assistant/prompt_context/types';
  */
 export type { PromptContextTemplate } from './impl/assistant/prompt_context/types';
 
-/**
- * This interface is used to pass a default or base set of Quick Prompts to the Elastic Assistant that
- * can be displayed when corresponding PromptContext's are registered.
- */
-export type { QuickPrompt } from './impl/assistant/quick_prompts/types';
-
 export { useFetchCurrentUserConversations } from './impl/assistant/api/conversations/use_fetch_current_user_conversations';
 export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
@@ -152,4 +137,4 @@ export { getConversationById } from './impl/assistant/api/conversations/conversa
 export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
-export { getUserConversations } from './impl/assistant/api';
+export { getUserConversations, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';

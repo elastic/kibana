@@ -90,13 +90,6 @@ const dashboardsTab: Tab = {
   ),
 };
 
-const linkToApmTab: Tab = {
-  id: ContentTabIds.LINK_TO_APM,
-  name: i18n.translate('xpack.infra.assetDetails.tabs.linkToApm', {
-    defaultMessage: 'APM',
-  }),
-};
-
 export const hostDetailsTabs: Tab[] = [
   overviewTab,
   metadataTab,
@@ -108,11 +101,11 @@ export const hostDetailsTabs: Tab[] = [
   osqueryTab,
   dashboardsTab,
 ];
-export const hostDetailsFlyoutTabs: Tab[] = [...hostDetailsTabs, linkToApmTab];
+export const hostDetailsFlyoutTabs: Tab[] = [...hostDetailsTabs];
 
 // The profiling tab would be added in next iteration
-export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab, logsTab];
-export const containerDetailsFlyoutTabs: Tab[] = [overviewTab, metadataTab, logsTab, linkToApmTab];
+export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab, metricsTab, logsTab];
+export const containerDetailsFlyoutTabs: Tab[] = [overviewTab, metadataTab, metricsTab, logsTab];
 
 export const getAssetDetailsTabs = (type: string): Tab[] => {
   switch (type) {

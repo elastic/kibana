@@ -16,22 +16,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
-import { StatusRuleParams } from '../../../../../../common/rules/status_rule';
+import type { StatusRuleParams } from '../../../../../../common/rules/status_rule';
 
 interface Props {
-  core: CoreStart;
+  coreStart: CoreStart;
   plugins: ClientPluginsStart;
   params: RuleTypeParamsExpressionProps<StatusRuleParams>;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function MonitorStatusAlert({ core, plugins, params }: Props) {
-  kibanaService.core = core;
+export default function MonitorStatusAlert({ coreStart, plugins, params }: Props) {
+  kibanaService.coreStart = coreStart;
   const queryClient = new QueryClient();
   return (
     <ReduxProvider store={store}>
       <QueryClientProvider client={queryClient}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
           <EuiText>
             <FormattedMessage
               id="xpack.synthetics.alertRule.monitorStatus.description"

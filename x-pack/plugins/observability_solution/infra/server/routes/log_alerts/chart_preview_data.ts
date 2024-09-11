@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAlertsV1 } from '../../../common/http_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
 
-import { createValidationFunction } from '../../../common/runtime_types';
 import { getChartPreviewData } from '../../lib/alerting/log_threshold/log_threshold_chart_preview';
 
 export const initGetLogAlertsChartPreviewDataRoute = ({
@@ -31,7 +31,7 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
         version: '1',
         validate: {
           request: {
-            body: createValidationFunction(
+            body: createRouteValidationFunction(
               logAlertsV1.getLogAlertsChartPreviewDataRequestPayloadRT
             ),
           },

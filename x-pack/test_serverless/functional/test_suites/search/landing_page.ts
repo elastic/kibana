@@ -10,20 +10,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'svlSearchLandingPage',
-    'svlCommonPage',
-    'svlCommonNavigation',
-  ]);
+  const pageObjects = getPageObjects(['svlSearchLandingPage', 'svlCommonPage', 'embeddedConsole']);
   const svlSearchNavigation = getService('svlSearchNavigation');
 
   describe('landing page', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     it('has serverless side nav', async () => {
@@ -49,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testHasEmbeddedConsole(pageObjects);
     });
 
-    describe('API Key creation', async () => {
+    describe('API Key creation', () => {
       beforeEach(async () => {
         // We need to reload the page between api key creations
         await svlSearchNavigation.navigateToLandingPage();
@@ -92,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Pipelines', async () => {
+    describe('Pipelines', () => {
       beforeEach(async () => {
         await svlSearchNavigation.navigateToLandingPage();
       });

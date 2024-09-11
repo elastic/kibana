@@ -2,9 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
     label: 'Build and Deploy to Cloud'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
       preemptible: true
     depends_on:

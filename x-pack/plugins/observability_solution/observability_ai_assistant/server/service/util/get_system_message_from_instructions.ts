@@ -5,25 +5,37 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
+import { compact, partition, uniqBy } from 'lodash';
 import { v4 } from 'uuid';
-import { UserInstruction } from '../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { RegisteredInstruction } from '../types';
+import { InstructionOrCallback } from '../types';
+
+export const USER_INSTRUCTIONS_HEADER = `## User instructions
+          
+What follows is a set of instructions provided by the user, please abide by them
+as long as they don't conflict with anything you've been told so far:
+
+`;
 
 export function getSystemMessageFromInstructions({
-  registeredInstructions,
-  userInstructions,
-  requestInstructions,
+  // application instructions registered by the functions. These will be displayed first
+  applicationInstructions,
+
+  // instructions provided by the user. These will be displayed after the application instructions and only if they fit within the token budget
+  userInstructions: kbUserInstructions,
+
+  // ad-hoc instruction. Can be either user or application instruction
+  adHocInstructions,
   availableFunctionNames,
 }: {
-  registeredInstructions: RegisteredInstruction[];
-  userInstructions: UserInstruction[];
-  requestInstructions: Array<UserInstruction | string>;
+  applicationInstructions: InstructionOrCallback[];
+  userInstructions: Instruction[];
+  adHocInstructions: AdHocInstruction[];
   availableFunctionNames: string[];
 }): string {
-  const allRegisteredInstructions = compact(
-    registeredInstructions.flatMap((instruction) => {
+  const allApplicationInstructions = compact(
+    applicationInstructions.flatMap((instruction) => {
       if (typeof instruction === 'function') {
         return instruction({ availableFunctionNames });
       }
@@ -31,27 +43,30 @@ export function getSystemMessageFromInstructions({
     })
   );
 
-  const requestInstructionsWithId = requestInstructions.map((instruction) =>
-    typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
+  const adHocInstructionsWithId = adHocInstructions.map((adHocInstruction) => ({
+    ...adHocInstruction,
+    doc_id: adHocInstruction.doc_id ?? v4(),
+  }));
+
+  // split ad hoc instructions into user instructions and application instructions
+  const [adHocUserInstructions, adHocApplicationInstructions] = partition(
+    adHocInstructionsWithId,
+    (instruction) => instruction.instruction_type === 'user_instruction'
   );
 
-  const requestOverrideIds = requestInstructionsWithId.map((instruction) => instruction.doc_id);
-
-  // all request instructions, and those from the KB that are not defined as a request instruction
-  const allUserInstructions = requestInstructionsWithId.concat(
-    userInstructions.filter((instruction) => !requestOverrideIds.includes(instruction.doc_id))
+  // all adhoc instructions and KB instructions.
+  // adhoc instructions will be prioritized over Knowledge Base instructions if the doc_id is the same
+  const allUserInstructions = withTokenBudget(
+    uniqBy([...adHocUserInstructions, ...kbUserInstructions], (i) => i.doc_id),
+    1000
   );
-
-  const instructionsWithinBudget = withTokenBudget(allUserInstructions, 1000);
 
   return [
-    ...allRegisteredInstructions,
-    ...(instructionsWithinBudget.length
-      ? [
-          `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:`,
-          ...instructionsWithinBudget,
-        ]
-      : []),
+    // application instructions
+    ...allApplicationInstructions.concat(adHocApplicationInstructions),
+
+    // user instructions
+    ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),
   ]
     .map((instruction) => {
       return typeof instruction === 'string' ? instruction : instruction.text;

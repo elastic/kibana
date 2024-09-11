@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiDescribedFormGroup, EuiSpacer, EuiCallOut } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import styled from 'styled-components';
+import { EuiDescribedFormGroup, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   NewAgentPolicy,
@@ -24,11 +23,20 @@ import { GlobalDataTagsTable } from './global_data_tags_table';
 interface Props {
   agentPolicy: Partial<AgentPolicy | NewAgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
+  isDisabled?: boolean;
 }
+
+// Fix to align description to top during empty state w/ unsupported callout
+const DescribedFormGroup = styled(EuiDescribedFormGroup)`
+  .euiFlexGroup {
+    align-items: flex-start;
+  }
+`;
 
 export const CustomFields: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
+  isDisabled,
 }) => {
   const isAgentPolicy = (policy: Partial<AgentPolicy | NewAgentPolicy>): policy is AgentPolicy => {
     return (policy as AgentPolicy).package_policies !== undefined;
@@ -56,7 +64,8 @@ export const CustomFields: React.FunctionComponent<Props> = ({
   const unsupportedInputs = findUnsupportedInputs(agentPolicy, GLOBAL_DATA_TAG_EXCLUDED_INPUTS);
 
   return (
-    <EuiDescribedFormGroup
+    <DescribedFormGroup
+      fullWidth
       title={
         <h3>
           <FormattedMessage
@@ -78,7 +87,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
                 title={
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.globalDataTagUnsupportedInputTitle"
-                    defaultMessage="Unsupported Inputs"
+                    defaultMessage="Unsupported inputs"
                   />
                 }
                 color="warning"
@@ -102,9 +111,10 @@ export const CustomFields: React.FunctionComponent<Props> = ({
       }
     >
       <GlobalDataTagsTable
+        isDisabled={isDisabled}
         updateAgentPolicy={updateAgentPolicy}
         globalDataTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
       />
-    </EuiDescribedFormGroup>
+    </DescribedFormGroup>
   );
 };

@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
+import _ from 'lodash';
+import {
+  DataGridDensity,
+  UnifiedDataTableSettings,
+  UnifiedDataTableSettingsColumn,
+  useColumns,
+} from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -21,10 +27,10 @@ import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
-import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
@@ -130,20 +136,34 @@ export const CloudSecurityDataTable = ({
     columnsLocalStorageKey,
     defaultColumns.map((c) => c.id)
   );
-  const [settings, setSettings] = useLocalStorage<UnifiedDataTableSettings>(
+  const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
-      columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width
-          ? { width: curr.width, display: columnHeaders?.[curr.id] }
-          : { display: columnHeaders?.[curr.id] };
-        const newColumn = { [curr.id]: columnDefaultSettings };
-        return { ...prev, ...newColumn };
+      columns: defaultColumns.reduce((columnSettings, column) => {
+        const columnDefaultSettings = column.width ? { width: column.width } : {};
+        const newColumn = { [column.id]: columnDefaultSettings };
+        return { ...columnSettings, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
 
-  const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
+  const settings = useMemo(() => {
+    return {
+      columns: Object.keys(persistedSettings?.columns as UnifiedDataTableSettings).reduce(
+        (columnSettings, columnId) => {
+          const newColumn: UnifiedDataTableSettingsColumn = {
+            ..._.pick(persistedSettings?.columns?.[columnId], ['width']),
+            display: columnHeaders?.[columnId],
+          };
+
+          return { ...columnSettings, [columnId]: newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
+    };
+  }, [persistedSettings, columnHeaders]);
+
+  const { dataView, dataViewIsRefetching } = useDataViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -161,7 +181,6 @@ export const CloudSecurityDataTable = ({
     fieldFormats,
     toastNotifications,
     storage,
-    dataViewFieldEditor,
   } = useKibana().services;
 
   const styles = useStyles();
@@ -176,7 +195,6 @@ export const CloudSecurityDataTable = ({
     toastNotifications,
     storage,
     data,
-    dataViewFieldEditor,
   };
 
   const {
@@ -241,15 +259,14 @@ export const CloudSecurityDataTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const onResize = (colSettings: { columnId: string; width: number }) => {
-    const grid = settings || {};
+  const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
+    const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
-    newColumns[colSettings.columnId] = {
-      width: Math.round(colSettings.width),
-      display: columnHeaders?.[colSettings.columnId],
-    };
+    newColumns[colSettings.columnId] = colSettings.width
+      ? { width: Math.round(colSettings.width) }
+      : {};
     const newGrid = { ...grid, columns: newColumns };
-    setSettings(newGrid);
+    setPersistedSettings(newGrid);
   };
 
   const externalCustomRenderers = useMemo(() => {
@@ -346,7 +363,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
-          onFieldEdited={dataViewRefetch}
+          dataGridDensityState={DataGridDensity.EXPANDED}
         />
       </div>
     </CellActionsProvider>

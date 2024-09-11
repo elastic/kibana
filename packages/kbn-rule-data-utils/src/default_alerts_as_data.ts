@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ValuesType } from 'utility-types';
@@ -23,6 +24,12 @@ const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
 // kibana.alert.action_group - framework action group ID for this alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
+
+// kibana.alert.previous_action_group
+const ALERT_PREVIOUS_ACTION_GROUP = `${ALERT_NAMESPACE}.previous_action_group` as const;
+
+// kibana.alert.severity_improving
+const ALERT_SEVERITY_IMPROVING = `${ALERT_NAMESPACE}.severity_improving` as const;
 
 // kibana.alert.case_ids - array of cases associated with the alert
 const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
@@ -51,6 +58,9 @@ const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 
 // kibana.alert.last_detected - timestamp when the alert was last seen
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
+
+// kiana.alert.intended_timestamp - timestamp when the alert was intended to be detected, useful for backfilling
+const ALERT_INTENDED_TIMESTAMP = `${ALERT_NAMESPACE}.intended_timestamp` as const;
 
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
@@ -129,10 +139,12 @@ const fields = {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -141,6 +153,7 @@ const fields = {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -171,10 +184,12 @@ export {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -183,6 +198,7 @@ export {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,

@@ -27,6 +27,12 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import {
+  getStateWithCopyToFields,
+  isSemanticTextField,
+} from '../../../../components/mappings_editor/lib/utils';
 import { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
@@ -65,17 +71,35 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 }> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     services: { extensionsService },
-    core: { getUrlForApp },
-    plugins: { ml },
-    url,
+    core: {
+      getUrlForApp,
+      application: { capabilities, navigateToUrl },
+      http,
+    },
+    plugins: { ml, licensing },
     config,
+    overlays,
+    history,
   } = useAppContext();
+
+  const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
   const { enableSemanticText: isSemanticTextEnabled } = config;
-  const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
-    []
-  );
+  const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<
+    Record<string, string | undefined>
+  >({});
+
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
+
   const semanticTextInfo = {
-    isSemanticTextEnabled,
+    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
@@ -91,6 +115,22 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   });
 
   const [isAddingFields, setAddingFields] = useState<boolean>(false);
+
+  useUnsavedChangesPrompt({
+    titleText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptTitle', {
+      defaultMessage: 'Exit without saving changes?',
+    }),
+    messageText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptMessage', {
+      defaultMessage:
+        'Your changes will be lost if you leave this page without saving the mapping.',
+    }),
+    hasUnsavedChanges: isAddingFields,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
+
   const newFieldsLength = useMemo(() => {
     return Object.keys(state.fields.byId).length;
   }, [state.fields.byId]);
@@ -114,11 +154,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     [jsonData]
   );
 
+  const [hasSavedFields, setHasSavedFields] = useState<boolean>(false);
+  const [isUpdatingMappings, setIsUpdatingMappings] = useState<boolean>(false);
+
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
-  const { fetchInferenceToModelIdMap, pendingDeployments } = useDetailsPageMappingsModelManagement(
-    state.fields,
-    state.inferenceToModelIdMap
-  );
+  const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
 
   const onCancelAddingNewFields = useCallback(() => {
     setAddingFields(!isAddingFields);
@@ -161,10 +201,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     });
   }, [dispatch, isAddingFields, state]);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
   useEffect(() => {
-    if (!isSemanticTextEnabled) {
+    if (!isSemanticTextEnabled || !hasMLPermissions) {
       return;
     }
 
@@ -174,50 +212,56 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isSemanticTextEnabled, hasMLPermissions]);
 
-  const refreshModal = useCallback(async () => {
-    try {
-      if (!isSemanticTextEnabled) {
-        return;
-      }
-
-      await fetchInferenceToModelIdMap();
-    } catch (exception) {
-      setSaveMappingError(exception.message);
-    }
-  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled]);
-
-  const updateMappings = useCallback(async () => {
-    try {
-      if (isSemanticTextEnabled) {
-        await fetchInferenceToModelIdMap();
-
-        if (pendingDeployments.length > 0) {
-          setIsModalVisible(true);
-          return;
+  const updateMappings = useCallback(
+    async (forceSaveMappings?: boolean) => {
+      const hasSemanticText = hasSemanticTextField(state.fields);
+      let inferenceToModelIdMap = state.inferenceToModelIdMap;
+      setIsUpdatingMappings(true);
+      try {
+        if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
+          inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
+        const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
+        const denormalizedFields = deNormalize(fields);
+        const inferenceIdsInPendingList = forceSaveMappings
+          ? []
+          : Object.values(denormalizedFields)
+              .filter(isSemanticTextField)
+              .map((field) => field.inference_id)
+              .filter(
+                (inferenceId: string) =>
+                  inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
+                  !inferenceToModelIdMap?.[inferenceId].isDeployed
+              );
+        setHasSavedFields(true);
+        if (inferenceIdsInPendingList.length === 0) {
+          const { error } = await updateIndexMappings(indexName, denormalizedFields);
+
+          if (!error) {
+            notificationService.showSuccessToast(
+              i18n.translate(
+                'xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings',
+                {
+                  defaultMessage: 'Updated index mapping',
+                }
+              )
+            );
+            refetchMapping();
+            setHasSavedFields(false);
+          } else {
+            setSaveMappingError(error.message);
+          }
+        }
+      } catch (exception) {
+        setSaveMappingError(exception.message);
       }
-
-      const denormalizedFields = deNormalize(state.fields);
-
-      const { error } = await updateIndexMappings(indexName, denormalizedFields);
-
-      if (!error) {
-        notificationService.showSuccessToast(
-          i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
-            defaultMessage: 'Index Mapping was successfully updated',
-          })
-        );
-        refetchMapping();
-      } else {
-        setSaveMappingError(error.message);
-      }
-    } catch (exception) {
-      setSaveMappingError(exception.message);
-    }
+      setIsUpdatingMappings(false);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.fields, pendingDeployments]);
+    [state.fields]
+  );
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -445,7 +489,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   </EuiButton>
                 ) : (
                   <EuiButton
-                    onClick={updateMappings}
+                    onClick={() => updateMappings()}
                     color="success"
                     fill
                     disabled={newFieldsLength === 0}
@@ -453,7 +497,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   >
                     <FormattedMessage
                       id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
-                      defaultMessage="Save mappings"
+                      defaultMessage="Save mapping"
                     />
                   </EuiButton>
                 )}
@@ -487,7 +531,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={true}>
-            <SemanticTextBanner isSemanticTextEnabled={isSemanticTextEnabled} />
+            {hasMLPermissions && (
+              <SemanticTextBanner
+                isSemanticTextEnabled={isSemanticTextEnabled}
+                isPlatinumLicense={isPlatinumLicense}
+              />
+            )}
           </EuiFlexItem>
           {errorSavingMappings}
           {isAddingFields && (
@@ -555,15 +604,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-      {isModalVisible && isSemanticTextEnabled && (
+      {isSemanticTextEnabled && isAddingFields && hasSavedFields && (
         <TrainedModelsDeploymentModal
-          pendingDeployments={pendingDeployments}
           errorsInTrainedModelDeployment={errorsInTrainedModelDeployment}
-          setIsModalVisible={setIsModalVisible}
-          refreshModal={refreshModal}
-          url={url}
+          forceSaveMappings={() => updateMappings(true)}
+          saveMappings={() => updateMappings()}
+          saveMappingsLoading={isUpdatingMappings}
+          setErrorsInTrainedModelDeployment={setErrorsInTrainedModelDeployment}
         />
       )}
     </>
   );
 };
+
+function hasSemanticTextField(fields: NormalizedFields): boolean {
+  return Object.values(fields.byId).some((field) => field.source.type === 'semantic_text');
+}

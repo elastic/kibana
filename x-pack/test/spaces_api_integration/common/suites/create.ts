@@ -71,7 +71,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       description: 'a description',
       color: '#5c5959',
       disabledFeatures: [],
-      solution: 'search',
+      solution: 'es',
     });
   };
 
@@ -151,7 +151,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                   id: 'solution',
                   description: 'a description',
                   color: '#5c5959',
-                  solution: 'search',
+                  solution: 'es',
                   disabledFeatures: [],
                 })
                 .expect(tests.solutionSpecified.statusCode)

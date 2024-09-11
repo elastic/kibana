@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import deepEqual from 'react-fast-compare';
 import {
   openPanelsAction,
   openLeftPanelAction,
@@ -69,7 +71,11 @@ export const reducer = createReducer(initialState, (builder) => {
   builder.addCase(openPreviewPanelAction, (state, { payload: { preview, id } }) => {
     if (id in state.byId) {
       if (state.byId[id].preview) {
-        state.byId[id].preview?.push(preview);
+        const previewIdenticalToLastOne = deepEqual(preview, state.byId[id].preview?.at(-1));
+        // Only append preview when it does not match the last item in state.byId[id].preview
+        if (!previewIdenticalToLastOne) {
+          state.byId[id].preview?.push(preview);
+        }
       } else {
         state.byId[id].preview = preview ? [preview] : undefined;
       }
@@ -89,7 +95,8 @@ export const reducer = createReducer(initialState, (builder) => {
       state.byId[id].preview?.pop();
     }
 
-    state.needsSync = true;
+    // if state is stored in url, click go back in preview should utilize browser history
+    state.needsSync = false;
   });
 
   builder.addCase(closePanelsAction, (state, { payload: { id } }) => {

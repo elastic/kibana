@@ -217,7 +217,7 @@ export const schema: FormSchema<AboutStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
       {
-        defaultMessage: 'MITRE ATT&CK\\u2122',
+        defaultMessage: 'MITRE ATT&CK\u2122',
       }
     ),
     labelAppend: OptionalFieldLabel,

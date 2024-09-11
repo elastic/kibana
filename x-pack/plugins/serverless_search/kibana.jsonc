@@ -29,6 +29,9 @@
     "optionalPlugins": [
       "indexManagement",
       "searchConnectors",
+      "searchHomepage",
+      "searchIndices",
+      "searchInferenceEndpoints",
       "usageCollection"
     ],
     "requiredBundles": [

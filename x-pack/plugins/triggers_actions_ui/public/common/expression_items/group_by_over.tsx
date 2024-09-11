@@ -109,7 +109,7 @@ export const GroupByExpression = ({
   }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
-    if (fields) {
+    if (fields && fields.length > 0) {
       // if current field set doesn't contain selected field, clear selection
       const hasUnknownField = selectedTermsFieldsOptions.some(
         (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
@@ -197,13 +197,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
+                <EuiFormRow isInvalid={Number(errors.termSize.length) > 0} error={errors.termSize}>
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}
-                    isInvalid={errors.termSize.length > 0}
+                    isInvalid={Number(errors.termSize.length) > 0}
                     value={termSize || ''}
                     onChange={(e) => {
                       const { value } = e.target;
@@ -216,7 +216,10 @@ export const GroupByExpression = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                <EuiFormRow isInvalid={errors.termField.length > 0} error={errors.termField}>
+                <EuiFormRow
+                  isInvalid={Number(errors.termField.length) > 0}
+                  error={errors.termField}
+                >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}
                     placeholder={i18n.translate(
@@ -226,7 +229,7 @@ export const GroupByExpression = ({
                       }
                     )}
                     data-test-subj="fieldsExpressionSelect"
-                    isInvalid={errors.termField.length > 0}
+                    isInvalid={Number(errors.termField.length) > 0}
                     selectedOptions={selectedTermsFieldsOptions}
                     onChange={(
                       selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>

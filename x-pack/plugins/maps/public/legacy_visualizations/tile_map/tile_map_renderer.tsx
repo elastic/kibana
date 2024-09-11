@@ -9,8 +9,10 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { TileMapVisRenderValue } from './tile_map_fn';
 import { TILE_MAP_RENDER } from './types';
+import { getAnalytics, getCoreI18n, getTheme } from '../../kibana_services';
 
 const Component = dynamic(async () => {
   const { TileMapVisualization } = await import('./tile_map_visualization');
@@ -37,6 +39,15 @@ export const tileMapRenderer = {
       visConfig,
     };
 
-    render(<Component {...props} />, domNode);
+    render(
+      <KibanaRenderContextProvider
+        analytics={getAnalytics()}
+        i18n={getCoreI18n()}
+        theme={getTheme()}
+      >
+        <Component {...props} />
+      </KibanaRenderContextProvider>,
+      domNode
+    );
   },
 } as ExpressionRenderDefinition<TileMapVisRenderValue>;

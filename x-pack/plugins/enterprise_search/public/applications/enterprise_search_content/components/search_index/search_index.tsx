@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useParams } from 'react-router-dom';
 
@@ -15,12 +15,15 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { ClientConfigType } from '../../../../../common/types';
+
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
+import { ElasticsearchViewIndex } from '../../types';
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -37,6 +40,7 @@ import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_co
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
+import { IndexError } from './index_error';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
@@ -223,20 +227,6 @@ export const SearchIndex: React.FC = () => {
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
-
-  const onTabClick = (tab: EuiTabbedContentTab) => {
-    KibanaLogic.values.navigateToUrl(
-      generateEncodedPath(
-        tab.id === SearchIndexTabId.OVERVIEW ? SEARCH_INDEX_PATH : SEARCH_INDEX_TAB_PATH,
-        {
-          indexName,
-          tabId: tab.id,
-        }
-      )
-    );
-  };
-
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
@@ -250,18 +240,57 @@ export const SearchIndex: React.FC = () => {
         rightSideItems: getHeaderActions(index),
       }}
     >
-      {isCrawlerIndex(index) && !index.connector ? (
-        <NoConnectorRecord />
-      ) : isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config.host) ? (
-        <ErrorStatePrompt />
-      ) : (
-        <>
-          {indexName === index?.name && (
-            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-          )}
-          {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
-        </>
-      )}
+      <IndexError indexName={indexName} />
+      <Content
+        index={index}
+        errorConnectingMessage={errorConnectingMessage}
+        config={config}
+        tabs={tabs}
+        tabId={tabId}
+      />
     </EnterpriseSearchContentPageTemplate>
+  );
+};
+
+interface ContentProps {
+  config?: ClientConfigType;
+  errorConnectingMessage: string;
+  index?: ElasticsearchViewIndex;
+  tabId?: string;
+  tabs: EuiTabbedContentTab[];
+}
+
+const Content: React.FC<ContentProps> = ({
+  config,
+  errorConnectingMessage,
+  index,
+  tabs,
+  tabId,
+}) => {
+  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => {
+    KibanaLogic.values.navigateToUrl(
+      generateEncodedPath(
+        tab.id === SearchIndexTabId.OVERVIEW ? SEARCH_INDEX_PATH : SEARCH_INDEX_TAB_PATH,
+        {
+          indexName: index?.name || '',
+          tabId: tab.id,
+        }
+      )
+    );
+  };
+
+  if (isCrawlerIndex(index) && !index.connector) {
+    return <NoConnectorRecord />;
+  }
+  if (isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config?.host)) {
+    return <ErrorStatePrompt />;
+  }
+  return (
+    <>
+      <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
+    </>
   );
 };

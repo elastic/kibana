@@ -5,18 +5,36 @@
  * 2.0.
  */
 
-import { finished } from 'stream/promises';
 import { Readable } from 'stream';
+import { finished } from 'stream/promises';
 import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { StreamParser } from './types';
 
-type StreamParser = (
+export const parseBedrockStreamAsAsyncIterator = async function* (
   responseStream: Readable,
   logger: Logger,
-  abortSignal?: AbortSignal,
-  tokenHandler?: (token: string) => void
-) => Promise<string>;
+  abortSignal?: AbortSignal
+) {
+  if (abortSignal) {
+    abortSignal.addEventListener('abort', () => {
+      responseStream.destroy(new Error('Aborted'));
+    });
+  }
+  try {
+    for await (const chunk of responseStream) {
+      const bedrockChunk = handleBedrockChunk({ chunk, bedrockBuffer: new Uint8Array(0), logger });
+      yield bedrockChunk.decodedChunk;
+    }
+  } catch (err) {
+    if (abortSignal?.aborted) {
+      logger.info('Bedrock stream parsing was aborted.');
+    } else {
+      throw err;
+    }
+  }
+};
 
 export const parseBedrockStream: StreamParser = async (
   responseStream,
@@ -187,7 +205,7 @@ const prepareBedrockOutput = (responseBody: CompletionChunk, logger?: Logger): s
       return responseBody.delta.text;
     }
   }
-  logger?.warn(`Failed to parse bedrock chunk ${JSON.stringify(responseBody)}`);
+  // ignore any chunks that do not include text output
   return '';
 };
 

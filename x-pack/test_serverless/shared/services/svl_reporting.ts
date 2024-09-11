@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { RoleCredentials } from '.';
+import { InternalRequestHeader } from '.';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 /**
  * Services to create roles and users for security testing
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
-
-  const REPORTING_USER_USERNAME = config.get('servers.kibana.username');
-  const REPORTING_USER_PASSWORD = config.get('servers.kibana.password');
 
   return {
     /**
@@ -35,17 +32,16 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async createReportJobInternal(
       jobType: string,
       job: object,
-      username: string = REPORTING_USER_USERNAME,
-      password: string = REPORTING_USER_PASSWORD
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader
     ) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
-      const { status, body } = await supertest
+      const { status, body } = await supertestWithoutAuth
         .post(requestPath)
-        .auth(username, password)
-        .set(...API_HEADER)
-        .set(...INTERNAL_HEADER)
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({ jobParams: rison.encode(job) });
 
       expect(status).to.be(200);
@@ -61,20 +57,20 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
      */
     async waitForJobToFinish(
       downloadReportPath: string,
-      username = REPORTING_USER_USERNAME,
-      password = REPORTING_USER_PASSWORD,
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
       await retry.waitForWithTimeout(
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
         async () => {
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .get(`${downloadReportPath}?elasticInternalOrigin=true`)
-            .auth(username, password)
             .responseType('blob')
             .set(...API_HEADER)
-            .set(...INTERNAL_HEADER);
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           if (response.status === 500) {
             throw new Error(`Report at path ${downloadReportPath} has failed`);
@@ -102,25 +98,28 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     },
 
     /*
-     * This function is only used in the API tests, funtional tests we have to click the download link in the UI
+     * This function is only used in the API tests, functional tests we have to click the download link in the UI
      */
     async getCompletedJobOutput(
       downloadReportPath: string,
-      username = REPORTING_USER_USERNAME,
-      password = REPORTING_USER_PASSWORD
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader
     ) {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
-        .auth(username, password);
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
       return response.text as unknown;
     },
-    async deleteAllReports() {
+    async deleteAllReports(roleAuthc: RoleCredentials, internalReqHeader: InternalRequestHeader) {
       log.debug('ReportingAPI.deleteAllReports');
 
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {
-        await supertest
+        await supertestWithoutAuth
           .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({ query: { match_all: {} } });
       });
     },

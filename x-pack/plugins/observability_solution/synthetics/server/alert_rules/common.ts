@@ -8,25 +8,31 @@ import moment, { Moment } from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
-import { IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import {
+  IRuleTypeAlerts,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+} from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
-import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
-import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
 import {
-  getUptimeIndexPattern,
-  IndexPatternTitleAndFields,
-} from '../legacy_uptime/lib/requests/get_index_pattern';
+  MonitorStatusActionGroup,
+  SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
+} from '../../common/constants/synthetics_alerts';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
 import { StatusCheckFilters } from '../../common/runtime_types';
-import { UptimeEsClient } from '../lib';
+import { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
-  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
@@ -154,30 +160,36 @@ export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
 };
 
 export const setRecoveredAlertsContext = ({
-  alertFactory,
+  alertsClient,
   basePath,
-  getAlertUuid,
   spaceId,
   staleDownConfigs,
   upConfigs,
   dateFormat,
   tz,
 }: {
-  alertFactory: RuleExecutorServices['alertFactory'];
+  alertsClient: PublicAlertsClient<
+    ObservabilityUptimeAlert,
+    AlertState,
+    AlertContext,
+    ActionGroupIdsOf<MonitorStatusActionGroup>
+  >;
   basePath?: IBasePath;
-  getAlertUuid?: (alertId: string) => string | null;
   spaceId?: string;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
 }) => {
-  const { getRecoveredAlerts } = alertFactory.done();
-  for (const alert of getRecoveredAlerts()) {
-    const recoveredAlertId = alert.getId();
-    const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
+  const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+  for (const recoveredAlert of recoveredAlerts) {
+    const recoveredAlertId = recoveredAlert.alert.getId();
+    const alertUuid = recoveredAlert.alert.getUuid();
 
-    const state = alert.getState() as SyntheticsCommonState & SyntheticsMonitorStatusAlertState;
+    const state = recoveredAlert.alert.getState();
+    const alertHit = recoveredAlert.hit;
+    const locationId = alertHit?.['location.id'];
+    const configId = alertHit?.configId;
 
     let recoveryReason = '';
     let recoveryStatus = i18n.translate(
@@ -191,15 +203,14 @@ export const setRecoveredAlertsContext = ({
     let monitorSummary: MonitorSummaryStatusRule | null = null;
     let lastErrorMessage;
 
-    if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
-      const { idWithLocation, locationId } = state;
-      const downConfig = staleDownConfigs[idWithLocation];
-      const { ping, configId } = downConfig;
+    if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
+      const downConfig = staleDownConfigs[recoveredAlertId];
+      const { ping } = downConfig;
       monitorSummary = getMonitorSummary(
         ping,
         RECOVERED_LABEL,
         locationId,
-        configId,
+        downConfig.configId,
         dateFormat,
         tz
       );
@@ -234,12 +245,11 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
-    if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      const { idWithLocation, configId, locationId } = state;
+    if (configId && recoveredAlertId && locationId && upConfigs[recoveredAlertId]) {
       // pull the last error from state, since it is not available on the up ping
-      lastErrorMessage = state.lastErrorMessage;
+      lastErrorMessage = alertHit?.['error.message'];
 
-      const upConfig = upConfigs[idWithLocation];
+      const upConfig = upConfigs[recoveredAlertId];
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
 
@@ -279,18 +289,22 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
-    alert.setContext({
+    const context = {
       ...state,
       ...(monitorSummary ? monitorSummary : {}),
+      locationId,
+      idWithLocation: recoveredAlertId,
       lastErrorMessage,
       recoveryStatus,
       linkMessage,
       ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
+      ...(recoveryReason ? { [ALERT_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
-    });
+    };
+    alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
 };
 
@@ -299,14 +313,14 @@ export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.re
 });
 
 export const formatFilterString = async (
-  uptimeEsClient: UptimeEsClient,
+  syntheticsEsClient: SyntheticsEsClient,
   filters?: StatusCheckFilters,
   search?: string
 ) =>
   await generateFilterDSL(
     () =>
       getUptimeIndexPattern({
-        uptimeEsClient,
+        syntheticsEsClient,
       }),
     filters,
     search
@@ -340,10 +354,14 @@ export const generateFilterDSL = async (
   return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const syntheticsRuleTypeFieldMap = {
+  ...syntheticsRuleFieldMap,
+  ...legacyExperimentalFieldMap,
+};
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
+  shouldWrite: true,
 };

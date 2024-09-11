@@ -18,9 +18,9 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
+import { Group } from '../../../../common/typings';
 import {
   CustomMetricExpressionParams,
-  Group,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';

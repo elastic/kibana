@@ -7,11 +7,11 @@
 
 import { cleanup, generate } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 import { ALL_VALUE } from '@kbn/slo-schema';
-
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '@kbn/slo-plugin/common/constants';
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
       await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
       await transform.api.cleanTransformIndices();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
@@ -149,10 +149,10 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedTransforms: ExpectedTransforms = {
           count: 2,
           results: {
-            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.2' },
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.3' },
             transform1: {
               id: 'slo-summary-my-custom-id1-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
           },
           typeOfVersion: 'string',
@@ -169,15 +169,20 @@ export default function ({ getService }: FtrProviderContext) {
         assertTransformsResponseBody(body, expectedTransforms);
       });
 
-      it('creates ingest pipeline', async () => {
+      it('creates ingest pipelines', async () => {
         const sloRevision = 1;
-        const pipelineResponse = await esClient.ingest.getPipeline({
+        const rollupPipelineResponse = await esClient.ingest.getPipeline({
+          id: getSLOPipelineId(sloId, sloRevision),
+        });
+        const expectedRollupPipeline = `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
+        expect(rollupPipelineResponse[expectedRollupPipeline]).not.to.be(undefined);
+
+        const summaryPipelineResponse = await esClient.ingest.getPipeline({
           id: getSLOSummaryPipelineId(sloId, sloRevision),
         });
-        const expectedPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
-
-        expect(pipelineResponse[expectedPipeline]).not.to.be(undefined);
-        expect(pipelineResponse[expectedPipeline].description).to.be(
+        const expectedSummaryPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+        expect(summaryPipelineResponse[expectedSummaryPipeline]).not.to.be(undefined);
+        expect(summaryPipelineResponse[expectedSummaryPipeline].description).to.be(
           `Ingest pipeline for SLO summary data [id: ${sloId}, revision: ${sloRevision}]`
         );
       });
@@ -318,25 +323,25 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedTransforms: ExpectedTransforms = {
           count: 8,
           results: {
-            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.2' },
-            transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3.2' },
-            transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3.2' },
-            transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3.2' },
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.3' },
+            transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3.3' },
+            transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3.3' },
+            transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3.3' },
             transform4: {
               id: 'slo-summary-my-custom-id1-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
             transform5: {
               id: 'slo-summary-my-custom-id2-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
             transform6: {
               id: 'slo-summary-my-custom-id3-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
             transform7: {
               id: 'slo-summary-my-custom-id4-1',
-              destIndex: '.slo-observability.summary-v3.2',
+              destIndex: '.slo-observability.summary-v3.3',
             },
           },
           typeOfVersion: 'string',

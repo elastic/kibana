@@ -12,7 +12,6 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 import {
   CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
@@ -29,7 +28,6 @@ const ADVANCED_EXECUTE_AUTHZ = `api:${CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_
 function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
-  const authentication = security.authc;
   // typescript is having trouble inferring jest's automocking
   (
     authorization.actions.savedObject.get as jest.MockedFunction<
@@ -37,7 +35,7 @@ function mockSecurity() {
     >
   ).mockImplementation(mockAuthorizationAction);
   authorization.mode.useRbacForRequest.mockReturnValue(true);
-  return { authorization, authentication };
+  return { authorization };
 }
 
 beforeEach(() => {
@@ -167,7 +165,7 @@ describe('ensureAuthorized', () => {
   });
 
   test('exempts users from requiring privileges to execute actions when authorizationMode is Legacy', async () => {
-    const { authorization, authentication } = mockSecurity();
+    const { authorization } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<
       ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
     > = jest.fn();
@@ -175,13 +173,8 @@ describe('ensureAuthorized', () => {
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
-      authentication,
       authorizationMode: AuthorizationMode.Legacy,
     });
-
-    authentication.getCurrentUser.mockReturnValueOnce({
-      username: 'some-user',
-    } as unknown as AuthenticatedUser);
 
     await actionsAuthorization.ensureAuthorized({ operation: 'execute', actionTypeId: 'myType' });
 

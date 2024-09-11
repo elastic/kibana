@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export interface FillOpacityOptionProps {
   /**
@@ -35,8 +35,8 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
     <>
       <EuiFormRow
         display="columnCompressed"
-        label={i18n.translate('xpack.lens.xyChart.fillOpacityLabel', {
-          defaultMessage: 'Fill opacity',
+        label={i18n.translate('xpack.lens.xyChart.areaFillOpacityLabel', {
+          defaultMessage: 'Area fill opacity',
         })}
         fullWidth
       >

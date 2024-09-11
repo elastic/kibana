@@ -33,7 +33,6 @@ const mockPromptContexts: Record<string, PromptContext> = {
 const defaultProps = {
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContexts: mockPromptContexts,
-  isFlyoutMode: false,
 };
 
 describe('ContextPills', () => {
@@ -69,7 +68,7 @@ describe('ContextPills', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId(`pillButton-${context.id}`));
+    await userEvent.click(screen.getByTestId(`pillButton-${context.id}`));
 
     await waitFor(() => {
       expect(setSelectedPromptContexts).toBeCalled();

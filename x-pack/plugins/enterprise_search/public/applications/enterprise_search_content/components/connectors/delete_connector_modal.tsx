@@ -9,6 +9,9 @@ import React, { useState, useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { omit } from 'lodash';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   EuiCheckbox,
   EuiConfirmModal,
@@ -30,7 +33,11 @@ export interface DeleteConnectorModalProps {
   isCrawler: boolean;
 }
 export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCrawler }) => {
+  const [connectorUiOptions, setConnectorUiOptions] = useLocalStorage<
+    Record<string, { deploymentMethod: 'docker' | 'source' | null }>
+  >('search:connector-ui-options', {});
   const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
+
   const {
     deleteModalConnectorId: connectorId,
     deleteModalConnectorName,
@@ -75,6 +82,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
             connectorId,
             shouldDeleteIndex,
           });
+          setConnectorUiOptions(omit(connectorUiOptions, connectorId));
         }
       }}
       cancelButtonText={

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { FC } from 'react';
@@ -11,10 +12,8 @@ import React from 'react';
 import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
-import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { useServices } from '../services';
-import { NoUsersTip } from './user_missing_tip';
+import { useUserProfiles, NoCreatorTip } from '@kbn/content-management-user-profiles';
 
 interface Context {
   enabled: boolean;
@@ -25,43 +24,32 @@ interface Context {
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, staleTime: 30 * 60 * 1000 } },
-});
 
-export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+export const UserFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
+  children,
+  ...props
+}) => {
   if (!props.enabled) {
     return <>{children}</>;
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <UserFilterContext.Provider value={props}>{children}</UserFilterContext.Provider>
-    </QueryClientProvider>
-  );
+  return <UserFilterContext.Provider value={props}>{children}</UserFilterContext.Provider>;
 };
 
 export const NULL_USER = 'no-user';
 
 export const UserFilterPanel: FC<{}> = () => {
-  const { bulkGetUserProfiles } = useServices();
   const { euiTheme } = useEuiTheme();
   const componentContext = React.useContext(UserFilterContext);
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
-  if (!bulkGetUserProfiles)
-    throw new Error('UserFilterPanel must be used with a bulkGetUserProfiles function');
 
   const { onSelectedUsersChange, selectedUsers, showNoUserOption } = componentContext;
 
   const [isPopoverOpen, setPopoverOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  const query = useQuery({
-    queryKey: ['user-filter-suggestions', componentContext.allUsers],
-    queryFn: () => bulkGetUserProfiles(componentContext.allUsers),
-    enabled: isPopoverOpen,
-  });
+  const query = useUserProfiles(componentContext.allUsers, { enabled: isPopoverOpen });
 
   const usersMap = React.useMemo(() => {
     if (!query.data) return {};
@@ -138,7 +126,7 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
               />
-              {<NoUsersTip />}
+              {<NoCreatorTip />}
             </p>
           ),
           nullOptionLabel: i18n.translate(
@@ -148,7 +136,7 @@ export const UserFilterPanel: FC<{}> = () => {
             }
           ),
           nullOptionProps: {
-            append: <NoUsersTip />,
+            append: <NoCreatorTip />,
           },
           clearButtonLabel: (
             <FormattedMessage

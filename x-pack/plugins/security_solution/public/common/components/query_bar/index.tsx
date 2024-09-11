@@ -180,7 +180,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
-        displayStyle={displayStyle}
+        displayStyle={isEsql ? 'withBorders' : displayStyle}
         isDisabled={isDisabled}
       />
     );

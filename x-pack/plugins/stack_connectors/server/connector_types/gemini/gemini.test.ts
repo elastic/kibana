@@ -11,7 +11,11 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { RunApiResponseSchema } from '../../../common/gemini/schema';
+import { RunApiResponseSchema, StreamingResponseSchema } from '../../../common/gemini/schema';
+import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
+import { AxiosError } from 'axios';
+import { Transform } from 'stream';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => ({
@@ -28,14 +32,27 @@ let mockRequest: jest.Mock;
 describe('GeminiConnector', () => {
   const defaultResponse = {
     data: {
-      candidates: [{ content: { parts: [{ text: 'Paris' }] } }],
-      usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 },
+      candidates: [{ content: { role: 'model', parts: [{ text: 'Paris' }] } }],
+      usageMetadata: { totalTokenCount: 0, promptTokenCount: 0, candidatesTokenCount: 0 },
     },
+  };
+
+  const sampleGeminiBody = {
+    messages: [
+      {
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: 'What is the capital of France?' }],
+          },
+        ],
+      },
+    ],
   };
 
   const connectorResponse = {
     completion: 'Paris',
-    usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 },
+    usageMetadata: { totalTokenCount: 0, promptTokenCount: 0, candidatesTokenCount: 0 },
   };
 
   beforeEach(() => {
@@ -45,12 +62,13 @@ describe('GeminiConnector', () => {
     mockRequest = connector.request = jest.fn().mockResolvedValue(defaultResponse);
   });
 
+  const logger = loggingSystemMock.createLogger();
   const connector = new GeminiConnector({
     connector: { id: '1', type: '.gemini' },
     configurationUtilities: actionsConfigMock.create(),
     config: {
       apiUrl: 'https://api.gemini.com',
-      defaultModel: 'gemini-1.5-pro-preview-0409',
+      defaultModel: DEFAULT_GEMINI_MODEL,
       gcpRegion: 'us-central1',
       gcpProjectID: 'my-project-12345',
     },
@@ -68,57 +86,283 @@ describe('GeminiConnector', () => {
         client_x509_cert_url: '',
       }),
     },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
+  let connectorUsageCollector: ConnectorUsageCollector;
 
-  describe('runApi', () => {
-    it('should send a formatted request to the API and return the response', async () => {
-      const runActionParams: RunActionParams = {
-        body: JSON.stringify({
-          messages: [
-            {
-              contents: [
+  describe('Gemini', () => {
+    beforeEach(() => {
+      // @ts-ignore
+      connector.request = mockRequest;
+      connectorUsageCollector = new ConnectorUsageCollector({
+        logger,
+        connectorId: 'test-connector-id',
+      });
+    });
+
+    describe('runApi', () => {
+      it('should send a formatted request to the API and return the response', async () => {
+        const runActionParams: RunActionParams = {
+          body: JSON.stringify(sampleGeminiBody),
+          model: DEFAULT_GEMINI_MODEL,
+        };
+
+        const response = await connector.runApi(runActionParams, connectorUsageCollector);
+
+        // Assertions
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            method: 'post',
+            data: JSON.stringify({
+              messages: [
                 {
-                  role: 'user',
-                  parts: [{ text: 'What is the capital of France?' }],
+                  contents: [
+                    {
+                      role: 'user',
+                      parts: [{ text: 'What is the capital of France?' }],
+                    },
+                  ],
                 },
               ],
+            }),
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
             },
-          ],
-        }),
-        model: 'test-model',
+            timeout: 60000,
+            responseSchema: RunApiResponseSchema,
+            signal: undefined,
+          },
+          connectorUsageCollector
+        );
+
+        expect(response).toEqual(connectorResponse);
+      });
+    });
+
+    describe('invokeAI', () => {
+      const aiAssistantBody = {
+        messages: [
+          {
+            role: 'user',
+            content: 'What is the capital of France?',
+          },
+        ],
       };
 
-      const response = await connector.runApi(runActionParams);
-
-      // Assertions
-      expect(mockRequest).toBeCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith({
-        url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
-        method: 'post',
-        data: JSON.stringify({
-          messages: [
-            {
+      it('the API call is successful with correct parameters', async () => {
+        await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            method: 'post',
+            responseSchema: RunApiResponseSchema,
+            data: JSON.stringify({
               contents: [
                 {
                   role: 'user',
                   parts: [{ text: 'What is the capital of France?' }],
                 },
               ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens: 8192,
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
             },
-          ],
-        }),
-        headers: {
-          Authorization: 'Bearer mock_access_token',
-          'Content-Type': 'application/json',
-        },
-        timeout: 60000,
-        responseSchema: RunApiResponseSchema,
-        signal: undefined,
+            signal: undefined,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
       });
 
-      expect(response).toEqual(connectorResponse);
+      it('signal and timeout is properly passed to runApi', async () => {
+        const signal = jest.fn();
+        const timeout = 60000;
+        await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            method: 'post',
+            responseSchema: RunApiResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens: 8192,
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+    });
+
+    describe('invokeStream', () => {
+      let stream;
+      beforeEach(() => {
+        stream = createStreamMock();
+        stream.write(new Uint8Array([1, 2, 3]));
+        mockRequest = jest.fn().mockResolvedValue({ ...defaultResponse, data: stream.transform });
+        // @ts-ignore
+        connector.request = mockRequest;
+      });
+      const aiAssistantBody = {
+        messages: [
+          {
+            role: 'user',
+            content: 'What is the capital of France?',
+          },
+        ],
+        toolConfig: {
+          mode: 'ANY' as const,
+          allowedFunctionNames: ['foo', 'bar'],
+        },
+      };
+
+      it('the API call is successful with correct request parameters', async () => {
+        await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            responseType: 'stream',
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal: undefined,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('signal and timeout is properly passed to streamApi', async () => {
+        const signal = jest.fn();
+        const timeout = 60000;
+        await connector.invokeStream(
+          { ...aiAssistantBody, timeout, signal },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            responseType: 'stream',
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+    });
+
+    describe('getResponseErrorMessage', () => {
+      it('returns an unknown error message', () => {
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage({})).toEqual(
+          `Unexpected API Error:  - Unknown error`
+        );
+      });
+
+      it('returns the error.message', () => {
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage({ message: 'a message' })).toEqual(
+          `Unexpected API Error:  - a message`
+        );
+      });
+
+      it('returns the error.response.data.error.message', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 404,
+            statusText: 'Resource Not Found',
+            data: {
+              message: 'Resource not found',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+        expect(
+          // @ts-expect-error expects an axios error as the parameter
+          connector.getResponseErrorMessage(err)
+        ).toEqual(`API Error: Resource Not Found - Resource not found`);
+      });
     });
   });
 
@@ -190,3 +434,21 @@ describe('GeminiConnector', () => {
     });
   });
 });
+
+function createStreamMock() {
+  const transform: Transform = new Transform({});
+
+  return {
+    write: (data: Uint8Array) => {
+      transform.push(data);
+    },
+    fail: () => {
+      transform.emit('error', new Error('Stream failed'));
+      transform.end();
+    },
+    transform,
+    complete: () => {
+      transform.end();
+    },
+  };
+}

@@ -22,6 +22,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 describe('Bulk create rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -34,9 +35,7 @@ describe('Bulk create rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful creation
-    clients.detectionRulesClient.createCustomRule.mockResolvedValue(
-      getRuleMock(getQueryRuleParams())
-    );
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );

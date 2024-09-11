@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
-
+import { merge } from 'lodash';
 import { take } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -20,7 +21,13 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 
 const testInterval = 100;
 
-const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
+function getBaseTestMetrics() {
+  return {
+    metricA: 'value',
+    metricB: 'otherValue',
+    process: { event_loop_utilization: { utilization: 1 } },
+  };
+}
 
 const logger = loggingSystemMock.create();
 
@@ -31,6 +38,7 @@ describe('MetricsService', () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
+    mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
 
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },
@@ -61,8 +69,6 @@ describe('MetricsService', () => {
     });
 
     it('collects the metrics at every interval', async () => {
-      mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
-
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
 
@@ -76,8 +82,6 @@ describe('MetricsService', () => {
     });
 
     it('resets the collector after each collection', async () => {
-      mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
-
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
@@ -112,8 +116,8 @@ describe('MetricsService', () => {
     });
 
     it('emits the last value on each getOpsMetrics$ call', async () => {
-      const firstMetrics = { metric: 'first' };
-      const secondMetrics = { metric: 'second' };
+      const firstMetrics = merge(getBaseTestMetrics(), { metric: 'first' });
+      const secondMetrics = merge(getBaseTestMetrics(), { metric: 'second' });
       mockOpsCollector.collect
         .mockResolvedValueOnce(firstMetrics)
         .mockResolvedValueOnce(secondMetrics);
@@ -128,8 +132,8 @@ describe('MetricsService', () => {
         return emission;
       };
 
-      expect(await nextEmission()).toEqual({ metric: 'first' });
-      expect(await nextEmission()).toEqual({ metric: 'second' });
+      expect(await nextEmission()).toEqual(firstMetrics);
+      expect(await nextEmission()).toEqual(secondMetrics);
     });
 
     it('logs the metrics at every interval', async () => {
@@ -138,6 +142,7 @@ describe('MetricsService', () => {
           memory: { heap: { used_in_bytes: 100 } },
           uptime_in_millis: 1500,
           event_loop_delay: 50,
+          event_loop_utilization: { utilization: 1 },
         },
         os: {
           load: {
@@ -152,6 +157,7 @@ describe('MetricsService', () => {
           memory: { heap: { used_in_bytes: 200 } },
           uptime_in_millis: 3000,
           event_loop_delay: 100,
+          event_loop_utilization: { utilization: 1 },
         },
         os: {
           load: {
@@ -185,12 +191,14 @@ describe('MetricsService', () => {
 
     it('omits metrics from log message if they are missing or malformed', async () => {
       const opsLogger = logger.get('metrics', 'ops');
-      mockOpsCollector.collect.mockResolvedValueOnce({ secondMetrics: 'metrics' });
+      mockOpsCollector.collect.mockResolvedValueOnce(
+        merge(getBaseTestMetrics(), { secondMetrics: 'metrics' })
+      );
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
       expect(loggingSystemMock.collect(opsLogger).debug[0]).toMatchInlineSnapshot(`
         Array [
-          "",
+          " utilization: 1.00000",
           Object {
             "event": Object {
               "category": Array [
@@ -214,7 +222,9 @@ describe('MetricsService', () => {
             "process": Object {
               "eventLoopDelay": undefined,
               "eventLoopDelayHistogram": undefined,
-              "eventLoopUtilization": undefined,
+              "eventLoopUtilization": Object {
+                "utilization": 1,
+              },
               "memory": Object {
                 "arrayBuffersInBytes": undefined,
                 "externalInBytes": undefined,

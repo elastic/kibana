@@ -209,7 +209,7 @@ describe('policy table', () => {
     expect(deprecatedPolicies.length).toBe(0);
 
     // Enable filtering by deprecated policies
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     (searchInput.instance() as unknown as HTMLInputElement).value = 'is:policy.deprecated';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();
@@ -221,7 +221,7 @@ describe('policy table', () => {
 
   test('filters based on content of search input', () => {
     const rendered = mountWithIntl(component);
-    const searchInput = rendered.find('.euiFieldSearch').first();
+    const searchInput = rendered.find('input.euiFieldSearch').first();
     (searchInput.instance() as unknown as HTMLInputElement).value = 'testy0';
     searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
     rendered.update();

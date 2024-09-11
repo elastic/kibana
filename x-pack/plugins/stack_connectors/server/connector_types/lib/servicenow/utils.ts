@@ -24,13 +24,23 @@ import {
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
 
-export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
-  useOldApi
-    ? incident
-    : Object.entries(incident).reduce(
-        (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
-        {} as Incident
-      );
+export const prepareIncident = (
+  useOldApi: boolean,
+  incident: PartialIncident
+): Record<string, unknown> => {
+  const { additional_fields: additionalFields, ...restIncidentFields } = incident;
+
+  if (useOldApi) {
+    return restIncidentFields;
+  }
+
+  const baseFields = Object.entries(restIncidentFields).reduce<Partial<Incident>>(
+    (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
+    {}
+  );
+
+  return { ...additionalFields, ...baseFields };
+};
 
 const createErrorMessage = (errorResponse?: ServiceNowError): string => {
   if (errorResponse == null) {
@@ -88,6 +98,18 @@ export const throwIfSubActionIsNotSupported = ({
     const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
+  }
+};
+
+export const throwIfAdditionalFieldsNotSupported = (
+  useOldApi: boolean,
+  incident: PartialIncident
+) => {
+  if (useOldApi && incident.additional_fields) {
+    throw new AxiosError(
+      'ServiceNow additional fields are not supported for deprecated connectors.',
+      '400'
+    );
   }
 };
 

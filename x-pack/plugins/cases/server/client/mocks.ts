@@ -6,7 +6,11 @@
  */
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
 import {
@@ -226,6 +230,7 @@ export const createCasesClientFactoryMockArgs = () => {
   return {
     securityPluginSetup: securityMock.createSetup(),
     securityPluginStart: securityMock.createStart(),
+    securityServiceStart: securityServiceMock.createStart(),
     spacesPluginStart: spacesMock.createStart(),
     featuresPluginStart: featuresPluginMock.createSetup(),
     actionsPluginStart: actionsMock.createStart(),

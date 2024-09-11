@@ -57,6 +57,8 @@ exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error CONTAINER_IMAGE 1`] = `undefined`;
 
+exports[`Error DATA_STEAM_TYPE 1`] = `undefined`;
+
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
@@ -165,6 +167,8 @@ exports[`Error LABEL_NAME 1`] = `undefined`;
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
+
+exports[`Error LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -401,6 +405,8 @@ exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span CONTAINER_IMAGE 1`] = `undefined`;
 
+exports[`Span DATA_STEAM_TYPE 1`] = `undefined`;
+
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
@@ -496,6 +502,8 @@ exports[`Span LABEL_NAME 1`] = `undefined`;
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
+
+exports[`Span LOG_LEVEL 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -732,6 +740,8 @@ exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction CONTAINER_IMAGE 1`] = `undefined`;
 
+exports[`Transaction DATA_STEAM_TYPE 1`] = `undefined`;
+
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
@@ -837,6 +847,8 @@ exports[`Transaction LABEL_NAME 1`] = `undefined`;
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
+
+exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 

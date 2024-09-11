@@ -1,26 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   withSuspense,
   LazyLabsFlyout,
   getContextProvider as getPresentationUtilContextProvider,
 } from '@kbn/presentation-util-plugin/public';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-import type { EuiBreadcrumb } from '@elastic/eui';
+import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import {
+  EuiBreadcrumb,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiToolTipProps,
+  EuiPopover,
+  EuiBadge,
+  EuiLink,
+} from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -38,6 +47,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -83,13 +93,13 @@ export function InternalDashboardTopNav({
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
+    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboard = useDashboardAPI();
   const PresentationUtilContextProvider = getPresentationUtilContextProvider();
-
   const hasRunMigrations = dashboard.select(
     (state) => state.componentState.hasRunClientsideMigrations
   );
@@ -104,15 +114,8 @@ export function InternalDashboardTopNav({
   const query = dashboard.select((state) => state.explicitInput.query);
   const title = dashboard.select((state) => state.explicitInput.title);
 
-  // store data views in state & subscribe to dashboard data view changes.
-  const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
-  useEffect(() => {
-    setAllDataViews(dashboard.getAllDataViews());
-    const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
-      setAllDataViews(dataViews)
-    );
-    return () => subscription.unsubscribe();
-  }, [dashboard]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const allDataViews = useStateFromPublishingSubject(dashboard.dataViews);
 
   const dashboardTitle = useMemo(() => {
     return getDashboardTitle(title, viewMode, !lastSavedId);
@@ -143,6 +146,11 @@ export function InternalDashboardTopNav({
         title,
         lastSavedId
       );
+      dashboardRecentlyAccessed.add(
+        getFullEditPath(lastSavedId, viewMode === ViewMode.EDIT),
+        title,
+        lastSavedId
+      );
     }
     return () => subscription.unsubscribe();
   }, [
@@ -152,6 +160,7 @@ export function InternalDashboardTopNav({
     lastSavedId,
     viewMode,
     title,
+    dashboardRecentlyAccessed,
   ]);
 
   /**
@@ -163,17 +172,17 @@ export function InternalDashboardTopNav({
         text:
           viewMode === ViewMode.EDIT ? (
             <>
-              {dashboardTitle} <EuiIcon size="s" type="pencil" />
+              {dashboardTitle}
+              <EuiIcon
+                size="s"
+                type="pencil"
+                className="dshTitleBreadcrumbs__updateIcon"
+                onClick={() => dashboard.showSettings()}
+              />
             </>
           ) : (
             dashboardTitle
           ),
-        onClick:
-          viewMode === ViewMode.EDIT
-            ? () => {
-                dashboard.showSettings();
-              }
-            : undefined,
       },
     ];
 
@@ -267,10 +276,26 @@ export function InternalDashboardTopNav({
     viewMode,
   ]);
 
+  const maybeRedirect = useCallback(
+    (result?: SaveDashboardReturn) => {
+      if (!result) return;
+      const { redirectRequired, id } = result;
+      if (redirectRequired) {
+        redirectTo({
+          id,
+          editMode: true,
+          useReplace: true,
+          destination: 'dashboard',
+        });
+      }
+    },
+    [redirectTo]
+  );
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    redirectTo,
     isLabsShown,
     setIsLabsShown,
+    maybeRedirect,
     showResetChange,
   });
 
@@ -285,7 +310,7 @@ export function InternalDashboardTopNav({
         'data-test-subj': 'dashboardUnsavedChangesBadge',
         badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
         title: '',
-        color: 'warning',
+        color: '#F6E58D',
         toolTipProps: {
           content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
           position: 'bottom',
@@ -306,10 +331,63 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      allBadges.push(getManagedContentBadge(dashboardManagedBadge.getTooltip()));
+      const badgeProps = {
+        ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
+        onClick: () => setIsPopoverOpen(!isPopoverOpen),
+        onClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
+        iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
+        iconOnClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
+      } as TopNavMenuBadgeProps;
+
+      allBadges.push({
+        renderCustomBadge: ({ badgeText }) => {
+          const badgeButton = <EuiBadge {...badgeProps}>{badgeText}</EuiBadge>;
+          return (
+            <EuiPopover
+              button={badgeButton}
+              isOpen={isPopoverOpen}
+              closePopover={() => setIsPopoverOpen(false)}
+              panelStyle={{ maxWidth: 250 }}
+            >
+              <FormattedMessage
+                id="dashboard.managedContentPopoverButton"
+                defaultMessage="Elastic manages this dashboard. {Duplicate} it to make changes."
+                values={{
+                  Duplicate: (
+                    <EuiLink
+                      id="dashboardManagedContentPopoverButton"
+                      onClick={() => {
+                        dashboard
+                          .runInteractiveSave(viewMode)
+                          .then((result) => maybeRedirect(result));
+                      }}
+                      aria-label={dashboardManagedBadge.getDuplicateButtonAriaLabel()}
+                    >
+                      <FormattedMessage
+                        id="dashboard.managedContentPopoverButtonText"
+                        defaultMessage="Duplicate"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiPopover>
+          );
+        },
+        badgeText: badgeProps.badgeText,
+      });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);
+  }, [
+    hasUnsavedChanges,
+    viewMode,
+    hasRunMigrations,
+    showWriteControls,
+    managed,
+    isPopoverOpen,
+    dashboard,
+    maybeRedirect,
+  ]);
 
   return (
     <div className="dashboardTopNav">
@@ -326,7 +404,7 @@ export function InternalDashboardTopNav({
         screenTitle={title}
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
-        indexPatterns={allDataViews}
+        indexPatterns={allDataViews ?? []}
         saveQueryMenuVisibility={allowSaveQuery ? 'allowed_by_app_privilege' : 'globally_managed'}
         appName={LEGACY_DASHBOARD_APP_ID}
         visible={viewMode !== ViewMode.PRINT}

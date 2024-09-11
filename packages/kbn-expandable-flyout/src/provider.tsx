@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -49,14 +50,14 @@ export const UrlSynchronizer = () => {
       dispatch(
         urlChangedAction({
           ...currentValue,
-          preview: currentValue?.preview?.[0],
+          preview: currentValue?.preview?.at(-1),
           id: urlKey,
         })
       );
     }
 
     const subscription = urlStorage.change$<FlyoutState>(urlKey).subscribe((value) => {
-      dispatch(urlChangedAction({ ...value, preview: value?.preview?.[0], id: urlKey }));
+      dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
     });
 
     return () => subscription.unsubscribe();
@@ -68,7 +69,7 @@ export const UrlSynchronizer = () => {
     }
 
     const { left, right, preview } = panels;
-    urlStorage.set(urlKey, { left, right, preview });
+    urlStorage.set(urlKey, { left, right, preview: [preview?.at(-1)] });
   }, [needsSync, panels, urlKey, urlStorage]);
 
   return null;

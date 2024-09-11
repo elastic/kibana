@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetAgentPolicies } from '../../../../../hooks';
 import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../../types';
-import { AgentPolicyIntegrationForm } from '../../../components';
-import { SO_SEARCH_LIMIT } from '../../../../../constants';
 import type { ValidationResults } from '../../../components/agent_policy_validation';
 
 import { incrementPolicyName } from '../../../../../services';
 
+import { AgentPolicyIntegrationForm } from '../../../components';
+
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
+import { useAllNonManagedAgentPolicies } from './components/use_policies';
 
 export enum SelectedPolicyTab {
   NEW = 'new',
@@ -42,7 +42,8 @@ interface Props {
   packageInfo?: PackageInfo;
   setHasAgentPolicyError: (hasError: boolean) => void;
   updateSelectedTab: (tab: SelectedPolicyTab) => void;
-  selectedAgentPolicyId?: string;
+  selectedAgentPolicyIds: string[];
+  initialSelectedTabIndex?: number;
 }
 
 export const StepSelectHosts: React.FunctionComponent<Props> = ({
@@ -56,25 +57,10 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   packageInfo,
   setHasAgentPolicyError,
   updateSelectedTab,
-  selectedAgentPolicyId,
+  selectedAgentPolicyIds,
+  initialSelectedTabIndex,
 }) => {
-  let existingAgentPolicies: AgentPolicy[] = [];
-  const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-    sortField: 'name',
-    sortOrder: 'asc',
-    full: false, // package_policies will always be empty
-    noAgentCount: true, // agentPolicy.agents will always be 0
-  });
-  if (err) {
-    // eslint-disable-next-line no-console
-    console.debug('Could not retrieve agent policies');
-  }
-  existingAgentPolicies = useMemo(
-    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
-    [agentPoliciesData?.items]
-  );
+  const existingAgentPolicies: AgentPolicy[] = useAllNonManagedAgentPolicies();
 
   useEffect(() => {
     if (existingAgentPolicies.length > 0) {
@@ -110,7 +96,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
           agentPolicies={agentPolicies}
           updateAgentPolicies={updateAgentPolicies}
           setHasAgentPolicyError={setHasAgentPolicyError}
-          selectedAgentPolicyId={selectedAgentPolicyId}
+          initialSelectedAgentPolicyIds={selectedAgentPolicyIds}
         />
       ),
     },
@@ -121,7 +107,13 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
 
   return existingAgentPolicies.length > 0 ? (
     <StyledEuiTabbedContent
-      initialSelectedTab={selectedAgentPolicyId ? tabs[1] : tabs[0]}
+      initialSelectedTab={
+        initialSelectedTabIndex
+          ? tabs[initialSelectedTabIndex]
+          : selectedAgentPolicyIds.length > 0
+          ? tabs[1]
+          : tabs[0]
+      }
       tabs={tabs}
       onTabClick={handleOnTabClick}
     />

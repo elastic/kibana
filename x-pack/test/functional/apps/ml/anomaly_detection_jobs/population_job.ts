@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2019-07-12 23:45:36',
+      latestTimestamp: '2023-07-12 23:45:36',
     };
   }
 
@@ -71,10 +71,10 @@ export default function ({ getService }: FtrProviderContext) {
       empty_bucket_count: '0',
       sparse_bucket_count: '0',
       bucket_count: '371',
-      earliest_record_timestamp: '2019-06-12 00:04:19',
-      latest_record_timestamp: '2019-07-12 23:45:36',
+      earliest_record_timestamp: '2023-06-12 00:04:19',
+      latest_record_timestamp: '2023-07-12 23:45:36',
       input_record_count: '4,675',
-      latest_bucket_timestamp: '2019-07-12 22:00:00',
+      latest_bucket_timestamp: '2023-07-12 22:00:00',
     };
   }
 
@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
       total_partition_field_count: '3',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2019-07-12 20:00:00',
+      timestamp: '2023-07-12 20:00:00',
     };
   }
 
@@ -132,8 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2019 @ 00:04:19.000',
-        'Jul 12, 2019 @ 23:45:36.000'
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jul 12, 2023 @ 23:45:36.000'
       );
 
       await ml.testExecution.logTestStep('job creation displays the event rate chart');
@@ -285,8 +285,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2019 @ 00:04:19.000',
-        'Jul 12, 2019 @ 23:45:36.000'
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jul 12, 2023 @ 23:45:36.000'
       );
 
       await ml.testExecution.logTestStep('job cloning displays the event rate chart');

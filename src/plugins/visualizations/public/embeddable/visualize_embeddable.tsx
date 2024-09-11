@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _, { get } from 'lodash';
@@ -91,6 +92,10 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
+/** @deprecated
+ * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
+ * used within the visualize editor.
+ */
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
   implements
@@ -527,20 +532,27 @@ export class VisualizeEmbeddable
   }
 
   private renderError(error: ErrorLike | string) {
+    const { core } = this.deps.start();
     if (isFallbackDataView(this.vis.data.indexPattern)) {
       return (
-        <VisualizationMissedSavedObjectError
-          renderMode={this.input.renderMode ?? 'view'}
-          savedObjectMeta={{
-            savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
-          }}
-          application={getApplication()}
-          message={typeof error === 'string' ? error : error.message}
-        />
+        <KibanaRenderContextProvider {...core}>
+          <VisualizationMissedSavedObjectError
+            renderMode={this.input.renderMode ?? 'view'}
+            savedObjectMeta={{
+              savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
+            }}
+            application={getApplication()}
+            message={typeof error === 'string' ? error : error.message}
+          />
+        </KibanaRenderContextProvider>
       );
     }
 
-    return <VisualizationError error={error} />;
+    return (
+      <KibanaRenderContextProvider {...core}>
+        <VisualizationError error={error} />
+      </KibanaRenderContextProvider>
+    );
   }
 
   public destroy() {

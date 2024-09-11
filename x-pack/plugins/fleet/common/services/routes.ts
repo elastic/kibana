@@ -24,6 +24,7 @@ import {
   FLEET_SERVER_HOST_API_ROUTES,
   FLEET_PROXY_API_ROUTES,
   UNINSTALL_TOKEN_ROUTES,
+  FLEET_DEBUG_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -74,6 +75,12 @@ export const epmRouteService = {
 
   getRemovePath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
+  getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN.replace('{pkgName}', pkgName)
       .replace('{pkgVersion}', pkgVersion)
       .replace(/\/$/, ''); // trim trailing slash
   },
@@ -280,12 +287,14 @@ export const settingsRoutesService = {
   getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
   getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
+  getSpaceInfoPath: () => SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
 };
 
 export const appRoutesService = {
   getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
   getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
   postHealthCheckPath: () => APP_API_ROUTES.HEALTH_CHECK_PATTERN,
+  getAgentPoliciesSpacesPath: () => APP_API_ROUTES.AGENT_POLICIES_SPACES,
 };
 
 export const enrollmentAPIKeyRouteService = {
@@ -315,4 +324,10 @@ export const downloadSourceRoutesService = {
   getDeletePath: (downloadSourceId: string) =>
     DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN.replace('{sourceId}', downloadSourceId),
   getCreatePath: () => DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
+};
+
+export const debugRoutesService = {
+  getIndexPath: () => FLEET_DEBUG_ROUTES.INDEX_PATTERN,
+  getSavedObjectsPath: () => FLEET_DEBUG_ROUTES.SAVED_OBJECTS_PATTERN,
+  getSavedObjectNamesPath: () => FLEET_DEBUG_ROUTES.SAVED_OBJECT_NAMES_PATTERN,
 };

@@ -61,7 +61,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // FLAKEY - see https://github.com/elastic/kibana/issues/182891
-    it('@skipInServerless Adds filter on define step', () => {
+    it('Adds filter on define step', { tags: ['@skipInServerless'] }, () => {
       visit(CREATE_RULE_URL);
       fillDefineCustomRule(rule);
       openAddFilterPopover();
@@ -73,7 +73,8 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: exists');
     });
 
-    describe('Alert suppression', () => {
+    // https://github.com/elastic/kibana/issues/187277
+    describe('Alert suppression', { tags: ['@skipInServerlessMKI'] }, () => {
       const SUPPRESS_BY_FIELDS = ['source.ip'];
 
       it('creates rule with suppression', () => {

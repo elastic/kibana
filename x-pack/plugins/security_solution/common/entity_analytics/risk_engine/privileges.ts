@@ -6,7 +6,7 @@
  */
 
 import type { NonEmptyArray } from 'fp-ts/NonEmptyArray';
-import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
+import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics';
 import type { RiskEngineIndexPrivilege } from './constants';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,

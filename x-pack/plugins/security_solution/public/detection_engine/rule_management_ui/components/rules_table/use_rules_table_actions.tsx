@@ -36,7 +36,10 @@ export const useRulesTableActions = ({
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => {
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
@@ -122,12 +125,16 @@ export const useRulesTableActions = ({
           {
             type: 'icon',
             'data-test-subj': 'manualRuleRunAction',
-            description: i18n.MANUAL_RULE_RUN,
+            description: (rule) =>
+              !rule.enabled ? i18n.MANUAL_RULE_RUN_TOOLTIP : i18n.MANUAL_RULE_RUN,
             icon: 'play',
             name: i18n.MANUAL_RULE_RUN,
             onClick: async (rule: Rule) => {
               startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
               const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+              telemetry.reportManualRuleRunOpenModal({
+                type: 'single',
+              });
               if (modalManualRuleRunConfirmationResult === null) {
                 return;
               }

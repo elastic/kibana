@@ -20,6 +20,7 @@ import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detect
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -31,9 +32,7 @@ describe('Create rule route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
-    clients.detectionRulesClient.createCustomRule.mockResolvedValue(
-      getRuleMock(getQueryRuleParams())
-    );
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -173,10 +172,6 @@ describe('Create rule route', () => {
     });
   });
   describe('rule containing response actions', () => {
-    beforeEach(() => {
-      // @ts-expect-error We're writting to a read only property just for the purpose of the test
-      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
-    });
     const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {

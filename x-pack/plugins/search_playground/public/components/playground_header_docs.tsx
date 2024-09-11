@@ -20,6 +20,7 @@ export const PlaygroundHeaderDocs: React.FC = () => (
     href={docLinks.chatPlayground}
     target="_blank"
     iconType="documents"
+    size="s"
   >
     {i18n.translate('xpack.searchPlayground.pageTitle.header.docLink', {
       defaultMessage: 'Playground Docs',

@@ -5,7 +5,7 @@
 # SKIP_VERIFICATION: if set to 1/true, it will skip running all tests
 # SKIP_CYPRESS: if set to 1/true, it will skip running the cypress tests
 # FTR_EXTRA_ARGS: a string argument, if passed, it will be forwarded verbatim to the FTR run script
-# ES_SERVERLESS_IMAGE: the tag for the docker image to test, in the form of docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:$TAG
+# ES_SERVERLESS_IMAGE: the full image path for the docker image to test
 # BUILDKITE_COMMIT: the commit hash of the kibana branch to test
 
 agents:
@@ -16,16 +16,7 @@ agents:
 
 steps:
   - label: "Annotate runtime parameters"
-    command: |
-      buildkite-agent annotate --context kibana-commit --style info "Kibana build hash: $BUILDKITE_BRANCH / $BUILDKITE_COMMIT"
-      cat << EOF | buildkite-agent annotate --context es-serverless-image --style info
-        ES Serverless image: \`$ES_SERVERLESS_IMAGE\`
-
-        To run this locally:
-        \`\`\`
-        node scripts/es serverless --image $ES_SERVERLESS_IMAGE
-        \`\`\`
-      EOF
+    command: .buildkite/scripts/steps/es_serverless/annotate_runtime_parameters.sh
 
   - group: "(:kibana: x :elastic:) Trigger Kibana Serverless suite"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
@@ -53,7 +44,7 @@ steps:
         timeout_in_minutes: 60
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 3
 
       - label: "Pick Test Group Run Order (FTR + Integration)"
@@ -61,18 +52,18 @@ steps:
         depends_on: build
         timeout_in_minutes: 10
         env:
-          FTR_CONFIGS_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh'
-          JEST_INTEGRATION_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh'
-          FTR_CONFIG_PATTERNS: '**/test_serverless/**'
-          FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
-          LIMIT_CONFIG_TYPE: 'functional,integration'
+          FTR_CONFIGS_SCRIPT: "TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh"
+          JEST_INTEGRATION_SCRIPT: "TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh"
+          FTR_CONFIG_PATTERNS: "**/test_serverless/**,**/test/security_solution_api_integration/**/serverless.config.ts"
+          FTR_EXTRA_ARGS: "$FTR_EXTRA_ARGS"
+          LIMIT_CONFIG_TYPE: "functional,integration"
         retry:
           automatic:
-            - exit_status: '*'
+            - exit_status: "*"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
-        label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
+        label: "Serverless Entity Analytics - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -85,11 +76,11 @@ steps:
         parallelism: 3
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
-        label: 'Serverless Explore - Security Solution Cypress Tests'
+        label: "Serverless Explore - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -102,11 +93,11 @@ steps:
         parallelism: 4
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
-        label: 'Serverless Investigations - Security Solution Cypress Tests'
+        label: "Serverless Investigations - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -119,11 +110,11 @@ steps:
         parallelism: 8
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
-        label: 'Serverless Rule Management - Security Solution Cypress Tests'
+        label: "Serverless Rule Management - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -136,11 +127,11 @@ steps:
         parallelism: 5
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
-        label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+        label: "Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -153,11 +144,11 @@ steps:
         parallelism: 1
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
-        label: 'Serverless Detection Engine - Security Solution Cypress Tests'
+        label: "Serverless Detection Engine - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -170,11 +161,11 @@ steps:
         parallelism: 5
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
-        label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
+        label: "Serverless Detection Engine - Exceptions - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -187,11 +178,11 @@ steps:
         parallelism: 2
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
-        label: 'Serverless AI Assistant - Security Solution Cypress Tests'
+        label: "Serverless AI Assistant - Security Solution Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -204,11 +195,11 @@ steps:
         parallelism: 1
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-        label: 'Defend Workflows Cypress Tests on Serverless'
+        label: "Defend Workflows Cypress Tests on Serverless"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -223,11 +214,11 @@ steps:
         parallelism: 12
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
       - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-        label: 'Serverless Osquery Cypress Tests'
+        label: "Serverless Osquery Cypress Tests"
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           image: family/kibana-ubuntu-2004
@@ -240,7 +231,7 @@ steps:
         parallelism: 7
         retry:
           automatic:
-            - exit_status: '-1'
+            - exit_status: "-1"
               limit: 1
 
   - wait: ~
@@ -250,6 +241,6 @@ steps:
 
   - wait: ~
 
-  - label: 'Post-Build'
+  - label: "Post-Build"
     command: .buildkite/scripts/lifecycle/post_build.sh
     timeout_in_minutes: 10

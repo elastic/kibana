@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { FetchStatus } from '../../types';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { reduce } from 'rxjs';
@@ -14,7 +16,6 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import {
-  DataAvailableFieldsMsg,
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
@@ -59,9 +60,6 @@ describe('test fetchAll', () => {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
-      availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>({
-        fetchStatus: FetchStatus.UNINITIALIZED,
-      }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
 
@@ -77,6 +75,10 @@ describe('test fetchAll', () => {
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+        },
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -265,6 +267,10 @@ describe('test fetchAll', () => {
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+        },
       }),
     };
     fetchAll(subjects, false, deps);
@@ -383,6 +389,10 @@ describe('test fetchAll', () => {
           expandedDoc: undefined,
           customFilters: [],
           overriddenVisContextAfterInvalidation: undefined,
+          resetDefaultProfileState: {
+            columns: false,
+            rowHeight: false,
+          },
         }),
       };
       fetchAll(subjects, false, deps);

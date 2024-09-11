@@ -35,7 +35,7 @@ describe('GlobalDataTagsTable', () => {
   ];
   let renderer: TestRenderer;
 
-  const renderComponent = (tags: GlobalDataTag[]) => {
+  const renderComponent = (tags: GlobalDataTag[], options?: { isDisabled?: boolean }) => {
     mockUpdateAgentPolicy = jest.fn();
     renderer = createFleetTestRendererMock();
 
@@ -44,8 +44,11 @@ describe('GlobalDataTagsTable', () => {
         global_data_tags: tags,
       });
 
-      const updateAgentPolicy = React.useCallback((policy) => {
+      const updateAgentPolicy = React.useCallback<
+        React.ComponentProps<typeof GlobalDataTagsTable>['updateAgentPolicy']
+      >((policy) => {
         mockUpdateAgentPolicy(policy);
+        // @ts-expect-error - TODO: fix this, types do not match
         _updateAgentPolicy(policy);
       }, []);
 
@@ -53,6 +56,7 @@ describe('GlobalDataTagsTable', () => {
         <GlobalDataTagsTable
           updateAgentPolicy={updateAgentPolicy}
           globalDataTags={agentPolicy.global_data_tags}
+          isDisabled={options?.isDisabled}
         />
       );
     };
@@ -286,5 +290,20 @@ describe('GlobalDataTagsTable', () => {
         { name: 'updatedTag2', value: 'updatedValue2' },
       ],
     });
+  });
+
+  it('should not allow to add tag when disabled and no tags exists', () => {
+    renderComponent([], { isDisabled: true });
+
+    const test = renderResult.getByTestId('globalDataTagAddFieldBtn');
+    expect(test).toBeDisabled();
+  });
+
+  it('should not allow to add/edit/remove tag when disabled and tags already exists', () => {
+    renderComponent(globalDataTags, { isDisabled: true });
+
+    expect(renderResult.getByTestId('globalDataTagAddAnotherFieldBtn')).toBeDisabled();
+    expect(renderResult.getByTestId('globalDataTagDeleteField1Btn')).toBeDisabled();
+    expect(renderResult.getByTestId('globalDataTagEditField1Btn')).toBeDisabled();
   });
 });

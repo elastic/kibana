@@ -12,3 +12,19 @@ components:
         $ref: './primitives.schema.yaml#/components/schemas/NonEmptyString'
       minItems: 1
       description: A list of alerts ids.
+
+    AlertTag:
+      $ref: './primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    AlertTags:
+      type: array
+      items:
+        $ref: '#/components/schemas/AlertTag'
+
+    AlertStatus:
+      type: string
+      enum:
+        - open
+        - closed
+        - acknowledged
+        - in-progress

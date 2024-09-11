@@ -12,6 +12,8 @@ import {
   disableProtections,
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isBillablePolicy,
+  getPolicyProtectionsReference,
 } from './policy_config_helpers';
 import { set } from 'lodash';
 
@@ -192,6 +194,35 @@ describe('Policy Config helpers', () => {
       }
     );
   });
+
+  describe('isBillablePolicy', () => {
+    it('doesnt bill if serverless false', () => {
+      const policy = policyFactory();
+      const isBillable = isBillablePolicy(policy);
+      expect(policy.meta.serverless).toBe(false);
+      expect(isBillable).toBe(false);
+    });
+
+    it('doesnt bill if event collection only', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      policy.meta.serverless = true;
+      const isBillable = isBillablePolicy(policy);
+      expect(isBillable).toBe(false);
+    });
+
+    it.each(getPolicyProtectionsReference())(
+      'correctly bills if $keyPath is enabled',
+      (feature) => {
+        for (const os of feature.osList) {
+          const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+          policy.meta.serverless = true;
+          set(policy, `${os}.${feature.keyPath}`, feature.enableValue);
+          const isBillable = isBillablePolicy(policy);
+          expect(isBillable).toBe(true);
+        }
+      }
+    );
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
@@ -205,6 +236,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
     cluster_name: '',
     cluster_uuid: '',
     serverless: false,
+    billable: false,
   },
   windows: {
     events: {

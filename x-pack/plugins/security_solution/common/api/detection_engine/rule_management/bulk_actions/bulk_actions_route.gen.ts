@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
@@ -53,7 +53,8 @@ export const BulkActionsDryRunErrCode = z.enum([
   'MACHINE_LEARNING_AUTH',
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',
-  'INVESTIGATION_FIELDS_FEATURE',
+  'MANUAL_RULE_RUN_FEATURE',
+  'MANUAL_RULE_RUN_DISABLED_RULE',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -157,6 +158,23 @@ export const BulkDuplicateRules = BulkActionBase.merge(
   })
 );
 
+export type BulkManualRuleRun = z.infer<typeof BulkManualRuleRun>;
+export const BulkManualRuleRun = BulkActionBase.merge(
+  z.object({
+    action: z.literal('run'),
+    run: z.object({
+      /**
+       * Start date of the manual rule run
+       */
+      start_date: z.string(),
+      /**
+       * End date of the manual rule run
+       */
+      end_date: z.string().optional(),
+    }),
+  })
+);
+
 /**
  * The condition for throttling the notification: 'rule', 'no_actions', or time duration
  */
@@ -173,6 +191,7 @@ export const BulkActionType = z.enum([
   'delete',
   'duplicate',
   'edit',
+  'run',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
 export const BulkActionTypeEnum = BulkActionType.enum;
@@ -199,7 +218,7 @@ export const BulkActionEditTypeEnum = BulkActionEditType.enum;
 export type NormalizedRuleAction = z.infer<typeof NormalizedRuleAction>;
 export const NormalizedRuleAction = z
   .object({
-    group: RuleActionGroup,
+    group: RuleActionGroup.optional(),
     id: RuleActionId,
     params: RuleActionParams,
     frequency: RuleActionFrequency.optional(),
@@ -221,7 +240,7 @@ export const BulkActionEditPayloadSchedule = z.object({
   type: z.literal('set_schedule'),
   value: z.object({
     /**
-     * Interval in which the rule is executed
+     * Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
      */
     interval: z.string().regex(/^[1-9]\d*[smh]$/),
     /**
@@ -265,8 +284,7 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayload>;
-export const BulkActionEditPayload = z.union([
+const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
@@ -274,6 +292,10 @@ export const BulkActionEditPayload = z.union([
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
 ]);
+
+export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayloadInternal>;
+export const BulkActionEditPayload =
+  BulkActionEditPayloadInternal as z.ZodType<BulkActionEditPayload>;
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
 export const BulkEditRules = BulkActionBase.merge(
@@ -286,28 +308,33 @@ export const BulkEditRules = BulkActionBase.merge(
   })
 );
 
-export type PerformBulkActionRequestQuery = z.infer<typeof PerformBulkActionRequestQuery>;
-export const PerformBulkActionRequestQuery = z.object({
+export type PerformRulesBulkActionRequestQuery = z.infer<typeof PerformRulesBulkActionRequestQuery>;
+export const PerformRulesBulkActionRequestQuery = z.object({
   /**
    * Enables dry run mode for the request call.
    */
   dry_run: BooleanFromString.optional(),
 });
-export type PerformBulkActionRequestQueryInput = z.input<typeof PerformBulkActionRequestQuery>;
+export type PerformRulesBulkActionRequestQueryInput = z.input<
+  typeof PerformRulesBulkActionRequestQuery
+>;
 
-export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
-export const PerformBulkActionRequestBody = z.union([
+export type PerformRulesBulkActionRequestBody = z.infer<typeof PerformRulesBulkActionRequestBody>;
+export const PerformRulesBulkActionRequestBody = z.union([
   BulkDeleteRules,
   BulkDisableRules,
   BulkEnableRules,
   BulkExportRules,
   BulkDuplicateRules,
+  BulkManualRuleRun,
   BulkEditRules,
 ]);
-export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
+export type PerformRulesBulkActionRequestBodyInput = z.input<
+  typeof PerformRulesBulkActionRequestBody
+>;
 
-export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse>;
-export const PerformBulkActionResponse = z.union([
+export type PerformRulesBulkActionResponse = z.infer<typeof PerformRulesBulkActionResponse>;
+export const PerformRulesBulkActionResponse = z.union([
   BulkEditActionResponse,
   BulkExportActionResponse,
 ]);

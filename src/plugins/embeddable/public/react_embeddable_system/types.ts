@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import {
   HasSerializableState,
   HasSnapshottableState,
@@ -31,7 +33,7 @@ export interface DefaultEmbeddableApi<
 > extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
-    PublishesUnsavedChanges,
+    Partial<PublishesUnsavedChanges>,
     HasSerializableState<SerializedState>,
     HasSnapshottableState<RuntimeState> {}
 
@@ -41,7 +43,11 @@ export interface DefaultEmbeddableApi<
  */
 export type SetReactEmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
 
 /**
@@ -50,9 +56,13 @@ export type SetReactEmbeddableApiRegistration<
  */
 export type BuildReactEmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > = Omit<
-  SetReactEmbeddableApiRegistration<SerializedState, Api>,
+  SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
   'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
 >;
 
@@ -65,8 +75,11 @@ export type BuildReactEmbeddableApiRegistration<
  **/
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
@@ -95,18 +108,26 @@ export interface ReactEmbeddableFactory<
    * function.
    */
   buildEmbeddable: (
-    initialState: RuntimeState,
+    /**
+     * Initial runtime state. Composed from last saved state and previous sessions's unsaved changes
+     */
+    initialRuntimeState: RuntimeState,
     /**
      * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
      * changes logic that the dashboard expects using the provided comparators
      */
     buildApi: (
-      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
+      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
       comparators: StateComparators<RuntimeState>
-    ) => Api,
+    ) => Api & HasSnapshottableState<RuntimeState>,
     uuid: string,
     parentApi: unknown | undefined,
     /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
-    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, Api>) => Api
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api,
+    /**
+     * Last saved runtime state. Different from initialRuntimeState in that it does not contain previous sessions's unsaved changes
+     * Compare with initialRuntimeState to flag unsaved changes on load
+     */
+    lastSavedRuntimeState: RuntimeState
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

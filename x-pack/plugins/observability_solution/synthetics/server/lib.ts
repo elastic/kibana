@@ -6,6 +6,10 @@
  */
 
 import {
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
@@ -13,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchResponse } from '@kbn/es-types';
+import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
@@ -36,7 +40,7 @@ export interface CountResponse {
   indices: string;
 }
 
-export class UptimeEsClient {
+export class SyntheticsEsClient {
   isDev: boolean;
   request?: KibanaRequest;
   baseESClient: ElasticsearchClient;
@@ -74,7 +78,6 @@ export class UptimeEsClient {
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
-
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -86,7 +89,8 @@ export class UptimeEsClient {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
-    if (this.request) {
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if (isInspectorEnabled && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
           esError,
@@ -98,9 +102,7 @@ export class UptimeEsClient {
           startTime: startTimeNow,
         })
       );
-    }
-    const isInspectorEnabled = await this.getInspectEnabled();
-    if (isInspectorEnabled && this.request) {
+
       debugESCall({
         startTime,
         request: this.request,
@@ -116,6 +118,60 @@ export class UptimeEsClient {
 
     return res;
   }
+
+  async msearch<
+    TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
+    TDocument = unknown
+  >(
+    requests: MsearchMultisearchBody[],
+    operationName?: string
+  ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+    const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
+    for (const request of requests) {
+      searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
+      searches.push(request);
+    }
+
+    const startTimeNow = Date.now();
+
+    let res: any;
+    let esError: any;
+
+    try {
+      res = await this.baseESClient.msearch(
+        {
+          searches,
+        },
+        { meta: true }
+      );
+    } catch (e) {
+      esError = e;
+    }
+
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if (isInspectorEnabled && this.request) {
+      requests.forEach((request, index) => {
+        this.inspectableEsQueries.push(
+          getInspectResponse({
+            esError,
+            esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
+            esRequestStatus: RequestStatus.OK,
+            esResponse: res.body.responses[index],
+            kibanaRequest: this.request!,
+            operationName: operationName ?? '',
+            startTime: startTimeNow,
+          })
+        );
+      });
+    }
+
+    return {
+      responses: res.body.responses as unknown as Array<
+        InferSearchResponseOf<TDocument, TSearchRequest>
+      >,
+    };
+  }
+
   async count<TParams>(params: TParams): Promise<CountResponse> {
     let res: any;
     let esError: any;
@@ -162,6 +218,9 @@ export class UptimeEsClient {
     return {};
   }
   async getInspectEnabled() {
+    if (this.isDev) {
+      return true;
+    }
     if (!this.uiSettings) {
       return false;
     }

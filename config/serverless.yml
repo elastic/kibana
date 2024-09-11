@@ -70,6 +70,9 @@ core.lifecycle.disablePreboot: true
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
+# Enable elasticsearch response size circuit breaker
+elasticsearch.maxResponseSize: "100mb"
+
 # Limit batch size to reduce possibility of failures.
 # A longer migration time is acceptable due to the ZDT algorithm.
 migrations.batchSize: 250
@@ -97,10 +100,12 @@ xpack.index_management.enableIndexActions: false
 xpack.index_management.enableLegacyTemplates: false
 # Disable index stats information from Index Management UI
 xpack.index_management.enableIndexStats: false
+# Enable size and doc count information via metering API from Index Management UI
+xpack.index_management.enableSizeAndDocCount: true
+# Disable data stream stats information from Index Management UI
+xpack.index_management.enableDataStreamStats: false
 # Only limited index settings can be edited
 xpack.index_management.editableIndexSettings: limited
-# Disable Storage size column in the Data streams table from Index Management UI
-xpack.index_management.enableDataStreamsStorageColumn: false
 # Disable _source field in the Mappings editor's advanced options form from Index Management UI
 xpack.index_management.enableMappingsSourceFieldSection: false
 # Disable toggle for enabling data retention in DSL form from Index Management UI
@@ -147,6 +152,7 @@ server.versioned.strictClientVersionCheck: false
 # Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
+xpack.spaces.allowSolutionVisibility: false
 
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless

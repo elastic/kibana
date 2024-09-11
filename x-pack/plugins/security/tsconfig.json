@@ -7,7 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "__mocks__/**/*"
+    "__mocks__/**/*",
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
@@ -65,11 +65,9 @@
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
     "@kbn/remote-clusters-plugin",
-    "@kbn/analytics-client",
     "@kbn/security-plugin-types-common",
     "@kbn/security-plugin-types-public",
     "@kbn/security-plugin-types-server",
-    "@kbn/kibana-utils-plugin",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/core-security-browser",
@@ -82,7 +80,13 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-user-profile-server",
-    "@kbn/core-user-profile-browser"
+    "@kbn/core-user-profile-browser",
+    "@kbn/security-api-key-management",
+    "@kbn/security-form-components",
+    "@kbn/core-security-server-mocks",
+    "@kbn/security-authorization-core",
+    "@kbn/security-role-management-model",
+    "@kbn/security-ui-components",
   ],
   "exclude": [
     "target/**/*",

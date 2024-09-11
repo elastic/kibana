@@ -26,7 +26,8 @@ import {
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { UptimeAlertTypeFactory } from './types';
+import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
+import { MonitorSummary, UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
   Ping,
@@ -151,7 +152,7 @@ export const formatFilterString = async (
 export const getMonitorSummary = (
   monitorInfo: Ping & { '@timestamp'?: string },
   statusMessage: string
-) => {
+): MonitorSummary => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
   const checkedAt = moment(monitorInfo['@timestamp'] ?? monitorInfo.timestamp).format('LLL');
@@ -159,13 +160,15 @@ export const getMonitorSummary = (
   const summary = {
     checkedAt,
     monitorUrl: monitorInfo.url?.full,
-    monitorId: monitorInfo.monitor?.id,
+    monitorId: monitorInfo.monitor.id,
     configId: monitorInfo.config_id,
-    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
-    monitorType: monitorInfo.monitor?.type,
+    monitorName: monitorInfo.monitor.name ?? monitorInfo.monitor.id,
+    monitorType: monitorInfo.monitor.type,
     latestErrorMessage: monitorInfo.error?.message,
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
+    observerName: monitorInfo.observer?.name,
     observerHostname: monitorInfo.agent?.name,
+    monitorTags: monitorInfo.tags,
   };
 
   return {
@@ -203,13 +206,15 @@ export const getReasonMessage = ({
   });
 };
 
-export const getMonitorAlertDocument = (monitorSummary: Record<string, string | undefined>) => ({
+export const getMonitorAlertDocument = (monitorSummary: MonitorSummary) => ({
   'monitor.id': monitorSummary.monitorId,
   configId: monitorSummary.configId,
   'monitor.type': monitorSummary.monitorType,
   'monitor.name': monitorSummary.monitorName,
+  'monitor.tags': monitorSummary.tags,
   'url.full': monitorSummary.monitorUrl,
   'observer.geo.name': monitorSummary.observerLocation,
+  'observer.name': monitorSummary.observerName,
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
   [ALERT_REASON]: monitorSummary.reason,
@@ -576,6 +581,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
+  fieldsForAAD: Object.keys(uptimeRuleFieldMap),
   getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
     observabilityPaths.ruleDetails(rule.id),
 });

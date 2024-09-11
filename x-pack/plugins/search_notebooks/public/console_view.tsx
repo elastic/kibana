@@ -7,22 +7,40 @@
 
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { EmbeddedConsoleView } from '@kbn/console-plugin/public';
+import type {
+  EmbeddedConsoleView,
+  EmbeddedConsoleViewButtonProps,
+} from '@kbn/console-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { QueryClient } from '@tanstack/react-query';
 
-import { SearchNotebooksButton } from './components/notebooks_button';
+import { NotebookListValue, AppMetricsTracker } from './types';
 
+const SearchNotebooksButton = dynamic(async () => ({
+  default: (await import('./components/notebooks_button')).SearchNotebooksButton,
+}));
 const SearchNotebooksView = dynamic(async () => ({
   default: (await import('./components/notebooks_view')).SearchNotebooksView,
 }));
 
 export const notebooksConsoleView = (
   core: CoreStart,
-  queryClient: QueryClient
+  queryClient: QueryClient,
+  usageTracker: AppMetricsTracker,
+  clearNotebookList: () => void,
+  getNotebookListValue: () => NotebookListValue
 ): EmbeddedConsoleView => {
   return {
-    ActivationButton: SearchNotebooksButton,
-    ViewContent: () => <SearchNotebooksView core={core} queryClient={queryClient} />,
+    ActivationButton: (props: EmbeddedConsoleViewButtonProps) => (
+      <SearchNotebooksButton {...props} clearNotebookList={clearNotebookList} />
+    ),
+    ViewContent: () => (
+      <SearchNotebooksView
+        core={core}
+        queryClient={queryClient}
+        usageTracker={usageTracker}
+        getNotebookList={getNotebookListValue}
+      />
+    ),
   };
 };

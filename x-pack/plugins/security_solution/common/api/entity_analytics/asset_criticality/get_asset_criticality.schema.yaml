@@ -1,24 +1,30 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Asset Criticality Get Record Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
-  /internal/asset_criticality:
+  /api/asset_criticality:
     get:
       x-labels: [ess, serverless]
-      x-internal: true
-      operationId: AssetCriticalityGetRecord
+      x-codegen-enabled: true
+      operationId: GetAssetCriticalityRecord
       summary: Get Criticality Record
+      description: Get the criticality record for a specific asset.
       parameters:
-        - $ref: './common.schema.yaml#/components/parameters/id_value'
-        - $ref: './common.schema.yaml#/components/parameters/id_field'
+        - name: id_value
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The ID value of the asset.
+        - name: id_field
+          in: query
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/IdField'
+          example: 'host.name'
+          description: The field representing the ID.
       responses:
         '200':
           description: Successful response

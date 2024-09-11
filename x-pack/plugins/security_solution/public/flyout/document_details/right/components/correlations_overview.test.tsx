@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
@@ -39,7 +39,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../../../common/components/guided_onboarding_tour/tour_config';
 
@@ -76,13 +76,13 @@ const panelContextValue = {
   browserFields: {},
   getFieldsData: () => {},
   scopeId: 'scopeId',
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderCorrelationsOverview = (contextValue: RightPanelContext) => (
+const renderCorrelationsOverview = (contextValue: DocumentDetailsContext) => (
   <TestProviders>
-    <RightPanelContext.Provider value={contextValue}>
+    <DocumentDetailsContext.Provider value={contextValue}>
       <CorrelationsOverview />
-    </RightPanelContext.Provider>
+    </DocumentDetailsContext.Provider>
   </TestProviders>
 );
 
@@ -92,10 +92,7 @@ const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn(),
@@ -139,6 +136,26 @@ describe('<CorrelationsOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render link when isPreviewMode is true', () => {
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'event-id' });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: false, originalEventId });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
+
+    const { getByTestId, queryByTestId } = render(
+      renderCorrelationsOverview({ ...panelContextValue, isPreviewMode: true })
+    );
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should show component with all rows in expandable panel', () => {
@@ -209,9 +226,9 @@ describe('<CorrelationsOverview />', () => {
   it('should navigate to the left section Insights tab when clicking on button', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <CorrelationsOverview />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -230,9 +247,9 @@ describe('<CorrelationsOverview />', () => {
   it('should navigate to the left section Insights tab automatically when active step is "view case"', () => {
     render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <CorrelationsOverview />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 

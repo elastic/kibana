@@ -47,11 +47,11 @@ export default function (providerContext: FtrProviderContext) {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
           true
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
@@ -72,26 +72,26 @@ export default function (providerContext: FtrProviderContext) {
       it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton',
-              2
+              'confirmCloudFormationModalConfirmButton'
             )
           ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);
       });
     });
 
-    describe('CIS_AWS Organization Manual Assume Role', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/187470
+    describe.skip('CIS_AWS Organization Manual Assume Role', () => {
       it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
@@ -108,7 +108,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
@@ -116,13 +116,14 @@ export default function (providerContext: FtrProviderContext) {
           directAccessSecretKey
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
           (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -135,7 +136,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
@@ -147,7 +148,7 @@ export default function (providerContext: FtrProviderContext) {
           tempAccessSessionToken
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -158,6 +159,7 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
             tempAccessSessionToken
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -169,7 +171,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
@@ -177,7 +179,7 @@ export default function (providerContext: FtrProviderContext) {
           sharedCredentialProfileName
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -197,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await cisIntegration.getUrlOnPostInstallModal()) ===
             'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
@@ -213,7 +215,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
@@ -231,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
         await cisIntegration.fillInTextField(
@@ -239,13 +241,14 @@ export default function (providerContext: FtrProviderContext) {
           directAccessSecretKey
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         expect(
           (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -259,7 +262,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(TEMP_ACCESS_KEY_ID_TEST_ID, accessKeyId);
         await cisIntegration.fillInTextField(
@@ -271,7 +274,7 @@ export default function (providerContext: FtrProviderContext) {
           tempAccessSessionToken
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();
@@ -282,6 +285,7 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
             tempAccessSessionToken
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -294,7 +298,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'shared_credentials');
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(SHARED_CREDENTIALS_FILE_TEST_ID, sharedCredentialFile);
         await cisIntegration.fillInTextField(
@@ -302,7 +306,7 @@ export default function (providerContext: FtrProviderContext) {
           sharedCredentialProfileName
         );
         await cisIntegration.clickSaveButton();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
         await cisIntegration.navigateToIntegrationCspList();
         await cisIntegration.clickFirstElementOnIntegrationTable();

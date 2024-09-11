@@ -29,6 +29,7 @@ import { getConnectorType as getWebhookConnectorType } from './webhook';
 import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
+import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
@@ -58,7 +59,7 @@ export type { SlackApiActionParams as SlackApiActionParams } from '../../common/
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
-export type { ActionParamsType as WebhookActionParams } from './webhook';
+export type { ActionParamsType as WebhookActionParams } from './webhook/types';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 
@@ -109,6 +110,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getGeminiConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
+  actions.registerSubActionConnectorType(getTheHiveConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

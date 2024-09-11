@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RouteValidator } from './route_validator';
@@ -86,7 +87,7 @@ export interface RouteConfigOptionsBody {
    *
    * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
-  output?: typeof validBodyOutput[number];
+  output?: (typeof validBodyOutput)[number];
 
   /**
    * Determines if the incoming payload is processed or presented raw. Available values:
@@ -198,6 +199,14 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * ```
    */
   description?: string;
+
+  /**
+   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
+   * refrain from usage of this route.
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   */
+  deprecated?: boolean;
 }
 
 /**

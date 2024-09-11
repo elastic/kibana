@@ -31,6 +31,7 @@ import {
   useGetUninstallToken,
   useGetUninstallTokens,
 } from '../../hooks/use_request/uninstall_tokens';
+import { MAX_FLYOUT_WIDTH } from '../../constants';
 
 import { UninstallCommandsPerPlatform } from './uninstall_commands_per_platform';
 import type { UninstallCommandTarget } from './types';
@@ -185,7 +186,11 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
   target,
 }) => {
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="uninstall-command-flyout">
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="uninstall-command-flyout"
+      maxWidth={MAX_FLYOUT_WIDTH}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>

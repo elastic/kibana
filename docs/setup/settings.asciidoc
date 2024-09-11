@@ -14,7 +14,7 @@ KBN_PATH_CONF=/home/kibana/config ./bin/kibana
 --
 
 The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
-variety of other options. 
+variety of other options.
 
 Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation
 will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value
@@ -85,10 +85,17 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+`permissionsPolicy.report_to:`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[Permissions Policy `report-to` directive].
+
 [[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
 The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
 
+[[elasticsearch-maxResponseSize]] `elasticsearch.maxResponseSize`::
+Either `false` or a `byteSize` value. When set, responses from {es} with a size higher than the defined limit will be rejected.
+This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {es}.
+*Default: `false`*
 
 [[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
 The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.
@@ -109,6 +116,9 @@ listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`
 +
 To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
 in this setting.
+
+[[elasticsearch-publicBaseUrl]] `elasticsearch.publicBaseUrl:`::
+The URL through which Elasticsearch is publicly accessible, if any. This will be shown to users in Kibana when they need connection details for your Elasticsearch cluster.
 
 [[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
 Time in milliseconds to wait for {es} to respond to pings.
@@ -420,6 +430,12 @@ Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissio
 directives, values, and text format. To disable, set to `null`.
 *Default:* `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
 
+[[server-securityResponseHeaders-permissionsPolicyReportOnly]] `server.securityResponseHeaders.permissionsPolicyReportOnly`::
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy-Report-Only`] header
+is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format.
+
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
@@ -457,7 +473,7 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 setting specifies the port to use. *Default: `5601`*
 
 `server.protocol`::
-experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server. 
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server.
 *Default: `http1`*
 +
 NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>

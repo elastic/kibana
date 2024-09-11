@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
       sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createLogoutRequest(options: { sessionIndex: string }) {
     return getLogoutRequest({
-      destination: `http://localhost:${kibanaServerConfig.port}/logout`,
+      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/logout`,
       ...options,
     });
   }
@@ -740,9 +740,9 @@ export default function ({ getService }: FtrProviderContext) {
         existingSessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
-      for (const [description, setup] of testScenarios) {
+      for (const [description, setupFn] of testScenarios) {
         it(`should renew session and redirect to the home page if login is for the same user ${description}`, async () => {
-          await setup();
+          await setupFn();
 
           const samlAuthenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -770,7 +770,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it(`should create a new session and redirect to the \`overwritten_session\` if login is for another user ${description}`, async () => {
-          await setup();
+          await setupFn();
 
           const newUsername = 'c@d.e';
           const samlAuthenticationResponse = await supertest

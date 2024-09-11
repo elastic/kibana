@@ -238,7 +238,7 @@ describe('#imageUrl', () => {
 describe('#solution', () => {
   it('should throw error if solution is defined in serverless offering', () => {
     expect(() =>
-      spaceServerlessSchema.validate({ ...defaultProperties, solution: 'search' })
+      spaceServerlessSchema.validate({ ...defaultProperties, solution: 'es' })
     ).toThrow();
   });
 
@@ -253,13 +253,13 @@ describe('#solution', () => {
       .toThrowErrorMatchingInlineSnapshot(`
       "[solution]: types that failed validation:
       - [solution.0]: expected value to equal [security]
-      - [solution.1]: expected value to equal [observability]
-      - [solution.2]: expected value to equal [search]
+      - [solution.1]: expected value to equal [oblt]
+      - [solution.2]: expected value to equal [es]
       - [solution.3]: expected value to equal [classic]"
     `);
 
     expect(() =>
-      spaceBaseSchema.validate({ ...defaultProperties, solution: ' search ' }, {})
+      spaceBaseSchema.validate({ ...defaultProperties, solution: ' es ' }, {})
     ).toThrow();
   });
 });

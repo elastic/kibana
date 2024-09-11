@@ -20,8 +20,9 @@ import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 interface CaseViewAlertsProps {
   caseData: CaseUI;
+  onAlertsTableLoaded?: (eventIds: Array<Partial<{ _id: string }>>) => void;
 }
-export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
+export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
   const { triggersActionsUi } = useKibana().services;
 
   const alertIds = getManualAlertIds(caseData.comments);
@@ -58,6 +59,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
         : alertData?.featureIds ?? []) as ValidFeatureId[],
       query: alertIdsQuery,
       showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
+      onLoaded: onAlertsTableLoaded,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -65,6 +67,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
       caseData.owner,
       alertData?.featureIds,
       alertIdsQuery,
+      onAlertsTableLoaded,
     ]
   );
 

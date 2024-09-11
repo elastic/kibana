@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -128,7 +128,10 @@ describe('VisualizeESQL', () => {
     const setVisibilitySpy = jest.fn();
     renderComponent({}, undefined, setVisibilitySpy);
     await waitFor(() => {
-      userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
+      expect(screen.getByTestId('observabilityAiAssistantLensESQLEditButton')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
+    await waitFor(() => {
       expect(setVisibilitySpy).toHaveBeenCalled();
     });
   });
@@ -142,7 +145,8 @@ describe('VisualizeESQL', () => {
       }),
     };
     renderComponent({}, lensService, undefined, ['There is an error mate']);
-    await waitFor(() => expect(screen.findByTestId('observabilityAiAssistantErrorsList')));
+
+    expect(await screen.findByTestId('observabilityAiAssistantErrorsList')).toBeInTheDocument();
   });
 
   it('should not display the table on first render', async () => {
@@ -153,15 +157,16 @@ describe('VisualizeESQL', () => {
         suggestions: jest.fn(),
       }),
     };
-    renderComponent({}, lensService);
-    // the button to render a table should be present
-    await waitFor(() =>
-      expect(screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton'))
-    );
 
-    await waitFor(() =>
-      expect(screen.queryByTestId('observabilityAiAssistantESQLDataGrid')).not.toBeInTheDocument()
-    );
+    renderComponent({}, lensService);
+
+    expect(
+      await screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton')
+    ).toBeInTheDocument();
+
+    expect(
+      await screen.queryByTestId('observabilityAiAssistantESQLDataGrid')
+    ).not.toBeInTheDocument();
   });
 
   it('should display the table when user clicks the table button', async () => {
@@ -172,11 +177,16 @@ describe('VisualizeESQL', () => {
         suggestions: jest.fn(),
       }),
     };
+
     renderComponent({}, lensService);
-    await waitFor(() => {
-      userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLDisplayTableButton'));
-      expect(screen.findByTestId('observabilityAiAssistantESQLDataGrid'));
+
+    await act(async () => {
+      await userEvent.click(
+        await screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton')
+      );
     });
+
+    expect(await screen.findByTestId('observabilityAiAssistantESQLDataGrid')).toBeInTheDocument();
   });
 
   it('should render the ESQLDataGrid if Lens returns a table', async () => {
@@ -195,8 +205,6 @@ describe('VisualizeESQL', () => {
       },
       lensService
     );
-    await waitFor(() => {
-      expect(screen.findByTestId('observabilityAiAssistantESQLDataGrid'));
-    });
+    expect(await screen.findByTestId('observabilityAiAssistantESQLDataGrid')).toBeInTheDocument();
   });
 });

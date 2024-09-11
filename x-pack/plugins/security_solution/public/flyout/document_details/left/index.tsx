@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
 import { PanelHeader } from './header';
@@ -17,38 +18,36 @@ import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
-import { useLeftPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
+import type { DocumentDetailsProps } from '../shared/types';
 import { LeftPanelTour } from './components/tour';
 
-export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
+export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response' | 'notes';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
 export const LeftPanelInsightsTab: LeftPanelPaths = 'insights';
 export const LeftPanelInvestigationTab: LeftPanelPaths = 'investigation';
 export const LeftPanelResponseTab: LeftPanelPaths = 'response';
+export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 
-export interface LeftPanelProps extends FlyoutPanelProps {
-  key: typeof DocumentDetailsLeftPanelKey;
-  path?: PanelPath;
-  params?: {
-    id: string;
-    indexName: string;
-    scopeId: string;
-  };
-}
-
-export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
+export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
 
-  const tabsDisplayed = useMemo(
-    () =>
+  const tabsDisplayed = useMemo(() => {
+    const tabList =
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
-        : [tabs.insightsTab],
-    [eventKind]
-  );
+        : [tabs.insightsTab];
+    if (securitySolutionNotesEnabled && !isPreview) {
+      tabList.push(tabs.notesTab);
+    }
+    return tabList;
+  }, [eventKind, isPreview, securitySolutionNotesEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

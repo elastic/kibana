@@ -27,7 +27,7 @@ import {
   type MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import type { MlApiServices } from '../services/ml_api_service';
+import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
@@ -48,12 +48,13 @@ export class MlCapabilitiesService {
 
   private _isPlatinumOrTrialLicense$ = new BehaviorSubject<boolean | null>(null);
   private _mlFeatureEnabledInSpace$ = new BehaviorSubject<boolean | null>(null);
+  private _isUpgradeInProgress$ = new BehaviorSubject<boolean | null>(null);
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
   private _subscription: Subscription | undefined;
 
-  constructor(private readonly mlApiServices: MlApiServices) {
+  constructor(private readonly mlApi: MlApi) {
     this.init();
   }
 
@@ -66,13 +67,14 @@ export class MlCapabilitiesService {
         tap(() => {
           this._isLoading$.next(true);
         }),
-        switchMap(() => from(this.mlApiServices.checkMlCapabilities())),
+        switchMap(() => from(this.mlApi.checkMlCapabilities())),
         retry({ delay: CAPABILITIES_REFRESH_INTERVAL })
       )
       .subscribe((results) => {
         this._capabilities$.next(results.capabilities);
         this._isPlatinumOrTrialLicense$.next(results.isPlatinumOrTrialLicense);
         this._mlFeatureEnabledInSpace$.next(results.mlFeatureEnabledInSpace);
+        this._isUpgradeInProgress$.next(results.upgradeInProgress);
         this._isLoading$.next(false);
 
         /**
@@ -92,6 +94,14 @@ export class MlCapabilitiesService {
 
   public mlFeatureEnabledInSpace(): boolean | null {
     return this._mlFeatureEnabledInSpace$.getValue();
+  }
+
+  public isUpgradeInProgress$() {
+    return this._isUpgradeInProgress$;
+  }
+
+  public isUpgradeInProgress(): boolean | null {
+    return this._isUpgradeInProgress$.getValue();
   }
 
   public getCapabilities$() {
@@ -137,6 +147,23 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
   }, [capabilities]);
 }
 
+/**
+ * Check whether upgrade mode has been set.
+ */
+export function useUpgradeCheck(): boolean {
+  const {
+    services: {
+      mlServices: { mlCapabilities: mlCapabilitiesService },
+    },
+  } = useMlKibana();
+
+  const isUpgradeInProgress = useObservable(
+    mlCapabilitiesService.isUpgradeInProgress$(),
+    mlCapabilitiesService.isUpgradeInProgress()
+  );
+  return isUpgradeInProgress ?? false;
+}
+
 export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalServices) {
   return new Promise<void>(async (resolve, reject) => {
     try {
@@ -160,6 +187,7 @@ export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalSer
           capabilities,
           isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
           mlFeatureEnabledInSpace: mlCapabilities.mlFeatureEnabledInSpace(),
+          isUpgradeInProgress: mlCapabilities.isUpgradeInProgress(),
         });
       }
     } catch (error) {
@@ -169,10 +197,11 @@ export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalSer
 }
 
 export function checkCreateJobsCapabilitiesResolver(
+  mlApi: MlApi,
   redirectToJobsManagementPage: () => Promise<void>
 ): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getCapabilities()
+    getCapabilities(mlApi)
       .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,

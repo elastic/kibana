@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -311,6 +312,7 @@ describe('DataViewLazy', () => {
       ...runtime,
       popularity: 5,
       customLabel: 'custom name',
+      customDescription: 'custom desc',
       format: {
         id: 'bytes',
       },
@@ -339,6 +341,7 @@ describe('DataViewLazy', () => {
           ...runtimeComposite.fields.a,
           popularity: 3,
           customLabel: 'custom name a',
+          customDescription: 'custom desc a',
           format: {
             id: 'bytes',
           },
@@ -347,6 +350,7 @@ describe('DataViewLazy', () => {
           ...runtimeComposite.fields.b,
           popularity: 4,
           customLabel: 'custom name b',
+          customDescription: 'custom desc b',
           format: {
             id: 'bytes',
           },
@@ -461,6 +465,21 @@ describe('DataViewLazy', () => {
       dataViewLazy.removeRuntimeField(newField);
     });
 
+    test('add and remove a custom description from a runtime field', async () => {
+      const newField = 'new_field_test';
+      fieldCapsResponse = [];
+      dataViewLazy.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        customDescription: 'test1',
+      });
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test1');
+      dataViewLazy.setFieldCustomDescription(newField, 'test2');
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toEqual('test2');
+      dataViewLazy.setFieldCustomDescription(newField, undefined);
+      expect((await dataViewLazy.getFieldByName(newField))?.customDescription).toBeUndefined();
+      dataViewLazy.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', async () => {
       const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap();
       const fieldCount = Object.values(fieldMap).length;
@@ -473,16 +492,21 @@ describe('DataViewLazy', () => {
         Object.values((await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap()).length -
           fieldCount
       ).toEqual(2);
+      expect(Object.keys(dataViewLazy.getRuntimeFields({ fieldName: ['new_field.a'] }))).toEqual([
+        'new_field.a',
+      ]);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.a']).toBeDefined();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.b']).toBeDefined();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.a']).toEqual({
         count: 3,
         customLabel: 'custom name a',
+        customDescription: 'custom desc a',
       });
       expect((await dataViewLazy.toSpec(toSpecGetAllFields)).fieldAttrs!['new_field.b']).toEqual({
         count: 4,
         customLabel: 'custom name b',
+        customDescription: 'custom desc b',
       });
 
       dataViewLazy.removeRuntimeField('new_field');

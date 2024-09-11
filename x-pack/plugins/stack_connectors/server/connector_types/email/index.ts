@@ -28,6 +28,7 @@ import {
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
@@ -273,8 +274,16 @@ async function executor(
   },
   execOptions: EmailConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, secrets, params, configurationUtilities, services, logger } =
-    execOptions;
+  const {
+    actionId,
+    config,
+    secrets,
+    params,
+    configurationUtilities,
+    services,
+    logger,
+    connectorUsageCollector,
+  } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
@@ -365,17 +374,33 @@ async function executor(
   let result;
 
   try {
-    result = await sendEmail(logger, sendEmailOptions, connectorTokenClient);
+    result = await sendEmail(
+      logger,
+      sendEmailOptions,
+      connectorTokenClient,
+      connectorUsageCollector
+    );
   } catch (err) {
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',
     });
-    return {
+    const errorResult: ConnectorTypeExecutorResult<unknown> = {
       status: 'error',
       actionId,
       message,
       serviceMessage: err.message,
     };
+
+    // Mark 4xx and 5xx errors as user errors
+    const statusCode = err?.response?.status;
+    if (statusCode >= 400 && statusCode < 600) {
+      return {
+        ...errorResult,
+        errorSource: TaskErrorSource.USER,
+      };
+    }
+
+    return errorResult;
   }
 
   return { status: 'ok', data: result, actionId };

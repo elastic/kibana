@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -15,28 +16,21 @@ import {
   EuiComboBoxOptionOption,
   EuiText,
 } from '@elastic/eui';
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
-import type { RuleFormErrors } from '../types';
 import {
   RULE_DETAILS_TITLE,
   RULE_DETAILS_DESCRIPTION,
   RULE_NAME_INPUT_TITLE,
   RULE_TAG_INPUT_TITLE,
+  RULE_TAG_PLACEHOLDER,
 } from '../translations';
+import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
-export interface RuleDetailsProps {
-  formValues: {
-    tags?: SanitizedRule<RuleTypeParams>['tags'];
-    name: SanitizedRule<RuleTypeParams>['name'];
-  };
-  errors?: RuleFormErrors;
-  onChange: (property: string, value: unknown) => void;
-}
+export const RuleDetails = () => {
+  const { formData, baseErrors } = useRuleFormState();
 
-export const RuleDetails = (props: RuleDetailsProps) => {
-  const { formValues, errors = {}, onChange } = props;
+  const dispatch = useRuleFormDispatch();
 
-  const { tags = [], name } = formValues;
+  const { tags = [], name } = formData;
 
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
@@ -44,40 +38,49 @@ export const RuleDetails = (props: RuleDetailsProps) => {
 
   const onNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange('name', e.target.value);
+      dispatch({
+        type: 'setName',
+        payload: e.target.value,
+      });
     },
-    [onChange]
+    [dispatch]
   );
 
   const onAddTag = useCallback(
     (searchValue: string) => {
-      onChange('tags', tags.concat([searchValue]));
+      dispatch({
+        type: 'setTags',
+        payload: tags.concat([searchValue]),
+      });
     },
-    [onChange, tags]
+    [dispatch, tags]
   );
 
   const onSetTag = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>) => {
-      onChange(
-        'tags',
-        options.map((selectedOption) => selectedOption.label)
-      );
+      dispatch({
+        type: 'setTags',
+        payload: options.map((selectedOption) => selectedOption.label),
+      });
     },
-    [onChange]
+    [dispatch]
   );
 
   const onBlur = useCallback(() => {
     if (!tags) {
-      onChange('tags', []);
+      dispatch({
+        type: 'setTags',
+        payload: [],
+      });
     }
-  }, [onChange, tags]);
+  }, [dispatch, tags]);
 
   return (
     <EuiDescribedFormGroup
       fullWidth
       title={<h3>{RULE_DETAILS_TITLE}</h3>}
       description={
-        <EuiText>
+        <EuiText size="s">
           <p>{RULE_DETAILS_DESCRIPTION}</p>
         </EuiText>
       }
@@ -86,12 +89,13 @@ export const RuleDetails = (props: RuleDetailsProps) => {
       <EuiFormRow
         fullWidth
         label={RULE_NAME_INPUT_TITLE}
-        isInvalid={errors.name?.length > 0}
-        error={errors.name}
+        isInvalid={!!baseErrors?.name?.length}
+        error={baseErrors?.name}
       >
         <EuiFieldText
           fullWidth
           value={name}
+          placeholder={RULE_NAME_INPUT_TITLE}
           onChange={onNameChange}
           data-test-subj="ruleDetailsNameInput"
         />
@@ -99,12 +103,13 @@ export const RuleDetails = (props: RuleDetailsProps) => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
-        isInvalid={errors.tags?.length > 0}
-        error={errors.tags}
+        isInvalid={!!baseErrors?.tags?.length}
+        error={baseErrors?.tags}
       >
         <EuiComboBox
           fullWidth
           noSuggestions
+          placeholder={RULE_TAG_PLACEHOLDER}
           data-test-subj="ruleDetailsTagsInput"
           selectedOptions={tagsOptions}
           onCreateOption={onAddTag}

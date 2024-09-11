@@ -229,7 +229,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+      if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
       }
 
@@ -311,7 +311,6 @@ export const IndexDataVisualizer: FC<Props> = ({
     maps,
     embeddable,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,
@@ -325,7 +324,6 @@ export const IndexDataVisualizer: FC<Props> = ({
     maps,
     embeddable,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,

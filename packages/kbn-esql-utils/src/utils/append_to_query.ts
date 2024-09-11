@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
@@ -85,9 +87,9 @@ export function appendWhereClauseToESQLQuery(
       }
     }
     // filter does not exist in the where clause
-    const whereClause = `and ${fieldName}${operator}${filterValue}`;
+    const whereClause = `AND ${fieldName}${operator}${filterValue}`;
     return appendToESQLQuery(baseESQLQuery, whereClause);
   }
-  const whereClause = `| where ${fieldName}${operator}${filterValue}`;
+  const whereClause = `| WHERE ${fieldName}${operator}${filterValue}`;
   return appendToESQLQuery(baseESQLQuery, whereClause);
 }

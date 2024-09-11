@@ -12,16 +12,10 @@ import {
   bedrockClaude2SuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { PassThrough } from 'stream';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.bedrock';
 const name = 'A bedrock action';
@@ -31,7 +25,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  defaultModel: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -61,8 +55,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
   };
 
   describe('Bedrock', () => {
-    after(() => {
-      objectRemover.removeAll();
+    after(async () => {
+      await objectRemover.removeAll();
     });
     describe('action creation', () => {
       const simulator = new BedrockSimulator({
@@ -351,6 +345,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should overwrite the model when a model argument is provided', async () => {
@@ -381,6 +392,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should invoke AI with assistant AI body argument formatted to bedrock expectations', async () => {
@@ -430,38 +458,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               connector_id: bedrockActionId,
               data: { message: bedrockClaude2SuccessResponse.completion },
             });
-          });
 
-          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
-            await new Promise<void>((resolve, reject) => {
-              const passThrough = new PassThrough();
-
-              supertest
-                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
-                .set('kbn-xsrf', 'foo')
-                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-                .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-                .on('error', reject)
-                .send({
-                  actionTypeId: '.bedrock',
-                  subAction: 'invokeStream',
-                  message: 'Hello world',
-                  isEnabledKnowledgeBase: false,
-                  isEnabledRAGAlerts: false,
-                  replacements: {},
-                })
-                .pipe(passThrough);
-              const responseBuffer: Uint8Array[] = [];
-              passThrough.on('data', (chunk) => {
-                responseBuffer.push(chunk);
-              });
-
-              passThrough.on('end', () => {
-                const parsed = parseBedrockBuffer(responseBuffer);
-                expect(parsed).to.eql('Hello world, what a unique string!');
-                resolve();
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: bedrockActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
               });
             });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(256);
           });
 
           describe('Token tracking dashboard', () => {
@@ -646,47 +659,4 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
       });
     });
   });
-}
-
-const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
-  let bedrockBuffer: Uint8Array = new Uint8Array(0);
-
-  return chunks
-    .map((chunk) => {
-      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
-      let messageLength = getMessageLength(bedrockBuffer);
-      const buildChunks = [];
-      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
-        const extractedChunk = bedrockBuffer.slice(0, messageLength);
-        buildChunks.push(extractedChunk);
-        bedrockBuffer = bedrockBuffer.slice(messageLength);
-        messageLength = getMessageLength(bedrockBuffer);
-      }
-
-      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
-
-      return buildChunks
-        .map((bChunk) => {
-          const event = awsDecoder.decode(bChunk);
-          const body = JSON.parse(
-            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
-          );
-          return body.delta.text;
-        })
-        .join('');
-    })
-    .join('');
-};
-
-function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const newBuffer = new Uint8Array(a.length + b.length);
-  newBuffer.set(a);
-  newBuffer.set(b, a.length);
-  return newBuffer;
-}
-
-function getMessageLength(buffer: Uint8Array): number {
-  if (buffer.byteLength === 0) return 0;
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  return view.getUint32(0, false);
 }

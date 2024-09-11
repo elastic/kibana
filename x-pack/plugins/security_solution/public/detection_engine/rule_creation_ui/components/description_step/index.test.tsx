@@ -14,7 +14,6 @@ import {
   buildListItems,
   getDescriptionItem,
 } from '.';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -575,7 +574,6 @@ describe('description_step', () => {
     });
 
     describe('alert suppression', () => {
-      const ruleTypesWithoutSuppression: Type[] = ['machine_learning'];
       const suppressionFields = {
         groupByDuration: {
           unit: 'm',
@@ -587,23 +585,6 @@ describe('description_step', () => {
         suppressionMissingFields: 'suppress',
       };
       describe('groupByDuration', () => {
-        ruleTypesWithoutSuppression.forEach((ruleType) => {
-          test(`should be empty if rule is ${ruleType}`, () => {
-            const result: ListItems[] = getDescriptionItem(
-              'groupByDuration',
-              'label',
-              {
-                ruleType,
-                ...suppressionFields,
-              },
-              mockFilterManager,
-              mockLicenseService
-            );
-
-            expect(result).toEqual([]);
-          });
-        });
-
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
@@ -686,22 +667,21 @@ describe('description_step', () => {
       });
 
       describe('groupByFields', () => {
-        [...ruleTypesWithoutSuppression, 'threshold'].forEach((ruleType) => {
-          test(`should be empty if rule is ${ruleType}`, () => {
-            const result: ListItems[] = getDescriptionItem(
-              'groupByFields',
-              'label',
-              {
-                ruleType,
-                ...suppressionFields,
-              },
-              mockFilterManager,
-              mockLicenseService
-            );
+        test(`should be empty if rule type is 'threshold'`, () => {
+          const result: ListItems[] = getDescriptionItem(
+            'groupByFields',
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
 
-            expect(result).toEqual([]);
-          });
+          expect(result).toEqual([]);
         });
+
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(
@@ -720,22 +700,21 @@ describe('description_step', () => {
       });
 
       describe('suppressionMissingFields', () => {
-        [...ruleTypesWithoutSuppression, 'threshold'].forEach((ruleType) => {
-          test(`should be empty if rule is ${ruleType}`, () => {
-            const result: ListItems[] = getDescriptionItem(
-              'suppressionMissingFields',
-              'label',
-              {
-                ruleType,
-                ...suppressionFields,
-              },
-              mockFilterManager,
-              mockLicenseService
-            );
+        test(`should be empty if rule type is 'threshold'`, () => {
+          const result: ListItems[] = getDescriptionItem(
+            'suppressionMissingFields',
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
 
-            expect(result).toEqual([]);
-          });
+          expect(result).toEqual([]);
         });
+
         ['query', 'saved_query'].forEach((ruleType) => {
           test(`should return item for ${ruleType} rule`, () => {
             const result: ListItems[] = getDescriptionItem(

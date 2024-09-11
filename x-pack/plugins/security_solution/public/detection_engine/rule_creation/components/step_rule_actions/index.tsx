@@ -18,7 +18,6 @@ import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
 import type {
   RuleStepProps,
@@ -85,8 +84,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: { application },
   } = useKibana();
-  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
-
   const displayActionsOptions = useMemo(
     () => (
       <>
@@ -120,7 +117,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         <DisplayActionsHeader />
         {ruleId && <RuleSnoozeSection ruleId={ruleId} />}
         {displayActionsOptions}
-        {responseActionsEnabled && displayResponseActionsOptions}
+        {displayResponseActionsOptions}
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
@@ -134,7 +131,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     application.capabilities.actions.show,
     displayActionsOptions,
     displayResponseActionsOptions,
-    responseActionsEnabled,
   ]);
 
   return (

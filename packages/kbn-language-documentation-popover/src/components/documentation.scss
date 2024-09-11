@@ -62,8 +62,8 @@
 }
 
 .documentation__docsText {
-  @include euiYScroll;
   padding: $euiSize;
+  @include euiYScroll;
 }
 
 .documentation__docsTextGroup,

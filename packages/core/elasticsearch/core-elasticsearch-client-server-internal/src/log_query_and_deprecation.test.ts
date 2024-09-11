@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Buffer } from 'buffer';
@@ -1049,6 +1050,43 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           `);
         });
       });
+    });
+  });
+
+  describe('requests aborted due to maximum response size exceeded errors', () => {
+    const requestAbortedErrorMessage = `The content length (9000) is bigger than the maximum allowed buffer (42)`;
+
+    it('logs warning when the client emits a RequestAbortedError error due to excessive response length ', () => {
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      client.diagnostic.emit(
+        'response',
+        new errors.RequestAbortedError(requestAbortedErrorMessage),
+        null
+      );
+
+      expect(loggingSystemMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
+        `"Request was aborted: The content length (9000) is bigger than the maximum allowed buffer (42)"`
+      );
+    });
+
+    it('does not log warning for other type of errors', () => {
+      instrumentEsQueryAndDeprecationLogger({
+        logger,
+        client,
+        type: 'test type',
+        apisToRedactInLogs: [],
+      });
+
+      const response = createApiResponse({ body: {} });
+      client.diagnostic.emit('response', new errors.TimeoutError('message', response), response);
+
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
     });
   });
 });

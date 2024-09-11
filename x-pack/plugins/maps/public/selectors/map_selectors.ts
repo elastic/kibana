@@ -373,10 +373,6 @@ export function getLayerById(layerId: string | null, state: MapStoreState): ILay
   });
 }
 
-export const getHiddenLayerIds = createSelector(getLayerListRaw, (layers) =>
-  layers.filter((layer) => !layer.visible).map((layer) => layer.id)
-);
-
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,
   getLayerList,
@@ -447,7 +443,7 @@ export const getMostCommonDataViewId = createSelector(
     const counts: { [key: string]: number } = {};
     function incrementCount(ids: string[]) {
       ids.forEach((id) => {
-        const count = counts.hasOwnProperty(id) ? counts[id] : 0;
+        const count = Object.hasOwn(counts, id) ? counts[id] : 0;
         counts[id] = count + 1;
       });
     }

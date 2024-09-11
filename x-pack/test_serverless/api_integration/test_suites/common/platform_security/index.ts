@@ -22,7 +22,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./role_mappings'));
     loadTestFile(require.resolve('./sessions'));
     loadTestFile(require.resolve('./users'));
-    loadTestFile(require.resolve('./request_as_viewer'));
     loadTestFile(require.resolve('./user_profiles'));
     loadTestFile(require.resolve('./views'));
     loadTestFile(require.resolve('./feature_check'));

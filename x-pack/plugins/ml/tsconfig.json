@@ -68,7 +68,6 @@
     "@kbn/ml-url-state",
     "@kbn/monaco",
     "@kbn/react-field",
-    "@kbn/repo-info",
     "@kbn/rison",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -127,5 +126,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/esql-utils",
     "@kbn/core-lifecycle-browser",
-  ],
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/json-schemas"
+  ]
 }

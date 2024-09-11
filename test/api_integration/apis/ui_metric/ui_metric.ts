@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -51,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
-      const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
+      const ids = response.hits.hits.map(({ _id }: { _id?: string }) => _id!);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
 
@@ -76,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
-      const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
+      const ids = response.hits.hits.map(({ _id }: { _id?: string }) => _id!);
       expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
       expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
       expect(ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
@@ -103,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       } = await es.search<any>({ index: '.kibana', q: 'type:ui-metric' });
 
       const countTypeEvent = hits.find(
-        (hit: { _id: string }) => hit._id === `ui-metric:myApp:${uniqueEventName}`
+        (hit: { _id?: string }) => hit._id! === `ui-metric:myApp:${uniqueEventName}`
       );
       expect(countTypeEvent?._source['ui-metric'].count).to.eql(3);
     });

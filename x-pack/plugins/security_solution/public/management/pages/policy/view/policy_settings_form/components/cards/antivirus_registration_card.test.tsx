@@ -41,7 +41,7 @@ describe('Policy Form Antivirus Registration Card', () => {
     getRadioButton = (testSubject) => renderResult.getByTestId(testSubject).querySelector('input')!;
   });
 
-  it('should render in edit mode', () => {
+  it('should render in edit mode with default value selected', () => {
     render();
 
     expect(renderResult.getByTestId(antivirusTestSubj.radioButtons)).toBeTruthy();
@@ -49,6 +49,10 @@ describe('Policy Form Antivirus Registration Card', () => {
     expect(getRadioButton(antivirusTestSubj.disabledRadioButton)).not.toHaveAttribute('disabled');
     expect(getRadioButton(antivirusTestSubj.enabledRadioButton)).not.toHaveAttribute('disabled');
     expect(getRadioButton(antivirusTestSubj.syncRadioButton)).not.toHaveAttribute('disabled');
+
+    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
+    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
+    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
   });
 
   it('should check `disabled` radio button if `antivirus_registration.mode` is disabled', () => {
@@ -89,13 +93,13 @@ describe('Policy Form Antivirus Registration Card', () => {
     );
   });
 
-  it('should be able to enable the option', () => {
+  it('should be able to enable the option', async () => {
     const expectedUpdate = cloneDeep(formProps.policy);
     expectedUpdate.windows.antivirus_registration.mode = AntivirusRegistrationModes.enabled;
 
     render();
 
-    userEvent.click(getRadioButton(antivirusTestSubj.enabledRadioButton));
+    await userEvent.click(getRadioButton(antivirusTestSubj.enabledRadioButton));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -111,7 +115,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    userEvent.click(getRadioButton(antivirusTestSubj.disabledRadioButton));
+    await userEvent.click(getRadioButton(antivirusTestSubj.disabledRadioButton));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -127,7 +131,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    userEvent.click(getRadioButton(antivirusTestSubj.syncRadioButton));
+    await userEvent.click(getRadioButton(antivirusTestSubj.syncRadioButton));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -144,9 +148,9 @@ describe('Policy Form Antivirus Registration Card', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId(antivirusTestSubj.card));
-      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(true);
+      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
       expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
-      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
     });
 
     it('should render in view mode (option enabled)', () => {

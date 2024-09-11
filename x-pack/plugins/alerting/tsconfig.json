@@ -70,7 +70,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
     "@kbn/alerting-state-types",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/core-http-server",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

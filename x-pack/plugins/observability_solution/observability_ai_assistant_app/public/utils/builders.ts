@@ -38,6 +38,7 @@ export function buildSystemMessage(
   }
 ) {
   return buildMessage(
+    // @ts-expect-error upgrade typescript v5.1.6
     merge({}, params, {
       message: { role: MessageRole.System },
     })
@@ -50,6 +51,7 @@ export function buildUserMessage(
   }
 ) {
   return buildMessage(
+    // @ts-expect-error upgrade typescript v5.1.6
     merge(
       {
         message: {
@@ -70,6 +72,7 @@ export function buildAssistantMessage(
   }
 ) {
   return buildMessage(
+    // @ts-expect-error upgrade typescript v5.1.6
     merge(
       {
         message: {

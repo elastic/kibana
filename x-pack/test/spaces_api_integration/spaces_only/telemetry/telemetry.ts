@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const usageAPI = getService('usageAPI');
 
-  describe('Verify disabledFeatures telemetry payloads', async () => {
+  describe('Verify disabledFeatures telemetry payloads', () => {
     before(async () => {
       await spacesService.create({
         id: 'space-1',
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'This is your space-3!',
         color: '#00bfb3',
         disabledFeatures: [],
-        solution: 'search',
+        solution: 'es',
       });
     });
 
@@ -82,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
         siem: 0,
         securitySolutionCases: 0,
         securitySolutionAssistant: 0,
+        securitySolutionAttackDiscovery: 0,
         discover: 0,
         visualize: 0,
         dashboard: 0,
@@ -103,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(stats.stack_stats.kibana.plugins.spaces.solutions).to.eql({
         security: 1,
-        search: 1,
-        observability: 0,
+        es: 1,
+        oblt: 0,
         classic: 0,
         unset: 2,
       });

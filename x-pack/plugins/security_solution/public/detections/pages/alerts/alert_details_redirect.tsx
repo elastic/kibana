@@ -13,7 +13,6 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
@@ -69,16 +68,11 @@ export const AlertDetailsRedirect = () => {
 
   const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
 
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
-
   const urlParams = new URLSearchParams({
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
     [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
-    [URL_PARAM_KEY.flyout]: resolveFlyoutParams(
-      { index, alertId, expandableFlyoutDisabled },
-      currentFlyoutParams
-    ),
+    [URL_PARAM_KEY.flyout]: resolveFlyoutParams({ index, alertId }, currentFlyoutParams),
   });
 
   const url = `${ALERTS_PATH}?${urlParams.toString()}`;

@@ -29,6 +29,7 @@ describe('AlertSummaryWidgetFullSize', () => {
         <AlertSummaryWidgetFullSize
           chartProps={mockedChartProps}
           dependencyProps={dependencyProps}
+          timeZone="UTC"
           {...mockedAlertSummaryResponse}
           {...props}
         />

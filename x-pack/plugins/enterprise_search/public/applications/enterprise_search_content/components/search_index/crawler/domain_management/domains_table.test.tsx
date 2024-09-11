@@ -94,6 +94,7 @@ describe('DomainsTable', () => {
   });
 
   const getTableBody = () =>
+    // @ts-expect-error upgrade typescript v5.1.6
     wrapper.find(EuiBasicTable).dive().find('RenderWithEuiTheme').renderProp('children')();
 
   it('renders', () => {

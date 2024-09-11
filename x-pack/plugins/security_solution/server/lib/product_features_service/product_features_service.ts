@@ -13,10 +13,11 @@
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import {
   getAssistantFeature,
+  getAttackDiscoveryFeature,
   getCasesFeature,
   getSecurityFeature,
 } from '@kbn/security-solution-features/product_features';
@@ -31,6 +32,7 @@ export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
   private securityAssistantProductFeatures: ProductFeatures;
+  private attackDiscoveryProductFeatures: ProductFeatures;
   private productFeatures?: Set<ProductFeatureKeyType>;
 
   constructor(
@@ -67,12 +69,21 @@ export class ProductFeaturesService {
       assistantFeature.baseKibanaFeature,
       assistantFeature.baseKibanaSubFeatureIds
     );
+
+    const attackDiscoveryFeature = getAttackDiscoveryFeature();
+    this.attackDiscoveryProductFeatures = new ProductFeatures(
+      this.logger,
+      attackDiscoveryFeature.subFeaturesMap,
+      attackDiscoveryFeature.baseKibanaFeature,
+      attackDiscoveryFeature.baseKibanaSubFeatureIds
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.securityProductFeatures.init(featuresSetup);
     this.casesProductFeatures.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
+    this.attackDiscoveryProductFeatures.init(featuresSetup);
   }
 
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
@@ -85,11 +96,15 @@ export class ProductFeaturesService {
     const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
     this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
 
+    const attackDiscoveryProductFeaturesConfig = configurator.attackDiscovery();
+    this.attackDiscoveryProductFeatures.setConfig(attackDiscoveryProductFeaturesConfig);
+
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
         ...securityProductFeaturesConfig.keys(),
         ...casesProductFeaturesConfig.keys(),
         ...securityAssistantProductFeaturesConfig.keys(),
+        ...attackDiscoveryProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }
@@ -107,7 +122,8 @@ export class ProductFeaturesService {
     return (
       this.securityProductFeatures.isActionRegistered(action) ||
       this.casesProductFeatures.isActionRegistered(action) ||
-      this.securityAssistantProductFeatures.isActionRegistered(action)
+      this.securityAssistantProductFeatures.isActionRegistered(action) ||
+      this.attackDiscoveryProductFeatures.isActionRegistered(action)
     );
   }
 

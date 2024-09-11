@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { get, isEqual, omit } from 'lodash';
+import moment from 'moment';
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
@@ -20,6 +21,7 @@ import {
   VERSION,
   ALERT_WORKFLOW_TAGS,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
+  ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -45,6 +47,9 @@ import {
   getPreviewAlerts,
   dataGeneratorFactory,
   getThreatMatchRuleForAlertTesting,
+  scheduleRuleRun,
+  stopAllManualRuns,
+  waitForBackfillExecuted,
 } from '../../../../utils';
 import {
   deleteAllAlerts,
@@ -121,6 +126,17 @@ const createThreatMatchRule = ({
   threat_indicator_path,
 });
 
+const threatMatchRuleEcsComplaint = (id: string): ThreatMatchRuleCreateProps => ({
+  ...getThreatMatchRuleForAlertTesting(['ecs_compliant']),
+  query: `id:${id} and NOT agent.type:threat`,
+  threat_query: `id:${id} and agent.type:threat`,
+  name: 'ALert suppression IM test rule',
+  from: 'now-35m',
+  interval: '30m',
+  timestamp_override: 'event.ingested',
+  timestamp_override_fallback_disabled: false,
+});
+
 function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
   const mapAlert = (alert: any) => {
     return omit(alert._source, [
@@ -137,6 +153,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
       'kibana.alert.rule.uuid',
       'kibana.alert.rule.execution.uuid',
       'kibana.alert.rule.execution.timestamp',
+      'kibana.alert.intended_timestamp',
       'kibana.alert.start',
       'kibana.alert.reason',
       'kibana.alert.uuid',
@@ -149,6 +166,20 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
 
   expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
 }
+
+const eventDoc = (id: string, timestamp: string) => ({
+  id,
+  '@timestamp': timestamp,
+  host: { name: 'host-a' },
+});
+
+const threatDoc = (id: string, timestamp: string) => ({
+  id,
+  '@timestamp': timestamp,
+  host: { name: 'host-a' },
+  'agent.type': 'threat',
+});
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -158,7 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
@@ -176,16 +207,19 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
       await esArchiver.unload(audibeatHostsPath);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     // First 2 test creates a real rule - remaining tests use preview API
     it('should be able to execute and get all alerts when doing a specific query (terms query)', async () => {
+      const username = await utils.getUsername();
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule();
 
       const createdRule = await createRule(supertest, log, rule);
@@ -320,7 +354,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           category: 'Indicator Match Rule',
           consumer: 'siem',
-          created_by: ELASTICSEARCH_USERNAME,
+          created_by: username,
           description: 'Detecting root and admin users',
           enabled: true,
           exceptions_list: [],
@@ -342,13 +376,14 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'threat_match',
           updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
-          updated_by: ELASTICSEARCH_USERNAME,
+          updated_by: username,
           uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
     });
     it('should be able to execute and get all alerts when doing a specific query (match query)', async () => {
+      const username = await utils.getUsername();
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
         threat_mapping: [
           // We match host.name against host.name
@@ -499,7 +534,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           category: 'Indicator Match Rule',
           consumer: 'siem',
-          created_by: ELASTICSEARCH_USERNAME,
+          created_by: username,
           description: 'Detecting root and admin users',
           enabled: true,
           exceptions_list: [],
@@ -521,7 +556,7 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'threat_match',
           updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
-          updated_by: ELASTICSEARCH_USERNAME,
+          updated_by: username,
           uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
@@ -1638,7 +1673,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({
@@ -1689,38 +1724,18 @@ export default ({ getService }: FtrProviderContext) => {
     describe('timestamp override and fallback timestamp', () => {
       const timestamp = '2020-10-28T05:45:00.000Z';
 
-      const eventDoc = (id: string) => ({
-        id,
-        '@timestamp': timestamp,
-        host: { name: 'host-a' },
-      });
-
-      const threatDoc = (id: string) => ({
-        id,
-        '@timestamp': timestamp,
-        host: { name: 'host-a' },
-        'agent.type': 'threat',
-      });
-
-      const threatMatchRule = (id: string): ThreatMatchRuleCreateProps => ({
-        ...getThreatMatchRuleForAlertTesting(['ecs_compliant']),
-        query: `id:${id} and NOT agent.type:threat`,
-        threat_query: `id:${id} and agent.type:threat`,
-        name: 'ALert suppression IM test rule',
-        from: 'now-35m',
-        interval: '30m',
-        timestamp_override: 'event.ingested',
-        timestamp_override_fallback_disabled: false,
-      });
-
       it('should create alerts using a timestamp override and timestamp fallback enabled on threats first code path execution', async () => {
         const id = uuidv4();
 
-        await indexListOfDocuments([eventDoc(id), eventDoc(id), threatDoc(id)]);
+        await indexListOfDocuments([
+          eventDoc(id, timestamp),
+          eventDoc(id, timestamp),
+          threatDoc(id, timestamp),
+        ]);
 
         const { previewId, logs } = await previewRule({
           supertest,
-          rule: threatMatchRule(id),
+          rule: threatMatchRuleEcsComplaint(id),
           timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
           invocationCount: 1,
         });
@@ -1738,11 +1753,15 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
         const id = uuidv4();
 
-        await indexListOfDocuments([eventDoc(id), threatDoc(id), threatDoc(id)]);
+        await indexListOfDocuments([
+          eventDoc(id, timestamp),
+          threatDoc(id, timestamp),
+          threatDoc(id, timestamp),
+        ]);
 
         const { previewId, logs } = await previewRule({
           supertest,
-          rule: threatMatchRule(id),
+          rule: threatMatchRuleEcsComplaint(id),
           timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
           invocationCount: 1,
         });
@@ -1755,6 +1774,201 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts.length).to.eql(1);
         expect(logs[0].errors).to.have.length(0);
+      });
+    });
+
+    // skipped on MKI since feature flags are not supported there
+    describe('@skipInServerlessMKI manual rule run', () => {
+      beforeEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await stopAllManualRuns(supertest);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('alerts when run on a time range that the rule has not previously seen, and deduplicates if run there more than once', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        const secondTimestamp = moment(new Date());
+
+        await indexListOfDocuments([
+          eventDoc(id, firstTimestamp.toISOString()),
+          eventDoc(id, secondTimestamp.toISOString()),
+          threatDoc(id, secondTimestamp.toISOString()),
+        ]);
+
+        const rule = threatMatchRuleEcsComplaint(id);
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(2);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).equal(2);
+      });
+
+      it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date());
+
+        await indexListOfDocuments([
+          eventDoc(id, firstTimestamp.toISOString()),
+          threatDoc(id, firstTimestamp.toISOString()),
+        ]);
+
+        const rule = threatMatchRuleEcsComplaint(id);
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(1);
+      });
+
+      it('should not generate alerts if threat query not in manual rule interval', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(2, 'h');
+
+        await indexListOfDocuments([
+          eventDoc(id, moment(firstTimestamp).toISOString()),
+          threatDoc(id, moment(new Date()).subtract(1, 'm').toISOString()),
+        ]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_query: `@timestamp >= "now-5m" and id:${id} and agent.type:threat`,
+          interval: '10m',
+          from: 'now-140m',
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(1);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(1);
+      });
+
+      it('supression per rule execution should work for manual rule runs', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+        await indexListOfDocuments([
+          eventDoc(id, firstTimestamp.toISOString()),
+          eventDoc(id, firstTimestamp.add(1, 'm').toISOString()),
+          eventDoc(id, firstTimestamp.add(3, 'm').toISOString()),
+          threatDoc(id, firstTimestamp.toISOString()),
+        ]);
+
+        const rule = {
+          ...threatMatchRuleEcsComplaint(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+          },
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(0);
+
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(10, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(1);
+
+        expect(allNewAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(2);
+      });
+
+      it('supression with time window should work for manual rule runs and update alert', async () => {
+        const id = uuidv4();
+        const firstTimestamp = moment(new Date()).subtract(3, 'h');
+
+        await indexListOfDocuments([
+          eventDoc(id, firstTimestamp.toISOString()),
+          threatDoc(id, firstTimestamp.toISOString()),
+        ]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 500,
+              unit: 'm',
+            },
+          },
+        };
+
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
+
+        expect(alerts.hits.hits.length).equal(0);
+
+        // generate alert in the past
+        const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).subtract(5, 'm'),
+          endDate: moment(firstTimestamp).add(5, 'm'),
+        });
+
+        await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
+        const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(allNewAlerts.hits.hits.length).equal(1);
+
+        // now we will ingest new event, and manual rule run should update original alert
+
+        await indexListOfDocuments([eventDoc(id, firstTimestamp.add(5, 'm').toISOString())]);
+
+        const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
+          startDate: moment(firstTimestamp).add(1, 'm'),
+          endDate: moment(firstTimestamp).add(120, 'm'),
+        });
+
+        await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
+        const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
+        expect(updatedAlerts.hits.hits.length).equal(1);
+
+        expect(updatedAlerts.hits.hits.length).equal(1);
+        expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
       });
     });
   });

@@ -16,11 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('create window', function () {
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('admin');
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('create maintenance window screenshot', async () => {

@@ -5,9 +5,14 @@ info:
 paths:
   /api/detection_engine/rules:
     put:
-      operationId: UpdateRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Update a single rule
+      operationId: UpdateRule
+      summary: Update a detection rule
+      description: |
+        Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
+        > info
+        > You cannot modify the `id` or `rule_id` values.
       tags:
         - Rules API
       requestBody:

@@ -1,0 +1,1270 @@
+{
+  "id": "@kbn/security-api-key-management",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.APIKeysAPIClient",
+        "type": "Class",
+        "tags": [],
+        "label": "APIKeysAPIClient",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.APIKeysAPIClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-api-key-management",
+                "id": "def-public.APIKeysAPIClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.APIKeysAPIClient.queryApiKeys",
+            "type": "Function",
+            "tags": [],
+            "label": "queryApiKeys",
+            "description": [],
+            "signature": [
+              "(params?: ",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.QueryApiKeyParams",
+                "text": "QueryApiKeyParams"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.QueryApiKeyResult",
+                "text": "QueryApiKeyResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-api-key-management",
+                "id": "def-public.APIKeysAPIClient.queryApiKeys.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-api-key-management",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                    "section": "def-public.QueryApiKeyParams",
+                    "text": "QueryApiKeyParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.APIKeysAPIClient.invalidateApiKeys",
+            "type": "Function",
+            "tags": [],
+            "label": "invalidateApiKeys",
+            "description": [],
+            "signature": [
+              "(apiKeys: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiKeyToInvalidate",
+                "text": "ApiKeyToInvalidate"
+              },
+              "[], isAdmin?: boolean) => Promise<",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.InvalidateApiKeysResponse",
+                "text": "InvalidateApiKeysResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-api-key-management",
+                "id": "def-public.APIKeysAPIClient.invalidateApiKeys.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "apiKeys",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.ApiKeyToInvalidate",
+                    "text": "ApiKeyToInvalidate"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-api-key-management",
+                "id": "def-public.APIKeysAPIClient.invalidateApiKeys.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.APIKeysAPIClient.createApiKey",
+            "type": "Function",
+            "tags": [],
+            "label": "createApiKey",
+            "description": [],
+            "signature": [
+              "(apiKey: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.CreateAPIKeyParams",
+                "text": "CreateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityCreateApiKeyResponse",
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-api-key-management",
+                "id": "def-public.APIKeysAPIClient.createApiKey.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "apiKey",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-server.CreateAPIKeyParams",
+                    "text": "CreateAPIKeyParams"
+                  }
+                ],
+                "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.APIKeysAPIClient.updateApiKey",
+            "type": "Function",
+            "tags": [],
+            "label": "updateApiKey",
+            "description": [],
+            "signature": [
+              "(apiKey: ",
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.UpdateAPIKeyParams",
+                "text": "UpdateAPIKeyParams"
+              },
+              ") => Promise<",
+              "SecurityUpdateApiKeyResponse",
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-api-key-management",
+                "id": "def-public.APIKeysAPIClient.updateApiKey.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "apiKey",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-security-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSecurityServerPluginApi",
+                    "section": "def-server.UpdateAPIKeyParams",
+                    "text": "UpdateAPIKeyParams"
+                  }
+                ],
+                "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyBadge",
+        "description": [],
+        "signature": [
+          "({ type }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.ApiKeyBadgeProps",
+            "text": "ApiKeyBadgeProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyBadge.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ type }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.ApiKeyBadgeProps",
+                "text": "ApiKeyBadgeProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_badge.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyCreatedCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyCreatedCallout",
+        "description": [],
+        "signature": [
+          "({ createdApiKey, }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.ApiKeyCreatedCalloutProps",
+            "text": "ApiKeyCreatedCalloutProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyCreatedCallout.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  createdApiKey,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.ApiKeyCreatedCalloutProps",
+                "text": "ApiKeyCreatedCalloutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyFlyout",
+        "description": [],
+        "signature": [
+          "({ onSuccess, onCancel, defaultExpiration, defaultMetadata, defaultRoleDescriptors, apiKey, canManageCrossClusterApiKeys, readOnly, currentUser, isLoadingCurrentUser, }: React.PropsWithChildren<(",
+          "DisambiguateSet",
+          "<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps> & UpdateApiKeyFlyoutProps) | (",
+          "DisambiguateSet",
+          "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFlyout.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  onSuccess,\n  onCancel,\n  defaultExpiration,\n  defaultMetadata,\n  defaultRoleDescriptors,\n  apiKey,\n  canManageCrossClusterApiKeys = false,\n  readOnly = false,\n  currentUser,\n  isLoadingCurrentUser,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<(",
+              "DisambiguateSet",
+              "<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps> & UpdateApiKeyFlyoutProps) | (",
+              "DisambiguateSet",
+              "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)>"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeySelectableTokenField",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeySelectableTokenField",
+        "description": [],
+        "signature": [
+          "({ createdApiKey, }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.ApiKeyCreatedCalloutProps",
+            "text": "ApiKeyCreatedCalloutProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeySelectableTokenField.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  createdApiKey,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.ApiKeyCreatedCalloutProps",
+                "text": "ApiKeyCreatedCalloutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyStatus",
+        "description": [],
+        "signature": [
+          "({ expiration }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.ApiKeyStatusProps",
+            "text": "ApiKeyStatusProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_status.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyStatus.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ expiration }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.ApiKeyStatusProps",
+                "text": "ApiKeyStatusProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_status.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.mapCreateApiKeyValues",
+        "type": "Function",
+        "tags": [],
+        "label": "mapCreateApiKeyValues",
+        "description": [],
+        "signature": [
+          "(values: ",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.ApiKeyFormValues",
+            "text": "ApiKeyFormValues"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateAPIKeyParams",
+            "text": "CreateAPIKeyParams"
+          }
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.mapCreateApiKeyValues.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.ApiKeyFormValues",
+                "text": "ApiKeyFormValues"
+              }
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.mapUpdateApiKeyValues",
+        "type": "Function",
+        "tags": [],
+        "label": "mapUpdateApiKeyValues",
+        "description": [],
+        "signature": [
+          "(type: \"managed\" | \"rest\" | \"cross_cluster\", id: string, values: ",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.ApiKeyFormValues",
+            "text": "ApiKeyFormValues"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateAPIKeyParams",
+            "text": "UpdateAPIKeyParams"
+          }
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.mapUpdateApiKeyValues.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"managed\" | \"rest\" | \"cross_cluster\""
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.mapUpdateApiKeyValues.$2",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.mapUpdateApiKeyValues.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.ApiKeyFormValues",
+                "text": "ApiKeyFormValues"
+              }
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.TimeToolTip",
+        "type": "Function",
+        "tags": [],
+        "label": "TimeToolTip",
+        "description": [],
+        "signature": [
+          "({ timestamp, children, }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/security-api-key-management",
+            "scope": "public",
+            "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+            "section": "def-public.TimeToolTipProps",
+            "text": "TimeToolTipProps"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.TimeToolTip.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  timestamp,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.TimeToolTipProps",
+                "text": "TimeToolTipProps"
+              },
+              ">>"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyBadgeProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyBadgeProps",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyBadgeProps.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"managed\" | \"rest\" | \"cross_cluster\""
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_badge.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyCreatedCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyCreatedCalloutProps",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyCreatedCalloutProps.createdApiKey",
+            "type": "Object",
+            "tags": [],
+            "label": "createdApiKey",
+            "description": [],
+            "signature": [
+              "SecurityCreateApiKeyResponse"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_created_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyFormValues",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyFormValues",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.customExpiration",
+            "type": "boolean",
+            "tags": [],
+            "label": "customExpiration",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.customPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "customPrivileges",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.includeMetadata",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeMetadata",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.access",
+            "type": "string",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.role_descriptors",
+            "type": "string",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.ApiKeyFormValues.metadata",
+            "type": "string",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.InvalidateApiKeysResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "InvalidateApiKeysResponse",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.InvalidateApiKeysResponse.itemsInvalidated",
+            "type": "Array",
+            "tags": [],
+            "label": "itemsInvalidated",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiKeyToInvalidate",
+                "text": "ApiKeyToInvalidate"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.InvalidateApiKeysResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.QueryApiKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryApiKeyParams",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryApiKeyParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "QueryContainer"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryApiKeyParams.from",
+            "type": "number",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryApiKeyParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryApiKeyParams.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryApiKeyParams.filters",
+            "type": "Object",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-api-key-management",
+                "scope": "public",
+                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
+                "section": "def-public.QueryFilters",
+                "text": "QueryFilters"
+              }
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.QueryFilters",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryFilters",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryFilters.usernames",
+            "type": "Array",
+            "tags": [],
+            "label": "usernames",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryFilters.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"managed\" | \"rest\" | \"cross_cluster\" | undefined"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.QueryFilters.expired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expired",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.TimeToolTipProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeToolTipProps",
+        "description": [],
+        "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-api-key-management",
+            "id": "def-public.TimeToolTipProps.timestamp",
+            "type": "number",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "path": "x-pack/packages/security/api_key_management/src/components/time_tool_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyFlyoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKeyFlyoutProps",
+        "description": [],
+        "signature": [
+          "(",
+          "DisambiguateSet",
+          "<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps> & UpdateApiKeyFlyoutProps) | (",
+          "DisambiguateSet",
+          "<UpdateApiKeyFlyoutProps, CreateApiKeyFlyoutProps> & CreateApiKeyFlyoutProps)"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.ApiKeyStatusProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKeyStatusProps",
+        "description": [],
+        "signature": [
+          "{ expiration?: number | undefined; }"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_key_status.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.CreateAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAPIKeyParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateRestAPIKeyParams",
+            "text": "CreateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.CreateCrossClusterAPIKeyParams",
+            "text": "CreateCrossClusterAPIKeyParams"
+          }
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.CreateAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAPIKeyResult",
+        "description": [
+          "\nResponse of Kibana Create API key endpoint."
+        ],
+        "signature": [
+          "SecurityCreateApiKeyResponse"
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.QueryApiKeySortOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryApiKeySortOptions",
+        "description": [],
+        "signature": [
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.UpdateAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateAPIKeyParams",
+        "description": [
+          "\nRequest body of Kibana Update API key endpoint."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateRestAPIKeyParams",
+            "text": "UpdateRestAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateCrossClusterAPIKeyParams",
+            "text": "UpdateCrossClusterAPIKeyParams"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-security-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSecurityServerPluginApi",
+            "section": "def-server.UpdateRestAPIKeyWithKibanaPrivilegesParams",
+            "text": "UpdateRestAPIKeyWithKibanaPrivilegesParams"
+          }
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.UpdateAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateAPIKeyResult",
+        "description": [
+          "\nResponse of Kibana Update API key endpoint."
+        ],
+        "signature": [
+          "SecurityUpdateApiKeyResponse"
+        ],
+        "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

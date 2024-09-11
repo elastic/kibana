@@ -21,7 +21,7 @@ import {
   apmLabsButton,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
-  apmEnableMultiSignal,
+  entityCentricExperience,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -238,10 +238,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
+      defaultMessage: 'Enable the Hosts view in the Infrastructure app.',
     }),
     schema: schema.boolean(),
   },
@@ -250,7 +247,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
       defaultMessage: 'Container view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.observability.enableInfrastructureContainerAssetViewDescription',
       {
@@ -342,20 +339,19 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
-  [apmEnableMultiSignal]: {
+  [entityCentricExperience]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableMultiSignal', {
-      defaultMessage: 'Multi signal APM',
+    name: i18n.translate('xpack.observability.entityCentricExperience', {
+      defaultMessage: 'Entity-centric experience',
     }),
-    description: i18n.translate('xpack.observability.apmEnableMultiSignalDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the multi-signal feature in APM, which allows you to monitor services from logs and traces.',
+    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
+      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
   },

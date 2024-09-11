@@ -40,7 +40,6 @@ export { IS_OPERATOR, EXISTS_OPERATOR } from './types';
 
 export type {
   BeatFields,
-  BrowserField,
   BrowserFields,
   CursorType,
   EqlOptionsData,
@@ -67,4 +66,4 @@ export type {
   PaginationInputPaginated,
 } from './search_strategy';
 
-export { Direction, EntityType, EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from './search_strategy';
+export { Direction, EntityType, EMPTY_BROWSER_FIELDS } from './search_strategy';

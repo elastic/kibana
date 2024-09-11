@@ -8,7 +8,8 @@
 import { indexNameToDataStreamParts } from '../../common/utils';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { generateDatasets } from './generate_datasets';
-import { DataStreamStatType } from '../../common/data_streams_stats/types';
+import { DataStreamStatType } from '../../common/data_streams_stats';
+import { DEFAULT_DICTIONARY_TYPE } from '../state_machines/dataset_quality_controller';
 
 describe('generateDatasets', () => {
   const integrations: Integration[] = [
@@ -41,34 +42,43 @@ describe('generateDatasets', () => {
       size: '82.1kb',
       sizeBytes: 84160,
       integration: 'system',
+      userPrivileges: {
+        canMonitor: true,
+      },
     },
     {
       name: 'logs-synth-default',
       lastActivity: 1712911241117,
       size: '62.5kb',
       sizeBytes: 64066,
+      userPrivileges: {
+        canMonitor: true,
+      },
     },
   ];
 
-  const degradedDocs = [
-    {
-      dataset: 'logs-system.application-default',
-      percentage: 0,
-      count: 0,
-      docsCount: 0,
-      quality: 'good' as const,
-    },
-    {
-      dataset: 'logs-synth-default',
-      percentage: 11.320754716981131,
-      count: 6,
-      docsCount: 0,
-      quality: 'poor' as const,
-    },
-  ];
+  const degradedDocs = {
+    ...DEFAULT_DICTIONARY_TYPE,
+    logs: [
+      {
+        dataset: 'logs-system.application-default',
+        percentage: 0,
+        count: 0,
+        docsCount: 0,
+        quality: 'good' as const,
+      },
+      {
+        dataset: 'logs-synth-default',
+        percentage: 11.320754716981131,
+        count: 6,
+        docsCount: 0,
+        quality: 'poor' as const,
+      },
+    ],
+  };
 
   it('merges integrations information with dataStreamStats', () => {
-    const datasets = generateDatasets(dataStreamStats, undefined, integrations);
+    const datasets = generateDatasets(dataStreamStats, DEFAULT_DICTIONARY_TYPE, integrations);
 
     expect(datasets).toEqual([
       {
@@ -81,10 +91,10 @@ describe('generateDatasets', () => {
         rawName: dataStreamStats[0].name,
         integration: integrations[0],
         degradedDocs: {
-          percentage: degradedDocs[0].percentage,
-          count: degradedDocs[0].count,
-          docsCount: degradedDocs[0].docsCount,
-          quality: degradedDocs[0].quality,
+          percentage: degradedDocs.logs[0].percentage,
+          count: degradedDocs.logs[0].count,
+          docsCount: degradedDocs.logs[0].docsCount,
+          quality: degradedDocs.logs[0].quality,
         },
       },
       {
@@ -109,38 +119,42 @@ describe('generateDatasets', () => {
 
     expect(datasets).toEqual([
       {
-        rawName: degradedDocs[0].dataset,
-        name: indexNameToDataStreamParts(degradedDocs[0].dataset).dataset,
-        type: indexNameToDataStreamParts(degradedDocs[0].dataset).type,
+        rawName: degradedDocs.logs[0].dataset,
+        name: indexNameToDataStreamParts(degradedDocs.logs[0].dataset).dataset,
+        type: indexNameToDataStreamParts(degradedDocs.logs[0].dataset).type,
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
-        namespace: indexNameToDataStreamParts(degradedDocs[0].dataset).namespace,
+        userPrivileges: undefined,
+        namespace: indexNameToDataStreamParts(degradedDocs.logs[0].dataset).namespace,
         title:
-          integrations[0].datasets[indexNameToDataStreamParts(degradedDocs[0].dataset).dataset],
+          integrations[0].datasets[
+            indexNameToDataStreamParts(degradedDocs.logs[0].dataset).dataset
+          ],
         integration: integrations[0],
         degradedDocs: {
-          percentage: degradedDocs[0].percentage,
-          count: degradedDocs[0].count,
-          docsCount: degradedDocs[0].docsCount,
-          quality: degradedDocs[0].quality,
+          percentage: degradedDocs.logs[0].percentage,
+          count: degradedDocs.logs[0].count,
+          docsCount: degradedDocs.logs[0].docsCount,
+          quality: degradedDocs.logs[0].quality,
         },
       },
       {
-        rawName: degradedDocs[1].dataset,
-        name: indexNameToDataStreamParts(degradedDocs[1].dataset).dataset,
-        type: indexNameToDataStreamParts(degradedDocs[1].dataset).type,
+        rawName: degradedDocs.logs[1].dataset,
+        name: indexNameToDataStreamParts(degradedDocs.logs[1].dataset).dataset,
+        type: indexNameToDataStreamParts(degradedDocs.logs[1].dataset).type,
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
-        namespace: indexNameToDataStreamParts(degradedDocs[1].dataset).namespace,
-        title: indexNameToDataStreamParts(degradedDocs[1].dataset).dataset,
+        userPrivileges: undefined,
+        namespace: indexNameToDataStreamParts(degradedDocs.logs[1].dataset).namespace,
+        title: indexNameToDataStreamParts(degradedDocs.logs[1].dataset).dataset,
         integration: undefined,
         degradedDocs: {
-          percentage: degradedDocs[1].percentage,
-          count: degradedDocs[1].count,
-          docsCount: degradedDocs[1].docsCount,
-          quality: degradedDocs[1].quality,
+          percentage: degradedDocs.logs[1].percentage,
+          count: degradedDocs.logs[1].count,
+          docsCount: degradedDocs.logs[1].docsCount,
+          quality: degradedDocs.logs[1].quality,
         },
       },
     ]);
@@ -160,10 +174,10 @@ describe('generateDatasets', () => {
         rawName: dataStreamStats[0].name,
         integration: integrations[0],
         degradedDocs: {
-          percentage: degradedDocs[0].percentage,
-          count: degradedDocs[0].count,
-          docsCount: degradedDocs[0].docsCount,
-          quality: degradedDocs[0].quality,
+          percentage: degradedDocs.logs[0].percentage,
+          count: degradedDocs.logs[0].count,
+          docsCount: degradedDocs.logs[0].docsCount,
+          quality: degradedDocs.logs[0].quality,
         },
       },
       {
@@ -174,10 +188,10 @@ describe('generateDatasets', () => {
         type: indexNameToDataStreamParts(dataStreamStats[1].name).type,
         rawName: dataStreamStats[1].name,
         degradedDocs: {
-          percentage: degradedDocs[1].percentage,
-          count: degradedDocs[1].count,
-          docsCount: degradedDocs[1].docsCount,
-          quality: degradedDocs[1].quality,
+          percentage: degradedDocs.logs[1].percentage,
+          count: degradedDocs.logs[1].count,
+          docsCount: degradedDocs.logs[1].docsCount,
+          quality: degradedDocs.logs[1].quality,
         },
       },
     ]);
@@ -192,9 +206,12 @@ describe('generateDatasets', () => {
       size: '82.1kb',
       sizeBytes: 84160,
       integration: 'system',
+      userPrivileges: {
+        canMonitor: true,
+      },
     };
 
-    const datasets = generateDatasets([nonDefaultDataset], undefined, integrations);
+    const datasets = generateDatasets([nonDefaultDataset], DEFAULT_DICTIONARY_TYPE, integrations);
 
     expect(datasets).toEqual([
       {
@@ -213,9 +230,5 @@ describe('generateDatasets', () => {
         },
       },
     ]);
-  });
-
-  it('returns an empty array if no valid object is provided', () => {
-    expect(generateDatasets(undefined, undefined, integrations)).toEqual([]);
   });
 });

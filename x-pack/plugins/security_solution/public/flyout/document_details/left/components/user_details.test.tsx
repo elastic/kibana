@@ -9,21 +9,37 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { TestProviders } from '../../../../common/mock';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { UserDetails } from './user_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
   USER_DETAILS_TEST_ID,
+  USER_DETAILS_LINK_TEST_ID,
   USER_DETAILS_INFO_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
+  USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
+  USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+
+jest.mock('@kbn/expandable-flyout');
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -121,27 +137,46 @@ const mockRelatedHostsResponse = {
   loading: false,
 };
 
-const renderUserDetails = (contextValue: LeftPanelContext) =>
+const renderUserDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <UserDetails {...defaultProps} />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('<UserDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseObservedUserDetails.mockReturnValue(mockUserDetailsResponse);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
-  it('should render host details correctly', () => {
-    const { getByTestId } = renderUserDetails(mockContextValue);
+  it('should render user details correctly', () => {
+    const { getByTestId, queryByTestId } = renderUserDetails(mockContextValue);
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID))).toBeInTheDocument();
+    expect(queryByTestId(USER_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render user name as clicable link when feature flag is true', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    const { getByTestId } = renderUserDetails(mockContextValue);
+    expect(getByTestId(USER_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
+
+    getByTestId(USER_DETAILS_LINK_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: UserPreviewPanelKey,
+      params: {
+        userName: defaultProps.userName,
+        scopeId: defaultProps.scopeId,
+        banner: USER_PREVIEW_BANNER,
+      },
+    });
   });
 
   describe('Host overview', () => {
@@ -176,7 +211,7 @@ describe('<UserDetails />', () => {
 
   describe('Related hosts', () => {
     it('should render the related host table with correct dates and indices', () => {
-      const { getByTestId } = renderUserDetails(mockContextValue);
+      const { getByTestId, queryByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
         userName: 'test user',
@@ -184,6 +219,7 @@ describe('<UserDetails />', () => {
         skip: false,
       });
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render host risk score column when license is valid', () => {
@@ -214,6 +250,32 @@ describe('<UserDetails />', () => {
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID).textContent).toContain(
         'No hosts identified'
       );
+    });
+
+    it('should render host name and ip as clicable link when preview is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      const { getAllByTestId } = renderUserDetails(mockContextValue);
+      expect(getAllByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID).length).toBe(1);
+
+      getAllByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: HostPreviewPanelKey,
+        params: {
+          hostName: 'test host',
+          scopeId: defaultProps.scopeId,
+          banner: HOST_PREVIEW_BANNER,
+        },
+      });
+
+      getAllByTestId(USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: NetworkPanelKey,
+        params: {
+          ip: '100.XXX.XXX',
+          flowTarget: 'source',
+          banner: NETWORK_PREVIEW_BANNER,
+        },
+      });
     });
   });
 });

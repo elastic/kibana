@@ -148,7 +148,7 @@ xpack.actions.preconfigured:
     actionTypeId: .bedrock
     config:
       apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-3-sonnet-20240229-v1:0 <2>
+      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>
@@ -328,7 +328,7 @@ xpack.actions.preconfigured:
     config:
       apiUrl: https://api.openai.com/v1/chat/completions <1>
       apiProvider: 'OpenAI' <2>
-      defaultModel: gpt-4 <3>
+      defaultModel: gpt-4o <3>
     secrets:
       apiKey: superlongapikey <4>
 --
@@ -513,14 +513,19 @@ xpack.actions.preconfigured:
       jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
       clientSecret: secretsecret <5>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+      privateKey: |  <6>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY----- 
 --
 <1> Specifies whether the connector uses basic or OAuth authentication.
 <2> The user identifier.
 <3> The client identifier assigned to your OAuth application.
 <4> The key identifier assigned to the JWT verifier map of your OAuth application.
 <5> The client secret assigned to your OAuth application.
-<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+<6> The RSA private key in multiline format. If it has a password, you must also provide `privateKeyPassword`.
 
 [float]
 [[preconfigured-servicenow-configuration]]
@@ -563,14 +568,19 @@ xpack.actions.preconfigured:
       jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
       clientSecret: secretsecret <5>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+      privateKey: | <6>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY----- 
 --
 <1> Specifies whether the connector uses basic or OAuth authentication.
 <2> The user identifier.
 <3> The client identifier assigned to your OAuth application.
 <4> The key ID assigned to the JWT verifier map of your OAuth application.
 <5> The client secret assigned to the OAuth application.
-<6> The RSA private key. If it has a password, you must also provide `privateKeyPassword`.
+<6> The RSA private key in multiline format. If it has a password, you must also provide `privateKeyPassword`.
 
 [float]
 [[preconfigured-servicenow-sir-configuration]]
@@ -613,14 +623,19 @@ xpack.actions.preconfigured:
       jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <4>
     secrets:
       clientSecret: secretsecret <5>
-      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <6>
+      privateKey: | <6>
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIE...
+        KAgD...
+        ... multiple lines of key data ...
+        -----END RSA PRIVATE KEY----- 
 --
 <1> Specifies whether the connector uses basic or OAuth authentication.
 <2> The user identifier.
 <3> The client identifier assigned to the OAuth application.
 <4> The key ID assigned to the JWT verifier map of your OAuth application.
 <5> The client secret assigned to the OAuth application.
-<6> The RSA private key. If it has a password, you must also specify
+<6> The RSA private key in multiline format. If it has a password, you must also specify
 `privateKeyPassword`.
 
 

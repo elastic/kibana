@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
-  AssetCriticalityCsvUploadResponse,
+  BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -74,18 +75,45 @@ export class AssetCriticalityDataClient {
    */
   public async search({
     query,
-    size,
+    size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
+    from,
+    sort,
   }: {
     query: ESFilter;
     size?: number;
+    from?: number;
+    sort?: SearchRequest['sort'];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
-      body: { query },
-      size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
+      query,
+      size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
+      from,
+      sort,
     });
     return response;
+  }
+
+  public async searchByKuery({
+    kuery,
+    size,
+    from,
+    sort,
+  }: {
+    kuery?: string;
+    size?: number;
+    from?: number;
+    sort?: SearchRequest['sort'];
+  }) {
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
+    return this.search({
+      query,
+      size,
+      from,
+      sort,
+    });
   }
 
   private getIndex() {
@@ -183,9 +211,9 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
-  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityCsvUploadResponse> => {
-    const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
-    const stats: AssetCriticalityCsvUploadResponse['stats'] = {
+  }: BulkUpsertFromStreamOptions): Promise<BulkUpsertAssetCriticalityRecordsResponse> => {
+    const errors: BulkUpsertAssetCriticalityRecordsResponse['errors'] = [];
+    const stats: BulkUpsertAssetCriticalityRecordsResponse['stats'] = {
       successful: 0,
       failed: 0,
       total: 0,
@@ -244,11 +272,52 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
-    await this.options.esClient.delete({
-      id: createId(idParts),
-      index: this.getIndex(),
-      refresh: refresh ?? false,
-    });
+  public async delete(
+    idParts: AssetCriticalityIdParts,
+    refresh = 'wait_for' as const
+  ): Promise<AssetCriticalityRecord | undefined> {
+    let record: AssetCriticalityRecord | undefined;
+    try {
+      record = await this.get(idParts);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
+
+    if (!record) {
+      return undefined;
+    }
+
+    try {
+      await this.options.esClient.delete({
+        id: createId(idParts),
+        index: this.getIndex(),
+        refresh: refresh ?? false,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to delete asset criticality record: ${err.message}`);
+      throw err;
+    }
+
+    return record;
+  }
+
+  public formatSearchResponse(response: SearchResponse<AssetCriticalityRecord>): {
+    records: AssetCriticalityRecord[];
+    total: number;
+  } {
+    const records = response.hits.hits.map((hit) => hit._source as AssetCriticalityRecord);
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    return {
+      records,
+      total,
+    };
   }
 }

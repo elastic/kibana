@@ -56,6 +56,10 @@ export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
 
+export const SAVE_WITH_ERRORS_MODAL = '[data-test-subj="save-with-errors-confirmation-modal"]';
+
+export const SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const CUSTOM_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleQueryBar"]';
@@ -118,6 +122,9 @@ export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loa
 export const EQL_QUERY_VALIDATION_LABEL = '.euiFormLabel-isInvalid';
 
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
+
+export const EQL_QUERY_VALIDATION_ERROR_CONTENT =
+  '[data-test-subj="eql-validation-errors-popover-content"]';
 
 export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
 
@@ -260,9 +267,6 @@ export const ESQL_QUERY_BAR_INPUT_AREA =
   '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] textarea';
 
 export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
-
-export const ESQL_QUERY_BAR_EXPAND_BTN =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] [data-test-subj="TextBasedLangEditor-expand"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 

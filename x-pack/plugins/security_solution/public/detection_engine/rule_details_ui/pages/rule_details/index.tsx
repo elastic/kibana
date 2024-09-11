@@ -38,6 +38,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -112,6 +113,7 @@ import {
 } from '../../../../detections/components/rules/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
@@ -138,6 +140,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
+import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
@@ -230,11 +233,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const {
-    sourcererDataView,
-    runtimeMappings,
-    loading: isLoadingIndexPattern,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
@@ -591,15 +592,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 border
                 subtitle={subTitle}
                 subtitle2={
-                  <>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                  <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
+                    <CustomizedPrebuiltRuleBadge rule={rule} />
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}
                         {':'}
                       </EuiFlexItem>
                       {ruleStatusInfo}
                     </EuiFlexGroup>
-                  </>
+                  </EuiFlexGroup>
                 }
                 title={title}
                 badgeOptions={badgeOptions}
@@ -757,7 +759,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         hasIndexWrite={hasIndexWrite ?? false}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={runtimeMappings}
+                        runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
                         signalIndexName={signalIndexName}
                         tableId={TableId.alertsOnRuleDetailsPage}
                         to={to}
@@ -785,13 +787,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable
-                    ruleId={ruleId}
-                    selectAlertsTab={navigateToAlertsTab}
-                    analytics={analytics}
-                    i18n={i18nStart}
-                    theme={theme}
-                  />
+                  <>
+                    <ExecutionLogTable
+                      ruleId={ruleId}
+                      selectAlertsTab={navigateToAlertsTab}
+                      analytics={analytics}
+                      i18n={i18nStart}
+                      theme={theme}
+                    />
+                    <EuiSpacer size="xl" />
+                    <RuleBackfillsInfo ruleId={ruleId} />
+                  </>
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />

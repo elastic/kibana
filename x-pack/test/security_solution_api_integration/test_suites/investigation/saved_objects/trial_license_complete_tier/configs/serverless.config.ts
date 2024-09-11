@@ -11,13 +11,13 @@ export default createTestConfig({
   kbnTestServerArgs: [
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-      { product_line: 'security', product_tier: 'essentials' },
-      { product_line: 'endpoint', product_tier: 'essentials' },
-      { product_line: 'cloud', product_tier: 'essentials' },
+      { product_line: 'security', product_tier: 'complete' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Saved Objects Integration Tests - Serverless Env - Essentials Tier',
+    reportName: 'Saved Objects Integration Tests - Serverless Env - Complete Tier',
   },
 });

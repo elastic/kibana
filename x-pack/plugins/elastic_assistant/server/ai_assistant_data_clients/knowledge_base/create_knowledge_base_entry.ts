@@ -6,20 +6,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema } from './types';
 
 export interface CreateKnowledgeBaseEntryParams {
   esClient: ElasticsearchClient;
-  logger: Logger;
   knowledgeBaseIndex: string;
+  logger: Logger;
   spaceId: string;
   user: AuthenticatedUser;
   knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
@@ -52,7 +51,7 @@ export const createKnowledgeBaseEntry = async ({
     });
   } catch (err) {
     logger.error(
-      `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.metadata.kbResource}`
+      `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.name}`
     );
     throw err;
   }
@@ -62,22 +61,37 @@ export const transformToCreateSchema = (
   createdAt: string,
   spaceId: string,
   user: AuthenticatedUser,
-  { metadata, text }: KnowledgeBaseEntryCreateProps
+  entry: KnowledgeBaseEntryCreateProps
 ): CreateKnowledgeBaseEntrySchema => {
-  return {
+  const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user.profile_uid ?? 'unknown',
     updated_at: createdAt,
     updated_by: user.profile_uid ?? 'unknown',
+    namespace: spaceId,
     users: [
       {
         id: user.profile_uid,
         name: user.username,
       },
     ],
-    namespace: spaceId,
-    metadata,
-    text,
   };
+
+  if (entry.type === 'index') {
+    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
+    return {
+      ...base,
+      ...restEntry,
+      query_description: queryDescription,
+      input_schema:
+        entry.inputSchema?.map((schema) => ({
+          field_name: schema.fieldName,
+          field_type: schema.fieldType,
+          description: schema.description,
+        })) ?? undefined,
+      output_fields: outputFields ?? undefined,
+    };
+  }
+  return { ...base, ...entry, vector: undefined };
 };

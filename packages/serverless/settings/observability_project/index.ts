@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as settings from '@kbn/management-settings-ids';
@@ -21,7 +22,6 @@ export const OBSERVABILITY_PROJECT_SETTINGS = [
   settings.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID,
   settings.OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID,
   settings.OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID,
-  settings.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID,
   settings.OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID,
   settings.OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID,
   settings.OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID,
@@ -33,5 +33,8 @@ export const OBSERVABILITY_PROJECT_SETTINGS = [
   settings.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID,
   settings.OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR,
   settings.OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR,
-  settings.OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL,
+  settings.OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE,
+  settings.OBSERVABILITY_AI_ASSISTANT_LOGS_INDEX_PATTERN_ID,
+  settings.OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING,
+  settings.OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN,
 ];

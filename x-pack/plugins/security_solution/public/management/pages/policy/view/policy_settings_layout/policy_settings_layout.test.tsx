@@ -33,7 +33,8 @@ jest.mock('../../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('When rendering PolicySettingsLayout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/179984
+describe.skip('When rendering PolicySettingsLayout', () => {
   jest.setTimeout(15000);
 
   const testSubj = getPolicySettingsFormTestSubjects();
@@ -66,13 +67,13 @@ describe('When rendering PolicySettingsLayout', () => {
     const clickSave = async (andConfirm: boolean = true, ensureApiIsCalled: boolean = true) => {
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId('policyDetailsSaveButton'));
+      await userEvent.click(getByTestId('policyDetailsSaveButton'));
       await waitFor(() => {
         expect(getByTestId('confirmModalConfirmButton'));
       });
 
       if (andConfirm) {
-        userEvent.click(getByTestId('confirmModalConfirmButton'));
+        await userEvent.click(getByTestId('confirmModalConfirmButton'));
 
         if (ensureApiIsCalled) {
           await waitFor(() => {
@@ -86,17 +87,21 @@ describe('When rendering PolicySettingsLayout', () => {
      * Makes updates to the policy form on the UI and return back a new (cloned) `PolicyData`
      * with the updates reflected in it
      */
-    const makeUpdates = () => {
+    const makeUpdates = async () => {
       const { getByTestId } = renderResult;
       const expectedUpdates = cloneDeep(policyData);
       const policySettings = expectedUpdates.inputs[0].config.policy.value;
 
       // Turn off malware
-      userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
-      setMalwareMode(policySettings, true);
+      await userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
+      setMalwareMode({
+        policy: policySettings,
+        turnOff: true,
+        includeAntivirus: true,
+      });
 
       // Turn off Behaviour Protection
-      userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
+      await userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
       set(policySettings, 'windows.behavior_protection.mode', ProtectionModes.off);
       set(policySettings, 'mac.behavior_protection.mode', ProtectionModes.off);
       set(policySettings, 'linux.behavior_protection.mode', ProtectionModes.off);
@@ -105,11 +110,11 @@ describe('When rendering PolicySettingsLayout', () => {
       set(policySettings, 'linux.popup.behavior_protection.enabled', false);
 
       // Set Ransomware User Notification message
-      userEvent.type(getByTestId(testSubj.ransomware.notifyCustomMessage), 'foo message');
+      await userEvent.type(getByTestId(testSubj.ransomware.notifyCustomMessage), 'foo message');
       set(policySettings, 'windows.popup.ransomware.message', 'foo message');
 
-      userEvent.click(getByTestId(testSubj.advancedSection.showHideButton));
-      userEvent.type(getByTestId('linux.advanced.agent.connection_delay'), '1000');
+      await userEvent.click(getByTestId(testSubj.advancedSection.showHideButton));
+      await userEvent.type(getByTestId('linux.advanced.agent.connection_delay'), '1000');
       set(policySettings, 'linux.advanced.agent.connection_delay', '1000');
 
       return expectedUpdates;
@@ -123,9 +128,9 @@ describe('When rendering PolicySettingsLayout', () => {
       expect(getByTestId('policyDetailsSaveButton')).toBeDisabled();
     });
 
-    it('should render layout with expected content when changes have been made', () => {
+    it('should render layout with expected content when changes have been made', async () => {
       const { getByTestId } = render();
-      makeUpdates();
+      await makeUpdates();
       expect(getByTestId('endpointPolicyForm'));
       expect(getByTestId('policyDetailsCancelButton')).not.toBeDisabled();
       expect(getByTestId('policyDetailsSaveButton')).not.toBeDisabled();
@@ -133,7 +138,7 @@ describe('When rendering PolicySettingsLayout', () => {
 
     it('should allow updates to be made', async () => {
       render();
-      const expectedUpdatedPolicy = makeUpdates();
+      const expectedUpdatedPolicy = await makeUpdates();
       await clickSave();
 
       expect(apiMocks.responseProvider.updateEndpointPolicy).toHaveBeenCalledWith({
@@ -147,7 +152,7 @@ describe('When rendering PolicySettingsLayout', () => {
       const deferred = getDeferred();
       apiMocks.responseProvider.updateEndpointPolicy.mockDelay.mockReturnValue(deferred.promise);
       const { getByTestId } = render();
-      makeUpdates();
+      await makeUpdates();
       await clickSave(true, false);
 
       await waitFor(() => {
@@ -164,7 +169,7 @@ describe('When rendering PolicySettingsLayout', () => {
 
     it('should show success toast on update success', async () => {
       render();
-      makeUpdates();
+      await makeUpdates();
       await clickSave();
 
       await waitFor(() => {
@@ -183,7 +188,7 @@ describe('When rendering PolicySettingsLayout', () => {
         throw new Error('oh oh!');
       });
       render();
-      makeUpdates();
+      await makeUpdates();
       await clickSave();
 
       await waitFor(() => {

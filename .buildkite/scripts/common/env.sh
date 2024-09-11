@@ -23,12 +23,14 @@ if [[ -d /opt/local-ssd/buildkite ]]; then
   mkdir -p "$TMPDIR"
 fi
 
-KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_BRANCH
-export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
+if command -v jq >/dev/null 2>&1; then
+  KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
+  export KIBANA_PKG_BRANCH
+  export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 
-KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_VERSION
+  KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
+  export KIBANA_PKG_VERSION
+fi
 
 # Detects and exports the final target branch when using a merge queue
 if [[ "${BUILDKITE_BRANCH:-}" == "gh-readonly-queue"* ]]; then
@@ -47,7 +49,6 @@ export MERGE_QUEUE_TARGET_BRANCH
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
 
-
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -62,7 +63,6 @@ fi
 
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
-export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX/cypress"
 
 export NODE_OPTIONS="--max-old-space-size=4096"
@@ -131,3 +131,23 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 
 # tells the gh command what our default repo is
 export GH_REPO=github.com/elastic/kibana
+
+FTR_ENABLE_FIPS_AGENT=false
+if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
+  FTR_ENABLE_FIPS_AGENT=true
+  ES_SECURITY_ENABLED=true
+  export ES_SECURITY_ENABLED
+  # used by FIPS agents to link FIPS OpenSSL modules
+  export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+
+  if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
+    echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
+    echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
+  fi
+
+  if [[ -f "$KIBANA_DIR/config/kibana.yml" ]]; then
+    echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
+  fi
+fi
+
+export FTR_ENABLE_FIPS_AGENT

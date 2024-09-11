@@ -151,6 +151,7 @@ export const getCertsRequestBody = ({
       collapse: {
         field: 'tls.server.hash.sha256',
         inner_hits: {
+          size: 100,
           _source: {
             includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
           },

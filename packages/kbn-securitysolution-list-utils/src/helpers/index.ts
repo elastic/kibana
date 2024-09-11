@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -1032,7 +1033,17 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
 export const hasWrongOperatorWithWildcard = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean => {
-  return items[0]?.entries.some((e) => {
+  // flattens array of multiple entries added with OR
+  const multipleEntries = items.flatMap((item) => item.entries);
+  // flattens nested entries
+  const allEntries = multipleEntries.flatMap((item) => {
+    if (item.type === 'nested') {
+      return item.entries;
+    }
+    return item;
+  });
+
+  return allEntries.some((e) => {
     if (e.type !== 'list' && 'value' in e) {
       return validateHasWildcardWithWrongOperator({
         operator: e.type,

@@ -2,12 +2,7 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c12 svg {
-  position: relative;
-  top: -1px;
-}
-
-.c10,
+  .c10,
 .c10 * {
   display: inline-block;
   max-width: 100%;
@@ -111,6 +106,11 @@ tr:hover .c2:focus::before {
   vertical-align: top;
 }
 
+.c12 svg {
+  position: relative;
+  top: -1px;
+}
+
 .c21 {
   margin-right: 5px;
 }
@@ -119,13 +119,12 @@ tr:hover .c2:focus::before {
   margin-right: 5px;
 }
 
-.c14 {
-  position: relative;
-  top: 1px;
+.c6 {
+  margin-right: 3px;
 }
 
-.c13 {
-  margin-right: 5px;
+.c7 {
+  margin: 0 5px;
 }
 
 .c16 {
@@ -156,12 +155,13 @@ tr:hover .c2:focus::before {
   margin: 0 5px;
 }
 
-.c6 {
-  margin-right: 3px;
+.c14 {
+  position: relative;
+  top: 1px;
 }
 
-.c7 {
-  margin: 0 5px;
+.c13 {
+  margin-right: 5px;
 }
 
 .c11 {

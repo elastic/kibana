@@ -5,53 +5,49 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
+import React, { useMemo } from 'react';
+import { FlyoutHeader } from '@kbn/security-solution-common';
+import { AgentTypeIntegration } from '../../../common/components/endpoint/agents/agent_type_integration';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint';
 
 /**
  * Document details expandable right section header for the isolate host panel
  */
 export const PanelHeader: FC = () => {
   const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
-  const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
+  const {
+    isSupported: supportsResponseActions,
+    details: { agentType },
+  } = useAlertResponseActionsSupport(data);
 
-  const isAlertFromCrowdstrikeAlert = isAlertFromCrowdstrikeEvent({ data });
-  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
-  const showAsTechPreview =
-    (isSentinelOneV1Enabled && isSentinelOneAlert) ||
-    (responseActionsCrowdstrikeManualHostIsolationEnabled && isAlertFromCrowdstrikeAlert);
+  const showTechPreviewBadge: boolean = useMemo(() => {
+    return supportsResponseActions && (agentType === 'sentinel_one' || agentType === 'crowdstrike');
+  }, [agentType, supportsResponseActions]);
+
   const title = (
     <EuiFlexGroup responsive gutterSize="s">
-      <EuiFlexItem grow={false}>
-        {isolateAction === 'isolateHost' ? (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
-            defaultMessage="Isolate host"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
-            defaultMessage="Release host"
-          />
-        )}
+      <EuiFlexItem grow={false} data-test-subj="flyoutHostIsolationHeaderTitle">
+        {isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}
+        <EuiSpacer size="s" />
+        <AgentTypeIntegration
+          agentType={agentType}
+          layout="horizontal"
+          data-test-subj="flyoutHostIsolationHeaderIntegration"
+        />
       </EuiFlexItem>
-      {showAsTechPreview && (
+      {showTechPreviewBadge && (
         <EuiFlexItem grow={false}>
-          <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
+          <EuiBetaBadge
+            data-test-subj="flyoutHostIsolationHeaderBadge"
+            label={TECHNICAL_PREVIEW}
+            tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

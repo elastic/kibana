@@ -7,6 +7,11 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
+if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
+  echo "--- Nothing to do in DRY_RUN mode"
+  exit 0
+fi
+
 echo "--- Push docker image"
 mkdir -p target
 
@@ -23,7 +28,7 @@ docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 if  docker manifest inspect $KIBANA_TEST_IMAGE &> /dev/null; then
   echo "Cloud image already exists, skipping docker push"
 else
-  docker image push "$KIBANA_TEST_IMAGE"
+  docker_with_retry push "$KIBANA_TEST_IMAGE"
 fi
 
 echo "--- Create deployment"

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -653,6 +654,91 @@ describe('TableListView', () => {
     });
   });
 
+  describe('column sorting with recently accessed', () => {
+    const setupColumnSorting = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        TagList: getTagList({ references: [] }),
+      }),
+      {
+        defaultProps: {
+          ...requiredProps,
+          recentlyAccessed: { get: () => [{ id: '123', link: '', label: '' }] },
+        },
+        memoryRouter: { wrapComponent: true },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
+        type: 'dashboard',
+        attributes: {
+          title: 'z-foo', // first desc, last asc
+        },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
+      },
+      {
+        id: '456',
+        updatedAt: yesterday.toISOString(), // first desc, last asc
+        type: 'dashboard',
+        attributes: {
+          title: 'a-foo', // first asc, last desc
+        },
+        references: [],
+      },
+    ];
+
+    test('should initially sort by "Recently Accessed"', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+    });
+
+    test('filter select should have 5 options', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+      const { openSortSelect } = getActions(testBed!);
+      const { component, find } = testBed!;
+      component.update();
+
+      act(() => {
+        openSortSelect();
+      });
+      component.update();
+
+      const filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.length).toBe(5);
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Recently viewed. Checked option.Additional information ',
+        'Name A-Z ',
+        'Name Z-A ',
+        'Recently updated ',
+        'Least recently updated ',
+      ]);
+    });
+  });
+
   describe('content editor', () => {
     const setupInspector = registerTestBed<string, TableListViewTableProps>(
       WithServices<TableListViewTableProps>(TableListViewTable),
@@ -967,7 +1053,7 @@ describe('TableListView', () => {
   });
 
   describe('search', () => {
-    const updatedAt = new Date('2023-07-15').toISOString();
+    const updatedAt = moment('2023-07-15').toISOString();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1061,7 +1147,7 @@ describe('TableListView', () => {
           {
             id: 'item-from-search',
             type: 'dashboard',
-            updatedAt: new Date('2023-07-01').toISOString(),
+            updatedAt: moment('2023-07-01').toISOString(),
             attributes: {
               title: 'Item from search',
             },

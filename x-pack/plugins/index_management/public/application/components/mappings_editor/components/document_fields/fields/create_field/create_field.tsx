@@ -14,13 +14,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
-import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
+import { isSemanticTextField } from '../../../../lib/utils';
+import { useDispatch } from '../../../../mappings_state_context';
+import { Form, FormDataProvider, useForm, useFormData } from '../../../../shared_imports';
 import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
@@ -30,20 +32,25 @@ import { getRequiredParametersFormForType } from './required_parameters_forms';
 import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
+
+export interface ModelIdMapEntry {
+  trainedModelId: string;
+  isDeployed: boolean;
+  isDeployable: boolean;
+  isDownloading: boolean;
+  modelStats?: TrainedModelStat; // third-party models don't have model stats
+}
 export interface InferenceToModelIdMap {
-  [key: string]: {
-    trainedModelId?: string;
-    isDeployed: boolean;
-    isDeployable: boolean;
-    defaultInferenceEndpoint: boolean;
-  };
+  [key: string]: ModelIdMapEntry;
 }
 
 export interface SemanticTextInfo {
   isSemanticTextEnabled?: boolean;
   indexName?: string;
   ml?: MlPluginStart;
-  setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>>;
+  setErrorsInTrainedModelDeployment: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
 }
 interface Props {
   allFields: NormalizedFields['byId'];
@@ -68,13 +75,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
   isAddingFields,
   semanticTextInfo,
 }: Props) {
-  const { isSemanticTextEnabled, indexName, ml, setErrorsInTrainedModelDeployment } =
-    semanticTextInfo ?? {};
+  const { isSemanticTextEnabled, ml, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
 
   const { form } = useForm<Field>({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
+    id: 'create-field',
   });
 
   useFormData({ form });
@@ -88,7 +95,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     return subscription.unsubscribe;
   }, [dispatch, subscribe]);
-
   const cancel = () => {
     if (isAddingFields && onCancelAddingNewFields) {
       onCancelAddingNewFields();
@@ -97,18 +103,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const {
-    referenceFieldComboValue,
-    nameValue,
-    inferenceIdComboValue,
-    setInferenceValue,
-    semanticFieldType,
-    handleSemanticText,
-  } = useSemanticText({
+  const { createInferenceEndpoint, handleSemanticText } = useSemanticText({
     form,
     setErrorsInTrainedModelDeployment,
     ml,
   });
+
+  const isSemanticText = form.getFormData().type === 'semantic_text';
 
   const submitForm = async (
     e?: React.FormEvent,
@@ -121,10 +122,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     const { isValid, data } = await form.submit();
 
-    if (isValid) {
-      form.reset();
-
-      if (data.type === 'semantic_text' && !clickOutside) {
+    if (isValid && !clickOutside) {
+      if (isSemanticTextField(data)) {
         handleSemanticText(data);
       } else {
         dispatch({ type: 'field.add', value: data });
@@ -133,6 +132,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       if (exitAfter) {
         cancel();
       }
+      form.reset();
     }
   };
 
@@ -180,22 +180,18 @@ export const CreateField = React.memo(function CreateFieldComponent({
       </FormDataProvider>
 
       {/* Field reference_field for semantic_text field type */}
-      <ReferenceFieldCombo indexName={indexName} />
+      {isSemanticText && (
+        <EuiFlexItem grow={false}>
+          <ReferenceFieldSelects />
+        </EuiFlexItem>
+      )}
 
       {/* Field name */}
       <EuiFlexItem>
-        <NameParameter />
+        <NameParameter isSemanticText={isSemanticText} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-
-  const isAddFieldButtonDisabled = (): boolean => {
-    if (semanticFieldType) {
-      return !referenceFieldComboValue || !nameValue || !inferenceIdComboValue;
-    }
-
-    return false;
-  };
 
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -215,7 +211,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onClick={submitForm}
           type="submit"
           data-test-subj="addButton"
-          isDisabled={isAddFieldButtonDisabled()}
+          isDisabled={form.getErrors().length > 0}
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
@@ -282,8 +278,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
                   );
                 }}
               </FormDataProvider>
-              {/* Field inference_id for semantic_text field type */}
-              <InferenceIdCombo setValue={setInferenceValue} />
+
+              {isSemanticText && (
+                <SelectInferenceId createInferenceEndpoint={createInferenceEndpoint} />
+              )}
               {renderFormActions()}
             </div>
           </div>
@@ -292,64 +290,3 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </>
   );
 });
-
-function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
-  const [{ type }] = useFormData({ watch: 'type' });
-
-  if (type === undefined || type[0]?.value !== 'semantic_text') {
-    return null;
-  }
-
-  return (
-    <EuiFlexItem grow={false}>
-      <UseField path="referenceField">
-        {(field) => <ReferenceFieldSelects onChange={field.setValue} indexName={indexName} />}
-      </UseField>
-    </EuiFlexItem>
-  );
-}
-
-interface InferenceProps {
-  setValue: (value: string) => void;
-}
-
-function InferenceIdCombo({ setValue }: InferenceProps) {
-  const { inferenceToModelIdMap } = useMappingsState();
-  const dispatch = useDispatch();
-  const [{ type }] = useFormData({ watch: 'type' });
-
-  // update new inferenceEndpoint
-  const setNewInferenceEndpoint = useCallback(
-    (newInferenceEndpoint: InferenceToModelIdMap) => {
-      dispatch({
-        type: 'inferenceToModelIdMap.update',
-        value: {
-          inferenceToModelIdMap: {
-            ...inferenceToModelIdMap,
-            ...newInferenceEndpoint,
-          },
-        },
-      });
-    },
-    [dispatch, inferenceToModelIdMap]
-  );
-
-  if (type === undefined || type[0]?.value !== 'semantic_text') {
-    return null;
-  }
-
-  return (
-    <>
-      <EuiSpacer />
-      <UseField path="inferenceId">
-        {(field) => (
-          <SelectInferenceId
-            onChange={field.setValue}
-            setValue={setValue}
-            setNewInferenceEndpoint={setNewInferenceEndpoint}
-          />
-        )}
-      </UseField>
-    </>
-  );
-}

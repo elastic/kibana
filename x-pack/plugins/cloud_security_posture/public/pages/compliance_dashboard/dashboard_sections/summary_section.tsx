@@ -15,6 +15,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { NavFilter } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
 import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
@@ -27,13 +30,7 @@ import type {
   PosturePolicyTemplate,
 } from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  RULE_FAILED,
-  RULE_PASSED,
-} from '../../../../common/constants';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 
@@ -135,6 +132,7 @@ export const SummarySection = ({
         button: (
           <EuiButtonEmpty
             iconType="search"
+            data-test-subj="dashboard-view-all-resources"
             onClick={() => {
               navToFindings(getPolicyTemplateQuery(dashboardType), [
                 FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,

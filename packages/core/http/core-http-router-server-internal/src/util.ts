@@ -1,32 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { once } from 'lodash';
 import {
   isFullValidatorContainer,
+  type RouteValidatorFullConfigResponse,
   type RouteConfig,
   type RouteMethod,
   type RouteValidator,
 } from '@kbn/core-http-server';
-import type { ObjectType, Type } from '@kbn/config-schema';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
 }
 
-interface ResponseValidation {
-  [statusCode: number]: { body: () => ObjectType | Type<unknown> };
-}
-
-export function prepareResponseValidation(validation: ResponseValidation): ResponseValidation {
+export function prepareResponseValidation(
+  validation: RouteValidatorFullConfigResponse
+): RouteValidatorFullConfigResponse {
   const responses = Object.entries(validation).map(([key, value]) => {
     if (isStatusCode(key)) {
-      return [key, { body: once(value.body) }];
+      return [key, { ...value, ...(value.body ? { body: once(value.body) } : {}) }];
     }
     return [key, value];
   });

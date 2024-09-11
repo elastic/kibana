@@ -6,13 +6,12 @@
   },
   "include": ["**/*.ts"],
   "kbn_references": [
-    "@kbn/analytics-client",
     "@kbn/ebt-tools",
     "@kbn/core-base-browser-internal",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-analytics-browser",
     "@kbn/core-base-browser-mocks",
-    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-injected-metadata-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

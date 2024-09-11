@@ -18,14 +18,14 @@ interface Props {
   groupBy: GroupByField;
   groups?: string[];
   kqlQuery?: string;
-  sloView: SLOView;
+  view: SLOView;
   sort?: SortField;
   filters?: Filter[];
   reloadSubject: Subject<boolean>;
 }
 
 export function GroupSloView({
-  sloView,
+  view,
   groupBy = 'status',
   groups = [],
   kqlQuery = '',
@@ -46,7 +46,7 @@ export function GroupSloView({
 
   return (
     <GroupView
-      sloView={sloView}
+      view={view}
       groupBy={groupBy}
       groupsFilter={groups}
       kqlQuery={combinedKqlQuery}

@@ -610,6 +610,7 @@ exports[`XYChart component it renders area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -664,7 +665,7 @@ exports[`XYChart component it renders area 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -688,11 +689,11 @@ exports[`XYChart component it renders area 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -999,6 +1000,7 @@ exports[`XYChart component it renders area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -1024,12 +1026,15 @@ exports[`XYChart component it renders area 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -1742,8 +1747,8 @@ exports[`XYChart component it renders area 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -2160,6 +2165,7 @@ exports[`XYChart component it renders bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -2214,7 +2220,7 @@ exports[`XYChart component it renders bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2238,11 +2244,11 @@ exports[`XYChart component it renders bar 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -2549,6 +2555,7 @@ exports[`XYChart component it renders bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -2574,12 +2581,15 @@ exports[`XYChart component it renders bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -3292,8 +3302,8 @@ exports[`XYChart component it renders bar 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -3710,6 +3720,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -3764,7 +3775,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -3788,11 +3799,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -4099,6 +4110,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -4124,12 +4136,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -4842,8 +4857,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -5260,6 +5275,7 @@ exports[`XYChart component it renders line 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -5314,7 +5330,7 @@ exports[`XYChart component it renders line 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5338,11 +5354,11 @@ exports[`XYChart component it renders line 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -5649,6 +5665,7 @@ exports[`XYChart component it renders line 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -5674,12 +5691,15 @@ exports[`XYChart component it renders line 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -6392,8 +6412,8 @@ exports[`XYChart component it renders line 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -6810,6 +6830,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -6864,7 +6885,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -6888,11 +6909,11 @@ exports[`XYChart component it renders stacked area 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -7199,6 +7220,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -7224,12 +7246,15 @@ exports[`XYChart component it renders stacked area 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -7942,8 +7967,8 @@ exports[`XYChart component it renders stacked area 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -8360,6 +8385,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -8414,7 +8440,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -8438,11 +8464,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -8749,6 +8775,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -8774,12 +8801,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -9492,8 +9522,8 @@ exports[`XYChart component it renders stacked bar 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -9910,6 +9940,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -9964,7 +9995,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -9988,11 +10019,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -10299,6 +10330,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -10324,12 +10356,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -11042,8 +11077,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -11490,6 +11525,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -11544,7 +11580,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -11568,11 +11604,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -11879,6 +11915,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -11904,12 +11941,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -12818,8 +12858,8 @@ exports[`XYChart component split chart should render split chart if both, splitR
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -13278,6 +13318,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -13332,7 +13373,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13356,11 +13397,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -13667,6 +13708,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -13692,12 +13734,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -14601,8 +14646,8 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}
@@ -15059,6 +15104,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -15113,7 +15159,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -15137,11 +15183,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -15448,6 +15494,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 },
               },
               "isolatedPoint": Object {
+                "enabled": true,
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
@@ -15473,12 +15520,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -16382,8 +16432,8 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         minBarHeight={1}
         paletteService={
           Object {
-            "get": [Function],
-            "getAll": [Function],
+            "get": [MockFunction],
+            "getAll": [MockFunction],
           }
         }
         shouldShowValueLabels={true}

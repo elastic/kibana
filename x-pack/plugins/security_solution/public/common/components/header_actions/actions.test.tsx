@@ -45,6 +45,12 @@ jest.mock(
   })
 );
 
+jest.mock('./add_note_icon_item', () => {
+  return {
+    AddEventNoteAction: jest.fn(() => <div data-test-subj="add-note-mock-action" />),
+  };
+});
+
 jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
@@ -98,6 +104,7 @@ const defaultProps = {
   checked: false,
   columnId: '',
   columnValues: 'abc def',
+  disableExpandAction: false,
   data: mockTimelineData[0].data,
   ecsData: mockTimelineData[0].ecs,
   eventId: 'abc',
@@ -426,6 +433,62 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('Show notes action', () => {
+    test('should show notes action if showNotes is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} showNotes={true} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeTruthy();
+    });
+
+    test('should NOT show notes action if showNotes is false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} showNotes={false} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('Expand action', () => {
+    test('should not be visible if disableExpandAction is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('Pin action', () => {
+    test('should hide pin Action by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeFalsy();
+    });
+
+    test('should show pin Action by when disablePinAction = false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction disablePinAction={false} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeTruthy();
     });
   });
 });
