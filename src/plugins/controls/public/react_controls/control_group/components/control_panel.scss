@@ -20,6 +20,7 @@ $controlMinWidth: $euiSize * 14;
     .controlPanel--label {
       @include euiTextTruncate;
       padding: 0;
+      height: 100%;
     }
   }
 
