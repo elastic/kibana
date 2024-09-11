@@ -15,7 +15,7 @@ import {
   InitEntityStoreRequestBody,
   InitEntityStoreRequestParams,
 } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
-import { API_VERSIONS } from '../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const initEntityEngineRoute = (
@@ -26,7 +26,9 @@ export const initEntityEngineRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/init',
-      options: {},
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      },
     })
     .addVersion(
       {

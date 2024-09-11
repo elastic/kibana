@@ -10,7 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { ListEntityStoreEnginesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/list.gen';
-import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -22,7 +22,9 @@ export const listEntityEnginesRoute = (
     .get({
       access: 'public',
       path: '/api/entity_store/engines',
-      options: {},
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      },
     })
     .addVersion(
       {

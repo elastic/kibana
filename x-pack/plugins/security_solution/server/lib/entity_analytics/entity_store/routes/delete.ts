@@ -15,7 +15,7 @@ import {
   DeleteEntityStoreRequestQuery,
   DeleteEntityStoreRequestParams,
 } from '../../../../../common/api/entity_analytics/entity_store/engine/delete.gen';
-import { API_VERSIONS } from '../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const deleteEntityEngineRoute = (
@@ -26,7 +26,9 @@ export const deleteEntityEngineRoute = (
     .delete({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}',
-      options: {},
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      },
     })
     .addVersion(
       {

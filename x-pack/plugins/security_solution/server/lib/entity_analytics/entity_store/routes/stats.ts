@@ -12,7 +12,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import type { GetEntityStoreStatsResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/stats.gen';
 import { GetEntityStoreStatsRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stats.gen';
-import { API_VERSIONS } from '../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const getEntityEngineStatsRoute = (
@@ -23,7 +23,9 @@ export const getEntityEngineStatsRoute = (
     .post({
       access: 'public',
       path: '/api/entity_store/engines/{entityType}/stats',
-      options: {},
+      options: {
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      },
     })
     .addVersion(
       {
