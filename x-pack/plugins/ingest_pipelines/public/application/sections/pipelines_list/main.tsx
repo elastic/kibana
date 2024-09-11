@@ -33,6 +33,7 @@ import {
   getCreatePath,
   getManageProcessorsPath,
 } from '../../services/navigation';
+import { useCheckManageProcessorsPrivileges } from '../manage_processors';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
@@ -60,6 +61,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
 
+  const hasManageProcessorsPrivileges = useCheckManageProcessorsPrivileges();
   // Track component loaded
   useEffect(() => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
@@ -196,7 +198,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       />
     </EuiPopover>,
   ];
-  if (services.config.enableManageProcessors) {
+  if (services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
     titleActionButtons.push(
       <EuiButtonEmpty
         iconType="wrench"

@@ -67,7 +67,7 @@ export const renderApp = (
   render(
     <KibanaRenderContextProvider {...coreServices}>
       <AuthorizationProvider
-        privilegesEndpoint={`${API_BASE_PATH}/privileges`}
+        privilegesEndpoint={`${API_BASE_PATH}/privileges/ingest_pipelines`}
         httpClient={coreServices.http}
       >
         <KibanaContextProvider services={services}>
