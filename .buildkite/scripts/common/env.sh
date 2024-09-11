@@ -151,5 +151,3 @@ if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-ag
 fi
 
 export FTR_ENABLE_FIPS_AGENT
-
-export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.0.0/archives/20240911-172219_4ce661cc/manifest.json"
