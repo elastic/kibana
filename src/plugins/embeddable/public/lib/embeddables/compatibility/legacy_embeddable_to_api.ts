@@ -267,6 +267,7 @@ export const legacyEmbeddableToApi = (
 
       dataViews,
       disabledActionIds,
+      setDisabledActionIds: (ids) => disabledActionIds.next(ids),
 
       panelTitle,
       setPanelTitle,
