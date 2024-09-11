@@ -48,6 +48,7 @@ export enum ExternalServiceSimulator {
   TINES = 'tines',
   SENTINELONE = 'sentinelone',
   CROWDSTRIKE = 'crowdstrike',
+  THEHIVE = 'thehive',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -68,6 +69,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SENTINELONE}/web/api/v2.1/`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.CROWDSTRIKE}`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.THEHIVE}`);
   return allPaths;
 }
 
@@ -162,6 +164,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
     );
     initTines(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES));
+    initTines(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.THEHIVE));
     initUnsecuredAction(router, core);
   }
 

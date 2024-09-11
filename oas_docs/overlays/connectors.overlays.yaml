@@ -142,7 +142,8 @@ actions:
                   oneOf:
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_config.yaml'
-                    # Crowdstrike (.crowdstrike) TBD
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_config.yaml'
                     # D3 Security (.d3security)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_config.yaml'
                     # Email (.email)
@@ -193,7 +194,8 @@ actions:
                   oneOf:
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_secrets.yaml'
-                    # Crowdstrike (.crowdstrike) TBD
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_secrets.yaml'
                     # D3 Security (.d3security)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_secrets.yaml'
                     # Email (.email)
@@ -249,7 +251,8 @@ actions:
                   oneOf:
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_config.yaml'
-                    # Crowdstrike (.crowdstrike) TBD
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_config.yaml'
                     # D3 Security (.d3security)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_config.yaml'
                     # Email (.email)
@@ -300,7 +303,8 @@ actions:
                   oneOf:
                     # Bedrock (.bedrock)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/bedrock_secrets.yaml'
-                    # Crowdstrike (.crowdstrike) TBD
+                    # Crowdstrike (.crowdstrike)
+                    - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/crowdstrike_secrets.yaml'
                     # D3 Security (.d3security)
                     - $ref: '../../x-pack/plugins/actions/docs/openapi/components/schemas/d3security_secrets.yaml'
                     # Email (.email)
