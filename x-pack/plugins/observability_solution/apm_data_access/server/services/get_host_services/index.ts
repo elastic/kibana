@@ -15,6 +15,7 @@ import {
 } from '@kbn/apm-types/es_fields';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  RollupInterval,
   TimeRangeMetadata,
   getBucketSize,
   getPreferredBucketSizeAndDataSource,
@@ -66,8 +67,8 @@ export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesP
       apm: {
         sources: [
           {
-            documentType: sourcesToUse.source.documentType,
-            rollupInterval: sourcesToUse.source.rollupInterval,
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
           },
         ],
       },
@@ -121,7 +122,7 @@ export function createGetHostServices({ apmEventClient }: ApmDataAccessServicesP
       apm: {
         sources: [
           {
-            documentType: sourcesToUse.source.documentType,
+            documentType: ApmDocumentType.ErrorEvent,
             rollupInterval: sourcesToUse.source.rollupInterval,
           },
         ],
