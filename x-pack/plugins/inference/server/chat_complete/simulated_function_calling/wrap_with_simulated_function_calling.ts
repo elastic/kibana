@@ -32,12 +32,12 @@ export function wrapWithSimulatedFunctionCalling({
     tools,
   });
 
-  const wrappedSystem = system ? `${system}\n${system}` : instructions;
+  const wrappedSystem = system ? `${system}\n${instructions}` : instructions;
 
   const wrappedMessages = messages
     .map<UserMessage | AssistantMessage>((message) => {
       if (message.role === MessageRole.Tool) {
-        return convertToolMessage(message);
+        return convertToolResponseMessage(message);
       }
       if (message.role === MessageRole.Assistant && message.toolCalls?.length) {
         return convertToolCallMessage(message);
@@ -72,22 +72,14 @@ export function wrapWithSimulatedFunctionCalling({
   };
 }
 
-const convertToolMessage = (message: ToolMessage<unknown>): UserMessage => {
-  const deserialized = JSON.parse((message.response as any) || '{}');
-
-  const results: Record<string, unknown> = {
-    type: 'tool_result',
-    tool: message.toolCallId,
-    response: deserialized,
-  };
-
-  if ('error' in deserialized) {
-    results.is_error = true;
-  }
-
+const convertToolResponseMessage = (message: ToolMessage<unknown>): UserMessage => {
   return {
     role: MessageRole.User,
-    content: JSON.stringify(results),
+    content: JSON.stringify({
+      type: 'tool_result',
+      tool: message.toolCallId,
+      response: message.response,
+    }),
   };
 };
 
