@@ -22,6 +22,7 @@ import {
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { createDatafeedId } from '../../../../../../common/util/job_utils';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
@@ -36,7 +37,6 @@ import type {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
-import type { MlJobService } from '../../../../services/job_service';
 import { JobRunner, type ProgressSubscriber } from '../job_runner';
 import type { CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '../../../../../../common/constants/new_job';
@@ -80,19 +80,16 @@ export class JobCreator {
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
   public mlApi: MlApi;
-  public mlJobService: MlJobService;
   public newJobCapsService: NewJobCapsService;
 
   constructor(
     mlApi: MlApi,
-    mlJobService: MlJobService,
     newJobCapsService: NewJobCapsService,
     indexPattern: DataView,
     savedSearch: SavedSearch | null,
     query: object
   ) {
     this.mlApi = mlApi;
-    this.mlJobService = mlJobService;
     this.newJobCapsService = newJobCapsService;
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
@@ -241,7 +238,7 @@ export class JobCreator {
   public set jobId(jobId: JobId) {
     this._job_config.job_id = jobId;
     this._datafeed_config.job_id = jobId;
-    this._datafeed_config.datafeed_id = `datafeed-${jobId}`;
+    this._datafeed_config.datafeed_id = createDatafeedId(jobId);
 
     if (this._useDedicatedIndex) {
       this._job_config.results_index_name = jobId;
@@ -620,16 +617,13 @@ export class JobCreator {
     }
   }
 
-  public async createJob(): Promise<object> {
+  public async createJob() {
     try {
-      const { success, resp } = await this.mlJobService.saveNewJob(this._job_config);
+      await this.mlApi.addJob({
+        jobId: this._job_config.job_id,
+        job: this._job_config,
+      });
       await this._updateCalendars();
-
-      if (success === true) {
-        return resp;
-      } else {
-        throw resp;
-      }
     } catch (error) {
       throw error;
     }
@@ -638,7 +632,14 @@ export class JobCreator {
   public async createDatafeed(): Promise<object> {
     try {
       const tempDatafeed = this._getDatafeedWithFilteredRuntimeMappings();
-      return await this.mlJobService.saveNewDatafeed(tempDatafeed, this._job_config.job_id);
+      const jobId = this._job_config.job_id;
+      const datafeedId = createDatafeedId(jobId);
+      tempDatafeed.job_id = jobId;
+
+      return this.mlApi.addDatafeed({
+        datafeedId,
+        datafeedConfig: tempDatafeed,
+      });
     } catch (error) {
       throw error;
     }
