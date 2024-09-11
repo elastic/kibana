@@ -14,7 +14,7 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
   title: i18n.translate('xpack.searchIndices.codingLanguages.javascript', {
     defaultMessage: 'Javascript',
   }),
-  icon: 'js',
+  icon: 'javascript.svg',
   codeBlockLanguage: 'javascript',
 };
 
@@ -27,7 +27,7 @@ export const JavascriptServerlessExamples: CreateIndexLanguageExamples = {
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    }) => `import { Client } from "@elastic/elasticsearch-serverless"
 
 const client = new Client({
   node: '${elasticsearchURL}',
@@ -46,7 +46,7 @@ client.indices.create({
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    }) => `import { Client } from "@elastic/elasticsearch-serverless"
 
 const client = new Client({
   node: '${elasticsearchURL}',
@@ -59,8 +59,8 @@ client.indices.create({
   index: "${indexName ?? INDEX_PLACEHOLDER}",
   mappings: {
     properties: {
-      vector": { type: "dense_vector", dims: 3 },
-      text": { type: "text"}
+      vector: { type: "dense_vector", dims: 3 },
+      text: { type: "text"}
     },
   },
 });`,

@@ -24,10 +24,18 @@ import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../.
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
+import { generateRandomIndexName } from '../../utils/indices';
 import { CreateIndexForm } from './create_index';
 import { CreateIndexCodeView } from './create_index_code';
+import { CreateIndexFormState } from './types';
 
-const MAX_WIDTH = '600px';
+function initCreateIndexState(): CreateIndexFormState {
+  return {
+    indexName: generateRandomIndexName(),
+  };
+}
+
+const MAX_WIDTH = '650px';
 
 enum CreateIndexView {
   UI = 'ui',
@@ -42,6 +50,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   const [createIndexView, setCreateIndexView] = useState<CreateIndexView>(
     userPrivileges?.privileges.canCreateIndex === false ? CreateIndexView.Code : CreateIndexView.UI
   );
+  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState());
   const usageTracker = useUsageTracker();
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.startPageOpened);
@@ -151,9 +160,15 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
               </p>
             </EuiText>
             {createIndexView === CreateIndexView.UI && (
-              <CreateIndexForm userPrivileges={userPrivileges} />
+              <CreateIndexForm
+                userPrivileges={userPrivileges}
+                formState={formState}
+                setFormState={setFormState}
+              />
             )}
-            {createIndexView === CreateIndexView.Code && <CreateIndexCodeView />}
+            {createIndexView === CreateIndexView.Code && (
+              <CreateIndexCodeView createIndexForm={formState} />
+            )}
           </EuiFlexGroup>
         </EuiForm>
       </EuiPanel>

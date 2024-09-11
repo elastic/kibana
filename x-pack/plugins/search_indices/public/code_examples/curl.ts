@@ -12,7 +12,7 @@ import { CodeLanguage, CreateIndexLanguageExamples } from '../types';
 export const CURL_INFO: CodeLanguage = {
   id: 'curl',
   title: i18n.translate('xpack.searchIndices.codingLanguages.curl', { defaultMessage: 'cURL' }),
-  icon: 'curl',
+  icon: 'curl.svg',
   codeBlockLanguage: 'shell',
 };
 

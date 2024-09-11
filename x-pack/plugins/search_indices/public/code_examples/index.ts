@@ -14,3 +14,7 @@ export const Languages = {
   python: PYTHON_INFO,
   javascript: JAVASCRIPT_INFO,
 };
+
+export const LanguageOptions = Object.values(Languages);
+
+export type AvailableLanguages = keyof typeof Languages;

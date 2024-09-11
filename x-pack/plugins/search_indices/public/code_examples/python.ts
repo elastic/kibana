@@ -12,7 +12,7 @@ import { CodeLanguage, CodeSnippetParameters, CreateIndexLanguageExamples } from
 export const PYTHON_INFO: CodeLanguage = {
   id: 'python',
   title: i18n.translate('xpack.searchIndices.codingLanguages.python', { defaultMessage: 'Python' }),
-  icon: 'python',
+  icon: 'python.svg',
   codeBlockLanguage: 'python',
 };
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -23,6 +24,7 @@ export interface AppPluginStartDependencies {
 
 export interface SearchIndicesAppPluginStartDependencies {
   console?: ConsolePluginStart;
+  cloud?: CloudStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
 }
@@ -57,7 +59,7 @@ export interface CodeLanguage {
 }
 
 export interface CreateIndexCodeDefinition {
-  installCommand?: string | CodeSnippetFunction;
+  installCommand?: string;
   createIndex: CodeSnippetFunction;
 }
 

@@ -20,26 +20,23 @@ import { i18n } from '@kbn/i18n';
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { isValidIndexName, generateRandomIndexName } from '../../utils/indices';
+import { isValidIndexName } from '../../utils/indices';
 
 import { useCreateIndex } from './hooks/use_create_index';
 
-interface CreateIndexFormState {
-  indexName: string;
-}
-
-function initCreateIndexState(): CreateIndexFormState {
-  return {
-    indexName: generateRandomIndexName(),
-  };
-}
+import { CreateIndexFormState } from './types';
 
 export interface CreateIndexFormProps {
+  formState: CreateIndexFormState;
+  setFormState: React.Dispatch<React.SetStateAction<CreateIndexFormState>>;
   userPrivileges?: UserStartPrivilegesResponse;
 }
 
-export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
-  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState());
+export const CreateIndexForm = ({
+  userPrivileges,
+  formState,
+  setFormState,
+}: CreateIndexFormProps) => {
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
   const { createIndex, isLoading } = useCreateIndex();
@@ -77,6 +74,7 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
           name="indexName"
           value={formState.indexName}
           isInvalid={indexNameHasError}
+          disabled={userPrivileges?.privileges?.canCreateIndex === false}
           onChange={onIndexNameChange}
           placeholder={i18n.translate(
             'xpack.searchIndices.startPage.createIndex.name.placeholder',
