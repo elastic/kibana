@@ -9,9 +9,12 @@
 
 import { ControlsPlugin } from './plugin';
 
-export { controlGroupStateBuilder } from './react_controls/control_group/utils/control_group_state_builder';
+export {
+  controlGroupStateBuilder,
+  type ControlGroupStateBuilder,
+} from './react_controls/control_group/utils/control_group_state_builder';
 
-export type { ControlGroupApi } from './react_controls/control_group/types';
+export type { ControlGroupApi, ControlStateTransform } from './react_controls/control_group/types';
 
 export type {
   DataControlApi,
@@ -20,11 +23,25 @@ export type {
 } from './react_controls/controls/data_controls/types';
 
 export {
+  ControlGroupRenderer,
+  type ControlGroupRendererApi,
+  type ControlGroupCreationOptions,
+  type ControlGroupRendererProps,
+} from './react_controls/external_api';
+
+export {
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '../common';
+export type {
+  ControlGroupRuntimeState,
+  ControlPanelState,
+  ControlPanelsState,
+  DefaultDataControlState,
+} from '../common';
+export type { OptionsListControlState } from '../common/options_list';
 
 export function plugin() {
   return new ControlsPlugin();

@@ -21,7 +21,7 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
+import { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 

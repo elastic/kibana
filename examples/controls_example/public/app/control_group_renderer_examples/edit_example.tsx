@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pickBy } from 'lodash';
-import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,20 +14,25 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSkeletonRectangle,
 } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
-import { ControlGroupRuntimeState, ControlStateTransform } from '@kbn/controls-plugin/public';
 import {
-  ACTION_DELETE_CONTROL,
-  ACTION_EDIT_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  type ControlGroupRuntimeState,
+} from '@kbn/controls-plugin/common';
+import {
   ControlGroupRenderer,
+  ControlGroupRendererApi,
+  type ControlStateTransform,
 } from '@kbn/controls-plugin/public';
-import { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from '@kbn/controls-plugin/public/actions';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { pickBy } from 'lodash';
+import React, { useEffect, useState } from 'react';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
