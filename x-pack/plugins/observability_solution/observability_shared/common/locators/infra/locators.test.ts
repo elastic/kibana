@@ -77,6 +77,24 @@ describe('Infra Locators', () => {
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
+
+    it('should return correct fallback params for non-supported assetType using assetDetails', async () => {
+      const { assetDetailsLocator } = await setupAssetDetailsLocator();
+
+      const { app, path, state } = await assetDetailsLocator.getLocation({
+        ...params,
+        assetType: 'pod',
+      });
+
+      const expectedDetails = rison.encodeUnknown({
+        time: params.assetDetails.dateRange,
+      });
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(`/detail/pod/${params.assetId}?_a=${expectedDetails}`);
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
   });
 
   describe('Asset Details Flyout Locator', () => {
