@@ -14,11 +14,14 @@ export const parseSchedule = (
     return schedule;
   }
 
-  const { frequency, customFrequency, interval } = schedule;
+  const { frequency, customFrequency, interval, count } = schedule;
 
+  // We must case them to unknown because form-lib is already turning them into strings
+  // despite what our types suggests
   const parsedFrequency = parseInt(frequency as string, 10);
   const parsedCustomFrequency = parseInt(customFrequency as unknown as string, 10);
   const parsedInterval = parseInt(interval as unknown as string, 10);
+  const parsedCount = parseInt(count as unknown as string, 10);
 
   const shallowCopy = { ...schedule };
 
@@ -32,6 +35,10 @@ export const parseSchedule = (
 
   if (!isNaN(parsedInterval)) {
     shallowCopy.interval = parsedInterval;
+  }
+
+  if (!isNaN(parsedCount)) {
+    shallowCopy.count = parsedCount;
   }
 
   return shallowCopy;

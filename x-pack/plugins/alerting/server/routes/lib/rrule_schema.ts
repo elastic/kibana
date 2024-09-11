@@ -13,25 +13,27 @@ export const rRuleSchema = schema.object({
   dtstart: schema.string({ validate: validateSnoozeStartDate }),
   tzid: schema.string(),
   freq: schema.maybe(
-    schema.number({
-      validate: (freq: number) => {
-        if (freq < 0 || freq > 3) return 'rRule freq must be 0, 1, 2, or 3';
-      },
-    })
+    schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
   ),
   interval: schema.maybe(
     schema.number({
       validate: (interval: number) => {
-        if (interval < 1) return 'rRule interval must be > 0';
+        if (!Number.isInteger(interval)) {
+          return `rRule interval must be an integer greater than 0`;
+        }
       },
+      min: 1,
     })
   ),
   until: schema.maybe(schema.string({ validate: validateSnoozeEndDate })),
   count: schema.maybe(
     schema.number({
       validate: (count: number) => {
-        if (count < 1) return 'rRule count must be > 0';
+        if (!Number.isInteger(count)) {
+          return `rRule count must be an integer greater than 0`;
+        }
       },
+      min: 1,
     })
   ),
   byweekday: schema.maybe(

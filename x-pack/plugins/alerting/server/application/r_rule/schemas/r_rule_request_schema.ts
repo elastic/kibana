@@ -16,16 +16,22 @@ export const rRuleRequestSchema = schema.object({
   interval: schema.maybe(
     schema.number({
       validate: (interval: number) => {
-        if (interval < 1) return 'rRule interval must be > 0';
+        if (!Number.isInteger(interval)) {
+          return `rRule interval must be an integer greater than 0`;
+        }
       },
+      min: 1,
     })
   ),
   until: schema.maybe(schema.string({ validate: validateEndDate })),
   count: schema.maybe(
     schema.number({
       validate: (count: number) => {
-        if (count < 1) return 'rRule count must be > 0';
+        if (!Number.isInteger(count)) {
+          return `rRule count must be an integer greater than 0`;
+        }
       },
+      min: 1,
     })
   ),
   byweekday: schema.maybe(
