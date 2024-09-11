@@ -56,6 +56,7 @@ export function registerVisualizeESQLFunction({
           ],
         },
       };
-    }
+    },
+    ['all']
   );
 }
