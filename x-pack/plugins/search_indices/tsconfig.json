@@ -28,6 +28,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
     "@kbn/index-management",
+    "@kbn/try-in-console",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",
