@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ViewMode } from '@kbn/presentation-publishing';
@@ -51,7 +52,11 @@ export const embeddableInputToSubject = <
     subscription.add(
       embeddable
         .getInput$()
-        .pipe(distinctUntilKeyChanged(key))
+        .pipe(
+          distinctUntilKeyChanged(key, (prev, current) => {
+            return deepEqual(prev, current);
+          })
+        )
         .subscribe(() => subject.next(embeddable.getInput()?.[key] as ValueType))
     );
   }

@@ -44,7 +44,8 @@
     "@kbn/content-management-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/field-formats-plugin",
-    "@kbn/presentation-panel-plugin"
+    "@kbn/presentation-panel-plugin",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }

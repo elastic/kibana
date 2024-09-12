@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -24,11 +25,7 @@ import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_as
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
-  | 'autoApplySelections'
-  | 'chainingSystem'
-  | 'ignoreParentSettings'
-  | 'initialChildControlState'
-  | 'labelPosition'
+  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
 > & {
   controlsInOrder: ControlsInOrder;
 };
@@ -38,6 +35,7 @@ export function initializeControlGroupUnsavedChanges(
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
+  resetControlsUnsavedChanges: () => void,
   parentApi: unknown,
   lastSavedRuntimeState: ControlGroupRuntimeState
 ) {
@@ -47,7 +45,6 @@ export function initializeControlGroupUnsavedChanges(
       chainingSystem: lastSavedRuntimeState.chainingSystem,
       controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
       ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
-      initialChildControlState: lastSavedRuntimeState.initialChildControlState,
       labelPosition: lastSavedRuntimeState.labelPosition,
     },
     parentApi,
@@ -72,6 +69,7 @@ export function initializeControlGroupUnsavedChanges(
       ),
       asyncResetUnsavedChanges: async () => {
         controlGroupUnsavedChanges.api.resetUnsavedChanges();
+        resetControlsUnsavedChanges();
 
         const filtersReadyPromises: Array<Promise<void>> = [];
         Object.values(children$.value).forEach((controlApi) => {
