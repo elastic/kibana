@@ -818,7 +818,7 @@ export const createAgentPolicy = async ({
   const body: CreateAgentPolicyRequest['body'] = policy ?? {
     name: randomAgentPolicyName(),
     description: `Policy created by security solution tooling: ${__filename}`,
-    namespace: 'default',
+    namespace: (await fetchActiveSpace(kbnClient)).id,
     monitoring_enabled: ['logs', 'metrics'],
   };
 
@@ -994,7 +994,6 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
   return createIntegrationPolicy(kbnClient, {
     name: integrationPolicyName,
     description: `Created by script: ${__filename}`,
-    namespace: 'default',
     policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
     enabled: true,
