@@ -18,8 +18,8 @@ import {
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
