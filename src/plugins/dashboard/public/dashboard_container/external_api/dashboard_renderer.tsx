@@ -125,7 +125,7 @@ export function DashboardRenderer({
       }
 
       setDashboardContainer(container);
-      onApiAvailable?.(container);
+      onApiAvailable?.(container as DashboardApi);
     })();
     return () => {
       canceled = true;
@@ -165,7 +165,7 @@ export function DashboardRenderer({
         !isErrorEmbeddable(dashboardContainer) && (
           <ParentClassController
             viewportRef={dashboardViewport.current}
-            dashboardApi={dashboardContainer}
+            dashboardApi={dashboardContainer as DashboardApi}
           />
         )}
       {renderDashboardContents()}

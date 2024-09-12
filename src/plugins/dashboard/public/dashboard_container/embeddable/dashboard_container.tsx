@@ -822,7 +822,7 @@ export class DashboardContainer
 
   public getPanelsState = () => {
     return this.getState().explicitInput.panels;
-  }
+  };
 
   public setExpandedPanelId = (newId?: string) => {
     this.dispatch.setExpandedPanelId(newId);
@@ -830,11 +830,11 @@ export class DashboardContainer
 
   public setViewMode = (viewMode: ViewMode) => {
     this.dispatch.setViewMode(viewMode);
-  }
+  };
 
   public setFullScreenMode = (fullScreenMode: boolean) => {
     this.dispatch.setFullScreenMode(fullScreenMode);
-  }
+  };
 
   public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
     this.clearOverlays();

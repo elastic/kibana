@@ -17,10 +17,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import {
-  convertPanelMapToSavedPanels,
-  DashboardPanelMap,
-} from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardUrlParams } from '../../dashboard_router';

@@ -176,34 +176,32 @@ describe('ShowShareModal', () => {
         panel_2: { changedKey2: 'definitely changed' },
       },
     });
-    props.getPanelsState = () => (
-      {
-        panel_1: {
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          type: 'superType',
-          explicitInput: {
-            id: 'whatever',
-            changedKey1: 'NOT changed',
-          },
+    props.getPanelsState = () => ({
+      panel_1: {
+        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+        type: 'superType',
+        explicitInput: {
+          id: 'whatever',
+          changedKey1: 'NOT changed',
         },
-        panel_2: {
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          type: 'superType',
-          explicitInput: {
-            id: 'whatever2',
-            changedKey2: 'definitely NOT changed',
-          },
+      },
+      panel_2: {
+        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+        type: 'superType',
+        explicitInput: {
+          id: 'whatever2',
+          changedKey2: 'definitely NOT changed',
         },
-        panel_3: {
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-          type: 'superType',
-          explicitInput: {
-            id: 'whatever2',
-            changedKey3: 'should still exist',
-          },
+      },
+      panel_3: {
+        gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+        type: 'superType',
+        explicitInput: {
+          id: 'whatever2',
+          changedKey3: 'should still exist',
         },
-      }
-    );
+      },
+    });
     ShowShareModal(props);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (

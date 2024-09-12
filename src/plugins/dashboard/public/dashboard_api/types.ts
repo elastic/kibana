@@ -22,9 +22,9 @@ import {
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
+import { DashboardPanelMap } from '../../common';
+import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &

@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
@@ -22,7 +23,6 @@ import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -55,14 +55,22 @@ export const useDashboardMenuItems = ({
    */
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasRunMigrations, hasUnsavedChanges, lastSavedId, managed, viewMode] = useBatchedPublishingSubjects(
+  const [
+    dashboardTitle,
+    hasOverlays,
+    hasRunMigrations,
+    hasUnsavedChanges,
+    lastSavedId,
+    managed,
+    viewMode,
+  ] = useBatchedPublishingSubjects(
     dashboardApi.panelTitle,
     dashboardApi.hasOverlays$,
     dashboardApi.hasRunMigrations$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId,
     dashboardApi.managed$,
-    dashboardApi.viewMode,
+    dashboardApi.viewMode
   );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
