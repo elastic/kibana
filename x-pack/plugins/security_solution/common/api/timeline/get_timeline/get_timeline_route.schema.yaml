@@ -18,7 +18,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetTimeline
-      summary: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
+      summary: Get Timeline or Timeline template details
+      description: Get the details of an existing saved Timeline or Timeline template.
       tags:
         - access:securitySolution
       parameters:
@@ -34,7 +35,7 @@ paths:
           description: The ID of the timeline to retrieve
       responses:
         '200':
-          description: Indicates that the (template) timeline was found and returned.
+          description: Indicates that the (template) Timeline was found and returned.
           content:
             application/json:
               schema:

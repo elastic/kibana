@@ -31,7 +31,7 @@ paths:
           description: The ID of the timeline to resolve
       responses:
         '200':
-          description: The (template) timeline has been found
+          description: The (template) Timeline has been found
           content:
             application/json:
               schema:
@@ -48,4 +48,4 @@ paths:
         '400':
           description: The request is missing parameters
         '404':
-          description: The (template) timeline was not found
+          description: The (template) Timeline was not found

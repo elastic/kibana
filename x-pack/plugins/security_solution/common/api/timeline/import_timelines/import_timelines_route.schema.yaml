@@ -18,11 +18,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ImportTimelines
-      summary: Imports timelines.
+      summary: Import Timelines
+      descriptions: Import Timelines.
       tags:
         - access:securitySolution
       requestBody:
-        description: The timelines to import as a readable stream.
+        description: The Timelines to import as a readable stream.
         required: true
         content:
           application/json:
@@ -50,7 +51,7 @@ paths:
                                 - 'false'
       responses:
         '200':
-          description: Indicates the import of timelines was successful.
+          description: Indicates the import of Timelines was successful.
           content:
             application/json:
               schema:
@@ -61,7 +62,7 @@ paths:
                     $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
 
         '400':
-          description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
+          description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
           content:
             application/json:
               schema:
@@ -86,7 +87,7 @@ paths:
                   statusCode:
                     type: number
         '409':
-          description: Indicates the import of timelines was unsuccessful.
+          description: Indicates the import of Timelines was unsuccessful.
           content:
             application/json:
               schema:
