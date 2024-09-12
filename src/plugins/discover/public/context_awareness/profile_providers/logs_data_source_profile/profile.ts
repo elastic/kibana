@@ -12,6 +12,7 @@ import { ProfileProviderServices } from '../profile_provider_services';
 import { getRowIndicatorProvider } from './accessors';
 import { extractIndexPatternFrom } from '../extract_index_pattern_from';
 import { makeGetCellRenderersHandler } from './accessors/get_cell_renderers';
+import { getRowAdditionalLeadingControls } from './accessors/get_row_additional_leading_controls';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -20,6 +21,7 @@ export const createLogsDataSourceProfileProvider = (
   profile: {
     getRowIndicatorProvider,
     getCellRenderers: makeGetCellRenderersHandler(services),
+    getRowAdditionalLeadingControls,
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

@@ -493,6 +493,7 @@ function DiscoverDocumentsComponent({
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                query={query}
                 cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
                 cellActionsMetadata={cellActionsMetadata}
                 cellActionsHandling="append"
