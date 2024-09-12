@@ -65,6 +65,7 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
+    getFieldsMetadata: jest.fn(async () => ({})),
   };
 }
 
@@ -452,6 +453,7 @@ describe('quick fixes logic', () => {
             getFieldsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
+            getFieldsMetadata: undefined,
           }
         );
       } catch {
