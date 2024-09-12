@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { investigationSchema } from '@kbn/investigation-shared';
+import { investigationSchema, statusSchema } from '@kbn/investigation-shared';
 import * as t from 'io-ts';
 
+export type InvestigationStatus = t.TypeOf<typeof statusSchema>;
 export type Investigation = t.TypeOf<typeof investigationSchema>;
 export type StoredInvestigation = t.OutputOf<typeof investigationSchema>;

@@ -1438,6 +1438,16 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 #CC# /x-pack/plugins/security_solution/ @elastic/security-solution
 
+# Security Solution OpenAPI bundles
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
+/x-pack/plugins/security_solution/docs/openapi/serverless/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_detections_api_* @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
+/x-pack/plugins/security_solution/docs/openapi/ess/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
+
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
 /x-pack/plugins/security_solution_ess/ @elastic/security-solution
@@ -1481,6 +1491,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
+/x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Threat Hunting Investigations
@@ -1777,15 +1788,9 @@ test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-/x-pack/plugins/fleet/common/openapi          @elastic/platform-docs
-/x-pack/plugins/ml/common/openapi             @elastic/platform-docs
-/packages/core/saved-objects/docs/openapi     @elastic/platform-docs
-/plugins/data_views/docs/openapi              @elastic/platform-docs
 oas_docs/.spectral.yaml                       @elastic/platform-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
 oas_docs/kibana.info.yaml                     @elastic/platform-docs
-oas_docs/makefile                             @elastic/platform-docs
-oas_docs/overlays                             @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
