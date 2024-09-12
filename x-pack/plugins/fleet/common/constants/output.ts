@@ -66,6 +66,11 @@ export const kafkaPartitionType = {
   Hash: 'hash',
 } as const;
 
+export const kafkaTopicsType = {
+  Static: 'static',
+  Dynamic: 'dynamic',
+} as const;
+
 export const kafkaTopicWhenType = {
   Equals: 'equals',
   Contains: 'contains',

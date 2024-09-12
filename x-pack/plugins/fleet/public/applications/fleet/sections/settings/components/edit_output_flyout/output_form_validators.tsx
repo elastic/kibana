@@ -307,7 +307,7 @@ export function validateSSLKey(value: string) {
 
 export const validateSSLKeySecret = toSecretValidator(validateSSLKey);
 
-export function validateKafkaDefaultTopic(value: string) {
+export function validateKafkaStaticTopic(value: string) {
   if (!value || value === '') {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.kafkaDefaultTopicRequiredMessage', {
@@ -342,7 +342,7 @@ export function validateKafkaPartitioningGroupEvents(value: string) {
         ),
       ];
 }
-
+// TODO: update it to work with new dynamic topics
 export function validateKafkaTopics(
   topics: Array<{
     topic: string;

@@ -10,6 +10,8 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
 
 import type {
@@ -45,6 +47,7 @@ import {
   sendPutOutput,
   useKeyValueInput,
   useAuthz,
+  useComboBoxWithCustomInput,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -65,10 +68,11 @@ import {
   validateKafkaPassword,
   validateKafkaPasswordSecret,
   validateKafkaHeaders,
-  validateKafkaDefaultTopic,
+  validateKafkaStaticTopic,
   validateKafkaClientId,
   validateKafkaHosts,
   validateKafkaPartitioningGroupEvents,
+  // validateKafkaTopics,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -116,7 +120,9 @@ export interface OutputFormInputsType {
   kafkaPartitionTypeRoundRobinInput: ReturnType<typeof useInput>;
   kafkaHeadersInput: ReturnType<typeof useKeyValueInput>;
   kafkaClientIdInput: ReturnType<typeof useInput>;
-  kafkaDefaultTopicInput: ReturnType<typeof useInput>;
+  kafkaTopicsInput: ReturnType<typeof useRadioInput>;
+  kafkaStaticTopicInput: ReturnType<typeof useInput>;
+  kafkaDynamicTopicInput: ReturnType<typeof useComboBoxWithCustomInput>;
   kafkaCompressionInput: ReturnType<typeof useSwitchInput>;
   kafkaCompressionLevelInput: ReturnType<typeof useInput>;
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
@@ -327,13 +333,25 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
+  const extractKafkaTopics = (
+    topics?: Array<{ topic: string }>
+  ): Array<EuiComboBoxOptionOption<string>> => {
+    if (!topics || topics.length <= 1) {
+      return [];
+    }
+    return topics.slice(0, -1).map((t) => ({
+      label: t.topic,
+      value: t.topic,
+    }));
+  };
+
   /**
    * Kafka inputs
    */
 
   const kafkaOutput = output as KafkaOutput;
 
-  const extractDefaultKafkaTopic = (topics?: Array<{ topic: string }>): string => {
+  const extractStaticKafkaTopic = (topics?: Array<{ topic: string }>): string => {
     if (!topics || topics.length === 0) {
       return '';
     }
@@ -441,11 +459,24 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isDisabled('partition')
   );
 
-  const kafkaDefaultTopicInput = useInput(
-    extractDefaultKafkaTopic(kafkaOutput?.topics),
-    validateKafkaDefaultTopic,
+  const kafkaTopicsInput = useRadioInput(
+    extractStaticKafkaTopic(kafkaOutput?.topics),
     isDisabled('topics')
   );
+
+  const kafkaStaticTopicInput = useInput(
+    extractStaticKafkaTopic(kafkaOutput?.topics),
+    validateKafkaStaticTopic,
+    isDisabled('topics')
+  );
+
+  const kafkaDynamicTopicInput = useComboBoxWithCustomInput(
+    'kafkaDynamicTopicComboBox',
+    extractKafkaTopics(kafkaOutput?.topics),
+    undefined, // define validation
+    isDisabled('topics')
+  );
+
   const kafkaHeadersInput = useKeyValueInput(
     'kafkaHeadersComboBox',
     kafkaOutput?.headers ?? [{ key: '', value: '' }],
@@ -553,7 +584,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
-    kafkaDefaultTopicInput,
+    kafkaTopicsInput,
+    kafkaStaticTopicInput,
+    kafkaDynamicTopicInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -569,7 +602,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
     const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
-    const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
@@ -611,7 +643,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         kafkaUsernameValid &&
         kafkaPasswordValid &&
         kafkaHeadersValid &&
-        kafkaDefaultTopicValid &&
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
         partitioningRandomGroupEventsValid &&
@@ -647,7 +678,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
-    kafkaDefaultTopicInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
@@ -824,7 +854,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                     },
                   }
                 : {}),
-              topics: [{ topic: kafkaDefaultTopicInput.value }],
+              topics: [{ topic: kafkaTopicsInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -969,7 +999,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
-    kafkaDefaultTopicInput.value,
+    kafkaTopicsInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
@@ -980,9 +1010,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     sslCertificateAuthoritiesInput.value,
     sslKeySecretInput.value,
     elasticsearchUrlInput.value,
+    presetInput.value,
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
-    presetInput.value,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
