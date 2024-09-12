@@ -235,9 +235,9 @@ export type AssistantToolLlm =
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
-  inference: InferenceServerStart;
+  inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
-  connectorId: string;
+  connectorId?: string;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;

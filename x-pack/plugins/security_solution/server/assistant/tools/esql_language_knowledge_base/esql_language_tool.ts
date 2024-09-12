@@ -46,7 +46,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request } = params as ESQLToolParams;
-    if (inference == null) return null;
+    if (inference == null || connectorId == null) return null;
 
     const callNaturalLanguageToEsql = async (question: string) => {
       return lastValueFrom(
