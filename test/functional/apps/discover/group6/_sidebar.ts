@@ -114,12 +114,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
         expect(options).to.have.length(6);
 
-        expect(await unifiedFieldList.getSidebarAriaDescription()).to.be('82 available fields.');
+        expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '76 available fields. 6 empty fields.'
+        );
 
         await testSubjects.click('typeFilter-number');
 
         await retry.waitFor('updates', async () => {
-          return (await unifiedFieldList.getSidebarAriaDescription()) === '6 available fields.';
+          return (
+            (await unifiedFieldList.getSidebarAriaDescription()) ===
+            '4 available fields. 2 empty fields.'
+          );
         });
       });
 
