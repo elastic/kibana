@@ -66,7 +66,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     [onChange]
   );
 
-  const placeholder = i18n.translate('xpack.infra.metricsExplorer.aggregationSelectLabel', {
+  const label = i18n.translate('xpack.infra.metricsExplorer.aggregationSelectLabel', {
     defaultMessage: 'Select an aggregation',
   });
 
@@ -77,8 +77,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
   return (
     <EuiSelect
       data-test-subj="infraMetricsExplorerAggregationPickerSelect"
-      aria-label={placeholder}
-      placeholder={placeholder}
+      aria-label={label}
       fullWidth
       value={options.aggregation}
       options={METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM.map((k) => ({
