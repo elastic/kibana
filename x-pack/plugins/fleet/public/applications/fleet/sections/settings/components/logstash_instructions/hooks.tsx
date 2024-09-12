@@ -42,7 +42,7 @@ export function useLogstashApiKey() {
             }),
             text: toMountPoint(
               <FormattedMessage
-                id="xpack.fleet.settings.outputs.defaultOutputBadgeTitle"
+                id="xpack.fleet.settings.logstashInstructions.generateApiKeyPermissions"
                 defaultMessage="You need the cluster permissions: {clusterPermissions}{br} and the index permissions: {indexPermissions}{br}for indexes: {br}{indexes}"
                 values={{
                   clusterPermissions: (
