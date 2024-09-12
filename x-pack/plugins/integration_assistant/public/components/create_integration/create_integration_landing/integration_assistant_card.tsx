@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { useAuthorization } from '../../../common/hooks/use_authorization';
 import { MissingPrivilegesTooltip } from '../../../common/components/authorization';
@@ -30,9 +38,27 @@ export const IntegrationAssistantCard = React.memo(() => {
             justifyContent="flexStart"
           >
             <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h3>{i18n.ASSISTANT_TITLE}</h3>
-              </EuiTitle>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="s"
+                // alignItems="flexStart"
+                // justifyContent="flexStart"
+              >
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>{i18n.ASSISTANT_TITLE}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    iconType="beaker"
+                    label={i18n.TECH_PREVIEW}
+                    tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+                    size="s"
+                    color="hollow"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued" textAlign="left">
