@@ -34,12 +34,16 @@ export function useCustomCardsForCategory(
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
+  const { href: otelKubernetesUrl } = reactRouterNavigate(
+    history,
+    `/otel-kubernetes/${location.search}`
+  );
   const { href: kubernetesUrl } = reactRouterNavigate(history, `/kubernetes/${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
 
-  const otelCard: VirtualCard = {
+  const otelLogsCard: VirtualCard = {
     id: 'otel-logs',
     type: 'virtual',
     release: 'preview',
@@ -55,6 +59,26 @@ export function useCustomCardsForCategory(
       },
     ],
     url: otelLogsUrl,
+    version: '',
+    integration: '',
+  };
+
+  const otelKubernetesCard: VirtualCard = {
+    id: 'otel-kubernetes',
+    type: 'virtual',
+    release: 'preview',
+    title: 'Elastic Distro for OTel Collector',
+    description:
+      'Collect logs, metrics and traces for Kubernetes cluster monitoring  using the Elastic Distro for OTel Collector',
+    name: 'custom-kubernetes-virtual',
+    categories: ['observability'],
+    icons: [
+      {
+        type: 'svg',
+        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+      },
+    ],
+    url: otelKubernetesUrl,
     version: '',
     integration: '',
   };
@@ -134,8 +158,9 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
+        otelKubernetesCard,
         toFeaturedCard('docker'),
-        otelCard,
+        otelLogsCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -216,7 +241,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        otelCard,
+        otelLogsCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',

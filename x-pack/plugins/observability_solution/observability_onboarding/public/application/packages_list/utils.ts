@@ -9,6 +9,7 @@ import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
 export const QUICKSTART_FLOWS = [
   'auto-detect-logs-virtual',
+  'custom-kubernetes-virtual',
   'kubernetes-quick-start',
   'firehose-quick-start',
 ];

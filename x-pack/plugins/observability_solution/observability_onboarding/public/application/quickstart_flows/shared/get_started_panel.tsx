@@ -60,7 +60,7 @@ export function GetStartedPanel({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="m">
             {actionLinks.map(({ id, title, label, href }) => (
               <EuiFlexItem key={id}>
                 <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
