@@ -7,8 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
   getRiskInputTab,
   getInsightsInputTab,
@@ -24,7 +22,8 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   name: string;
   scopeId: string;
-  isMisconfigurationFindingsExist?: boolean;
+  isMisconfigurationFindingsIndexExist?: boolean;
+  isMisconfigurationFindingsForThisQueryExist?: boolean;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
   };
@@ -40,25 +39,14 @@ export const HostDetailsPanel = ({
   isRiskScoreExist,
   scopeId,
   path,
-  isMisconfigurationFindingsExist,
+  isMisconfigurationFindingsIndexExist,
+  isMisconfigurationFindingsForThisQueryExist,
 }: HostDetailsPanelProps) => {
   const [selectedTabId, setSelectedTabId] = useState(
     path?.tab === EntityDetailsLeftPanelTab.CSP_INSIGHTS
       ? EntityDetailsLeftPanelTab.CSP_INSIGHTS
       : EntityDetailsLeftPanelTab.RISK_INPUTS
   );
-
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
-
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
   const [tabs] = useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
@@ -68,7 +56,7 @@ export const HostDetailsPanel = ({
 
     // Determine if the Insights tab should be included
     const insightsTab =
-      isMisconfigurationFindingsExist && hasMisconfigurationFindings
+      isMisconfigurationFindingsIndexExist && isMisconfigurationFindingsForThisQueryExist
         ? [getInsightsInputTab({ name })]
         : [];
     return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
@@ -76,8 +64,8 @@ export const HostDetailsPanel = ({
     isRiskScoreExist,
     name,
     scopeId,
-    isMisconfigurationFindingsExist,
-    hasMisconfigurationFindings,
+    isMisconfigurationFindingsIndexExist,
+    isMisconfigurationFindingsForThisQueryExist,
   ]);
 
   return (

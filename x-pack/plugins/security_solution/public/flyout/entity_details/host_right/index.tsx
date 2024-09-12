@@ -95,7 +95,7 @@ export const HostPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const hasMisconfigurationFindings =
+  const hasMisconfigurationFindingsIndex =
     useCspSetupStatusApi().data?.hasMisconfigurationsFindings || false;
 
   const { data } = useMisconfigurationPreview({
@@ -133,11 +133,20 @@ export const HostPanel = ({
           scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
-          isMisconfigurationFindingsExist: hasMisconfigurationFindings,
+          isMisconfigurationFindingsIndexExist: hasMisconfigurationFindingsIndex,
+          isMisconfigurationFindingsForThisQueryExist: hasMisconfigurationFindingsForThisQuery,
         },
       });
     },
-    [telemetry, openLeftPanel, hostName, scopeId, isRiskScoreExist, hasMisconfigurationFindings]
+    [
+      telemetry,
+      openLeftPanel,
+      hostName,
+      scopeId,
+      isRiskScoreExist,
+      hasMisconfigurationFindingsIndex,
+      hasMisconfigurationFindingsForThisQuery,
+    ]
   );
 
   const openDefaultPanel = useCallback(
@@ -179,7 +188,7 @@ export const HostPanel = ({
               flyoutIsExpandable={
                 !isPreviewMode &&
                 (isRiskScoreExist ||
-                  (hasMisconfigurationFindings && hasMisconfigurationFindingsForThisQuery))
+                  (hasMisconfigurationFindingsIndex && hasMisconfigurationFindingsForThisQuery))
               }
               expandDetails={openDefaultPanel}
             />

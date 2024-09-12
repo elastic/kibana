@@ -143,7 +143,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
   const failedFindings = data?.count.failed || 0;
 
   const { euiTheme } = useEuiTheme();
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+  const hasMisconfigurationFindingsForThisQuery = passedFindings > 0 || failedFindings > 0;
   const hasMisconfigurationFindingsIndex =
     useCspSetupStatusApi().data?.hasMisconfigurationsFindings || false;
   const hostNameFilterQuery = useMemo(
@@ -168,11 +168,18 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
       params: {
         name: hostName,
         isRiskScoreExist,
-        isMisconfigurationFindingsExist: hasMisconfigurationFindingsIndex,
+        isMisconfigurationFindingsIndexExist: hasMisconfigurationFindingsIndex,
+        isMisconfigurationFindingsForThisQueryExist: hasMisconfigurationFindingsForThisQuery,
         path: { tab: 'csp_insights' },
       },
     });
-  }, [hasMisconfigurationFindingsIndex, hostName, isRiskScoreExist, openLeftPanel]);
+  }, [
+    hasMisconfigurationFindingsForThisQuery,
+    hasMisconfigurationFindingsIndex,
+    hostName,
+    isRiskScoreExist,
+    openLeftPanel,
+  ]);
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -180,8 +187,8 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
             callback: goToEntityInsightTab,
             tooltip: (
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
-                defaultMessage="Show all threat intelligence"
+                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
+                defaultMessage="Show all misconfiguration findings"
               />
             ),
           }
@@ -191,7 +198,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
   return (
     <ExpandablePanel
       header={{
-        iconType: hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: hasMisconfigurationFindingsForThisQuery ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
@@ -205,12 +212,12 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
             />
           </EuiText>
         ),
-        link: hasMisconfigurationFindings ? link : undefined,
+        link: hasMisconfigurationFindingsForThisQuery ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
       <EuiFlexGroup gutterSize="none">
-        {hasMisconfigurationFindings ? (
+        {hasMisconfigurationFindingsForThisQuery ? (
           <MisconfigurationPreviewScore
             passedFindings={passedFindings}
             failedFindings={failedFindings}

@@ -14,6 +14,7 @@ import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
+export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 
 export const getRiskInputTab = ({ entityType, entityName, scopeId }: RiskInputsTabProps) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
@@ -29,7 +30,7 @@ export const getRiskInputTab = ({ entityType, entityName, scopeId }: RiskInputsT
 
 export const getInsightsInputTab = ({ name }: { name: string }) => ({
   id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-  'data-test-subj': 'cspInsightDataTestId',
+  'data-test-subj': INSIGHTS_TAB_TEST_ID,
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
