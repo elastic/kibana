@@ -27,9 +27,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
-import { LastSavedState, ParentApi, UnsavedChanges } from './types';
+import { LastSavedState, PageApi, UnsavedChanges } from './types';
 
-export function getParentApi() {
+export function getPageApi() {
   const initialUnsavedChanges = unsavedChangesSessionStorage.load();
   const initialSavedState = lastSavedStateSessionStorage.load();
   let newPanels: Record<string, object> = {};
@@ -185,7 +185,7 @@ export function getParentApi() {
         timeRange$.next(timeRange);
       },
     },
-    parentApi: {
+    pageApi: {
       addNewPanel: async ({ panelType, initialState }: PanelPackage) => {
         const id = generateId();
         panels$.next([...panels$.value, { id, type: panelType }]);
@@ -257,6 +257,6 @@ export function getParentApi() {
       },
       timeRange$,
       unsavedChanges: unsavedChanges$ as PublishingSubject<object | undefined>,
-    } as ParentApi,
+    } as PageApi,
   };
 }
