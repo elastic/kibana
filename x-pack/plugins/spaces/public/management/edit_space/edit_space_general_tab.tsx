@@ -38,12 +38,8 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const imageAvatarSelected = Boolean(space.imageUrl);
   const [formValues, setFormValues] = useState<CustomizeSpaceFormValues>({
     ...space,
-    initials: imageAvatarSelected ? '' : space.initials,
     avatarType: imageAvatarSelected ? 'image' : 'initials',
     imageUrl: imageAvatarSelected ? space.imageUrl : '',
-    customAvatarInitials: !imageAvatarSelected,
-    customAvatarColor: !imageAvatarSelected,
-    customIdentifier: false, // customizing identifier not available for edit screen
   });
 
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made

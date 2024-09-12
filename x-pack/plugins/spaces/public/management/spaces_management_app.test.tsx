@@ -183,7 +183,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"theme":{"theme$":{}},"i18n":{},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true}
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"theme":{"theme$":{}},"i18n":{},"logger":{"context":[]},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true}
         </div>
       </div>
     `);

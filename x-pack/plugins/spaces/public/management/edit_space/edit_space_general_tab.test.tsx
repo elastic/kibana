@@ -197,6 +197,7 @@ describe('EditSpaceSettings', () => {
         ...spaceToUpdate,
         name: 'Updated Name Of Space',
         initials: 'UN',
+        imageUrl: '',
         color: '#D6BF57',
       });
     });
@@ -278,6 +279,7 @@ describe('EditSpaceSettings', () => {
         name: 'Updated Existing Space',
         color: '#D6BF57',
         initials: 'UE',
+        imageUrl: '',
       });
     });
   });
@@ -328,6 +330,7 @@ describe('EditSpaceSettings', () => {
       await waitFor(() => {
         expect(updateSpaceSpy).toHaveBeenCalledWith({
           ...spaceToUpdate,
+          imageUrl: '',
           solution: 'es',
         });
       });
@@ -394,6 +397,7 @@ describe('EditSpaceSettings', () => {
       await waitFor(() => {
         expect(updateSpaceSpy).toHaveBeenCalledWith({
           ...spaceToUpdate,
+          imageUrl: '',
           disabledFeatures: ['feature-1'],
         });
       });
