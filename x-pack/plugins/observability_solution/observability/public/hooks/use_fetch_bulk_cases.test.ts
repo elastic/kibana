@@ -6,7 +6,8 @@
  */
 
 import { useFetchBulkCases } from './use_fetch_bulk_cases';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
@@ -19,9 +20,9 @@ jest.mock('../utils/kibana_react', () => ({
 describe('Bulk Get Cases API hook', () => {
   it('initially is not loading and does not have data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useFetchBulkCases({ ids: [] }));
+      const { result } = renderHook(() => useFetchBulkCases({ ids: [] }));
 
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(result.current.cases).toEqual([]);
       expect(result.current.error).toEqual(undefined);

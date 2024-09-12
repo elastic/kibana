@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -42,8 +43,8 @@ describe('useFetchPrompts', () => {
     });
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useFetchPrompts());
-      await waitForNextUpdate();
+      renderHook(() => useFetchPrompts());
+      await waitFor(() => null);
       expect(http.fetch).toHaveBeenCalledWith('/api/security_ai_assistant/prompts/_find', {
         method: 'GET',
         query: {

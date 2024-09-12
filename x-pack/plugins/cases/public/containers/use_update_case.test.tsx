@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { useUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
@@ -41,7 +42,7 @@ describe('useUpdateCase', () => {
   it('patch case and refresh the case page', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCase(), {
+    const { result } = renderHook(() => useUpdateCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -49,7 +50,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -57,7 +58,7 @@ describe('useUpdateCase', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCaseSpy = jest.spyOn(api, 'patchCase');
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCase(), {
+    const { result } = renderHook(() => useUpdateCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -65,7 +66,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(patchCaseSpy).toHaveBeenCalledWith({
       caseId: basicCase.id,
@@ -75,7 +76,7 @@ describe('useUpdateCase', () => {
   });
 
   it('shows a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCase(), {
+    const { result } = renderHook(() => useUpdateCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -83,7 +84,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Updated "Another horrible breach!!"',
@@ -94,7 +95,7 @@ describe('useUpdateCase', () => {
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'patchCase').mockRejectedValue(new Error('useUpdateCase: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCase(), {
+    const { result } = renderHook(() => useUpdateCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -102,7 +103,7 @@ describe('useUpdateCase', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

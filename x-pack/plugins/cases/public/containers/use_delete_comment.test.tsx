@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import { useDeleteComment } from './use_delete_comment';
 import * as api from './api';
 import { basicCaseId } from './mock';
@@ -45,7 +46,7 @@ describe('useDeleteComment', () => {
   it('calls deleteComment with correct arguments - case', async () => {
     const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
 
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteComment(), {
+    const { result } = renderHook(() => useDeleteComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -57,7 +58,7 @@ describe('useDeleteComment', () => {
       });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spyOnDeleteComment).toBeCalledWith({
       caseId: basicCaseId,
@@ -66,7 +67,7 @@ describe('useDeleteComment', () => {
   });
 
   it('refreshes the case page view after delete', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteComment(), {
+    const { result } = renderHook(() => useDeleteComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -76,13 +77,13 @@ describe('useDeleteComment', () => {
       successToasterTitle,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(useRefreshCaseViewPage()).toBeCalled();
   });
 
   it('shows a success toaster correctly', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteComment(), {
+    const { result } = renderHook(() => useDeleteComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -94,7 +95,7 @@ describe('useDeleteComment', () => {
       });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Deleted',
@@ -106,7 +107,7 @@ describe('useDeleteComment', () => {
     const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
     spyOnDeleteComment.mockRejectedValue(new Error('Error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteComment(), {
+    const { result } = renderHook(() => useDeleteComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -116,7 +117,7 @@ describe('useDeleteComment', () => {
       successToasterTitle,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spyOnDeleteComment).toBeCalledWith({
       caseId: basicCaseId,

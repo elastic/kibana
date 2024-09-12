@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import * as api from './api';
 import { useGetActionLicense } from './use_get_action_license';
 import type { AppMockRenderer } from '../common/mock';
@@ -25,11 +26,11 @@ describe('useGetActionLicense', () => {
 
   it('calls getActionLicense with correct arguments', async () => {
     const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
-    const { waitForNextUpdate } = renderHook(() => useGetActionLicense(), {
+    renderHook(() => useGetActionLicense(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
     expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal);
   });
 
@@ -42,10 +43,10 @@ describe('useGetActionLicense', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetActionLicense(), {
+    renderHook(() => useGetActionLicense(), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

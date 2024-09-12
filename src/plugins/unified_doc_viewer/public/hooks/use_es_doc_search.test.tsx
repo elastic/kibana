@@ -8,6 +8,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -281,8 +282,9 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       });
       mockSearchResult.complete();
-      await hook.waitForNextUpdate();
     });
+
+    await waitFor(() => null);
 
     expect(hook.result.current.slice(0, 2)).toEqual([
       ElasticRequestState.Found,
