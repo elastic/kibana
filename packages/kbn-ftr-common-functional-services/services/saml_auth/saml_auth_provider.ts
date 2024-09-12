@@ -116,7 +116,12 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
 
       const requestBody = {
-        apiKeys: [roleCredentials.apiKey],
+        apiKeys: [
+          {
+            id: roleCredentials.apiKey.id,
+            name: roleCredentials.apiKey.name,
+          },
+        ],
         isAdmin: true,
       };
 
