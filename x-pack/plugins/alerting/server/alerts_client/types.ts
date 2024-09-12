@@ -74,16 +74,12 @@ export interface IAlertsClient<
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
-  processAndLogAlerts(opts: ProcessAndLogAlertsOpts): void;
   processAlerts(opts: ProcessAlertsOpts): void;
   logAlerts(opts: LogAlertsOpts): void;
   getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  persistAlerts(maintenanceWindows?: MaintenanceWindow[]): Promise<{
-    alertIds: string[];
-    maintenanceWindowIds: string[];
-  } | null>;
+  persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getAlertsToSerialize(): {
@@ -114,7 +110,6 @@ export interface ProcessAndLogAlertsOpts {
 
 export interface ProcessAlertsOpts {
   flappingSettings: RulesSettingsFlappingProperties;
-  maintenanceWindowIds: string[];
   alertDelay: number;
   ruleRunMetricsStore: RuleRunMetricsStore;
 }

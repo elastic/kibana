@@ -6,16 +6,17 @@
  */
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { TaskRunnerContext } from './types';
+import { MaintenanceWindow } from '../../application/maintenance_window/types';
+import { MaintenanceWindowClientApi } from '../../types';
+import { withAlertingSpan } from '../lib';
 
 interface GetMaintenanceWindowsOpts {
-  context: TaskRunnerContext;
   fakeRequest: KibanaRequest;
+  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   logger: Logger;
+  ruleId: string;
   ruleTypeId: string;
   ruleTypeCategory: string;
-  ruleId: string;
 }
 
 interface FilterMaintenanceWindowsOpts {
@@ -55,29 +56,38 @@ export const filterMaintenanceWindowsIds = ({
 export const getMaintenanceWindows = async (
   opts: GetMaintenanceWindowsOpts
 ): Promise<MaintenanceWindow[]> => {
-  const { context, fakeRequest, logger, ruleTypeId, ruleId, ruleTypeCategory } = opts;
-  const maintenanceWindowClient = context.getMaintenanceWindowClientWithRequest(fakeRequest);
+  return await withAlertingSpan('alerting:load-maintenance-windows', async () => {
+    const {
+      getMaintenanceWindowClientWithRequest,
+      fakeRequest,
+      logger,
+      ruleTypeId,
+      ruleId,
+      ruleTypeCategory,
+    } = opts;
+    const maintenanceWindowClient = getMaintenanceWindowClientWithRequest(fakeRequest);
 
-  let activeMaintenanceWindows: MaintenanceWindow[] = [];
-  try {
-    activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
-  } catch (err) {
-    logger.error(
-      `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
-    );
-  }
+    let activeMaintenanceWindows: MaintenanceWindow[] = [];
+    try {
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
+    } catch (err) {
+      logger.error(
+        `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
+      );
+    }
 
-  const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
-    // If category IDs array doesn't exist: allow all
-    if (!Array.isArray(categoryIds)) {
-      return true;
-    }
-    // If category IDs array exist: check category
-    if ((categoryIds as string[]).includes(ruleTypeCategory)) {
-      return true;
-    }
-    return false;
+    const maintenanceWindows = activeMaintenanceWindows.filter(({ categoryIds }) => {
+      // If category IDs array doesn't exist: allow all
+      if (!Array.isArray(categoryIds)) {
+        return true;
+      }
+      // If category IDs array exist: check category
+      if ((categoryIds as string[]).includes(ruleTypeCategory)) {
+        return true;
+      }
+      return false;
+    });
+
+    return maintenanceWindows;
   });
-
-  return maintenanceWindows;
 };

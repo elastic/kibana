@@ -51,7 +51,7 @@ export type BackendAlertWithSuppressionFields870<T> = Omit<
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
-const augmentAlerts = <T>({
+const augmentAlerts = async <T>({
   alerts,
   options,
   kibanaVersion,
@@ -65,6 +65,13 @@ const augmentAlerts = <T>({
   intendedTimestamp: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
+  let maintenanceWindowIds: string[] = [];
+  if (alerts.length > 0 && options.services.maintenanceWindowsService) {
+    const { maintenanceWindowsWithoutScopedQueryIds } =
+      await options.services.maintenanceWindowsService.loadMaintenanceWindows();
+    maintenanceWindowIds = maintenanceWindowsWithoutScopedQueryIds ?? [];
+  }
+
   return alerts.map((alert) => {
     return {
       ...alert,
@@ -76,8 +83,8 @@ const augmentAlerts = <T>({
           ? intendedTimestamp
           : currentTimeOverride ?? new Date(),
         [VERSION]: kibanaVersion,
-        ...(options?.maintenanceWindowIds?.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+        ...(maintenanceWindowIds.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
           : {}),
         ...commonRuleFields,
         ...alert._source,
@@ -309,7 +316,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   intendedTimestamp = options.startedAt;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
@@ -573,7 +580,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,

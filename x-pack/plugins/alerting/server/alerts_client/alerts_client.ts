@@ -38,7 +38,6 @@ import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from '
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
   TrackedAlerts,
   ReportedAlert,
   ReportedAlertData,
@@ -62,11 +61,10 @@ import {
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
-} from '../task_runner/get_maintenance_windows';
+} from '../task_runner/maintenance_windows';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -77,6 +75,10 @@ export interface AlertsClientParams extends CreateAlertsClientParams {
   dataStreamAdapter: DataStreamAdapter;
 }
 
+interface AlertsAffectedByMaintenanceWindows {
+  alertIds: string[];
+  maintenanceWindowIds: string[];
+}
 export class AlertsClient<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -121,7 +123,11 @@ export class AlertsClient<
       LegacyContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >({ logger: this.options.logger, ruleType: this.options.ruleType });
+    >({
+      logger: this.options.logger,
+      maintenanceWindowsService: this.options.maintenanceWindowsService,
+      ruleType: this.options.ruleType,
+    });
     this.indexTemplateAndPattern = getIndexTemplateAndPattern({
       context: this.options.ruleType.alerts?.context!,
       namespace: this.options.ruleType.alerts?.isSpaceAware
@@ -301,16 +307,12 @@ export class AlertsClient<
     return this.legacyAlertsClient.checkLimitUsage();
   }
 
-  public processAlerts(opts: ProcessAlertsOpts) {
-    this.legacyAlertsClient.processAlerts(opts);
+  public async processAlerts(opts: ProcessAlertsOpts) {
+    await this.legacyAlertsClient.processAlerts(opts);
   }
 
   public logAlerts(opts: LogAlertsOpts) {
     this.legacyAlertsClient.logAlerts(opts);
-  }
-
-  public processAndLogAlerts(opts: ProcessAndLogAlertsOpts) {
-    this.legacyAlertsClient.processAndLogAlerts(opts);
   }
 
   public getProcessedAlerts(
@@ -319,27 +321,11 @@ export class AlertsClient<
     return this.legacyAlertsClient.getProcessedAlerts(type);
   }
 
-  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]): Promise<{
-    alertIds: string[];
-    maintenanceWindowIds: string[];
-  } | null> {
+  public async persistAlerts(): Promise<AlertsAffectedByMaintenanceWindows> {
     // Persist alerts first
-    await this.persistAlertsHelper();
+    const didWriteAlerts = await this.persistAlertsHelper();
 
-    // Try to update the persisted alerts with maintenance windows with a scoped query
-    let updateAlertsMaintenanceWindowResult = null;
-    try {
-      updateAlertsMaintenanceWindowResult = await this.updateAlertsMaintenanceWindowIdByScopedQuery(
-        maintenanceWindows ?? []
-      );
-    } catch (e) {
-      this.options.logger.debug(
-        `Failed to update alert matched by maintenance window scoped query ${this.ruleInfoMessage}`,
-        this.logTags
-      );
-    }
-
-    return updateAlertsMaintenanceWindowResult;
+    return await this.updatePersistedAlertsWithMaintenanceWindowIds(didWriteAlerts);
   }
 
   public getAlertsToSerialize() {
@@ -418,7 +404,7 @@ export class AlertsClient<
         `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false ${this.ruleInfoMessage}.`,
         this.logTags
       );
-      return;
+      return false;
     }
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
@@ -623,6 +609,8 @@ export class AlertsClient<
         },
       };
     }
+
+    return alertsToIndex.length > 0;
   }
 
   private async getMaintenanceWindowScopedQueryAlerts({
@@ -692,18 +680,31 @@ export class AlertsClient<
     }
   }
 
-  private async updateAlertsMaintenanceWindowIdByScopedQuery(
-    maintenanceWindows: MaintenanceWindow[]
-  ) {
+  private async updatePersistedAlertsWithMaintenanceWindowIds(
+    didWriteAlerts: boolean
+  ): Promise<AlertsAffectedByMaintenanceWindows> {
+    // check if there are any new alerts
+    const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
+
+    // return if there are no new alerts written because we only check new alerts against maintenance window filters
+    if (!didWriteAlerts || newAlerts.length === 0 || !this.options.maintenanceWindowsService) {
+      return {
+        alertIds: [],
+        maintenanceWindowIds: [],
+      };
+    }
+
+    const { maintenanceWindows } =
+      await this.options.maintenanceWindowsService.loadMaintenanceWindows();
+
     const maintenanceWindowsWithScopedQuery = filterMaintenanceWindows({
-      maintenanceWindows,
+      maintenanceWindows: maintenanceWindows ?? [],
       withScopedQuery: true,
     });
     const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-      maintenanceWindows,
+      maintenanceWindows: maintenanceWindows ?? [],
       withScopedQuery: false,
     });
-
     if (maintenanceWindowsWithScopedQuery.length === 0) {
       return {
         alertIds: [],
@@ -722,8 +723,6 @@ export class AlertsClient<
 
     const alertsAffectedByScopedQuery: string[] = [];
     const appliedMaintenanceWindowIds: string[] = [];
-
-    const newAlerts = Object.values(this.getProcessedAlerts('new'));
 
     for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(aggsResult)) {
       // Go through matched alerts, find the in memory object

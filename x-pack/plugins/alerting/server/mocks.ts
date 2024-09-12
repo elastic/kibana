@@ -23,6 +23,7 @@ import {
   PublicRuleMonitoringService,
 } from './types';
 import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
+import { maintenanceWindowsServiceMock } from './task_runner/maintenance_windows/maintenance_windows_service.mock';
 
 export { rulesClientMock };
 
@@ -168,16 +169,17 @@ const createRuleExecutorServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     alertsClient: publicAlertsClientMock.create(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-    uiSettingsClient: uiSettingsServiceMock.createClient(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    shouldWriteAlerts: () => true,
-    shouldStopExecution: () => true,
-    search: createAbortableSearchServiceMock(),
-    getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
-    ruleMonitoringService: createRuleMonitoringServiceMock(),
-    share: createShareStartMock(),
     getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+    getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
+    maintenanceWindowsService: maintenanceWindowsServiceMock.create(),
+    ruleMonitoringService: createRuleMonitoringServiceMock(),
+    savedObjectsClient: savedObjectsClientMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    search: createAbortableSearchServiceMock(),
+    share: createShareStartMock(),
+    shouldStopExecution: () => true,
+    shouldWriteAlerts: () => true,
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

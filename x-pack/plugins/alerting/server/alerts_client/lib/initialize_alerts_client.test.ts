@@ -22,6 +22,7 @@ import { alertsClientMock } from '../alerts_client.mock';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { legacyAlertsClientMock } from '../legacy_alerts_client.mock';
 import { initializeAlertsClient, RuleData } from './initialize_alerts_client';
+import { maintenanceWindowsServiceMock } from '../../task_runner/maintenance_windows/maintenance_windows_service.mock';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -29,6 +30,7 @@ const alertsService = alertsServiceMock.create();
 const alertsClient = alertsClientMock.create();
 const legacyAlertsClient = legacyAlertsClientMock.create();
 const logger = loggingSystemMock.create().get();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
 const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
@@ -83,6 +85,7 @@ describe('initializeAlertsClient', () => {
       executionId: 'abc',
       logger,
       maxAlerts: 100,
+      maintenanceWindowsService,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
       startedAt,
@@ -92,6 +95,7 @@ describe('initializeAlertsClient', () => {
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
       logger,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
       rule: {
         alertDelay: 0,
@@ -135,6 +139,7 @@ describe('initializeAlertsClient', () => {
       },
       executionId: 'abc',
       logger,
+      maintenanceWindowsService,
       maxAlerts: 100,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
@@ -145,6 +150,7 @@ describe('initializeAlertsClient', () => {
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
       logger,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
       rule: {
         alertDelay: 0,
@@ -189,6 +195,7 @@ describe('initializeAlertsClient', () => {
       },
       executionId: 'abc',
       logger,
+      maintenanceWindowsService,
       maxAlerts: 100,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
@@ -199,6 +206,7 @@ describe('initializeAlertsClient', () => {
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
       logger,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
       rule: {
         alertDelay: 0,
@@ -217,6 +225,7 @@ describe('initializeAlertsClient', () => {
     expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
       logger,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
     });
     expect(legacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
       activeAlertsFromState: {},
@@ -249,6 +258,7 @@ describe('initializeAlertsClient', () => {
       executionId: 'abc',
       logger,
       maxAlerts: 100,
+      maintenanceWindowsService,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
       startedAt: mockedTaskInstance.startedAt,
@@ -258,6 +268,7 @@ describe('initializeAlertsClient', () => {
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
       logger,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
       namespace: 'default',
       rule: {
         alertDelay: 0,
@@ -276,6 +287,7 @@ describe('initializeAlertsClient', () => {
     expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
       logger,
       ruleType: ruleTypeWithAlerts,
+      maintenanceWindowsService,
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error initializing AlertsClient for context test. Using legacy alerts client instead. - fail fail`

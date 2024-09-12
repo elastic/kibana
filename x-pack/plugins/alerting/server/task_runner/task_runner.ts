@@ -64,8 +64,7 @@ import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { lastRunToRaw } from '../lib/last_run_status';
 import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_maintenance_windows';
+import { MaintenanceWindowsService } from './maintenance_windows';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
@@ -136,8 +135,7 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
-  private maintenanceWindows: MaintenanceWindow[] = [];
-  private maintenanceWindowsWithoutScopedQueryIds: string[] = [];
+  private maintenanceWindowsService: MaintenanceWindowsService;
   private ruleTypeRunner: RuleTypeRunner<
     Params,
     ExtractedParams,
@@ -204,6 +202,11 @@ export class TaskRunner<
       timer: this.timer,
     });
     this.ruleResult = new RuleResultService();
+    this.maintenanceWindowsService = new MaintenanceWindowsService({
+      alertingEventLogger: this.alertingEventLogger,
+      getMaintenanceWindowClientWithRequest: this.context.getMaintenanceWindowClientWithRequest,
+      logger: this.logger,
+    });
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -325,6 +328,7 @@ export class TaskRunner<
         executionId: this.executionId,
         logger: this.logger,
         maxAlerts: this.context.maxAlerts,
+        maintenanceWindowsService: this.maintenanceWindowsService,
         rule: {
           id: rule.id,
           name: rule.name,
@@ -364,8 +368,7 @@ export class TaskRunner<
       alertsClient,
       executionId: this.executionId,
       executorServices,
-      maintenanceWindows: this.maintenanceWindows,
-      maintenanceWindowsWithoutScopedQueryIds: this.maintenanceWindowsWithoutScopedQueryIds,
+      maintenanceWindowsService: this.maintenanceWindowsService,
       rule,
       ruleType: this.ruleType,
       startedAt: this.taskInstance.startedAt!,
@@ -532,28 +535,12 @@ export class TaskRunner<
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
       // Load the maintenance windows
-      this.maintenanceWindows = await withAlertingSpan('alerting:load-maintenance-windows', () =>
-        getMaintenanceWindows({
-          context: this.context,
-          fakeRequest: runRuleParams.fakeRequest,
-          logger: this.logger,
-          ruleTypeId: this.ruleType.id,
-          ruleId,
-          ruleTypeCategory: this.ruleType.category,
-        })
-      );
-
-      // Set the event log MW Id field the first time with MWs without scoped queries
-      this.maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-        maintenanceWindows: this.maintenanceWindows,
-        withScopedQuery: false,
+      this.maintenanceWindowsService.initialize({
+        request: runRuleParams.fakeRequest,
+        ruleId,
+        ruleTypeId: this.ruleType.id,
+        ruleTypeCategory: this.ruleType.category,
       });
-
-      if (this.maintenanceWindowsWithoutScopedQueryIds.length) {
-        this.alertingEventLogger.setMaintenanceWindowIds(
-          this.maintenanceWindowsWithoutScopedQueryIds
-        );
-      }
 
       (async () => {
         try {

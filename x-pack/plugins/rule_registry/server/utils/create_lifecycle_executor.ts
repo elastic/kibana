@@ -130,10 +130,9 @@ export const createLifecycleExecutor =
     >
   ): Promise<{ state: WrappedLifecycleRuleState<State> }> => {
     const {
-      services: { alertFactory, shouldWriteAlerts },
+      services: { alertFactory, maintenanceWindowsService, shouldWriteAlerts },
       state: previousState,
       flappingSettings,
-      maintenanceWindowIds,
       rule,
     } = options;
 
@@ -216,6 +215,14 @@ export const createLifecycleExecutor =
     logger.debug(
       `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
+
+    // load maintenance window ids if there are new alerts
+    let maintenanceWindowIds: string[] = [];
+    if (newAlertIds.length && maintenanceWindowsService) {
+      const { maintenanceWindowsWithoutScopedQueryIds } =
+        await maintenanceWindowsService.loadMaintenanceWindows();
+      maintenanceWindowIds = maintenanceWindowsWithoutScopedQueryIds ?? [];
+    }
 
     interface TrackedAlertData {
       indexName: string;

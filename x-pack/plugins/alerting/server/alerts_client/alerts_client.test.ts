@@ -11,6 +11,7 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   AlertsFilter,
   DEFAULT_FLAPPING_SETTINGS,
+  MaintenanceWindowStatus,
   RecoveredActionGroup,
   RuleAlertData,
 } from '../types';
@@ -54,8 +55,9 @@ import { Alert } from '../alert/alert';
 import { AlertsClient, AlertsClientParams } from './alerts_client';
 import {
   GetSummarizedAlertsParams,
-  ProcessAndLogAlertsOpts,
   GetMaintenanceWindowScopedQueryAlertsParams,
+  ProcessAlertsOpts,
+  LogAlertsOpts,
 } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
 import { keys, range } from 'lodash';
@@ -74,6 +76,8 @@ import {
 } from './alerts_client_fixtures';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
+import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -81,6 +85,7 @@ const maxAlerts = 1000;
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const alertingEventLogger = alertingEventLoggerMock.create();
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
@@ -226,7 +231,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
-  [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+  [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
   [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -259,6 +264,7 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: undefined,
+  [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   ...overrides,
 });
 
@@ -275,6 +281,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
   [ALERT_SEVERITY_IMPROVING]: true,
+  [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   ...overrides,
 });
 
@@ -292,7 +299,8 @@ const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
-  let processAndLogAlertsOpts: ProcessAndLogAlertsOpts;
+  let processAlertsOpts: ProcessAlertsOpts;
+  let logAlertsOpts: LogAlertsOpts;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -314,18 +322,40 @@ describe('Alerts Client', () => {
           logger,
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           ruleType,
+          maintenanceWindowsService,
           namespace: 'default',
           rule: alertRuleData,
           kibanaVersion: '8.9.0',
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
         };
-        processAndLogAlertsOpts = {
-          eventLogger: alertingEventLogger,
+        maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+          maintenanceWindows: [
+            {
+              ...getMockMaintenanceWindow(),
+              eventStartTime: new Date().toISOString(),
+              eventEndTime: new Date().toISOString(),
+              status: MaintenanceWindowStatus.Running,
+              id: 'test-id1',
+            },
+            {
+              ...getMockMaintenanceWindow(),
+              eventStartTime: new Date().toISOString(),
+              eventEndTime: new Date().toISOString(),
+              status: MaintenanceWindowStatus.Running,
+              id: 'test-id2',
+            },
+          ],
+          maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
+        });
+        processAlertsOpts = {
           ruleRunMetricsStore,
-          shouldLogAlerts: false,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          maintenanceWindowIds: [],
           alertDelay: 0,
+        };
+        logAlertsOpts = {
+          eventLogger: alertingEventLogger,
+          shouldLogAlerts: false,
+          ruleRunMetricsStore,
         };
       });
 
@@ -508,7 +538,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -533,6 +564,8 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
@@ -547,11 +580,14 @@ describe('Alerts Client', () => {
           const alertExecutorService = alertsClient.factory();
           alertExecutorService.create('1').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should update ongoing alerts in existing index', async () => {
@@ -588,7 +624,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -618,6 +655,8 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should update unflattened ongoing alerts in existing index', async () => {
@@ -654,7 +693,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -719,6 +759,8 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should not update ongoing alerts in existing index when they are not in the processed alerts', async () => {
@@ -740,6 +782,7 @@ describe('Alerts Client', () => {
             .mockReturnValueOnce({
               '1': activeAlertObj, // return only the first (tracked) alert
             })
+            .mockReturnValueOnce({})
             .mockReturnValueOnce({});
 
           clusterClient.search.mockResolvedValue({
@@ -773,13 +816,15 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default'); // will be skipped as getProcessedAlerts does not return it
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(2);
+          expect(spy).toHaveBeenCalledTimes(3);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'recoveredCurrent');
+          expect(spy).toHaveBeenNthCalledWith(3, 'new');
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
@@ -802,6 +847,8 @@ describe('Alerts Client', () => {
               getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should recover recovered alerts in existing index', async () => {
@@ -846,7 +893,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -894,6 +942,8 @@ describe('Alerts Client', () => {
               getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should recover unflattened recovered alerts in existing index', async () => {
@@ -938,7 +988,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -1051,6 +1102,8 @@ describe('Alerts Client', () => {
               },
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should use startedAt time if provided', async () => {
@@ -1096,7 +1149,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -1160,6 +1214,8 @@ describe('Alerts Client', () => {
               }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should use runTimestamp time if provided', async () => {
@@ -1207,7 +1263,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('2').scheduleActions('default');
           alertExecutorService.create('3').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -1271,6 +1328,8 @@ describe('Alerts Client', () => {
               }),
             ],
           });
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should not try to index if no alerts', async () => {
@@ -1282,11 +1341,13 @@ describe('Alerts Client', () => {
 
           // Report no alerts
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
         });
 
         test('should log if bulk indexing fails for some alerts', async () => {
@@ -1345,7 +1406,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -1354,6 +1416,8 @@ describe('Alerts Client', () => {
             `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
             { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
           );
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should log if alert to update belongs to a non-standard index', async () => {
@@ -1398,7 +1462,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -1432,6 +1497,9 @@ describe('Alerts Client', () => {
             `Could not update alert abc in partial-.internal.alerts-test.alerts-default-000001. Partial and restored alert indices are not supported ${ruleInfo}.`,
             logTags
           );
+
+          // loadMaintenanceWindows is not called because there are no new alerts
+          expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
         });
 
         test('should log and swallow error if bulk indexing throws error', async () => {
@@ -1449,7 +1517,8 @@ describe('Alerts Client', () => {
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -1458,12 +1527,16 @@ describe('Alerts Client', () => {
             `Error writing 2 alerts to .alerts-test.alerts-default ${ruleInfo} - fail`,
             logTags
           );
+
+          // loadMaintenanceWindows called because there is a new alert
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should not persist alerts if shouldWrite is false', async () => {
           alertsClientParams = {
             logger,
             elasticsearchClientPromise: Promise.resolve(clusterClient),
+            maintenanceWindowsService,
             ruleType: {
               ...ruleType,
               alerts: {
@@ -1490,6 +1563,7 @@ describe('Alerts Client', () => {
             logTags
           );
           expect(clusterClient.bulk).not.toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
         });
       });
 
@@ -2041,8 +2115,15 @@ describe('Alerts Client', () => {
         });
       });
 
-      describe('updateAlertsMaintenanceWindowIdByScopedQuery', () => {
+      describe('updatePersistedAlertsWithMaintenanceWindowIds', () => {
         test('should update alerts with MW ids when provided with maintenance windows', async () => {
+          maintenanceWindowsService.loadMaintenanceWindows.mockReturnValueOnce({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
           const alertsClient = new AlertsClient(alertsClientParams);
 
           const alert1 = new Alert('1');
@@ -2073,10 +2154,7 @@ describe('Alerts Client', () => {
             .mockResolvedValueOnce({});
 
           // @ts-expect-error
-          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery([
-            ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-            { id: 'mw3' } as unknown as MaintenanceWindow,
-          ]);
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds(true);
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
           expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
@@ -2302,7 +2380,8 @@ describe('Alerts Client', () => {
             payload: { count: 2, url: `https://url2` },
           });
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -2330,7 +2409,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
-                [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2365,7 +2444,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '2',
-                [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2579,7 +2658,8 @@ describe('Alerts Client', () => {
             payload: { count: 100, url: `https://elastic.co` },
           });
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -2605,7 +2685,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
-                [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -2679,7 +2759,8 @@ describe('Alerts Client', () => {
             payload: { count: 100, url: `https://elastic.co` },
           });
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
@@ -2775,7 +2856,8 @@ describe('Alerts Client', () => {
             payload: { count: 100, url: `https://elastic.co` },
           });
 
-          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+          await alertsClient.processAlerts(processAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 

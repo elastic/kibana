@@ -21,7 +21,6 @@ import {
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettingsFlappingProperties,
@@ -29,16 +28,17 @@ import {
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
   ProcessAlertsOpts,
   LogAlertsOpts,
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
 
 export interface LegacyAlertsClientParams {
   logger: Logger;
+  maintenanceWindowsService?: MaintenanceWindowsService;
   ruleType: UntypedNormalizedRuleType;
 }
 
@@ -141,9 +141,8 @@ export class LegacyAlertsClient<
     return !!this.trackedAlerts.active[id];
   }
 
-  public processAlerts({
+  public async processAlerts({
     flappingSettings,
-    maintenanceWindowIds,
     alertDelay,
     ruleRunMetricsStore,
   }: ProcessAlertsOpts) {
@@ -160,9 +159,19 @@ export class LegacyAlertsClient<
       alertLimit: this.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       flappingSettings,
-      maintenanceWindowIds,
       startedAt: this.startedAtString,
     });
+
+    if (keys(processedAlertsNew).length > 0 && this.options.maintenanceWindowsService) {
+      const { maintenanceWindowsWithoutScopedQueryIds } =
+        await this.options.maintenanceWindowsService.loadMaintenanceWindows();
+
+      for (const id in processedAlertsNew) {
+        if (Object.hasOwn(processedAlertsNew, id)) {
+          processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+        }
+      }
+    }
 
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
       this.options.logger,
@@ -201,28 +210,6 @@ export class LegacyAlertsClient<
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
-    });
-  }
-
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
-    flappingSettings,
-    maintenanceWindowIds,
-    alertDelay,
-  }: ProcessAndLogAlertsOpts) {
-    this.processAlerts({
-      flappingSettings,
-      maintenanceWindowIds,
-      alertDelay,
-      ruleRunMetricsStore,
-    });
-
-    this.logAlerts({
-      eventLogger,
-      ruleRunMetricsStore,
-      shouldLogAlerts,
     });
   }
 
@@ -267,7 +254,7 @@ export class LegacyAlertsClient<
     return null;
   }
 
-  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]) {
+  public async persistAlerts() {
     return null;
   }
 

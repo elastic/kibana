@@ -7,19 +7,19 @@
 
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { maintenanceWindowCategoryIdTypes } from '../application/maintenance_window/constants';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
-import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import { MaintenanceWindowStatus } from '../types';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { mockedRawRuleSO, mockedRule } from './fixtures';
+import { maintenanceWindowCategoryIdTypes } from '../../application/maintenance_window/constants';
+import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
+import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
+import { MaintenanceWindowStatus } from '../../types';
+import { MaintenanceWindow } from '../../application/maintenance_window/types';
+import { mockedRawRuleSO, mockedRule } from '../fixtures';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
   getMaintenanceWindows,
 } from './get_maintenance_windows';
-import { getFakeKibanaRequest } from './rule_loader';
-import { TaskRunnerContext } from './types';
+import { getFakeKibanaRequest } from '../rule_loader';
+import { TaskRunnerContext } from '../types';
 import { FilterStateStore } from '@kbn/es-query';
 
 const logger = loggingSystemMock.create().get();
@@ -64,8 +64,8 @@ describe('getMaintenanceWindows', () => {
     );
     expect(
       await getMaintenanceWindows({
-        context,
         fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -98,8 +98,8 @@ describe('getMaintenanceWindows', () => {
     );
     expect(
       await getMaintenanceWindows({
-        context,
         fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -139,8 +139,8 @@ describe('getMaintenanceWindows', () => {
     );
     expect(
       await getMaintenanceWindows({
-        context,
         fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -153,8 +153,8 @@ describe('getMaintenanceWindows', () => {
     maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([]);
     expect(
       await getMaintenanceWindows({
-        context,
         fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',
@@ -169,8 +169,8 @@ describe('getMaintenanceWindows', () => {
     });
     expect(
       await getMaintenanceWindows({
-        context,
         fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
         logger,
         ruleTypeId,
         ruleTypeCategory: 'observability',

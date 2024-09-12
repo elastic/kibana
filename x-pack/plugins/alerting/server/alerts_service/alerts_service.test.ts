@@ -21,8 +21,11 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { getDataStreamAdapter } from './lib/data_stream_adapter';
+import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 
 jest.mock('../alerts_client');
+
+const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1509,6 +1512,7 @@ describe('Alerts Service', () => {
           await alertsService.createAlertsClient({
             logger,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1530,6 +1534,7 @@ describe('Alerts Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1565,6 +1570,7 @@ describe('Alerts Service', () => {
           const result = await alertsService.createAlertsClient({
             logger,
             ruleType,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1615,6 +1621,7 @@ describe('Alerts Service', () => {
           const result = await alertsService.createAlertsClient({
             logger,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1650,6 +1657,7 @@ describe('Alerts Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1716,6 +1724,7 @@ describe('Alerts Service', () => {
             alertsService.createAlertsClient({
               logger,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
               rule: {
                 consumer: 'bar',
@@ -1734,6 +1743,7 @@ describe('Alerts Service', () => {
             alertsService.createAlertsClient({
               logger,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
               rule: {
                 consumer: 'bar',
@@ -1769,6 +1779,7 @@ describe('Alerts Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1827,6 +1838,7 @@ describe('Alerts Service', () => {
           const result = await alertsService.createAlertsClient({
             logger,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1848,6 +1860,7 @@ describe('Alerts Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -1914,6 +1927,7 @@ describe('Alerts Service', () => {
             return await alertsService.createAlertsClient({
               logger,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
               rule: {
                 consumer: 'bar',
@@ -1942,6 +1956,7 @@ describe('Alerts Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             dataStreamAdapter,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -2013,6 +2028,7 @@ describe('Alerts Service', () => {
             return await alertsService.createAlertsClient({
               logger,
               ruleType: ruleTypeWithAlertDefinition,
+              maintenanceWindowsService,
               namespace: 'default',
               rule: {
                 consumer: 'bar',
@@ -2080,6 +2096,7 @@ describe('Alerts Service', () => {
           const result = await alertsService.createAlertsClient({
             logger,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -2147,6 +2164,7 @@ describe('Alerts Service', () => {
           const result = await alertsService.createAlertsClient({
             logger,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
@@ -2212,6 +2230,7 @@ describe('Alerts Service', () => {
           const result = await alertsService.createAlertsClient({
             logger,
             ruleType: ruleTypeWithAlertDefinition,
+            maintenanceWindowsService,
             namespace: 'default',
             rule: {
               consumer: 'bar',
