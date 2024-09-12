@@ -17,18 +17,18 @@ import type {
 } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
-import { getByEntityTypeQuery } from '../utils/utils';
+import { getByEntityTypeQuery, getEntityDefinition } from '../utils/utils';
 
 export class EngineDescriptorClient {
   constructor(private readonly soClient: SavedObjectsClientContract) {}
 
   async init(entityType: EntityType, definition: EntityDefinition, filter: string) {
-    const engineDescriptor = await this.get(entityType);
+    const engineDescriptor = await this.find(entityType);
 
     if (engineDescriptor.total > 0)
       throw new Error(`Entity engine for ${entityType} already exists`);
 
-    return this.soClient.create<EngineDescriptor>(
+    const { attributes } = await this.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       {
         status: 'installing',
@@ -38,22 +38,35 @@ export class EngineDescriptorClient {
       },
       { id: definition.id }
     );
+    return attributes;
   }
 
   async update(id: string, status: EngineStatus) {
-    return this.soClient.update<EngineDescriptor>(
+    const { attributes } = await this.soClient.update<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       id,
       { status },
       { refresh: 'wait_for' }
     );
+    return attributes;
   }
 
-  async get(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
+  async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
     return this.soClient.find<EngineDescriptor>({
       type: entityEngineDescriptorTypeName,
       filter: getByEntityTypeQuery(entityType),
     });
+  }
+
+  async get(entityType: EntityType): Promise<EngineDescriptor> {
+    const { id } = getEntityDefinition(entityType);
+
+    const { attributes } = await this.soClient.get<EngineDescriptor>(
+      entityEngineDescriptorTypeName,
+      id
+    );
+
+    return attributes;
   }
 
   async delete(id: string) {

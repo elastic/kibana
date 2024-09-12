@@ -46,9 +46,7 @@ export const getEntityEngineRoute = (
 
         try {
           const secSol = await context.securitySolution;
-          const { attributes: body } = await secSol
-            .getEntityStoreDataClient()
-            .get(request.params.entityType);
+          const body = await secSol.getEntityStoreDataClient().get(request.params.entityType);
 
           return response.ok({ body });
         } catch (e) {

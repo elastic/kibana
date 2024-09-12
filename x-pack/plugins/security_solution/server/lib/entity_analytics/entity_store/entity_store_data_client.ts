@@ -18,7 +18,7 @@ import type {
 } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from './saved_object';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { ensureEngineExists, getEntityDefinition } from './utils/utils';
+import { getEntityDefinition } from './utils/utils';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -42,7 +42,7 @@ export class EntityStoreDataClient {
 
     this.options.logger.info(`Initializing entity store for ${entityType}`);
 
-    const savedObj = await this.engineClient.init(entityType, definition, filter);
+    const descriptor = await this.engineClient.init(entityType, definition, filter);
     await this.options.entityClient.createEntityDefinition({
       definition: {
         ...definition,
@@ -50,49 +50,47 @@ export class EntityStoreDataClient {
         indexPatterns: [...definition.indexPatterns, ...indexPattern.split(',')],
       },
     });
-    const updatedObj = await this.engineClient.update(savedObj.id, 'started');
+    const updated = await this.engineClient.update(definition.id, 'started');
 
-    return { ...savedObj.attributes, ...updatedObj.attributes };
+    return { ...descriptor, ...updated };
   }
 
   public async start(entityType: EntityType) {
     const definition = getEntityDefinition(entityType);
 
-    const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
+    const descriptor = await this.engineClient.get(entityType);
 
-    if (savedObj.attributes.status !== 'stopped') {
+    if (descriptor.status !== 'stopped') {
       throw new Error(
-        `Cannot start Entity engine for ${entityType} when current status is: ${savedObj.attributes.status}`
+        `Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
     this.options.logger.info(`Starting entity store for ${entityType}`);
     await this.options.entityClient.startEntityDefinition(definition);
 
-    const updatedObj = await this.engineClient.update(savedObj.id, 'started');
-    return updatedObj.attributes;
+    return this.engineClient.update(definition.id, 'started');
   }
 
   public async stop(entityType: EntityType) {
     const definition = getEntityDefinition(entityType);
 
-    const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
+    const descriptor = await this.engineClient.get(entityType);
 
-    if (savedObj.attributes.status !== 'started') {
+    if (descriptor.status !== 'started') {
       throw new Error(
-        `Cannot stop Entity engine for ${entityType} when current status is: ${savedObj.attributes.status}`
+        `Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
     }
 
     this.options.logger.info(`Stopping entity store for ${entityType}`);
     await this.options.entityClient.stopEntityDefinition(definition);
 
-    const updatedObj = await this.engineClient.update(savedObj.id, 'stopped');
-    return updatedObj.attributes;
+    return this.engineClient.update(definition.id, 'stopped');
   }
 
   public async get(entityType: EntityType) {
-    return this.engineClient.get(entityType).then(ensureEngineExists(entityType));
+    return this.engineClient.get(entityType);
   }
 
   public async list() {
@@ -107,12 +105,12 @@ export class EntityStoreDataClient {
   }
 
   public async delete(entityType: EntityType, deleteData: boolean) {
-    const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
+    const { id } = getEntityDefinition(entityType);
 
     this.options.logger.info(`Deleting entity store for ${entityType}`);
 
-    await this.options.entityClient.deleteEntityDefinition({ id: savedObj.id, deleteData });
-    await this.engineClient.delete(savedObj.id); // QUESTION: What happens if this fails but the entity definition is successfully deleted?
+    await this.options.entityClient.deleteEntityDefinition({ id, deleteData });
+    await this.engineClient.delete(id);
 
     return { deleted: true };
   }

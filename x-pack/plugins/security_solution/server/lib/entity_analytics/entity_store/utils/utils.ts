@@ -25,7 +25,7 @@ export const ensureEngineExists =
     if (results.total === 0) {
       throw new Error(`Entity engine for ${entityType} does not exist`);
     }
-    return results.saved_objects[0];
+    return results.saved_objects[0].attributes;
   };
 
 export const getByEntityTypeQuery = (entityType: EntityType) => {
