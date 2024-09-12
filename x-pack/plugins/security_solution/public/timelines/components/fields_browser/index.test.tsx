@@ -45,7 +45,10 @@ const runAllPromises = () => new Promise(setImmediate);
 const renderUseFieldBrowserOptions = (
   props: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}
 ) =>
-  renderHook<UseFieldBrowserOptionsProps & { store?: Store }, ReturnType<UseFieldBrowserOptions>>(
+  renderHook<
+    React.PropsWithChildren<UseFieldBrowserOptionsProps & { store?: Store }>,
+    ReturnType<UseFieldBrowserOptions>
+  >(
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,

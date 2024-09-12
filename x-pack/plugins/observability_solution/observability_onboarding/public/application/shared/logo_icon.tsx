@@ -31,7 +31,9 @@ export type SupportedLogo =
   | 'rabbitmq'
   | 'kafka'
   | 'mongodb'
-  | 'apache_tomcat';
+  | 'apache_tomcat'
+  | 'firehose';
+
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [

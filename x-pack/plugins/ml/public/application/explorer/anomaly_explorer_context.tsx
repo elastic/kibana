@@ -61,7 +61,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
 
   const {
     services: {
-      mlServices: { mlApiServices, mlFieldFormatService },
+      mlServices: { mlApi, mlFieldFormatService },
       uiSettings,
       data,
     },
@@ -71,7 +71,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   const [, , tableSeverityState] = useTableSeverity();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
+  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApi), []);
 
   const [anomalyExplorerContextValue, setAnomalyExplorerContextValue] = useState<
     AnomalyExplorerContextValue | undefined
@@ -104,7 +104,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
 
     const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
       timefilter,
-      mlApiServices,
+      mlApi,
       mlResultsService
     );
 

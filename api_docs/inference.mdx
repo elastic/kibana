@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/inference
 title: "inference"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the inference plugin
-date: 2024-09-04
+date: 2024-09-12
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'inference']
 ---
 import inferenceObj from './inference.devdocs.json';
@@ -21,7 +21,7 @@ Contact [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 16 | 0 | 14 | 11 |
+| 41 | 0 | 39 | 13 |
 
 ## Client
 
@@ -44,4 +44,15 @@ Contact [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai
 
 ### Functions
 <DocDefinitionList data={inferenceObj.server.functions}/>
+
+## Common
+
+### Functions
+<DocDefinitionList data={inferenceObj.common.functions}/>
+
+### Enums
+<DocDefinitionList data={inferenceObj.common.enums}/>
+
+### Consts, variables and types
+<DocDefinitionList data={inferenceObj.common.misc}/>
 

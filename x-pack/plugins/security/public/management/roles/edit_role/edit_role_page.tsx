@@ -205,6 +205,7 @@ function useRole(
   roleName?: string
 ) {
   const [role, setRole] = useState<Role | null>(null);
+
   useEffect(() => {
     const rolePromise = roleName
       ? rolesAPIClient.getRole(roleName)
@@ -350,7 +351,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
-  const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
+  const { current: validator } = useRef(new RoleValidator({ shouldValidate: false, buildFlavor }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
   const [previousName, setPreviousName] = useState<string>('');

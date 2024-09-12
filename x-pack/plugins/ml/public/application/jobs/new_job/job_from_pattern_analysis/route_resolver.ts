@@ -14,8 +14,7 @@ import {
   QuickCategorizationJobCreator,
   CATEGORIZATION_TYPE,
 } from './quick_create_job';
-import type { MlApiServices } from '../../../services/ml_api_service';
-import type { MlJobService } from '../../../services/job_service';
+import type { MlApi } from '../../../services/ml_api_service';
 
 import { getDefaultDatafeedQuery, getRisonValue } from '../utils/new_job_utils';
 
@@ -24,8 +23,7 @@ interface Dependencies {
   timeFilter: TimefilterContract;
   dashboardService: DashboardStart;
   data: DataPublicPluginStart;
-  mlApiServices: MlApiServices;
-  mlJobService: MlJobService;
+  mlApi: MlApi;
 }
 export async function resolver(
   deps: Dependencies,
@@ -38,7 +36,7 @@ export async function resolver(
   toRisonString: string,
   queryRisonString: string
 ) {
-  const { mlApiServices, mlJobService, timeFilter, kibanaConfig, dashboardService, data } = deps;
+  const { mlApi, timeFilter, kibanaConfig, dashboardService, data } = deps;
 
   const query = getRisonValue<QueryDslQueryContainer>(queryRisonString, getDefaultDatafeedQuery());
   const from = getRisonValue<string>(fromRisonString, '');
@@ -59,8 +57,7 @@ export async function resolver(
     timeFilter,
     dashboardService,
     data,
-    mlApiServices,
-    mlJobService
+    mlApi
   );
   await jobCreator.createAndStashADJob(
     categorizationType,

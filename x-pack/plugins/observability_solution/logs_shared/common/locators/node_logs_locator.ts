@@ -12,7 +12,6 @@ import {
 import { LocatorClient, LocatorDefinition } from '@kbn/share-plugin/common/url_service';
 
 import { NodeLogsLocatorParams } from './types';
-import { INFRA_NODE_LOGS_LOCATOR_ID } from './infra';
 import { getNodeQuery, getTimeRangeStartFromTime, getTimeRangeEndFromTime } from './helpers';
 
 export const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
@@ -23,14 +22,6 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   constructor(private readonly locators: LocatorClient) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
-    const infraNodeLogsLocator = this.locators.get<NodeLogsLocatorParams>(
-      INFRA_NODE_LOGS_LOCATOR_ID
-    );
-
-    if (infraNodeLogsLocator) {
-      return infraNodeLogsLocator.getLocation(params);
-    }
-
     const allDatasetsLocator =
       this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
     const { time } = params;

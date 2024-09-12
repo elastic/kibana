@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect } from 'react';
@@ -14,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
@@ -43,7 +45,7 @@ export function Doc(props: DocProps) {
   }, [profilesManager, core, dataView]);
 
   const onProcessRecord = useCallback(
-    (record) => {
+    (record: DataTableRecord) => {
       return profilesManager.resolveDocumentProfile({ record });
     },
     [profilesManager]

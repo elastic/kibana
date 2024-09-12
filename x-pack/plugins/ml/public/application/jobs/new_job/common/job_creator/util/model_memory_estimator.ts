@@ -30,16 +30,16 @@ import type { JobValidator } from '../../job_validator/job_validator';
 import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import type { JobCreator } from '../job_creator';
-import type { MlApiServices } from '../../../../../services/ml_api_service';
+import type { MlApi } from '../../../../../services/ml_api_service';
 
-export type CalculatePayload = Parameters<MlApiServices['calculateModelMemoryLimit$']>[0];
+export type CalculatePayload = Parameters<MlApi['calculateModelMemoryLimit$']>[0];
 
 type ModelMemoryEstimator = ReturnType<typeof modelMemoryEstimatorProvider>;
 
 export const modelMemoryEstimatorProvider = (
   jobCreator: JobCreator,
   jobValidator: JobValidator,
-  mlApiServices: MlApiServices
+  mlApi: MlApi
 ) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
   const error$ = new Subject<MLHttpFetchError>();
@@ -65,7 +65,7 @@ export const modelMemoryEstimatorProvider = (
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap((payload) => {
-          return mlApiServices.calculateModelMemoryLimit$(payload).pipe(
+          return mlApi.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
             catchError((error) => {
               // eslint-disable-next-line no-console
@@ -93,14 +93,14 @@ export const useModelMemoryEstimator = (
   const {
     services: {
       notifications,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlKibana();
 
   // Initialize model memory estimator only once
   const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
-    () => modelMemoryEstimatorProvider(jobCreator, jobValidator, mlApiServices),
-    [jobCreator, jobValidator, mlApiServices]
+    () => modelMemoryEstimatorProvider(jobCreator, jobValidator, mlApi),
+    [jobCreator, jobValidator, mlApi]
   );
 
   // Listen for estimation results and errors
