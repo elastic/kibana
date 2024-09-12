@@ -13,7 +13,6 @@ import {
   EuiContextMenuPanel,
   EuiCopy,
   EuiFieldText,
-  EuiFormControlLayout,
   EuiHorizontalRule,
   EuiPopover,
   EuiSpacer,
@@ -29,12 +28,25 @@ export interface TokenFieldProps extends Omit<EuiFieldTextProps, 'append'> {
   value: string;
 }
 
-export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
+export const TokenField: FunctionComponent<TokenFieldProps> = ({ value, ...props }) => {
   return (
-    <EuiFormControlLayout
+    <EuiFieldText
+      data-test-subj="apiKeyTokenField"
+      controlOnly
+      aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
+        defaultMessage: 'Token',
+      })}
+      value={value}
+      style={{
+        fontFamily: euiThemeVars.euiCodeFontFamily,
+        fontSize: euiThemeVars.euiFontSizeXS,
+        backgroundColor: 'transparent',
+      }}
+      onFocus={(event) => event.currentTarget.select()}
+      readOnly
       {...props}
       append={
-        <EuiCopy textToCopy={props.value}>
+        <EuiCopy textToCopy={value}>
           {(copyText) => (
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.security.copyTokenField.copyButton', {
@@ -48,25 +60,7 @@ export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
           )}
         </EuiCopy>
       }
-      style={{ backgroundColor: 'transparent' }}
-      readOnly
-    >
-      <EuiFieldText
-        data-test-subj="apiKeyTokenField"
-        controlOnly
-        aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
-          defaultMessage: 'Token',
-        })}
-        value={props.value}
-        style={{
-          fontFamily: euiThemeVars.euiCodeFontFamily,
-          fontSize: euiThemeVars.euiFontSizeXS,
-          backgroundColor: 'transparent',
-        }}
-        onFocus={(event) => event.currentTarget.select()}
-        readOnly
-      />
-    </EuiFormControlLayout>
+    />
   );
 };
 
