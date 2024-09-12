@@ -50,7 +50,7 @@ export const ImportConfirmModal = ({
       onCancel={onClose}
       onConfirm={onConfirmImport}
       cancelButtonText={i18n.translate('console.importConfirmModal.cancelButton', { defaultMessage: 'Cancel' })}
-      confirmButtonText={i18n.translate('console.importConfirmModal.confirmButton', { defaultMessage: 'Import' })}
+      confirmButtonText={i18n.translate('console.importConfirmModal.confirmButton', { defaultMessage: 'Import and replace' })}
       buttonColor="primary"
       defaultFocusedButton="confirm"
     >
