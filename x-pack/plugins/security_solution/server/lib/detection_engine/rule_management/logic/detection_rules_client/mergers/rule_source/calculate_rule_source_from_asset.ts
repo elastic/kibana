@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleSource, RuleToImport } from '../../../../../../../../common/api/detection_engine';
+import type { RuleResponse, RuleSource } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateIsCustomized } from './calculate_is_customized';
 
@@ -25,7 +25,7 @@ export const calculateRuleSourceFromAsset = ({
   assetWithMatchingVersion,
   ruleIdExists,
 }: {
-  rule: RuleToImport;
+  rule: RuleResponse;
   assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
   ruleIdExists: boolean;
 }): RuleSource => {

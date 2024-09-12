@@ -12,6 +12,7 @@ import {
   RequiredFieldInput,
   RuleSignatureId,
   TypeSpecificCreateProps,
+  RuleVersion,
 } from '../../model/rule_schema';
 
 /**
@@ -38,5 +39,21 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
       `required_fields` will fail.
     */
     required_fields: z.array(RequiredFieldInput).optional(),
+  })
+);
+
+/**
+ * This type represents new rules being imported once the prebuilt rule
+ * customization work is complete. In order to provide backwards compatibility
+ * with existing rules, and not change behavior, we now validate `version` in
+ * the route as opposed to the type itself.
+ *
+ * It differs from RuleToImport in that it requires a `version` field.
+ */
+export type ValidatedRuleToImport = z.infer<typeof ValidatedRuleToImport>;
+export type ValidatedRuleToImportInput = z.input<typeof ValidatedRuleToImport>;
+export const ValidatedRuleToImport = RuleToImport.and(
+  z.object({
+    version: RuleVersion,
   })
 );

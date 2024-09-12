@@ -12,7 +12,10 @@ import type {
   ImportExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
+import {
+  ruleToImportHasVersion,
+  type RuleToImport,
+} from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import type { PrebuiltRulesImportHelper } from '../../../prebuilt_rules/logic/prebuilt_rules_import_helper';
@@ -100,7 +103,7 @@ export const importRules = async ({
               return null;
             }
 
-            if (!parsedRule.version) {
+            if (!ruleToImportHasVersion(parsedRule)) {
               resolve(
                 createBulkErrorObject({
                   statusCode: 400,
