@@ -95,6 +95,8 @@ export function investigationRepositoryFactory({
         page: pagination.page,
         perPage: pagination.perPage,
         filter,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
       });
 
       return {
