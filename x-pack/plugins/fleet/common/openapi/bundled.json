@@ -1,5 +1,27 @@
 {
   "openapi": "3.0.0",
+  "info": {
+    "title": "Fleet",
+    "description": "OpenAPI schema for Fleet API endpoints",
+    "version": "0.2",
+    "contact": {
+      "name": "Fleet Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://KIBANA_HOST:5601"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
   "tags": [
     {
       "name": "Data streams"
@@ -50,26 +72,8 @@
       "name": "Fleet uninstall tokens"
     }
   ],
-  "info": {
-    "title": "Fleet",
-    "description": "OpenAPI schema for Fleet API endpoints",
-    "version": "0.2",
-    "contact": {
-      "name": "Fleet Team"
-    },
-    "license": {
-      "name": "Elastic License 2.0",
-      "url": "https://www.elastic.co/licensing/elastic-license"
-    }
-  },
-  "servers": [
-    {
-      "url": "http://KIBANA_HOST:5601/api/fleet",
-      "description": "Public and supported Fleet API"
-    }
-  ],
   "paths": {
-    "/health_check": {
+    "/api/fleet/health_check": {
       "post": {
         "summary": "Fleet Server health check",
         "tags": [
@@ -133,7 +137,7 @@
         }
       }
     },
-    "/setup": {
+    "/api/fleet/setup": {
       "post": {
         "summary": "Initiate Fleet setup",
         "tags": [
@@ -177,7 +181,7 @@
         ]
       }
     },
-    "/settings": {
+    "/api/fleet/settings": {
       "get": {
         "summary": "Get settings",
         "tags": [
@@ -247,48 +251,7 @@
         "operationId": "update-settings"
       }
     },
-    "/settings/enrollment": {
-      "servers": [
-        {
-          "url": "http://KIBANA_HOST:5601/internal/fleet",
-          "description": "Used for Fleet internals and not supported"
-        }
-      ],
-      "get": {
-        "summary": "Get enrollment settings",
-        "tags": [
-          "Fleet internals"
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "agentPolicyId",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "description": "An agent policy ID to scope the enrollment settings to. For example, that policy's Fleet Server host, its proxy, download location, etc. If not provided, the default Fleet Server policy is used (if any)."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/fleet_settings_enrollment_response"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "operationId": "get-enrollment-settings"
-      }
-    },
-    "/service-tokens": {
+    "/api/fleet/service-tokens": {
       "post": {
         "summary": "Create service token",
         "tags": [
@@ -326,7 +289,7 @@
         "deprecated": true
       }
     },
-    "/service_tokens": {
+    "/api/fleet/service_tokens": {
       "post": {
         "summary": "Create service token",
         "tags": [
@@ -363,7 +326,7 @@
         ]
       }
     },
-    "/epm/verification_key_id": {
+    "/api/fleet/epm/verification_key_id": {
       "get": {
         "summary": "Get package signature verification key ID",
         "tags": [
@@ -406,7 +369,7 @@
       },
       "parameters": []
     },
-    "/epm/bulk_assets": {
+    "/api/fleet/epm/bulk_assets": {
       "post": {
         "summary": "Bulk get assets",
         "tags": [
@@ -459,7 +422,7 @@
         }
       }
     },
-    "/epm/categories": {
+    "/api/fleet/epm/categories": {
       "get": {
         "summary": "List package categories",
         "tags": [
@@ -511,7 +474,7 @@
         }
       ]
     },
-    "/epm/packages/limited": {
+    "/api/fleet/epm/packages/limited": {
       "get": {
         "summary": "Get limited package list",
         "tags": [
@@ -544,7 +507,7 @@
       },
       "parameters": []
     },
-    "/epm/packages": {
+    "/api/fleet/epm/packages": {
       "get": {
         "summary": "List packages",
         "tags": [
@@ -712,7 +675,7 @@
         }
       }
     },
-    "/epm/packages/_bulk": {
+    "/api/fleet/epm/packages/_bulk": {
       "post": {
         "summary": "Bulk install packages",
         "tags": [
@@ -790,7 +753,7 @@
         }
       }
     },
-    "/epm/packages/{pkgkey}": {
+    "/api/fleet/epm/packages/{pkgkey}": {
       "get": {
         "summary": "Get package",
         "tags": [
@@ -1047,7 +1010,7 @@
         "deprecated": true
       }
     },
-    "/epm/packages/{pkgName}/{pkgVersion}": {
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}": {
       "get": {
         "summary": "Get package",
         "tags": [
@@ -1414,7 +1377,7 @@
         }
       }
     },
-    "/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
       "post": {
         "summary": "Authorize transforms",
         "tags": [
@@ -1517,7 +1480,7 @@
         }
       }
     },
-    "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Get package file",
         "tags": [
@@ -1578,7 +1541,7 @@
         }
       ]
     },
-    "/epm/packages/{pkgName}/stats": {
+    "/api/fleet/epm/packages/{pkgName}/stats": {
       "get": {
         "summary": "Get package stats",
         "tags": [
@@ -1625,7 +1588,7 @@
         }
       ]
     },
-    "/epm/templates/{pkgName}/{pkgVersion}/inputs": {
+    "/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
         "summary": "Get inputs template",
         "tags": [
@@ -1694,7 +1657,7 @@
         }
       ]
     },
-    "/agents/setup": {
+    "/api/fleet/agents/setup": {
       "get": {
         "summary": "Get agent setup info",
         "tags": [
@@ -1771,7 +1734,7 @@
         ]
       }
     },
-    "/agent-status": {
+    "/api/fleet/agent-status": {
       "get": {
         "summary": "Get agent status summary",
         "tags": [
@@ -1842,7 +1805,7 @@
         "deprecated": true
       }
     },
-    "/agent_status": {
+    "/api/fleet/agent_status": {
       "get": {
         "summary": "Get agent status summary",
         "tags": [
@@ -1933,7 +1896,7 @@
         ]
       }
     },
-    "/agent_status/data": {
+    "/api/fleet/agent_status/data": {
       "get": {
         "summary": "Get incoming agent data",
         "tags": [
@@ -1986,7 +1949,7 @@
         ]
       }
     },
-    "/agents": {
+    "/api/fleet/agents": {
       "get": {
         "summary": "List agents",
         "tags": [
@@ -2097,7 +2060,7 @@
         }
       }
     },
-    "/agents/bulk_upgrade": {
+    "/api/fleet/agents/bulk_upgrade": {
       "post": {
         "summary": "Bulk upgrade agents",
         "tags": [
@@ -2151,7 +2114,7 @@
         }
       }
     },
-    "/agents/action_status": {
+    "/api/fleet/agents/action_status": {
       "get": {
         "summary": "Get agent action status",
         "tags": [
@@ -2311,7 +2274,7 @@
         "operationId": "agents-action-status"
       }
     },
-    "/agents/{agentId}": {
+    "/api/fleet/agents/{agentId}": {
       "parameters": [
         {
           "schema": {
@@ -2452,7 +2415,7 @@
         ]
       }
     },
-    "/agents/{agentId}/actions": {
+    "/api/fleet/agents/{agentId}/actions": {
       "parameters": [
         {
           "schema": {
@@ -2520,7 +2483,7 @@
         }
       }
     },
-    "/agents/{agentId}/actions/{actionId}/cancel": {
+    "/api/fleet/agents/{agentId}/actions/{actionId}/cancel": {
       "parameters": [
         {
           "schema": {
@@ -2572,7 +2535,7 @@
         ]
       }
     },
-    "/agents/files/{fileId}/{fileName}": {
+    "/api/fleet/agents/files/{fileId}/{fileName}": {
       "parameters": [
         {
           "schema": {
@@ -2628,7 +2591,7 @@
         "operationId": "get-agent-upload-file"
       }
     },
-    "/agents/files/{fileId}": {
+    "/api/fleet/agents/files/{fileId}": {
       "parameters": [
         {
           "schema": {
@@ -2675,7 +2638,7 @@
         "operationId": "delete-agent-upload-file"
       }
     },
-    "/agents/{agentId}/reassign": {
+    "/api/fleet/agents/{agentId}/reassign": {
       "parameters": [
         {
           "schema": {
@@ -2778,7 +2741,7 @@
         "deprecated": true
       }
     },
-    "/agents/{agentId}/unenroll": {
+    "/api/fleet/agents/{agentId}/unenroll": {
       "parameters": [
         {
           "schema": {
@@ -2855,7 +2818,7 @@
         }
       }
     },
-    "/agents/{agentId}/upgrade": {
+    "/api/fleet/agents/{agentId}/upgrade": {
       "parameters": [
         {
           "schema": {
@@ -2904,7 +2867,7 @@
         }
       }
     },
-    "/agents/{agentId}/uploads": {
+    "/api/fleet/agents/{agentId}/uploads": {
       "parameters": [
         {
           "schema": {
@@ -2951,7 +2914,7 @@
         "operationId": "list-agent-uploads"
       }
     },
-    "/agents/bulk_reassign": {
+    "/api/fleet/agents/bulk_reassign": {
       "post": {
         "summary": "Bulk reassign agents",
         "tags": [
@@ -3023,7 +2986,7 @@
         }
       }
     },
-    "/agents/bulk_unenroll": {
+    "/api/fleet/agents/bulk_unenroll": {
       "post": {
         "summary": "Bulk unenroll agents",
         "tags": [
@@ -3106,7 +3069,7 @@
         }
       }
     },
-    "/agents/bulk_update_agent_tags": {
+    "/api/fleet/agents/bulk_update_agent_tags": {
       "post": {
         "summary": "Bulk update agent tags",
         "tags": [
@@ -3196,7 +3159,7 @@
         }
       }
     },
-    "/agents/tags": {
+    "/api/fleet/agents/tags": {
       "get": {
         "summary": "List agent tags",
         "tags": [
@@ -3220,7 +3183,7 @@
         "operationId": "get-agent-tags"
       }
     },
-    "/agents/{agentId}/request_diagnostics": {
+    "/api/fleet/agents/{agentId}/request_diagnostics": {
       "parameters": [
         {
           "schema": {
@@ -3288,7 +3251,7 @@
         ]
       }
     },
-    "/agents/bulk_request_diagnostics": {
+    "/api/fleet/agents/bulk_request_diagnostics": {
       "post": {
         "summary": "Bulk request diagnostics from agents",
         "tags": [
@@ -3370,7 +3333,7 @@
         }
       }
     },
-    "/agent_policies": {
+    "/api/fleet/agent_policies": {
       "get": {
         "summary": "List agent policies",
         "tags": [
@@ -3487,7 +3450,7 @@
         ]
       }
     },
-    "/agent_policies/{agentPolicyId}": {
+    "/api/fleet/agent_policies/{agentPolicyId}": {
       "parameters": [
         {
           "schema": {
@@ -3575,7 +3538,7 @@
         ]
       }
     },
-    "/agent_policies/{agentPolicyId}/copy": {
+    "/api/fleet/agent_policies/{agentPolicyId}/copy": {
       "parameters": [
         {
           "schema": {
@@ -3643,7 +3606,7 @@
         }
       }
     },
-    "/agent_policies/{agentPolicyId}/full": {
+    "/api/fleet/agent_policies/{agentPolicyId}/full": {
       "get": {
         "summary": "Get full agent policy by ID",
         "tags": [
@@ -3713,7 +3676,7 @@
         }
       ]
     },
-    "/agent_policies/{agentPolicyId}/download": {
+    "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
         "summary": "Download agent policy by ID",
         "tags": [
@@ -3776,7 +3739,7 @@
         }
       ]
     },
-    "/agent_policies/_bulk_get": {
+    "/api/fleet/agent_policies/_bulk_get": {
       "post": {
         "summary": "Bulk get agent policies",
         "tags": [
@@ -3841,7 +3804,7 @@
         "parameters": []
       }
     },
-    "/agent_policies/delete": {
+    "/api/fleet/agent_policies/delete": {
       "post": {
         "summary": "Delete agent policy by ID",
         "tags": [
@@ -3904,7 +3867,7 @@
       },
       "parameters": []
     },
-    "/data_streams": {
+    "/api/fleet/data_streams": {
       "get": {
         "summary": "List data streams",
         "tags": [
@@ -3937,7 +3900,7 @@
       },
       "parameters": []
     },
-    "/enrollment-api-keys": {
+    "/api/fleet/enrollment-api-keys": {
       "get": {
         "summary": "List enrollment API keys",
         "tags": [
@@ -4032,7 +3995,7 @@
         "deprecated": true
       }
     },
-    "/enrollment-api-keys/{keyId}": {
+    "/api/fleet/enrollment-api-keys/{keyId}": {
       "parameters": [
         {
           "schema": {
@@ -4114,7 +4077,7 @@
         "deprecated": true
       }
     },
-    "/enrollment_api_keys": {
+    "/api/fleet/enrollment_api_keys": {
       "get": {
         "summary": "List enrollment API keys",
         "tags": [
@@ -4207,7 +4170,7 @@
         ]
       }
     },
-    "/enrollment_api_keys/{keyId}": {
+    "/api/fleet/enrollment_api_keys/{keyId}": {
       "parameters": [
         {
           "schema": {
@@ -4287,7 +4250,7 @@
         ]
       }
     },
-    "/package_policies": {
+    "/api/fleet/package_policies": {
       "get": {
         "summary": "List package policies",
         "tags": [
@@ -4398,7 +4361,7 @@
         ]
       }
     },
-    "/package_policies/_bulk_get": {
+    "/api/fleet/package_policies/_bulk_get": {
       "post": {
         "summary": "Bulk get package policies",
         "tags": [
@@ -4463,7 +4426,7 @@
         ]
       }
     },
-    "/package_policies/delete": {
+    "/api/fleet/package_policies/delete": {
       "post": {
         "summary": "Delete package policy",
         "tags": [
@@ -4533,7 +4496,7 @@
         ]
       }
     },
-    "/package_policies/upgrade": {
+    "/api/fleet/package_policies/upgrade": {
       "post": {
         "summary": "Upgrade package policy to a newer package version",
         "tags": [
@@ -4598,7 +4561,7 @@
         }
       }
     },
-    "/package_policies/upgrade/dryrun": {
+    "/api/fleet/package_policies/upgrade/dryrun": {
       "post": {
         "summary": "Dry run package policy upgrade",
         "tags": [
@@ -4662,7 +4625,7 @@
         }
       }
     },
-    "/package_policies/{packagePolicyId}": {
+    "/api/fleet/package_policies/{packagePolicyId}": {
       "parameters": [
         {
           "schema": {
@@ -4799,7 +4762,7 @@
         ]
       }
     },
-    "/outputs": {
+    "/api/fleet/outputs": {
       "get": {
         "summary": "List outputs",
         "tags": [
@@ -4877,7 +4840,7 @@
         "operationId": "post-outputs"
       }
     },
-    "/outputs/{outputId}": {
+    "/api/fleet/outputs/{outputId}": {
       "get": {
         "summary": "Get output by ID",
         "tags": [
@@ -4992,7 +4955,7 @@
         ]
       }
     },
-    "/outputs/{outputId}/health": {
+    "/api/fleet/outputs/{outputId}/health": {
       "get": {
         "summary": "Get latest output health",
         "tags": [
@@ -5040,7 +5003,7 @@
         }
       ]
     },
-    "/logstash_api_keys": {
+    "/api/fleet/logstash_api_keys": {
       "post": {
         "summary": "Generate Logstash API key",
         "tags": [
@@ -5074,7 +5037,7 @@
         ]
       }
     },
-    "/agent_download_sources": {
+    "/api/fleet/agent_download_sources": {
       "get": {
         "summary": "List agent binary download sources",
         "tags": [
@@ -5170,7 +5133,7 @@
         "operationId": "post-download-sources"
       }
     },
-    "/agent_download_sources/{sourceId}": {
+    "/api/fleet/agent_download_sources/{sourceId}": {
       "get": {
         "summary": "Get agent binary download source by ID",
         "tags": [
@@ -5307,7 +5270,7 @@
         ]
       }
     },
-    "/fleet_server_hosts": {
+    "/api/fleet/fleet_server_hosts": {
       "get": {
         "summary": "List Fleet Server hosts",
         "tags": [
@@ -5412,7 +5375,7 @@
         "operationId": "post-fleet-server-hosts"
       }
     },
-    "/fleet_server_hosts/{itemId}": {
+    "/api/fleet/fleet_server_hosts/{itemId}": {
       "get": {
         "summary": "Get Fleet Server host by ID",
         "tags": [
@@ -5555,7 +5518,7 @@
         ]
       }
     },
-    "/proxies": {
+    "/api/fleet/proxies": {
       "get": {
         "summary": "List proxies",
         "tags": [
@@ -5659,7 +5622,7 @@
         "operationId": "post-fleet-proxies"
       }
     },
-    "/proxies/{itemId}": {
+    "/api/fleet/proxies/{itemId}": {
       "get": {
         "summary": "Get proxy by ID",
         "tags": [
@@ -5800,7 +5763,7 @@
         ]
       }
     },
-    "/kubernetes": {
+    "/api/fleet/kubernetes": {
       "get": {
         "summary": "Get full K8s agent manifest",
         "tags": [
@@ -5855,7 +5818,7 @@
         ]
       }
     },
-    "/uninstall_tokens": {
+    "/api/fleet/uninstall_tokens": {
       "get": {
         "summary": "List metadata for latest uninstall tokens per agent policy",
         "tags": [
@@ -5943,7 +5906,7 @@
         ]
       }
     },
-    "/uninstall_tokens/{uninstallTokenId}": {
+    "/api/fleet/uninstall_tokens/{uninstallTokenId}": {
       "get": {
         "summary": "Get one decrypted uninstall token by its ID",
         "tags": [
@@ -6213,166 +6176,6 @@
         },
         "required": [
           "item"
-        ]
-      },
-      "fleet_server_host": {
-        "title": "Fleet Server Host",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "is_default": {
-            "type": "boolean"
-          },
-          "is_internal": {
-            "type": "boolean"
-          },
-          "is_preconfigured": {
-            "type": "boolean"
-          },
-          "proxy_id": {
-            "type": "string"
-          },
-          "host_urls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "fleet_server_hosts",
-          "id",
-          "is_default",
-          "is_preconfigured",
-          "host_urls"
-        ]
-      },
-      "proxies": {
-        "title": "Fleet Proxy",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "proxy_headers": {
-            "type": "object"
-          },
-          "certificate_authorities": {
-            "type": "string"
-          },
-          "certificate": {
-            "type": "string"
-          },
-          "certificate_key": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "url"
-        ]
-      },
-      "download_sources": {
-        "title": "Download Source",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "is_default": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string"
-          },
-          "host": {
-            "type": "string"
-          },
-          "proxy_id": {
-            "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "is_default",
-          "name",
-          "host"
-        ]
-      },
-      "fleet_settings_enrollment_response": {
-        "title": "Fleet settings response",
-        "type": "object",
-        "properties": {
-          "fleet_server": {
-            "type": "object",
-            "properties": {
-              "policies": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "is_managed": {
-                      "type": "boolean"
-                    },
-                    "is_default_fleet_server": {
-                      "type": "boolean"
-                    },
-                    "has_fleet_server": {
-                      "type": "boolean"
-                    },
-                    "fleet_server_host_id": {
-                      "type": "string"
-                    },
-                    "download_source_id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "is_managed"
-                  ]
-                }
-              },
-              "has_active": {
-                "type": "boolean"
-              },
-              "host": {
-                "$ref": "#/components/schemas/fleet_server_host"
-              },
-              "host_proxy": {
-                "$ref": "#/components/schemas/proxies"
-              }
-            },
-            "required": [
-              "agent_policies",
-              "has_active"
-            ]
-          },
-          "download_source": {
-            "$ref": "#/components/schemas/download_sources"
-          }
-        },
-        "required": [
-          "fleet_server"
         ]
       },
       "saved_object_type": {
@@ -9479,12 +9282,103 @@
             "logstash": "#/components/schemas/output_update_request_logstash"
           }
         }
+      },
+      "download_sources": {
+        "title": "Download Source",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "proxy_id": {
+            "description": "The ID of the proxy to use for this download source. See the proxies API for more information.",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "is_default",
+          "name",
+          "host"
+        ]
+      },
+      "fleet_server_host": {
+        "title": "Fleet Server Host",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_internal": {
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "type": "boolean"
+          },
+          "proxy_id": {
+            "type": "string"
+          },
+          "host_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id",
+          "is_default",
+          "is_preconfigured",
+          "host_urls"
+        ]
+      },
+      "proxies": {
+        "title": "Fleet Proxy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "proxy_headers": {
+            "type": "object"
+          },
+          "certificate_authorities": {
+            "type": "string"
+          },
+          "certificate": {
+            "type": "string"
+          },
+          "certificate_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ]
+  }
 }
