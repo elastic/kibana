@@ -19,6 +19,7 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -41,6 +42,12 @@ import {
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
+  VECTOR_SEARCH_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
+  AI_SEARCH_PLUGIN,
+  APPLICATIONS_PLUGIN,
+  SEARCH_PRODUCT_NAME,
+  SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 
 import {
@@ -166,6 +173,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       ANALYTICS_PLUGIN.ID,
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
+      VECTOR_SEARCH_PLUGIN.ID,
+      SEMANTIC_SEARCH_PLUGIN.ID,
+      APPLICATIONS_PLUGIN.ID,
+      AI_SEARCH_PLUGIN.ID,
+      SEARCH_RELEVANCE_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
 
@@ -187,14 +199,33 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register space/feature control
      */
     features.registerKibanaFeature({
-      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+      id: ENTERPRISE_SEARCH_APP_ID,
+      name: SEARCH_PRODUCT_NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ...PLUGIN_IDS],
       catalogue: PLUGIN_IDS,
-      privileges: null,
+      privileges: {
+        all: {
+          app: ['kibana', ...PLUGIN_IDS],
+          api: [],
+          catalogue: PLUGIN_IDS,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
     });
 
     /**
@@ -219,35 +250,15 @@ export class EnterpriseSearchPlugin implements Plugin {
         };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-        const showEnterpriseSearch =
-          hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
         return {
           navLinks: {
-            enterpriseSearch: showEnterpriseSearch,
-            enterpriseSearchContent: showEnterpriseSearch,
-            enterpriseSearchAnalytics: showEnterpriseSearch,
-            enterpriseSearchApplications: showEnterpriseSearch,
-            enterpriseSearchAISearch: showEnterpriseSearch,
-            enterpriseSearchVectorSearch: showEnterpriseSearch,
-            enterpriseSearchSemanticSearch: showEnterpriseSearch,
-            enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-            searchExperiences: showEnterpriseSearch,
           },
           catalogue: {
-            enterpriseSearch: showEnterpriseSearch,
-            enterpriseSearchContent: showEnterpriseSearch,
-            enterpriseSearchAnalytics: showEnterpriseSearch,
-            enterpriseSearchApplications: showEnterpriseSearch,
-            enterpriseSearchAISearch: showEnterpriseSearch,
-            enterpriseSearchVectorSearch: showEnterpriseSearch,
-            enterpriseSearchSemanticSearch: showEnterpriseSearch,
-            enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-            searchExperiences: showEnterpriseSearch,
           },
         };
       },
