@@ -29,6 +29,7 @@ import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { Query } from '@kbn/es-query';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -104,6 +105,8 @@ export function InternalDashboardTopNav({
     allDataViews,
     focusedPanelId,
     fullScreenMode,
+    hasRunMigrations,
+    hasUnsavedChanges,
     lastSavedId,
     managed,
     query,
@@ -113,6 +116,8 @@ export function InternalDashboardTopNav({
     dashboardApi.dataViews,
     dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
+    dashboardApi.hasRunMigrations$,
+    dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId,
     dashboardApi.managed$,
     dashboardApi.query$,
@@ -120,13 +125,7 @@ export function InternalDashboardTopNav({
     dashboardApi.viewMode
   );
 
-  const hasRunMigrations = dashboard.select(
-    (state) => state.componentState.hasRunClientsideMigrations
-  );
-  const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
-
-  const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
-
+  const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const dashboardTitle = useMemo(() => {
@@ -189,7 +188,7 @@ export function InternalDashboardTopNav({
                 size="s"
                 type="pencil"
                 className="dshTitleBreadcrumbs__updateIcon"
-                onClick={() => dashboard.showSettings()}
+                onClick={() => dashboardApi.showSettings()}
               />
             </>
           ) : (
@@ -225,7 +224,7 @@ export function InternalDashboardTopNav({
     setBreadcrumbs,
     redirectTo,
     dashboardTitle,
-    dashboard,
+    dashboardApi,
     viewMode,
     serverless,
     customLeadingBreadCrumbs,
@@ -308,7 +307,7 @@ export function InternalDashboardTopNav({
   });
 
   UseUnmount(() => {
-    dashboard.clearOverlays();
+    dashboardApi.clearOverlays();
   });
 
   const badges = useMemo(() => {
@@ -365,7 +364,7 @@ export function InternalDashboardTopNav({
                     <EuiLink
                       id="dashboardManagedContentPopoverButton"
                       onClick={() => {
-                        dashboard
+                        dashboardApi
                           .runInteractiveSave(viewMode)
                           .then((result) => maybeRedirect(result));
                       }}
@@ -393,7 +392,7 @@ export function InternalDashboardTopNav({
     showWriteControls,
     managed,
     isPopoverOpen,
-    dashboard,
+    dashboardApi,
     maybeRedirect,
   ]);
 
@@ -407,7 +406,7 @@ export function InternalDashboardTopNav({
       >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       <TopNavMenu
         {...visibilityProps}
-        query={query}
+        query={query as Query | undefined}
         badges={badges}
         screenTitle={title}
         useDefaultBehaviors={true}
@@ -431,12 +430,10 @@ export function InternalDashboardTopNav({
         }
         onQuerySubmit={(_payload, isUpdate) => {
           if (isUpdate === false) {
-            dashboard.forceRefresh();
+            dashboardApi.forceRefresh();
           }
         }}
-        onSavedQueryIdChange={(newId: string | undefined) =>
-          dashboard.dispatch.setSavedQueryId(newId)
-        }
+        onSavedQueryIdChange={setSavedQueryId}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <PresentationUtilContextProvider>

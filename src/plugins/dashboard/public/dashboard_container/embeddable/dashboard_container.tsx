@@ -305,6 +305,10 @@ export class DashboardContainer
     this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
     this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
     this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
+    this.hasRunMigrations$ = new BehaviorSubject(
+      this.getState().componentState.hasRunClientsideMigrations
+    );
+    this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -322,6 +326,12 @@ export class DashboardContainer
         }
         if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
           this.fullScreenMode$.next(state.componentState.fullScreenMode);
+        }
+        if (this.hasRunMigrations$.value !== state.componentState.hasRunClientsideMigrations) {
+          this.hasRunMigrations$.next(state.componentState.hasRunClientsideMigrations);
+        }
+        if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
+          this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
         }
       })
     );
@@ -541,6 +551,8 @@ export class DashboardContainer
   public focusedPanelId$: BehaviorSubject<string | undefined>;
   public managed$: BehaviorSubject<boolean | undefined>;
   public fullScreenMode$: BehaviorSubject<boolean | undefined>;
+  public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
+  public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(

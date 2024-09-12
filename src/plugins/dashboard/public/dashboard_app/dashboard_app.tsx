@@ -192,29 +192,30 @@ export function DashboardApp({
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
-  return showNoDataPage
-    ? <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
-    : <>
-        {dashboardApi && (
-          <>
-            <DashboardTabTitleSetter dashboardApi={dashboardApi} />
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardApi={dashboardApi}
-            />
-          </>
-        )}
+  return showNoDataPage ? (
+    <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+  ) : (
+    <>
+      {dashboardApi && (
+        <>
+          <DashboardTabTitleSetter dashboardApi={dashboardApi} />
+          <DashboardTopNav
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardApi={dashboardApi}
+          />
+        </>
+      )}
 
-        {getLegacyConflictWarning?.()}
-        <DashboardRenderer
-          locator={locator}
-          onApiAvailable={setDashboardApi}
-          dashboardRedirect={redirectTo}
-          savedObjectId={savedDashboardId}
-          showPlainSpinner={showPlainSpinner}
-          getCreationOptions={getCreationOptions}
-        />
-      </>
+      {getLegacyConflictWarning?.()}
+      <DashboardRenderer
+        locator={locator}
+        onApiAvailable={setDashboardApi}
+        dashboardRedirect={redirectTo}
+        savedObjectId={savedDashboardId}
+        showPlainSpinner={showPlainSpinner}
+        getCreationOptions={getCreationOptions}
+      />
+    </>
   );
 }

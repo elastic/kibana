@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CanExpandPanels, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  CanExpandPanels,
+  PresentationContainer,
+  TracksOverlays,
+} from '@kbn/presentation-containers';
 import {
   PublishesDataViews,
   PublishesPanelTitle,
@@ -15,7 +19,9 @@ import {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishingSubject,
+  ViewMode,
 } from '@kbn/presentation-publishing';
+import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 
 export type DashboardApi = CanExpandPanels &
   PresentationContainer &
@@ -23,8 +29,14 @@ export type DashboardApi = CanExpandPanels &
   Pick<PublishesPanelTitle, 'panelTitle'> &
   PublishesSavedObjectId &
   PublishesUnifiedSearch &
-  PublishesViewMode & {
+  PublishesViewMode &
+  TracksOverlays & {
     fullScreenMode$: PublishingSubject<boolean | undefined>;
     focusedPanelId$: PublishingSubject<string | undefined>;
+    forceRefresh: () => void;
+    hasRunMigrations$: PublishingSubject<boolean | undefined>;
+    hasUnsavedChanges$: PublishingSubject<boolean | undefined>;
     managed$: PublishingSubject<boolean | undefined>;
+    runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
+    showSettings: () => void;
   };
