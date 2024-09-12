@@ -13,6 +13,7 @@ import { KueryNode } from '@kbn/es-query';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { RegistryRuleType } from '../rule_type_registry';
 import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
 import {
@@ -88,6 +89,8 @@ export interface ConstructorOptions {
   authorization?: SecurityPluginSetup['authz'];
 }
 
+const DISCOVER_FEATURE_ID = 'discover';
+
 export class AlertingAuthorization {
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly request: KibanaRequest;
@@ -135,7 +138,7 @@ export class AlertingAuthorization {
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
       return featuresIds.size
-        ? asAuthorizedConsumers([ALERTING_FEATURE_ID, ...featuresIds], {
+        ? asAuthorizedConsumers([ALERTING_FEATURE_ID, DISCOVER_FEATURE_ID, ...featuresIds], {
             read: true,
             all: true,
           })
@@ -329,6 +332,21 @@ export class AlertingAuthorization {
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
     const fIds = featuresIds ?? (await this.featuresIds);
+
+    /**
+     * Temporary hack to fix issues with the discover consumer.
+     * Issue: https://github.com/elastic/kibana/issues/184595.
+     * PR https://github.com/elastic/kibana/pull/183756 will
+     * remove the hack and fix it in a generic way.
+     *
+     * The discover consumer should be authorized
+     * as the stackAlerts consumer.
+     */
+    if (fIds.has(DISCOVER_FEATURE_ID)) {
+      fIds.delete(DISCOVER_FEATURE_ID);
+      fIds.add(STACK_ALERTS_FEATURE_ID);
+    }
+
     if (this.authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
@@ -347,11 +365,15 @@ export class AlertingAuthorization {
       >();
       const allPossibleConsumers = await this.allPossibleConsumers;
       const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
-        legacyConsumer === ALERTING_FEATURE_ID || isEmpty(featuresIds);
+        legacyConsumer === ALERTING_FEATURE_ID ||
+        legacyConsumer === DISCOVER_FEATURE_ID ||
+        isEmpty(featuresIds);
+
       for (const feature of fIds) {
         const featureDef = this.features
           .getKibanaFeatures()
           .find((kFeature) => kFeature.id === feature);
+
         for (const ruleTypeId of featureDef?.alerting ?? []) {
           const ruleTypeAuth = ruleTypesWithAuthorization.find((rtwa) => rtwa.id === ruleTypeId);
           if (ruleTypeAuth) {
