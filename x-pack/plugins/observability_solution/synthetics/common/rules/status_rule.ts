@@ -78,6 +78,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
       numberOfChecks,
       downThreshold: 1,
       locationsThreshold: 1,
+      isDefaultRule: true,
     };
   }
   const conWindow = condition.window;
@@ -100,5 +101,6 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     numberOfChecks,
     locationsThreshold: condition?.locationsThreshold ?? 1,
     downThreshold: condition?.downThreshold ?? 1,
+    isDefaultRule: isEmpty(condition),
   };
 };
