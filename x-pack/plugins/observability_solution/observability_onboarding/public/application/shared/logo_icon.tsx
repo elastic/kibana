@@ -23,7 +23,15 @@ export type SupportedLogo =
   | 'nginx'
   | 'apache'
   | 'system'
-  | 'opentelemetry';
+  | 'opentelemetry'
+  | 'mysql'
+  | 'postgresql'
+  | 'redis'
+  | 'haproxy'
+  | 'rabbitmq'
+  | 'kafka'
+  | 'mongodb'
+  | 'apache_tomcat';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [
@@ -40,6 +48,14 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
     'system',
     'apache',
     'opentelemetry',
+    'mysql',
+    'postgresql',
+    'redis',
+    'haproxy',
+    'rabbitmq',
+    'kafka',
+    'mongodb',
+    'apache_tomcat',
   ].includes(logo);
 }
 
