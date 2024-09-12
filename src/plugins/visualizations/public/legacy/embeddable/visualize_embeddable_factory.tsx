@@ -28,7 +28,7 @@ import {
   AttributeService,
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
+import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
@@ -38,24 +38,24 @@ import type {
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import type { SerializedVis, Vis } from '../vis';
-import { createVisAsync } from '../vis_async';
-import { getCapabilities, getTypes } from '../services';
-import { showNewVisModal } from '../wizard';
+import type { SerializedVis, Vis } from '../../vis';
+import { createVisAsync } from '../../vis_async';
+import { getCapabilities, getTypes } from '../../services';
+import { showNewVisModal } from '../../wizard';
 import {
   convertToSerializedVis,
   getSavedVisualization,
   saveVisualization,
   getFullPath,
-} from '../utils/saved_visualize_utils';
+} from '../../utils/saved_visualize_utils';
 import {
   extractControlsReferences,
   extractTimeSeriesReferences,
   injectTimeSeriesReferences,
   injectControlsReferences,
-} from '../utils/saved_visualization_references';
+} from '../../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import type { VisualizationsStartDeps } from '../plugin';
+import type { VisualizationsStartDeps } from '../../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   title: string;

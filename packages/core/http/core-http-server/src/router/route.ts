@@ -107,7 +107,7 @@ export interface RouteConfigOptionsBody {
  * Public routes are stable and intended for external access and are subject to
  * stricter change management and have long term maintenance windows.
  *
- * @remark On serverless access to internal routes is restricted.
+ * @remark as of 9.0, access to internal routes is restricted by default. See https://github.com/elastic/kibana/issues/163654.
  */
 export type RouteAccess = 'public' | 'internal';
 
