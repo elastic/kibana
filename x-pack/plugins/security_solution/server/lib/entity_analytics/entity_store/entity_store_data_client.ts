@@ -15,7 +15,16 @@ import type {
 import type { InitEntityStoreResponse } from '../../../../common/api/entity_analytics/entity_store/generated/init.gen';
 import { entityEngineDescriptorTypeName } from './saved_object';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { ensureEngineExists, getEntityDefinition } from './utils/utils';
+import {
+  ensureEngineExists,
+  getEntityDefinition,
+  getIdentityFieldForEntityType,
+} from './utils/utils';
+import {
+  ensureAssetCriticalityEnrichPolicies,
+  executeAssetCriticalityEnrichPolicies,
+  getAssetCriticalityPipelineSteps,
+} from '../asset_criticality/asset_criticality_enrich_policy';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -39,15 +48,34 @@ export class EntityStoreDataClient {
       -H 'elastic-api-version: 2023-10-31' \
       http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/init
   */
-  public async init(entityType: EntityType): Promise<InitEntityStoreResponse> {
+  public async init(
+    entityType: EntityType,
+    spaceId: string = 'default'
+  ): Promise<InitEntityStoreResponse> {
     const definition = getEntityDefinition(entityType);
 
     this.options.logger.debug(`Initializing entity store for ${entityType}`);
+
+    // TODO - move this to somewhere else
+    await ensureAssetCriticalityEnrichPolicies(spaceId, this.options.esClient);
+    await executeAssetCriticalityEnrichPolicies(spaceId, this.options.esClient);
+
+    this.options.esClient.ingest.putPipeline({
+      id: `${definition.id}@platform`,
+      body: {
+        description: `Ingest pipeline for entity defiinition ${definition.id}`,
+        processors: getAssetCriticalityPipelineSteps(
+          spaceId,
+          getIdentityFieldForEntityType(entityType)
+        ),
+      },
+    });
 
     const savedObj = await this.engineClient.init(entityType, definition);
     await this.options.entityClient.createEntityDefinition({
       definition,
     });
+
     const updatedObj = await this.engineClient.update(savedObj.id, 'started');
 
     return { ...savedObj.attributes, ...updatedObj.attributes };

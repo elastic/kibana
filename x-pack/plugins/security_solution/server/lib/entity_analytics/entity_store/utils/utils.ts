@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
 import type {
   EngineDescriptor,
   EntityType,
@@ -13,11 +14,21 @@ import type {
 import { HOST_ENTITY_DEFINITION, USER_ENTITY_DEFINITION } from '../definition';
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
-export const getEntityDefinition = (entityType: EntityType) => {
-  if (entityType === 'host') return HOST_ENTITY_DEFINITION;
-  if (entityType === 'user') return USER_ENTITY_DEFINITION;
+export const getEntityDefinition = (entityType: EntityType, spaceId: string = 'default') => {
+  // throw if invalid entity type
+  const entityDefinition = entityType === 'host' ? HOST_ENTITY_DEFINITION : USER_ENTITY_DEFINITION;
 
-  throw new Error(`Unsupported entity type: ${entityType}`);
+  const assetCriticalityIndex = getAssetCriticalityIndex(spaceId);
+
+  entityDefinition.indexPatterns.push(assetCriticalityIndex);
+
+  return entityDefinition;
+};
+
+export const getIdentityFieldForEntityType = (entityType: EntityType) => {
+  if (entityType === 'host') return 'host.name';
+
+  return 'user.name';
 };
 
 export const ensureEngineExists =

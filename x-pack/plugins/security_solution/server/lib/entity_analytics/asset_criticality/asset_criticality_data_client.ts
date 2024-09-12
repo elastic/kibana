@@ -190,6 +190,10 @@ export class AssetCriticalityDataClient {
       id_field: record.idField,
       id_value: record.idValue,
       criticality_level: record.criticalityLevel,
+      asset: {
+        criticality: record.criticalityLevel,
+      },
+      [record.idField]: record.idValue,
       '@timestamp': new Date().toISOString(),
     };
 
