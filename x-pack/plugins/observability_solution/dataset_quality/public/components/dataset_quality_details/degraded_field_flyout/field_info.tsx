@@ -91,7 +91,7 @@ export const DegradedFieldInfo = ({ fieldList }: { fieldList?: DegradedField }) 
           data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause"
           grow={2}
         >
-          <EuiBadge color="hollow">
+          <EuiBadge color="hollow" css={{ maxWidth: '135px' }}>
             <strong>{degradedFieldAnalysisResult?.potentialCause}</strong>
           </EuiBadge>
         </EuiFlexItem>
