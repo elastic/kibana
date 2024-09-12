@@ -44,6 +44,9 @@ import {
   scalarArrayDiffAlgorithm,
   simpleDiffAlgorithm,
   singleLineStringDiffAlgorithm,
+  kqlQueryDiffAlgorithm,
+  eqlQueryDiffAlgorithm,
+  esqlQueryDiffAlgorithm,
 } from './algorithms';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
@@ -209,7 +212,7 @@ const calculateCustomQueryFieldsDiff = (
 
 const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQueryFields> = {
   type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
 };
 
@@ -221,7 +224,7 @@ const calculateSavedQueryFieldsDiff = (
 
 const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
   type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
 };
 
@@ -233,7 +236,7 @@ const calculateEqlFieldsDiff = (
 
 const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: simpleDiffAlgorithm,
-  eql_query: simpleDiffAlgorithm,
+  eql_query: eqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
   event_category_override: singleLineStringDiffAlgorithm,
   timestamp_field: singleLineStringDiffAlgorithm,
@@ -248,7 +251,7 @@ const calculateEsqlFieldsDiff = (
 
 const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
   type: simpleDiffAlgorithm,
-  esql_query: simpleDiffAlgorithm,
+  esql_query: esqlQueryDiffAlgorithm,
 };
 
 const calculateThreatMatchFieldsDiff = (
@@ -259,9 +262,9 @@ const calculateThreatMatchFieldsDiff = (
 
 const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMatchFields> = {
   type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
-  threat_query: simpleDiffAlgorithm,
+  threat_query: kqlQueryDiffAlgorithm,
   threat_index: scalarArrayDiffAlgorithm,
   threat_mapping: simpleDiffAlgorithm,
   threat_indicator_path: singleLineStringDiffAlgorithm,
@@ -275,7 +278,7 @@ const calculateThresholdFieldsDiff = (
 
 const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
   type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
   threshold: simpleDiffAlgorithm,
 };
@@ -301,7 +304,7 @@ const calculateNewTermsFieldsDiff = (
 
 const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
   type: simpleDiffAlgorithm,
-  kql_query: simpleDiffAlgorithm,
+  kql_query: kqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
   new_terms_fields: scalarArrayDiffAlgorithm,
   history_window_start: singleLineStringDiffAlgorithm,
