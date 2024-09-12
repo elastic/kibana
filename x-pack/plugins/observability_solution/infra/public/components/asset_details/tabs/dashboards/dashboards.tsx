@@ -143,9 +143,11 @@ export function Dashboards() {
 
   useEffect(() => {
     if (!dashboard) return;
-    dashboard.setFilters(metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
-      ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
-      : []);
+    dashboard.setFilters(
+      metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
+        ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
+        : []
+    );
     dashboard.setTimeRange({ from: dateRange.from, to: dateRange.to });
     dashboard.forceRefresh();
   }, [

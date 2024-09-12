@@ -110,11 +110,13 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
   useEffect(() => {
     if (!dashboard) return;
 
-    dashboard.setFilters(dataView &&
-      currentDashboard?.serviceEnvironmentFilterEnabled &&
-      currentDashboard?.serviceNameFilterEnabled
+    dashboard.setFilters(
+      dataView &&
+        currentDashboard?.serviceEnvironmentFilterEnabled &&
+        currentDashboard?.serviceNameFilterEnabled
         ? getFilters(serviceName, environment, dataView)
-        : []);
+        : []
+    );
     dashboard.setQuery({ query: kuery, language: 'kuery' });
     dashboard.setTimeRange({ from: rangeFrom, to: rangeTo });
   }, [dataView, serviceName, environment, kuery, dashboard, rangeFrom, rangeTo, currentDashboard]);

@@ -8,8 +8,8 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { EDIT_DASHBOARD_TITLE } from '../pages/details/translations';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EDIT_DASHBOARD_TITLE } from '../pages/details/translations';
 
 const DashboardTitleComponent = ({
   dashboardContainer,
@@ -21,8 +21,8 @@ const DashboardTitleComponent = ({
   const dashboardTitle = useStateFromPublishingSubject(dashboardContainer.panelTitle);
   const title = useMemo(() => {
     return dashboardTitle && dashboardTitle.length !== 0 ? dashboardTitle : EDIT_DASHBOARD_TITLE;
-  }, [dashboardTitle])
-  
+  }, [dashboardTitle]);
+
   useEffect(() => {
     onTitleLoaded(title);
   }, [dashboardContainer, title, onTitleLoaded]);

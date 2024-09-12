@@ -9,10 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CanDuplicatePanels, CanExpandPanels, TracksOverlays } from '@kbn/presentation-containers';
-import {
-  HasTypeDisplayName,
-  PublishesSavedObjectId,
-} from '@kbn/presentation-publishing';
+import { HasTypeDisplayName, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 

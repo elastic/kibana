@@ -154,8 +154,7 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, timeRange]);
 
   useEffect(() => {
-    if (isCreateDashboard && firstSecurityTagId)
-      dashboardContainer?.setTags([firstSecurityTagId]);
+    if (isCreateDashboard && firstSecurityTagId) dashboardContainer?.setTags([firstSecurityTagId]);
   }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
 
   useEffect(() => {

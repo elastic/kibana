@@ -24,9 +24,9 @@ import {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DashboardPanelMap } from '../../common';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
