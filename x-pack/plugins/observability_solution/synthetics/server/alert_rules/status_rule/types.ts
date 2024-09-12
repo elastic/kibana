@@ -23,7 +23,6 @@ type MonitorStatusActionGroups = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 type MonitorStatusRuleTypeState = SyntheticsCommonState;
 type MonitorStatusAlertState = SyntheticsMonitorStatusAlertState;
 type MonitorStatusAlertContext = AlertContext;
-type MonitorStatusAlert = ObservabilityUptimeAlert;
 
 export type StatusRuleExecutorOptions = RuleExecutorOptions<
   MonitorStatusRuleTypeParams,
@@ -31,9 +30,22 @@ export type StatusRuleExecutorOptions = RuleExecutorOptions<
   MonitorStatusAlertState,
   MonitorStatusAlertContext,
   MonitorStatusActionGroups,
-  MonitorStatusAlert
+  MonitorStatusAlertDocument
 >;
 
+export type MonitorStatusAlertDocument = ObservabilityUptimeAlert &
+  Required<
+    Pick<
+      ObservabilityUptimeAlert,
+      | 'monitor.id'
+      | 'monitor.type'
+      | 'monitor.name'
+      | 'configId'
+      | 'observer.geo.name'
+      | 'location.name'
+      | 'location.id'
+    >
+  >;
 export interface MonitorSummaryStatusRule {
   reason: string;
   status: string;
@@ -51,7 +63,7 @@ export interface MonitorSummaryStatusRule {
   stateId: string | null;
   monitorUrlLabel: string;
   monitorTags?: string[];
-  downThreshold?: number;
+  downThreshold: number;
   checks?: {
     downWithinXChecks: number;
     down: number;
