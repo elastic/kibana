@@ -18,7 +18,6 @@ import { InternalRequestHeader } from './default_request_headers';
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
   apiKeyHeader: { Authorization: string };
-  cookieHeader: { Cookie: string };
 }
 
 export function SamlAuthProvider({ getService }: FtrProviderContext) {
@@ -110,23 +109,21 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       const apiKeyHeader = { Authorization: 'ApiKey ' + apiKey.encoded };
 
       log.debug(`Created api key for role: [${role}]`);
-      return { apiKey, apiKeyHeader, cookieHeader: adminCookieHeader };
+      return { apiKey, apiKeyHeader };
     },
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
+      // Get admin credentials in order to invalidate the API key
+      const adminCookieHeader = await this.getM2MApiCredentialsWithRoleScope('admin');
+
       const requestBody = {
-        apiKeys: [
-          {
-            id: roleCredentials.apiKey.id,
-            name: roleCredentials.apiKey.name,
-          },
-        ],
+        apiKeys: [roleCredentials.apiKey],
         isAdmin: true,
       };
 
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
         .set(INTERNAL_REQUEST_HEADERS)
-        .set(roleCredentials.cookieHeader)
+        .set(adminCookieHeader)
         .send(requestBody);
 
       expect(status).to.be(200);
