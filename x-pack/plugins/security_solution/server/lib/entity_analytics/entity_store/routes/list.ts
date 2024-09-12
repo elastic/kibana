@@ -29,13 +29,7 @@ export const listEntityEnginesRoute = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {
-          request: {
-            query: undefined,
-            params: undefined,
-            body: undefined,
-          },
-        },
+        validate: {},
       },
 
       async (

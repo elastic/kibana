@@ -37,7 +37,6 @@ export const deleteEntityEngineRoute = (
           request: {
             query: buildRouteValidationWithZod(DeleteEntityStoreRequestQuery),
             params: buildRouteValidationWithZod(DeleteEntityStoreRequestParams),
-            body: undefined,
           },
         },
       },

@@ -32,9 +32,7 @@ export const startEntityEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: undefined,
             params: buildRouteValidationWithZod(StartEntityStoreRequestParams),
-            body: undefined,
           },
         },
       },
