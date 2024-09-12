@@ -18,10 +18,7 @@ interface ImportConfirmModalProps {
   fileContent: string;
 }
 
-export const ImportConfirmModal = ({
-  onClose,
-  fileContent,
-}: ImportConfirmModalProps) => {
+export const ImportConfirmModal = ({ onClose, fileContent }: ImportConfirmModalProps) => {
   const dispatch = useEditorActionContext();
   const {
     services: { notifications },
@@ -41,22 +38,28 @@ export const ImportConfirmModal = ({
     );
 
     onClose();
-  }, [fileContent, onClose]);
+  }, [fileContent, onClose, dispatch, notifications.toasts]);
 
   return (
     <EuiConfirmModal
       data-test-subj="importConfirmModal"
-      title={i18n.translate('console.importConfirmModal.title', { defaultMessage: 'Import and replace requests?' })}
+      title={i18n.translate('console.importConfirmModal.title', {
+        defaultMessage: 'Import and replace requests?',
+      })}
       onCancel={onClose}
       onConfirm={onConfirmImport}
-      cancelButtonText={i18n.translate('console.importConfirmModal.cancelButton', { defaultMessage: 'Cancel' })}
-      confirmButtonText={i18n.translate('console.importConfirmModal.confirmButton', { defaultMessage: 'Import and replace' })}
+      cancelButtonText={i18n.translate('console.importConfirmModal.cancelButton', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('console.importConfirmModal.confirmButton', {
+        defaultMessage: 'Import and replace',
+      })}
       buttonColor="primary"
       defaultFocusedButton="confirm"
     >
       <p>
         {i18n.translate('console.importConfirmModal.body', {
-          defaultMessage: `Importing this file will replace all current requests in the editor. You can still find replaced requests in the console's history.`,
+          defaultMessage: `Importing this file will replace all current requests in the editor.`,
         })}
       </p>
     </EuiConfirmModal>
