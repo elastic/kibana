@@ -4,15 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import moment from 'moment';
-import { Criteria, EuiBasicTable, EuiBasicTableColumn, EuiLink, EuiBadge } from '@elastic/eui';
+import {
+  Criteria,
+  EuiBadge,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiLink,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
-import { InvestigationListActions } from './investigation_list_actions';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { paths } from '../../../../common/paths';
+import { InvestigationNotFound } from '../../../components/investigation_not_found/investigation_not_found';
+import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
 import { useKibana } from '../../../hooks/use_kibana';
-import { paths } from '../../../../common/paths';
+import { InvestigationListActions } from './investigation_list_actions';
 
 export function InvestigationList() {
   const [pageIndex, setPageIndex] = useState(0);
@@ -31,27 +40,15 @@ export function InvestigationList() {
   const tz = uiSettings.get('dateFormat:tz');
 
   if (isLoading) {
-    return (
-      <h1>
-        {i18n.translate('xpack.investigateApp.investigationList.loadingLabel', {
-          defaultMessage: 'Loading...',
-        })}
-      </h1>
-    );
+    return <EuiLoadingSpinner size="xl" />;
   }
 
   if (isError) {
-    return (
-      <h1>
-        {i18n.translate('xpack.investigateApp.investigationList.errorLabel', {
-          defaultMessage: 'Error while loading investigations',
-        })}
-      </h1>
-    );
+    return <InvestigationNotFound />;
   }
 
   const investigations = data?.results ?? [];
-  const total = data?.total ?? 0;
+  const totalItemCount = data?.total ?? 0;
 
   const columns: Array<EuiBasicTableColumn<InvestigationResponse>> = [
     {
@@ -97,8 +94,18 @@ export function InvestigationList() {
       field: 'status',
       name: 'Status',
       render: (status: InvestigationResponse['status']) => {
-        const color = status === 'ongoing' ? 'danger' : 'success';
-        return <EuiBadge color={color}>{status}</EuiBadge>;
+        return <InvestigationStatusBadge status={status} />;
+      },
+    },
+    {
+      field: 'tags',
+      name: 'Tags',
+      render: (tags: InvestigationResponse['tags']) => {
+        return tags.map((tag) => (
+          <EuiBadge color={'default'} key="tag">
+            {tag}
+          </EuiBadge>
+        ));
       },
     },
     {
@@ -112,7 +119,7 @@ export function InvestigationList() {
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: total || 0,
+    totalItemCount,
     pageSizeOptions: [10, 50],
     showPerPageOptions: true,
   };

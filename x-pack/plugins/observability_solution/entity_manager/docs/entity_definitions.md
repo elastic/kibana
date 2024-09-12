@@ -16,13 +16,192 @@ To enable the backfill transform set a value to `history.settings.backfillSyncDe
 
 History and summary transforms will output their data to indices where history writes to time-based (monthly) indices (`.entities.v1.history.<definition-id>.<yyyy-MM-dd>`) and summary writes to a unique indice (`.entities.v1.latest.<definition-id>`). For convenience we create type-based aliases on top on these indices, where the type is extracted from the `entityDefinition.type` property. For a definition of `type: service`, the data can be read through the `entities-service-history` and `entities-service-latest` aliases.
 
-**Entity definition example**:
+#### Iterating on a definition
 
-One can create a definition with a `POST kbn:/internal/entities/definition` request, or through the [entity client](../server/lib/entity_client.ts).
+One can create a definition with a request to `POST kbn:/internal/entities/definition`, or through the [entity client](../server/lib/entity_client.ts).
 
-Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate`, `logErrorRatio` metrics and `data_stream.type`, `sourceIndex` metadata aggregated over one minute.
+When creating the definition, there are 3 main pieces to consider:
+1. The core entity discovery settings
+2. The metadata to collect for each entity that is identified
+3. The metrics to compute for each entity that is identified
 
-Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
+Let's look at the most basic example, one that only discovers entities.
+
+```json
+{
+  "id": "my_hosts",
+  "name": "Hosts from logs data",
+  "description": "This definition extracts host entities from log data",
+  "version": "1.0.0",
+  "type": "host",
+  "indexPatterns": ["logs-*"],
+  "identityFields": ["host.name"],
+  "displayNameTemplate": "{{host.name}}",
+  "history": {
+    "timestampField": "@timestamp",
+    "interval": "2m",
+    "settings": {
+        "frequency": "2m"
+    }
+  }
+}
+```
+
+This definition will look inside the `logs-*` index pattern for documents that container the field `host.name` and group them based on that value to create the entities. It will run the discovery every 2 minutes.
+The documents will be of type "host" so they can be queried via `entities-host-history` or `entities-host-latest`. Beyond the basic `entity` fields, each entity document will also contain all the identify fields at the root of the document, this it is easy to find your hosts by filtering by `host.name`. Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
+
+An entity document for this definition will look like below.
+
+History:
+```json
+{
+  "host": {
+    "name": "gke-edge-oblt-edge-oblt-pool-8fc2868f-jf56"
+  },
+  "@timestamp": "2024-09-10T12:36:00.000Z",
+  "event": {
+    "ingested": "2024-09-10T13:06:54.211210797Z"
+  },
+  "entity": {
+    "lastSeenTimestamp": "2024-09-10T12:37:59.334Z",
+    "identityFields": [
+      "host.name"
+    ],
+    "id": "X/FDBqGTvfnAAHTrv6XfzQ==",
+    "definitionId": "my_hosts",
+    "definitionVersion": "1.0.0",
+    "schemaVersion": "v1",
+    "type": "host"
+  }
+}
+```
+
+Latest:
+```json
+{
+  "event": {
+    "ingested": "2024-09-10T13:07:19.042735184Z"
+  },
+  "host": {
+    "name": "gke-edge-oblt-edge-oblt-pool-8fc2868f-lgmr"
+  },
+  "entity": {
+    "firstSeenTimestamp": "2024-09-10T12:06:00.000Z",
+    "lastSeenTimestamp": "2024-09-10T13:03:59.432Z",
+    "id": "0j+khoOmcrluI7nhYSVnCw==",
+    "displayName": "gke-edge-oblt-edge-oblt-pool-8fc2868f-lgmr",
+    "definitionId": "my_hosts",
+    "definitionVersion": "1.0.0",
+    "identityFields": [
+      "host.name"
+    ],
+    "type": "host",
+    "schemaVersion": "v1"
+  }
+}
+```
+
+Let's extend our definition by adding some metadata and a metric to compute. We can do this by issuing a request to `PATCH kbn:/internal/entities/definition/my_hosts` with the following body:
+
+```json
+{
+  "version": "1.1.0",
+  "metadata": [
+    "cloud.provider"
+  ],
+  "metrics": [
+    {
+      "name": "cpu_usage_avg",
+      "equation": "A",
+      "metrics": [
+        {
+          "name": "A",
+          "aggregation": "avg",
+          "field": "system.cpu.total.norm.pct"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Once that is done, we can view how the shape of the entity documents change.
+
+History:
+```json
+{
+  "cloud": {
+    "provider": [
+      "gcp"
+    ]
+  },
+  "host": {
+    "name": "opbeans-go-nsn-7f8749688-qfw4t"
+  },
+  "@timestamp": "2024-09-10T12:58:00.000Z",
+  "event": {
+    "ingested": "2024-09-10T13:28:50.505448228Z"
+  },
+  "entity": {
+    "lastSeenTimestamp": "2024-09-10T12:59:57.501Z",
+    "schemaVersion": "v1",
+    "definitionVersion": "1.1.0",
+    "identityFields": [
+      "host.name"
+    ],
+    "metrics": {
+      "log_rate": 183
+    },
+    "id": "8yUkkMImEDcbgXmMIm7rkA==",
+    "type": "host",
+    "definitionId": "my_hosts"
+  }
+}
+}
+```
+
+Latest:
+```json
+{
+  "cloud": {
+    "provider": [
+      "gcp"
+    ]
+  },
+  "host": {
+    "name": "opbeans-go-nsn-7f8749688-qfw4t"
+  },
+  "event": {
+    "ingested": "2024-09-10T13:29:15.028655880Z"
+  },
+  "entity": {
+    "lastSeenTimestamp": "2024-09-10T13:25:59.278Z",
+    "schemaVersion": "v1",
+    "definitionVersion": "1.1.0",
+    "displayName": "opbeans-go-nsn-7f8749688-qfw4t",
+    "identityFields": [
+      "host.name"
+    ],
+    "id": "8yUkkMImEDcbgXmMIm7rkA==",
+    "metrics": {
+      "log_rate": 203
+    },
+    "type": "host",
+    "firstSeenTimestamp": "2024-09-10T12:06:00.000Z",
+    "definitionId": "my_hosts"
+  }
+}
+```
+
+The key additions to notice are:
+1. The new root field `cloud.provider`
+2. The new metric field `entity.metrics.log_rate`
+
+Through this iterative process you can craft a definition to meet your needs, verifying along the way that the data is captured as you expect.
+In case the data is not captured correctly, a common cause is due to the exact timings of the two transforms.
+If the history transform is lagging behind, then the latest transform will not have any data in its lookback window to capture.
+
+**Entity definition examples**:
 
 __service_from_logs definition__
 <pre>
