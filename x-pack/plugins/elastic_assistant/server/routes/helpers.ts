@@ -442,12 +442,19 @@ export const langChainExecute = async ({
     executorParams
   );
 
+  console.log('assistantToolsss', assistantTools);
+
+  console.log('assistantToolsssassistantTools', JSON.stringify(assistantTools));
+
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
     assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
+    isEnabledKnowledgeBase: assistantTools.some((tool) =>
+      ['KnowledgeBaseWriteTool', 'KnowledgeBaseRetrievalTool'].includes(tool.name)
+    ),
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
