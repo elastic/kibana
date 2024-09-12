@@ -158,6 +158,45 @@ describe('useTableFilters', () => {
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["number"]');
   });
 
+  it('should filter by field value and field type', () => {
+    const { result } = renderHook(() => useTableFilters(storage));
+
+    expect(result.current.onFilterField(rowTimestamp)).toBe(true);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
+
+    act(() => {
+      result.current.onChangeSearchTerm('500');
+      result.current.onChangeFieldTypes(['number']);
+    });
+
+    expect(result.current.onFilterField(rowTimestamp)).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
+
+    act(() => {
+      result.current.onChangeSearchTerm('2021');
+      result.current.onChangeFieldTypes(['number']);
+    });
+
+    expect(result.current.onFilterField(rowTimestamp)).toBe(false);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(false);
+
+    act(() => {
+      result.current.onChangeSearchTerm('2021');
+      result.current.onChangeFieldTypes(['date']);
+    });
+
+    expect(result.current.onFilterField(rowTimestamp)).toBe(true);
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(false);
+    expect(result.current.onFilterField(rowBytes)).toBe(false);
+
+    jest.advanceTimersByTime(600);
+    expect(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM)).toBe('2021');
+    expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["date"]');
+  });
+
   it('should restore previous filters', () => {
     storage.set(LOCAL_STORAGE_KEY_SEARCH_TERM, 'bytes');
     storage.set(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES, '["number"]');

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -83,6 +83,69 @@ const hit = buildDataTableRecord(generateEsHits(dataView, 1)[0], dataView);
 describe('DocViewerTable', () => {
   afterEach(() => {
     storage.clear();
+  });
+
+  describe('table cells', () => {
+    it('should render cells', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
+        </IntlProvider>
+      );
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('2023-12-31T23:00:00.000Z')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('551')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword_0')).toBeInTheDocument();
+    });
+  });
+
+  describe('search', () => {
+    it('should find by field name', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
+        </IntlProvider>
+      );
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
+          target: { value: 'bytes' },
+        });
+      });
+
+      expect(screen.queryByText('@timestamp')).toBeNull();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.queryByText('extension.keyword')).toBeNull();
+    });
+
+    it('should find by field value', async () => {
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
+        </IntlProvider>
+      );
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
+          target: { value: '2023' },
+        });
+      });
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.queryByText('bytes')).toBeNull();
+      expect(screen.queryByText('extension.keyword')).toBeNull();
+    });
   });
 
   describe('switch - show only selected fields', () => {
