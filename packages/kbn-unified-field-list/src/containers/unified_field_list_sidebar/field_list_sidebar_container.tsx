@@ -117,6 +117,7 @@ const UnifiedFieldListSidebarContainer = memo(
         prependInFlyout,
         variant = 'responsive',
         onFieldEdited,
+        additionalFilters,
       } = props;
       const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
         createStateService({ options: getCreationOptions() })
@@ -155,7 +156,7 @@ const UnifiedFieldListSidebarContainer = memo(
         disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
         dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
         query: querySubscriberResult.query,
-        filters: querySubscriberResult.filters,
+        filters: (querySubscriberResult.filters || []).concat(additionalFilters || []),
         fromDate: querySubscriberResult.fromDate,
         toDate: querySubscriberResult.toDate,
         services,

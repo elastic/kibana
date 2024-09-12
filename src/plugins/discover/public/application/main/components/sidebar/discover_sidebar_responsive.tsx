@@ -23,6 +23,7 @@ import {
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
+import { Filter } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -133,6 +134,10 @@ export interface DiscoverSidebarResponsiveProps {
   fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
 
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
+  /**
+   * Custom filters to apply for the field list, ex: namespace custom filter
+   */
+  additionalFilters?: Filter[];
 }
 
 /**
@@ -158,6 +163,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onAddField,
     onRemoveField,
     sidebarToggleState$,
+    additionalFilters,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -388,6 +394,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onFieldEdited={onFieldEdited}
             prependInFlyout={prependDataViewPickerForMobile}
             additionalFieldGroups={additionalFieldGroups}
+            additionalFilters={additionalFilters}
           />
         ) : null}
       </EuiFlexItem>
