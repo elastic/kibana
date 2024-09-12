@@ -125,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             'osquery',
             'rulesSettings',
             'uptime',
+            'searchInferenceEndpoints',
             'siem',
             'slo',
             'securitySolutionAssistant',
