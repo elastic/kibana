@@ -41,7 +41,7 @@ export class SpecDefinitionsService {
   public addEndpointDescription(
     endpoint: string,
     description: EndpointDescription = {},
-    docsLinkToApiReference: boolean
+    docsLinkToApiReference: boolean = false
   ) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {

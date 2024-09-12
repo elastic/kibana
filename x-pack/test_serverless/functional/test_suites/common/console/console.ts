@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
+  const browser = getService('browser');
 
   describe('console app', function describeIndexTests() {
     before(async () => {
