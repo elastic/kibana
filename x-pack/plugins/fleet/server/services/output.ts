@@ -153,6 +153,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const directAgentPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
@@ -162,6 +163,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
     kuery: packagePoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
@@ -234,6 +236,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
       internalSoClientWithoutSpaceExtension,
       {
         fields: ['policy_ids', 'package.name'],
+        spaceId: '*',
         kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
           .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
           .join(' or '),
@@ -820,20 +823,9 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
-    const internalSoClientWithoutSpaceExtension =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    await packagePolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id);
 
-    await packagePolicyService.removeOutputFromAll(
-      internalSoClientWithoutSpaceExtension,
-      appContextService.getInternalUserESClient(),
-      id
-    );
-
-    await agentPolicyService.removeOutputFromAll(
-      internalSoClientWithoutSpaceExtension,
-      appContextService.getInternalUserESClient(),
-      id
-    );
+    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
