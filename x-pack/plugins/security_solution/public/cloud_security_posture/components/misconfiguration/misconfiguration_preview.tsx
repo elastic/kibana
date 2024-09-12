@@ -131,6 +131,18 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => {
+  const { data } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
+
+  const { euiTheme } = useEuiTheme();
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
     [hostName]
@@ -152,13 +164,12 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
       id: HostDetailsPanelKey,
       params: {
         name: hostName,
-        scopeId: 'unused',
         isRiskScoreExist,
-        isMisconfigurationFindingsExist: true,
+        isMisconfigurationFindingsExist: hasMisconfigurationFindings,
         path: { tab: 'csp_insights' },
       },
     });
-  }, [hostName, isRiskScoreExist, openLeftPanel]);
+  }, [hasMisconfigurationFindings, hostName, isRiskScoreExist, openLeftPanel]);
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -174,23 +185,10 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
         : undefined,
     [isPreviewMode, goToEntityInsightTab]
   );
-
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
-
-  const { euiTheme } = useEuiTheme();
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
   return (
     <ExpandablePanel
       header={{
-        iconType: 'arrowStart',
+        iconType: hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
@@ -204,7 +202,7 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
             />
           </EuiText>
         ),
-        link,
+        link: hasMisconfigurationFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >

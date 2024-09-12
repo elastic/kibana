@@ -11,6 +11,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import type { Refetch } from '../../../common/types';
@@ -96,6 +98,18 @@ export const HostPanel = ({
   const hasMisconfigurationFindings =
     useCspSetupStatusApi().data?.hasMisconfigurationsFindings || false;
 
+  const { data } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
+
+  const hasMisconfigurationFindingsForThisQuery = passedFindings > 0 || failedFindings > 0;
+
   useQueryInspector({
     deleteQuery,
     inspect: inspectRiskScore,
@@ -162,7 +176,9 @@ export const HostPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode && (isRiskScoreExist || hasMisconfigurationFindings)
+                !isPreviewMode &&
+                (isRiskScoreExist ||
+                  (hasMisconfigurationFindings && hasMisconfigurationFindingsForThisQuery))
               }
               expandDetails={openDefaultPanel}
             />

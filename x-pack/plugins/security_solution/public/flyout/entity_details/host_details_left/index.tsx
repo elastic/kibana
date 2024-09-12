@@ -7,6 +7,8 @@
 
 import React, { useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
   getRiskInputTab,
   getInsightsInputTab,
@@ -46,6 +48,18 @@ export const HostDetailsPanel = ({
       : EntityDetailsLeftPanelTab.RISK_INPUTS
   );
 
+  const { data } = useMisconfigurationPreview({
+    query: buildEntityFlyoutPreviewQuery('host.name', name),
+    sort: [],
+    enabled: true,
+    pageSize: 1,
+  });
+
+  const passedFindings = data?.count.passed || 0;
+  const failedFindings = data?.count.failed || 0;
+
+  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
+
   const [tabs] = useMemo(() => {
     const isRiskScoreTabAvailable = isRiskScoreExist && name;
     const riskScoreTab = isRiskScoreTabAvailable
@@ -53,9 +67,18 @@ export const HostDetailsPanel = ({
       : [];
 
     // Determine if the Insights tab should be included
-    const insightsTab = isMisconfigurationFindingsExist ? [getInsightsInputTab({ name })] : [];
+    const insightsTab =
+      isMisconfigurationFindingsExist && hasMisconfigurationFindings
+        ? [getInsightsInputTab({ name })]
+        : [];
     return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
-  }, [isRiskScoreExist, name, scopeId, isMisconfigurationFindingsExist]);
+  }, [
+    isRiskScoreExist,
+    name,
+    scopeId,
+    isMisconfigurationFindingsExist,
+    hasMisconfigurationFindings,
+  ]);
 
   return (
     <>
