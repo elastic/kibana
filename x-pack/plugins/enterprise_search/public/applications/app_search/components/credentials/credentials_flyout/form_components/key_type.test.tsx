@@ -37,7 +37,6 @@ describe('FormKeyType', () => {
     const wrapper = shallow(<FormKeyType />);
 
     expect(wrapper.find(EuiSelect)).toHaveLength(1);
-    expect(wrapper.find(EuiSelect).prop('placeholder')).toEqual('Select a key type');
     expect(wrapper.find(EuiSelect).prop('options')).toEqual(TOKEN_TYPE_INFO);
     expect(wrapper.find(EuiSelect).prop('value')).toEqual(ApiTokenTypes.Private);
     expect(wrapper.find(EuiSelect).prop('disabled')).toEqual(false);

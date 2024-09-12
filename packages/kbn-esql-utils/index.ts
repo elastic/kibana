@@ -25,7 +25,9 @@ export {
   getTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
-  retieveMetadataColumns,
+  prettifyQuery,
+  isQueryWrappedByPipes,
+  retrieveMetadataColumns,
   TextBasedLanguages,
 } from './src';
 

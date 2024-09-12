@@ -14,13 +14,19 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
+import { DiscoverAppState } from '../../application/main/state_management/discover_app_state_container';
+
+export interface DiscoverGridProps extends UnifiedDataTableProps {
+  query?: DiscoverAppState['query'];
+}
 
 /**
  * Customized version of the UnifiedDataTable
  * @constructor
  */
-export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
+export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
+  query,
   ...props
 }) => {
   const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
@@ -34,8 +40,14 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
   const rowAdditionalLeadingControls = useMemo(() => {
     return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
       dataView: props.dataView,
+      query,
     });
-  }, [getRowAdditionalLeadingControlsAccessor, props.dataView, customRowAdditionalLeadingControls]);
+  }, [
+    getRowAdditionalLeadingControlsAccessor,
+    props.dataView,
+    query,
+    customRowAdditionalLeadingControls,
+  ]);
 
   return (
     <UnifiedDataTable

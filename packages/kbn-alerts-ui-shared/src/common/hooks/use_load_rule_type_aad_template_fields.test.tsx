@@ -17,7 +17,7 @@ import { useLoadRuleTypeAadTemplateField } from './use_load_rule_type_aad_templa
 
 const queryClient = new QueryClient();
 
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 

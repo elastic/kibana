@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
+  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -25,8 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         'doc_table:legacy': true,
       });
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display try document explorer button', async function () {
-      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await discover.selectIndexPattern('logstash-*');
       const tourButtonExists = await testSubjects.exists('tryDocumentExplorerButton');
       expect(tourButtonExists).to.be(true);
     });
