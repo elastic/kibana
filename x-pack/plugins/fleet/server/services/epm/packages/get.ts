@@ -54,7 +54,8 @@ import {
   RegistryResponseError,
   PackageInvalidArchiveError,
 } from '../../../errors';
-import { appContextService, dataStreamService } from '../..';
+import { appContextService } from '../..';
+import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
