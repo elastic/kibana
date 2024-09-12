@@ -116,6 +116,8 @@
     "@elastic/elasticsearch": "^8.15.0",
     "@elastic/ems-client": "8.5.3",
     "@elastic/eui": "95.9.0",
+    "@elastic/eui-theme-barcelona": "file:./elastic-eui-theme-barcelona.v0.0.1.tgz",
+    "@elastic/eui-theme-rainbow": "file:./elastic-eui-theme-rainbow.v0.0.1.tgz",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",

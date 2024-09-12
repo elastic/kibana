@@ -1741,6 +1741,14 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
+"@elastic/eui-theme-barcelona@file:./elastic-eui-theme-barcelona.v0.0.1.tgz":
+  version "0.0.1"
+  resolved "file:./elastic-eui-theme-barcelona.v0.0.1.tgz#62d9cac00bd598c0837b2a9d1e96e7b1f363964c"
+
+"@elastic/eui-theme-rainbow@file:./elastic-eui-theme-rainbow.v0.0.1.tgz":
+  version "1.0.0"
+  resolved "file:./elastic-eui-theme-rainbow.v0.0.1.tgz#49e5fe0d4c91277768ceb2eacf397de92831c564"
+
 "@elastic/eui@95.9.0":
   version "95.9.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.9.0.tgz#23fbafd7613fb6b41b4925ec4977a0c1e075b455"
