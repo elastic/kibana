@@ -8,7 +8,8 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { useRootProfile } from './use_root_profile';
@@ -37,30 +38,30 @@ describe('useRootProfile', () => {
   });
 
   it('should return rootProfileLoading as true', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
     // avoid act warning
-    await waitForNextUpdate();
+    await waitFor(() => null);
   });
 
   it('should return rootProfileLoading as false', async () => {
-    const { result, waitForNextUpdate } = render();
-    await waitForNextUpdate();
+    const { result } = render();
+    await waitFor(() => null);
     expect(result.current.rootProfileLoading).toBe(false);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
   });
 
   it('should return rootProfileLoading as true when solutionNavId changes', async () => {
-    const { result, rerender, waitForNextUpdate } = render();
-    await waitForNextUpdate();
+    const { result, rerender } = render();
+    await waitFor(() => null);
     expect(result.current.rootProfileLoading).toBe(false);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
     act(() => mockSolutionNavId$.next('newSolutionNavId'));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
-    await waitForNextUpdate();
+    await waitFor(() => null);
     expect(result.current.rootProfileLoading).toBe(false);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
   });

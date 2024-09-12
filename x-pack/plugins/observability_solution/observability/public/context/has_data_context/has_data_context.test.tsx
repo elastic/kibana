@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from './data_handler';
@@ -16,7 +17,6 @@ import { HasDataContextProvider } from './has_data_context';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../../common/typings';
-import { act } from '@testing-library/react';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
@@ -58,7 +58,7 @@ describe('HasDataContextProvider', () => {
 
   describe('when no plugin has registered', () => {
     it('hasAnyData returns undefined and all apps return undefined', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+      const { result } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toMatchObject({
         hasDataMap: {},
         hasAnyData: false,
@@ -66,9 +66,8 @@ describe('HasDataContextProvider', () => {
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
       });
-      await act(async () => {
-        await waitForNextUpdate();
-      });
+
+      await waitFor(() => null);
 
       expect(result.current).toEqual({
         hasDataMap: {
@@ -112,7 +111,7 @@ describe('HasDataContextProvider', () => {
       afterAll(unregisterAll);
 
       it('hasAnyData returns false and all apps return false', async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+        const { result } = renderHook(() => useHasData(), { wrapper });
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -124,9 +123,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await act(async () => {
-          await waitForNextUpdate();
-        });
+        await waitFor(() => null);
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -178,7 +175,7 @@ describe('HasDataContextProvider', () => {
       afterAll(unregisterAll);
 
       it('hasAnyData returns true apm returns true and all other apps return false', async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+        const { result } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
           hasAnyData: false,
@@ -187,9 +184,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await act(async () => {
-          await waitForNextUpdate();
-        });
+        await waitFor(() => null);
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -243,7 +238,7 @@ describe('HasDataContextProvider', () => {
       afterAll(unregisterAll);
 
       it('hasAnyData returns true and all apps return true', async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+        const { result } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
           hasAnyData: false,
@@ -252,9 +247,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await act(async () => {
-          await waitForNextUpdate();
-        });
+        await waitFor(() => null);
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -297,7 +290,7 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns true, apm returns true and all other apps return undefined', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasData(), {
+          const { result } = renderHook(() => useHasData(), {
             wrapper,
           });
           expect(result.current).toEqual({
@@ -308,9 +301,7 @@ describe('HasDataContextProvider', () => {
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await act(async () => {
-            await waitForNextUpdate();
-          });
+          await waitFor(() => null);
 
           expect(result.current).toEqual({
             hasDataMap: {
@@ -343,7 +334,7 @@ describe('HasDataContextProvider', () => {
         afterAll(unregisterAll);
 
         it('hasAnyData returns false, apm returns false and all other apps return undefined', async () => {
-          const { result, waitForNextUpdate } = renderHook(() => useHasData(), {
+          const { result } = renderHook(() => useHasData(), {
             wrapper,
           });
           expect(result.current).toEqual({
@@ -354,9 +345,7 @@ describe('HasDataContextProvider', () => {
             onRefreshTimeRange: expect.any(Function),
           });
 
-          await act(async () => {
-            await waitForNextUpdate();
-          });
+          await waitFor(() => null);
 
           expect(result.current).toEqual({
             hasDataMap: {
@@ -412,7 +401,7 @@ describe('HasDataContextProvider', () => {
       afterAll(unregisterAll);
 
       it('hasAnyData returns true, apm is undefined and all other apps return true', async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+        const { result } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
           hasAnyData: false,
@@ -421,9 +410,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await act(async () => {
-          await waitForNextUpdate();
-        });
+        await waitFor(() => null);
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -491,7 +478,7 @@ describe('HasDataContextProvider', () => {
       afterAll(unregisterAll);
 
       it('hasAnyData returns false and all apps return undefined', async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+        const { result } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
           hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
           hasAnyData: false,
@@ -500,9 +487,7 @@ describe('HasDataContextProvider', () => {
           onRefreshTimeRange: expect.any(Function),
         });
 
-        await act(async () => {
-          await waitForNextUpdate();
-        });
+        await waitFor(() => null);
 
         expect(result.current).toEqual({
           hasDataMap: {
@@ -538,7 +523,7 @@ describe('HasDataContextProvider', () => {
     });
 
     it('returns if alerts are available', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+      const { result } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
         hasAnyData: false,
@@ -547,9 +532,7 @@ describe('HasDataContextProvider', () => {
         onRefreshTimeRange: expect.any(Function),
       });
 
-      await act(async () => {
-        await waitForNextUpdate();
-      });
+      await waitFor(() => null);
 
       expect(result.current).toEqual({
         hasDataMap: {

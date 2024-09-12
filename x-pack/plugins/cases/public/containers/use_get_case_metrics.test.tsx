@@ -8,6 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
@@ -34,11 +35,11 @@ describe('useGetCaseMetrics', () => {
   it('calls getSingleCaseMetrics with correct arguments', async () => {
     const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+    renderHook(() => useGetCaseMetrics(basicCase.id, features), {
       wrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
     expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
   });
 
@@ -51,11 +52,11 @@ describe('useGetCaseMetrics', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+    renderHook(() => useGetCaseMetrics(basicCase.id, features), {
       wrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
     expect(addError).toHaveBeenCalled();

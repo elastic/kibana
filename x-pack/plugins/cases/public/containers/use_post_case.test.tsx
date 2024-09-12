@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { ConnectorTypes } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -49,7 +50,7 @@ describe('usePostCase', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'postCase');
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -57,14 +58,14 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ newCase: samplePost });
   });
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -72,7 +73,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -80,7 +81,7 @@ describe('usePostCase', () => {
   });
 
   it('does not show a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -88,7 +89,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addSuccess).not.toHaveBeenCalled();
   });
@@ -96,7 +97,7 @@ describe('usePostCase', () => {
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'postCase').mockRejectedValue(new Error('usePostCase: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => usePostCase(), {
+    const { result } = renderHook(() => usePostCase(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -104,7 +105,7 @@ describe('usePostCase', () => {
       result.current.mutate({ request: samplePost });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useKibana } from '../../common/lib/kibana';
 import {
@@ -34,7 +35,7 @@ describe('useLoadAlertSummary', () => {
       ...mockedAlertSummaryResponse,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadAlertSummary({
         featureIds,
         timeRange: mockedAlertSummaryTimeRange,
@@ -49,7 +50,7 @@ describe('useLoadAlertSummary', () => {
       },
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
@@ -70,7 +71,7 @@ describe('useLoadAlertSummary', () => {
       ...mockedAlertSummaryResponse,
     });
 
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useLoadAlertSummary({
         featureIds,
         timeRange: mockedAlertSummaryTimeRange,
@@ -78,7 +79,7 @@ describe('useLoadAlertSummary', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const body = JSON.stringify({
       fixed_interval: fixedInterval,
@@ -99,14 +100,14 @@ describe('useLoadAlertSummary', () => {
     const error = new Error('Fetch Alert Summary Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadAlertSummary({
         featureIds,
         timeRange: mockedAlertSummaryTimeRange,
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current.error).toMatch(error.message);
   });

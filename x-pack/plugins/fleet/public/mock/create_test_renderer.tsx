@@ -9,7 +9,7 @@ import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender, act } from '@testing-library/react';
+import { render as reactRender, act, waitFor } from '@testing-library/react';
 import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { Router } from '@kbn/shared-ux-router';
@@ -57,6 +57,7 @@ export interface TestRenderer {
     wrapper?: WrapperComponent<any>
   ) => RenderHookResult<TProps, TResult>;
   setHeaderActionMenu: Function;
+  waitFor: typeof waitFor;
 }
 
 // disable retries to avoid test flakiness
@@ -135,6 +136,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
         wrapper,
       });
     },
+    waitFor,
     render: (ui, options) => {
       let renderResponse: RenderResult;
       act(() => {
@@ -218,6 +220,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
         wrapper,
       });
     },
+    waitFor,
   };
 
   return testRendererMocks;

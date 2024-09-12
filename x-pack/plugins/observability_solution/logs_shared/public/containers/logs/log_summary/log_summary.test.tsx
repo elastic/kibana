@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 
@@ -56,14 +57,14 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       ({ logViewReference }) => useLogSummary(logViewReference, startTimestamp, endTimestamp, null),
       {
         initialProps: { logViewReference: LOG_VIEW_REFERENCE },
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -75,7 +76,7 @@ describe('useLogSummary hook', () => {
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ logViewReference: CHANGED_LOG_VIEW_REFERENCE });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -101,7 +102,7 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(firstMockResponse)
       .mockResolvedValueOnce(secondMockResponse);
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       ({ filterQuery }) =>
         useLogSummary(LOG_VIEW_REFERENCE, startTimestamp, endTimestamp, filterQuery),
       {
@@ -109,7 +110,7 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -121,7 +122,7 @@ describe('useLogSummary hook', () => {
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
     rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -139,7 +140,7 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(createMockResponse([]));
 
     const firstRange = createMockDateRange();
-    const { waitForNextUpdate, rerender } = renderHook(
+    const { rerender } = renderHook(
       ({ startTimestamp, endTimestamp }) =>
         useLogSummary(LOG_VIEW_REFERENCE, startTimestamp, endTimestamp, null),
       {
@@ -147,7 +148,7 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -160,7 +161,7 @@ describe('useLogSummary hook', () => {
     const secondRange = createMockDateRange('now-20s', 'now');
 
     rerender(secondRange);
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
@@ -176,7 +177,7 @@ describe('useLogSummary hook', () => {
     fetchLogSummaryMock.mockResolvedValueOnce(createMockResponse([]));
 
     const firstRange = createMockDateRange();
-    const { waitForNextUpdate, rerender } = renderHook(
+    const { rerender } = renderHook(
       ({ startTimestamp, endTimestamp }) =>
         useLogSummary(LOG_VIEW_REFERENCE, startTimestamp, endTimestamp, null),
       {
@@ -188,7 +189,7 @@ describe('useLogSummary hook', () => {
 
     // intentionally don't wait for an update to test the throttling
     rerender(secondRange);
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
