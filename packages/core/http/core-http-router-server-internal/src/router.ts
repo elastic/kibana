@@ -218,10 +218,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   }
 
   public getRoutes({ excludeVersionedRoutes }: InternalGetRoutesOptions = {}) {
+    const routes = this.routes.filter((route) => route.options.hiddenFromIntrospection !== true);
     if (excludeVersionedRoutes) {
-      return this.routes.filter((route) => !route.isVersioned);
+      return routes.filter((route) => !route.isVersioned);
     }
-    return [...this.routes];
+    return routes;
   }
 
   public handleLegacyErrors = wrapErrors;

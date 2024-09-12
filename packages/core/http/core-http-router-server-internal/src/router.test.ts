@@ -72,6 +72,48 @@ describe('Router', () => {
       });
     });
 
+    it('excludes "hidden" routes', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      const validation = schema.object({ foo: schema.string() });
+      router.post(
+        {
+          path: '/visible',
+          validate: { body: validation, query: validation, params: validation },
+        },
+        (context, req, res) => res.ok()
+      );
+      router.post(
+        {
+          path: '/visible-versioned',
+          validate: { body: validation, query: validation, params: validation },
+        },
+        (context, req, res) => res.ok(),
+        { isVersioned: true }
+      );
+      router.get(
+        {
+          path: '/hidden',
+          options: { hiddenFromIntrospection: true },
+          validate: { body: validation, query: validation, params: validation },
+        },
+        (context, req, res) => res.ok()
+      );
+      router.get(
+        {
+          path: '/hidden-versioned',
+          options: { hiddenFromIntrospection: true },
+          validate: { body: validation, query: validation, params: validation },
+        },
+        (context, req, res) => res.ok(),
+        { isVersioned: true }
+      );
+      const routes = router.getRoutes();
+      expect(routes).toHaveLength(2);
+      const [route1, route2] = routes;
+      expect(route1).toMatchObject({ method: 'post', path: '/visible' });
+      expect(route2).toMatchObject({ method: 'post', path: '/visible-versioned' });
+    });
+
     it('can exclude versioned routes', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       const validation = schema.object({ foo: schema.string() });
