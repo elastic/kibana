@@ -32,7 +32,7 @@ describe('overrideGridCopyEvent', () => {
           <div role="gridcell">
             <div className="euiDataGridRowCell__content">
               Sep 12, 2024 @ 10:08:49.615
-              <div className="kbnFieldIcon">Token</div>
+              <div className="euiToken">Token</div>
             </div>
             <div>other elements</div>
           </div>
