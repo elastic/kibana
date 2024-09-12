@@ -908,6 +908,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const addResponsesToQueueIfAny = (responseList: LogsEndpointActionResponse[]): void => {
       if (responseList.length > 0) {
         addToQueue(...responseList);
+
+        if (this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+          this.sendTelemetry(responseList);
+        }
       }
     };
 

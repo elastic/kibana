@@ -13,6 +13,7 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT } from '../../../../../lib/telemetry/event_based/events';
 import { NotFoundError } from '../../../../errors';
 import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
 import { SimpleMemCache } from './simple_mem_cache';
@@ -707,6 +708,23 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         return pendingRequests;
       },
     });
+  }
+
+  protected sendTelemetry(responseList: LogsEndpointActionResponse[]): void {
+    for (const response of responseList) {
+      this.options.endpointService
+        .getTelemetryService()
+        .reportEvent(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: response.EndpointActions.action_id,
+            agentType: this.agentType,
+            actionStatus: response.error ? 'failed' : 'successful',
+            command: response.EndpointActions.data.command,
+            endpointIds:
+              typeof response.agent.id === 'string' ? [response.agent.id] : response.agent.id,
+          },
+        });
+    }
   }
 
   public async isolate(
