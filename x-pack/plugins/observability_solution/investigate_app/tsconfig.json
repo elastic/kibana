@@ -25,7 +25,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/lens-plugin",
-    "@kbn/utility-types",
     "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/data-plugin",
