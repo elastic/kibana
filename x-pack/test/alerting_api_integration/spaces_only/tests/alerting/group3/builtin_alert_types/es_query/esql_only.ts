@@ -186,7 +186,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
       expect(activeValue).to.be('1');
       expect(activeMessage).to.match(
-        /Document count is \d+ in the last 4s. Alert when greater than 0./
+        /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
       await createEsDocumentsInGroups(1, endDate);
       docs = await waitForDocs(2);
