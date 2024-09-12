@@ -21,6 +21,7 @@ import {
  */
 const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>()([
   'actions',
+  'response_actions',
   'throttle',
   'meta',
   'output_index',

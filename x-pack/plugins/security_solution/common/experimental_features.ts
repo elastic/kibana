@@ -55,7 +55,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Temporary feature flag to enable the Response Actions in Rules UI - intermediate release
    */
-  rulesResponseActionsTemporaryFlagEnabled: false,
+  automatedResponseActionsForMoreRulesEnabled: false,
 
   /**
    * Enables the ability to send Response actions to SentinelOne and persist the results

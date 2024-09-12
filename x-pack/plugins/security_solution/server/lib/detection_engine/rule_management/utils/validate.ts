@@ -75,7 +75,7 @@ export const validateResponseActionsPermissions = async (
   if (
     !shouldShowResponseActions(
       ruleUpdate.type,
-      experimentalFeatures.rulesResponseActionsTemporaryFlagEnabled
+      experimentalFeatures.automatedResponseActionsForMoreRulesEnabled
     )
   ) {
     return;
