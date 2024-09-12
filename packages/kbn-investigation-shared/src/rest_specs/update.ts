@@ -9,7 +9,6 @@
 
 import { z } from '@kbn/zod';
 import { investigationResponseSchema } from './investigation';
-import { statusSchema } from '../schema';
 
 const updateInvestigationParamsSchema = z.object({
   path: z.object({
