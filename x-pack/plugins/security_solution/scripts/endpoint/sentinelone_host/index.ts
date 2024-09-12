@@ -8,7 +8,8 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
-import { fetchActiveSpace } from '../common/spaces';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ensureSpaceIdExists, fetchActiveSpace } from '../common/spaces';
 import {
   isFleetServerRunning,
   startFleetServer,
@@ -18,6 +19,7 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import {
   addSentinelOneIntegrationToAgentPolicy,
   DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+  enableFleetSpaceAwareness,
   enrollHostVmWithFleet,
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
@@ -126,6 +128,13 @@ const runCli: RunFn = async ({ log, flags }) => {
     apiKey,
   });
 
+  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    await ensureSpaceIdExists(kbnClient, spaceId, { log });
+    await enableFleetSpaceAwareness(kbnClient);
+  }
+
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
+
   const runningS1VMs = (
     await findVm(
       'multipass',
@@ -171,7 +180,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     : await getOrCreateDefaultAgentPolicy({
         kbnClient,
         log,
-        policyName: DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+        policyName: `${DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME} - ${activeSpaceId}`,
       });
 
   const { namespace: integrationPolicyNamespace } = await addSentinelOneIntegrationToAgentPolicy({
@@ -187,8 +196,6 @@ const runCli: RunFn = async ({ log, flags }) => {
   // If no agents are running against the given Agent policy for agentless integrations, then add one now
   if (!agents) {
     log.info(`Creating VM and enrolling it with Fleet using policy [${agentPolicyName}]`);
-
-    const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
     agentPolicyVm = await createVm({
       type: 'multipass',
