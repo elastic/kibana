@@ -8,8 +8,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { getFieldValue } from '@kbn/discover-utils';
-import type { RowControlColumn } from '@kbn/unified-data-table';
+import { getFieldValue, RowControlColumn } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -88,6 +87,7 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
                   label={`Example ${iconType}`}
+                  tooltipContent={`Example ${iconType}`}
                   iconType={iconType}
                   onClick={() => {
                     alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
@@ -115,6 +115,27 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       ],
       rowHeight: 5,
     }),
+    getAdditionalCellActions: (prev) => () =>
+      [
+        ...prev(),
+        {
+          id: 'example-data-source-action',
+          getDisplayName: () => 'Example data source action',
+          getIconType: () => 'plus',
+          execute: () => {
+            alert('Example data source action executed');
+          },
+        },
+        {
+          id: 'another-example-data-source-action',
+          getDisplayName: () => 'Another example data source action',
+          getIconType: () => 'minus',
+          execute: () => {
+            alert('Another example data source action executed');
+          },
+          isCompatible: ({ field }) => field.name !== 'message',
+        },
+      ],
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
