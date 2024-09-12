@@ -5,6 +5,11 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
+import type {
+  ResponseActionAgentType,
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
@@ -250,10 +255,145 @@ const getUploadStatus = (stats?: BulkUpsertAssetCriticalityRecordsResponse['stat
   return 'fail';
 };
 
+export const ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT: EventTypeOpts<{
+  responseActions: {
+    error: string;
+  };
+}> = {
+  eventType: 'endpoint_response_action_sent_error',
+  schema: {
+    responseActions: {
+      properties: {
+        error: {
+          type: 'text',
+          _meta: {
+            description: 'The error message for the response action',
+          },
+        },
+      },
+    },
+  },
+};
+
+export const ENDPOINT_RESPONSE_ACTION_SENT_EVENT: EventTypeOpts<{
+  responseActions: {
+    actionId: string;
+    agentType: ResponseActionAgentType;
+    command: ResponseActionsApiCommandNames;
+    endpointIds: string[];
+    isAutomated: boolean;
+  };
+}> = {
+  eventType: 'endpoint_response_action_sent',
+  schema: {
+    responseActions: {
+      properties: {
+        actionId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The ID of the action that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        agentType: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of agent that the action was sent to',
+            optional: false,
+          },
+        },
+        command: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        endpointIds: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description: 'The endpoint IDs that the action were sent to',
+              optional: false,
+            },
+          },
+        },
+        isAutomated: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the action was auto-initiated by a pre-configured rule',
+            optional: false,
+          },
+        },
+      },
+    },
+  },
+};
+
+export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
+  responseActions: {
+    actionId: string;
+    agentType: ResponseActionAgentType;
+    actionStatus: ResponseActionStatus;
+    command: ResponseActionsApiCommandNames;
+    endpointIds: string[];
+  };
+}> = {
+  eventType: 'endpoint_response_action_status_change_event',
+  schema: {
+    responseActions: {
+      properties: {
+        actionId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The ID of the action that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        agentType: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of agent that the action was sent to',
+            optional: false,
+          },
+        },
+        actionStatus: {
+          type: 'keyword',
+          _meta: {
+            description: 'The status of the action',
+            optional: false,
+          },
+        },
+        command: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command that was sent to the endpoint',
+            optional: false,
+          },
+        },
+        endpointIds: {
+          type: 'array',
+          items: {
+            type: 'keyword',
+            _meta: {
+              description: 'The endpoint IDs that the action were sent to',
+              optional: false,
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
 ];

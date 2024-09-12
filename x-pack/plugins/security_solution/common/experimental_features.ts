@@ -173,6 +173,11 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enabled collection Response actions telemetry
+   */
+  responseActionsTelemetryEnabled: false,
+
+  /**
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,

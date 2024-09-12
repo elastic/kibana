@@ -6,6 +6,7 @@
  */
 
 import type {
+  AnalyticsServiceSetup,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
@@ -58,6 +59,7 @@ export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
   loggerFactory: LoggerFactory;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -338,5 +340,12 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.createFleetActionsClient('endpoint');
+  }
+
+  public getTelemetryService(): AnalyticsServiceSetup {
+    if (!this.setupDependencies?.telemetry) {
+      throw new EndpointAppContentServicesNotSetUpError();
+    }
+    return this.setupDependencies.telemetry;
   }
 }

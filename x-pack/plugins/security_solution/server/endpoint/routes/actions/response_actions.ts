@@ -8,6 +8,10 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+} from '../../../lib/telemetry/event_based/events';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
@@ -406,6 +410,22 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       const { action: actionId, ...data } = action;
 
+      if (endpointContext.experimentalFeatures.responseActionsTelemetryEnabled) {
+        const telemetryEvent = {
+          responseActions: {
+            actionId,
+            agentType: data.agentType,
+            command: data.command,
+            endpointIds: data.agents,
+            isAutomated: data.createdBy === 'unknown',
+          },
+        };
+
+        endpointContext.service
+          .getTelemetryService()
+          .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, telemetryEvent);
+      }
+
       // `action` is deprecated, but still returned in order to ensure backwards compatibility
       const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
         ? {
@@ -420,6 +440,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         },
       });
     } catch (err) {
+      if (endpointContext.experimentalFeatures.responseActionsTelemetryEnabled) {
+        endpointContext.service
+          .getTelemetryService()
+          .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, { error: err });
+      }
+
       return errorHandler(logger, res, err);
     }
   };
