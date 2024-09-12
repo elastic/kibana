@@ -58,15 +58,14 @@ FROM employees
 
 ## Limitations
 
-The LIMIT command restricts the number of rows returned by a query. However, regardless of the value set for the LIMIT command, a query will not return more than 10,000 rows.
+There is no way to achieve pagination with LIMIT, there is no offset parameter.
 
-This limitation only applies to the number of rows retrieved by the query. The query and any aggregations will still run on the full dataset.
+A query will never return more than 10,000 rows. This limitation only applies to the number of rows retrieved by the query. The query and any aggregations will still run on the full dataset.
 
 To work around this limitation:
 
 - Reduce the size of the result set by modifying the query to only return relevant data. This can be achieved by using the WHERE command to select a smaller subset of the data.
 - Shift any post-query processing to the query itself. The ES|QL STATS ... BY command can be used to aggregate data within the query.
-
 
 ## Notes
 
