@@ -15,7 +15,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
   registerAssetCriticalityRoutes(routeDeps);
   registerRiskScoreRoutes(routeDeps);
   registerRiskEngineRoutes(routeDeps);
-  if (routeDeps.config.experimentalFeatures.entityStoreEngineRoutesEnabled) {
+  if (routeDeps.config.experimentalFeatures.entityStoreEnabled) {
     registerEntityStoreRoutes(routeDeps);
   }
 };

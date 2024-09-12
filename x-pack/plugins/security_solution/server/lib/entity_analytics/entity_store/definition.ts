@@ -36,7 +36,7 @@ export const USER_ENTITY_DEFINITION: EntityDefinition = entityDefinitionSchema.p
   id: 'ea_user_entity_store',
   name: 'EA User Store',
   type: 'user',
-  indexPatterns: ['log*'],
+  indexPatterns: ENTITY_STORE_DEFAULT_SOURCE_INDICES,
   identityFields: ['user.name'],
   displayNameTemplate: '{{user.name}}',
   metadata: [

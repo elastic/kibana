@@ -227,7 +227,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new Entity Store engine routes
    */
-  entityStoreEngineRoutesEnabled: false,
+  entityStoreEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
