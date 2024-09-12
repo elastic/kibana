@@ -85,6 +85,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: { application },
   } = useKibana();
+  const rulesResponseActionsTemporaryFlagEnabled = useIsExperimentalFeatureEnabled(
+    'rulesResponseActionsTemporaryFlagEnabled'
+  );
   const displayActionsOptions = useMemo(
     () => (
       <>
@@ -110,7 +113,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       );
     }
     return null;
-  }, [ruleType]);
+  }, [ruleType, rulesResponseActionsTemporaryFlagEnabled]);
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {
     return application.capabilities.actions.show ? (
@@ -154,9 +157,6 @@ const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
   const {
     services: { triggersActionsUi },
   } = useKibana();
-  const rulesResponseActionsTemporaryFlagEnabled = useIsExperimentalFeatureEnabled(
-    'rulesResponseActionsTemporaryFlagEnabled'
-  );
 
   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry as ActionTypeRegistryContract;
 
