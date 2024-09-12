@@ -12,13 +12,7 @@ import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PageApi } from '../types';
 
-export function AddButton({
-  pageApi,
-  uiActions,
-}: {
-  pageApi: PageApi;
-  uiActions: UiActionsStart;
-}) {
+export function AddButton({ pageApi, uiActions }: { pageApi: PageApi; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [items, setItems] = useState<ReactElement[]>([]);
 
