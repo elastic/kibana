@@ -12,14 +12,9 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
-        retry:
-          automatic:
-            - exit_status: "-1"
-              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:exceptions
         label: "Cypress MKI - Detection Engine - Exceptions"
@@ -31,14 +26,9 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
-        retry:
-          automatic:
-            - exit_status: "-1"
-              limit: 1
 
   - group: "API MKI - Detection Engine"
     key: api_test_detections_engine
@@ -51,7 +41,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -66,7 +55,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -81,7 +69,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -96,7 +83,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -111,7 +97,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -126,7 +111,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -141,7 +125,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -156,7 +139,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -171,7 +153,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -186,7 +167,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -201,7 +181,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -216,7 +195,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -231,7 +209,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -246,7 +223,6 @@ steps:
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
-          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
