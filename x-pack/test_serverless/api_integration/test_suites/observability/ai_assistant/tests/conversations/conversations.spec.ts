@@ -151,7 +151,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      it('returns the conversation', () => {
+      // TODO: we don't have a user.name in MKI but some numbers which we don't know in advance and cannot set.
+      it('returns the conversation', function () {
+        this.tags(['skipMKI']);
         expect(createResponse.body).to.eql({
           '@timestamp': createResponse.body['@timestamp'],
           conversation: {
@@ -165,7 +167,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           namespace: 'default',
           public: conversationCreate.public,
           user: {
-            name: 'elastic_admin', // TODO: serverless always uses the elastic_admin username to make the reqest
+            name: 'elastic_admin',
           },
         });
       });
