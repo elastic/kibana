@@ -96,7 +96,6 @@ function getCellTextContent(cell: Element) {
   // remove from the grid
   dropBySelector(cellCloned, '.euiIcon');
   dropBySelector(cellCloned, '.euiToken');
-  dropBySelector(cellCloned, '.euiToolTipAnchor');
   dropBySelector(cellCloned, 'svg');
 
   // Logs Explorer
