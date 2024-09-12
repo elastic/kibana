@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export enum AnalyticsEvents {
-  startPageOpened = 'start_page_opened',
-  startPageShowCodeClick = 'start_page_show_code',
-  startPageShowCreateIndexUIClick = 'start_page_show_create_index_ui',
-  startCreateIndexClick = 'start_create_index',
-}
+import { PLUGIN_ID } from '../../common';
+import { useKibana } from './use_kibana';
+
+export const useAssetBasePath = () => {
+  const { http } = useKibana().services;
+  return http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+};
