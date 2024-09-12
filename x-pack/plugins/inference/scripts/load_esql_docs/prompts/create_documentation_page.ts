@@ -58,4 +58,3 @@ export const createDocumentationPagePrompt: PromptTemplate<{
       `,
   };
 };
-
