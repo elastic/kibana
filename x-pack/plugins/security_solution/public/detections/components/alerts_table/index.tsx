@@ -292,6 +292,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       },
       dynamicRowHeight: isEventRenderedView,
       height: '600px',
+      initialPageSize: 20,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
@@ -352,11 +353,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   return (
     <div>
       {graphOverlay}
-      <FullWidthFlexGroupTable
-        style={{ height: '600px' }}
-        $visible={!graphEventId && graphOverlay == null}
-        gutterSize="none"
-      >
+      <FullWidthFlexGroupTable $visible={!graphEventId && graphOverlay == null} gutterSize="none">
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           <EuiDataGridContainer hideLastPage={false}>{AlertTable}</EuiDataGridContainer>
         </StatefulEventContext.Provider>
