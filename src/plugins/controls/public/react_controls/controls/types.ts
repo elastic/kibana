@@ -62,7 +62,6 @@ export type ControlApiInitialization<ControlApi extends DefaultControlApi = Defa
     'serializeState' | 'getTypeDisplayName' | 'clearSelections'
   >;
 
-// TODO: Move this to the Control plugin's setup contract
 export interface ControlFactory<
   State extends DefaultControlState = DefaultControlState,
   ControlApi extends DefaultControlApi = DefaultControlApi

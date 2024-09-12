@@ -29,11 +29,11 @@ import type {
   ControlGroupChainingSystem,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
+  ControlLabelPosition,
   ControlPanelsState,
-  ControlStyle,
   ParentIgnoreSettings,
 } from '../../../common';
-import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_STYLE } from '../../../common';
+import { CONTROL_GROUP_TYPE, DEFAULT_CONTROL_LABEL_POSITION } from '../../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
@@ -90,14 +90,11 @@ export const getControlGroupEmbeddableFactory = () => {
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
       );
-      const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
-        initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
+      const labelPosition$ = new BehaviorSubject<ControlLabelPosition>(
+        initialLabelPosition ?? DEFAULT_CONTROL_LABEL_POSITION
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
       const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
-
-      /** TODO: Handle loading; loading should be true if any child is loading */
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
       const unsavedChanges = initializeControlGroupUnsavedChanges(
         selectionsManager.applySelections,
@@ -118,7 +115,10 @@ export const getControlGroupEmbeddableFactory = () => {
             (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
             fastIsEqual,
           ],
-          labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
+          labelPosition: [
+            labelPosition$,
+            (next: ControlLabelPosition) => labelPosition$.next(next),
+          ],
         },
         controlsManager.snapshotControlsRuntimeState,
         controlsManager.resetControlsUnsavedChanges,
@@ -153,7 +153,6 @@ export const getControlGroupEmbeddableFactory = () => {
             initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
           };
         },
-        dataLoading: dataLoading$,
         onEdit: async () => {
           openEditControlGroupFlyout(api, {
             chainingSystem: chainingSystem$,
@@ -192,7 +191,7 @@ export const getControlGroupEmbeddableFactory = () => {
           return {
             rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
+              controlStyle: labelPosition$.getValue(),
               showApplySelections: !autoApplySelections$.getValue(),
               ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
               panelsJSON,
@@ -258,8 +257,7 @@ export const getControlGroupEmbeddableFactory = () => {
               try {
                 const { allowExpensiveQueries } = await coreServices.http.get<{
                   allowExpensiveQueries: boolean;
-                  // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
-                }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+                }>('/internal/controls/getExpensiveQueriesSetting', {
                   version: '1',
                 });
                 if (!allowExpensiveQueries) {
