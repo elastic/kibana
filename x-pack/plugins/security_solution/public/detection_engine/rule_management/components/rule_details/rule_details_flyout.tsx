@@ -196,7 +196,7 @@ export const RuleDetailsFlyout = ({
       paddingSize="l"
       data-test-subj={dataTestSubj}
       aria-labelledby={prebuiltRulesFlyoutTitleId}
-      ownFocus={false}
+      ownFocus
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">

@@ -1104,8 +1104,10 @@ describe(
             .contains('"name": "Outdated rule 1"')
             .should('be.visible');
 
-          /* Select another rule without closing the preview for the current rule */
+          closeRulePreview();
+
           openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.JSON_VIEW);
 
           /* Make sure the JSON diff is displayed for the newly selected rule */
           cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
@@ -1175,36 +1177,6 @@ describe(
           cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
           cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
           cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
-        });
-
-        it('User can switch between rules upgrades without closing flyout', () => {
-          clickRuleUpdatesTab();
-
-          openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
-          assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
-
-          /* Version should be the first field in the order */
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
-
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
-
-          /* Select another rule without closing the preview for the current rule */
-          openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
-
-          /* Make sure the per-field diff is displayed for the newly selected rule */
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 2').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 2').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Outdated rule 1').should('not.exist');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Updated rule 1').should('not.exist');
-
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
         });
 
         it('User can see changes when updated rule is a different rule type', () => {
