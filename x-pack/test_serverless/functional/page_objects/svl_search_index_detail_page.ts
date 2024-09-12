@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   return {
     async expectToBeIndexDetailPage() {
@@ -61,7 +60,7 @@ export function SvlSearchIndexDetailPageProvider({ getService }: FtrProviderCont
 
     async expectQuickStatsAIMappingsToHaveVectorFields() {
       const quickStatsDocumentElem = await testSubjects.find('QuickStatsAIMappings');
-      quickStatsDocumentElem.click();
+      await quickStatsDocumentElem.click();
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('AI Search\n1 Field');
       await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
     },
