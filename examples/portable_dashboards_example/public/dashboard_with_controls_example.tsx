@@ -12,8 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import {
   AwaitingDashboardAPI,
   DashboardRenderer,
@@ -64,16 +63,15 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
-            const builder = controlGroupInputBuilder;
-            const controlGroupInput = getDefaultControlGroupInput();
-            await builder.addDataControlFromField(controlGroupInput, {
+            const controlGroupState = {};
+            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
               dataViewId: dataView.id ?? '',
               title: 'Destintion country',
               fieldName: 'geo.dest',
               width: 'medium',
               grow: false,
             });
-            await builder.addDataControlFromField(controlGroupInput, {
+            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
               dataViewId: dataView.id ?? '',
               fieldName: 'bytes',
               width: 'medium',
@@ -86,7 +84,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
-                controlGroupInput,
+                controlGroupState,
               }),
             };
           }}

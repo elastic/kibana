@@ -5,44 +5,51 @@
  * 2.0.
  */
 
+import { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
 import { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 
 export const getInfraContainerHref = (
-  summary: MonitorSummary,
-  basePath: string
+  { state }: MonitorSummary,
+  locator?: AssetDetailsLocator
 ): string | undefined => {
-  const getHref = (value: string | string[] | undefined) => {
-    if (!value) {
-      return undefined;
-    }
-    const ret = !Array.isArray(value) ? value : value[0];
-    return addBasePath(
-      basePath,
-      `/app/metrics/link-to/container-detail/${encodeURIComponent(ret)}`
-    );
-  };
-  return buildHref(summary.state.summaryPings || [], (ping: Ping) => ping?.container?.id, getHref);
+  if (!locator) {
+    return undefined;
+  }
+
+  const pings = Array.isArray(state.summaryPings) ? state.summaryPings : [state.summaryPings];
+
+  // Pick the first container id if one is available
+  const containerId = pings[0]?.container?.id;
+
+  return containerId
+    ? locator.getRedirectUrl({
+        assetType: 'container',
+        assetId: containerId,
+      })
+    : undefined;
 };
 
 export const getInfraKubernetesHref = (
-  summary: MonitorSummary,
-  basePath: string
+  { state }: MonitorSummary,
+  locator?: AssetDetailsLocator
 ): string | undefined => {
-  const getHref = (value: string | string[] | undefined) => {
-    if (!value) {
-      return undefined;
-    }
-    const ret = !Array.isArray(value) ? value : value[0];
-    return addBasePath(basePath, `/app/metrics/link-to/pod-detail/${encodeURIComponent(ret)}`);
-  };
+  if (!locator) {
+    return undefined;
+  }
 
-  return buildHref(
-    summary.state.summaryPings || [],
-    (ping: Ping) => ping?.kubernetes?.pod?.uid,
-    getHref
-  );
+  const pings = Array.isArray(state.summaryPings) ? state.summaryPings : [state.summaryPings];
+
+  // Pick the first pod id if one is available
+  const podId = pings[0]?.kubernetes?.pod?.uid;
+
+  return podId
+    ? locator.getRedirectUrl({
+        assetType: 'pod',
+        assetId: podId,
+      })
+    : undefined;
 };
 
 export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {

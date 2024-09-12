@@ -151,7 +151,7 @@ export const ThresholdExpression = ({
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
                     isInvalid={Number(errors[`threshold${i}`]?.length) > 0 || isNil(threshold[i])}
-                    error={errors[`threshold${i}`]}
+                    error={errors[`threshold${i}`] as string[]}
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
