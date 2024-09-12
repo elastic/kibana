@@ -8,7 +8,13 @@
 :frontmatter-tags-content-type: [how-to]
 :frontmatter-tags-user-goals: [configure]
 
-TheHive connector uses the https://docs.strangebee.com/thehive/api-docs/[TheHive (v1) REST API] to create cases and alerts.
+TheHive connector uses the https://docs.strangebee.com/thehive/api-docs/[TheHive (v1) REST API] to create cases and alerts. added:[8.16.0]
+
+[NOTE]
+====
+If you use this connector with <<cases,cases>>, the status values differ in {kib} and TheHive.
+The status values are not synchronized when you update a case.
+====
 
 [float]
 [[define-thehive-ui]]
@@ -28,9 +34,9 @@ image::management/connectors/images/thehive-connector.png[TheHive connector]
 TheHive connectors have the following configuration properties:
 
 Name::         The name of the connector.
-Organisation:: Organisation name in which user intends to create cases or alerts.
-URL::          TheHive instance URL.
-API Key::      TheHive API key for authentication.
+Organisation:: The organisation in TheHive that will contain the cases or alerts.
+URL::          The instance URL in TheHive.
+API key::      The API key for authentication in TheHive.
 
 [float]
 [[thehive-action-configuration]]
@@ -49,28 +55,16 @@ image::management/connectors/images/thehive-params-alert-test.png[TheHive alert 
 
 TheHive actions have the following configuration properties.
 
-Event Action:: Action that will be performed in thehive. Supported actions are Create Case (default) and Create Alert.
-Title:: Title of the incident.
+Event action:: The action that will be performed in TheHive: create a case or an alert.
+Title:: The title of the incident.
 Description:: The details about the incident.
-Severity:: Severity of the incident. This can be one of `LOW`, `MEDIUM`(default), `HIGH` or `CRITICAL`.
-TLP:: Traffic Light Protocol designation for the incident. This can be one of `CLEAR`, `GREEN`, `AMBER`(default), `AMBER+STRICT` or `RED`.
-Tags:: The keywords or tags about the incident.
-Additional comments:: Additional information about the Case.
-Type:: Type of the Alert.
-Source:: Source of the Alert.
-Source Reference:: Source reference of the Alert.
-
-[float]
-[[thehive-features]]
-=== Features
-
-1. Rule base creation of alerts and cases.
-2. Create case, Update case.
-
-[NOTE]
-====
-* For update case, status of the case is not sync with the kibana case.
-====
+Severity:: The severity of the incident: `LOW`, `MEDIUM`, `HIGH` or `CRITICAL`.
+TLP:: The traffic light protocol designation for the incident: `CLEAR`, `GREEN`, `AMBER`, `AMBER+STRICT` or `RED`.
+Tags:: The keywords or tags for the incident.
+Additional comments:: Additional information about the incident.
+Type:: The type of alert.
+Source:: The source of the alert.
+Source reference:: A source reference for the alert.
 
 [float]
 [[thehive-connector-networking-configuration]]
@@ -82,7 +76,7 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 [[configure-thehive]]
 === Configure TheHive
 
-To generate an API Key in TheHive:
+To generate an API key in TheHive:
 
 1. Log in to your TheHive instance.
 2. Open profile tab and select the settings.
