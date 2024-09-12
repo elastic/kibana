@@ -12,6 +12,8 @@ import {
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
+  selectIsolateAndSaveWithoutEnabling,
+  fillUpNewEsqlRule,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
@@ -28,6 +30,7 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'automatedProcessActionsEnabled',
+            'rulesResponseActionsTemporaryFlagEnabled',
           ])}`,
         ],
       },
@@ -202,23 +205,22 @@ describe(
       });
     });
 
-    // TODO: uncomment the test after another serverless release - intermediate release
-    // describe('User should be able to add response action to ESQL rule', () => {
-    //   const [ruleName, ruleDescription] = generateRandomStringName(2);
-    //
-    //   beforeEach(() => {
-    //     login(ROLE.soc_manager);
-    //   });
-    //
-    //   it('create and save endpoint response action inside of a rule', () => {
-    //     const query = 'FROM * METADATA _index, _id {backspace}{enter}';
-    //     fillUpNewEsqlRule(ruleName, ruleDescription, query);
-    //     addEndpointResponseAction();
-    //     focusAndOpenCommandDropdown();
-    //     validateAvailableCommands();
-    //     selectIsolateAndSaveWithoutEnabling(ruleName);
-    //   });
-    // });
+    describe('User should be able to add response action to ESQL rule', () => {
+      const [ruleName, ruleDescription] = generateRandomStringName(2);
+
+      beforeEach(() => {
+        login(ROLE.soc_manager);
+      });
+
+      it('create and save endpoint response action inside of a rule', () => {
+        const query = 'FROM * METADATA _index, _id {backspace}{enter}';
+        fillUpNewEsqlRule(ruleName, ruleDescription, query);
+        addEndpointResponseAction();
+        focusAndOpenCommandDropdown();
+        validateAvailableCommands();
+        selectIsolateAndSaveWithoutEnabling(ruleName);
+      });
+    });
 
     describe('User should not see endpoint action when no rbac', () => {
       const [ruleName, ruleDescription] = generateRandomStringName(2);

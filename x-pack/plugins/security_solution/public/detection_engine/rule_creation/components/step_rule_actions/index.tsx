@@ -16,6 +16,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { shouldShowResponseActions } from '../../../../../common/detection_engine/utils';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
@@ -101,7 +102,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [actionMessageParams, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
-    if (shouldShowResponseActions(ruleType)) {
+    if (shouldShowResponseActions(ruleType, rulesResponseActionsTemporaryFlagEnabled)) {
       return (
         <UseArray path="responseActions" initialNumberOfItems={0}>
           {ResponseActionsForm}
@@ -153,6 +154,9 @@ const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
   const {
     services: { triggersActionsUi },
   } = useKibana();
+  const rulesResponseActionsTemporaryFlagEnabled = useIsExperimentalFeatureEnabled(
+    'rulesResponseActionsTemporaryFlagEnabled'
+  );
 
   const actionTypeRegistry = triggersActionsUi.actionTypeRegistry as ActionTypeRegistryContract;
 
