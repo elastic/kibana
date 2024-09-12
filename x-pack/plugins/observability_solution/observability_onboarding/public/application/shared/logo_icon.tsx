@@ -34,7 +34,6 @@ export type SupportedLogo =
   | 'apache_tomcat'
   | 'firehose';
 
-
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [
     'aws',
