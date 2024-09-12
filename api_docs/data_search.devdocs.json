@@ -7004,7 +7004,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "<Record<string, any>>[]; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7028,7 +7028,7 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+                  "; removeField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -10410,6 +10410,14 @@
               {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/rule_type.test.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -33572,7 +33580,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -33596,7 +33604,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+          "; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",

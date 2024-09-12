@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
+
 import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -19,31 +21,33 @@ import {
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import {
-  apiPublishesDataViews,
   PublishesDataViews,
+  apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
+
+import { ControlStyle } from '../..';
 import {
-  ControlGroupChainingSystem,
   CONTROL_GROUP_TYPE,
+  ControlGroupChainingSystem,
   DEFAULT_CONTROL_STYLE,
+  ParentIgnoreSettings,
 } from '../../../common';
+import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup } from './serialization_utils';
+import { initSelectionsManager } from './selections_manager';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelsState,
 } from './types';
-import { ControlGroup } from './components/control_group';
-import { initSelectionsManager } from './selections_manager';
-import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
-import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { deserializeControlGroup } from './utils/serialization_utils';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 
@@ -97,6 +101,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
+      const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -130,9 +135,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
-        getLastSavedControlState: (controlUuid: string) => {
-          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
-        },
+        disabledActionIds: disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
@@ -149,8 +152,13 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections$,
         allowExpensiveQueries$,
         snapshotRuntimeState: () => {
-          // TODO: Remove this if it ends up being unnecessary
-          return {} as unknown as ControlGroupRuntimeState;
+          return {
+            chainingSystem: chainingSystem$.getValue(),
+            labelPosition: labelPosition$.getValue(),
+            autoApplySelections: autoApplySelections$.getValue(),
+            ignoreParentSettings: ignoreParentSettings$.getValue(),
+            initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
+          };
         },
         dataLoading: dataLoading$,
         onEdit: async () => {
@@ -166,15 +174,12 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
         },
         isEditingEnabled: () => true,
-        getTypeDisplayName: () =>
-          i18n.translate('controls.controlGroup.displayName', {
-            defaultMessage: 'Controls',
-          }),
-        openAddDataControlFlyout: (options) => {
+        openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
             ? parentApi.dataViews.value?.[0]?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
+
           openDataControlEditor({
             initialState: {
               ...newControlState,
@@ -184,14 +189,11 @@ export const getControlGroupEmbeddableFactory = (services: {
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: options?.controlInputTransform
-                  ? options.controlInputTransform(
-                      initialState as Partial<ControlGroupSerializedState>,
-                      controlType
-                    )
+                initialState: settings?.controlStateTransform
+                  ? settings.controlStateTransform(initialState, controlType)
                   : initialState,
               });
-              options?.onSave?.();
+              settings?.onSave?.();
             },
             controlGroupApi: api,
             services,
@@ -216,6 +218,20 @@ export const getControlGroupEmbeddableFactory = (services: {
           ? parentApi.saveNotification$
           : undefined,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
+
+        /** Public getters */
+        getTypeDisplayName: () =>
+          i18n.translate('controls.controlGroup.displayName', {
+            defaultMessage: 'Controls',
+          }),
+        getEditorConfig: () => initialRuntimeState.editorConfig,
+        getLastSavedControlState: (controlUuid: string) => {
+          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
+        },
+
+        /** Public setters */
+        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
+        setChainingSystem: (newChainingSystem) => chainingSystem$.next(newChainingSystem),
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
@@ -240,22 +256,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           })
         : undefined;
 
-      /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
-      try {
-        const { allowExpensiveQueries } = await services.core.http.get<{
-          allowExpensiveQueries: boolean;
-          // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
-        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
-          version: '1',
-        });
-        if (!allowExpensiveQueries) {
-          // only set if this returns false, since it defaults to true
-          allowExpensiveQueries$.next(allowExpensiveQueries);
-        }
-      } catch {
-        // do nothing - default to true on error (which it was initialized to)
-      }
-
       return {
         api,
         Component: () => {
@@ -265,6 +265,25 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
 
           useEffect(() => {
+            /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
+            const fetchAllowExpensiveQueries = async () => {
+              try {
+                const { allowExpensiveQueries } = await services.core.http.get<{
+                  allowExpensiveQueries: boolean;
+                  // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
+                }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+                  version: '1',
+                });
+                if (!allowExpensiveQueries) {
+                  // only set if this returns false, since it defaults to true
+                  allowExpensiveQueries$.next(allowExpensiveQueries);
+                }
+              } catch {
+                // do nothing - default to true on error (which it was initialized to)
+              }
+            };
+            fetchAllowExpensiveQueries(); // no need to await - don't want to block anything waiting for this
+
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();

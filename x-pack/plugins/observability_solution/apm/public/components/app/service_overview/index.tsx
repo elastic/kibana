@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { SignalTypes } from '../../../../common/entities/types';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -18,6 +17,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { isApmSignal, isLogsSignal } from '../../../utils/get_signal_type';
 import { ApmOverview } from './apm_overview';
 import { LogsOverview } from './logs_overview';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -26,7 +26,7 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
-  const { serviceName, serviceEntitySummary } = useApmServiceContext();
+  const { serviceName, serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
 
   const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
@@ -49,16 +49,24 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const hasLogsSignal =
-    serviceEntitySummary?.signalTypes &&
-    isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+  const hasSignal =
+    serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
 
-  const hasApmSignal =
-    serviceEntitySummary?.signalTypes &&
-    isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
 
-  // Shows APM overview when entity has APM signal or when Entity centric is not enabled
-  const showApmOverview = isEntityCentricExperienceViewEnabled === false || hasApmSignal;
+  const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
+
+  // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
+  const showApmOverview =
+    isEntityCentricExperienceViewEnabled === false || hasApmSignal || !hasSignal;
+
+  if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EuiLoadingLogo logo="logoObservability" size="l" />
+      </div>
+    );
+  }
 
   return (
     <AnnotationsContextProvider
