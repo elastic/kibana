@@ -11,7 +11,7 @@ import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-as
 
 import { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 
-interface Props {
+export interface UseAnonymizationListUpdateProps {
   anonymizationFields: FindAnonymizationFieldsResponse;
   anonymizationFieldsBulkActions: PerformAnonymizationFieldsBulkActionRequestBody;
   setAnonymizationFieldsBulkActions: React.Dispatch<
@@ -27,7 +27,7 @@ export const useAnonymizationListUpdate = ({
   anonymizationFieldsBulkActions,
   setAnonymizationFieldsBulkActions,
   setUpdatedAnonymizationData,
-}: Props) => {
+}: UseAnonymizationListUpdateProps) => {
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
       const updatedFieldsKeys = updates.map((u) => u.field);

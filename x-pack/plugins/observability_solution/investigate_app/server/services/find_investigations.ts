@@ -11,6 +11,7 @@ import {
   findInvestigationsResponseSchema,
 } from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
+import { InvestigationStatus } from '../models/investigation';
 
 export async function findInvestigations(
   params: FindInvestigationsParams,
@@ -32,7 +33,9 @@ function toPagination(params: FindInvestigationsParams) {
 
 function toFilter(params: FindInvestigationsParams) {
   if (params.alertId) {
-    return `investigation.attributes.origin.id:(${params.alertId}) AND investigation.attributes.status: ongoing`;
+    const activeStatus: InvestigationStatus = 'active';
+    const triageStatus: InvestigationStatus = 'triage';
+    return `investigation.attributes.origin.id:(${params.alertId}) AND (investigation.attributes.status: ${activeStatus} OR investigation.attributes.status: ${triageStatus})`;
   }
   return '';
 }

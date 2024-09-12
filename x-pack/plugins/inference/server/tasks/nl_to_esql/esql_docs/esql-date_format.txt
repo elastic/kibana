@@ -1,0 +1,17 @@
+## DATE_FORMAT
+
+The `DATE_FORMAT` function returns a string representation of a date in the provided format. If no format is specified, the default format `yyyy-MM-dd'T'HH:mm:ss.SSSZ` is used. If the date expression is null, the function returns null.
+
+### Examples
+
+```esql
+FROM employees
+| KEEP first_name, last_name, hire_date
+| EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
+```
+
+```esql
+FROM employees
+| KEEP first_name, last_name, hire_date
+| EVAL hired = DATE_FORMAT("yyyy/MM/dd", hire_date)
+```

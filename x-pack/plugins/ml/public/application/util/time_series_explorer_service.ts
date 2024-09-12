@@ -29,11 +29,11 @@ import {
   MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
-import type { MlApiServices } from '../services/ml_api_service';
+import type { MlApi } from '../services/ml_api_service';
 import { useMlResultsService, type MlResultsService } from '../services/results_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
-import { useMlApiContext, useMlKibana } from '../contexts/kibana';
+import { useMlApi, useMlKibana } from '../contexts/kibana';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -59,12 +59,12 @@ export interface FocusData {
 
 export function timeSeriesExplorerServiceFactory(
   uiSettings: IUiSettingsClient,
-  mlApiServices: MlApiServices,
+  mlApi: MlApi,
   mlResultsService: MlResultsService
 ) {
   const timeBuckets = timeBucketsServiceFactory(uiSettings);
-  const mlForecastService = forecastServiceFactory(mlApiServices);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
+  const mlForecastService = forecastServiceFactory(mlApi);
+  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApi);
 
   function getAutoZoomDuration(bucketSpan: Job['analysis_config']['bucket_span']) {
     // function getAutoZoomDuration(selectedJob: Job) {
@@ -511,7 +511,7 @@ export function timeSeriesExplorerServiceFactory(
         esFunctionToPlotIfMetric
       ),
       // Query 2 - load all the records across selected time range for the chart anomaly markers.
-      mlApiServices.results.getAnomalyRecords$(
+      mlApi.results.getAnomalyRecords$(
         [selectedJob.job_id],
         criteriaFields,
         0,
@@ -530,7 +530,7 @@ export function timeSeriesExplorerServiceFactory(
         MAX_SCHEDULED_EVENTS
       ),
       // Query 4 - load any annotations for the selected job.
-      mlApiServices.annotations
+      mlApi.annotations
         .getAnnotations$({
           jobIds: [selectedJob.job_id],
           earliestMs: searchBounds.min.valueOf(),
@@ -647,10 +647,10 @@ export function timeSeriesExplorerServiceFactory(
 
 export function useTimeSeriesExplorerService(): TimeSeriesExplorerService {
   const { services } = useMlKibana();
-  const mlApiServices = useMlApiContext();
+  const mlApi = useMlApi();
   const mlResultsService = useMlResultsService();
   return useMemo(
-    () => timeSeriesExplorerServiceFactory(services.uiSettings, mlApiServices, mlResultsService),
+    () => timeSeriesExplorerServiceFactory(services.uiSettings, mlApi, mlResultsService),
     // initialize only once
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

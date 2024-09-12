@@ -95,44 +95,62 @@ class AgentlessAgentService {
       requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
 
-    logger.debug(
-      `Creating agentless agent with request config ${JSON.stringify({
-        ...requestConfig,
-        httpsAgent: {
-          ...requestConfig.httpsAgent,
-          options: {
-            ...requestConfig.httpsAgent.options,
-            cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
-            key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-            ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
-          },
+    const requestConfigDebug = JSON.stringify({
+      ...requestConfig,
+      httpsAgent: {
+        ...requestConfig.httpsAgent,
+        options: {
+          ...requestConfig.httpsAgent.options,
+          cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
+          key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
         },
-      })}`
-    );
+      },
+    });
+
+    logger.debug(`Creating agentless agent with request config ${requestConfigDebug}`);
 
     const response = await axios<AgentlessApiResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
-          logger.error(`Creating agentless failed with an error ${error}`);
+          logger.error(
+            `Creating agentless failed with an error ${error}  ${JSON.stringify(
+              requestConfigDebug
+            )}`
+          );
           throw new AgentlessAgentCreateError(error.message);
         }
+
+        const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
+
         if (error.response) {
+          // The request was made and the server responded with a status code and error data
           logger.error(
-            `Creating agentless failed with a response status code that falls out of the range of 2xx: ${error.response.status} ${error.response.statusText} ${requestConfig.data}`
+            `Creating agentless failed because the Agentless API responding with a status code that falls out of the range of 2xx: ${JSON.stringify(
+              error.response.status
+            )}} ${JSON.stringify(error.response.data)}} ${JSON.stringify(requestConfigDebug)}`
           );
           throw new AgentlessAgentCreateError(
             `the Agentless API could not create the agentless agent`
           );
         } else if (error.request) {
+          // The request was made but no response was received
           logger.error(
-            `Creating agentless failed to receive a response from the Agentless API ${JSON.stringify(
-              error.cause
+            `Creating agentless agent failed while sending the request to the Agentless API: ${errorLogCodeCause} ${JSON.stringify(
+              requestConfigDebug
             )}`
           );
           throw new AgentlessAgentCreateError(`no response received from the Agentless API`);
         } else {
-          logger.error(`Creating agentless failed to create the request ${error.cause}`);
-          throw new AgentlessAgentCreateError('the request could not be created');
+          // Something happened in setting up the request that triggered an Error
+          logger.error(
+            `Creating agentless agent failed to be created ${errorLogCodeCause} ${JSON.stringify(
+              requestConfigDebug
+            )}`
+          );
+          throw new AgentlessAgentCreateError(
+            'the Agentless API could not create the agentless agent'
+          );
         }
       }
     );
@@ -140,6 +158,13 @@ class AgentlessAgentService {
     logger.debug(`Created an agentless agent ${response}`);
     return response;
   }
+
+  private convertCauseErrorsToString = (error: AxiosError) => {
+    if (error.cause instanceof AggregateError) {
+      return error.cause.errors.map((e: Error) => e.message);
+    }
+    return error.cause;
+  };
 
   private async getFleetUrlAndTokenForAgentlessAgent(
     esClient: ElasticsearchClient,

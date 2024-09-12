@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import userEvent from '@testing-library/user-event';
@@ -66,23 +67,23 @@ describe('LogsExplorerTabs', () => {
     expect(getLogsExplorerTab()).toHaveAttribute('href', ALL_DATASETS_LOCATOR_ID);
   });
 
-  it('should render Discover as the selected tab', () => {
+  it('should render Discover as the selected tab', async () => {
     const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'true');
-    userEvent.click(getDiscoverTab());
+    await userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).not.toHaveBeenCalled();
     expect(getLogsExplorerTab()).toHaveAttribute('aria-selected', 'false');
-    userEvent.click(getLogsExplorerTab());
+    await userEvent.click(getLogsExplorerTab());
     expect(mockLogsExplorerLocator.navigate).toHaveBeenCalledWith({});
   });
 
-  it('should render Log Explorer as the selected tab', () => {
+  it('should render Log Explorer as the selected tab', async () => {
     const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs('logs-explorer');
     expect(getLogsExplorerTab()).toHaveAttribute('aria-selected', 'true');
-    userEvent.click(getLogsExplorerTab());
+    await userEvent.click(getLogsExplorerTab());
     expect(mockLogsExplorerLocator.navigate).not.toHaveBeenCalled();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'false');
-    userEvent.click(getDiscoverTab());
+    await userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
   });
 });
