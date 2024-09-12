@@ -54,7 +54,7 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "deprecated": true,
-            "'x-discontinued'": "x.y.z",
+            "x-discontinued": "x.y.z",
           },
           "path": "/test/{id}",
         },
