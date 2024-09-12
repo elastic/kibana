@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const browser = getService('browser');
 
   describe('Listing of Reports', function () {
     const kbnArchive =
@@ -83,70 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Displays types of report jobs', async () => {
       const list = await pageObjects.reporting.getManagementList();
-      expectSnapshot(list).toMatchInline(`
-        Array [
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:47 PM",
-            "report": "Discover search [2021-07-19T11:47:35.995-07:00]",
-            "status": "Done",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:46 PM",
-            "report": "Discover search [2021-07-19T11:46:00.132-07:00]",
-            "status": "Done, warnings detected",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:44 PM",
-            "report": "Discover search [2021-07-19T11:44:48.670-07:00]",
-            "status": "Done, warnings detected",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PM",
-            "report": "[Flights] Global Flight Dashboard",
-            "status": "Pending",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PM",
-            "report": "[Flights] Global Flight Dashboard",
-            "status": "Failed",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PM",
-            "report": "[Flights] Global Flight Dashboard",
-            "status": "Done, warnings detected",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PM",
-            "report": "[Flights] Global Flight Dashboard",
-            "status": "Done",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PM",
-            "report": "[Flights] Global Flight Dashboard",
-            "status": "Done",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 02:41 PM",
-            "report": "[Flights] Global Flight Dashboard",
-            "status": "Failed",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2020-04-21 @ 07:01 PM",
-            "report": "[Logs] File Type Scatter Plot",
-            "status": "Done",
-          },
-        ]
-      `);
+      expectSnapshot(list).toMatch();
     });
 
     it('Exposes an action to see the ES query in console', async () => {
@@ -167,10 +105,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.waitUntilUrlIncludes('dev_tools#/console');
 
       await retry.try(async () => {
-        const actualRequest = await pageObjects.console.getEditorText();
+        // Getting the text of the console directly will only return the visible
+        // text, not the full content so this test could fail on smaller screens.
+        // So we need to copy the content to the clipboard and then read it from there.
+        await pageObjects.console.copyRequestsToClipboard();
+        const actualRequest = await browser.execute(() => navigator.clipboard.readText());
+
         expect(actualRequest.trim()).to.contain(
           '# These are the queries used when exporting data for\n# the CSV report'
         );
+
         expect(actualRequest).to.contain('POST /_search');
       });
     });

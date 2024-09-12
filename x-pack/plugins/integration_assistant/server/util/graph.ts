@@ -8,10 +8,15 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { CategorizationState, RelatedState } from '../types';
 import { testPipeline } from './pipeline';
 
-export async function handleValidatePipeline(
-  state: CategorizationState | RelatedState,
-  client: IScopedClusterClient
-): Promise<Partial<CategorizationState> | Partial<RelatedState>> {
+interface HandleValidateNodeParams {
+  state: CategorizationState | RelatedState;
+  client: IScopedClusterClient;
+}
+
+export async function handleValidatePipeline({
+  state,
+  client,
+}: HandleValidateNodeParams): Promise<Partial<CategorizationState> | Partial<RelatedState>> {
   const previousError = JSON.stringify(state.errors, null, 2);
   const results = await testPipeline(state.rawSamples, state.currentPipeline, client);
   return {

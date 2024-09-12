@@ -17,7 +17,19 @@
       "path": "x-pack/plugins/search_indices/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "searchIndices",
+          "id": "def-public.SearchIndicesPluginSetup.enabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "enabled",
+          "description": [],
+          "path": "x-pack/plugins/search_indices/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -75,7 +87,64 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "searchIndices",
+        "id": "def-common.IndicesStatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndicesStatusResponse",
+        "description": [],
+        "path": "x-pack/plugins/search_indices/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchIndices",
+            "id": "def-common.IndicesStatusResponse.indexNames",
+            "type": "Array",
+            "tags": [],
+            "label": "indexNames",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/search_indices/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchIndices",
+        "id": "def-common.UserStartPrivilegesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserStartPrivilegesResponse",
+        "description": [],
+        "path": "x-pack/plugins/search_indices/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchIndices",
+            "id": "def-common.UserStartPrivilegesResponse.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "{ canCreateApiKeys: boolean; canCreateIndex: boolean; }"
+            ],
+            "path": "x-pack/plugins/search_indices/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

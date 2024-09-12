@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -17,6 +18,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +36,20 @@ interface Props {
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: NotificationsSetup;
 }
+
+const styles = {
+  // Remove the default underline on hover for the context menu items since it
+  // will also be applied to the language selector button, and apply it only to
+  // the text in the context menu item.
+  button: css`
+    &:hover {
+      text-decoration: none !important;
+      .languageSelector {
+        text-decoration: underline;
+      }
+    }
+  `,
+};
 
 const DELAY_FOR_HIDING_SPINNER = 500;
 
@@ -186,10 +202,11 @@ export const ContextMenu = ({
         onCopyAsSubmit();
       }}
       icon="copyClipboard"
+      css={styles.button}
     >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" className="languageSelector">
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 tagName="span"

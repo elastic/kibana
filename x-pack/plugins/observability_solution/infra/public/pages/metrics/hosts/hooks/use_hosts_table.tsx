@@ -40,6 +40,7 @@ import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
+import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
 
 /**
  * Columns and items types
@@ -64,7 +65,20 @@ export type HostNodeRow = HostMetadata &
  * Helper functions
  */
 const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
-  return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
+  const defaultValue = value ?? 0;
+  return createInventoryMetricFormatter({ type })(defaultValue);
+};
+
+const buildMetricCell = (
+  value: number | null,
+  formatType: InfraAssetMetricType,
+  hasSystemMetrics?: boolean
+) => {
+  if (!hasSystemMetrics && value === null) {
+    return <AddDataTroubleshootingPopover />;
+  }
+
+  return formatMetric(formatType, value);
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
@@ -89,7 +103,7 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
       ...metrics.reduce(
         (acc, curr) => ({
           ...acc,
-          [curr.name]: curr.value ?? 0,
+          [curr.name]: curr.value,
         }),
         {} as HostMetrics
       ),
@@ -104,12 +118,15 @@ const isTitleColumn = (cell: HostNodeRow[keyof HostNodeRow]): cell is HostNodeRo
 };
 
 const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
-  if (typeof aValue === 'string' && typeof bValue === 'string') {
-    return direction === 'desc' ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
+  const a = aValue ?? -1;
+  const b = bValue ?? -1;
+
+  if (typeof a === 'string' && typeof b === 'string') {
+    return direction === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
   }
 
-  if (isNumber(aValue) && isNumber(bValue)) {
-    return direction === 'desc' ? bValue - aValue : aValue - bValue;
+  if (isNumber(a) && isNumber(b)) {
+    return direction === 'desc' ? b - a : a - b;
   }
 
   return 1;
@@ -358,7 +375,8 @@ export const useHostsTable = () => {
         field: 'cpuV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-cpuUsage',
-        render: (avg: number) => formatMetric('cpuV2', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'cpuV2', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -373,7 +391,8 @@ export const useHostsTable = () => {
         field: 'normalizedLoad1m',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-normalizedLoad1m',
-        render: (avg: number) => formatMetric('normalizedLoad1m', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'normalizedLoad1m', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -388,7 +407,8 @@ export const useHostsTable = () => {
         field: 'memory',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryUsage',
-        render: (avg: number) => formatMetric('memory', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'memory', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -403,7 +423,8 @@ export const useHostsTable = () => {
         field: 'memoryFree',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-memoryFree',
-        render: (avg: number) => formatMetric('memoryFree', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'memoryFree', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -418,7 +439,8 @@ export const useHostsTable = () => {
         field: 'diskSpaceUsage',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
-        render: (max: number) => formatMetric('diskSpaceUsage', max),
+        render: (max: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(max, 'diskSpaceUsage', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -433,7 +455,8 @@ export const useHostsTable = () => {
         field: 'rxV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
-        render: (avg: number) => formatMetric('rx', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'rx', hasSystemMetrics),
         align: 'right',
       },
       {
@@ -448,7 +471,8 @@ export const useHostsTable = () => {
         field: 'txV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
-        render: (avg: number) => formatMetric('tx', avg),
+        render: (avg: number, { hasSystemMetrics }: HostNodeRow) =>
+          buildMetricCell(avg, 'tx', hasSystemMetrics),
         align: 'right',
       },
     ],

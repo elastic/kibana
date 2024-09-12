@@ -17,7 +17,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -428,26 +427,22 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         shouldRerunAnalysis={shouldRerunAnalysis}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="columnCompressedSwitch">
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">{groupResultsMessage}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  data-test-subj={`aiopsLogRateAnalysisGroupSwitch${
-                    groupResults ? ' checked' : ''
-                  }`}
-                  buttonSize="s"
-                  isDisabled={disabledGroupResultsSwitch}
-                  legend="Smart grouping"
-                  options={toggleButtons}
-                  idSelected={toggleIdSelected}
-                  onChange={onGroupResultsToggle}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">{groupResultsMessage}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                data-test-subj={`aiopsLogRateAnalysisGroupSwitch${groupResults ? ' checked' : ''}`}
+                buttonSize="s"
+                isDisabled={disabledGroupResultsSwitch}
+                legend="Smart grouping"
+                options={toggleButtons}
+                idSelected={toggleIdSelected}
+                onChange={onGroupResultsToggle}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FieldFilterPopover

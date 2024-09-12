@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, Logger, IScopedClusterClient } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
@@ -27,6 +27,7 @@ import { TransformManager } from './transform_manager';
 export class ResetSLO {
   constructor(
     private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
@@ -50,7 +51,10 @@ export class ResetSLO {
 
     try {
       await retryTransientEsErrors(
-        () => this.esClient.ingest.putPipeline(getSLOPipelineTemplate(slo)),
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+            getSLOPipelineTemplate(slo)
+          ),
         { logger: this.logger }
       );
 
@@ -59,7 +63,7 @@ export class ResetSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.ingest.putPipeline(
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
             getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
           ),
         { logger: this.logger }
@@ -87,12 +91,12 @@ export class ResetSLO {
       await this.summaryTransformManager.uninstall(summaryTransformId);
       await this.transformManager.stop(rollupTransformId);
       await this.transformManager.uninstall(rollupTransformId);
-      await this.esClient.ingest.deletePipeline(
+      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       );
 
-      await this.esClient.ingest.deletePipeline(
+      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
         { id: getSLOPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       );

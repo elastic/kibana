@@ -82,7 +82,7 @@ export const PortContainer = styled.div`
   }
 `;
 
-interface ReputationLinkOverflowProps {
+export interface ReputationLinkOverflowProps {
   rowItems: ReputationLinkSetting[];
   render?: (item: ReputationLinkSetting) => React.ReactNode;
   overflowIndexStart?: number;

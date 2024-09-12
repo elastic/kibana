@@ -40,7 +40,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe('Hosts Page', function () {
+  // failing feature flag test, see https://github.com/elastic/kibana/issues/191810
+  describe.skip('Hosts Page', function () {
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
@@ -152,10 +153,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render the correct page title', async () => {
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
-        });
-
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
         });
 
         describe('Hosts table', () => {

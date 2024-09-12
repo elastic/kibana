@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
     <EuiPageTemplate.Header
       css={{
         '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' },
-        backgroundColor: euiTheme.colors.ghost,
+        backgroundColor: euiTheme.colors.emptyShade,
       }}
       paddingSize="s"
       data-test-subj="chat-playground-home-page"

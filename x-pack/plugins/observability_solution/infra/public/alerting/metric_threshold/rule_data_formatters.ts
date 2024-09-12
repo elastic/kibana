@@ -8,15 +8,19 @@
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import type { AssetDetailsLocatorParams } from '@kbn/observability-shared-plugin/common';
+import type {
+  AssetDetailsLocatorParams,
+  MetricsExplorerLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { castArray } from 'lodash';
-import { METRICS_EXPLORER_URL } from '../../../common/constants';
 import { getMetricsViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
 export const getRuleFormat = ({
   assetDetailsLocator,
+  metricsExplorerLocator,
 }: {
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+  metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
 }): ObservabilityRuleTypeFormatter => {
   return ({ fields }) => {
     const reason = fields[ALERT_REASON] ?? '-';
@@ -26,12 +30,13 @@ export const getRuleFormat = ({
       fields,
       groupBy: castArray<string>(parameters?.groupBy as string[] | string),
       assetDetailsLocator,
+      metricsExplorerLocator,
     });
 
     return {
       reason,
       link,
-      hasBasePath: link !== METRICS_EXPLORER_URL,
+      hasBasePath: true,
     };
   };
 };

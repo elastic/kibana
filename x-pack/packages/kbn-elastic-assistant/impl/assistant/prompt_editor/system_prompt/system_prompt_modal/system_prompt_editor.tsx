@@ -32,10 +32,7 @@ import { TEST_IDS } from '../../../constants';
 import { ConversationsBulkActions } from '../../../api';
 import { getSelectedConversations } from '../system_prompt_settings_management/utils';
 import { useSystemPromptEditor } from './use_system_prompt_editor';
-import {
-  getConversationApiConfig,
-  getFallbackDefaultSystemPrompt,
-} from '../../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../../use_conversation/helpers';
 
 interface Props {
   connectors: AIConnector[] | undefined;
@@ -186,7 +183,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       if (selectedSystemPrompt != null) {
         setConversationSettings((prev) =>
           keyBy(
-            'title',
+            'id',
             /*
              * updatedConversationWithPrompts calculates the present of prompt for
              * each conversation. Based on the values of selected conversation, it goes
@@ -228,9 +225,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
                     conversation: convo,
                     defaultConnector,
                   }).apiConfig,
-                  defaultSystemPromptId:
-                    getDefaultSystemPromptId(convo) ??
-                    getFallbackDefaultSystemPrompt({ allSystemPrompts: systemPromptSettings })?.id,
+                  defaultSystemPromptId: getDefaultSystemPromptId(convo),
                 },
               };
             }
@@ -292,7 +287,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   );
 
   const handleNewConversationDefaultChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const isChecked = e.target.checked;
       const defaultNewSystemPrompts = systemPromptSettings.filter(
         (p) => p.isNewConversationDefault

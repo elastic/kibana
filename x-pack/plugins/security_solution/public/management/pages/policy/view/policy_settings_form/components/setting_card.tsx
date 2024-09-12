@@ -127,7 +127,7 @@ export const SettingCard: FC<SettingCardProps> = memo(
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiShowFor sizes={['m', 'l', 'xl']}>
+          <EuiShowFor sizes={['m', 'l', 'xl', 'xxl']}>
             <EuiFlexItem grow={3}>
               <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
                 <EuiFlexItem grow={false} data-test-subj={getTestId('rightCornerContainer')}>

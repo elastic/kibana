@@ -15,6 +15,14 @@ import { useGetAgentPolicies } from '../../../../../hooks';
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 
 import { StepSelectHosts } from './step_select_hosts';
+import { useAllNonManagedAgentPolicies } from './components/use_policies';
+
+jest.mock('./components/use_policies', () => {
+  return {
+    ...jest.requireActual('./components/use_policies'),
+    useAllNonManagedAgentPolicies: jest.fn(),
+  };
+});
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -121,6 +129,9 @@ describe('StepSelectHosts', () => {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
 
     render();
 
@@ -140,6 +151,9 @@ describe('StepSelectHosts', () => {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
 
     render();
 
@@ -155,7 +169,7 @@ describe('StepSelectHosts', () => {
     ).toContain('Agent policy 1');
   });
 
-  it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', () => {
+  it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [
@@ -164,6 +178,10 @@ describe('StepSelectHosts', () => {
         ],
       },
     });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+      { id: '2', name: 'Agent policy 2', namespace: 'default' },
+    ]);
 
     render();
 
@@ -174,8 +192,9 @@ describe('StepSelectHosts', () => {
       fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
     });
 
-    waitFor(() => {
-      expect(renderResult.getByText('At least one agent policy is required.')).toBeInTheDocument();
+    await act(async () => {
+      const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
+      expect((select as any)?.value).toEqual('');
     });
   });
 });

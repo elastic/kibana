@@ -73,7 +73,7 @@ export const ArgumentFileSelector = memo<
     setIsPopoverOpen(false);
   }, [setIsPopoverOpen]);
 
-  const handleFileSelection: EuiFilePickerProps['onChange'] = useCallback(
+  const handleFileSelection = useCallback<NonNullable<EuiFilePickerProps['onChange']>>(
     (selectedFiles) => {
       // Get only the first file selected
       const file = selectedFiles?.item(0);
@@ -96,7 +96,7 @@ export const ArgumentFileSelector = memo<
         isOpen={state.isPopoverOpen}
         closePopover={handleClosePopover}
         anchorPosition="upCenter"
-        initialFocus={`#${filePickerUUID}`}
+        initialFocus={`[id="${filePickerUUID}"]`}
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>

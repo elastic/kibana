@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -18,7 +19,12 @@ import {
 import type { TimeRange } from '@kbn/es-query';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
-import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
+import {
+  buildMockDashboard,
+  getSampleDashboardInput,
+  getSampleDashboardPanel,
+  mockControlGroupApi,
+} from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from './dashboard_container';
 
@@ -170,6 +176,7 @@ test('searchSessionId propagates to children', async () => {
     undefined,
     { lastSavedInput: sampleInput }
   );
+  container?.setControlGroupApi(mockControlGroupApi);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -189,11 +196,10 @@ describe('getInheritedInput', () => {
   const dashboardTimeslice = [1688061910000, 1688062209000] as [number, number];
 
   test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
-    const container = buildMockDashboard({
-      overrides: {
-        timeRange: dashboardTimeRange,
-        timeslice: dashboardTimeslice,
-      },
+    const container = buildMockDashboard();
+    container.updateInput({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
     });
     const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
       CONTACT_CARD_EMBEDDABLE,
@@ -214,11 +220,10 @@ describe('getInheritedInput', () => {
   });
 
   test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
-    const container = buildMockDashboard({
-      overrides: {
-        timeRange: dashboardTimeRange,
-        timeslice: dashboardTimeslice,
-      },
+    const container = buildMockDashboard();
+    container.updateInput({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
     });
     const embeddableTimeRange = {
       to: 'now',

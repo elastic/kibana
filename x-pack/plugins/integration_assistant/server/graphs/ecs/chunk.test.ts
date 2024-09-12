@@ -12,6 +12,9 @@ describe('test chunks', () => {
     const objects = ['{"a": 1, "b": 2, "c": {"d": 3}}', '{"a": 2, "b": 3, "e": 4}'];
     const chunkSize = 2;
     const result = mergeAndChunkSamples(objects, chunkSize);
-    expect(result).toEqual(['{"a":1,"b":2}', '{"c":{"d":3},"e":4}']);
+    expect(result).toStrictEqual([
+      JSON.stringify({ a: 1, b: 2 }, null, 2),
+      JSON.stringify({ c: { d: 3 }, e: 4 }, null, 2),
+    ]);
   });
 });

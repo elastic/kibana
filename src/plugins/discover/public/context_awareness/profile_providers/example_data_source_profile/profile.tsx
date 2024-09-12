@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiBadge } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import type { RowControlColumn } from '@kbn/unified-data-table';
+import { getFieldValue, RowControlColumn } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -19,6 +19,7 @@ import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 
 export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'example-data-source-profile',
+  isExperimental: true,
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),
@@ -86,6 +87,7 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
                   label={`Example ${iconType}`}
+                  tooltipContent={`Example ${iconType}`}
                   iconType={iconType}
                   onClick={() => {
                     alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
@@ -113,6 +115,27 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       ],
       rowHeight: 5,
     }),
+    getAdditionalCellActions: (prev) => () =>
+      [
+        ...prev(),
+        {
+          id: 'example-data-source-action',
+          getDisplayName: () => 'Example data source action',
+          getIconType: () => 'plus',
+          execute: () => {
+            alert('Example data source action executed');
+          },
+        },
+        {
+          id: 'another-example-data-source-action',
+          getDisplayName: () => 'Another example data source action',
+          getIconType: () => 'minus',
+          execute: () => {
+            alert('Another example data source action executed');
+          },
+          isCompatible: ({ field }) => field.name !== 'message',
+        },
+      ],
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
@@ -136,9 +159,4 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       context: { category: DataSourceCategory.Logs },
     };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
 };

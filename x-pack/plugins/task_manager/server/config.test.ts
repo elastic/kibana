@@ -14,6 +14,10 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "claim_strategy": "update_by_query",
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -22,6 +26,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -71,6 +76,10 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "claim_strategy": "update_by_query",
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -79,6 +88,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -126,6 +136,10 @@ describe('config validation', () => {
       Object {
         "allow_reading_invalid_state": true,
         "claim_strategy": "update_by_query",
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -134,6 +148,7 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
@@ -251,5 +266,31 @@ describe('config validation', () => {
   test('mget claim strategy defaults poll interval to 500ms', () => {
     const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_MGET });
     expect(result.poll_interval).toEqual(500);
+  });
+
+  test('discovery active_nodes_lookback must be a valid duration', () => {
+    const config: Record<string, unknown> = {
+      discovery: {
+        active_nodes_lookback: 'foo',
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string"`
+    );
+  });
+
+  test('discovery active_nodes_lookback must be less than 5m', () => {
+    const config: Record<string, unknown> = {
+      discovery: {
+        active_nodes_lookback: '301s',
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
+    );
   });
 });
