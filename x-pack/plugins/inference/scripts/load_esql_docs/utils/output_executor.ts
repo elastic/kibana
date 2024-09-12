@@ -6,7 +6,7 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import type { OutputAPI } from '../../common/output';
+import type { OutputAPI } from '../../../common/output';
 
 export interface Prompt {
   system?: string;

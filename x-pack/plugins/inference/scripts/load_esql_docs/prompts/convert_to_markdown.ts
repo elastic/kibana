@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
-import { ScriptInferenceClient } from '../util/kibana_client';
+import type { PromptTemplate } from '../output_executor';
 
-export const convertToMarkdown = async ({
-  htmlContent,
-  client,
-}: {
+/**
+ * Prompt used to ask the LLM to convert a raw html content to markdown.
+ */
+export const convertToMarkdownPrompt: PromptTemplate<{
   htmlContent: string;
-  client: ScriptInferenceClient;
-}) => {
-  const response = await lastValueFrom(
-    client.output('convert_to_markdown', {
-      connectorId: client.getConnectorId(),
-      system: `
+}> = ({ htmlContent }) => {
+  return {
+    system: `
       You are a helpful assistant specialized
       in converting html fragment extracted from online documentation into equivalent Markdown documents.
 
@@ -40,15 +36,11 @@ export const convertToMarkdown = async ({
       \`\`\`
 
       `,
-      input: `
+    input: `
       Here is the html documentation to convert to markdown:
       \`\`\`html
       ${htmlContent}
       \`\`\`
       `,
-    })
-  );
-
-  const output = response.content!;
-  return output;
+  };
 };

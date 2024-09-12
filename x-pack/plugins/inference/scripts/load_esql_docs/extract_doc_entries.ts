@@ -13,7 +13,8 @@ import { partition } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pLimit from 'p-limit';
 import { ScriptInferenceClient } from '../util/kibana_client';
-import { convertToMarkdown } from './convert_to_markdown';
+import { convertToMarkdownPrompt } from './prompts/convert_to_markdown';
+import { bindOutput, PromptCaller } from './utils/output_executor';
 
 /**
  * The pages that will be extracted but only used as context
@@ -40,6 +41,7 @@ interface ExtractedPage {
 export interface ExtractedCommandOrFunc {
   name: string;
   markdownContent: string;
+  command: boolean;
 }
 
 export interface ExtractionOutput {
@@ -70,6 +72,11 @@ export async function extractDocEntries({
     skippedFile: [],
   };
 
+  const executePrompt = bindOutput({
+    output: inferenceClient.output,
+    connectorId: inferenceClient.getConnectorId(),
+  });
+
   const limiter = pLimit(10);
 
   await Promise.all(
@@ -77,7 +84,7 @@ export async function extractDocEntries({
       return await processFile({
         file,
         log,
-        inferenceClient,
+        executePrompt,
         output,
         limiter,
       });
@@ -90,13 +97,13 @@ export async function extractDocEntries({
 async function processFile({
   file: fileFullPath,
   output,
-  inferenceClient,
+  executePrompt,
   log,
   limiter,
 }: {
   file: string;
   output: ExtractionOutput;
-  inferenceClient: ScriptInferenceClient;
+  executePrompt: PromptCaller;
   log: ToolingLog;
   limiter: pLimit.Limit;
 }) {
@@ -110,7 +117,7 @@ async function processFile({
       log,
       output,
       limiter,
-      inferenceClient,
+      executePrompt,
     });
   } else if (basename === 'esql-functions-operators.html') {
     // process functions / operators
@@ -119,7 +126,7 @@ async function processFile({
       log,
       output,
       limiter,
-      inferenceClient,
+      executePrompt,
     });
   } else if (contextArticles.includes(basename)) {
     const $element = load(fileContent)('*');
@@ -136,13 +143,13 @@ async function processFile({
 async function processFunctionsAndOperators({
   fileContent,
   output,
-  inferenceClient,
+  executePrompt,
   log,
   limiter,
 }: {
   fileContent: string;
   output: ExtractionOutput;
-  inferenceClient: ScriptInferenceClient;
+  executePrompt: PromptCaller;
   log: ToolingLog;
   limiter: pLimit.Limit;
 }) {
@@ -185,10 +192,10 @@ async function processFunctionsAndOperators({
       return limiter(async () => {
         return {
           name: section.title,
-          markdownContent: await convertToMarkdown({
-            htmlContent: section.content,
-            client: inferenceClient,
-          }),
+          markdownContent: await executePrompt(
+            convertToMarkdownPrompt({ htmlContent: section.content })
+          ),
+          command: false,
         };
       });
     })
@@ -206,13 +213,13 @@ async function processFunctionsAndOperators({
 async function processCommands({
   fileContent,
   output,
-  inferenceClient,
+  executePrompt,
   log,
   limiter,
 }: {
   fileContent: string;
   output: ExtractionOutput;
-  inferenceClient: ScriptInferenceClient;
+  executePrompt: PromptCaller;
   log: ToolingLog;
   limiter: pLimit.Limit;
 }) {
@@ -225,10 +232,10 @@ async function processCommands({
       return limiter(async () => {
         return {
           name: section.title,
-          markdownContent: await convertToMarkdown({
-            htmlContent: section.content,
-            client: inferenceClient,
-          }),
+          markdownContent: await executePrompt(
+            convertToMarkdownPrompt({ htmlContent: section.content })
+          ),
+          command: true,
         };
       });
     })
@@ -264,6 +271,7 @@ export function extractSections(cheerio: Cheerio<AnyNode>) {
     untilNextHeader.find('svg defs').remove();
     untilNextHeader.find('.console_code_copy').remove();
     untilNextHeader.find('.imageblock').remove();
+    untilNextHeader.find('table').remove();
 
     const htmlContent = untilNextHeader
       .map((i, node) => $(node).prop('outerHTML'))

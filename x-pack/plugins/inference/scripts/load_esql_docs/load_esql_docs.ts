@@ -8,13 +8,11 @@
 import { run } from '@kbn/dev-cli-runner';
 import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import FastGlob from 'fast-glob';
 import Fs from 'fs/promises';
 import { compact } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
 import yargs, { Argv } from 'yargs';
-import { lastValueFrom } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { INLINE_ESQL_QUERY_REGEX } from '../../common/tasks/nl_to_esql/constants';
 import { correctCommonEsqlMistakes } from '../../common/tasks/nl_to_esql/correct_common_esql_mistakes';
@@ -22,10 +20,9 @@ import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cl
 import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
-import { syncBuiltDocs } from './built-docs';
+import { syncBuiltDocs } from './sync-built-docs-repo';
 import { extractDocEntries } from './extract_doc_entries';
 import { generateDoc } from './generate_doc';
-import { convertToMarkdown } from './convert_to_markdown';
 
 yargs(process.argv.slice(2))
   .command(
@@ -94,6 +91,7 @@ yargs(process.argv.slice(2))
           const tempFileName = Path.join(REPO_ROOT, './extraction.json');
 
           // await Fs.writeFile(tempFileName, JSON.stringify(extraction, undefined, 2));
+
           const extraction = JSON.parse((await Fs.readFile(tempFileName)).toString('utf-8'));
 
           const docFiles = await generateDoc({
