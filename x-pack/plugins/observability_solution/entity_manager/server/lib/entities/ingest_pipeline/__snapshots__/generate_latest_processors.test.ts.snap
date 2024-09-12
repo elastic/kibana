@@ -1,6 +1,123 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateLatestProcessors(definition) should genearte a valid pipeline 1`] = `
+exports[`generateLatestProcessors(definition) should generate a valid pipeline for builtin definition 1`] = `
+Array [
+  Object {
+    "set": Object {
+      "field": "event.ingested",
+      "value": "{{{_ingest.timestamp}}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.type",
+      "value": "service",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionId",
+      "value": "builtin_mock_entity_definition",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionVersion",
+      "value": "1.0.0",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.schemaVersion",
+      "value": "v1",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.identityFields",
+      "value": Array [
+        "log.logger",
+        "event.category",
+      ],
+    },
+  },
+  Object {
+    "script": Object {
+      "source": "if (ctx.entity?.metadata?.tags.data != null) {
+  ctx.tags = ctx.entity.metadata.tags.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.name.data != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  ctx.host.name = ctx.entity.metadata.host.name.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.os?.name.data != null) {
+  if (ctx.host == null) {
+    ctx.host = new HashMap();
+  }
+  if (ctx.host.os == null) {
+    ctx.host.os = new HashMap();
+  }
+  ctx.host.os.name = ctx.entity.metadata.host.os.name.data.keySet();
+}
+if (ctx.entity?.metadata?.sourceIndex.data != null) {
+  ctx.sourceIndex = ctx.entity.metadata.sourceIndex.data.keySet();
+}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "dot_expander": Object {
+      "field": "log.logger",
+      "path": "entity.identity.log.logger.top_metric",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "log.logger",
+      "value": "{{entity.identity.log.logger.top_metric.log.logger}}",
+    },
+  },
+  Object {
+    "dot_expander": Object {
+      "field": "event.category",
+      "path": "entity.identity.event.category.top_metric",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "event.category",
+      "value": "{{entity.identity.event.category.top_metric.event.category}}",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.identity",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.displayName",
+      "value": "{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "_index",
+      "value": ".entities.v1.latest.builtin_mock_entity_definition",
+    },
+  },
+]
+`;
+
+exports[`generateLatestProcessors(definition) should generate a valid pipeline for custom definition 1`] = `
 Array [
   Object {
     "set": Object {
