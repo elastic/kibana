@@ -232,4 +232,10 @@ describe('replaceStringWithParams', () => {
 
     expect(result).toEqual('Basic https://elastic.co/product { value');
   });
+
+  it("returns value as string | null when no params and it's an object", () => {
+    const result = replaceStringWithParams({}, { param: '1' }, logger);
+
+    expect(result).toEqual({});
+  });
 });
