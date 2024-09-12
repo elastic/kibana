@@ -74,18 +74,7 @@ function getProps(): UnifiedDataTableProps {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHitsMock.map((hit) =>
-      buildDataTableRecord(
-        {
-          ...hit,
-          _source: {
-            ...hit._source,
-            '@timestamp': hit._source.date,
-          },
-        },
-        dataViewMock
-      )
-    ),
+    rows: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
