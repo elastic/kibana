@@ -163,6 +163,16 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual('Basic ${host.name} https://elastic.co/product value');
   });
 
+  it('works with ${host.name} just missing params', () => {
+    const result = replaceStringWithParams(
+      '${host.name} ${homePageUrl1}',
+      { homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('${host.name} https://elastic.co/product');
+  });
+
   it('works with } ${abc} as part of value', () => {
     const result = replaceStringWithParams(
       'Basic } ${homePageUrl1} value',
