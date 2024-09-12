@@ -23,13 +23,10 @@ import {
   DryRunPackagePoliciesRequestSchema,
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
-  ConfigRecordSchema,
-  SimplifiedVarsSchema,
-  PackagePolicyBaseSchema,
   PackagePolicyPackageSchema,
-  SimplifiedPackagePolicyInputsSchema,
-  PackagePolicySchema,
-  PackagePolicyInputsSchema,
+  PackagePolicyResponseSchema,
+  PackagePolicyStatusResponseSchema,
+  DryRunPackagePolicySchema,
 } from '../../types';
 import { calculateRouteAuthz } from '../../services/security/security';
 
@@ -47,41 +44,6 @@ import {
   deleteOnePackagePolicyHandler,
   bulkGetPackagePoliciesHandler,
 } from './handlers';
-
-const PackagePolicyResponseSchema = PackagePolicySchema.extends({
-  vars: schema.maybe(schema.oneOf([ConfigRecordSchema, schema.maybe(SimplifiedVarsSchema)])),
-  inputs: schema.oneOf([
-    schema.arrayOf(
-      schema.object({
-        ...PackagePolicyInputsSchema,
-        compiled_input: schema.maybe(schema.any()),
-      })
-    ),
-    SimplifiedPackagePolicyInputsSchema,
-  ]),
-});
-
-const DryRunPackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
-  id: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
-  errors: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        message: schema.string(),
-        key: schema.maybe(schema.string()),
-      })
-    )
-  ),
-});
-
-const PackagePolicyStatusResponseSchema = schema.object({
-  id: schema.string(),
-  success: schema.boolean(),
-  name: schema.maybe(schema.string()),
-  statusCode: schema.maybe(schema.number()),
-  body: schema.maybe(schema.object({ message: schema.string() })),
-});
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
@@ -214,10 +176,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   // Create
+  // Authz check moved to service here: https://github.com/elastic/kibana/pull/140458
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-      // TODO missing fleetAuthz?
       description: 'Create package policy',
       options: {
         tags: ['oas-tag:Fleet package policies'],
@@ -437,7 +399,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                               revision: schema.number(),
                               type: schema.string(),
                               data_stream: schema.object({
-                                namesapce: schema.string(),
+                                namespace: schema.string(),
                               }),
                               use_output: schema.string(),
                               package_policy_id: schema.string(),

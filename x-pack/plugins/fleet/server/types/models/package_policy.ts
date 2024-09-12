@@ -370,3 +370,38 @@ export const PackagePolicySchema = schema.object({
     )
   ),
 });
+
+export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
+  vars: schema.maybe(schema.oneOf([ConfigRecordSchema, schema.maybe(SimplifiedVarsSchema)])),
+  inputs: schema.oneOf([
+    schema.arrayOf(
+      schema.object({
+        ...PackagePolicyInputsSchema,
+        compiled_input: schema.maybe(schema.any()),
+      })
+    ),
+    SimplifiedPackagePolicyInputsSchema,
+  ]),
+});
+
+export const DryRunPackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
+  id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+  errors: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        message: schema.string(),
+        key: schema.maybe(schema.string()),
+      })
+    )
+  ),
+});
+
+export const PackagePolicyStatusResponseSchema = schema.object({
+  id: schema.string(),
+  success: schema.boolean(),
+  name: schema.maybe(schema.string()),
+  statusCode: schema.maybe(schema.number()),
+  body: schema.maybe(schema.object({ message: schema.string() })),
+});
