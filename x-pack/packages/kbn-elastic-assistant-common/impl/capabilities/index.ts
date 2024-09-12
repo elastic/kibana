@@ -22,4 +22,5 @@ export const defaultAssistantFeatures = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
   assistantModelEvaluation: false,
   assistantBedrockChat: true,
+  assistantNaturalLanguageESQLTool: false,
 });
