@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     //   cisIntegrationAws = pageObjects.cisAddIntegration.cisAws; // Start the usage api mock server on port 8081
     // });
 
-    it(`should have been collected`, async () => {
+    it(`should have agentless agent findings`, async () => {
       const findings = pageObjects.findings;
 
       await findings.navigateToLatestFindingsPage();
