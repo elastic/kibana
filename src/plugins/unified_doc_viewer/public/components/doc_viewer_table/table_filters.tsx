@@ -28,6 +28,12 @@ const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchP
   defaultMessage: 'Search field names or values',
 });
 
+export enum TermMatch {
+  name = 'name',
+  value = 'value',
+  both = 'both',
+}
+
 interface TableFiltersCommonProps {
   // search
   searchTerm: string;
@@ -111,7 +117,7 @@ const getStoredFieldTypes = (storage: Storage) => {
 
 export interface UseTableFiltersReturn extends TableFiltersCommonProps {
   onFilterField: (row: FieldRow) => boolean;
-  onFindSearchTermMatch: (row: FieldRow, term: string) => 'name' | 'value' | null;
+  onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
 }
 
 export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
@@ -140,18 +146,20 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
     (row, term) => {
       const { name, dataViewField } = row;
 
+      let termMatch: TermMatch | null = null;
+
       if (fieldNameWildcardMatcher({ name, displayName: dataViewField?.customLabel }, term)) {
-        return 'name';
+        termMatch = TermMatch.name;
       }
 
       if (
-        fieldNameWildcardMatcher({ name: row.formattedAsText || '' }, term) ||
-        fieldNameWildcardMatcher({ name: JSON.stringify(row.flattenedValue) || '' }, term)
+        (row.formattedAsText || '').toLowerCase().includes(term.toLowerCase()) ||
+        (JSON.stringify(row.flattenedValue) || '').toLowerCase().includes(term.toLowerCase())
       ) {
-        return 'value';
+        termMatch = termMatch ? TermMatch.both : TermMatch.value;
       }
 
-      return null;
+      return termMatch;
     },
     []
   );

@@ -12,7 +12,7 @@ import { FieldName } from '@kbn/unified-doc-viewer';
 import { FieldDescription, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { TableFieldValue } from './table_cell_value';
 import type { FieldRow } from './field_row';
-import type { UseTableFiltersReturn } from './table_filters';
+import { TermMatch, type UseTableFiltersReturn } from './table_filters';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 interface TableCellProps {
@@ -39,7 +39,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
 
     const nameHighlight = useMemo(
       () =>
-        row && searchTermMatch === 'name'
+        row && searchTermMatch && [TermMatch.name, TermMatch.both].includes(searchTermMatch)
           ? getFieldSearchMatchingHighlight(row.dataViewField?.displayName || row.name, searchTerm)
           : undefined,
       [searchTerm, searchTermMatch, row]
@@ -83,7 +83,9 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
           rawValue={flattenedValue}
           ignoreReason={ignoredReason}
           isDetails={isDetails}
-          isHighLighted={searchTermMatch === 'value'}
+          isHighLighted={Boolean(
+            searchTermMatch && [TermMatch.value, TermMatch.both].includes(searchTermMatch)
+          )}
         />
       );
     }
