@@ -73,7 +73,7 @@ function NumberIntervalParamEditor({
   setTouched,
   setValidity,
   setValue,
-}: AggParamEditorProps<string | undefined>) {
+}: AggParamEditorProps<string | undefined | number>) {
   const field = agg.getField();
   const fieldSupportsAuto = !field || field.type === 'number';
   const isAutoChecked = fieldSupportsAuto && isAutoInterval(value);
@@ -85,12 +85,12 @@ function NumberIntervalParamEditor({
     setValidity(isValid);
   }, [isValid, setValidity]);
 
-  const onChange: EuiFieldNumberProps['onChange'] = useCallback(
+  const onChange = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     ({ target }) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
     [setValue]
   );
 
-  const onAutoSwitchChange: EuiSwitchProps['onChange'] = useCallback(
+  const onAutoSwitchChange = useCallback<EuiSwitchProps['onChange']>(
     (e) => {
       const isAutoSwitchChecked = e.target.checked;
 
@@ -105,7 +105,7 @@ function NumberIntervalParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation && !isValid}
-      helpText={get(editorConfig, 'interval.help')}
+      helpText={get(editorConfig, 'interval.help') as string}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>
         <EuiFlexItem>
