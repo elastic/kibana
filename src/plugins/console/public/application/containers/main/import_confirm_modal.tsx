@@ -46,7 +46,7 @@ export const ImportConfirmModal = ({
   return (
     <EuiConfirmModal
       data-test-subj="importConfirmModal"
-      title={i18n.translate('console.importConfirmModal.title', { defaultMessage: 'Import file contents' })}
+      title={i18n.translate('console.importConfirmModal.title', { defaultMessage: 'Import and replace requests?' })}
       onCancel={onClose}
       onConfirm={onConfirmImport}
       cancelButtonText={i18n.translate('console.importConfirmModal.cancelButton', { defaultMessage: 'Cancel' })}
