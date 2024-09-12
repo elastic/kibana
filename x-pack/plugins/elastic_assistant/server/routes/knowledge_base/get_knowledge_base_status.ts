@@ -101,6 +101,7 @@ export const getKnowledgeBaseStatusRoute = (
               (
                 await kbDataClient.getKnowledgeBaseDocumentEntries({
                   query: ESQL_DOCS_LOADED_QUERY,
+                  // kbResource, // Note: `8.15` installs have kbResource as `unknown`, so don't filter yet
                   required: true,
                 })
               ).length > 0;

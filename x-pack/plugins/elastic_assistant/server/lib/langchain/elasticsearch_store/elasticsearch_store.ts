@@ -157,6 +157,7 @@ export class ElasticsearchStore extends VectorStore {
     try {
       const response = await this.kbDataClient.addKnowledgeBaseDocuments({
         documents,
+        global: true,
       });
       return response.map((doc) => doc.id);
     } catch (e) {

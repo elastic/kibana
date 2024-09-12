@@ -254,15 +254,19 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * Adds LangChain Documents to the knowledge base
    *
    * @param {Array<Document<Metadata>>} documents - LangChain Documents to add to the knowledge base
+   * @param global whether these entries should be added globally, i.e. empty users[]
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
+    global = false,
   }: {
     documents: Array<Document<Metadata>>;
+    global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse[]> => {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
     const authenticatedUser = this.options.currentUser;
+    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
@@ -285,11 +289,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
               },
             };
         // @ts-ignore Transform only explicitly supports v2 schema, but technically still supports v1
-        return transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          type: DocumentEntryType.value,
-          name: 'unknown',
-          text: doc.pageContent,
-          ...body,
+        return transformToCreateSchema({
+          createdAt: changedAt,
+          spaceId: this.spaceId,
+          user: authenticatedUser,
+          entry: {
+            type: DocumentEntryType.value,
+            name: 'unknown',
+            text: doc.pageContent,
+            ...body,
+          } as unknown as KnowledgeBaseEntryCreateProps,
+          global,
         });
       }),
       authenticatedUser,
@@ -386,13 +396,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * Creates a new Knowledge Base Entry.
    *
    * @param knowledgeBaseEntry
+   * @param global
    */
   public createKnowledgeBaseEntry = async ({
     knowledgeBaseEntry,
+    global = false,
   }: {
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+    global?: boolean;
   }): Promise<KnowledgeBaseEntryResponse | null> => {
     const authenticatedUser = this.options.currentUser;
+    // TODO: KB-RBAC check for when `global:true`
     if (authenticatedUser == null) {
       throw new Error(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
@@ -410,6 +424,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       spaceId: this.spaceId,
       user: authenticatedUser,
       knowledgeBaseEntry,
+      global,
     });
   };
 

@@ -71,24 +71,47 @@ export const getKBVectorSearchQuery = ({
       ]
     : [];
 
-  const userFilter = [
-    {
-      nested: {
-        path: 'users',
-        query: {
-          bool: {
-            must: [
-              {
-                match: user.profile_uid
-                  ? { 'users.id': user.profile_uid }
-                  : { 'users.name': user.username },
-              },
-            ],
+  const userFilter = {
+    should: [
+      {
+        nested: {
+          path: 'users',
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: user.profile_uid
+                    ? { 'users.id': user.profile_uid }
+                    : { 'users.name': user.username },
+                },
+              ],
+            },
           },
         },
       },
-    },
-  ];
+      {
+        bool: {
+          must_not: [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    filter: {
+                      exists: {
+                        field: 'users',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  };
 
   return {
     bool: {
@@ -103,9 +126,10 @@ export const getKBVectorSearchQuery = ({
         },
         ...requiredFilter,
         ...resourceFilter,
-        ...userFilter,
       ],
+      ...userFilter,
       filter,
+      minimum_should_match: 1,
     },
   };
 };

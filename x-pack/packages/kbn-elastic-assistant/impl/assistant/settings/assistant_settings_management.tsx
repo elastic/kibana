@@ -19,6 +19,8 @@ import { ConversationSettingsManagement } from '../conversations/conversation_se
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
 import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonymization_settings_management';
+import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
+import { EvaluationSettings } from '.';
 
 import {
   ANONYMIZATION_TAB,
@@ -29,8 +31,6 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
-import { EvaluationSettings } from '.';
 
 interface Props {
   selectedConversation: Conversation;
@@ -59,7 +59,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     useEffect(() => {
       if (selectedSettingsTab == null) {
-        setSelectedSettingsTab(CONNECTORS_TAB);
+        setSelectedSettingsTab(KNOWLEDGE_BASE_TAB);
       }
     }, [selectedSettingsTab, setSelectedSettingsTab]);
 

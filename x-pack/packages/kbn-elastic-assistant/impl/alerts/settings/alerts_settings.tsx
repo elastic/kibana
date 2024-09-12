@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiRange,
-  EuiSpacer,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
 import { KnowledgeBaseConfig } from '../../assistant/types';
+import { AlertsRange } from '../../knowledge_base/alerts_range';
 import * as i18n from '../../knowledge_base/translations';
 
 export const MIN_LATEST_ALERTS = 10;
 export const MAX_LATEST_ALERTS = 100;
 export const TICK_INTERVAL = 10;
 export const RANGE_CONTAINER_WIDTH = 300; // px
-const LABEL_WRAPPER_MIN_WIDTH = 95; // px
 
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
@@ -32,21 +24,13 @@ interface Props {
 }
 
 const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }: Props) => {
-  const inputRangeSliderId = useGeneratedHtmlId({ prefix: 'inputRangeSlider' });
-
   return (
     <>
-      <EuiFormRow
-        display="columnCompressedSwitch"
-        label={i18n.ALERTS_LABEL}
-        css={css`
-          .euiFormRow__labelWrapper {
-            min-width: ${LABEL_WRAPPER_MIN_WIDTH}px !important;
-          }
-        `}
-      >
-        <></>
-      </EuiFormRow>
+      {/* <AlertsSwitch*/}
+      {/*  isEnabledRAGAlerts={knowledgeBase.isEnabledRAGAlerts}*/}
+      {/*  setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}*/}
+      {/*  knowledgeBase={knowledgeBase}*/}
+      {/* />*/}
 
       <EuiSpacer size="xs" />
 
@@ -58,22 +42,9 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
           grow={false}
         >
           <EuiSpacer size="xs" />
-          <EuiRange
-            aria-label={i18n.ALERTS_RANGE}
-            compressed
-            data-test-subj="alertsRange"
-            id={inputRangeSliderId}
-            max={MAX_LATEST_ALERTS}
-            min={MIN_LATEST_ALERTS}
-            onChange={(e) =>
-              setUpdatedKnowledgeBaseSettings({
-                ...knowledgeBase,
-                latestAlerts: Number(e.currentTarget.value),
-              })
-            }
-            showTicks
-            step={TICK_INTERVAL}
-            value={knowledgeBase.latestAlerts}
+          <AlertsRange
+            knowledgeBase={knowledgeBase}
+            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>

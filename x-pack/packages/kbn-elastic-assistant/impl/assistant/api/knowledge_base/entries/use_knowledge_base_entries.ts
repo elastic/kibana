@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup, type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
@@ -15,11 +16,13 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 
 export interface UseKnowledgeBaseEntriesParams {
   http: HttpSetup;
-  query: FindKnowledgeBaseEntriesRequestQuery;
+  query?: FindKnowledgeBaseEntriesRequestQuery;
   signal?: AbortSignal | undefined;
+  toasts?: IToasts;
 }
 
 const defaultQuery: FindKnowledgeBaseEntriesRequestQuery = {
@@ -50,6 +53,7 @@ export const useKnowledgeBaseEntries = ({
   http,
   query = defaultQuery,
   signal,
+  toasts,
 }: UseKnowledgeBaseEntriesParams) =>
   useQuery(
     KNOWLEDGE_BASE_ENTRY_QUERY_KEY,
@@ -66,6 +70,15 @@ export const useKnowledgeBaseEntries = ({
     {
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
+        if (error.name !== 'AbortError') {
+          toasts?.addError(error, {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.fetchError', {
+              defaultMessage: 'Error fetching Knowledge Base entries',
+            }),
+          });
+        }
+      },
     }
   );
 

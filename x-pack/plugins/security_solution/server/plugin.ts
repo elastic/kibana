@@ -544,15 +544,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
-    plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+    const features = {
       assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-    });
-    plugins.elasticAssistant.registerFeatures('management', {
-      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-    });
+    };
+    plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
+    plugins.elasticAssistant.registerFeatures('management', features);
+    plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

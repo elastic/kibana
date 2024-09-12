@@ -10,6 +10,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   API_VERSIONS,
+  DocumentEntry,
+  DocumentEntryType,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
@@ -22,6 +24,7 @@ import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
+import { ESQL_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -70,15 +73,48 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
           const currentUser = ctx.elasticAssistant.getCurrentUser();
           const userFilter = getKBUserFilter(currentUser);
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
+          const systemFilter = ` AND NOT kb_resource:"${ESQL_RESOURCE}"`;
 
+          // TODO: Either plumb through new `findDocuments` that takes query DSL so you can do agg + pagination to collapse
+          // TODO: system entries, use scoped esClient from request, or query them separate and mess with pagination...latter for now.
           const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `${userFilter}${additionalFilter}`,
+            filter: `${userFilter}${systemFilter}${additionalFilter}`,
             fields: query.fields,
           });
+
+          const systemResult = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
+            perPage: 1000,
+            page: 1,
+            filter: `kb_resource:"${ESQL_RESOURCE}"`,
+          });
+
+          // Group system entries
+          const systemEntry = systemResult?.data.hits.hits?.[0]?._source;
+          const systemEntryCount = systemResult?.data.hits.hits?.length ?? 1;
+          const systemEntries: DocumentEntry[] =
+            systemEntry == null
+              ? []
+              : [
+                  {
+                    id: 'someID',
+                    createdAt: systemEntry.created_at,
+                    createdBy: systemEntry.created_by,
+                    updatedAt: systemEntry.updated_at,
+                    updatedBy: systemEntry.updated_by,
+                    users: [],
+                    name: 'ES|QL documents',
+                    namespace: systemEntry.namespace,
+                    type: DocumentEntryType.value,
+                    kbResource: ESQL_RESOURCE,
+                    source: '',
+                    required: true,
+                    text: `${systemEntryCount}`,
+                  },
+                ];
 
           if (result) {
             return response.ok({
@@ -86,7 +122,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: transformESSearchToKnowledgeBaseEntry(result.data),
+                data: [...transformESSearchToKnowledgeBaseEntry(result.data), ...systemEntries],
               },
             });
           }

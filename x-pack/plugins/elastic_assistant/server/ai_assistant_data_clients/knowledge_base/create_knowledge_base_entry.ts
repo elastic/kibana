@@ -22,6 +22,7 @@ export interface CreateKnowledgeBaseEntryParams {
   spaceId: string;
   user: AuthenticatedUser;
   knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+  global?: boolean;
 }
 
 export const createKnowledgeBaseEntry = async ({
@@ -31,9 +32,16 @@ export const createKnowledgeBaseEntry = async ({
   user,
   knowledgeBaseEntry,
   logger,
+  global = false,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateSchema(createdAt, spaceId, user, knowledgeBaseEntry);
+  const body = transformToCreateSchema({
+    createdAt,
+    spaceId,
+    user,
+    entry: knowledgeBaseEntry,
+    global,
+  });
   try {
     const response = await esClient.create({
       body,
@@ -57,12 +65,21 @@ export const createKnowledgeBaseEntry = async ({
   }
 };
 
-export const transformToCreateSchema = (
-  createdAt: string,
-  spaceId: string,
-  user: AuthenticatedUser,
-  entry: KnowledgeBaseEntryCreateProps
-): CreateKnowledgeBaseEntrySchema => {
+interface TransformToCreateSchemaProps {
+  createdAt: string;
+  spaceId: string;
+  user: AuthenticatedUser;
+  entry: KnowledgeBaseEntryCreateProps;
+  global?: boolean;
+}
+
+export const transformToCreateSchema = ({
+  createdAt,
+  spaceId,
+  user,
+  entry,
+  global = false,
+}: TransformToCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
   const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
@@ -70,12 +87,14 @@ export const transformToCreateSchema = (
     updated_at: createdAt,
     updated_by: user.profile_uid ?? 'unknown',
     namespace: spaceId,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
+    users: global
+      ? []
+      : [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
   };
 
   if (entry.type === 'index') {

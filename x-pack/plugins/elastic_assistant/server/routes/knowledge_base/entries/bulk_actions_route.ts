@@ -201,8 +201,13 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((c) =>
-              transformToCreateSchema(changedAt, spaceId, authenticatedUser, c)
+            documentsToCreate: body.create?.map((entry) =>
+              transformToCreateSchema({
+                createdAt: changedAt,
+                spaceId,
+                user: authenticatedUser,
+                entry,
+              })
             ),
             documentsToDelete: body.delete?.ids,
             documentsToUpdate: [], // TODO: Support bulk update

@@ -102,6 +102,7 @@ export interface UseAssistantContext {
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
   baseConversations: Record<string, Conversation>;
+  currentUserAvatar?: UserAvatar;
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
@@ -121,6 +122,7 @@ export interface UseAssistantContext {
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+  setCurrentUserAvatar: React.Dispatch<React.SetStateAction<UserAvatar | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
@@ -234,6 +236,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
+   * Current User Avatar
+   */
+  const [currentUserAvatar, setCurrentUserAvatar] = useState<UserAvatar>();
+
+  /**
    * Settings State
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
@@ -265,6 +272,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
+      currentUserAvatar,
       docLinks,
       getComments,
       http,
@@ -278,6 +286,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled: localStorageStreaming ?? true,
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
+      setCurrentUserAvatar,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
       setTraceOptions: setSessionStorageTraceOptions,
@@ -301,6 +310,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       basePath,
       basePromptContexts,
+      currentUserAvatar,
       docLinks,
       getComments,
       http,
@@ -323,7 +333,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageLastConversationId,
       baseConversations,
       currentAppId,
-      codeBlockRef,
     ]
   );
 

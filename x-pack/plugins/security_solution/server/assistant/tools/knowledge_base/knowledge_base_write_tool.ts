@@ -61,7 +61,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           kbDataClient.isV2KnowledgeBaseEnabled
             ? {
                 name: input.name,
-                kbResource: 'user',
+                kb_resource: 'user', // TODO: Breaks retrieval BWC
                 source: 'conversation',
                 required: input.required,
                 text: input.query,
