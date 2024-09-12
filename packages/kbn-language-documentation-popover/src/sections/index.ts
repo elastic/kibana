@@ -18,7 +18,7 @@ export const getESQLDocsSections = async () => {
     sourceCommands,
     processingCommands,
     initialSection,
-    functions,
+    scalarFunctions,
     aggregationFunctions,
     groupingFunctions,
     operators,
@@ -32,7 +32,7 @@ export const getESQLDocsSections = async () => {
   groups.push(
     sourceCommands,
     processingCommands,
-    functions,
+    scalarFunctions,
     aggregationFunctions,
     groupingFunctions,
     operators
