@@ -12,7 +12,12 @@ import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_
 import { allStarConstant } from '../complete_items';
 import { getAddDateHistogramSnippet } from '../factories';
 import { roundParameterTypes } from './constants';
-import { setup, getFunctionSignaturesByReturnType, getFieldNamesByType } from './helpers';
+import {
+  setup,
+  getFunctionSignaturesByReturnType,
+  getFieldNamesByType,
+  getLiteralsByType,
+} from './helpers';
 
 const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
   agg: true,
@@ -283,6 +288,33 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
           [',', '| ', '+ $0', '- $0']
+        );
+      });
+      test('on space within bucket()', async () => {
+        const { assertSuggestions } = await setup();
+        await assertSuggestions('from a | stats avg(b) by BUCKET(/, 50, ?t_start, ?t_end)', [
+          // Note there's no space or comma in the suggested field names
+          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
+            scalar: true,
+          }),
+        ]);
+        await assertSuggestions('from a | stats avg(b) by BUCKET(  /  , 50, ?t_start, ?t_end)', [
+          // Note there's no space or comma in the suggested field names
+          ...getFieldNamesByType(['date', ...ESQL_COMMON_NUMERIC_TYPES]),
+          ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
+            scalar: true,
+          }),
+        ]);
+
+        await assertSuggestions(
+          'from a | stats avg(b) by BUCKET(dateField, /50, ?t_start, ?t_end)',
+          [
+            ...getLiteralsByType('time_literal'),
+            ...getFunctionSignaturesByReturnType('eval', ['integer', 'date_period'], {
+              scalar: true,
+            }),
+          ]
         );
       });
 
