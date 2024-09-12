@@ -62,6 +62,7 @@ import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
+import { fetchActiveSpace } from './spaces';
 import { fetchKibanaStatus } from '../../../common/endpoint/utils/kibana_status';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
@@ -865,12 +866,13 @@ export const getOrCreateDefaultAgentPolicy = async ({
 
   log.info(`Creating default test/dev Fleet agent policy with name: [${policyName}]`);
 
+  const spaceId = (await fetchActiveSpace(kbnClient)).id;
   const newAgentPolicy = await createAgentPolicy({
     kbnClient,
     policy: {
       name: policyName,
       description: `Policy created by security solution tooling: ${__filename}`,
-      namespace: 'default',
+      namespace: spaceId,
       monitoring_enabled: ['logs', 'metrics'],
     },
   });
@@ -1220,7 +1222,6 @@ export const addEndpointIntegrationToAgentPolicy = async ({
   const newIntegrationPolicy = await createIntegrationPolicy(kbnClient, {
     name,
     description: `Created by: ${__filename}`,
-    namespace: 'default',
     policy_id: agentPolicyId,
     policy_ids: [agentPolicyId],
     enabled: true,

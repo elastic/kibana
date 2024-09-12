@@ -16,7 +16,8 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { omit } from 'lodash';
-import { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { enableFleetSpaceAwareness } from './fleet_services';
 import {
   fetchKibanaStatus,
   isServerlessKibanaFlavor,
@@ -175,17 +176,23 @@ export const createRuntimeServices = async ({
   const kbnURL = new URL(kibanaUrl);
   const esURL = new URL(elasticsearchUrl);
   const fleetURL = new URL(fleetServerUrl);
+  const kbnClient = createKbnClient({
+    log,
+    url: kibanaUrl,
+    username,
+    password,
+    spaceId,
+    apiKey,
+    useCertForSsl,
+  });
+
+  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    log?.info(`Enabling Fleet space awareness`);
+    await enableFleetSpaceAwareness(kbnClient);
+  }
 
   return {
-    kbnClient: createKbnClient({
-      log,
-      url: kibanaUrl,
-      username,
-      password,
-      spaceId,
-      apiKey,
-      useCertForSsl,
-    }),
+    kbnClient,
     esClient: createEsClient({
       log,
       url: elasticsearchUrl,
