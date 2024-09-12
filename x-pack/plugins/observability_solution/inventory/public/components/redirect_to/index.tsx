@@ -5,16 +5,21 @@
  * 2.0.
  */
 import React, { useLayoutEffect } from 'react';
-import { PathsOf } from '@kbn/typed-react-router-config';
+import { PathsOf, TypeOf } from '@kbn/typed-react-router-config';
+import { DeepPartial } from 'utility-types';
+import { merge } from 'lodash';
 import { InventoryRoutes } from '../../routes/config';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 
-export function RedirectTo({ path }: { path: PathsOf<InventoryRoutes> }) {
+export function RedirectTo<
+  TPath extends PathsOf<InventoryRoutes>,
+  TParams extends TypeOf<InventoryRoutes, TPath, false>
+>({ path, params }: { path: TPath; params?: DeepPartial<TParams> }) {
   const router = useInventoryRouter();
-  const params = useInventoryParams('/*');
+  const currentParams = useInventoryParams('/*');
   useLayoutEffect(() => {
-    router.replace(path, params);
+    router.replace(path, ...([merge({}, currentParams, params)] as any));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

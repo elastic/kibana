@@ -8,11 +8,11 @@ import { EuiFlexGroup, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 export function LoadingPanel({
-  loading,
+  loading = true,
   size,
   className,
 }: {
-  loading: boolean;
+  loading?: boolean;
   size?: React.ComponentProps<typeof EuiLoadingSpinner>['size'];
   className?: string;
 }) {

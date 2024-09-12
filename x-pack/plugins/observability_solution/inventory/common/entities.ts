@@ -8,10 +8,13 @@ import { EntityDefinition as EntityDiscoveryDefinition } from '@kbn/entities-sch
 
 export interface Entity<TAttributes extends Record<string, any> = {}> {
   id: string;
-  name: string;
   label: string;
   type: string;
-  properties: TAttributes;
+  properties: TAttributes & {
+    'entity.id': string;
+    'entity.type': string;
+    'entity.displayName': string;
+  };
 }
 
 export interface EntityTypeDefinition {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { createRouter, Outlet } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
@@ -19,6 +19,7 @@ import { AllInventoryView } from '../components/all_inventory_view';
 import { DatasetManagementView } from '../components/dataset_management_view';
 import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
 import { DefinitionsView } from '../components/definitions_view';
+import { EntityDetailView } from '../components/entity_detail_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -109,16 +110,29 @@ const inventoryRoutes = {
         },
       },
       '/{type}': {
-        element: <></>,
+        element: <Outlet />,
         params: t.type({
           path: t.type({ type: t.string }),
         }),
         children: {
           '/{type}/{id}': {
-            element: <></>,
             params: t.type({
               path: t.type({ id: t.string }),
             }),
+            element: <Outlet />,
+            children: {
+              '/{type}/{id}': {
+                element: (
+                  <RedirectTo path="/{type}/{id}/{tab}" params={{ path: { tab: 'overview' } }} />
+                ),
+              },
+              '/{type}/{id}/{tab}': {
+                element: <EntityDetailView />,
+                params: t.type({
+                  path: t.type({ tab: t.string }),
+                }),
+              },
+            },
           },
         },
       },
@@ -127,7 +141,7 @@ const inventoryRoutes = {
       },
     },
   },
-};
+} satisfies RouteMap;
 
 export type InventoryRoutes = typeof inventoryRoutes;
 

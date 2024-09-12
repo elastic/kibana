@@ -62,23 +62,21 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <InventoryPageHeader>
-          <InventoryPageHeaderTitle title={id} />
-        </InventoryPageHeader>
-        <EntityOverviewTabList
-          tabs={Object.entries(tabs).map(([key, { label, href, selected }]) => {
-            return {
-              name: key,
-              label,
-              href,
-              selected,
-            };
-          })}
-        />
-        {children}
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <InventoryPageHeader>
+        <InventoryPageHeaderTitle title={id} />
+      </InventoryPageHeader>
+      <EntityOverviewTabList
+        tabs={Object.entries(tabs).map(([key, { label, href, selected }]) => {
+          return {
+            name: key,
+            label,
+            href,
+            selected,
+          };
+        })}
+      />
+      {children}
+    </EuiFlexGroup>
   );
 }
