@@ -111,6 +111,7 @@ export interface KVState {
   packageName: string;
   dataStreamName: string;
   kvProcessor: ESProcessorItem;
+  grokPattern: string;
   logSamples: string[];
   kvLogMessages: string[];
   jsonSamples: string[];

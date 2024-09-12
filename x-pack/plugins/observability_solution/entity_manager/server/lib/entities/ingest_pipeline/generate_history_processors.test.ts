@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { entityDefinition } from '../helpers/fixtures/entity_definition';
+import { entityDefinition, builtInEntityDefinition } from '../helpers/fixtures';
 import { generateHistoryProcessors } from './generate_history_processors';
 
 describe('generateHistoryProcessors(definition)', () => {
-  it('should genearte a valid pipeline', () => {
+  it('should generate a valid pipeline for custom definition', () => {
     const processors = generateHistoryProcessors(entityDefinition);
+    expect(processors).toMatchSnapshot();
+  });
+
+  it('should generate a valid pipeline for builtin definition', () => {
+    const processors = generateHistoryProcessors(builtInEntityDefinition);
     expect(processors).toMatchSnapshot();
   });
 });
