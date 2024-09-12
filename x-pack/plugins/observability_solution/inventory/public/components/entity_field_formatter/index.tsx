@@ -53,7 +53,7 @@ export function createEntityFieldFormatterClass({
       contentType?: FieldFormatsContentType,
       options?: HtmlContextTypeOptions | TextContextTypeOptions | undefined
     ): string {
-      if (options && 'field' in options) {
+      if (options && 'field' in options && typeof value === 'string') {
         const fieldName = options.field?.name ?? '';
         const entityType = typeByField.get(fieldName);
         if (entityType) {

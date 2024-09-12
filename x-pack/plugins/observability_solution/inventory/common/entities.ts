@@ -6,7 +6,7 @@
  */
 import { EntityDefinition as EntityDiscoveryDefinition } from '@kbn/entities-schema';
 
-export interface Entity<TAttributes extends Record<string, any> = {}> {
+export interface Entity<TAttributes extends Record<string, any> = Record<string, any>> {
   id: string;
   label: string;
   type: string;

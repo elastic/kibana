@@ -7,12 +7,21 @@
 import { EuiFlexGroup, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-export function InventoryPageHeaderTitle({ title }: { title: string }) {
+export function InventoryPageHeaderTitle({
+  title,
+  children,
+}: {
+  title: string;
+  children?: React.ReactNode;
+}) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiTitle>
-        <h1>{title}</h1>
-      </EuiTitle>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiTitle>
+          <h1>{title}</h1>
+        </EuiTitle>
+        {children}
+      </EuiFlexGroup>
       <EuiHorizontalRule margin="none" />
     </EuiFlexGroup>
   );

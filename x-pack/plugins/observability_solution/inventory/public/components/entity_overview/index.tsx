@@ -4,17 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment from 'moment';
-import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { take } from 'lodash';
+import moment from 'moment';
+import React, { useMemo, useState } from 'react';
 import { Required } from 'utility-types';
-import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
-import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
+import { css } from '@emotion/css';
 import { Entity, EntityTypeDefinition } from '../../../common/entities';
+import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
+import { getDataStreamsForEntity } from '../../util/entities/get_data_streams_for_entity';
+import { getEntitySourceDslFilter } from '../../util/entities/get_entity_source_dsl_filter';
+import { getInitialColumnsForLogs } from '../../util/get_initial_columns_for_logs';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
+import { useKibana } from '../../hooks/use_kibana';
+import { InventorySearchBar } from '../inventory_search_bar';
 
 export function EntityOverview({
   entity,
@@ -31,25 +45,72 @@ export function EntityOverview({
     };
   }, []);
 
-  const baseQuery = `FROM ${typeDefinition.discoveryDefinition.indexPatterns
-    .map((pattern) => `"${pattern}"`)
-    .join(',')} | WHERE ${typeDefinition.discoveryDefinition.identityFields
-    .map(({ field }) => {
-      const value = entity.properties[field];
-      if (value === null || value === undefined) {
-        return `"${field}" IS NULL`;
-      }
-      return [`${field}`, '==', typeof value === 'string' ? `"${value}"` : value].join(' ');
-    })
-    .join(' AND ')}`;
+  const {
+    services: { inventoryAPIClient },
+    dependencies: {
+      start: { dataViews },
+    },
+  } = useKibana();
 
-  const logsQuery = `${baseQuery} | LIMIT 100`;
+  const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
+  const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
 
-  const logsQueryResult = useEsqlQueryResult({ query: logsQuery, start, end });
+  const [selectedDataStream, setSelectedDataStream] = useState<string>('');
 
-  const histogramQuery = `${baseQuery} | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 minute)`;
+  const entityDataStreamsFetch = useAbortableAsync(
+    ({ signal }) => {
+      return getDataStreamsForEntity({
+        entity,
+        typeDefinition,
+        inventoryAPIClient,
+        signal,
+      });
+    },
+    [entity, typeDefinition, inventoryAPIClient]
+  );
 
-  const histogramQueryResult = useEsqlQueryResult({ query: histogramQuery, start, end });
+  const queries = useMemo(() => {
+    if (!entityDataStreamsFetch.value?.dataStreams.length) {
+      return undefined;
+    }
+
+    const baseDslFilter = getEntitySourceDslFilter({
+      entity,
+      identityFields: typeDefinition.discoveryDefinition.identityFields,
+    });
+
+    const indexPatterns = entityDataStreamsFetch.value.dataStreams.map(
+      (dataStream) => dataStream.name
+    );
+
+    const baseQuery = `FROM ${indexPatterns.join(', ')}`;
+
+    const logsQuery = `${baseQuery} | LIMIT 100`;
+
+    const histogramQuery = `${baseQuery} | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 minute)`;
+
+    return {
+      logsQuery,
+      histogramQuery,
+      baseDslFilter,
+    };
+  }, [entityDataStreamsFetch.value?.dataStreams, typeDefinition, entity]);
+
+  const logsQueryResult = useEsqlQueryResult({
+    query: queries?.logsQuery,
+    start,
+    end,
+    kqlFilter: persistedKqlFilter,
+    dslFilter: queries?.baseDslFilter,
+  });
+
+  const histogramQueryResult = useEsqlQueryResult({
+    query: queries?.histogramQuery,
+    start,
+    end,
+    kqlFilter: persistedKqlFilter,
+    dslFilter: queries?.baseDslFilter,
+  });
 
   const columnAnalysis = useMemo(() => {
     if (logsQueryResult.value) {
@@ -60,8 +121,97 @@ export function EntityOverview({
     return undefined;
   }, [logsQueryResult]);
 
+  const dataViewsFetch = useAbortableAsync(() => {
+    if (!entityDataStreamsFetch.value?.dataStreams.length) {
+      return Promise.resolve([]);
+    }
+
+    return dataViews
+      .create(
+        {
+          title: entityDataStreamsFetch.value.dataStreams
+            .map((dataStream) => dataStream.name)
+            .join(','),
+          timeFieldName: '@timestamp',
+        },
+        false, // skip fetch fields
+        true // display errors
+      )
+      .then((response) => {
+        return [response];
+      });
+  }, [dataViews, entityDataStreamsFetch.value]);
+
+  const fetchedDataViews = useMemo(() => dataViewsFetch.value ?? [], [dataViewsFetch.value]);
+
   return (
     <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiFlexItem grow>
+          <InventorySearchBar
+            query={displayedKqlFilter}
+            onQueryChange={({ query }) => {
+              setDisplayedKqlFilter(query);
+            }}
+            onQuerySubmit={() => {
+              setPersistedKqlFilter(displayedKqlFilter);
+            }}
+            onRefresh={() => {
+              logsQueryResult.refresh();
+              histogramQueryResult.refresh();
+            }}
+            placeholder={i18n.translate('xpack.inventory.entityOverview.searchBarPlaceholder', {
+              defaultMessage: 'Filter data by using KQL',
+            })}
+            dataViews={fetchedDataViews}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          className={css`
+            width: 240px;
+          `}
+        >
+          <EuiSuperSelect
+            data-test-subj="inventoryEntityOverviewSelect"
+            itemClassName={css`
+              white-space: nowrap;
+              display: inline-block;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              margin-left: 4px;
+            `}
+            options={[
+              ...(entityDataStreamsFetch.loading
+                ? []
+                : [
+                    {
+                      value: '',
+                      inputDisplay: i18n.translate(
+                        'xpack.inventory.entityOverview.allDataStreamsSelected',
+                        {
+                          defaultMessage:
+                            '{count,plural, one {# data stream} other {All # data streams}}',
+                          values: {
+                            count: entityDataStreamsFetch.value?.dataStreams.length,
+                          },
+                        }
+                      ),
+                    },
+                  ]),
+              ...(entityDataStreamsFetch.value?.dataStreams.map((dataStream) => ({
+                value: dataStream.name,
+                inputDisplay: dataStream.name,
+              })) ?? []),
+            ]}
+            valueOfSelected={selectedDataStream}
+            isLoading={entityDataStreamsFetch.loading}
+            onChange={(next) => {
+              setSelectedDataStream(next);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiPanel hasShadow={false} hasBorder>
         <EuiFlexGroup direction="column">
           <EuiTitle size="xs">
@@ -112,11 +262,13 @@ export function EntityOverview({
               </EuiFlexGroup>
             </>
           ) : null}
-          <ControlledEsqlGrid
-            query={logsQuery}
-            result={logsQueryResult}
-            initialColumns={columnAnalysis?.initialColumns}
-          />
+          {queries?.logsQuery ? (
+            <ControlledEsqlGrid
+              query={queries?.logsQuery}
+              result={logsQueryResult}
+              initialColumns={columnAnalysis?.initialColumns}
+            />
+          ) : null}
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexGroup>

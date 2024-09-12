@@ -62,7 +62,7 @@ export function ControlledEsqlGrid({
       query={{ esql: query }}
       flyoutType="overlay"
       isTableView
-      initialRowHeight={0}
+      initialRowHeight={1}
     />
   );
 }

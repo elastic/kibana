@@ -23,6 +23,7 @@ import {
   ExtractServiceDefinitionOutputCompleteEvent,
   extractServiceDefinitions,
 } from './extract_service_definitions';
+import { getDataStreamsForFilter } from './get_data_streams_for_filter';
 
 const listServiceDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/service_definitions',
@@ -53,7 +54,7 @@ const listServiceDefinitionsRoute = createInventoryServerRoute({
         indexPatterns: params?.body?.indexPatterns,
       });
 
-      return fetchedDatasets.map((dataset) => dataset.entity.name);
+      return fetchedDatasets.map((dataset) => dataset.entity.id);
     }
 
     async function fetchEntityDefinitions() {
@@ -177,6 +178,38 @@ const listServiceDefinitionsRoute = createInventoryServerRoute({
   },
 });
 
+const dataStreamsForEntitiesRoute = createInventoryServerRoute({
+  endpoint: 'POST /internal/inventory/entities/data_streams_for_entity',
+  options: {
+    tags: ['access:inventory'],
+  },
+  params: t.type({
+    body: t.type({
+      kql: t.string,
+      indexPatterns: t.array(t.string),
+    }),
+  }),
+  handler: async ({
+    params,
+    context,
+    logger,
+  }): Promise<{ dataStreams: Array<{ name: string }> }> => {
+    const esClient = createObservabilityEsClient({
+      client: (await context.core).elasticsearch.client.asCurrentUser,
+      logger,
+      plugin: 'inventory',
+    });
+
+    return {
+      dataStreams: await getDataStreamsForFilter({
+        kql: params.body.kql,
+        esClient,
+        indexPatterns: params.body.indexPatterns,
+      }),
+    };
+  },
+});
+
 const extractServiceDefinitionsRoute = createInventoryServerRoute({
   endpoint: 'POST /internal/inventory/service_definitions/extract',
   options: {
@@ -269,4 +302,5 @@ export const entitiesRoutes = {
   ...listEntityTypesRoute,
   ...listServiceDefinitionsRoute,
   ...extractServiceDefinitionsRoute,
+  ...dataStreamsForEntitiesRoute,
 };

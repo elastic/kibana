@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Required } from 'utility-types';
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -21,6 +21,8 @@ import type { Entity, EntityTypeDefinition } from '../../../common/entities';
 import { esqlResultToPlainObjects } from '../../util/esql_result_to_plain_objects';
 import { LoadingPanel } from '../loading_panel';
 import { EntityOverview } from '../entity_overview';
+import { EntityMetadata } from '../entity_metadata';
+import { EntityRelationshipsView } from '../entity_relationships_view';
 
 export function EntityDetailView<TEntity extends Entity>() {
   const {
@@ -39,17 +41,15 @@ export function EntityDetailView<TEntity extends Entity>() {
 
   const typeDefinitionFetch = useAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient
-        .fetch('GET /internal/inventory/entity_types', {
-          signal,
-        })
-        .then((response) => {
-          return response.definitions.find(
-            (definition) => definition.discoveryDefinition?.type === type
-          );
-        });
+      return inventoryAPIClient.fetch('GET /internal/inventory/entity_types', {
+        signal,
+      });
     },
-    [inventoryAPIClient, type]
+    [inventoryAPIClient]
+  );
+
+  const typeDefinition = typeDefinitionFetch.value?.definitions.find(
+    (definition) => definition.discoveryDefinition?.type === type
   );
 
   const entity = useMemo<TEntity | undefined>(() => {
@@ -67,12 +67,20 @@ export function EntityDetailView<TEntity extends Entity>() {
     } as TEntity;
   }, [entityQueryResult.value]);
 
-  useInventoryBreadcrumbs(
-    () => ({ title: id, path: `/{type}/{id}`, params: { path: { id } } }),
-    [id]
-  );
+  useInventoryBreadcrumbs(() => {
+    if (!typeDefinition) {
+      return [];
+    }
 
-  const typeDefinition = typeDefinitionFetch.value;
+    return [
+      {
+        title: typeDefinition?.discoveryDefinition?.name ?? typeDefinition.name,
+        path: `/{type}`,
+        params: { path: { id } },
+      },
+      { title: id, path: `/{type}/{id}`, params: { path: { id } } },
+    ];
+  }, [id]);
 
   if (!entity || !typeDefinition || !typeDefinition.discoveryDefinition) {
     return <LoadingPanel />;
@@ -96,25 +104,31 @@ export function EntityDetailView<TEntity extends Entity>() {
       label: i18n.translate('xpack.inventory.entityDetailView.metadataTabLabel', {
         defaultMessage: 'Metadata',
       }),
-      content: <></>,
+      content: <EntityMetadata entity={entity} />,
     },
-    related: {
-      href: router.link('/{type}/{id}/{tab}', { path: { type, id, tab: 'related' } }),
+    relationships: {
+      href: router.link('/{type}/{id}/{tab}', { path: { type, id, tab: 'relationships' } }),
       label: i18n.translate('xpack.inventory.entityDetailView.relatedTabLabel', {
-        defaultMessage: 'Related entities',
+        defaultMessage: 'Relationships',
       }),
-      content: <></>,
+      content: (
+        <EntityRelationshipsView
+          entity={entity}
+          typeDefinition={typeDefinition as Required<EntityTypeDefinition, 'discoveryDefinition'>}
+          allTypeDefinitions={typeDefinitionFetch.value!.definitions}
+        />
+      ),
     },
   };
 
   const selectedTab = tabs[tab as keyof typeof tabs];
 
-  console.log(selectedTab);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <InventoryPageHeader>
-        <InventoryPageHeaderTitle title={id} />
+        <InventoryPageHeaderTitle title={id}>
+          <EuiBadge>{type}</EuiBadge>
+        </InventoryPageHeaderTitle>
       </InventoryPageHeader>
       <EntityOverviewTabList
         tabs={Object.entries(tabs).map(([key, { label, href }]) => {
