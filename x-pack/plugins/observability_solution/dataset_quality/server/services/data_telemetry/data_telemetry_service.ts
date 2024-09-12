@@ -11,7 +11,7 @@ import {
   delay,
   filter,
   tap,
-  take,
+  // take,
   takeWhile,
   exhaustMap,
   switchMap,
@@ -130,11 +130,11 @@ export class DataTelemetryService {
               service.logger.debug(`[Logs Data Telemetry] Running task`);
 
               try {
-                service.run$.pipe(take(1)).subscribe({
-                  complete: () => {
-                    service.logger.debug(`[Logs Data Telemetry] Task completed`);
-                  },
-                });
+                // service.run$.pipe(take(1)).subscribe({
+                //   complete: () => {
+                //     service.logger.debug(`[Logs Data Telemetry] Task completed`);
+                //   },
+                // });
 
                 return { state };
               } catch (e) {
