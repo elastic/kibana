@@ -147,7 +147,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     const { params } = resources;
 
     const {
-      body: { name, messages, connectorId, functions, functionCall, scope },
+      body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
     const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(

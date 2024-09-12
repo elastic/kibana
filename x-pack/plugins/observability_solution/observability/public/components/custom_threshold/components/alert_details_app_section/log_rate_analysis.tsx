@@ -219,6 +219,7 @@ export function LogRateAnalysis({
             <ObservabilityAIAssistantContextualInsight
               title={logRateAnalysisTitle}
               messages={messages}
+              scope="observability"
             />
           </EuiFlexItem>
         ) : null}

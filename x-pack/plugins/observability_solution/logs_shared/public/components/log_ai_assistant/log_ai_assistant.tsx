@@ -69,6 +69,7 @@ export const LogAIAssistant = ({
             title={explainLogMessageTitle}
             messages={explainLogMessageMessages}
             dataTestSubj="obsAiAssistantInsightButtonExplainLogMessage"
+            scope="observability"
           />
         </EuiFlexItem>
       ) : null}
@@ -78,6 +79,7 @@ export const LogAIAssistant = ({
             title={similarLogMessagesTitle}
             messages={similarLogMessageMessages}
             dataTestSubj="obsAiAssistantInsightButtonSimilarLogMessage"
+            scope="observability"
           />
         </EuiFlexItem>
       ) : null}

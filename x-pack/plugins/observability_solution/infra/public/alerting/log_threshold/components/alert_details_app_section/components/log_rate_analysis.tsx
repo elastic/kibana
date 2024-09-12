@@ -241,6 +241,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
             <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
               title={logRateAnalysisTitle}
               messages={messages}
+              scope="observability"
             />
           </EuiFlexItem>
         ) : null}

@@ -101,6 +101,7 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
             { defaultMessage: 'Help me understand this alert' }
           )}
           messages={getAlertContextMessages}
+          scope="observability"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
