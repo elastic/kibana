@@ -18,11 +18,7 @@ export const connectorResponseSchema = schema.object({
       description: ' The name of the rule.',
     },
   }),
-  config: schema.maybe(
-    schema.recordOf(schema.string(), schema.any(), {
-      meta: { description: 'The configurations for the connector.' },
-    })
-  ),
+  config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   connector_type_id: schema.string({
     meta: { description: 'The connector type identifier.' },
   }),
