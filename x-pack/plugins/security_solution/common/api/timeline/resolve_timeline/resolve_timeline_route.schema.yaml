@@ -15,7 +15,8 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ResolveTimeline
-      summary: Get an existing saved timeline or timeline template.
+      summary: Resolve a Timeline or Timeline template
+      description: 
       tags:
         - access:securitySolution
       parameters:
