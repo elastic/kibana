@@ -15,7 +15,10 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { IndexManagementPluginSetup, IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import {
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
