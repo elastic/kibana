@@ -103,6 +103,10 @@ describe('DocViewerTable', () => {
   });
 
   describe('search', () => {
+    afterEach(() => {
+      storage.clear();
+    });
+
     it('should find by field name', async () => {
       render(
         <IntlProvider locale="en">
@@ -121,7 +125,7 @@ describe('DocViewerTable', () => {
       });
 
       expect(screen.queryByText('@timestamp')).toBeNull();
-      expect(screen.getByText('bytes')).toBeInTheDocument();
+      expect(screen.queryByText('bytes')).toBeInTheDocument();
       expect(screen.queryByText('extension.keyword')).toBeNull();
     });
 
@@ -142,7 +146,7 @@ describe('DocViewerTable', () => {
         });
       });
 
-      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.queryByText('@timestamp')).toBeInTheDocument();
       expect(screen.queryByText('bytes')).toBeNull();
       expect(screen.queryByText('extension.keyword')).toBeNull();
     });
