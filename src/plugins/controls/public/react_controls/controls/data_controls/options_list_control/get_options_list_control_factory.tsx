@@ -25,7 +25,7 @@ import type {
 } from '../../../../../common/options_list';
 import { getSelectionAsFieldType, isValidSearch } from '../../../../../common/options_list';
 import { initializeDataControl } from '../initialize_data_control';
-import type { DataControlFactory, DataControlServices } from '../types';
+import type { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
@@ -39,9 +39,10 @@ import { initializeOptionsListSelections } from './options_list_control_selectio
 import { OptionsListStrings } from './options_list_strings';
 import type { OptionsListControlApi } from './types';
 
-export const getOptionsListControlFactory = (
-  services: DataControlServices
-): DataControlFactory<OptionsListControlState, OptionsListControlApi> => {
+export const getOptionsListControlFactory = (): DataControlFactory<
+  OptionsListControlState,
+  OptionsListControlApi
+> => {
   return {
     type: OPTIONS_LIST_CONTROL,
     order: 3, // should always be first, since this is the most popular control
@@ -90,8 +91,7 @@ export const getOptionsListControlFactory = (
         'optionsListDataView',
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
-        controlGroupApi,
-        services
+        controlGroupApi
       );
 
       const selections = initializeOptionsListSelections(
@@ -161,7 +161,6 @@ export const getOptionsListControlFactory = (
       /** Fetch the suggestions and perform validation */
       const loadMoreSubject = new BehaviorSubject<null>(null);
       const fetchSubscription = fetchAndValidate$({
-        services,
         api: {
           ...dataControl.api,
           loadMoreSubject,

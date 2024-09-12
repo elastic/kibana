@@ -33,7 +33,7 @@ import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/pub
 
 import { ACTION_DELETE_CONTROL } from '.';
 import { CONTROL_GROUP_TYPE } from '..';
-import { pluginServices } from '../services';
+import { coreServices } from '../services/kibana_services';
 
 export type DeleteControlActionApi = HasType &
   HasUniqueId &
@@ -54,13 +54,7 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_DELETE_CONTROL;
   public order = 100; // should always be last
 
-  private openConfirm;
-
-  constructor() {
-    ({
-      overlays: { openConfirm: this.openConfirm },
-    } = pluginServices.getServices());
-  }
+  constructor() {}
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
@@ -99,26 +93,28 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
-    this.openConfirm(
-      i18n.translate('controls.controlGroup.management.delete.sub', {
-        defaultMessage: 'Controls are not recoverable once removed.',
-      }),
-      {
-        confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-          defaultMessage: 'Delete',
+    coreServices.overlays
+      .openConfirm(
+        i18n.translate('controls.controlGroup.management.delete.sub', {
+          defaultMessage: 'Controls are not recoverable once removed.',
         }),
-        cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-          defaultMessage: 'Cancel',
-        }),
-        title: i18n.translate('controls.controlGroup.management.delete.deleteTitle', {
-          defaultMessage: 'Delete control?',
-        }),
-        buttonColor: 'danger',
-      }
-    ).then((confirmed) => {
-      if (confirmed) {
-        embeddable.parentApi.removePanel(embeddable.uuid);
-      }
-    });
+        {
+          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
+            defaultMessage: 'Delete',
+          }),
+          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
+            defaultMessage: 'Cancel',
+          }),
+          title: i18n.translate('controls.controlGroup.management.delete.deleteTitle', {
+            defaultMessage: 'Delete control?',
+          }),
+          buttonColor: 'danger',
+        }
+      )
+      .then((confirmed) => {
+        if (confirmed) {
+          embeddable.parentApi.removePanel(embeddable.uuid);
+        }
+      });
   }
 }

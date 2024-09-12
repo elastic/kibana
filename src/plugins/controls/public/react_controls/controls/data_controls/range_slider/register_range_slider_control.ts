@@ -8,21 +8,18 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { RANGE_SLIDER_CONTROL } from '../../../../../common';
+import { untilPluginStartServicesReady } from '../../../../services/kibana_services';
 import type { ControlsPluginStartDeps } from '../../../../types';
 import { registerControlFactory } from '../../../control_factory_registry';
-import { RANGE_SLIDER_CONTROL } from '../../../../../common';
 
 export function registerRangeSliderControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
   registerControlFactory(RANGE_SLIDER_CONTROL, async () => {
-    const [{ getRangesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
+    const [{ getRangesliderControlFactory }] = await Promise.all([
       import('./get_range_slider_control_factory'),
-      coreSetup.getStartServices(),
+      untilPluginStartServicesReady(),
     ]);
 
-    return getRangesliderControlFactory({
-      core: coreStart,
-      data: depsStart.data,
-      dataViews: depsStart.data.dataViews,
-    });
+    return getRangesliderControlFactory();
   });
 }

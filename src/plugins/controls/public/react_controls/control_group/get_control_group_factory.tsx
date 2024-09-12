@@ -11,9 +11,7 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -45,13 +43,11 @@ import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
 import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 
 const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 
-export const getControlGroupEmbeddableFactory = (services: {
-  core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
-}) => {
+export const getControlGroupEmbeddableFactory = () => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
     ControlGroupSerializedState,
     ControlGroupRuntimeState,
@@ -75,7 +71,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const defaultDataViewId = await services.dataViews.getDefaultId();
+      const defaultDataViewId = await dataViewsService.getDefaultId();
       const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
         lastSavedRuntimeState.initialChildControlState
       );
@@ -159,16 +155,12 @@ export const getControlGroupEmbeddableFactory = (services: {
         },
         dataLoading: dataLoading$,
         onEdit: async () => {
-          openEditControlGroupFlyout(
-            api,
-            {
-              chainingSystem: chainingSystem$,
-              labelPosition: labelPosition$,
-              autoApplySelections: autoApplySelections$,
-              ignoreParentSettings: ignoreParentSettings$,
-            },
-            { core: services.core }
-          );
+          openEditControlGroupFlyout(api, {
+            chainingSystem: chainingSystem$,
+            labelPosition: labelPosition$,
+            autoApplySelections: autoApplySelections$,
+            ignoreParentSettings: ignoreParentSettings$,
+          });
         },
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
@@ -193,7 +185,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               settings?.onSave?.();
             },
             controlGroupApi: api,
-            services,
           });
         },
         serializeState: () => {
@@ -265,7 +256,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
             const fetchAllowExpensiveQueries = async () => {
               try {
-                const { allowExpensiveQueries } = await services.core.http.get<{
+                const { allowExpensiveQueries } = await coreServices.http.get<{
                   allowExpensiveQueries: boolean;
                   // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
                 }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {

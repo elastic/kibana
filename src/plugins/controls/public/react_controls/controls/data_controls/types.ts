@@ -62,12 +62,6 @@ export const isDataControlFactory = (
   return typeof (factory as DataControlFactory).isFieldCompatible === 'function';
 };
 
-export interface DataControlServices {
-  core: CoreStart;
-  data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-}
-
 interface DataControlField {
   field: DataViewField;
   compatibleControlTypes: string[];
