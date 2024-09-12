@@ -38,10 +38,10 @@ export const useMisconfigurationPreview = (options: UseMisconfigurationOptions) 
           params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
         })
       );
-      if (!aggregations) throw new Error('expected aggregations to be defined');
-
+      if (!aggregations && !options.ignore_unavailable)
+        throw new Error('expected aggregations to be defined');
       return {
-        count: getMisconfigurationAggregationCount(aggregations.count.buckets),
+        count: getMisconfigurationAggregationCount(aggregations?.count?.buckets),
       };
     },
     {

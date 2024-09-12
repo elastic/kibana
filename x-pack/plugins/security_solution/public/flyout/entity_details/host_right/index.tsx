@@ -103,6 +103,7 @@ export const HostPanel = ({
     sort: [],
     enabled: true,
     pageSize: 1,
+    ignore_unavailable: true,
   });
 
   const passedFindings = data?.count.passed || 0;

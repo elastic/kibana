@@ -39,8 +39,8 @@ export const HostDetailsPanel = ({
   name,
   isRiskScoreExist,
   scopeId,
-  isMisconfigurationFindingsExist,
   path,
+  isMisconfigurationFindingsExist,
 }: HostDetailsPanelProps) => {
   const [selectedTabId, setSelectedTabId] = useState(
     path?.tab === EntityDetailsLeftPanelTab.CSP_INSIGHTS

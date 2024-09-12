@@ -67,6 +67,7 @@ export interface UseMisconfigurationOptions extends MisconfigurationBaseEsQuery 
   sort: string[][];
   enabled: boolean;
   pageSize: number;
+  ignore_unavailable?: boolean;
 }
 
 export type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;

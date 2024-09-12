@@ -14,6 +14,12 @@ import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import type { UseMisconfigurationOptions } from '../../type';
 
+interface AggregationBucket {
+  doc_count?: number;
+}
+
+type AggregationBuckets = Record<string, AggregationBucket>;
+
 const RESULT_EVALUATION = {
   PASSED: 'passed',
   FAILED: 'failed',
@@ -33,9 +39,17 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
 });
 
 export const getMisconfigurationAggregationCount = (
-  buckets: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
+  buckets?: estypes.AggregationsBuckets<estypes.AggregationsStringRareTermsBucketKeys>
 ) => {
-  return Object.entries(buckets).reduce(
+  const defaultBuckets: AggregationBuckets = {
+    [RESULT_EVALUATION.PASSED]: { doc_count: 0 },
+    [RESULT_EVALUATION.FAILED]: { doc_count: 0 },
+    [RESULT_EVALUATION.UNKNOWN]: { doc_count: 0 },
+  };
+
+  // if buckets are undefined we will use default buckets
+  const usedBuckets = buckets || defaultBuckets;
+  return Object.entries(usedBuckets).reduce(
     (evaluation, [key, value]) => {
       evaluation[key] = (evaluation[key] || 0) + (value.doc_count || 0);
       return evaluation;
@@ -59,7 +73,7 @@ export const buildMisconfigurationsFindingsQuery = (
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: isPreview ? 0 : 500,
     aggs: getFindingsCountAggQueryMisconfiguration(),
-    ignore_unavailable: false,
+    ignore_unavailable: true,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
   };
 };
