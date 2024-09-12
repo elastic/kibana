@@ -158,7 +158,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
 
-  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading: dataViewListLoading,
     value: dataViewListItems = [],
@@ -167,7 +166,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     return dataViewsService.getIdsWithTitle();
   });
 
-  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading: dataViewLoading,
     value: { selectedDataView, fieldRegistry } = {
