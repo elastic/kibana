@@ -18,6 +18,18 @@ const LazyLogsOverview = dynamic(() =>
   import('@kbn/observability-logs-overview').then((mod) => ({ default: mod.LogsOverview }))
 );
 
+const LazyLogsOverviewErrorContent = dynamic(() =>
+  import('@kbn/observability-logs-overview').then((mod) => ({
+    default: mod.LogsOverviewErrorContent,
+  }))
+);
+
+const LazyLogsOverviewLoadingContent = dynamic(() =>
+  import('@kbn/observability-logs-overview').then((mod) => ({
+    default: mod.LogsOverviewLoadingContent,
+  }))
+);
+
 export type LogsOverviewProps = Omit<FullLogsOverviewProps, 'dependencies'>;
 
 export const createLogsOverview = (dependencies: LogsOverviewDependencies) => {
@@ -33,6 +45,10 @@ export const createLogsOverview = (dependencies: LogsOverviewDependencies) => {
   SelfContainedLogsOverview.useIsEnabled = (): boolean => {
     return useObservable<boolean>(isEnabled$, defaultIsEnabled);
   };
+
+  SelfContainedLogsOverview.ErrorContent = LazyLogsOverviewErrorContent;
+
+  SelfContainedLogsOverview.LoadingContent = LazyLogsOverviewLoadingContent;
 
   return SelfContainedLogsOverview;
 };

@@ -14,7 +14,7 @@ import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../com
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
@@ -86,7 +86,7 @@ export function ServiceLogsOverview() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const timeRange = useMemo(() => ({ start, end }), [start, end]);
 
-  const { data: logFilters } = useFetcher(
+  const { data: logFilters, status } = useFetcher(
     async (callApmApi) => {
       if (start == null || end == null) {
         return;
@@ -112,7 +112,15 @@ export function ServiceLogsOverview() {
     [environment, kuery, serviceName, start, end]
   );
 
-  return <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
+  if (status === FETCH_STATUS.SUCCESS) {
+    return <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
+  } else if (status === FETCH_STATUS.FAILURE) {
+    return (
+      <logsShared.LogsOverview.ErrorContent error={new Error('Failed to fetch service details')} />
+    );
+  } else {
+    return <logsShared.LogsOverview.LoadingContent />;
+  }
 }
 
 export function getInfrastructureKQLFilter({

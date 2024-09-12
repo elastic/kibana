@@ -7,7 +7,10 @@
 
 export {
   LogsOverview,
+  LogsOverviewErrorContent,
+  LogsOverviewLoadingContent,
   type LogsOverviewDependencies,
+  type LogsOverviewErrorContentProps,
   type LogsOverviewProps,
 } from './src/components/logs_overview';
 export type {
