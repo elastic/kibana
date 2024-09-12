@@ -9,8 +9,6 @@ import { run } from '@kbn/dev-cli-runner';
 import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
-import { compact } from 'lodash';
-import pLimit from 'p-limit';
 import Path from 'path';
 import yargs, { Argv } from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -22,7 +20,7 @@ import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './sync-built-docs-repo';
 import { extractDocEntries } from './extract_doc_entries';
-import { generateDoc } from './generate_doc';
+import { generateDoc, FileToWrite } from './generate_doc';
 
 yargs(process.argv.slice(2))
   .command(
@@ -36,15 +34,15 @@ yargs(process.argv.slice(2))
           default: process.env.LOG_LEVEL || 'info',
           choices: ['info', 'debug', 'silent', 'verbose'],
         })
-        .option('only', {
-          describe: 'Only regenerate these files',
-          string: true,
-          array: true,
-        })
         .option('dryRun', {
           describe: 'Do not write or delete any files',
           boolean: true,
           default: false,
+        })
+        .option('syncDocs', {
+          describe: 'Sync doc repository before generation',
+          boolean: true,
+          default: true,
         })
         .option('kibana', kibanaOption)
         .option('elasticsearch', elasticsearchOption)
@@ -78,125 +76,66 @@ yargs(process.argv.slice(2))
           const builtDocsDir = Path.join(REPO_ROOT, '../built-docs');
           log.info(`Looking in ${builtDocsDir} for built-docs repository`);
 
-          // TODO: uncomment
-          // await syncBuiltDocs({ builtDocsDir, log });
+          if (argv.syncDocs) {
+            log.info(`Running sync for built-docs repository in ${builtDocsDir}...`);
+            await syncBuiltDocs({ builtDocsDir, log });
+          }
 
-          // TODO: uncomment
-          // const extraction = await extractDocEntries({
-          //   builtDocsDir,
-          //   inferenceClient: chatClient,
-          //   log,
-          // });
+          log.info(`Retrieving and converting documentation from ${builtDocsDir}...`);
+          const extraction = await extractDocEntries({
+            builtDocsDir,
+            inferenceClient: chatClient,
+            log,
+          });
 
-          const tempFileName = Path.join(REPO_ROOT, './extraction.json');
-
-          // await Fs.writeFile(tempFileName, JSON.stringify(extraction, undefined, 2));
-
-          const extraction = JSON.parse((await Fs.readFile(tempFileName)).toString('utf-8'));
-
+          log.info(`Rewriting documentation...`);
           const docFiles = await generateDoc({
             extraction,
             inferenceClient: chatClient,
             log,
           });
 
-          // console.log('*** extraction');
-          // console.log(JSON.stringify(extraction, undefined, 2));
+          log.info(`Correcting common ESQL mistakes...`);
+          docFiles.forEach((docFile) => {
+            docFile.content = docFile.content.replaceAll(
+              INLINE_ESQL_QUERY_REGEX,
+              (match, query) => {
+                const correctionResult = correctCommonEsqlMistakes(query);
+                if (correctionResult.isCorrection) {
+                  log.info(
+                    `Corrected ES|QL, from:\n${correctionResult.input}\nto:\n${correctionResult.output}`
+                  );
+                }
+                return '```esql\n' + correctionResult.output + '\n```';
+              }
+            );
+          });
 
           const outDir = Path.join(__dirname, '../../server/tasks/nl_to_esql/esql_docs');
 
-          await Promise.all(
-            docFiles.map(async (file) => {
-              const fileName = Path.join(outDir, file.name);
-              await Fs.writeFile(fileName, file.content);
-            })
-          );
-
-          return;
-
           if (!argv.dryRun) {
             log.info(`Writing ${docFiles.length} documents to disk to ${outDir}`);
-          }
 
-          if (!argv.only && !argv.dryRun) {
-            log.debug(`Clearing ${outDir}`);
-
-            await Fs.readdir(outDir, { recursive: true })
-              .then((filesInDir) => {
-                const limiter = pLimit(10);
-                return Promise.all(filesInDir.map((file) => limiter(() => Fs.unlink(file))));
-              })
-              .catch((error) => (error.code === 'ENOENT' ? Promise.resolve() : error));
-          }
-
-          if (!argv.dryRun) {
             await Fs.mkdir(outDir).catch((error) =>
               error.code === 'EEXIST' ? Promise.resolve() : error
             );
+
+            await Promise.all(
+              docFiles.map(async (file) => {
+                const fileName = Path.join(outDir, file.name);
+                await Fs.writeFile(fileName, file.content);
+              })
+            );
           }
 
-          const allErrors: Array<{
-            title: string;
-            fileName: string;
-            errors: Array<{ query: string; errors: Array<ESQLMessage | EditorError> }>;
-          }> = [];
-
-          async function writeFile(doc: { title: string; content: string }) {
-            const fileName = Path.join(
-              outDir,
-              `esql-${doc.title.replaceAll(' ', '-').toLowerCase()}.txt`
-            );
-
-            doc.content = doc.content.replaceAll(INLINE_ESQL_QUERY_REGEX, (match, query) => {
-              const correctionResult = correctCommonEsqlMistakes(query);
-              if (correctionResult.isCorrection) {
-                log.info(
-                  `Corrected ES|QL, from:\n${correctionResult.input}\nto:\n${correctionResult.output}`
-                );
-              }
-              return '```esql\n' + correctionResult.output + '\n```';
-            });
-
-            const queriesWithSyntaxErrors = compact(
-              await Promise.all(
-                Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).map(
-                  async ([match, query]) => {
-                    const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, {
-                      // setting this to true, we don't want to validate the index / fields existence
-                      ignoreOnMissingCallbacks: true,
-                    });
-
-                    const all = [...errors, ...warnings];
-                    if (all.length) {
-                      log.warning(
-                        `Error in ${fileName}:\n${JSON.stringify({ errors, warnings }, null, 2)}`
-                      );
-                      return {
-                        errors: all,
-                        query,
-                      };
-                    }
-                  }
-                )
-              )
-            );
-
-            if (queriesWithSyntaxErrors.length) {
-              allErrors.push({
-                title: doc.title,
-                fileName,
-                errors: queriesWithSyntaxErrors,
-              });
-            }
-
-            if (!argv.dryRun) {
-              await Fs.writeFile(fileName, doc.content);
-            }
-          }
+          log.info(`Checking syntax...`);
+          const syntaxErrors = (
+            await Promise.all(docFiles.map(async (file) => await findEsqlSyntaxError(file)))
+          ).flat();
 
           log.warning(
             `Please verify the following queries that had syntax errors\n${JSON.stringify(
-              allErrors,
+              syntaxErrors,
               null,
               2
             )}`
@@ -207,3 +146,31 @@ yargs(process.argv.slice(2))
     }
   )
   .parse();
+
+interface SyntaxError {
+  query: string;
+  errors: Array<ESQLMessage | EditorError>;
+}
+
+const findEsqlSyntaxError = async (doc: FileToWrite): Promise<SyntaxError[]> => {
+  return Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).reduce(
+    async (listP, [match, query]) => {
+      const list = await listP;
+      const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, {
+        // setting this to true, we don't want to validate the index / fields existence
+        ignoreOnMissingCallbacks: true,
+      });
+
+      const all = [...errors, ...warnings];
+      if (all.length) {
+        list.push({
+          errors: all,
+          query,
+        });
+      }
+
+      return list;
+    },
+    Promise.resolve([] as SyntaxError[])
+  );
+};

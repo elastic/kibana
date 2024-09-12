@@ -12,7 +12,7 @@ import type { ExtractionOutput } from './extract_doc_entries';
 import { createDocumentationPagePrompt, rewriteFunctionPagePrompt } from './prompts';
 import { bindOutput } from './utils/output_executor';
 
-interface FileToWrite {
+export interface FileToWrite {
   name: string;
   content: string;
 }
