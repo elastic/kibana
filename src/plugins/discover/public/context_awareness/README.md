@@ -37,6 +37,8 @@ Definitions for the available profile provider types are located in the [`profil
 
 Composable profiles operate similarly to middleware in that each of their extension point implementations are passed a `prev` argument, which can be called to access the results from profiles at previous context levels, and allows overwriting or composing a final result from the previous results. The function Discover calls to trigger the extension point merging process and obtain a final result from the combined profiles is referred to as a "merged accessor".
 
+The merging order for profiles is based on the context level hierarchy (`root` > `data source` > `document`), meaning the root profile is passed a base implementation as its `prev` argument, the data source profile is passed the root implementation as `prev` (if one exists, otherwise the base implementation), and document profiles are passed the data source implementation as `prev` (if one exists, otherwise the root or base implementation).
+
 The following diagram illustrates the extension point merging process:
 ![image](./docs/merged_accessors.png)
 

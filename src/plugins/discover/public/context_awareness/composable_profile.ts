@@ -38,6 +38,7 @@ export const getMergedAccessor = <TKey extends keyof Profile>(
   key: TKey,
   baseImpl: Profile[TKey]
 ) => {
+  // root, data source, and document profiles are merged in order
   return profiles.reduce((nextAccessor, profile) => {
     const currentAccessor = profile[key];
     return currentAccessor ? currentAccessor(nextAccessor) : nextAccessor;
