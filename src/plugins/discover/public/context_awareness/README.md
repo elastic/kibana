@@ -27,7 +27,7 @@ There are currently three context levels supported in Discover:
 
 Discover uses a concept called "composable profiles" to support context awareness. Composable profiles are implementations of a core `Profile` interface (or a subset of it) containing all of the available extension points Discover supports. A composable profile can be implemented at any context level through a "profile provider", responsible for defining the composable profile and its associated context resolution method, called `resolve`. Each provider's `resolve` method is passed a parameters object specific to its context level, which it uses to determine if its associated `profile` is a match. In cases where it is a match, the `resolve` method also returns related metadata in a `context` object.
 
-Within Discover there is always one active root profile, one active data source profile (as long as search results exist), and an active document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level providers within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which only becomes active when the current solution type is Observability, and the current data source contains logs data.
+Within Discover there is always one resolved root profile, one resolved data source profile (as long as search results exist), and a resolved document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level providers within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which is used when the current solution type is Observability, and the current data source contains logs data.
 
 Definitions for the core `Profile` interface are located in the [`types.ts`](types.ts) file.
 
@@ -186,6 +186,6 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
 
 /**
  * Navigate to Discover and execute the following ES|QL query
- * to activate the profile: `FROM my-example-logs`
+ * to resolve the profile: `FROM my-example-logs`
  */
 ```

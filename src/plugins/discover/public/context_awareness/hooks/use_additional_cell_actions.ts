@@ -24,7 +24,7 @@ import { useProfileAccessor } from './use_profile_accessor';
 export const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
 /**
- * Hook to register additional cell actions based on the active profiles
+ * Hook to register additional cell actions based on the resolved profiles
  * @param options Additional cell action options
  * @returns The current cell actions metadata
  */

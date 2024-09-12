@@ -170,9 +170,9 @@ export class ProfilesManager {
   }
 
   /**
-   * Retrieves an array of the active profiles
+   * Retrieves an array of the resolved profiles
    * @param options Options for getting the profiles
-   * @returns The active profiles
+   * @returns The resolved profiles
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
@@ -185,9 +185,9 @@ export class ProfilesManager {
   }
 
   /**
-   * Retrieves an observable of the active profiles that emits when the profiles change
+   * Retrieves an observable of the resolved profiles that emits when the profiles change
    * @param options Options for getting the profiles
-   * @returns The active profiles as an observable
+   * @returns The resolved profiles as an observable
    */
   public getProfiles$(options: GetProfilesOptions = {}) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(

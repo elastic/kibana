@@ -202,7 +202,7 @@ export interface Profile {
    */
 
   /**
-   * Gets default Discover app state that should be used when the profile becomes active
+   * Gets default Discover app state that should be used when the profile is resolved
    * @param params The default app state extension parameters
    * @returns The default app state
    */

@@ -14,9 +14,9 @@ import { useProfiles } from './use_profiles';
 import type { Profile } from '../types';
 
 /**
- * Hook to retrieve an extension point accessor based on the active profiles
+ * Hook to retrieve an extension point accessor based on the resolved profiles
  * @param key The key of the extension point
- * @param options Options to get the active profiles
+ * @param options Options to get the resolved profiles
  * @returns The resolved accessor function
  */
 export const useProfileAccessor = <TKey extends keyof Profile>(

@@ -12,9 +12,9 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { GetProfilesOptions } from '../profiles_manager';
 
 /**
- * Hook to retreive the active profiles
+ * Hook to retreive the resolved profiles
  * @param options Profiles options
- * @returns The active profiles
+ * @returns The resolved profiles
  */
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   const { profilesManager } = useDiscoverServices();
