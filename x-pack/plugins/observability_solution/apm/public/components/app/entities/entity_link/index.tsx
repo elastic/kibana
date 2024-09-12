@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiEmptyPrompt, EuiLink, EuiLoadingSpinner, EuiImage } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiImage, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_values';
 import { useServiceEntitySummaryFetcher } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
 import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { ApmPluginStartDeps } from '../../../../plugin';
 
@@ -38,6 +38,7 @@ export function EntityLink() {
   } = useApmParams('/link-to/entity/{serviceName}');
   const { isEntityCentricExperienceViewEnabled, entityManagerEnablementStatus } =
     useEntityManagerEnablementContext();
+
   const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
     serviceName,
     environment: ENVIRONMENT_ALL_VALUE,
@@ -52,91 +53,86 @@ export function EntityLink() {
     serviceEntitySummaryStatus === FETCH_STATUS.LOADING ||
     isPending(hasApmDataStatus)
   ) {
-    return (
-      <div>
-        <EuiLoadingSpinner />
-      </div>
-    );
+    return <EuiLoadingSpinner data-test-subj="apmEntityLinkLoadingSpinner" />;
   }
 
   if (
-    // When EEM is disabled we'll show the APM overview page.
-    isEntityCentricExperienceViewEnabled === false ||
-    // When EEM is enabled and the Service has APM and/or Logs data, we'll show the APM overview page
-    (serviceEntitySummary?.dataStreamTypes && serviceEntitySummary.dataStreamTypes.length > 0) ||
-    // When EEM is enabled and the service is not found on the EEM indices but it has APM data
-    hasApmData?.hasData === true
+    // When EEM is enabled and the service is not found on the EEM indices and there's no APM data, display a callout guiding on the limitations of EEM
+    isEntityCentricExperienceViewEnabled === true &&
+    (serviceEntitySummary?.dataStreamTypes === undefined ||
+      serviceEntitySummary.dataStreamTypes.length === 0) &&
+    hasApmData?.hasData !== true
   ) {
     return (
-      <Redirect
-        to={router.link('/services/{serviceName}/overview', {
-          path: { serviceName },
-          query: {
-            rangeFrom,
-            rangeTo,
-            kuery: '',
-            serviceGroup: '',
-            comparisonEnabled: true,
-            environment: ENVIRONMENT_ALL_VALUE,
-          },
-        })}
-      />
+      <ObservabilityPageTemplate pageHeader={pageHeader}>
+        <EuiEmptyPrompt
+          data-test-subj="apmEntityLinkEEMCallout"
+          icon={
+            <EuiImage
+              size="fullWidth"
+              src={theme.darkMode ? dashboardsDark : dashboardsLight}
+              alt=""
+            />
+          }
+          title={
+            <h2>
+              {i18n.translate('xpack.apm.entityLink.eemGuide.title', {
+                defaultMessage: 'Service not supported',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.apm.entityLink.eemGuide.description"
+                defaultMessage="Sorry, we aren't able to provide you with more details on this service yet due to {limitationsLink}."
+                values={{
+                  limitationsLink: (
+                    <EuiLink
+                      target="_blank"
+                      data-test-subj="apmEntityLinkLimitationsWithTheElasticEntityModelLink"
+                      href="https://ela.st/eem-limitations"
+                    >
+                      {i18n.translate('xpack.apm.entityLink.eemGuide.description.link', {
+                        defaultMessage: 'limitations with the Elastic Entity Model',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          }
+          actions={[
+            <EuiButtonEmpty
+              data-test-subj="apmEntityLinkGoBackButton"
+              iconType="arrowLeft"
+              onClick={() => {
+                window.history.back();
+              }}
+            >
+              {i18n.translate('xpack.apm.entityLink.eemGuide.goBackButtonLabel', {
+                defaultMessage: 'Go back',
+              })}
+            </EuiButtonEmpty>,
+          ]}
+        />
+      </ObservabilityPageTemplate>
     );
   }
 
-  // When EEM is enabled and the service is not found on the EEM indices display a callout guiding on the limitations of EEM
   return (
-    <ObservabilityPageTemplate pageHeader={pageHeader}>
-      <EuiEmptyPrompt
-        icon={
-          <EuiImage
-            size="fullWidth"
-            src={theme.darkMode ? dashboardsDark : dashboardsLight}
-            alt=""
-          />
-        }
-        title={
-          <h2>
-            {i18n.translate('xpack.apm.entityLink.eemGuide.title', {
-              defaultMessage: 'Service not supported',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.apm.entityLink.eemGuide.description"
-              defaultMessage="Sorry, we aren't able to provide you with more details on this service yet due to {limitationsLink}."
-              values={{
-                limitationsLink: (
-                  <EuiLink
-                    target="_blank"
-                    data-test-subj="apmEntityLinkLimitationsWithTheElasticEntityModelLink"
-                    href="https://ela.st/eem-limitations"
-                  >
-                    {i18n.translate('xpack.apm.entityLink.eemGuide.description.link', {
-                      defaultMessage: 'limitations with the Elastic Entity Model',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        }
-        actions={[
-          <EuiButtonEmpty
-            data-test-subj="apmEntityLinkGoBackButton"
-            iconType="arrowLeft"
-            onClick={() => {
-              window.history.back();
-            }}
-          >
-            {i18n.translate('xpack.apm.entityLink.eemGuide.goBackButtonLabel', {
-              defaultMessage: 'Go back',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-      />
-    </ObservabilityPageTemplate>
+    <Redirect
+      to={router.link('/services/{serviceName}/overview', {
+        path: { serviceName },
+        query: {
+          rangeFrom,
+          rangeTo,
+          kuery: '',
+          serviceGroup: '',
+          comparisonEnabled: true,
+          environment: ENVIRONMENT_ALL_VALUE,
+        },
+      })}
+    />
   );
 }

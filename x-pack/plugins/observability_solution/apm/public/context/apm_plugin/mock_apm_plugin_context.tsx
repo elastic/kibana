@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo } from 'react';
-import { RouterProvider } from '@kbn/typed-react-router-config';
-import { useHistory } from 'react-router-dom';
-import { createMemoryHistory, History } from 'history';
-import { merge, noop } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   LogsLocatorParams,
   NodeLogsLocatorParams,
   TraceLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
-import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
-import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
+import {
+  createObservabilityRuleTypeRegistryMock,
+  enableComparisonByDefault,
+} from '@kbn/observability-plugin/public';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { History, createMemoryHistory } from 'history';
+import { merge, noop } from 'lodash';
+import React, { ReactNode, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ConfigSchema } from '../..';
-import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { apmRouter } from '../../components/routing/apm_route_config';
+import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
+import { ApmThemeProvider } from '../../components/routing/app_root';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -65,6 +70,23 @@ const mockCore = merge({}, coreStart, {
         [apmEnableProfilingIntegration]: true,
       };
       return uiSettings[key];
+    },
+  },
+  data: {
+    query: {
+      queryString: { getQuery: jest.fn(), setQuery: jest.fn(), clearQuery: jest.fn() },
+      timefilter: {
+        timefilter: {
+          setTime: jest.fn(),
+          setRefreshInterval: jest.fn(),
+          getTime: jest.fn(),
+        },
+      },
+    },
+  },
+  observabilityShared: {
+    navigation: {
+      PageTemplate: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     },
   },
 });
@@ -203,11 +225,18 @@ export function MockApmPluginContextWrapper({
       })
     );
   }, [history, contextHistory]);
+
   return (
-    <ApmPluginContext.Provider value={contextValue}>
-      <RouterProvider router={apmRouter as any} history={usedHistory}>
-        {children}
-      </RouterProvider>
-    </ApmPluginContext.Provider>
+    <IntlProvider locale="en">
+      <KibanaContextProvider services={contextValue.core}>
+        <ApmPluginContext.Provider value={contextValue}>
+          <ApmThemeProvider>
+            <RouterProvider router={apmRouter as any} history={usedHistory}>
+              {children}
+            </RouterProvider>
+          </ApmThemeProvider>
+        </ApmPluginContext.Provider>
+      </KibanaContextProvider>
+    </IntlProvider>
   );
 }
