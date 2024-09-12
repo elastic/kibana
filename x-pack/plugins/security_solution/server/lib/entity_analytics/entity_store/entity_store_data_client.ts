@@ -34,21 +34,13 @@ export class EntityStoreDataClient {
     this.engineClient = new EngineDescriptorClient(options.soClient);
   }
 
-  /**
-  * HOST:INIT
-    curl -H 'Content-Type: application/json' \
-      -X POST \
-      -H 'kbn-xsrf: true' \
-      -H 'elastic-api-version: 2023-10-31' \
-      http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/init
-  */
   public async init(
     entityType: EntityType,
     { indexPattern = '', filter = '' }: InitEntityStoreRequestBody
   ): Promise<InitEntityStoreResponse> {
     const definition = getEntityDefinition(entityType);
 
-    this.options.logger.debug(`Initializing entity store for ${entityType}`);
+    this.options.logger.info(`Initializing entity store for ${entityType}`);
 
     const savedObj = await this.engineClient.init(entityType, definition, filter);
     await this.options.entityClient.createEntityDefinition({
@@ -63,14 +55,6 @@ export class EntityStoreDataClient {
     return { ...savedObj.attributes, ...updatedObj.attributes };
   }
 
-  /**
-  * HOST:START
-    curl -H 'Content-Type: application/json' \
-      -X POST \
-      -H 'kbn-xsrf: true' \
-      -H 'elastic-api-version: 2023-10-31' \
-      http:///elastic:changeme@localhost:5601/api/entity_store/engines/host/start
-  */
   public async start(entityType: EntityType) {
     const definition = getEntityDefinition(entityType);
 
@@ -82,7 +66,7 @@ export class EntityStoreDataClient {
       );
     }
 
-    this.options.logger.debug(`Starting entity store for ${entityType}`);
+    this.options.logger.info(`Starting entity store for ${entityType}`);
     await this.options.entityClient.startEntityDefinition(definition);
 
     const updatedObj = await this.engineClient.update(savedObj.id, 'started');
@@ -100,7 +84,7 @@ export class EntityStoreDataClient {
       );
     }
 
-    this.options.logger.debug(`Stopping entity store for ${entityType}`);
+    this.options.logger.info(`Stopping entity store for ${entityType}`);
     await this.options.entityClient.stopEntityDefinition(definition);
 
     const updatedObj = await this.engineClient.update(savedObj.id, 'stopped');
@@ -111,14 +95,6 @@ export class EntityStoreDataClient {
     return this.engineClient.get(entityType).then(ensureEngineExists(entityType));
   }
 
-  /**
-   * LIST
-    curl -H 'Content-Type: application/json' \
-      -X GET \
-      -H 'kbn-xsrf: true' \
-      -H 'elastic-api-version: 2023-10-31' \
-      http:///elastic:changeme@localhost:5601/api/entity_store/engines
-  */
   public async list() {
     return this.options.soClient
       .find<EngineDescriptor>({
@@ -133,7 +109,7 @@ export class EntityStoreDataClient {
   public async delete(entityType: EntityType, deleteData: boolean) {
     const savedObj = await this.engineClient.get(entityType).then(ensureEngineExists(entityType));
 
-    this.options.logger.debug(`Deleting entity store for ${entityType}`);
+    this.options.logger.info(`Deleting entity store for ${entityType}`);
 
     await this.options.entityClient.deleteEntityDefinition({ id: savedObj.id, deleteData });
     await this.engineClient.delete(savedObj.id); // QUESTION: What happens if this fails but the entity definition is successfully deleted?
