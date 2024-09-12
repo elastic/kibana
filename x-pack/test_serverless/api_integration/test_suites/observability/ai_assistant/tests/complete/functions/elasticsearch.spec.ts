@@ -30,7 +30,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('when calling elasticsearch', () => {
+  describe('when calling elasticsearch', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192751
+    this.tags(['skipMKI']);
     let proxy: LlmProxy;
     let connectorId: string;
     let events: MessageAddEvent[];

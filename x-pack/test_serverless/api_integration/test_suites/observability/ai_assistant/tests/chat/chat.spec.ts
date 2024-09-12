@@ -41,7 +41,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('/internal/observability_ai_assistant/chat', () => {
+  describe('/internal/observability_ai_assistant/chat', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192751
+    this.tags(['skipMKI']);
     let proxy: LlmProxy;
     let connectorId: string;
     let roleAuthc: RoleCredentials;
