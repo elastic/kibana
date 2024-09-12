@@ -66,39 +66,45 @@ const BaseSchema = {
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
-  ca_sha256: schema.maybe(schema.string()),
-  ca_trusted_fingerprint: schema.maybe(schema.string()),
-  config_yaml: schema.maybe(schema.string()),
-  ssl: schema.maybe(
-    schema.object({
-      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-      certificate: schema.maybe(schema.string()),
-      key: schema.maybe(schema.string()),
-      verification_mode: schema.maybe(
-        schema.oneOf([
-          schema.literal(kafkaVerificationModes.Full),
-          schema.literal(kafkaVerificationModes.None),
-          schema.literal(kafkaVerificationModes.Certificate),
-          schema.literal(kafkaVerificationModes.Strict),
-        ])
-      ),
-    })
+  is_preconfigured: schema.maybe(schema.boolean()),
+  ca_sha256: schema.nullable(schema.maybe(schema.string())),
+  ca_trusted_fingerprint: schema.nullable(schema.maybe(schema.string())),
+  config_yaml: schema.nullable(schema.maybe(schema.string())),
+  ssl: schema.nullable(
+    schema.maybe(
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+        verification_mode: schema.maybe(
+          schema.oneOf([
+            schema.literal(kafkaVerificationModes.Full),
+            schema.literal(kafkaVerificationModes.None),
+            schema.literal(kafkaVerificationModes.Certificate),
+            schema.literal(kafkaVerificationModes.Strict),
+          ])
+        ),
+      })
+    )
   ),
-  proxy_id: schema.nullable(schema.string()),
-  shipper: schema.maybe(
-    schema.object({
-      disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
-      disk_queue_path: schema.nullable(schema.string()),
-      disk_queue_max_size: schema.nullable(schema.number()),
-      disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
-      disk_queue_compression_enabled: schema.nullable(schema.boolean()),
-      compression_level: schema.nullable(schema.number()),
-      loadbalance: schema.nullable(schema.boolean()),
-      mem_queue_events: schema.nullable(schema.number()),
-      queue_flush_timeout: schema.nullable(schema.number()),
-      max_batch_bytes: schema.nullable(schema.number()),
-    })
+  proxy_id: schema.nullable(schema.maybe(schema.string())),
+  shipper: schema.nullable(
+    schema.maybe(
+      schema.object({
+        disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
+        disk_queue_path: schema.nullable(schema.string()),
+        disk_queue_max_size: schema.nullable(schema.number()),
+        disk_queue_encryption_enabled: schema.nullable(schema.boolean()),
+        disk_queue_compression_enabled: schema.nullable(schema.boolean()),
+        compression_level: schema.nullable(schema.number()),
+        loadbalance: schema.nullable(schema.boolean()),
+        mem_queue_events: schema.nullable(schema.number()),
+        queue_flush_timeout: schema.nullable(schema.number()),
+        max_batch_bytes: schema.nullable(schema.number()),
+      })
+    )
   ),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
 };
 
 const UpdateSchema = {
@@ -108,6 +114,14 @@ const UpdateSchema = {
   is_default_monitoring: schema.maybe(schema.boolean()),
 };
 
+const PresetSchema = schema.oneOf([
+  schema.literal('balanced'),
+  schema.literal('custom'),
+  schema.literal('throughput'),
+  schema.literal('scale'),
+  schema.literal('latency'),
+]);
+
 /**
  * Elasticsearch schemas
  */
@@ -116,30 +130,14 @@ export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
-  preset: schema.maybe(
-    schema.oneOf([
-      schema.literal('balanced'),
-      schema.literal('custom'),
-      schema.literal('throughput'),
-      schema.literal('scale'),
-      schema.literal('latency'),
-    ])
-  ),
+  preset: schema.maybe(PresetSchema),
 };
 
 const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
-  preset: schema.maybe(
-    schema.oneOf([
-      schema.literal('balanced'),
-      schema.literal('custom'),
-      schema.literal('throughput'),
-      schema.literal('scale'),
-      schema.literal('latency'),
-    ])
-  ),
+  preset: schema.maybe(PresetSchema),
 };
 
 /**
@@ -149,7 +147,7 @@ const ElasticSearchUpdateSchema = {
 export const RemoteElasticSearchSchema = {
   ...ElasticSearchSchema,
   type: schema.literal(outputType.RemoteElasticsearch),
-  service_token: schema.maybe(schema.string()),
+  service_token: schema.nullable(schema.maybe(schema.string())),
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
@@ -160,7 +158,7 @@ export const RemoteElasticSearchSchema = {
 const RemoteElasticSearchUpdateSchema = {
   ...ElasticSearchUpdateSchema,
   type: schema.maybe(schema.literal(outputType.RemoteElasticsearch)),
-  service_token: schema.maybe(schema.string()),
+  service_token: schema.nullable(schema.maybe(schema.string())),
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
@@ -255,33 +253,39 @@ export const KafkaSchema = {
     ]),
     schema.never()
   ),
-  username: schema.conditional(
-    schema.siblingRef('auth_type'),
-    kafkaAuthType.Userpass,
-    schema.string(),
-    schema.never()
-  ),
-  password: schema.conditional(
-    schema.siblingRef('secrets.password'),
-    secretRefSchema,
-    schema.never(),
+  username: schema.nullable(
     schema.conditional(
-      schema.siblingRef('username'),
-      schema.string(),
+      schema.siblingRef('auth_type'),
+      kafkaAuthType.Userpass,
       schema.string(),
       schema.never()
     )
   ),
-  sasl: schema.maybe(
-    schema.object({
-      mechanism: schema.maybe(
-        schema.oneOf([
-          schema.literal(kafkaSaslMechanism.Plain),
-          schema.literal(kafkaSaslMechanism.ScramSha256),
-          schema.literal(kafkaSaslMechanism.ScramSha512),
-        ])
-      ),
-    })
+  password: schema.nullable(
+    schema.conditional(
+      schema.siblingRef('secrets.password'),
+      secretRefSchema,
+      schema.never(),
+      schema.conditional(
+        schema.siblingRef('username'),
+        schema.string(),
+        schema.string(),
+        schema.never()
+      )
+    )
+  ),
+  sasl: schema.nullable(
+    schema.maybe(
+      schema.object({
+        mechanism: schema.maybe(
+          schema.oneOf([
+            schema.literal(kafkaSaslMechanism.Plain),
+            schema.literal(kafkaSaslMechanism.ScramSha256),
+            schema.literal(kafkaSaslMechanism.ScramSha512),
+          ])
+        ),
+      })
+    )
   ),
   partition: schema.maybe(
     schema.oneOf([

@@ -7,6 +7,7 @@
 import https from 'https';
 
 import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
 import { getFleetServerHost } from '../../services/fleet_server_host';
@@ -19,6 +20,7 @@ import type { FleetRequestHandler } from '../../types';
 
 import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
+import { genericErrorResponse } from '../schema/errors';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // get fleet server health check by host id
@@ -29,11 +31,33 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { allSettings: true },
       },
       description: `Check Fleet Server health`,
+      options: {
+        tags: ['oas_tag:Fleet internals'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostHealthCheckRequestSchema },
+        validate: {
+          request: PostHealthCheckRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  status: schema.string(),
+                  name: schema.string(),
+                  host: schema.string({
+                    meta: {
+                      deprecated: true,
+                    },
+                  }),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postHealthCheckHandler
     );

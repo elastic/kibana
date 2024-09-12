@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
@@ -15,9 +16,12 @@ import {
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
   GetOutputsRequestSchema,
+  OutputSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
+
+import { genericErrorResponse } from '../schema/errors';
 
 import {
   deleteOutputHandler,
@@ -36,11 +40,31 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: 'List outputs',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetOutputsRequestSchema },
+        validate: {
+          request: GetOutputsRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  items: schema.arrayOf(OutputSchema),
+                  total: schema.number(),
+                  page: schema.number(),
+                  perPage: schema.number(),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getOutputsHandler
     );
@@ -50,11 +74,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: 'Get output by ID',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetOneOutputRequestSchema },
+        validate: {
+          request: GetOneOutputRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  item: OutputSchema,
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getOneOuputHandler
     );
@@ -64,11 +105,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Update output by ID',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PutOutputRequestSchema },
+        validate: {
+          request: PutOutputRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  item: OutputSchema,
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       putOutputHandler
     );
@@ -79,11 +137,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Create output',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostOutputRequestSchema },
+        validate: {
+          request: PostOutputRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  item: OutputSchema,
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postOutputHandler
     );
@@ -94,11 +169,31 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Delete output by ID',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DeleteOutputRequestSchema },
+        validate: {
+          request: DeleteOutputRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  id: schema.string(),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+            404: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       deleteOutputHandler
     );
@@ -109,11 +204,28 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: 'Generate Logstash API keyy',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  api_key: schema.string(),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postLogstashApiKeyHandler
     );
@@ -124,11 +236,42 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: 'Get latest output health',
+      options: {
+        tags: ['oas_tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetLatestOutputHealthRequestSchema },
+        validate: {
+          request: GetLatestOutputHealthRequestSchema,
+          response: {
+            200: {
+              body: () =>
+                schema.object({
+                  state: schema.string({
+                    meta: {
+                      description: 'state of output, HEALTHY or DEGRADED',
+                    },
+                  }),
+                  message: schema.string({
+                    meta: {
+                      description: 'long message if unhealthy',
+                    },
+                  }),
+                  timestamp: schema.string({
+                    meta: {
+                      description: 'timestamp of reported state',
+                    },
+                  }),
+                }),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getLatestOutputHealth
     );
