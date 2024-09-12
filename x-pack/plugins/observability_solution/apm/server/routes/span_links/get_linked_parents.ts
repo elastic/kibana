@@ -58,8 +58,7 @@ export async function getLinkedParentsOfSpan({
   });
 
   const fields = response.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields) as TransactionRaw | SpanRaw | undefined;
-  // const source = response.hits.hits?.[0]?._source as TransactionRaw | SpanRaw;
+  const fieldsNorm = normalizeFields(fields) as unknown as TransactionRaw | SpanRaw | undefined;
 
   return fieldsNorm?.span?.links || [];
 }

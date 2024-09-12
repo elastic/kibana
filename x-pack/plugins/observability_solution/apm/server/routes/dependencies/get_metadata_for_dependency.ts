@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { Span } from '@kbn/apm-types/es_schemas_ui';
 import { maybe } from '../../../common/utils/maybe';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -55,9 +56,8 @@ export async function getMetadataForDependency({
   });
 
   const sample = maybe(sampleResponse.hits.hits[0])?.fields;
-  const sampleNorm = sample ? normalizeFields(sample) : null;
+  const sampleNorm = sample ? (normalizeFields(sample) as unknown as Span) : null;
 
-  // console.log('sampleNorm', sampleNorm);
   return {
     spanType: sampleNorm?.span.type,
     spanSubtype: sampleNorm?.span.subtype,

@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { Transaction } from '@kbn/apm-types/es_schemas_ui';
 import { normalizeFields } from '../../../utils/normalize_fields';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -53,7 +54,7 @@ export async function getTransaction({
   });
 
   const fields = resp.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields);
+  const fieldsNorm = normalizeFields(fields) as unknown as Transaction;
 
   return fieldsNorm;
 }

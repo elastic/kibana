@@ -9,6 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { Span } from '@kbn/apm-types/es_schemas_ui';
+import type { TransactionRaw } from '@kbn/apm-types/es_schemas_raw';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -144,12 +145,13 @@ export async function getTopDependencySpans({
           },
         },
         _source: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
+        fields: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
         sort: {
           '@timestamp': 'desc',
         },
       },
     })
-  ).hits.hits.map((hit) => hit._source);
+  ).hits.hits.map((hit) => normalizeFields(hit.fields) as unknown as TransactionRaw);
 
   const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
 

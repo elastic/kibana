@@ -7,6 +7,7 @@
 
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import type { ErrorRaw } from '@kbn/apm-types/es_schemas_raw';
 import { normalizeFields } from '../../../utils/normalize_fields';
 import {
   ERROR_CULPRIT,
@@ -169,7 +170,7 @@ export async function getErrorGroupMainStatistics({
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => {
       const fields = bucket.sample.hits.hits[0]?.fields;
-      const fieldsNorm = normalizeFields(fields);
+      const fieldsNorm = normalizeFields(fields) as unknown as ErrorRaw;
       return {
         groupId: bucket.key as string,
         name: getErrorName(fieldsNorm),
