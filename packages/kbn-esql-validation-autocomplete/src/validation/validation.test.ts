@@ -10,7 +10,7 @@
 import { join } from 'path';
 import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
-import { evalFunctionDefinitions } from '../definitions/functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import {
   FieldType,
@@ -20,7 +20,7 @@ import {
   fieldTypes as _fieldTypes,
 } from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -43,22 +43,22 @@ const NESTED_DEPTHS = Array(NESTING_LEVELS)
   .fill(0)
   .map((_, i) => i + 1);
 
-const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
-const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
-const toDoubleSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_double')!;
-const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
-const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
-const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
-const toIpSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
-const toGeoPointSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
-const toGeoShapeSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_geoshape')!;
-const toCartesianPointSignature = evalFunctionDefinitions.find(
+const toAvgSignature = aggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
+const toInteger = scalarFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toDoubleSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_double')!;
+const toStringSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_string')!;
+const toDateSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
+const toBooleanSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
+const toIpSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toGeoShapeSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_geoshape')!;
+const toCartesianPointSignature = scalarFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianpoint'
 )!;
-const toCartesianShapeSignature = evalFunctionDefinitions.find(
+const toCartesianShapeSignature = scalarFunctionDefinitions.find(
   ({ name }) => name === 'to_cartesianshape'
 )!;
-const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
+const toVersionSignature = scalarFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
 const nestedFunctions = {
   double: prepareNestedFunction(toDoubleSignature),

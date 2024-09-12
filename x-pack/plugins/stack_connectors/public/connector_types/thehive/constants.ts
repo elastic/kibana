@@ -14,7 +14,7 @@ export const eventActionOptions = [
     text: i18n.translate(
       'xpack.stackConnectors.components.thehive.eventSelectCreateCaseOptionLabel',
       {
-        defaultMessage: 'Create Case',
+        defaultMessage: 'Create case',
       }
     ),
   },
@@ -23,7 +23,7 @@ export const eventActionOptions = [
     text: i18n.translate(
       'xpack.stackConnectors.components.thehive.eventSelectCreateAlertOptionLabel',
       {
-        defaultMessage: 'Create Alert',
+        defaultMessage: 'Create alert',
       }
     ),
   },
