@@ -23,7 +23,7 @@ import {
   VisualizeEmbeddable,
   VisualizeInput,
   VisualizeOutput,
-} from '@kbn/visualizations-plugin/public/embeddable/visualize_embeddable';
+} from '@kbn/visualizations-plugin/public/legacy/embeddable/visualize_embeddable';
 
 const INPUT_KEY = 'portableDashboard:saveExample:input';
 
