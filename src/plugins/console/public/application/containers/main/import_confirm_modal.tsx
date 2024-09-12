@@ -56,7 +56,7 @@ export const ImportConfirmModal = ({
     >
       <p>
         {i18n.translate('console.importConfirmModal.body', {
-          defaultMessage: `Importing this file will replace the current request in the editor. Are you sure you want to proceed?`,
+          defaultMessage: `Importing this file will replace all current requests in the editor. You can still find replaced requests in the console's history.`,
         })}
       </p>
     </EuiConfirmModal>
