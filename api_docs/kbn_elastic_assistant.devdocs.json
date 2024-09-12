@@ -2520,6 +2520,60 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.GetAssistantMessages",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAssistantMessages",
+        "description": [],
+        "signature": [
+          "(commentArgs: { abortStream: () => void; currentConversation?: ",
+          {
+            "pluginId": "@kbn/elastic-assistant",
+            "scope": "public",
+            "docId": "kibKbnElasticAssistantPluginApi",
+            "section": "def-public.Conversation",
+            "text": "Conversation"
+          },
+          " | undefined; isFetchingResponse: boolean; refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean | undefined; }) => void; regenerateMessage: (conversationId: string) => void; showAnonymizedValues: boolean; currentUserAvatar?: ",
+          "UserAvatar",
+          " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; }) => ",
+          "EuiCommentProps",
+          "[]"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.GetAssistantMessages.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "commentArgs",
+            "description": [],
+            "signature": [
+              "{ abortStream: () => void; currentConversation?: ",
+              {
+                "pluginId": "@kbn/elastic-assistant",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantPluginApi",
+                "section": "def-public.Conversation",
+                "text": "Conversation"
+              },
+              " | undefined; isFetchingResponse: boolean; refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean | undefined; }) => void; regenerateMessage: (conversationId: string) => void; showAnonymizedValues: boolean; currentUserAvatar?: ",
+              "UserAvatar",
+              " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; }"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.KNOWLEDGE_BASE_LOCAL_STORAGE_KEY",
         "type": "string",
         "tags": [],

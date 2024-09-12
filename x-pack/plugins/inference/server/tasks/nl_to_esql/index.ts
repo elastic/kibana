@@ -8,8 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty, has } from 'lodash';
 import { Observable, from, map, merge, of, switchMap } from 'rxjs';
-import { v4 } from 'uuid';
-import { ToolSchema, isChatCompletionMessageEvent } from '../../../common';
+import { ToolSchema, generateFakeToolCallId, isChatCompletionMessageEvent } from '../../../common';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
@@ -111,7 +110,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
               functions,
             },
           },
-          toolCallId: v4().substring(0, 6),
+          toolCallId: generateFakeToolCallId(),
         };
 
         return merge(
@@ -127,6 +126,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
               keywords,
               requestedDocumentation,
             },
+            content: '',
           }),
           client
             .chatComplete({
