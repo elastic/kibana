@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { investigationResponseSchema } from './investigation';
+import { statusSchema } from '../schema';
 
 const updateInvestigationParamsSchema = z.object({
   path: z.object({
@@ -21,6 +22,7 @@ const updateInvestigationParamsSchema = z.object({
       params: z.object({
         timeRange: z.object({ from: z.number(), to: z.number() }),
       }),
+      tags: z.array(z.string()),
     })
     .partial(),
 });

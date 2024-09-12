@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { investigationSchema } from '@kbn/investigation-shared';
+import { investigationSchema, statusSchema } from '@kbn/investigation-shared';
 
 export type Investigation = z.infer<typeof investigationSchema>;
+export type InvestigationStatus = z.infer<typeof statusSchema>;
 export type StoredInvestigation = z.infer<typeof investigationSchema>;

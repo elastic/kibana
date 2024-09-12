@@ -12,6 +12,14 @@ import { alertOriginSchema, blankOriginSchema } from './origin';
 import { investigationNoteSchema } from './investigation_note';
 import { investigationItemSchema } from './investigation_item';
 
+const statusSchema = z.union([
+  z.literal('triage'),
+  z.literal('active'),
+  z.literal('mitigated'),
+  z.literal('resolved'),
+  z.literal('cancelled'),
+]);
+
 const investigationSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -21,9 +29,10 @@ const investigationSchema = z.object({
     timeRange: z.object({ from: z.number(), to: z.number() }),
   }),
   origin: z.union([alertOriginSchema, blankOriginSchema]),
-  status: z.union([z.literal('ongoing'), z.literal('closed')]),
+  status: statusSchema,
+  tags: z.array(z.string()),
   notes: z.array(investigationNoteSchema),
   items: z.array(investigationItemSchema),
 });
 
-export { investigationSchema };
+export { investigationSchema, statusSchema };

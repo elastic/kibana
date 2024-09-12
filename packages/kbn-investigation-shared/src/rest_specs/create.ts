@@ -19,6 +19,7 @@ const createInvestigationParamsSchema = z.object({
       timeRange: z.object({ from: z.number(), to: z.number() }),
     }),
     origin: z.union([alertOriginSchema, blankOriginSchema]),
+    tags: z.array(z.string()),
   }),
 });
 
