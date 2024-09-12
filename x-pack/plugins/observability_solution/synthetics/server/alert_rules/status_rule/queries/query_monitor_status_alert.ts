@@ -159,7 +159,7 @@ export async function queryMonitorStatusAlert(
             const { totalChecks, downChecks } = locationSummary;
             const latestPing = totalChecks.hits.hits[0]._source;
             const downCount = downChecks.doc_count;
-            const upCount = latestPing.summary?.up ?? 0;
+            const isLatestPingUp = (latestPing.summary?.up ?? 0) > 0;
             const configId = latestPing.config_id;
             const monitorQueryId = latestPing.monitor.id;
 
@@ -183,7 +183,8 @@ export async function queryMonitorStatusAlert(
                 ...meta,
                 status: 'down',
               };
-            } else if (upCount > 0) {
+            }
+            if (isLatestPingUp) {
               upConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'up',
