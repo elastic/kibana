@@ -14,13 +14,15 @@ const updateInvestigationParamsSchema = z.object({
   path: z.object({
     investigationId: z.string(),
   }),
-  body: z.object({
-    title: z.string().optional(),
-    status: z.union([z.literal('ongoing'), z.literal('closed')]).optional(),
-    params: z.object({
-      timeRange: z.object({ from: z.number(), to: z.number() }),
-    }),
-  }),
+  body: z
+    .object({
+      title: z.string(),
+      status: z.union([z.literal('ongoing'), z.literal('closed')]),
+      params: z.object({
+        timeRange: z.object({ from: z.number(), to: z.number() }),
+      }),
+    })
+    .partial(),
 });
 
 const updateInvestigationResponseSchema = investigationResponseSchema;

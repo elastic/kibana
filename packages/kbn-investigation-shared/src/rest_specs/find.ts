@@ -10,13 +10,17 @@
 import { z } from '@kbn/zod';
 import { investigationResponseSchema } from './investigation';
 
-const findInvestigationsParamsSchema = z.object({
-  query: z.object({
-    alertId: z.string().optional(),
-    page: z.string().optional(),
-    perPage: z.string().optional(),
-  }),
-});
+const findInvestigationsParamsSchema = z
+  .object({
+    query: z
+      .object({
+        alertId: z.string(),
+        page: z.string(),
+        perPage: z.string(),
+      })
+      .partial(),
+  })
+  .partial();
 
 const findInvestigationsResponseSchema = z.object({
   page: z.number(),
