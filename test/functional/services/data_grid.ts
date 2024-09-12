@@ -34,7 +34,7 @@ export class DataGridService extends FtrService {
     const table = await this.find.byCssSelector('.euiDataGrid');
     const $ = await table.parseDomContent();
 
-    const columns = $('.euiDataGridHeaderCell__content')
+    const columns = $('.euiDataGridHeaderCell')
       .toArray()
       .map((cell) => $(cell).text());
     const cells = $.findTestSubjects('dataGridRowCell')
@@ -59,7 +59,7 @@ export class DataGridService extends FtrService {
     cellDataTestSubj: string
   ): Promise<string[][]> {
     const $ = await element.parseDomContent();
-    const columnNumber = $('.euiDataGridHeaderCell__content').length;
+    const columnNumber = $('.euiDataGridHeaderCell').length;
     const cells = $.findTestSubjects('dataGridRowCell')
       .toArray()
       .map((cell) =>
@@ -79,7 +79,7 @@ export class DataGridService extends FtrService {
   public async getHeaders() {
     const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
     const $ = await header.parseDomContent();
-    return $('.euiDataGridHeaderCell__content')
+    return $('.euiDataGridHeaderCell')
       .toArray()
       .map((cell) => $(cell).text());
   }
@@ -402,9 +402,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
-    );
+    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell__content');
 
     const textArr = [];
     for (const cell of result) {
@@ -415,9 +413,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
-    const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell--controlColumn .euiDataGridHeaderCell__content'
-    );
+    const result = await this.find.allByCssSelector('.euiDataGridHeaderCell--controlColumn');
 
     const textArr = [];
     for (const cell of result) {
