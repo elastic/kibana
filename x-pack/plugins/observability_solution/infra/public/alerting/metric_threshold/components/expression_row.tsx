@@ -200,7 +200,7 @@ export const ExpressionRow = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" data-test-subj="expressionRow">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
