@@ -8,6 +8,7 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
+import { fetchActiveSpace } from '../common/spaces';
 import {
   isFleetServerRunning,
   startFleetServer,
@@ -164,6 +165,7 @@ const runCli: RunFn = async ({ log, flags }) => {
     id: agentPolicyId,
     agents = 0,
     name: agentPolicyName,
+    namespace: agentPolicyNamespace,
   } = policy
     ? await fetchAgentPolicy(kbnClient, policy)
     : await getOrCreateDefaultAgentPolicy({
@@ -172,7 +174,7 @@ const runCli: RunFn = async ({ log, flags }) => {
         policyName: DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
       });
 
-  await addSentinelOneIntegrationToAgentPolicy({
+  const { namespace: integrationPolicyNamespace } = await addSentinelOneIntegrationToAgentPolicy({
     kbnClient,
     log,
     agentPolicyId,
@@ -186,9 +188,11 @@ const runCli: RunFn = async ({ log, flags }) => {
   if (!agents) {
     log.info(`Creating VM and enrolling it with Fleet using policy [${agentPolicyName}]`);
 
+    const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
+
     agentPolicyVm = await createVm({
       type: 'multipass',
-      name: generateVmName('agentless-integrations'),
+      name: generateVmName(`agentless-integrations-${activeSpaceId}`),
     });
 
     if (forceFleetServer || !(await isFleetServerRunning(kbnClient, log))) {
@@ -213,7 +217,11 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   await Promise.all([
     createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url }),
-    createDetectionEngineSentinelOneRuleIfNeeded(kbnClient, log),
+    createDetectionEngineSentinelOneRuleIfNeeded(
+      kbnClient,
+      log,
+      integrationPolicyNamespace || agentPolicyNamespace
+    ),
   ]);
 
   // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana

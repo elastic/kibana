@@ -22,7 +22,6 @@ import type {
 } from './types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import type { HostVm } from '../common/types';
-
 import { createConnector, fetchConnectorByType } from '../common/connectors_services';
 import { createRule, findRules } from '../common/detection_rules_services';
 
@@ -274,11 +273,17 @@ export const createSentinelOneStackConnectorIfNeeded = async ({
 
 export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   kbnClient: KbnClient,
-  log: ToolingLog
+  log: ToolingLog,
+  /** If defined, then the Index patterns used the SIEM rule will include this value */
+  namespace?: string
 ): Promise<RuleResponse> => {
   const ruleName = 'Promote SentinelOne alerts';
   const tag = 'dev-script-run-sentinelone-host';
-  const index = ['logs-sentinel_one.alert*', 'logs-sentinel_one.threat*'];
+  const indexNamespace = namespace ? `-${namespace}` : '';
+  const index = [
+    `logs-sentinel_one.alert${indexNamespace}*`,
+    `logs-sentinel_one.threat${indexNamespace}*`,
+  ];
   const ruleQueryValue = 'sentinel_one.alert.agent.id:* OR sentinel_one.threat.agent.id:*';
 
   const { data } = await findRules(kbnClient, {
