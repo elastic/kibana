@@ -50,12 +50,23 @@ export const openInLogsExplorerText = i18n.translate(
   }
 );
 
+export const logsExplorerAriaText = i18n.translate(
+  'xpack.datasetQuality.details.logsExplorerAriaText',
+  {
+    defaultMessage: 'Logs Explorer',
+  }
+);
+
 export const openInDiscoverText = i18n.translate(
   'xpack.datasetQuality.details.openInDiscoverText',
   {
     defaultMessage: 'Open in Discover',
   }
 );
+
+export const discoverAriaText = i18n.translate('xpack.datasetQuality.details.discoverAriaText', {
+  defaultMessage: 'Discover',
+});
 
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',

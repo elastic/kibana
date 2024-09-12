@@ -16,20 +16,34 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useDatasetQualityDetailsState, useDegradedFields } from '../../../hooks';
+import { NavigationSource } from '../../../services/telemetry';
+import {
+  useDatasetDetailsRedirectLinkTelemetry,
+  useDatasetQualityDetailsState,
+  useDegradedFields,
+  useRedirectLink,
+} from '../../../hooks';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
+  discoverAriaText,
   fieldIgnoredText,
+  logsExplorerAriaText,
+  openInDiscoverText,
+  openInLogsExplorerText,
   overviewDegradedFieldsSectionTitle,
 } from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
+import { _IGNORED } from '../../../../common/es_fields';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DegradedFieldFlyout() {
   const { closeDegradedFieldFlyout, expandedDegradedField, renderedItems } = useDegradedFields();
-  const { dataStreamSettings } = useDatasetQualityDetailsState();
+  const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
   });
@@ -43,6 +57,18 @@ export default function DegradedFieldFlyout() {
   const isUserViewingTheIssueOnLatestBackingIndex =
     dataStreamSettings?.lastBackingIndexName === fieldList?.indexFieldWasLastPresentIn;
 
+  const { sendTelemetry } = useDatasetDetailsRedirectLinkTelemetry({
+    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+    navigationSource: NavigationSource.DegradedFieldFlyoutHeader,
+  });
+
+  const redirectLinkProps = useRedirectLink({
+    dataStreamStat: datasetDetails,
+    timeRangeConfig: timeRange,
+    query: { language: 'kuery', query: `${_IGNORED}: ${expandedDegradedField}` },
+    sendTelemetry,
+  });
+
   return (
     <EuiFlyout
       type="push"
@@ -54,11 +80,33 @@ export default function DegradedFieldFlyout() {
       <EuiFlyoutHeader hasBorder>
         <EuiBadge color="warning">{overviewDegradedFieldsSectionTitle}</EuiBadge>
         <EuiSpacer size="s" />
-        <EuiTitle size="m">
-          <EuiText>
-            {expandedDegradedField} <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
-          </EuiText>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+          <EuiTitle size="m">
+            <EuiText>
+              {expandedDegradedField} <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
+            </EuiText>
+          </EuiTitle>
+          <EuiToolTip
+            content={
+              redirectLinkProps.isLogsExplorerAvailable
+                ? openInLogsExplorerText
+                : openInDiscoverText
+            }
+          >
+            <EuiButtonIcon
+              display="base"
+              iconType={
+                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
+              }
+              aria-label={
+                redirectLinkProps.isLogsExplorerAvailable ? logsExplorerAriaText : discoverAriaText
+              }
+              size="s"
+              data-test-subj="datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover"
+              {...redirectLinkProps.linkProps}
+            />
+          </EuiToolTip>
+        </EuiFlexGroup>
         {!isUserViewingTheIssueOnLatestBackingIndex && (
           <>
             <EuiSpacer size="s" />
