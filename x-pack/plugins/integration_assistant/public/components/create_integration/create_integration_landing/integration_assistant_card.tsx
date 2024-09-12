@@ -38,12 +38,7 @@ export const IntegrationAssistantCard = React.memo(() => {
             justifyContent="flexStart"
           >
             <EuiFlexItem>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="s"
-                // alignItems="flexStart"
-                // justifyContent="flexStart"
-              >
+              <EuiFlexGroup direction="row" gutterSize="s">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
                     <h3>{i18n.ASSISTANT_TITLE}</h3>
