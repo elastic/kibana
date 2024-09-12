@@ -16,6 +16,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServerlessTypeFromCloudData, ServerlessType } from '../../../common/serverless';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 interface ServiceAgent {
   agent?: {
@@ -90,6 +91,7 @@ export async function getServiceAgent({
           ],
         },
       },
+      fields: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
       sort: {
         _score: { order: 'desc' as const },
       },
@@ -101,7 +103,7 @@ export async function getServiceAgent({
     return {};
   }
 
-  const { agent, service, cloud } = response.hits.hits[0]._source as ServiceAgent;
+  const { agent, service, cloud } = normalizeFields(response.hits.hits[0].fields) as ServiceAgent;
   const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
 
   return {
