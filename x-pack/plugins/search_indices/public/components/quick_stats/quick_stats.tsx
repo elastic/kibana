@@ -22,7 +22,7 @@ import { Mappings } from '../../types';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { QuickStat } from './quick_stat';
 
-interface QuickStatsProps {
+export interface QuickStatsProps {
   index: Index;
   mappings: Mappings;
 }
