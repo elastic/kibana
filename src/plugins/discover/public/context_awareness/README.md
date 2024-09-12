@@ -8,10 +8,10 @@ The Discover context awareness framework allows Discover's UI and functionality 
 
 ### Context levels
 
-We currently support three levels of context in Discover:
+There are currently three context levels supported in Discover:
 
 - Root context:
-  - Based on the current solution type, navigational parameters, etc.
+  - Based on the current solution type, navigation parameters, etc.
   - Resolved at application initialization and on parameter changes.
   - Runs synchronously or asynchronously.
 - Data source context:
@@ -25,7 +25,9 @@ We currently support three levels of context in Discover:
 
 ### Composable profiles
 
-To support application extensibility based on context, we've introduced the concept of "composable profiles". Composable profiles are implementations of a core `Profile` interface (or a subset of it) containing all of the available extension points Discover supports. A composable profile can be implemented at any context level through a "profile provider", responsible for defining the composable profile and its associated context resolution method. The context resolution method, named `resolve`, determines if its composable profile is a match for the current Discover context, and returns related metadata in a `context` object.
+Discover uses a concept called "composable profiles" to support context awareness. Composable profiles are implementations of a core `Profile` interface (or a subset of it) containing all of the available extension points Discover supports. A composable profile can be implemented at any context level through a "profile provider", responsible for defining the composable profile and its associated context resolution method, called `resolve`. Each provider's `resolve` method is passed a parameters object specific to its context level, which it uses to determine if its associated `profile` is a match. In cases where it is a match, the `resolve` method also returns related metadata in a `context` object.
+
+Within Discover there is always one active root profile, one active data source profile (as long as search results exist), and an active document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level profiles within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which only becomes active when the current solution type is Observability, and the current data source contains logs data.
 
 Definitions for the core `Profile` interface are located in the [`types.ts`](types.ts) file.
 
@@ -44,7 +46,7 @@ Definitions for composable profiles and the merging routine are located in the [
 
 The context awareness framework is driven by two main supporting services called `ProfileService` and `ProfilesManager`.
 
-Each context level has a dedicated profile service, e.g. `RootProfileService`, which is responsible for accepting profile provider registrations and running through each provider in order during context resolution to identify a matching profile.
+Each context level has a dedicated profile service, e.g. `RootProfileService`, which is responsible for accepting profile provider registrations and looping over each provider in order during context resolution to identify a matching profile. Each resolution call can result in only one matching profile, which is the first to return a match based on execution order.
 
 A single `ProfilesManager` is instantiated on Discover load, or one per saved search panel in a dashboard. The profiles manager is responsible for the following:
 
@@ -78,9 +80,9 @@ This means that in an ideal situation, the code for Discover profiles should eit
 - When adding solution specific code directly to the Discover codebase, it should be done in an organized way in order to support shared ownership. For example, the [`profile_providers/security`](./profile_providers/security) folder contains code specific to Security Solution maintained profiles, and an override has been added to the [`CODEOWNERS`](/.github/CODEOWNERS) file to reflect the shared ownership of this folder.
 - When creating a dedicated package for some profile code, the maintaining team can retain full ownership over the package, and Discover is only responsible for importing the functionality and adding it to the associated profile registration.
 
-There are situations where neither of the above two options are viable, such as when migrating large pieces of functionality from a solution plugin to a Discover profile, which could be time consuming and involve moving huge amounts of code to packages. For these situations, we have created a [discover_shared](/src/plugins/discover_shared) plugin specifically to support inversion of control for Discover profile features (see the [`README`](/src/plugins/discover_shared/README.md) for more details).
+There are situations where neither of the above two options are viable, such as when migrating large pieces of functionality from a solution plugin to a Discover profile, which could be time consuming and involve moving huge amounts of code to packages. For these situations, there's a [discover_shared](/src/plugins/discover_shared) plugin specifically to support inversion of control for Discover profile features (see the [`README`](/src/plugins/discover_shared/README.md) for more details).
 
-By ensuring all Discover profiles use the same IoC mechanism, we can centralize changes or improvements to the system as well as easily locating all areas where doing so was necessary. In general, this should be used as a last resort when the benefits of importing directly from packages aren't worth the effort to migrate the code, and ideally teams who use it should have a plan to later refactor the code into packages.
+By ensuring all Discover profiles use the same IoC mechanism, changes or improvements to the system can be centralized, and areas that use it can easily be located. In general, this should be used as a last resort when the benefits of importing directly from packages aren't worth the effort to migrate the code, and ideally teams who use it should have a plan to later refactor the code into packages.
 
 ## Registering a profile
 
@@ -92,7 +94,7 @@ In order to register a Discover profile, follow these steps:
 4. **If your provider is not ready for GA or should only be enabled for specific configurations, make sure to set the `isExperimental` flag to `true` in your profile provider.** This will ensure the profile is disabled by default, and can be enabled in `kibana.yml` like this: `discover.experimental.enabledProfiles: [{YOUR_PROFILE_ID}]`.
 5. Call and return the result of your provider factory function from the corresponding factory function in [`register_profile_providers.ts`](./profile_providers/register_profile_providers.ts), e.g. `createRootProfileProviders`. The order of providers in the returned array determines the execution order during context resolution.
 
-Existing profiles can be extended using the [`extendProfileProvider`](./profile_providers/extend_profile_provider.ts) utility, allowing multiple sub profiles to be composed from a shared parent profile.
+Existing providers can be extended using the [`extendProfileProvider`](./profile_providers/extend_profile_provider.ts) utility, allowing multiple sub profiles to be composed from a shared parent profile.
 
 Example profile provider implementations are located in [`profile_providers/example`](./profile_providers/example).
 
@@ -111,7 +113,8 @@ import { DataSourceType, isDataSourceType } from '../../../../../common/data_sou
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 
-// Export profile provider factory function, optionally accepting ProfileProviderServices
+// Export profile provider factory function, optionally accepting ProfileProviderServices,
+// and returning a profile provider for a specific context level
 export const createExampleDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
@@ -137,7 +140,9 @@ export const createExampleDataSourceProfileProvider = (
     }),
   },
 
-  // The method responsible for context resolution
+  // The method responsible for context resolution,
+  // passed a params object with props specific to the context level,
+  // as well as providing access to higher level context objects
   resolve: (params) => {
     let indexPattern: string | undefined;
 
