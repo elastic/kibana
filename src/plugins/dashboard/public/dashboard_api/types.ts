@@ -48,6 +48,7 @@ export type DashboardApi = CanExpandPanels &
     managed$: PublishingSubject<boolean | undefined>;
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
+    scrollToTop: () => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setViewMode: (viewMode: ViewMode) => void;
     showSettings: () => void;
