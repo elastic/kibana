@@ -45,7 +45,7 @@ export const ensureAssetCriticalityEnrichPolicies = async (
 ): Promise<void> => {
   const enrichPolicies = getAssetCriticalityEnrichPolicies(spaceId);
   for (const policy of enrichPolicies) {
-    esClient.enrich.putPolicy(policy);
+    await esClient.enrich.putPolicy(policy);
   }
 };
 
@@ -55,7 +55,7 @@ export const executeAssetCriticalityEnrichPolicies = async (
 ): Promise<void> => {
   const enrichPolicies = getAssetCriticalityEnrichPolicies(spaceId);
   for (const policy of enrichPolicies) {
-    esClient.enrich.executePolicy({ name: policy.name });
+    await esClient.enrich.executePolicy({ name: policy.name });
   }
 };
 
@@ -65,7 +65,7 @@ export const deleteAssetCriticalityEnrichPolicies = async (
 ): Promise<void> => {
   const enrichPolicies = getAssetCriticalityEnrichPolicies(spaceId);
   for (const policy of enrichPolicies) {
-    esClient.enrich.deletePolicy({ name: policy.name });
+    await esClient.enrich.deletePolicy({ name: policy.name });
   }
 };
 
@@ -75,7 +75,7 @@ export const getAssetCriticalityPipelineSteps = (
 ): IngestProcessorContainer[] => [
   {
     enrich: {
-      if: 'ctx.asset == null || ctx.asset.criticality == null',
+      if: 'ctx.asset == null || ctx.asset.criticality == null || ctx.asset.criticality.size() == 0',
       policy_name: getEnrichPolicyName(spaceId, idField),
       field: idField,
       target_field: 'historical.asset.criticality',
@@ -83,7 +83,7 @@ export const getAssetCriticalityPipelineSteps = (
   },
   {
     set: {
-      if: 'ctx.asset == null || ctx.asset.criticality == null',
+      if: 'ctx.asset == null || ctx.asset.criticality == null || ctx.asset.criticality.size() == 0',
       field: 'asset.criticality',
       value: '{{historical.asset.criticality.criticality_level}}',
     },
