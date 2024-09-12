@@ -820,6 +820,55 @@ describe('healthRoute', () => {
       },
     });
   });
+
+  it('calls summarizeMonitoringStats with the latest number of Kibana nodes', async () => {
+    const router = httpServiceMock.createRouter();
+    const stats$ = new Subject<MonitoringStats>();
+    const numOfKibanaInstances$ = new BehaviorSubject(1);
+
+    const id = uuidv4();
+    const config = getTaskManagerConfig({
+      monitored_stats_required_freshness: 1000,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        level: 'debug',
+        warn_delayed_task_start_in_seconds: 100,
+      },
+      monitored_aggregated_stats_refresh_rate: 60000,
+    });
+    healthRoute({
+      router,
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: id,
+      config,
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
+      numOfKibanaInstances$,
+    });
+
+    stats$.next(mockHealthStats());
+    expect(summarizeMonitoringStats).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      1
+    );
+
+    await sleep(1000);
+    numOfKibanaInstances$.next(2);
+    stats$.next(mockHealthStats());
+    expect(summarizeMonitoringStats).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      2
+    );
+  });
 });
 
 function ignoreCapacityEstimation(stats: RawMonitoringStats) {

@@ -86,7 +86,7 @@ export function healthRoute(params: HealthRouteParams): {
 
   let numOfKibanaInstances = 1;
   numOfKibanaInstances$.subscribe((updatedNumber) => {
-    numOfKibanaInstances = updatedNumber;
+    numOfKibanaInstances = Math.max(updatedNumber, 1);
   });
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
