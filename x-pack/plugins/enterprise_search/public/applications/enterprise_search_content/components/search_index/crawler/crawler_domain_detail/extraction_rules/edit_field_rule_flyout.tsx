@@ -357,7 +357,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                       }
                     )}
                     isInvalid={!!error && isTouched}
-                    error={error}
+                    error={error as React.ReactNode}
                   >
                     <EuiRadioGroup
                       data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleExtraction"
