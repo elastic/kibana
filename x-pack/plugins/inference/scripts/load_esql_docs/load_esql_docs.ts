@@ -18,7 +18,7 @@ import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cl
 import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
-import { syncBuiltDocs } from './sync-built-docs-repo';
+import { syncBuiltDocs } from './sync_built_docs_repo';
 import { extractDocEntries } from './extract_doc_entries';
 import { generateDoc, FileToWrite } from './generate_doc';
 
