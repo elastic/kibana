@@ -492,14 +492,21 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme, isESQLQuery);
-    const isLens = this.props.kibana.services.appName === 'lens';
-    const isMaps = this.props.kibana.services.appName === 'maps';
+    const isLensNoFilters =
+      this.props.kibana.services.appName === 'lens' && !this.props.filters?.length;
+    const isMapsNoFilters =
+      this.props.kibana.services.appName === 'maps' && !this.props.filters?.length;
+    const isLensWithFilters =
+      this.props.kibana.services.appName === 'lens' && this.props.filters?.length;
+    const isMapsWithFilters =
+      this.props.kibana.services.appName === 'maps' && this.props.filters?.length;
 
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],
       isScreenshotMode && styles.hidden,
-      (isLens || isMaps) && styles.noExpand,
+      (isLensNoFilters || isMapsNoFilters) && styles.noExpand,
+      (isLensWithFilters || isMapsWithFilters) && styles.withFilters,
     ];
 
     const classes = classNames('uniSearchBar', {

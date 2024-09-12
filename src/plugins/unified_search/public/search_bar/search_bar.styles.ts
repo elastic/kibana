@@ -32,5 +32,8 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
     hidden: css`
       display: none;
     `,
+    withFilters: css`
+      max-height: 90px;
+    `,
   };
 };
