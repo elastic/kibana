@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
 import type { AppMockRenderer } from '../../common/mock';
@@ -35,11 +36,11 @@ describe('Use get case configuration hook', () => {
       targetConfiguration,
     ]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     /**
      * The response after fetching
@@ -59,11 +60,11 @@ describe('Use get case configuration hook', () => {
       { ...initialConfiguration, id: 'my-new-configuration-2', owner: 'bar' },
     ]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     /**
      * The response after fetching
@@ -76,11 +77,11 @@ describe('Use get case configuration hook', () => {
 
     spy.mockResolvedValue([]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     /**
      * The response after fetching
@@ -94,11 +95,11 @@ describe('Use get case configuration hook', () => {
 
     spy.mockResolvedValue([]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetCaseConfiguration(), {
+    const { result } = renderHook(() => useGetCaseConfiguration(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     /**
      * The response after fetching

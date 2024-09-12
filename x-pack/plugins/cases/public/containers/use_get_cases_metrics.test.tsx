@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import * as api from '../api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -33,11 +34,11 @@ describe('useGetCasesMetrics', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCasesMetrics');
-    const { waitForNextUpdate } = renderHook(() => useGetCasesMetrics(), {
+    renderHook(() => useGetCasesMetrics(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({
       http: expect.anything(),
@@ -51,11 +52,11 @@ describe('useGetCasesMetrics', () => {
       .spyOn(api, 'getCasesMetrics')
       .mockRejectedValue(new Error('useGetCasesMetrics: Test error'));
 
-    const { waitForNextUpdate } = renderHook(() => useGetCasesMetrics(), {
+    renderHook(() => useGetCasesMetrics(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });
