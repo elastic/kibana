@@ -40,7 +40,9 @@ describe('Testing kv header', () => {
   } as unknown as IScopedClusterClient;
   it('handleHeader()', async () => {
     const response = await handleHeader({ state, model, client });
-    expect(response.kvLogMessages).toStrictEqual(['dummy=data']);
+    expect(response.grokPattern).toStrictEqual(
+      '<%{NUMBER:priority}>%{NUMBER:version} %{GREEDYDATA:message}'
+    );
     expect(response.lastExecutedChain).toBe('kv_header');
   });
 });
