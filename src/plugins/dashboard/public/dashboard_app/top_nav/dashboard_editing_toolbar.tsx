@@ -87,7 +87,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
 
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const extraButtons = [
-    <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} api={dashboardApi} />,
+    <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} />,
     <AddFromLibraryButton
       onClick={() => dashboardApi.addFromLibrary()}
       size="s"
