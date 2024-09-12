@@ -21,7 +21,7 @@ export {
   DashboardContainerFactoryDefinition,
 } from './embeddable/dashboard_container_factory';
 
-export { DashboardRenderer } from './external_api/dashboard_renderer';
+export { LazyDashboardRenderer } from './external_api/lazy_dashboard_renderer';
 export type { DashboardAPI, AwaitingDashboardAPI } from './external_api/dashboard_api';
 export type { DashboardLocatorParams } from './types';
 export type { IProvidesLegacyPanelPlacementSettings } from './panel_placement';

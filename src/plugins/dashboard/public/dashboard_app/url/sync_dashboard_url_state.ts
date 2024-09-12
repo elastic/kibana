@@ -20,12 +20,12 @@ import {
   convertSavedPanelsToPanelMap,
   DashboardContainerInput,
 } from '../../../common';
-import { DashboardAPI } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 import { SavedDashboardPanel } from '../../../common/content_management';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
+import { DashboardApi } from '../../dashboard_api/types';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -89,10 +89,10 @@ export const loadAndRemoveDashboardState = (
 
 export const startSyncingDashboardUrlState = ({
   kbnUrlStateStorage,
-  dashboardAPI,
+  dashboardApi,
 }: {
   kbnUrlStateStorage: IKbnUrlStateStorage;
-  dashboardAPI: DashboardAPI;
+  dashboardApi: DashboardApi;
 }) => {
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
@@ -100,7 +100,7 @@ export const startSyncingDashboardUrlState = ({
     .subscribe(() => {
       const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
       if (Object.keys(stateFromUrl).length === 0) return;
-      dashboardAPI.updateInput(stateFromUrl);
+      dashboardApi.updateInput(stateFromUrl);
     });
 
   const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();

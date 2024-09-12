@@ -10,7 +10,7 @@
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
 import useObservable from 'react-use/lib/useObservable';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -31,10 +31,9 @@ import {
   removeSearchSessionIdFromURL,
   createSessionRestorationDataProvider,
 } from './url/search_sessions_integration';
-import { DashboardAPI, DashboardRenderer } from '..';
+import { DashboardApi, DashboardRenderer } from '..';
 import { type DashboardEmbedSettings } from './types';
 import { pluginServices } from '../services/plugin_services';
-import { AwaitingDashboardAPI } from '../dashboard_container';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { createDashboardEditUrl, DASHBOARD_APP_ID } from '../dashboard_constants';
@@ -52,16 +51,6 @@ export interface DashboardAppProps {
   embedSettings?: DashboardEmbedSettings;
 }
 
-export const DashboardAPIContext = createContext<AwaitingDashboardAPI>(null);
-
-export const useDashboardAPI = (): DashboardAPI => {
-  const api = useContext<AwaitingDashboardAPI>(DashboardAPIContext);
-  if (api == null) {
-    throw new Error('useDashboardAPI must be used inside DashboardAPIContext');
-  }
-  return api!;
-};
-
 export function DashboardApp({
   savedDashboardId,
   embedSettings,
@@ -73,7 +62,7 @@ export function DashboardApp({
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
-  const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
+  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
 
   /**
    * Unpack & set up dashboard services
@@ -94,7 +83,7 @@ export function DashboardApp({
 
   useObservabilityAIAssistantContext({
     observabilityAIAssistant: observabilityAIAssistant.start,
-    dashboardAPI,
+    dashboardApi,
     search,
     dataViews,
   });
@@ -193,45 +182,39 @@ export function DashboardApp({
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
-    if (!dashboardAPI) return;
+    if (!dashboardApi) return;
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
-      dashboardAPI,
+      dashboardApi,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
+  }, [dashboardApi, kbnUrlStateStorage, savedDashboardId]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
-  return (
-    <>
-      {showNoDataPage && (
-        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
-      )}
-      {!showNoDataPage && (
-        <>
-          {dashboardAPI && (
-            <>
-              <DashboardTabTitleSetter dashboardContainer={dashboardAPI} />
-              <DashboardTopNav
-                redirectTo={redirectTo}
-                embedSettings={embedSettings}
-                dashboardContainer={dashboardAPI}
-              />
-            </>
-          )}
+  return showNoDataPage
+    ? <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+    : <>
+        {dashboardApi && (
+          <>
+            <DashboardTabTitleSetter dashboardApi={dashboardApi} />
+            <DashboardTopNav
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardApi={dashboardApi}
+            />
+          </>
+        )}
 
-          {getLegacyConflictWarning?.()}
-          <DashboardRenderer
-            locator={locator}
-            ref={setDashboardAPI}
-            dashboardRedirect={redirectTo}
-            savedObjectId={savedDashboardId}
-            showPlainSpinner={showPlainSpinner}
-            getCreationOptions={getCreationOptions}
-          />
-        </>
-      )}
-    </>
+        {getLegacyConflictWarning?.()}
+        <DashboardRenderer
+          locator={locator}
+          onApiAvailable={setDashboardApi}
+          dashboardRedirect={redirectTo}
+          savedObjectId={savedDashboardId}
+          showPlainSpinner={showPlainSpinner}
+          getCreationOptions={getCreationOptions}
+        />
+      </>
   );
 }

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {
@@ -43,7 +43,7 @@ export const dashboardManagedBadge = {
  * @returns {string} A title to display to the user based on the above parameters.
  */
 export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: boolean): string {
-  const isEditMode = viewMode === ViewMode.EDIT;
+  const isEditMode = viewMode === 'edit';
   const dashboardTitle = isNew ? getNewDashboardTitle() : title;
   return isEditMode
     ? i18n.translate('dashboard.strings.dashboardEditTitle', {

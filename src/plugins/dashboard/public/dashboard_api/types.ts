@@ -7,6 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CanExpandPanels } from '@kbn/presentation-containers';
+import { CanExpandPanels, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  PublishesDataViews,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
+  PublishesUnifiedSearch,
+  PublishesViewMode,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 
-export type DashboardApi = CanExpandPanels;
+export type DashboardApi = CanExpandPanels &
+  PresentationContainer &
+  PublishesDataViews &
+  Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesSavedObjectId &
+  PublishesUnifiedSearch &
+  PublishesViewMode & {
+    fullScreenMode$: PublishingSubject<boolean | undefined>;
+    focusedPanelId$: PublishingSubject<string | undefined>;
+    managed$: PublishingSubject<boolean | undefined>;
+  };

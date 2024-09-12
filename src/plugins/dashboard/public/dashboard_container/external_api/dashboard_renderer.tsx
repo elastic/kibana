@@ -125,7 +125,7 @@ export function DashboardRenderer({
       }
 
       setDashboardContainer(container);
-      onApiAvailable(container as DashboardApi);
+      onApiAvailable(container);
     })();
     return () => {
       canceled = true;

@@ -301,23 +301,28 @@ export class DashboardContainer
     this.select = reduxTools.select;
 
     this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
+    this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
+    this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
+    this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
     this.publishingSubscription.add(
       this.onStateChange(() => {
-        if (this.savedObjectId.value === this.getDashboardSavedObjectId()) return;
-        this.savedObjectId.next(this.getDashboardSavedObjectId());
-      })
-    );
-    this.publishingSubscription.add(
-      this.savedObjectId.subscribe(() => {
-        this.hadContentfulRender = false;
-      })
-    );
-
-    this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
-    this.publishingSubscription.add(
-      this.onStateChange(() => {
-        if (this.expandedPanelId.value === this.getExpandedPanelId()) return;
-        this.expandedPanelId.next(this.getExpandedPanelId());
+        const state = this.getState();
+        if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
+          this.savedObjectId.next(this.getDashboardSavedObjectId());
+        }
+        if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
+          this.expandedPanelId.next(this.getExpandedPanelId());
+        }
+        if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
+          this.focusedPanelId$.next(state.componentState.focusedPanelId);
+        }
+        if (this.managed$.value !== state.componentState.managed) {
+          this.managed$.next(state.componentState.managed);
+        }
+        if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
+          this.fullScreenMode$.next(state.componentState.fullScreenMode);
+        }
       })
     );
 
@@ -533,6 +538,9 @@ export class DashboardContainer
 
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
+  public focusedPanelId$: BehaviorSubject<string | undefined>;
+  public managed$: BehaviorSubject<boolean | undefined>;
+  public fullScreenMode$: BehaviorSubject<boolean | undefined>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
