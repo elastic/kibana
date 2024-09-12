@@ -628,7 +628,11 @@ export const QueryBarTopRow = React.memo(
       if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
         return (
           <EuiFlexItem
-            style={isLens ? { maxWidth: '100%', maxHeight: '32px' } : { maxWidth: '100%' }}
+            style={
+              props.screenTitle === 'lens'
+                ? { maxWidth: '100%', maxHeight: '32px' }
+                : { maxWidth: '100%' }
+            }
             grow={isMobile}
           >
             <DataViewPicker
@@ -753,7 +757,8 @@ export const QueryBarTopRow = React.memo(
     }
     const { euiTheme } = useEuiTheme();
     const isScreenshotMode = props.isScreenshotMode === true;
-    const isLens = props.screenTitle === 'lens';
+    const getMaxHeight = props.screenTitle === 'lens' ? `'max-height' : ${euiTheme.size.s};` : null;
+
     return (
       <>
         <SharingMetaFields
@@ -772,7 +777,7 @@ export const QueryBarTopRow = React.memo(
                 padding: ${isQueryLangSelected && !props.disableExternalPadding
                   ? euiTheme.size.s
                   : 0};
-                ${isLens ? 'max-height' : euiTheme.size.s};
+                ${getMaxHeight};
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap

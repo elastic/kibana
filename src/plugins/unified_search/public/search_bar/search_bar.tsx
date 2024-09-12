@@ -492,19 +492,16 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
     const styles = searchBarStyles(theme, isESQLQuery);
-    const isDiscover = this.props.dataViewPickerComponentProps?.trigger['data-test-subj'];
     const isLens = this.props.kibana.services.appName === 'lens';
 
     const cssStyles = [
       styles.uniSearchBar,
-      !isDiscover && styles.noExpand,
       this.props.displayStyle && styles[this.props.displayStyle],
       isScreenshotMode && styles.hidden,
       isLens && styles.noExpand,
     ];
 
     const classes = classNames('uniSearchBar', {
-      [`uniSearchBar`]: isDiscover,
       [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
       [`uniSearchBarFixed`]: this.props.displayStyle === 'detached',

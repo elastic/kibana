@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
       });
 
-      describe('global filters', () => {
+      describe.only('global filters', () => {
         before(async () => {
           await filterBar.addFilter({
             field: 'Carrier',
