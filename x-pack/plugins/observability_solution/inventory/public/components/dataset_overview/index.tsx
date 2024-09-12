@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiFlexGroup, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { take } from 'lodash';
+import moment from 'moment';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { ControlledEsqlGrid } from '../esql_grid/controlled_esql_grid';
 import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
@@ -18,21 +19,29 @@ import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 export function DatasetOverview() {
   const {
     path: { id },
-  } = useInventoryParams('/datastream/{id}/*');
+  } = useInventoryParams('/data_stream/{id}/*');
 
-  const baseQuery = `FROM "${id}" | WHERE @timestamp <= NOW() AND @timestamp >= NOW() - 60 minutes`;
+  const { start, end } = useMemo(() => {
+    const endM = moment();
+    return {
+      start: moment(endM).subtract(60, 'minutes').valueOf(),
+      end: endM.valueOf(),
+    };
+  }, []);
+
+  const baseQuery = `FROM "${id}"`;
 
   const logsQuery = `${baseQuery} | LIMIT 100`;
 
-  const logsQueryResult = useEsqlQueryResult({ query: logsQuery });
+  const logsQueryResult = useEsqlQueryResult({ query: logsQuery, start, end });
 
   const histogramQuery = `${baseQuery} | STATS count = COUNT(*) BY @timestamp = BUCKET(@timestamp, 1 minute)`;
 
-  const histogramQueryResult = useEsqlQueryResult({ query: histogramQuery });
+  const histogramQueryResult = useEsqlQueryResult({ query: histogramQuery, start, end });
 
   useInventoryBreadcrumbs(() => {
     return {
-      path: '/datastream/{id}/overview',
+      path: '/data_stream/{id}/overview',
       title: i18n.translate('xpack.inventory.datastreamOverview.breadcrumbTitle', {
         defaultMessage: 'Overview',
       }),

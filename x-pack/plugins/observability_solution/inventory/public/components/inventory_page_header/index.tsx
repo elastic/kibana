@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
-export function EntityOverviewHeaderTitle({ title }: { title: string }) {
-  return (
-    <EuiTitle>
-      <h1>{title}</h1>
-    </EuiTitle>
-  );
+export function InventoryPageHeader({ children }: { children: React.ReactNode }) {
+  return <EuiFlexGroup direction="row">{children}</EuiFlexGroup>;
 }

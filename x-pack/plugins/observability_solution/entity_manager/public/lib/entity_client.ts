@@ -12,6 +12,8 @@ import {
   createRepositoryClient,
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
+import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import type { RequestCacheOptions } from '@kbn/server-route-repository-client/src/request_cache';
 import {
   DisableManagedEntityResponse,
   EnableManagedEntityResponse,
@@ -20,7 +22,12 @@ import {
 import type { EntityManagerRouteRepository } from '../../server';
 import { EntityManagerUnauthorizedError } from './errors';
 
-type EntityManagerRepositoryClient = RouteRepositoryClient<EntityManagerRouteRepository, {}>;
+type EntityManagerRepositoryClient = RouteRepositoryClient<
+  EntityManagerRouteRepository,
+  {
+    caching?: RequestCacheOptions;
+  }
+>;
 
 type QueryParamOf<T extends { params?: any }> = Exclude<T['params'], undefined>['query'];
 
@@ -35,6 +42,15 @@ type CreateEntityDefinitionQuery = QueryParamOf<
   ClientRequestParamsOf<EntityManagerRouteRepository, 'PUT /internal/entities/managed/enablement'>
 >;
 
+function rethrowAuthorizationError<T, U extends (...args: any[]) => Promise<T>>(cb: U): Promise<T> {
+  return cb().catch((error) => {
+    if (isHttpFetchError(error) && error.body?.statusCode === 403) {
+      throw new EntityManagerUnauthorizedError(error.body.message);
+    }
+    throw error;
+  });
+}
+
 export class EntityClient {
   public readonly repositoryClient: EntityManagerRepositoryClient['fetch'];
 
@@ -43,44 +59,65 @@ export class EntityClient {
   }
 
   async isManagedEntityDiscoveryEnabled(): Promise<ManagedEntityEnabledResponse> {
-    return await this.repositoryClient('GET /internal/entities/managed/enablement');
+    return await this.repositoryClient('GET /internal/entities/managed/enablement', {
+      caching: {
+        mode: 'never',
+      },
+    });
   }
 
   async enableManagedEntityDiscovery(
     query?: CreateEntityDefinitionQuery
   ): Promise<EnableManagedEntityResponse> {
-    try {
-      return await this.repositoryClient('PUT /internal/entities/managed/enablement', {
+    return rethrowAuthorizationError(() =>
+      this.repositoryClient('PUT /internal/entities/managed/enablement', {
         params: {
           query: {
             installOnly: query?.installOnly,
           },
         },
-      });
-    } catch (err) {
-      if (isHttpFetchError(err) && err.body?.statusCode === 403) {
-        throw new EntityManagerUnauthorizedError(err.body.message);
-      }
-      throw err;
-    }
+      })
+    );
   }
 
   async disableManagedEntityDiscovery(
     query?: DeleteEntityDefinitionQuery
   ): Promise<DisableManagedEntityResponse> {
-    try {
-      return await this.repositoryClient('DELETE /internal/entities/managed/enablement', {
+    return rethrowAuthorizationError(() =>
+      this.repositoryClient('DELETE /internal/entities/managed/enablement', {
         params: {
           query: {
             deleteData: query?.deleteData,
           },
         },
-      });
-    } catch (err) {
-      if (isHttpFetchError(err) && err.body?.statusCode === 403) {
-        throw new EntityManagerUnauthorizedError(err.body.message);
-      }
-      throw err;
-    }
+      })
+    );
+  }
+
+  async createEntityDefinition(definition: EntityDefinition): Promise<void> {
+    return rethrowAuthorizationError(() =>
+      this.repositoryClient('POST /internal/entities/definition', {
+        params: {
+          body: definition,
+          query: {
+            installOnly: false,
+          },
+        },
+      })
+    );
+  }
+
+  async updateEntityDefinition(id: string, definition: EntityDefinitionUpdate): Promise<void> {
+    return rethrowAuthorizationError(() =>
+      this.repositoryClient('PATCH /internal/entities/definition/{id}', {
+        params: {
+          path: { id },
+          body: definition,
+          query: {
+            installOnly: false,
+          },
+        },
+      })
+    );
   }
 }

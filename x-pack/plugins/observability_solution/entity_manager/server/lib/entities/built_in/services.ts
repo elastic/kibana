@@ -32,7 +32,7 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
       'filebeat*',
       'metrics-apm.service_transaction.1m*',
       'metrics-apm.service_summary.1m*',
-    ],
+    ].flatMap((pattern) => [pattern, `*:${pattern}`]),
     history: {
       timestampField: '@timestamp',
       interval: '1m',

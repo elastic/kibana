@@ -11,9 +11,9 @@ import { useInventoryBreadcrumbs } from '../../hooks/use_inventory_breadcrumbs';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRoutePath } from '../../hooks/use_inventory_route_path';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { EntityOverviewHeader } from '../entity_overview_header';
-import { EntityOverviewHeaderTitle } from '../entity_overview_header/entity_overview_header';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
+import { InventoryPageHeader } from '../inventory_page_header';
+import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
 
 type TabMap = Record<
   string,
@@ -23,7 +23,7 @@ type TabMap = Record<
 export function DatasetDetailView({ children }: { children: React.ReactNode }) {
   const {
     path: { id },
-  } = useInventoryParams('/datastream/{id}/*');
+  } = useInventoryParams('/data_stream/{id}/*');
 
   const router = useInventoryRouter();
 
@@ -31,24 +31,24 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
 
   const tabs = {
     overview: {
-      selected: routePath === '/datastream/{id}/overview',
-      href: router.link('/datastream/{id}/overview', { path: { id } }),
+      selected: routePath === '/data_stream/{id}/overview',
+      href: router.link('/data_stream/{id}/overview', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
       content: <></>,
     },
     metrics: {
-      selected: routePath === '/datastream/{id}/metrics',
-      href: router.link('/datastream/{id}/metrics', { path: { id } }),
+      selected: routePath === '/data_stream/{id}/metrics',
+      href: router.link('/data_stream/{id}/metrics', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
       content: <></>,
     },
     manage: {
-      selected: routePath === '/datastream/{id}/management',
-      href: router.link('/datastream/{id}/management', { path: { id } }),
+      selected: routePath === '/data_stream/{id}/management',
+      href: router.link('/data_stream/{id}/management', { path: { id } }),
       label: i18n.translate('xpack.inventory.datasetOverview.manageTabLabel', {
         defaultMessage: 'Manage',
       }),
@@ -57,16 +57,16 @@ export function DatasetDetailView({ children }: { children: React.ReactNode }) {
   } satisfies TabMap;
 
   useInventoryBreadcrumbs(
-    () => ({ title: id, path: `/datastream/{id}`, params: { path: { id } } }),
+    () => ({ title: id, path: `/data_stream/{id}`, params: { path: { id } } }),
     [id]
   );
 
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EntityOverviewHeader>
-          <EntityOverviewHeaderTitle title={id} />
-        </EntityOverviewHeader>
+        <InventoryPageHeader>
+          <InventoryPageHeaderTitle title={id} />
+        </InventoryPageHeader>
         <EntityOverviewTabList
           tabs={Object.entries(tabs).map(([key, { label, href, selected }]) => {
             return {

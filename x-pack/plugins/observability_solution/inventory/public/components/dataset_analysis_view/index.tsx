@@ -79,7 +79,7 @@ export function TaskAccordion({
 export function DatasetAnalysisView() {
   const {
     query: { indexPatterns: indexPatternsFromQuery },
-  } = useInventoryParams('/datastream/analyze');
+  } = useInventoryParams('/data_stream/analyze');
 
   const indexPatterns = useMemo(
     () => indexPatternsFromQuery.split(',').map((indexPattern) => indexPattern.trim()),

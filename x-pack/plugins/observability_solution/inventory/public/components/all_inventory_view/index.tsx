@@ -5,52 +5,116 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import { useListEntitiesFetch } from '../../hooks/use_list_entities_fetch';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup } from '@elastic/eui';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useEsqlQueryResult } from '../../hooks/use_esql_query_result';
+import { InventoryPageHeader } from '../inventory_page_header';
+import { InventoryPageHeaderTitle } from '../inventory_page_header/inventory_page_header_title';
 import { ControlledEntityTable } from '../entity_table';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function AllInventoryView() {
-  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number }>({
-    pageIndex: 0,
-    pageSize: 25,
-  });
+  const {
+    dependencies: {
+      start: { dataViews },
+    },
+  } = useKibana();
+  const type: 'all' | string = 'all';
 
-  const entitiesFetch = useListEntitiesFetch({ type: 'all' });
+  const query = useMemo(() => {
+    const commands = ['FROM entities-*-latest'];
 
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredItems = useMemo(() => {
-    const entities = entitiesFetch.value?.entities;
-    if (!entities || !searchQuery) {
-      return entities || [];
+    if (type !== 'all') {
+      commands.push(`WHERE entity.type == "${type}"`);
     }
 
-    const lowercasedSearchQuery = searchQuery.toLowerCase();
+    commands.push('SORT entity.displayName ASC');
 
-    return entities.filter((entity) => entity.name.toLowerCase().includes(lowercasedSearchQuery));
-  }, [entitiesFetch.value?.entities, searchQuery]);
+    return commands.join(' | ');
+  }, []);
 
-  const visibleItems = useMemo(() => {
-    return filteredItems.slice(
-      pagination.pageIndex * pagination.pageSize,
-      pagination.pageIndex * pagination.pageSize + pagination.pageSize
-    );
-  }, [pagination.pageIndex, pagination.pageSize, filteredItems]);
+  const [displayedKqlFilter, setDisplayedKqlFilter] = useState('');
+  const [persistedKqlFilter, setPersistedKqlFilter] = useState('');
+
+  const queryResult = useEsqlQueryResult({
+    query,
+    kqlFilter: persistedKqlFilter,
+  });
+
+  const entityRows = useMemo(() => {
+    const columns = queryResult.value?.columns ?? [];
+    const rows = queryResult.value?.rows ?? [];
+
+    if (!columns.length || !rows.length) {
+      return [];
+    }
+
+    return rows
+      .map((row) => {
+        return row.reduce<Record<string, unknown>>((acc, value, index) => {
+          const column = columns[index];
+          acc[column.name] = value;
+          return acc;
+        }, {});
+      })
+      .map((record) => {
+        return {
+          id: record['entity.displayName'] as string,
+          type: record['entity.type'] as string,
+          name: record['entity.displayName'] as string,
+        };
+      });
+  }, [queryResult.value]);
+
+  const [pagination, setPagination] = useState<{ pageSize: number; pageIndex: number }>({
+    pageSize: 10,
+    pageIndex: 0,
+  });
+
+  const dataViewsFetch = useAbortableAsync(() => {
+    return dataViews
+      .create(
+        {
+          title: `entities-*-latest`,
+          timeFieldName: '@timestamp',
+        },
+        false, // skip fetch fields
+        true // display errors
+      )
+      .then((response) => {
+        return [response];
+      });
+  }, [dataViews]);
 
   return (
-    <ControlledEntityTable
-      columns={[]}
-      rows={visibleItems}
-      loading={entitiesFetch.loading}
-      query={searchQuery}
-      pagination={pagination}
-      onPaginationChange={(nextPagination) => {
-        setPagination(nextPagination);
-      }}
-      onQueryChange={(nextQuery) => {
-        setSearchQuery(nextQuery);
-      }}
-      onQuerySubmit={() => {}}
-      totalItemCount={entitiesFetch.value?.entities.length ?? 0}
-    />
+    <EuiFlexGroup direction="column">
+      <InventoryPageHeader>
+        <InventoryPageHeaderTitle
+          title={i18n.translate(
+            'xpack.inventory.allInventoryView.inventoryPageHeaderTitle.allEntitiesLabel',
+            { defaultMessage: 'All entities' }
+          )}
+        />
+      </InventoryPageHeader>
+      <ControlledEntityTable
+        rows={entityRows}
+        loading={queryResult.loading}
+        kqlFilter={displayedKqlFilter}
+        onKqlFilterChange={(next) => {
+          setDisplayedKqlFilter(next);
+        }}
+        onKqlFilterSubmit={() => {
+          setPersistedKqlFilter(displayedKqlFilter);
+        }}
+        onPaginationChange={(next) => {
+          setPagination(next);
+        }}
+        pagination={pagination}
+        totalItemCount={entityRows.length}
+        columns={[]}
+        dataViews={dataViewsFetch.value}
+      />
+    </EuiFlexGroup>
   );
 }

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EntityDefinition as EntityDiscoveryDefinition } from '@kbn/entities-schema';
 
 export interface Entity<TAttributes extends Record<string, any> = {}> {
   id: string;
@@ -17,6 +18,7 @@ export interface EntityTypeDefinition {
   name: string;
   label: string;
   icon: string;
+  discoveryDefinition?: EntityDiscoveryDefinition;
 }
 
 interface ConcreteIdentifyField {

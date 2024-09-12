@@ -14,6 +14,8 @@ import { ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
 import { ES_FIELD_TYPES, esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { Values } from '@kbn/utility-types';
+import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/exclude_frozen_query';
+import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { useKibana } from './use_kibana';
 
 type EsFieldType = Values<typeof ES_FIELD_TYPES>;
@@ -29,8 +31,14 @@ export interface EsqlQueryResult {
 
 export function useEsqlQueryResult({
   query,
+  start,
+  end,
+  kqlFilter,
 }: {
   query: string;
+  start?: number;
+  end?: number;
+  kqlFilter?: string;
 }): AbortableAsyncState<EsqlQueryResult> {
   const {
     dependencies: {
@@ -46,6 +54,26 @@ export function useEsqlQueryResult({
             params: {
               query,
               dropNullColumns: true,
+              filter: {
+                bool: {
+                  filter: [
+                    ...(start && end
+                      ? [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: start,
+                                lte: end,
+                              },
+                            },
+                          },
+                        ]
+                      : []),
+                    ...excludeFrozenQuery(),
+                    ...kqlQuery(kqlFilter),
+                  ],
+                },
+              },
             },
           },
           { strategy: ESQL_SEARCH_STRATEGY, abortSignal: signal }
@@ -69,6 +97,6 @@ export function useEsqlQueryResult({
         };
       });
     },
-    [query, data.search]
+    [query, data.search, start, end, kqlFilter]
   );
 }

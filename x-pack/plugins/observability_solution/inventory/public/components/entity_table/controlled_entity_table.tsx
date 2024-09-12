@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import {
   CriteriaWithPagination,
   EuiBadge,
@@ -12,32 +11,35 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiLink,
-  EuiSearchBar,
 } from '@elastic/eui';
-import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
+import { InventorySearchBar } from '../inventory_search_bar';
 
 export function ControlledEntityTable<TEntity extends { id: string; name: string; type: string }>({
   rows,
   columns,
   loading,
-  query,
-  onQueryChange,
-  onQuerySubmit,
+  kqlFilter,
+  onKqlFilterChange,
+  onKqlFilterSubmit,
   pagination: { pageSize, pageIndex },
   onPaginationChange,
   totalItemCount,
+  dataViews,
 }: {
   rows: TEntity[];
   columns: Array<EuiBasicTableColumn<TEntity>>;
-  query: string;
-  onQueryChange: (nextQuery: string) => void;
-  onQuerySubmit: () => void;
+  kqlFilter: string;
+  onKqlFilterChange: (nextKql: string) => void;
+  onKqlFilterSubmit: () => void;
   loading: boolean;
   pagination: { pageSize: number; pageIndex: number };
   onPaginationChange: (pagination: { pageSize: number; pageIndex: number }) => void;
   totalItemCount: number;
+  dataViews?: DataView[];
 }) {
   const router = useInventoryRouter();
 
@@ -77,25 +79,29 @@ export function ControlledEntityTable<TEntity extends { id: string; name: string
     ];
   }, [router]);
 
+  const displayedRows = useMemo(
+    () => rows.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize),
+    [rows, pageIndex, pageSize]
+  );
+
   return (
     <EuiFlexGroup direction="column">
-      <EuiSearchBar
-        query={query}
-        onChange={({ queryText }) => {
-          onQueryChange(queryText);
+      <InventorySearchBar
+        query={kqlFilter}
+        onQueryChange={({ query }) => {
+          onKqlFilterChange(query);
         }}
-        box={{
-          onChange: (event) => {
-            onQueryChange(event.currentTarget.value);
-          },
-          placeholder: i18n.translate('xpack.inventory.entityTable.filterEntitiesPlaceholder', {
-            defaultMessage: 'Filter entities',
-          }),
+        onQuerySubmit={() => {
+          onKqlFilterSubmit();
         }}
+        placeholder={i18n.translate('xpack.inventory.entityTable.filterEntitiesPlaceholder', {
+          defaultMessage: 'Filter entities',
+        })}
+        dataViews={dataViews}
       />
       <EuiBasicTable<TEntity>
         columns={displayedColumns}
-        items={rows}
+        items={displayedRows}
         itemId="name"
         pagination={{
           pageSize,

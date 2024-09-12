@@ -222,7 +222,7 @@ export function DatasetView() {
           data-test-subj="inventoryDatasetViewRunAiAnalysisButton"
           disabled={!selectedOptions.length}
           onClick={() => {
-            router.push('/datastream/analyze', {
+            router.push('/data_stream/analyze', {
               path: {},
               query: {
                 indexPatterns: selectedOptions.map((option) => option.label).join(','),

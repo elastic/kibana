@@ -272,6 +272,16 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     const hasQuerySuggestions =
       this.props.deps.unifiedSearch.autocomplete.hasQuerySuggestions(language);
 
+    console.log({
+      language,
+      hasQuerySuggestions,
+      indexPatterns: this.state.indexPatterns,
+      selection: {
+        start: this.inputRef.selectionStart,
+        end: this.inputRef.selectionEnd,
+      },
+    });
+
     if (
       !hasQuerySuggestions ||
       !Array.isArray(this.state.indexPatterns) ||

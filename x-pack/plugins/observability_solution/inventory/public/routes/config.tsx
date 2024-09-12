@@ -18,6 +18,7 @@ import { RedirectTo } from '../components/redirect_to';
 import { AllInventoryView } from '../components/all_inventory_view';
 import { DatasetManagementView } from '../components/dataset_management_view';
 import { InventoryRouterBreadcrumb } from '../components/inventory_router_breadcrumb';
+import { DefinitionsView } from '../components/definitions_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -41,6 +42,9 @@ const inventoryRoutes = {
       '/updates': {
         element: <></>,
       },
+      '/definitions': {
+        element: <DefinitionsView />,
+      },
       '/all': {
         element: (
           <InventoryRouterBreadcrumb
@@ -53,7 +57,7 @@ const inventoryRoutes = {
           </InventoryRouterBreadcrumb>
         ),
       },
-      '/datastream/analyze': {
+      '/data_stream/analyze': {
         element: <DatasetAnalysisView />,
         params: t.type({
           query: t.type({
@@ -61,22 +65,22 @@ const inventoryRoutes = {
           }),
         }),
       },
-      '/datastream': {
+      '/data_stream': {
         element: (
           <InventoryRouterBreadcrumb
             title={i18n.translate('xpack.inventory.datastreamsBreadcrumbTitle', {
-              defaultMessage: 'Datastreams',
+              defaultMessage: 'Data streams',
             })}
-            path="/datastream"
+            path="/data_stream"
           >
             <Outlet />
           </InventoryRouterBreadcrumb>
         ),
         children: {
-          '/datastream': {
+          '/data_stream': {
             element: <DatasetInventoryView />,
           },
-          '/datastream/{id}': {
+          '/data_stream/{id}': {
             params: t.type({
               path: t.type({
                 id: t.string,
@@ -88,17 +92,17 @@ const inventoryRoutes = {
               </DatasetDetailView>
             ),
             children: {
-              '/datastream/{id}/overview': {
+              '/data_stream/{id}/overview': {
                 element: <DatasetOverview />,
               },
-              '/datastream/{id}/metrics': {
+              '/data_stream/{id}/metrics': {
                 element: <DatasetMetricsView />,
               },
-              '/datastream/{id}/management': {
+              '/data_stream/{id}/management': {
                 element: <DatasetManagementView />,
               },
-              '/datastream/{id}': {
-                element: <RedirectTo path="/datastream/{id}/overview" />,
+              '/data_stream/{id}': {
+                element: <RedirectTo path="/data_stream/{id}/overview" />,
               },
             },
           },
