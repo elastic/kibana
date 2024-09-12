@@ -109,7 +109,6 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: ALERT_ACTION_INDEX,
         ruleId,
-        retryOptions: { retryDelay: 700, retryCount: 10 },
       });
       expect(resp.hits.hits.length).to.be(1);
 
