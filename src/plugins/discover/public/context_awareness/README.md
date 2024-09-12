@@ -27,7 +27,7 @@ There are currently three context levels supported in Discover:
 
 Discover uses a concept called "composable profiles" to support context awareness. Composable profiles are implementations of a core `Profile` interface (or a subset of it) containing all of the available extension points Discover supports. A composable profile can be implemented at any context level through a "profile provider", responsible for defining the composable profile and its associated context resolution method, called `resolve`. Each provider's `resolve` method is passed a parameters object specific to its context level, which it uses to determine if its associated `profile` is a match. In cases where it is a match, the `resolve` method also returns related metadata in a `context` object.
 
-Within Discover there is always one active root profile, one active data source profile (as long as search results exist), and an active document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level profiles within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which only becomes active when the current solution type is Observability, and the current data source contains logs data.
+Within Discover there is always one active root profile, one active data source profile (as long as search results exist), and an active document profile for each search result in the data grid. Profile providers have access to the `context` objects of higher level providers within their `resolve` method (`root` > `data source` > `document`), making it possible to create context-dependent profiles. For example, an `oblt-logs-data-source` profile which only becomes active when the current solution type is Observability, and the current data source contains logs data.
 
 Definitions for the core `Profile` interface are located in the [`types.ts`](types.ts) file.
 
@@ -35,7 +35,7 @@ Definitions for the available profile provider types are located in the [`profil
 
 ### Merged accessors
 
-Composable profiles operate similarly to middleware in that each of their extension point implementations are passed a `prev` argument, which can be called to access the results from profiles at previous context levels, and allows overwriting or composing a final result from the previous results. The method Discover calls to trigger the extension point merging process and obtain a final result from the combined profiles is referred to as a "merged accessor".
+Composable profiles operate similarly to middleware in that each of their extension point implementations are passed a `prev` argument, which can be called to access the results from profiles at previous context levels, and allows overwriting or composing a final result from the previous results. The function Discover calls to trigger the extension point merging process and obtain a final result from the combined profiles is referred to as a "merged accessor".
 
 The following diagram illustrates the extension point merging process:
 ![image](./docs/merged_accessors.png)
@@ -60,7 +60,7 @@ A single `ProfilesManager` is instantiated on Discover load, or one per saved se
 
 The `ProfilesManager` implementation is located in the [`profiles_manager.ts`](./profiles_manager.ts) file.
 
-### Bringing it all together
+### Putting it all together
 
 The following diagram models the overall Discover context awareness framework and how each of the above concepts come together:
 ![image](./docs/architecture.png)
