@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFormControlLayout, EuiFormLabel, EuiDatePicker } from '@elastic/eui';
+import { EuiFormRow, EuiFormLabel, EuiDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import React from 'react';
@@ -37,70 +37,62 @@ export function AnnotationRange() {
           display="rowCompressed"
           fullWidth
         >
-          <EuiFormControlLayout
-            fullWidth
-            compressed
-            prepend={
-              <EuiFormLabel>
-                {i18n.translate('xpack.observability.annotationRange.fromFormLabelLabel', {
-                  defaultMessage: 'From',
-                })}
-              </EuiFormLabel>
-            }
-          >
-            <Controller
-              name="@timestamp"
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field }) => {
-                const { value, ref, ...rest } = field;
-                return (
-                  <EuiDatePicker
-                    showTimeSelect
-                    selected={field.value}
-                    compressed
-                    dateFormat={dateFormat}
-                    {...rest}
-                  />
-                );
-              }}
-            />
-          </EuiFormControlLayout>
+          <Controller
+            name="@timestamp"
+            control={control}
+            rules={{
+              required: true,
+            }}
+            render={({ field }) => {
+              const { value, ref, ...rest } = field;
+              return (
+                <EuiDatePicker
+                  showTimeSelect
+                  selected={field.value}
+                  fullWidth
+                  compressed
+                  prepend={
+                    <EuiFormLabel>
+                      {i18n.translate('xpack.observability.annotationRange.fromFormLabelLabel', {
+                        defaultMessage: 'From',
+                      })}
+                    </EuiFormLabel>
+                  }
+                  dateFormat={dateFormat}
+                  {...rest}
+                />
+              );
+            }}
+          />
         </EuiFormRow>
         <EuiFormRow display="rowCompressed" fullWidth>
-          <EuiFormControlLayout
-            fullWidth
-            compressed
-            prepend={
-              <EuiFormLabel>
-                {i18n.translate('xpack.observability.annotationRange.toFormLabelLabel', {
-                  defaultMessage: 'To',
-                })}
-              </EuiFormLabel>
-            }
-          >
-            <Controller
-              name="event.end"
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field }) => {
-                const { value, ref, ...rest } = field;
-                return (
-                  <EuiDatePicker
-                    showTimeSelect
-                    selected={field.value}
-                    compressed
-                    dateFormat={dateFormat}
-                    {...rest}
-                  />
-                );
-              }}
-            />
-          </EuiFormControlLayout>
+          <Controller
+            name="event.end"
+            control={control}
+            rules={{
+              required: true,
+            }}
+            render={({ field }) => {
+              const { value, ref, ...rest } = field;
+              return (
+                <EuiDatePicker
+                  showTimeSelect
+                  selected={field.value}
+                  fullWidth
+                  compressed
+                  prepend={
+                    <EuiFormLabel>
+                      {i18n.translate('xpack.observability.annotationRange.toFormLabelLabel', {
+                        defaultMessage: 'To',
+                      })}
+                    </EuiFormLabel>
+                  }
+                  dateFormat={dateFormat}
+                  {...rest}
+                />
+              );
+            }}
+          />
         </EuiFormRow>
       </>
     );
