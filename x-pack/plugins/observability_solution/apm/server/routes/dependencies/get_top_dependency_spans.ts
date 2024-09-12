@@ -8,6 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import { Span } from '@kbn/apm-types/es_schemas_ui';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -28,6 +29,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { maybe } from '../../../common/utils/maybe';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 const MAX_NUM_SPANS = 1000;
 
@@ -110,9 +112,21 @@ export async function getTopDependencySpans({
           EVENT_OUTCOME,
           '@timestamp',
         ],
+        fields: [
+          SPAN_ID,
+          TRACE_ID,
+          TRANSACTION_ID,
+          SPAN_NAME,
+          SERVICE_NAME,
+          SERVICE_ENVIRONMENT,
+          AGENT_NAME,
+          SPAN_DURATION,
+          EVENT_OUTCOME,
+          '@timestamp',
+        ],
       },
     })
-  ).hits.hits.map((hit) => hit._source);
+  ).hits.hits.map((hit) => normalizeFields(hit?.fields) as unknown as Span);
 
   const transactionIds = spans.map((span) => span.transaction!.id);
 

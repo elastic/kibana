@@ -67,6 +67,7 @@ export async function getErrorGroupSampleIds({
         },
       },
       _source: [ERROR_ID, 'transaction'],
+      fields: [ERROR_ID, 'transaction'],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
@@ -74,8 +75,8 @@ export async function getErrorGroupSampleIds({
     },
   });
   const errorSampleIds = resp.hits.hits.map((item) => {
-    const source = item._source;
-    return source.error.id;
+    const source = item.fields;
+    return source.error?.id;
   });
 
   return {

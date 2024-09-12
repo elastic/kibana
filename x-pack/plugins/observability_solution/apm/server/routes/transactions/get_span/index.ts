@@ -63,7 +63,7 @@ export async function getSpan({
   ]);
 
   const fields = spanResp.hits.hits[0]?.fields;
-  const fieldsNorm = normalizeFields(fields);
+  const fieldsNorm = normalizeFields(fields) as unknown as Span;
 
   return { span: fieldsNorm, parentTransaction };
 }

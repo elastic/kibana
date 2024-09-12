@@ -25,6 +25,7 @@ import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw'
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
+import { normalizeFields } from '../../utils/normalize_fields';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
@@ -74,6 +75,7 @@ export async function getServiceMetadataIcons({
       size: 1,
       _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
       query: { bool: { filter, should } },
+      fields: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
     },
   };
 
@@ -88,8 +90,9 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const { kubernetes, cloud, container, agent } = response.hits.hits[0]
-    ._source as ServiceMetadataIconsRaw;
+  const { kubernetes, cloud, container, agent } = normalizeFields(
+    response.hits.hits[0].fields
+  ) as ServiceMetadataIconsRaw;
 
   let containerType: ContainerType;
   if (!!kubernetes) {

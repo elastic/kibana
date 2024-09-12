@@ -62,6 +62,7 @@ export async function getErrorSampleDetails({
         },
       },
     },
+    fields: ['*'],
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
