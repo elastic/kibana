@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getColumnsWithMetadata } from './ecs_metadata_helper';
+import { enrichFieldsWithMetadata } from './ecs_metadata_helper';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { ESQLRealField } from '../../..';
 
-describe('getColumnsWithMetadata', () => {
+describe('enrichFieldsWithMetadata', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
     const columns: ESQLRealField[] = [
       { name: 'ecs.version', type: 'keyword' },
@@ -19,7 +19,7 @@ describe('getColumnsWithMetadata', () => {
       { name: 'field2', type: 'double' },
     ];
 
-    const result = await getColumnsWithMetadata(columns);
+    const result = await enrichFieldsWithMetadata(columns);
     expect(result).toEqual(columns);
   });
 
@@ -44,7 +44,7 @@ describe('getColumnsWithMetadata', () => {
       }),
     } as unknown as FieldsMetadataPublicStart;
 
-    const result = await getColumnsWithMetadata(columns, fieldsMetadata);
+    const result = await enrichFieldsWithMetadata(columns, fieldsMetadata);
 
     expect(result).toEqual([
       {
@@ -73,7 +73,7 @@ describe('getColumnsWithMetadata', () => {
       }),
     } as unknown as FieldsMetadataPublicStart;
 
-    const result = await getColumnsWithMetadata(columns, fieldsMetadata);
+    const result = await enrichFieldsWithMetadata(columns, fieldsMetadata);
 
     expect(result).toEqual([
       { name: 'ecs.version', type: 'keyword', metadata: { description: 'ECS version field' } },

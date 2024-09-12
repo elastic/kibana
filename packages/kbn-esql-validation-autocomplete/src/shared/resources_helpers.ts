@@ -10,22 +10,42 @@
 import type { ESQLAst } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
+import { enrichFieldsWithMetadata } from '../autocomplete/utils/ecs_metadata_helper';
 
 export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
   const prevCommand = ast[Math.max(ast.length - 2, 0)];
   return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
+// ECS Metadata is very static, so cache doesn't need to be cleared often
+let cacheEcsMetadata: Record<string, { type: string; source: string }> | undefined;
+
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
+
+  const getEcsMetadata = async () => {
+    if (!cacheEcsMetadata && resourceRetriever?.getFieldsMetadata) {
+      // Fetch full list of ECS field
+      const client = await resourceRetriever?.getFieldsMetadata();
+      const metadata = await client?.find({
+        attributes: ['type'],
+      });
+      cacheEcsMetadata = metadata?.fields;
+    }
+    return cacheEcsMetadata;
+  };
+
   const getFields = async () => {
+    const metadata = await getEcsMetadata();
     if (!cacheFields.size && queryText) {
       const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
-      for (const field of fieldsOfType || []) {
+      const fieldsWithMetadata = enrichFieldsWithMetadata(fieldsOfType || [], metadata);
+      for (const field of fieldsWithMetadata || []) {
         cacheFields.set(field.name, field);
       }
     }
   };
+
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',

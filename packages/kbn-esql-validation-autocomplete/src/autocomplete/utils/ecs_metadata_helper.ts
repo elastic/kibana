@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { ESQLRealField } from '../../validation/types';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
 
+export interface ECSMetadata {
+  [key: string]: {
+    type: string;
+    source: string;
+  };
+}
 /**
  * Returns columns with the metadata/description (e.g ECS info)
  * if available
@@ -22,9 +27,9 @@ const removeKeywordSuffix = (name: string) => {
  * @param fieldsMetadata
  * @returns
  */
-export function getColumnsWithMetadata(
+export function enrichFieldsWithMetadata(
   columns: Array<Omit<ESQLRealField, 'metadata'>>,
-  ecsMetadataCache?: FieldsMetadataPublicStart
+  ecsMetadataCache?: ECSMetadata
 ): ESQLRealField[] {
   if (!ecsMetadataCache) return columns;
 

@@ -54,7 +54,6 @@ import {
 import type { TextBasedLanguagesEditorProps, TextBasedEditorDeps } from './types';
 
 import './overwrite.scss';
-import { getColumnsWithMetadata } from './ecs_metadata_helper';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
@@ -92,7 +91,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     core,
     fieldsMetadata,
     uiSettings,
-    http,
   } = kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
@@ -113,7 +111,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [ecsMetadataCache, setEcsMetadataCache] = useState();
+  // const [ecsMetadataCache, setEcsMetadataCache] = useState<ECSMetadata>({});
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -183,25 +181,25 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, []);
 
-  useEffect(
-    function fetchECSMetadataOnce() {
-      const fetchECSFields = async () => {
-        if (fieldsMetadata) {
-          const fieldsMetadataClient = await fieldsMetadata?.getClient();
-          if (fieldsMetadataClient) {
-            const fields = await fieldsMetadataClient.find({
-              attributes: ['source', 'type'],
-            });
-            if (fields.fields) {
-              setEcsMetadataCache(fields.fields);
-            }
-          }
-        }
-      };
-      fetchECSFields();
-    },
-    [fieldsMetadata]
-  );
+  // useEffect(
+  //   function fetchECSMetadataOnce() {
+  //     const fetchECSFields = async () => {
+  //       if (fieldsMetadata) {
+  //         const fieldsMetadataClient = await fieldsMetadata?.getClient();
+  //         if (fieldsMetadataClient) {
+  //           const fields = await fieldsMetadataClient.find({
+  //             attributes: ['source', 'type'],
+  //           });
+  //           if (fields.fields) {
+  //             setEcsMetadataCache(fields.fields as ECSMetadata);
+  //           }
+  //         }
+  //       }
+  //     };
+  //     fetchECSFields();
+  //   },
+  //   [fieldsMetadata]
+  // );
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -377,7 +375,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 };
               }) || [];
 
-            return getColumnsWithMetadata(columns, ecsMetadataCache);
+            return columns;
           } catch (e) {
             // no action yet
           }
@@ -415,7 +413,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    ecsMetadataCache,
     fieldsMetadata,
   ]);
 

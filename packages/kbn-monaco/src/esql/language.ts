@@ -108,15 +108,18 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         };
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
+        if (!callbacks?.getFieldsMetadata) return item;
+
         const fieldsMetadataClient = await callbacks?.getFieldsMetadata();
 
         if (
+          !fieldsMetadataClient ||
           // If not a field, no need to fetch metadata
           item.kind !== 4 ||
-          typeof item.label !== 'string' ||
-          !fieldsMetadataClient
-        )
+          typeof item.label !== 'string'
+        ) {
           return item;
+        }
 
         const ecsMetadata = await fieldsMetadataClient.find({
           fieldNames: [item.label],
@@ -124,7 +127,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         });
 
         const fieldMetadata = ecsMetadata.fields[item.label as string];
-        if (fieldMetadata) {
+        if (fieldMetadata && fieldMetadata.description) {
           const completionItem: monaco.languages.CompletionItem = {
             ...item,
             documentation: {
