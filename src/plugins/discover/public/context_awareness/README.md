@@ -1,5 +1,7 @@
 # Discover context awareness
 
+**If you're looking for available extension point definitions, they're located in the `Profile` interface in [`types.ts`](types.ts).**
+
 ## Summary
 
 The Discover context awareness framework allows Discover's UI and functionality to adapt to the surrounding context of the page, including solution type, data source, current search parameters, etc., in order to provide curated data exploration experiences across a variety of data types and scenarios. Support for this is implemented through a system of profiles that map to distinct context levels, and extension points that provide interfaces for customizing specific aspects of Discover.
