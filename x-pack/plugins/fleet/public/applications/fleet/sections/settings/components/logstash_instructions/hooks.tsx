@@ -38,7 +38,7 @@ export function useLogstashApiKey() {
         notifications.toasts.addDanger(
           {
             title: i18n.translate('xpack.fleet.settings.logstashInstructions.generateApiKeyError', {
-              defaultMessage: 'Impossible to generate an api key',
+              defaultMessage: 'Cannot generate an API key',
             }),
             text: toMountPoint(
               <FormattedMessage
@@ -68,7 +68,7 @@ export function useLogstashApiKey() {
       } else {
         notifications.toasts.addError(err, {
           title: i18n.translate('xpack.fleet.settings.logstashInstructions.generateApiKeyError', {
-            defaultMessage: 'Impossible to generate an api key',
+            defaultMessage: 'Cannot generate an API key',
           }),
         });
       }
