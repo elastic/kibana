@@ -229,14 +229,14 @@ export function getQueryParams({
       (searchFieldsParam.length === 1 && searchFieldsParam[0] === '*');
     const useNestedStringClause =
       nestedFields.searchFields.size > 0 && !isSearchingInAllFields && !useMatchPhrasePrefix;
-    // TODO: improve name as it's also used for match_phrase_prefix
-    const simpleQueryOptions =
-      isSearchingInAllFields || useMatchPhrasePrefix
-        ? {
-            types,
-            searchFields: searchFieldsParam,
-          }
-        : { types: fields.types, searchFields: fields.searchFields };
+    // TODO: move into extractFieldsAndNestedFields fn
+    const simpleQueryOptions = useNestedStringClause
+      ? { types: fields.types, searchFields: fields.searchFields }
+      : {
+          types,
+          searchFields: searchFieldsParam,
+        };
+
     const useSimpleQueryStringClause =
       isSearchingInAllFields || simpleQueryOptions.searchFields.length > 0;
     const useSimpleQueryStringClauseOnly = !useNestedStringClause && !useMatchPhrasePrefix;
@@ -265,6 +265,7 @@ export function getQueryParams({
           searchFields: simpleQueryOptions.searchFields,
           types: simpleQueryOptions.types,
           registry,
+          mappings,
         })
       : [];
 
@@ -296,15 +297,17 @@ const getMatchPhrasePrefixClauses = ({
   searchFields,
   registry,
   types,
+  mappings,
 }: {
   search: string;
   searchFields?: string[];
   types: string[];
   registry: ISavedObjectTypeRegistry;
+  mappings: IndexMapping;
 }) => {
   // need to remove the prefix search operator
   const query = search.replace(/[*]$/, '');
-  const mppFields = getMatchPhrasePrefixFields({ searchFields, types, registry });
+  const mppFields = getMatchPhrasePrefixFields({ searchFields, types, registry, mappings });
   return mppFields.map(({ field, boost }) => {
     return {
       match_phrase_prefix: {
@@ -326,10 +329,12 @@ const getMatchPhrasePrefixFields = ({
   searchFields = [],
   types,
   registry,
+  mappings,
 }: {
   searchFields?: string[];
   types: string[];
   registry: ISavedObjectTypeRegistry;
+  mappings: IndexMapping;
 }): FieldWithBoost[] => {
   const output: FieldWithBoost[] = [];
 
@@ -346,7 +351,15 @@ const getMatchPhrasePrefixFields = ({
   } else {
     fields = [];
     for (const field of searchFields) {
-      fields = fields.concat(types.map((type) => `${type}.${field}`));
+      fields = fields.concat(
+        types
+          .map((type) => `${type}.${field}`)
+          .filter((absoluteFieldPath) => {
+            const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
+            const parentNodeType = getProperty(mappings, parentNode)?.type;
+            return parentNodeType !== 'nested';
+          })
+      );
     }
   }
 
@@ -383,53 +396,46 @@ const extractFieldsAndNestedFields = ({
   const usedFields: Set<string> = new Set();
   const typesUsedByFields: Set<string> = new Set();
   const usedNestedFields: Map<string, string[]> = new Map();
-  const typesUsedNestedFields: Set<string> = new Set();
 
   types.forEach((type) => {
     searchFields.forEach((rawSearchField) => {
       const isFieldDefinedAsNested = rawSearchField.split('.').length > 1;
       // Keeps the prefix only when boosting or wildcard
       const searchField = rawSearchField.replace(/[*^].$/, '');
+      const isBoostedOrWildcard = rawSearchField !== searchField;
       const absoluteFieldPath = `${type}.${searchField}`;
+      const nodeType = getProperty(mappings, absoluteFieldPath)?.type;
       const parentNode = absoluteFieldPath.split('.').slice(0, -1).join('.');
       const parentNodeType = getProperty(mappings, parentNode)?.type;
 
-      const nodeType = getProperty(mappings, absoluteFieldPath)?.type;
       if (isFieldDefinedAsNested) {
-        if (parentNodeType === 'nested' && nodeType !== undefined) {
-          usedNestedFields.set(parentNode, [
-            ...(usedNestedFields.get(parentNode) || []),
-            absoluteFieldPath,
-          ]);
-          typesUsedNestedFields.add(type);
-        } else if (nodeType !== undefined) {
-          usedFields.add(rawSearchField);
-          typesUsedByFields.add(type);
+        if (nodeType !== undefined) {
+          if (parentNodeType === 'nested') {
+            usedNestedFields.set(parentNode, [
+              ...(usedNestedFields.get(parentNode) || []),
+              absoluteFieldPath,
+            ]);
+          } else {
+            usedFields.add(rawSearchField);
+            typesUsedByFields.add(type);
+          }
         }
-      } else {
+      } else if (isBoostedOrWildcard || (nodeType !== undefined && nodeType !== 'nested')) {
         usedFields.add(rawSearchField);
         typesUsedByFields.add(type);
       }
     });
   });
 
-  const typesUsedByNestedFieldsAndNotBySearchFields = Array.from(typesUsedNestedFields).filter(
-    (type) => !typesUsedByFields.has(type)
-  );
-  const typesUsedBySearchFieldsAndNotByNestedFields = Array.from(typesUsedByFields).filter(
-    (type) => !typesUsedNestedFields.has(type)
-  );
-
-  const fields = {
-    types: typesUsedBySearchFieldsAndNotByNestedFields,
-    searchFields: Array.from(usedFields.values()),
+  return {
+    fields: {
+      types: Array.from(typesUsedByFields),
+      searchFields: Array.from(usedFields.values()),
+    },
+    nestedFields: {
+      searchFields: usedNestedFields,
+    },
   };
-  const nestedFields = {
-    types: typesUsedByNestedFieldsAndNotBySearchFields,
-    searchFields: usedNestedFields,
-  };
-
-  return { fields, nestedFields };
 };
 
 /**
@@ -446,7 +452,6 @@ const getNestedQueryStringClause = ({
     return [];
   }
 
-  // TODO: what about the defaultSearchOperator? Do we need to pass it here?
   return Array.from(nestedFields.entries()).map(([path, fields]) => {
     return {
       nested: {

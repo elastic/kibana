@@ -544,7 +544,6 @@ describe('#getQueryParams', () => {
         });
 
         it('supports multiple search fields', () => {
-          // TODO: check if .raw is something valid
           test({ searchFields: ['title', 'title.raw'] });
         });
 
@@ -795,7 +794,7 @@ describe('#getQueryParams', () => {
             registry,
             search: 'foo',
             searchFields: ['title^3', 'title.value'],
-            type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
+            type: ['nestedtype', 'saved', 'pending'],
             mappings: nestedFieldMappings,
           });
 
@@ -809,7 +808,11 @@ describe('#getQueryParams', () => {
             'nestedtype.title.value',
           ]);
 
-          expect(simpleQueryClause.fields).toEqual(['saved.title^3', 'pending.title^3']);
+          expect(simpleQueryClause.fields).toEqual([
+            'nestedtype.title^3', // does not exist but wont break
+            'saved.title^3',
+            'pending.title^3',
+          ]);
           expect(simpleQueryClause.query).toBe('foo');
         });
 
@@ -818,7 +821,7 @@ describe('#getQueryParams', () => {
             registry,
             search: 'foo',
             searchFields: ['title.raw', 'title.value'],
-            type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
+            type: ['nestedtype', 'saved', 'pending'],
             mappings: nestedFieldMappings,
           });
 
@@ -885,7 +888,6 @@ describe('#getQueryParams', () => {
         ]);
       });
 
-      // TODO: this is not taking into account nested fields
       it('ignores match_phrase_prefix for nested fields', () => {
         const result = getQueryParams({
           registry,
@@ -895,12 +897,14 @@ describe('#getQueryParams', () => {
           mappings: nestedFieldMappings,
         });
 
-        console.log(JSON.stringify(result));
         const shouldClause = result.query.bool.should;
-        expect(shouldClause.length).toBe(2);
+        expect(shouldClause.length).toBe(4);
         expect(shouldClause[0].simple_query_string).toBeTruthy();
-        expect(shouldClause[1].match_phrase_prefix).toBeTruthy();
-        // TODO: add the field to make sure its not using the nested type
+        for (let i = 1; i <= 3; i++) {
+          expect(Object.keys(shouldClause[i].match_phrase_prefix)).not.toContain(
+            'nestedtype.title.value'
+          );
+        }
       });
 
       it('defaultSearchField does not work with nested fields', () => {
