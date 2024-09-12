@@ -18,7 +18,7 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
-  useResizeObserver,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
@@ -73,13 +73,12 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
 
-  const [resizeRef, setResizeRef] = useState<HTMLDivElement | null>(null);
-  const containerDimensions = useResizeObserver(resizeRef);
-
   const {
     docLinks,
     services: { notifications, routeHistory },
   } = useServicesContext();
+
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
@@ -202,7 +201,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
     <div
       id="consoleRoot"
       className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
-      ref={setResizeRef}
     >
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
@@ -307,13 +305,13 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           {currentTab === SHELL_TAB_ID && (
             <Editor
               loading={!done}
-              containerWidth={containerDimensions.width}
+              isVerticalLayout={isVerticalLayout}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
             />
           )}
-          {currentTab === HISTORY_TAB_ID && <History containerWidth={containerDimensions.width} />}
-          {currentTab === CONFIG_TAB_ID && <Config containerWidth={containerDimensions.width} />}
+          {currentTab === HISTORY_TAB_ID && <History isVerticalLayout={isVerticalLayout} />}
+          {currentTab === CONFIG_TAB_ID && <Config isVerticalLayout={isVerticalLayout} />}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner

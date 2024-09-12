@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.console.openConsole();
+      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.clearEditorText();
     });
 

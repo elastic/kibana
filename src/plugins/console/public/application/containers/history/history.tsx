@@ -78,10 +78,10 @@ const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => 
 };
 
 interface Props {
-  containerWidth: number;
+  isVerticalLayout: boolean;
 }
 
-export function History({ containerWidth }: Props) {
+export function History({ isVerticalLayout }: Props) {
   const { euiTheme } = useEuiTheme();
   const {
     services: { history, routeHistory },
@@ -111,6 +111,8 @@ export function History({ containerWidth }: Props) {
 
   const restoreRequestFromHistory = useCallback(
     (restoreMethod: RestoreMethod) => {
+      routeHistory?.push(`/console/${SHELL_TAB_ID}`);
+
       const formattedRequest = getFormattedRequest(viewingReq as ESRequest);
 
       dispatch({
@@ -120,7 +122,6 @@ export function History({ containerWidth }: Props) {
           restoreMethod,
         },
       });
-      routeHistory?.push(`/console/${SHELL_TAB_ID}`);
     },
     [viewingReq, dispatch, routeHistory]
   );
@@ -159,7 +160,7 @@ export function History({ containerWidth }: Props) {
     >
       <EuiResizableContainer
         style={{ height: '100%' }}
-        direction={containerWidth < euiTheme.breakpoint.l ? 'vertical' : 'horizontal'}
+        direction={isVerticalLayout ? 'vertical' : 'horizontal'}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
