@@ -6,20 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiSearchBarOnChangeArgs,
-  SearchFilterConfig,
-  FieldValueOptionType,
-} from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiCard,
-  EuiIcon,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiSearchBar,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { SearchFilterConfig, FieldValueOptionType } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiFlexGrid, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import useMount from 'react-use/lib/useMount';
@@ -46,7 +34,6 @@ export const SuppliedConfigurations = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [query, setQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
-  const [error, setError] = useState<EuiSearchBarOnChangeArgs['error'] | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(false);
   const [selectedModuleId, setSelectedModuleId] = useState<string | undefined>();
 
@@ -109,23 +96,11 @@ export const SuppliedConfigurations = () => {
     return clauses.length > 0 ? filterModules(modules, clauses) : modules;
   }, [query, modules]);
 
-  const onChange = ({ query: onChangeQuery, error: onChangeError }: EuiSearchBarOnChangeArgs) => {
-    if (onChangeError) {
-      setError(error);
-    } else {
-      setError(null);
-      setQuery(onChangeQuery);
-    }
-  };
+  const onChange = useCallback(({ query: onChangeQuery }) => setQuery(onChangeQuery), [setQuery]);
 
   if (isLoading === true) return <LoadingIndicator />;
 
-  return error ? (
-    <>
-      <EuiCallOut iconType="faceSad" color="danger" title={`Invalid search: ${error?.message}`} />
-      <EuiSpacer size="l" />
-    </>
-  ) : (
+  return (
     <>
       <EuiSearchBar
         defaultQuery={query}
