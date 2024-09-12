@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
-  EuiFormControlLayout,
   transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -173,7 +172,7 @@ export const ScheduleItem = ({
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <EuiFormControlLayout
+      <EuiFieldNumber
         append={
           <MyEuiSelect
             fullWidth={false}
@@ -185,17 +184,14 @@ export const ScheduleItem = ({
             {...rest}
           />
         }
-      >
-        <EuiFieldNumber
-          fullWidth
-          min={minimumValue}
-          max={Number.MAX_SAFE_INTEGER}
-          onChange={onChangeTimeVal}
-          value={timeVal}
-          data-test-subj="interval"
-          {...rest}
-        />
-      </EuiFormControlLayout>
+        fullWidth
+        min={minimumValue}
+        max={Number.MAX_SAFE_INTEGER}
+        onChange={onChangeTimeVal}
+        value={timeVal}
+        data-test-subj="interval"
+        {...rest}
+      />
     </StyledEuiFormRow>
   );
 };

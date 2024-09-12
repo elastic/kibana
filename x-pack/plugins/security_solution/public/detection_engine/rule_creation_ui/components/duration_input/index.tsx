@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFieldNumber,
-  EuiFormRow,
-  EuiSelect,
-  EuiFormControlLayout,
-  transparentize,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiSelect, transparentize } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -42,12 +36,6 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   .euiFormControlLayout {
     max-width: 235px;
     width: auto;
-  }
-
-  .euiFormControlLayout__childrenWrapper > *:first-child {
-    box-shadow: none;
-    height: 38px;
-    width: 100%;
   }
 
   .euiFormControlLayout__childrenWrapper > select {
@@ -111,7 +99,7 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
 
   return (
     <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid}>
-      <EuiFormControlLayout
+      <EuiFieldNumber
         append={
           <MyEuiSelect
             fullWidth={false}
@@ -122,17 +110,14 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
             {...rest}
           />
         }
-      >
-        <EuiFieldNumber
-          fullWidth={false}
-          min={minimumValue}
-          max={Number.MAX_SAFE_INTEGER}
-          onChange={onChangeTimeVal}
-          value={durationValue}
-          data-test-subj="interval"
-          {...rest}
-        />
-      </EuiFormControlLayout>
+        fullWidth={false}
+        min={minimumValue}
+        max={Number.MAX_SAFE_INTEGER}
+        onChange={onChangeTimeVal}
+        value={durationValue}
+        data-test-subj="interval"
+        {...rest}
+      />
     </StyledEuiFormRow>
   );
 };
