@@ -11,8 +11,8 @@ The Discover context awareness framework allows Discover's UI and functionality 
 There are currently three context levels supported in Discover:
 
 - Root context:
-  - Based on the current solution type, navigation parameters, etc.
-  - Resolved at application initialization and on parameter changes.
+  - Based on the current solution type.
+  - Resolved at application initialization.
   - Runs synchronously or asynchronously.
 - Data source context:
   - Based on the current ES|QL query or data view.
