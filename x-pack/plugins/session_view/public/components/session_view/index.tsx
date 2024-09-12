@@ -411,7 +411,7 @@ export const SessionView = ({
           return (
             <>
               <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
-                {hasError && (
+                {hasError ? (
                   <EuiEmptyPrompt
                     iconType="warning"
                     color="danger"
@@ -432,7 +432,7 @@ export const SessionView = ({
                       </p>
                     }
                   />
-                )}
+                ) : null}
 
                 {hasData && (
                   <div css={styles.processTree}>

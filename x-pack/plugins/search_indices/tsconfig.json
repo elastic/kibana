@@ -29,7 +29,9 @@
     "@kbn/shared-ux-router",
     "@kbn/index-management",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/try-in-console",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

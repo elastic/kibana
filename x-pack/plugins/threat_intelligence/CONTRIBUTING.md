@@ -131,9 +131,5 @@ If changes are made to how developers build, test, interact with, or release cod
 
 **E2E tests:**
 
-```
-node scripts/build_kibana_platform_plugins
-cd x-pack/plugins/threat_intelligence
-yarn cypress:open-as-ci
-```
+Cypress tests are integrated with the Security Solution ones. Please refer to https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/README.md for more information 
 
