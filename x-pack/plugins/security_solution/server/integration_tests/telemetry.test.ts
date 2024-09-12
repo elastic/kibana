@@ -70,7 +70,8 @@ const securitySolutionPlugin = jest.spyOn(SecuritySolutionPlugin.prototype, 'sta
 
 type Defer = () => void;
 
-describe('telemetry tasks', () => {
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
+describe.skip('telemetry tasks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
