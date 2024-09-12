@@ -19,6 +19,7 @@ import type {
 import { entityEngineDescriptorTypeName } from './saved_object';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { getEntityDefinition } from './utils/utils';
+import { ENGINE_STATUS } from './constants';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -50,7 +51,7 @@ export class EntityStoreDataClient {
         indexPatterns: [...definition.indexPatterns, ...indexPattern.split(',')],
       },
     });
-    const updated = await this.engineClient.update(definition.id, 'started');
+    const updated = await this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
 
     return { ...descriptor, ...updated };
   }
@@ -60,7 +61,7 @@ export class EntityStoreDataClient {
 
     const descriptor = await this.engineClient.get(entityType);
 
-    if (descriptor.status !== 'stopped') {
+    if (descriptor.status !== ENGINE_STATUS.STOPPED) {
       throw new Error(
         `Cannot start Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
@@ -69,7 +70,7 @@ export class EntityStoreDataClient {
     this.options.logger.info(`Starting entity store for ${entityType}`);
     await this.options.entityClient.startEntityDefinition(definition);
 
-    return this.engineClient.update(definition.id, 'started');
+    return this.engineClient.update(definition.id, ENGINE_STATUS.STARTED);
   }
 
   public async stop(entityType: EntityType) {
@@ -77,7 +78,7 @@ export class EntityStoreDataClient {
 
     const descriptor = await this.engineClient.get(entityType);
 
-    if (descriptor.status !== 'started') {
+    if (descriptor.status !== ENGINE_STATUS.STARTED) {
       throw new Error(
         `Cannot stop Entity engine for ${entityType} when current status is: ${descriptor.status}`
       );
@@ -86,7 +87,7 @@ export class EntityStoreDataClient {
     this.options.logger.info(`Stopping entity store for ${entityType}`);
     await this.options.entityClient.stopEntityDefinition(definition);
 
-    return this.engineClient.update(definition.id, 'stopped');
+    return this.engineClient.update(definition.id, ENGINE_STATUS.STOPPED);
   }
 
   public async get(entityType: EntityType) {

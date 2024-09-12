@@ -18,6 +18,7 @@ import type {
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
 import { getByEntityTypeQuery, getEntityDefinition } from '../utils/utils';
+import { ENGINE_STATUS } from '../constants';
 
 export class EngineDescriptorClient {
   constructor(private readonly soClient: SavedObjectsClientContract) {}
@@ -31,7 +32,7 @@ export class EngineDescriptorClient {
     const { attributes } = await this.soClient.create<EngineDescriptor>(
       entityEngineDescriptorTypeName,
       {
-        status: 'installing',
+        status: ENGINE_STATUS.INSTALLING,
         type: entityType,
         indexPattern: definition.indexPatterns.join(','),
         filter,

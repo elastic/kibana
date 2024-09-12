@@ -14,6 +14,7 @@ import type { StopEntityStoreResponse } from '../../../../../common/api/entity_a
 import { StopEntityStoreRequestParams } from '../../../../../common/api/entity_analytics/entity_store/engine/stop.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { ENGINE_STATUS } from '../constants';
 
 export const stopEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -44,7 +45,7 @@ export const stopEntityEngineRoute = (
           const secSol = await context.securitySolution;
           const engine = await secSol.getEntityStoreDataClient().stop(request.params.entityType);
 
-          return response.ok({ body: { stopped: engine.status === 'stopped' } });
+          return response.ok({ body: { stopped: engine.status === ENGINE_STATUS.STOPPED } });
         } catch (e) {
           logger.error('Error in StopEntityStore:', e);
           const error = transformError(e);
