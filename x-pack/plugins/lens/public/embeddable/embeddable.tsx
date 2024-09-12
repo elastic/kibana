@@ -144,6 +144,7 @@ import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { TextBasedPersistedState } from '../datasources/text_based/types';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -1086,7 +1087,7 @@ export class Embeddable
     let totalTime = 0;
     for (let i = 0; i < requests.length; i++) {
       const request = requests[i];
-      if (request.status !== 1) {
+      if (request.status !== RequestStatus.OK) {
         allValid = false;
         break;
       }
