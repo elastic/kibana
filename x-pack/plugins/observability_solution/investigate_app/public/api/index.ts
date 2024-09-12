@@ -28,12 +28,12 @@ export type InvestigateAppAPIClientOptions = Omit<
 export type InvestigateAppAPIClient = RouteRepositoryClient<
   InvestigateAppServerRouteRepository,
   InvestigateAppAPIClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedInvestigateAppAPIClient = RouteRepositoryClient<
   InvestigateAppServerRouteRepository,
   Omit<InvestigateAppAPIClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type InvestigateAppAPIEndpoint = keyof InvestigateAppServerRouteRepository;
 
