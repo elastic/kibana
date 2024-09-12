@@ -128,7 +128,7 @@ const LogsTabLogsOverviewContent = () => {
     [parsedDateRange.from, parsedDateRange.to]
   );
 
-  const { hostNodes, loading } = useHostsViewContext();
+  const { hostNodes, loading, error } = useHostsViewContext();
   const logFilters = useMemo(
     () => [
       buildCombinedAssetFilter({
@@ -140,10 +140,12 @@ const LogsTabLogsOverviewContent = () => {
   );
 
   if (loading) {
-    return <LogsTabLoadingContent />;
+    return <LogsOverview.LoadingContent />;
+  } else if (error != null) {
+    return <LogsOverview.ErrorContent error={error} />;
+  } else {
+    return <LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
   }
-
-  return <LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
 };
 
 const LogsTabLoadingContent = () => (
