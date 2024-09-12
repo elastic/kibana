@@ -10,11 +10,9 @@ export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status` as const;
 export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init` as const;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable` as const;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable` as const;
-export const RISK_ENGINE_PRIVILEGES_URL =
-  `${RISK_ENGINE_URL}/privileges` as const;
+export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges` as const;
 export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings` as const;
-export const RISK_ENGINE_CLEANUP_URL =
-  `/api/risk_score/engine/dangerously_delete_data` as const;
+export const RISK_ENGINE_CLEANUP_URL = `/api/risk_score/engine/dangerously_delete_data` as const;
 
 // Public Risk Score routes
 export const PUBLIC_RISK_ENGINE_URL = `${PUBLIC_RISK_SCORE_URL}/engine` as const;
@@ -22,16 +20,16 @@ export const RISK_ENGINE_SCHEDULE_NOW_URL = `${RISK_ENGINE_URL}/schedule_now` as
 
 export const MAX_SPACES_COUNT = 1;
 
-type ClusterPrivilege = "manage_index_templates" | "manage_transform";
+type ClusterPrivilege = 'manage_index_templates' | 'manage_transform';
 export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
-  "manage_index_templates",
-  "manage_transform",
+  'manage_index_templates',
+  'manage_transform',
 ] as ClusterPrivilege[];
 
-export const RISK_SCORE_INDEX_PATTERN = "risk-score.risk-score-*";
+export const RISK_SCORE_INDEX_PATTERN = 'risk-score.risk-score-*';
 
-export type RiskEngineIndexPrivilege = "read" | "write";
+export type RiskEngineIndexPrivilege = 'read' | 'write';
 
 export const RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES = Object.freeze({
-  [RISK_SCORE_INDEX_PATTERN]: ["read", "write"] as RiskEngineIndexPrivilege[],
+  [RISK_SCORE_INDEX_PATTERN]: ['read', 'write'] as RiskEngineIndexPrivilege[],
 });

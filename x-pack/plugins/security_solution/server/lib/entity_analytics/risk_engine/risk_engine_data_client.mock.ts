@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RiskEngineDataClient } from "./risk_engine_data_client";
+import type { RiskEngineDataClient } from './risk_engine_data_client';
 
 const createRiskEngineDataClientMock = () =>
   ({

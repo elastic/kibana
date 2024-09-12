@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { securityMock } from "@kbn/security-plugin/server/mocks";
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 const createMockSecurityStartWithFullRiskEngineAccess = () => {
   const mockSecurityStart = securityMock.createStart();
@@ -14,9 +14,9 @@ const createMockSecurityStartWithFullRiskEngineAccess = () => {
     hasAllRequested: true,
     privileges: {
       elasticsearch: {
-        cluster: ["manage", "monitor"],
+        cluster: ['manage', 'monitor'],
         index: {
-          "index-name": ["read"],
+          'index-name': ['read'],
         },
       },
     },
