@@ -14,11 +14,9 @@
  *   version: 1
  */
 
-import { z } from "@kbn/zod";
+import { z } from '@kbn/zod';
 
-export type CleanUpRiskEngineErrorResponse = z.infer<
-  typeof CleanUpRiskEngineErrorResponse
->;
+export type CleanUpRiskEngineErrorResponse = z.infer<typeof CleanUpRiskEngineErrorResponse>;
 export const CleanUpRiskEngineErrorResponse = z.object({
   risk_engine_cleanup: z.boolean(),
   errors: z.array(
@@ -29,9 +27,7 @@ export const CleanUpRiskEngineErrorResponse = z.object({
   ),
 });
 
-export type CleanUpRiskEngineResponse = z.infer<
-  typeof CleanUpRiskEngineResponse
->;
+export type CleanUpRiskEngineResponse = z.infer<typeof CleanUpRiskEngineResponse>;
 export const CleanUpRiskEngineResponse = z.object({
   risk_engine_cleanup: z.boolean().optional(),
 });
