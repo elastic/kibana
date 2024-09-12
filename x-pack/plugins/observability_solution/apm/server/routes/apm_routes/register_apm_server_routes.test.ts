@@ -68,7 +68,9 @@ const getRegisterRouteDependencies = () => {
 };
 
 const initApi = (
-  routes: Array<ServerRoute<any, t.Any, APMRouteHandlerResources, any, APMRouteCreateOptions>>
+  routes: Array<
+    ServerRoute<any, t.Any | undefined, APMRouteHandlerResources, any, APMRouteCreateOptions>
+  >
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
 
