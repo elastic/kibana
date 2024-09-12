@@ -7,9 +7,6 @@
     "id": "mockIdpPlugin",
     "server": true,
     "browser": true,
-    "configPath": [
-      "mockIdpPlugin"
-    ],
     "enabledOnAnonymousPages": true,
     "requiredPlugins": [
       "cloud"
