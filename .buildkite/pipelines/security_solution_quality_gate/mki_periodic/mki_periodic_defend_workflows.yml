@@ -7,7 +7,7 @@ steps:
         key: test_defend_workflows
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
@@ -29,7 +29,7 @@ steps:
 #        key: edr_workflows:artifacts:qa:serverless
 #        agents:
 #          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-qa
+#          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -46,7 +46,7 @@ steps:
 #        key: edr_workflows:authentication:qa:serverless
 #        agents:
 #          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-qa
+#          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -63,7 +63,7 @@ steps:
 #        key: edr_workflows:metadata:qa:serverless
 #        agents:
 #          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-qa
+#          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -80,7 +80,7 @@ steps:
 #        key: edr_workflows:package:qa:serverless
 #        agents:
 #          image: family/kibana-ubuntu-2004
-#          imageProject: elastic-images-qa
+#          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
 #          localSsds: 1
@@ -97,7 +97,7 @@ steps:
         key: edr_workflows:policy_response:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
@@ -115,7 +115,7 @@ steps:
         key: edr_workflows:resolver:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
@@ -133,7 +133,7 @@ steps:
         key: edr_workflows:response_actions:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
@@ -154,7 +154,7 @@ steps:
         key: test_osquery_defend_workflows
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
