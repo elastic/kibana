@@ -242,6 +242,7 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -497,6 +498,21 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   */
+  async cleanUpRiskEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API CleanUpRiskEngine`);
+    return this.kbnClient
+      .request<CleanUpRiskEngineResponse>({
+        path: '/api/risk_score/engine/dangerously_delete_data',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
