@@ -41,7 +41,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   const {
     services: { cases, presentationUtil, uiSettings, mlServices },
   } = useMlKibana();
-  const { mlApiServices: ml } = mlServices;
+  const { mlApi } = mlServices;
 
   const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
@@ -77,7 +77,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
-      const fetchedStoppedPartitions = await ml.results.getCategoryStoppedPartitions(
+      const fetchedStoppedPartitions = await mlApi.results.getCategoryStoppedPartitions(
         selectedJobIds,
         ML_JOB_ID
       );
