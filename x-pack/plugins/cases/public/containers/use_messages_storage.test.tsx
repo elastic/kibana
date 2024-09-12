@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 import type { UseMessagesStorage } from './use_messages_storage';
 import { useMessagesStorage } from './use_messages_storage';
 
@@ -19,10 +20,8 @@ describe('useMessagesStorage', () => {
 
   it('should return an empty array when there is no messages', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+      await waitFor(() => null);
       const { getMessages } = result.current;
       expect(getMessages('case')).toEqual([]);
     });
@@ -30,10 +29,8 @@ describe('useMessagesStorage', () => {
 
   it('should add a message', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+      await waitFor(() => null);
       const { getMessages, addMessage } = result.current;
       addMessage('case', 'id-1');
       expect(getMessages('case')).toEqual(['id-1']);
@@ -42,10 +39,8 @@ describe('useMessagesStorage', () => {
 
   it('should add multiple messages', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+      await waitFor(() => null);
       const { getMessages, addMessage } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
@@ -55,10 +50,8 @@ describe('useMessagesStorage', () => {
 
   it('should remove a message', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+      await waitFor(() => null);
       const { getMessages, addMessage, removeMessage } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
@@ -69,10 +62,8 @@ describe('useMessagesStorage', () => {
 
   it('should return presence of a message', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+      await waitFor(() => null);
       const { hasMessage, addMessage, removeMessage } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
@@ -84,10 +75,8 @@ describe('useMessagesStorage', () => {
 
   it('should clear all messages', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+      await waitFor(() => null);
       const { getMessages, addMessage, clearAllMessages } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
