@@ -43,6 +43,10 @@ export const syntheticsRuleFieldMap: FieldMap = {
     array: true,
     required: false,
   },
+  'monitor.state.id': {
+    type: 'keyword',
+    required: false,
+  },
   configId: {
     type: 'keyword',
     required: false,
