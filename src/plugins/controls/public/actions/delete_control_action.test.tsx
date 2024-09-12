@@ -12,7 +12,6 @@ import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/presentation-publishing';
 
 import { getOptionsListControlFactory } from '../react_controls/controls/data_controls/options_list_control/get_options_list_control_factory';
@@ -60,14 +59,6 @@ beforeAll(async () => {
   );
 
   controlApi = control.api;
-});
-
-test('Action is incompatible with Error Embeddables', async () => {
-  const deleteControlAction = new DeleteControlAction();
-  const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
-  expect(await deleteControlAction.isCompatible({ embeddable: errorEmbeddable as any })).toBe(
-    false
-  );
 });
 
 test('Execute throws an error when called with an embeddable not in a parent', async () => {

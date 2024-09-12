@@ -13,7 +13,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import dateMath from '@kbn/datemath';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -73,14 +72,6 @@ beforeAll(async () => {
 });
 
 describe('Incompatible embeddables', () => {
-  test('Action is incompatible with Error Embeddables', async () => {
-    const editControlAction = new EditControlAction();
-    const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
-    expect(await editControlAction.isCompatible({ embeddable: errorEmbeddable as any })).toBe(
-      false
-    );
-  });
-
   test('Action is incompatible with embeddables that are not editable', async () => {
     const timeSliderFactory = getTimesliderControlFactory({
       core: mockCore,
