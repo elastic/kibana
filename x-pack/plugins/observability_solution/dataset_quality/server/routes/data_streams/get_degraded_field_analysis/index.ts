@@ -46,13 +46,13 @@ export async function analyzeDegradedField({
     fieldCount,
     totalFieldLimit,
     isFieldLimitIssue: Boolean(
-      !fieldPresent && ignoreDynamicBeyondLimit && fieldCount === totalFieldLimit - 2
+      !fieldPresent && ignoreDynamicBeyondLimit && fieldCount === totalFieldLimit
     ),
   });
 
   return {
     isFieldLimitIssue: Boolean(
-      !fieldPresent && ignoreDynamicBeyondLimit && fieldCount === totalFieldLimit - 2 // Why minus 2, because ES reserves 2 spots for _source and _id
+      !fieldPresent && ignoreDynamicBeyondLimit && fieldCount === totalFieldLimit
     ),
     fieldCount,
     fieldMapping,

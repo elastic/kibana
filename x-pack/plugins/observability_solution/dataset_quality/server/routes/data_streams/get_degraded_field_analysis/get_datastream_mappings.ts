@@ -10,7 +10,6 @@ import {
   MappingProperty,
   PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
-import { inspect } from 'util';
 import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 export interface DataStreamMappingResponse {
@@ -26,6 +25,9 @@ type MappingWithProperty = MappingTypeMapping & {
   properties: Record<PropertyName, MappingProperty>;
 };
 
+type MappingWithFields = MappingTypeMapping & {
+  fields: Record<PropertyName, MappingProperty>;
+};
 export async function getDataStreamMapping({
   field,
   datasetQualityESClient,
@@ -39,10 +41,8 @@ export async function getDataStreamMapping({
 }): Promise<DataStreamMappingResponse> {
   const mappings = await datasetQualityESClient.mappings({ index: dataStream });
   const properties = mappings[lastBackingIndex]?.mappings?.properties;
-  const flattenedMappings = getFlattenedMappings(properties ?? {});
-  const fieldCount = Object.keys(flattenedMappings).length;
-  const fieldPresent = field in flattenedMappings;
-  const mapping = flattenedMappings[field];
+  const { count: fieldCount, capturedMapping: mapping } = countFields(properties ?? {}, field);
+  const fieldPresent = mapping !== undefined;
   const fieldMapping = fieldPresent
     ? {
         type: mapping?.type,
@@ -50,9 +50,8 @@ export async function getDataStreamMapping({
       }
     : undefined;
 
-  console.log(inspect(flattenedMappings, { depth: null }));
-
   console.table({
+    field,
     fieldCount,
     fieldPresent,
     fieldMapping,
@@ -65,22 +64,61 @@ export async function getDataStreamMapping({
   };
 }
 
-function getFlattenedMappings(
-  properties: Record<PropertyName, MappingProperty>,
-  prefix = ''
-): Record<PropertyName, MappingProperty> {
-  return Object.entries(properties).reduce((props, [propertyName, propertyObj]) => {
-    const joinedPropertyName = [prefix, propertyName].filter(Boolean).join('.');
-
-    if (isNestedProperty(propertyObj)) {
-      return Object.assign(props, getFlattenedMappings(propertyObj.properties, joinedPropertyName));
-    }
-
-    props[joinedPropertyName] = propertyObj;
-    return props;
-  }, {} as Record<PropertyName, MappingProperty>);
+function isNestedProperty(property: MappingProperty): property is MappingWithProperty {
+  return 'properties' in property && property.properties !== undefined;
 }
 
-function isNestedProperty(property: MappingProperty): property is MappingWithProperty {
-  return (property as MappingTypeMapping).properties !== undefined;
+function isNestedField(property: MappingProperty): property is MappingWithFields {
+  return 'fields' in property && property.fields !== undefined;
+}
+
+function countFields(
+  mappings: Record<PropertyName, MappingProperty>,
+  captureField?: string,
+  prefix = ''
+): { count: number; capturedMapping?: any } {
+  let fieldCount = 0;
+  let capturedMapping;
+
+  for (const field in mappings) {
+    if (Object.prototype.hasOwnProperty.call(mappings, field)) {
+      const mappingField = mappings[field];
+      const currentPath = [prefix, field].filter(Boolean).join('.');
+
+      // Capture the value if the current path matches the captureField
+      if (captureField && currentPath === captureField) {
+        capturedMapping = mappingField;
+      }
+
+      fieldCount++; // Count the current field
+
+      // If there are properties, recursively count nested fields
+      if (isNestedProperty(mappingField)) {
+        const { count, capturedMapping: nestedCapturedValue } = countFields(
+          mappingField.properties,
+          captureField,
+          currentPath
+        );
+        fieldCount += count;
+        if (nestedCapturedValue !== undefined) {
+          capturedMapping = nestedCapturedValue;
+        }
+      }
+
+      // If there are fields, recursively count nested fields
+      if (isNestedField(mappingField)) {
+        const { count, capturedMapping: nestedCapturedValue } = countFields(
+          mappingField.fields,
+          captureField,
+          currentPath
+        );
+        fieldCount += count;
+        if (nestedCapturedValue !== undefined) {
+          capturedMapping = nestedCapturedValue;
+        }
+      }
+    }
+  }
+
+  return { count: fieldCount, capturedMapping };
 }
