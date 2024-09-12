@@ -205,7 +205,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('case-bulk-action-status'));
+      await userEvent.click(res.getByTestId('case-bulk-action-status'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
@@ -213,8 +213,8 @@ describe('useBulkActions', () => {
         expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'), {
+        pointerEventsCheck: 0,
       });
 
       await waitForHook(() => {
@@ -242,7 +242,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('case-bulk-action-severity'));
+      await userEvent.click(res.getByTestId('case-bulk-action-severity'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
@@ -251,8 +251,8 @@ describe('useBulkActions', () => {
         expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'), {
+        pointerEventsCheck: 0,
       });
 
       await waitForHook(() => {
@@ -281,7 +281,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+        await userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
         modals = result.current.modals;
         res.rerender(
@@ -295,7 +295,7 @@ describe('useBulkActions', () => {
           expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
         });
 
-        userEvent.click(res.getByTestId('confirmModalConfirmButton'));
+        await userEvent.click(res.getByTestId('confirmModalConfirmButton'));
 
         await waitForHook(() => {
           expect(deleteSpy).toHaveBeenCalled();
@@ -320,7 +320,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+        await userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
         modals = result.current.modals;
         res.rerender(
@@ -334,7 +334,7 @@ describe('useBulkActions', () => {
           expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
         });
 
-        userEvent.click(res.getByTestId('confirmModalCancelButton'));
+        await userEvent.click(res.getByTestId('confirmModalCancelButton'));
 
         modals = result.current.modals;
         res.rerender(
@@ -370,7 +370,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('cases-bulk-action-tags'));
+      await userEvent.click(res.getByTestId('cases-bulk-action-tags'));
 
       flyouts = result.current.flyouts;
 
@@ -389,8 +389,8 @@ describe('useBulkActions', () => {
         expect(res.getByText('coke')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByText('coke'));
-      userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+      await userEvent.click(res.getByText('coke'));
+      await userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
 
       await waitForHook(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
@@ -417,7 +417,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
+      await userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
 
       flyouts = result.current.flyouts;
 
@@ -436,8 +436,8 @@ describe('useBulkActions', () => {
         expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByText('Damaged Raccoon'));
-      userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+      await userEvent.click(res.getByText('Damaged Raccoon'));
+      await userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
 
       await waitForHook(() => {
         expect(updateCasesSpy).toHaveBeenCalled();

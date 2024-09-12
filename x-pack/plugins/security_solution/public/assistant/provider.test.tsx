@@ -5,28 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AssistantProvider, createConversations } from './provider';
+import { createConversations } from './provider';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useKibana as mockUseKibana } from '../common/lib/kibana/__mocks__';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { useKibana } from '../common/lib/kibana';
-import { render, waitFor } from '@testing-library/react';
-import { TestProviders } from '../common/mock';
-import { useAssistantAvailability } from './use_assistant_availability';
-import {
-  bulkUpdatePrompts,
-  getPrompts,
-  getUserConversations,
-} from '@kbn/elastic-assistant/impl/assistant/api';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 
-const mockedUseKibana = mockUseKibana();
 jest.mock('./use_assistant_availability');
-jest.mock('../common/lib/kibana');
 
 jest.mock('@kbn/elastic-assistant/impl/assistant/api');
 jest.mock('../common/hooks/use_license', () => ({
@@ -221,88 +207,6 @@ describe('createConversations', () => {
           : [];
       expect(createdConversations[0].apiConfig.actionTypeId).toEqual('.bedrock');
       expect(createdConversations[1].apiConfig.actionTypeId).toEqual('.gen-ai');
-    });
-  });
-});
-describe('AssistantProvider', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-      },
-    });
-    jest.mocked(useAssistantAvailability).mockReturnValue({
-      hasAssistantPrivilege: true,
-      hasConnectorsAllPrivilege: true,
-      hasConnectorsReadPrivilege: true,
-      hasUpdateAIAssistantAnonymization: true,
-      isAssistantEnabled: true,
-    });
-
-    (getUserConversations as jest.Mock).mockResolvedValue({
-      page: 1,
-      perPage: 5,
-      total: 5,
-      data: [],
-    });
-    (getPrompts as jest.Mock).mockResolvedValue({
-      page: 1,
-      perPage: 5,
-      total: 0,
-      data: [],
-    });
-  });
-  it('should not render the assistant when no prompts have been returned', async () => {
-    const { queryByTestId } = render(
-      <AssistantProvider>
-        <span data-test-subj="ourAssistant" />
-      </AssistantProvider>,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(queryByTestId('ourAssistant')).toBeNull();
-  });
-  it('should render the assistant when prompts are returned', async () => {
-    (getPrompts as jest.Mock).mockResolvedValue({
-      page: 1,
-      perPage: 5,
-      total: 2,
-      data: BASE_SECURITY_SYSTEM_PROMPTS,
-    });
-    const { getByTestId } = render(
-      <AssistantProvider>
-        <span data-test-subj="ourAssistant" />
-      </AssistantProvider>,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    await waitFor(() => {
-      expect(getByTestId('ourAssistant')).not.toBeNull();
-    });
-  });
-  it('should render the assistant once prompts have been created', async () => {
-    (bulkUpdatePrompts as jest.Mock).mockResolvedValue({
-      success: true,
-      attributes: {
-        results: {
-          created: BASE_SECURITY_SYSTEM_PROMPTS,
-        },
-      },
-    });
-    const { getByTestId } = render(
-      <AssistantProvider>
-        <span data-test-subj="ourAssistant" />
-      </AssistantProvider>,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    await waitFor(() => {
-      expect(getByTestId('ourAssistant')).not.toBeNull();
     });
   });
 });

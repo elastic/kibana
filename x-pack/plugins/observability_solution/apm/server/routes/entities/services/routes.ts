@@ -19,7 +19,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([environmentRt, rangeRt]),
+    query: environmentRt,
   }),
   options: { tags: ['access:apm'] },
   async handler(resources) {
@@ -32,12 +32,10 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     });
 
     const { serviceName } = params.path;
-    const { start, end, environment } = params.query;
+    const { environment } = params.query;
 
     return getServiceEntitySummary({
       entitiesESClient,
-      start,
-      end,
       serviceName,
       environment,
     });
