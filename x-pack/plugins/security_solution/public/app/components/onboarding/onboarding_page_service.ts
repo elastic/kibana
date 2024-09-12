@@ -13,22 +13,26 @@ import type { StepId } from '../../../common/components/landing_page/onboarding/
 export class OnboardingPageService {
   private productTypesSubject$: BehaviorSubject<SecurityProductTypes | undefined>;
   private projectsUrlSubject$: BehaviorSubject<string | undefined>;
+  private usersUrlSubject$: BehaviorSubject<string | undefined>;
   private projectFeaturesUrlSubject$: BehaviorSubject<string | undefined>;
   private availableStepsSubject$: BehaviorSubject<StepId[]>;
 
   public productTypes$: Observable<SecurityProductTypes | undefined>;
   public projectsUrl$: Observable<string | undefined>;
+  public usersUrl$: Observable<string | undefined>;
   public projectFeaturesUrl$: Observable<string | undefined>;
   public availableSteps$: Observable<StepId[]>;
 
   constructor() {
     this.productTypesSubject$ = new BehaviorSubject<SecurityProductTypes | undefined>(undefined);
     this.projectsUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
+    this.usersUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
     this.projectFeaturesUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
     this.availableStepsSubject$ = new BehaviorSubject<StepId[]>([]);
 
     this.productTypes$ = this.productTypesSubject$.asObservable();
     this.projectsUrl$ = this.projectsUrlSubject$.asObservable();
+    this.usersUrl$ = this.usersUrlSubject$.asObservable();
     this.projectFeaturesUrl$ = this.projectFeaturesUrlSubject$.asObservable();
     this.availableSteps$ = this.availableStepsSubject$.asObservable();
   }
@@ -38,6 +42,9 @@ export class OnboardingPageService {
   }
   setProjectFeaturesUrl(projectFeaturesUrl: string | undefined) {
     this.projectFeaturesUrlSubject$.next(projectFeaturesUrl);
+  }
+  setUsersUrl(userUrl: string | undefined) {
+    this.usersUrlSubject$.next(userUrl);
   }
   setProjectsUrl(projectsUrl: string | undefined) {
     this.projectsUrlSubject$.next(projectsUrl);
