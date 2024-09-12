@@ -139,7 +139,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * Defines intended request origin of the route:
    * - public. The route is public, declared stable and intended for external access.
-   *           In the future, may require an incomming request to contain a specified header.
+   *           In the future, may require an incoming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
    * Defaults to 'internal' If not declared,
@@ -207,6 +207,17 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @remarks This will be surfaced in OAS documentation.
    */
   deprecated?: boolean;
+
+  /**
+   * Whether this route should be treated as "invisible" and excluded from router
+   * introspection. This primarily concerns outputs like OAS derived from router
+   * introspection.
+   *
+   * @default false
+   * @remarks Setting this to `true` will make settings related to introspection useless,
+   *          for example "description".
+   */
+  hiddenFromIntrospection?: boolean;
 }
 
 /**
