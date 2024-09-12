@@ -165,7 +165,7 @@ describe('LensEditConfigurationFlyout', () => {
       navigateToLensEditor: navigateToLensEditorSpy,
     });
     expect(screen.getByTestId('editFlyoutHeader')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('navigateToLensEditorLink'));
+    await userEvent.click(screen.getByTestId('navigateToLensEditorLink'));
     expect(navigateToLensEditorSpy).toHaveBeenCalled();
   });
 
@@ -186,7 +186,7 @@ describe('LensEditConfigurationFlyout', () => {
       closeFlyout: closeFlyoutSpy,
     });
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
@@ -196,7 +196,7 @@ describe('LensEditConfigurationFlyout', () => {
       updatePanelState: updatePanelStateSpy,
     });
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
@@ -208,7 +208,7 @@ describe('LensEditConfigurationFlyout', () => {
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
     });
-    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(updateByRefInputSpy).toHaveBeenCalled();
   });
 
@@ -222,7 +222,7 @@ describe('LensEditConfigurationFlyout', () => {
       savedObjectId: 'id',
       saveByRef: saveByRefSpy,
     });
-    userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    await userEvent.click(screen.getByTestId('applyFlyoutButton'));
     expect(updateByRefInputSpy).toHaveBeenCalled();
     expect(saveByRefSpy).toHaveBeenCalled();
   });
@@ -237,7 +237,7 @@ describe('LensEditConfigurationFlyout', () => {
       },
       { esql: 'from index1 | limit 10' }
     );
-    userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    await userEvent.click(screen.getByTestId('applyFlyoutButton'));
     expect(onApplyCbSpy).toHaveBeenCalledWith({
       title: 'test',
       visualizationType: 'testVis',

@@ -967,7 +967,9 @@
             "section": "def-public.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
-          "> & ",
+          "<",
+          "DefaultControlState",
+          ">> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

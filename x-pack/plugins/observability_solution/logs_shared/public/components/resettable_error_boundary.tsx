@@ -25,7 +25,7 @@ interface ResettableErrorBoundaryState {
 }
 
 export class ResettableErrorBoundary<ResetOnChange> extends React.Component<
-  ResettableErrorBoundaryProps<ResetOnChange>,
+  React.PropsWithChildren<ResettableErrorBoundaryProps<ResetOnChange>>,
   ResettableErrorBoundaryState
 > {
   state: ResettableErrorBoundaryState = {

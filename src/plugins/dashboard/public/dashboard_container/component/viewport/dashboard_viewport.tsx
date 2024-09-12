@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { debounce } from 'lodash';
@@ -72,6 +73,10 @@ export const DashboardViewportComponent = () => {
     };
   }, [controlGroupApi]);
 
+  // Bug in main where panels are loaded before control filters are ready
+  // Want to migrate to react embeddable controls with same behavior
+  // TODO - do not load panels until control filters are ready
+  /*
   const [dashboardInitialized, setDashboardInitialized] = useState(false);
   useEffect(() => {
     let ignore = false;
@@ -84,6 +89,7 @@ export const DashboardViewportComponent = () => {
       ignore = true;
     };
   }, [dashboard]);
+  */
 
   return (
     <div
@@ -124,10 +130,10 @@ export const DashboardViewportComponent = () => {
         data-shared-items-count={panelCount}
       >
         {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
-            otherwise, there is a race condition where the panels can end up being squashed */}
-        {viewportWidth !== 0 && dashboardInitialized && (
-          <DashboardGrid viewportWidth={viewportWidth} />
-        )}
+            otherwise, there is a race condition where the panels can end up being squashed 
+            TODO only render when dashboardInitialized
+        */}
+        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>
     </div>
   );

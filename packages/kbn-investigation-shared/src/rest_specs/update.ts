@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as t from 'io-ts';
 import { investigationResponseSchema } from './investigation';
+import { statusSchema } from '../schema';
 
 const updateInvestigationParamsSchema = t.type({
   path: t.type({
@@ -15,10 +17,11 @@ const updateInvestigationParamsSchema = t.type({
   }),
   body: t.partial({
     title: t.string,
-    status: t.union([t.literal('ongoing'), t.literal('closed')]),
+    status: statusSchema,
     params: t.type({
       timeRange: t.type({ from: t.number, to: t.number }),
     }),
+    tags: t.array(t.string),
   }),
 });
 

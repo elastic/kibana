@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ChatModels, LogFormatDetectionState } from '../../types';
 
 export interface LogDetectionBaseNodeParams {
@@ -17,4 +18,5 @@ export interface LogDetectionNodeParams extends LogDetectionBaseNodeParams {
 
 export interface LogDetectionGraphParams {
   model: ChatModels;
+  client: IScopedClusterClient;
 }
