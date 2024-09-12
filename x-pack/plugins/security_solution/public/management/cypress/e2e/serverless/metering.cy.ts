@@ -17,7 +17,8 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHeartbeats } from '../../tasks/index_endpoint_heartbeats';
 import { login, ROLE } from '../../tasks/login';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/187083
+describe.skip(
   'Metering',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],

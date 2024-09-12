@@ -17,7 +17,7 @@ import {
   TestProviders,
 } from '../../../../common/mock';
 import { TimelineTabs } from '../../../../../common/types';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -38,7 +38,7 @@ const TestComponent = (props: Partial<TimelineTourProps> = {}) => {
       <TimelineTour
         activeTab={TimelineTabs.query}
         switchToTab={switchTabMock}
-        timelineType={TimelineType.default}
+        timelineType={TimelineTypeEnum.default}
         {...props}
       />
       {Object.values(TIMELINE_TOUR_CONFIG_ANCHORS).map((anchor) => {
@@ -103,7 +103,7 @@ describe('Timeline Tour', () => {
   });
 
   it('should render different tour steps when timeline type is template', async () => {
-    render(<TestComponent timelineType={TimelineType.template} />);
+    render(<TestComponent timelineType={TimelineTypeEnum.template} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('timeline-tour-step-1')).toBeVisible();

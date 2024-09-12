@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { access } from 'fs/promises';
-import del from 'del';
 import type { Logger } from '@kbn/core/server';
-import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
+import type { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
+import del from 'del';
+import { access } from 'fs/promises';
 import { sha256 } from './checksum';
 import { fetch } from './fetch';
 

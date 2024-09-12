@@ -35,6 +35,23 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/avc-banner",
+        "id": "def-public.useIsStillYear2024",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsStillYear2024",
+        "description": [],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "packages/kbn-avc-banner/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

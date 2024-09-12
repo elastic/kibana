@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
-import { isUndefined, omitBy } from 'lodash';
-import { OpenAPIV3 } from 'openapi-types';
 import { basename, dirname } from 'path';
 import { bundleDocument, SkipException } from './bundler/bundle_document';
 import { mergeDocuments } from './bundler/merge_documents';
@@ -19,6 +18,8 @@ import { writeDocuments } from './utils/write_documents';
 import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
 import { DEFAULT_BUNDLING_PROCESSORS, withIncludeLabelsProcessor } from './bundler/processor_sets';
+import { PrototypeDocument } from './prototype_document';
+import { validatePrototypeDocument } from './validate_prototype_document';
 
 export interface BundlerConfig {
   sourceGlob: string;
@@ -27,15 +28,26 @@ export interface BundlerConfig {
 }
 
 interface BundleOptions {
+  /**
+   * OpenAPI document itself or path to the document
+   */
+  prototypeDocument?: PrototypeDocument | string;
+  /**
+   * When `includeLabels` are specified the produced bundle will contain only
+   * operations objects with matching labels
+   */
   includeLabels?: string[];
-  specInfo?: Omit<Partial<OpenAPIV3.InfoObject>, 'version'>;
 }
 
 export const bundle = async ({
   sourceGlob,
-  outputFilePath = 'bundled-{version}.schema.yaml',
+  outputFilePath = 'bundled_{version}.schema.yaml',
   options,
 }: BundlerConfig) => {
+  const prototypeDocument = options?.prototypeDocument
+    ? await validatePrototypeDocument(options?.prototypeDocument)
+    : undefined;
+
   logger.debug(chalk.bold(`Bundling API route schemas`));
   logger.debug(`👀  Searching for source files in ${chalk.underline(sourceGlob)}`);
 
@@ -56,22 +68,22 @@ export const bundle = async ({
 
   logger.success(`Processed ${bundledDocuments.length} schemas`);
 
-  const blankOasFactory = (oasVersion: string, apiVersion: string) =>
+  const blankOasDocumentFactory = (oasVersion: string, apiVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
-      version: apiVersion,
-      title: options?.specInfo?.title ?? 'Bundled OpenAPI specs',
-      ...omitBy(
-        {
-          description: options?.specInfo?.description,
-          termsOfService: options?.specInfo?.termsOfService,
-          contact: options?.specInfo?.contact,
-          license: options?.specInfo?.license,
-        },
-        isUndefined
-      ),
+      info: prototypeDocument?.info
+        ? { ...DEFAULT_INFO, ...prototypeDocument.info, version: apiVersion }
+        : { ...DEFAULT_INFO, version: apiVersion },
+      servers: prototypeDocument?.servers,
+      security: prototypeDocument?.security,
+      components: {
+        securitySchemes: prototypeDocument?.components?.securitySchemes,
+      },
     });
-  const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasFactory, {
+  const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: true,
+    skipServers: Boolean(prototypeDocument?.servers),
+    skipSecurity: Boolean(prototypeDocument?.security),
+    addTags: prototypeDocument?.tags,
   });
 
   await writeDocuments(resultDocumentsMap, outputFilePath);
@@ -130,3 +142,7 @@ function filterOutSkippedDocuments(
 
   return processedDocuments;
 }
+
+const DEFAULT_INFO = {
+  title: 'Bundled OpenAPI specs',
+} as const;

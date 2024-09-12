@@ -11,6 +11,8 @@ import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
 
+export const DEFAULT_TIMEOUT = '5m';
+
 export enum TaskPriority {
   Low = 1,
   Normal = 50,
@@ -148,7 +150,7 @@ export const taskDefinitionSchema = schema.object(
      * the task will be re-attempted.
      */
     timeout: schema.string({
-      defaultValue: '5m',
+      defaultValue: DEFAULT_TIMEOUT,
     }),
     /**
      * Up to how many times the task should retry when it fails to run. This will
@@ -454,6 +456,10 @@ export interface ConcreteTaskInstance extends TaskInstance {
   partition?: number;
 }
 
+export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
+  id: ConcreteTaskInstance['id'];
+};
+
 export interface ConcreteTaskInstanceVersion {
   /** The _id of the the document (not the SO id) */
   esId: string;
@@ -487,4 +493,8 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+};
+
+export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
+  id: SerializedConcreteTaskInstance['id'];
 };

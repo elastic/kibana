@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export type ESQLAst = ESQLAstCommand[];
@@ -35,6 +36,15 @@ export type ESQLAstField = ESQLFunction | ESQLColumn;
  */
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
+export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction;
+
+/**
+ * *Proper* are nodes which are objects with `type` property, once we get rid
+ * of the nodes which are plain arrays, all nodes will be *proper* and we can
+ * remove this type.
+ */
+export type ESQLProperNode = ESQLSingleAstItem | ESQLAstCommand;
+
 export interface ESQLLocation {
   min: number;
   max: number;
@@ -61,6 +71,14 @@ export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
+}
+
+/**
+ * Right now rename expressions ("clauses") are parsed as options in the
+ * RENAME command.
+ */
+export interface ESQLAstRenameExpression extends ESQLCommandOption {
+  name: 'as';
 }
 
 export interface ESQLCommandMode extends ESQLAstBaseItem {
@@ -95,6 +113,17 @@ export interface ESQLFunction<
 
   args: ESQLAstItem[];
 }
+
+const isESQLAstBaseItem = (node: unknown): node is ESQLAstBaseItem =>
+  typeof node === 'object' &&
+  node !== null &&
+  Object.hasOwn(node, 'name') &&
+  Object.hasOwn(node, 'text');
+
+export const isESQLFunction = (node: unknown): node is ESQLFunction =>
+  isESQLAstBaseItem(node) &&
+  Object.hasOwn(node, 'type') &&
+  (node as ESQLFunction).type === 'function';
 
 export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'> {
   subtype: 'variadic-call';
@@ -158,10 +187,45 @@ export interface ESQLTimeInterval extends ESQLAstBaseItem {
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
+
+  /**
+   * Represents the cluster part of the source identifier. Empty string if not
+   * present.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  cluster?: string;
+
+  /**
+   * Represents the index part of the source identifier. Unescaped and unquoted.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  index?: string;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.
+   * This property contains the parsed unquoted parts of the identifier.
+   * For example: `['part1', 'part2', 'part`3️⃣']`.
+   */
+  parts: string[];
+
+  /**
+   * @deprecated
+   *
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part3️⃣`
+   *
+   * Each part can be quoted or not quoted independently. A single `quoted`
+   * property is not enough to represent the identifier. Use `parts` instead.
+   */
   quoted: boolean;
 }
 
@@ -170,19 +234,30 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
+export type ESQLNumericLiteralType = 'decimal' | 'integer';
+
 export type ESQLLiteral =
-  | ESQLNumberLiteral
+  | ESQLDecimalLiteral
+  | ESQLIntegerLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
   | ESQLParamLiteral<string>;
 
+// Exporting here to prevent TypeScript error TS4058
+// Return type of exported function has or is using name 'ESQLNumericLiteral' from external module
 // @internal
-export interface ESQLNumberLiteral extends ESQLAstBaseItem {
+export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'number';
+  literalType: T;
   value: number;
 }
+// We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
+// @internal
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+
+// @internal
+export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
 
 // @internal
 export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
@@ -229,6 +304,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
+  isESQLAstBaseItem(node) &&
+  (node as ESQLNamedParamLiteral).literalType === 'param' &&
+  (node as ESQLNamedParamLiteral).paramType === 'named';
 /**
  * *Positional* parameter is a question mark followed by a number "?1".
  *

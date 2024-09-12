@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -118,7 +119,9 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
     'use-fake-ui-for-media-stream',
     // Do not show "Choose your search engine" dialog (> Chrome v127)
-    'disable-search-engine-choice-screen'
+    'disable-search-engine-choice-screen',
+    // Disable component updater used for Chrome Certificate Verifier
+    'disable-component-update'
   );
 
   if (process.platform === 'linux') {

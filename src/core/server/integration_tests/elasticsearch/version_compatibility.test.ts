@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -91,8 +92,7 @@ describe('Version Compatibility', () => {
     await expect(startServers({ customKibanaVersion: previousMinor() })).resolves.toBeUndefined();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171289
-  it.skip('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
+  it('should flag the incompatibility on version mismatch (ES is previous minor)', async () => {
     const found$ = new Subject<void>();
     consoleSpy.mockImplementation((str) => {
       if (str.includes('is incompatible')) {

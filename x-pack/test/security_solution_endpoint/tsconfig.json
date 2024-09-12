@@ -1,0 +1,32 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "@kbn/ambient-ftr-types"
+    ],
+    "allowJs": false
+  },
+  "include": [
+    "**/*",
+    "../../../typings/**/*",
+    "../../../packages/kbn-test/types/ftr_globals/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/test-suites-serverless",
+    "@kbn/expect",
+    "@kbn/security-solution-plugin",
+    "@kbn/repo-info",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/fleet-plugin",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/test",
+    "@kbn/test-subj-selector",
+    "@kbn/ftr-common-functional-services",
+  ]
+}

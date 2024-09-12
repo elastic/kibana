@@ -1,4 +1,6 @@
 disabled:
+  # Stateful base config for deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
   - test/functional/firefox/config.base.ts
@@ -34,10 +36,6 @@ disabled:
   - x-pack/test/fleet_cypress/cli_config.ts
   - x-pack/test/fleet_cypress/config.ts
   - x-pack/test/fleet_cypress/visual_config.ts
-
-  # http/2 security muted tests
-  - x-pack/test/security_functional/saml.http2.config.ts
-  - x-pack/test/security_functional/oidc.http2.config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -159,7 +157,6 @@ enabled:
   - x-pack/test/api_integration/apis/monitoring/config.ts
   - x-pack/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/test/api_integration/apis/osquery/config.ts
-  - x-pack/test/api_integration/apis/painless_lab/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
@@ -275,6 +272,7 @@ enabled:
   - x-pack/test/functional/config.firefox.js
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
+  - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
@@ -326,6 +324,8 @@ enabled:
   - x-pack/test/security_functional/login_selector.config.ts
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts
+  - x-pack/test/security_functional/saml.http2.config.ts
+  - x-pack/test/security_functional/oidc.http2.config.ts
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
@@ -361,3 +361,5 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
+  # stateful config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts

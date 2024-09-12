@@ -7,48 +7,23 @@
 
 import {
   CSV_JOB_TYPE,
-  CSV_JOB_TYPE_DEPRECATED,
   CSV_JOB_TYPE_V2,
   CSV_REPORT_TYPE,
   CSV_REPORT_TYPE_V2,
 } from '@kbn/reporting-export-types-csv-common';
-import {
-  PDF_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE,
-  PDF_REPORT_TYPE_V2,
-} from '@kbn/reporting-export-types-pdf-common';
-import {
-  PNG_JOB_TYPE,
-  PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE,
-  PNG_REPORT_TYPE_V2,
-} from '@kbn/reporting-export-types-png-common';
+import { PDF_JOB_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_JOB_TYPE_V2, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 // Export Type Sets
 export const reportTypes = [
   CSV_REPORT_TYPE,
   CSV_REPORT_TYPE_V2,
-  PDF_REPORT_TYPE,
   PDF_REPORT_TYPE_V2,
-  PNG_REPORT_TYPE,
   PNG_REPORT_TYPE_V2,
 ];
 
-export const jobTypes = [
-  CSV_JOB_TYPE,
-  CSV_JOB_TYPE_V2,
-  PDF_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE,
-  PNG_JOB_TYPE_V2,
-];
+export const jobTypes = [CSV_JOB_TYPE, CSV_JOB_TYPE_V2, PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];
 
-export const USES_HEADLESS_JOB_TYPES = [
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE_V2,
-];
+export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2];
 
-export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
+export const DEPRECATED_JOB_TYPES = ['csv']; // Replaced with csv_searchsource and csv_v2

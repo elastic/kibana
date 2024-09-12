@@ -12,6 +12,7 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
+  apiIsOfType,
   areTriggersDisabled,
   getUnchangingComparator,
   initializeTimeRange,
@@ -121,6 +122,16 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
         // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
         return {
           rawState: getByReferenceState(rawState, rawState.savedObjectId),
+          references: [],
+        };
+      }
+
+      /**
+       * Canvas by-value embeddables do not support references
+       */
+      if (apiIsOfType(parentApi, 'canvas')) {
+        return {
+          rawState: getByValueState(rawState, savedMap.getAttributes()),
           references: [],
         };
       }

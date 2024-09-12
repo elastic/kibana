@@ -40,6 +40,7 @@
     "@kbn/index-management",
     "@kbn/react-kibana-context-render",
     "@kbn/unsaved-changes-prompt",
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": [
     "target/**/*",

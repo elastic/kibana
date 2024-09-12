@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,6 +13,15 @@ import { i18n } from '@kbn/i18n';
  * CSS class name used for the styling of highlighted requests
  */
 export const SELECTED_REQUESTS_CLASSNAME = 'console__monaco_editor__selectedRequests';
+
+/*
+ * CSS class names used for the styling of multiple-response status codes
+ */
+export const PRIMARY_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--primary';
+export const SUCCESS_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--success';
+export const DEFAULT_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--default';
+export const WARNING_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--warning';
+export const DANGER_STATUS_BADGE_CLASSNAME = 'monaco__status_badge--danger';
 
 export const whitespacesRegex = /\s+/;
 export const newLineRegex = /\n/;
@@ -31,6 +41,10 @@ export const END_OF_URL_TOKEN = '__url_path_end__';
  * In this case autocomplete suggestions should be triggered for an url.
  */
 export const methodWhitespaceRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+$/i;
+/*
+ * This regex matches a string that starts with a method (optional whitespace before the method)
+ */
+export const startsWithMethodRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)/i;
 /*
  * This regex matches a string that has
  * a method and some parts of an url ending with a slash, a question mark or an equals sign,

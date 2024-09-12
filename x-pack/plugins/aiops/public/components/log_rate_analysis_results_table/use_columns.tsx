@@ -596,7 +596,7 @@ export const useColumns = (
 
     for (const columnName in columnNamesToReturn) {
       if (
-        columnNamesToReturn.hasOwnProperty(columnName) === false ||
+        Object.hasOwn(columnNamesToReturn, columnName) === false ||
         skippedColumns.includes(columnNamesToReturn[columnName as ColumnNames] as string) ||
         ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback)
       )

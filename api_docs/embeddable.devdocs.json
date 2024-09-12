@@ -62,9 +62,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-common.IToasts",
+                    "section": "def-public.IToasts",
                     "text": "IToasts"
                   }
                 ],
@@ -407,9 +407,9 @@
           "<TChildInput, TContainerInput, TContainerOutput>,",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
+            "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           }
         ],
@@ -688,9 +688,9 @@
               "<ApiType extends unknown = unknown>(panelPackage: ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
+                "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
               "<object>) => Promise<ApiType | undefined>"
@@ -709,9 +709,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PanelPackage",
+                    "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
                   "<object>"
@@ -735,9 +735,9 @@
               "(idToRemove: string, { panelType, initialState }: ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
+                "section": "def-public.PanelPackage",
                 "text": "PanelPackage"
               },
               "<object>) => Promise<string>"
@@ -771,9 +771,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PanelPackage",
+                    "section": "def-public.PanelPackage",
                     "text": "PanelPackage"
                   },
                   "<object>"
@@ -2235,33 +2235,33 @@
               "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               "; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ") => void): Promise<void>; (next: (value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ") => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               "; closed: boolean; pipe: { (): ",
@@ -2269,9 +2269,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ">; <A>(op1: ",
@@ -2279,9 +2279,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>): ",
@@ -2291,9 +2291,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2305,9 +2305,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2321,9 +2321,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2339,9 +2339,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2359,9 +2359,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2381,9 +2381,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2405,9 +2405,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2431,9 +2431,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2459,9 +2459,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", A>, op2: ",
@@ -2489,9 +2489,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ">[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
@@ -2499,9 +2499,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ", R>) => ",
@@ -2511,9 +2511,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ">; operator: ",
@@ -2521,9 +2521,9 @@
               "<any, ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               "> | undefined; subscribe: { (observerOrNext?: Partial<",
@@ -2531,17 +2531,17 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ">> | ((value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ") => void) | undefined): ",
@@ -2549,9 +2549,9 @@
               "; (next?: ((value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               ") => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
@@ -2559,25 +2559,25 @@
               "; }; toPromise: { (): Promise<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               " | undefined>; (PromiseCtor: PromiseConstructor): Promise<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               " | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.ViewMode",
+                "section": "def-public.ViewMode",
                 "text": "ViewMode"
               },
               " | undefined>; }; }"
@@ -2597,25 +2597,25 @@
               "(",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PresentationContainer",
+                "section": "def-public.PresentationContainer",
                 "text": "PresentationContainer"
               },
               " & Partial<Pick<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelTitle",
+                "section": "def-public.PublishesPanelTitle",
                 "text": "PublishesPanelTitle"
               },
               ", \"hidePanelTitle\"> & ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesViewMode",
+                "section": "def-public.PublishesViewMode",
                 "text": "PublishesViewMode"
               },
               ">) | undefined"
@@ -4257,33 +4257,33 @@
               "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined) => void): Promise<void>; (next: (value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined; closed: boolean; pipe: { (): ",
@@ -4291,9 +4291,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>; <A>(op1: ",
@@ -4301,9 +4301,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>): ",
@@ -4313,9 +4313,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4327,9 +4327,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4343,9 +4343,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4361,9 +4361,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4381,9 +4381,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4403,9 +4403,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4427,9 +4427,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4453,9 +4453,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4481,9 +4481,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, A>, op2: ",
@@ -4511,9 +4511,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
@@ -4521,9 +4521,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined, R>) => ",
@@ -4533,9 +4533,9 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>; operator: ",
@@ -4543,9 +4543,9 @@
               "<any, ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
@@ -4553,17 +4553,17 @@
               "<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>> | ((value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined) => void) | undefined): ",
@@ -4571,9 +4571,9 @@
               "; (next?: ((value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
@@ -4581,25 +4581,25 @@
               "; }; toPromise: { (): Promise<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>; (PromiseCtor: PromiseConstructor): Promise<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PhaseEvent",
+                "section": "def-public.PhaseEvent",
                 "text": "PhaseEvent"
               },
               " | undefined>; }; }"
@@ -5549,9 +5549,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishingSubject",
+                "section": "def-public.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<string | undefined> | undefined"
@@ -5726,6 +5726,37 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.setDisabledActionIds",
+            "type": "Function",
+            "tags": [],
+            "label": "setDisabledActionIds",
+            "description": [],
+            "signature": [
+              "(ids: string[] | undefined) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Embeddable.setDisabledActionIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.unlinkFromLibrary",
             "type": "Function",
             "tags": [],
@@ -5794,9 +5825,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishingSubject",
+                "section": "def-public.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<string | undefined> | undefined"
@@ -6102,9 +6133,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.EmbeddableAppContext",
+                "section": "def-public.EmbeddableAppContext",
                 "text": "EmbeddableAppContext"
               },
               " | undefined"
@@ -6804,9 +6835,9 @@
                   "(appId: string, options?: ",
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToAppOptions",
+                    "section": "def-public.NavigateToAppOptions",
                     "text": "NavigateToAppOptions"
                   },
                   " | undefined) => Promise<void>"
@@ -6843,9 +6874,9 @@
                   "ReadonlyMap<string, ",
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.PublicAppInfo",
+                    "section": "def-public.PublicAppInfo",
                     "text": "PublicAppInfo"
                   },
                   "> | undefined"
@@ -8827,17 +8858,17 @@
           "({ container, onAddPanel, onClose, }: { container: ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
+            "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
           "; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.OverlayRef",
+            "section": "def-public.OverlayRef",
             "text": "OverlayRef"
           }
         ],
@@ -8866,9 +8897,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PresentationContainer",
+                    "section": "def-public.PresentationContainer",
                     "text": "PresentationContainer"
                   }
                 ],
@@ -8959,17 +8990,17 @@
           "<SerializedState, RuntimeState>, ParentApi extends ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializedChildState",
+            "section": "def-public.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
           "<SerializedState> = ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializedChildState",
+            "section": "def-public.HasSerializedChildState",
             "text": "HasSerializedChildState"
           },
           "<SerializedState>>({ type, maybeId, getParentApi, panelProps, onAnyStateChange, onApiAvailable, hidePanelChrome, }: { type: string; maybeId?: string | undefined; getParentApi: () => ParentApi; onApiAvailable?: ((api: Api) => void) | undefined; panelProps?: Pick<",
@@ -8980,12 +9011,12 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
+          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.SerializedPanelState",
+            "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
           "<SerializedState>) => void) | undefined; }) => JSX.Element"
@@ -9094,7 +9125,7 @@
                     "section": "def-public.PresentationPanelProps",
                     "text": "PresentationPanelProps"
                   },
-                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\"> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9127,9 +9158,9 @@
                   "((state: ",
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.SerializedPanelState",
+                    "section": "def-public.SerializedPanelState",
                     "text": "SerializedPanelState"
                   },
                   "<SerializedState>) => void) | undefined"
@@ -9148,9 +9179,9 @@
                     "signature": [
                       {
                         "pluginId": "@kbn/presentation-containers",
-                        "scope": "common",
+                        "scope": "public",
                         "docId": "kibKbnPresentationContainersPluginApi",
-                        "section": "def-common.SerializedPanelState",
+                        "section": "def-public.SerializedPanelState",
                         "text": "SerializedPanelState"
                       },
                       "<SerializedState>"
@@ -9666,41 +9697,41 @@
           ",",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasType",
+            "section": "def-public.HasType",
             "text": "HasType"
           },
           "<string>,",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPhaseEvents",
+            "section": "def-public.PublishesPhaseEvents",
             "text": "PublishesPhaseEvents"
           },
-          ",",
+          ",Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnsavedChanges",
+            "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          ",",
+          "<object>>,",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSerializableState",
+            "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
           "<SerializedState>,",
           {
             "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.HasSnapshottableState",
+            "section": "def-public.HasSnapshottableState",
             "text": "HasSnapshottableState"
           },
           "<RuntimeState>"
@@ -9753,6 +9784,22 @@
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableContainerSettings.untilContainerInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "untilContainerInitialized",
+            "description": [],
+            "signature": [
+              "(() => Promise<void>) | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10275,7 +10322,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10283,7 +10330,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              ">"
+              " | TEmbeddable>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -10396,7 +10443,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<TEmbeddable | ",
+              "> | undefined) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -10404,7 +10451,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | undefined>"
+              " | TEmbeddable | undefined>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -12366,9 +12413,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.EmbeddableAppContext",
+                "section": "def-public.EmbeddableAppContext",
                 "text": "EmbeddableAppContext"
               },
               " | undefined"
@@ -12838,9 +12885,9 @@
               "(panelState: ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.SerializedPanelState",
+                "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
               "<SerializedState>) => ",
@@ -12867,9 +12914,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.SerializedPanelState",
+                    "section": "def-public.SerializedPanelState",
                     "text": "SerializedPanelState"
                   },
                   "<SerializedState>"
@@ -12892,27 +12939,27 @@
               "\nA required async function that builds your embeddable component and a linked API instance. The API\nand component will be combined together by the ReactEmbeddableRenderer. Initial state will contain the result of\nthe deserialize function.\n\nThe returned API must extend {@link HasSerializableState} which does the opposite of the deserializeState\nfunction."
             ],
             "signature": [
-              "(initialState: RuntimeState, buildApi: (apiRegistration: ",
+              "(initialRuntimeState: RuntimeState, buildApi: (apiRegistration: ",
               "BuildReactEmbeddableApiRegistration",
               "<SerializedState, RuntimeState, Api>, comparators: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.StateComparators",
+                "section": "def-public.StateComparators",
                 "text": "StateComparators"
               },
               "<RuntimeState>) => Api & ",
               {
                 "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.HasSnapshottableState",
+                "section": "def-public.HasSnapshottableState",
                 "text": "HasSnapshottableState"
               },
               "<RuntimeState>, uuid: string, parentApi: unknown, setApi: (api: ",
               "SetReactEmbeddableApiRegistration",
-              "<SerializedState, RuntimeState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
+              "<SerializedState, RuntimeState, Api>) => Api, lastSavedRuntimeState: RuntimeState) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12923,7 +12970,7 @@
                 "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$1",
                 "type": "Uncategorized",
                 "tags": [],
-                "label": "initialState",
+                "label": "initialRuntimeState",
                 "description": [],
                 "signature": [
                   "RuntimeState"
@@ -12946,17 +12993,17 @@
                   "<SerializedState, RuntimeState, Api>, comparators: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.StateComparators",
+                    "section": "def-public.StateComparators",
                     "text": "StateComparators"
                   },
                   "<RuntimeState>) => Api & ",
                   {
                     "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.HasSnapshottableState",
+                    "section": "def-public.HasSnapshottableState",
                     "text": "HasSnapshottableState"
                   },
                   "<RuntimeState>"
@@ -13007,6 +13054,21 @@
                   "(api: ",
                   "SetReactEmbeddableApiRegistration",
                   "<SerializedState, RuntimeState, Api>) => Api"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$6",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "lastSavedRuntimeState",
+                "description": [],
+                "signature": [
+                  "RuntimeState"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -13251,9 +13313,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { value?: any; eventId?: string | undefined; columnMeta?: ",
@@ -13444,9 +13506,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { data: { table: Pick<",
@@ -13528,9 +13590,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { table: ",
@@ -13620,9 +13682,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { data: { table: Pick<",
@@ -13702,57 +13764,6 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
-            "type": "Object",
-            "tags": [],
-            "label": "legacy",
-            "description": [],
-            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
-                "type": "Function",
-                "tags": [],
-                "label": "getDisplayName",
-                "description": [],
-                "signature": [
-                  "() => string"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
-                "type": "number",
-                "tags": [],
-                "label": "order",
-                "description": [],
-                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "embeddable",
             "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation",
             "type": "Object",
             "tags": [],
@@ -13788,6 +13799,17 @@
                 "trackAdoption": false,
                 "children": [],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.annotation.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -13848,6 +13870,57 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.COMMON_EMBEDDABLE_GROUPING.other.order",
+                "type": "number",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy",
+            "type": "Object",
+            "tags": [],
+            "label": "legacy",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.getDisplayName",
+                "type": "Function",
+                "tags": [],
+                "label": "getDisplayName",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/common/constants.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.COMMON_EMBEDDABLE_GROUPING.legacy.order",
                 "type": "number",
                 "tags": [],
                 "label": "order",
@@ -14212,10 +14285,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/plugin.ts"
-            },
-            {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
             }
@@ -14266,9 +14335,9 @@
                   "signature": [
                     {
                       "pluginId": "@kbn/content-management-utils",
-                      "scope": "common",
+                      "scope": "server",
                       "docId": "kibKbnContentManagementUtilsPluginApi",
-                      "section": "def-common.SOWithMetadata",
+                      "section": "def-server.SOWithMetadata",
                       "text": "SOWithMetadata"
                     },
                     "<TSavedObjectAttributes>"
@@ -14439,10 +14508,6 @@
           "deprecated": true,
           "trackAdoption": false,
           "references": [
-            {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/plugin.ts"
-            },
             {
               "plugin": "lens",
               "path": "x-pack/plugins/lens/public/plugin.ts"
@@ -14839,14 +14904,6 @@
             },
             {
               "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.ts"
-            },
-            {
-              "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
             },
             {
@@ -14859,7 +14916,7 @@
             },
             {
               "plugin": "investigateApp",
-              "path": "x-pack/plugins/observability_solution/investigate_app/public/widgets/embeddable_widget/register_embeddable_widget.tsx"
+              "path": "x-pack/plugins/observability_solution/investigate_app/public/items/embeddable_item/register_embeddable_item.tsx"
             },
             {
               "plugin": "dashboard",
@@ -14880,26 +14937,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management/lib/migrate_dashboard_input.test.ts"
             },
             {
               "plugin": "dashboard",

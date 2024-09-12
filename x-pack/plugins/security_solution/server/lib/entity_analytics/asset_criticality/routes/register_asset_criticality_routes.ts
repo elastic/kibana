@@ -5,14 +5,11 @@
  * 2.0.
  */
 import { assetCriticalityInternalStatusRoute } from './status';
-import { assetCriticalityPublicUpsertRoute, assetCriticalityInternalUpsertRoute } from './upsert';
-import { assetCriticalityInternalGetRoute, assetCriticalityPublicGetRoute } from './get';
-import { assetCriticalityPublicDeleteRoute, assetCriticalityInternalDeleteRoute } from './delete';
+import { assetCriticalityPublicUpsertRoute } from './upsert';
+import { assetCriticalityPublicGetRoute } from './get';
+import { assetCriticalityPublicDeleteRoute } from './delete';
 import { assetCriticalityInternalPrivilegesRoute } from './privileges';
-import {
-  assetCriticalityInternalCSVUploadRoute,
-  assetCriticalityPublicCSVUploadRoute,
-} from './upload_csv';
+import { assetCriticalityPublicCSVUploadRoute } from './upload_csv';
 import { assetCriticalityPublicListRoute } from './list';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assetCriticalityPublicBulkUploadRoute } from './bulk_upload';
@@ -24,13 +21,8 @@ export const registerAssetCriticalityRoutes = ({
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
   // Internal routes
-  assetCriticalityInternalCSVUploadRoute(router, logger, config, getStartServices);
-  assetCriticalityInternalDeleteRoute(router, logger);
-  assetCriticalityInternalGetRoute(router, logger);
   assetCriticalityInternalPrivilegesRoute(router, logger, getStartServices);
   assetCriticalityInternalStatusRoute(router, logger);
-  assetCriticalityInternalUpsertRoute(router, logger);
-
   // Public routes
   assetCriticalityPublicCSVUploadRoute(router, logger, config, getStartServices);
   assetCriticalityPublicBulkUploadRoute(router, logger, config);

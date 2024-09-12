@@ -15,7 +15,7 @@ jobs:
   add_to_ingest_project:
     runs-on: ubuntu-latest
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         id: add_to_project
         if: ${{ github.event.label.name == env.FLEET_LABEL }}
         with:
@@ -32,7 +32,7 @@ jobs:
           content_id: ${{ github.event.issue.node_id }}
         env:
           GITHUB_TOKEN: ${{ secrets.FLEET_PROJECT_TOKEN }}
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         id: set_fleet_ui_area
         if: github.event.label.name == env.FLEET_LABEL
         with:

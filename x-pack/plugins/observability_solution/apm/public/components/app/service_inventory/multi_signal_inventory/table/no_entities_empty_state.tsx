@@ -18,10 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
 import { dashboardsLight } from '@kbn/shared-svg';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 import { useLocalStorage } from '../../../../../hooks/use_local_storage';
 import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
@@ -31,11 +29,11 @@ import {
   AssociateServiceLogs,
   CollectServiceLogs,
 } from '../../../../shared/add_data_buttons/buttons';
+import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 
 export function NoEntitiesEmptyState() {
-  const { core } = useApmPluginContext();
+  const { isLarge } = useBreakpoints();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { basePath } = core.http;
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.uiNewExperienceCallout',
     false
@@ -54,6 +52,34 @@ export function NoEntitiesEmptyState() {
 
   return (
     <EuiFlexGroup direction="column">
+      {!userHasDismissedCallout && (
+        <EuiFlexItem>
+          <EuiCallOut
+            css={{ textAlign: 'left' }}
+            onDismiss={() => setUserHasDismissedCallout(true)}
+            title={i18n.translate('xpack.apm.noEntitiesEmptyState.callout.title', {
+              defaultMessage: 'Trying for the first time?',
+            })}
+          >
+            <p>
+              {i18n.translate('xpack.apm.noEntitiesEmptyState.description', {
+                defaultMessage:
+                  'It can take up to a couple of minutes for your services to show. Try refreshing the page in a minute.',
+              })}
+            </p>
+            <EuiLink
+              external
+              target="_blank"
+              data-test-subj="apmNewExperienceEmptyStateLink"
+              href="https://ela.st/elastic-entity-model-first-time"
+            >
+              {i18n.translate('xpack.apm.noEntitiesEmptyState.learnMore.link', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiEmptyPrompt
           hasShadow={false}
@@ -67,7 +93,7 @@ export function NoEntitiesEmptyState() {
               })}
             </h2>
           }
-          layout="horizontal"
+          layout={isLarge ? 'vertical' : 'horizontal'}
           color="plain"
           body={
             <>
@@ -98,47 +124,17 @@ export function NoEntitiesEmptyState() {
                     reportButtonClick('add_apm_agent');
                   }}
                 />
+                <CollectServiceLogs
+                  onClick={() => {
+                    reportButtonClick('collect_new_service_logs');
+                  }}
+                />
                 <AssociateServiceLogs
                   onClick={() => {
                     reportButtonClick('associate_existing_service_logs');
                   }}
                 />
-                <CollectServiceLogs
-                  basePath={basePath}
-                  onClick={() => {
-                    reportButtonClick('collect_new_service_logs');
-                  }}
-                />
               </EuiFlexGroup>
-
-              {!userHasDismissedCallout && (
-                <EuiFlexItem>
-                  <EuiCallOut
-                    css={{ textAlign: 'left' }}
-                    onDismiss={() => setUserHasDismissedCallout(true)}
-                    title={i18n.translate('xpack.apm.noEntitiesEmptyState.callout.title', {
-                      defaultMessage: 'Trying for the first time?',
-                    })}
-                  >
-                    <p>
-                      {i18n.translate('xpack.apm.noEntitiesEmptyState.description', {
-                        defaultMessage:
-                          'It can take up to a couple of minutes for your services to show. Try refreshing the page in a minute. ',
-                      })}
-                    </p>
-                    <EuiLink
-                      external
-                      target="_blank"
-                      data-test-subj="apmNewExperienceEmptyStateLink"
-                      href="https://ela.st/elastic-entity-model-first-time"
-                    >
-                      {i18n.translate('xpack.apm.noEntitiesEmptyState.learnMore.link', {
-                        defaultMessage: 'Learn more',
-                      })}
-                    </EuiLink>
-                  </EuiCallOut>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           }
         />

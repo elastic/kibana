@@ -6,7 +6,7 @@
  */
 
 import {
-  GetPrebuiltRulesAndTimelinesStatusResponse,
+  ReadPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
@@ -22,7 +22,7 @@ import { refreshSavedObjectIndices } from '../../refresh_index';
 export const getPrebuiltRulesAndTimelinesStatus = async (
   es: Client,
   supertest: SuperTest.Agent
-): Promise<GetPrebuiltRulesAndTimelinesStatusResponse> => {
+): Promise<ReadPrebuiltRulesAndTimelinesStatusResponse> => {
   await refreshSavedObjectIndices(es);
 
   const response = await supertest

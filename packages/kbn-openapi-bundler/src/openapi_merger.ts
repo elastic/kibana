@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
-import { OpenAPIV3 } from 'openapi-types';
+
 import { mergeDocuments } from './bundler/merge_documents';
 import { logger } from './logger';
 import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
@@ -16,16 +17,20 @@ import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
 import { bundleDocument } from './bundler/bundle_document';
 import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
+import { PrototypeDocument } from './prototype_document';
+import { validatePrototypeDocument } from './validate_prototype_document';
 
 export interface MergerConfig {
   sourceGlobs: string[];
   outputFilePath: string;
-  options?: {
-    mergedSpecInfo?: Partial<OpenAPIV3.InfoObject>;
-    conflictsResolution?: {
-      prependComponentsWith: 'title';
-    };
-  };
+  options?: MergerOptions;
+}
+
+interface MergerOptions {
+  /**
+   * OpenAPI document itself or path to the document
+   */
+  prototypeDocument?: PrototypeDocument | string;
 }
 
 export const merge = async ({
@@ -36,6 +41,10 @@ export const merge = async ({
   if (sourceGlobs.length < 1) {
     throw new Error('As minimum one source glob is expected');
   }
+
+  const prototypeDocument = options?.prototypeDocument
+    ? await validatePrototypeDocument(options?.prototypeDocument)
+    : undefined;
 
   logger.info(chalk.bold(`Merging OpenAPI specs`));
   logger.info(
@@ -55,13 +64,19 @@ export const merge = async ({
 
   const blankOasDocumentFactory = (oasVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
-      title: 'Merged OpenAPI specs',
-      version: 'not specified',
-      ...(options?.mergedSpecInfo ?? {}),
+      info: prototypeDocument?.info ? { ...DEFAULT_INFO, ...prototypeDocument.info } : DEFAULT_INFO,
+      servers: prototypeDocument?.servers,
+      security: prototypeDocument?.security,
+      components: {
+        securitySchemes: prototypeDocument?.components?.securitySchemes,
+      },
     });
 
   const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: false,
+    skipServers: Boolean(prototypeDocument?.servers),
+    skipSecurity: Boolean(prototypeDocument?.security),
+    addTags: prototypeDocument?.tags,
   });
   // Only one document is expected when `splitDocumentsByVersion` is set to `false`
   const mergedDocument = Array.from(resultDocumentsMap.values())[0];
@@ -83,3 +98,8 @@ async function bundleDocuments(schemaFilePaths: string[]): Promise<ResolvedDocum
     )
   );
 }
+
+const DEFAULT_INFO = {
+  title: 'Merged OpenAPI specs',
+  version: 'not specified',
+} as const;

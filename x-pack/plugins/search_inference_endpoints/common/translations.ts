@@ -119,20 +119,6 @@ export const FORBIDDEN_TO_ACCESS_TRAINED_MODELS = i18n.translate(
   }
 );
 
-export const COPY_ID_ACTION_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.actions.copyID',
-  {
-    defaultMessage: 'Copy endpoint ID',
-  }
-);
-
-export const COPY_ID_ACTION_SUCCESS = i18n.translate(
-  'xpack.searchInferenceEndpoints.actions.copyIDSuccess',
-  {
-    defaultMessage: 'Inference endpoint ID copied!',
-  }
-);
-
 export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
   'xpack.searchInferenceEndpoints.actions.endpointAddedSuccess',
   {
@@ -152,13 +138,6 @@ export const ENDPOINT_ADDED_SUCCESS_DESCRIPTION = (endpointId: string) =>
     defaultMessage: 'The inference endpoint "{endpointId}" was added.',
     values: { endpointId },
   });
-
-export const DELETE_ACTION_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint',
-  {
-    defaultMessage: 'Delete endpoint',
-  }
-);
 
 export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint', {
   defaultMessage: 'Endpoint',

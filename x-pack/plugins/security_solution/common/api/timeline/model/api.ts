@@ -14,7 +14,36 @@ import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
 import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
-// TODO https://github.com/elastic/security-team/issues/7491
+import { ErrorSchema } from './error_schema';
+import type { DataProviderType } from './components.gen';
+import {
+  DataProviderTypeEnum,
+  RowRendererId,
+  RowRendererIdEnum,
+  SortFieldTimeline,
+  SortFieldTimelineEnum,
+  TemplateTimelineType,
+  TemplateTimelineTypeEnum,
+  TimelineStatus,
+  TimelineStatusEnum,
+  TimelineType,
+  TimelineTypeEnum,
+} from './components.gen';
+
+export {
+  DataProviderType,
+  DataProviderTypeEnum,
+  RowRendererId,
+  RowRendererIdEnum,
+  SortFieldTimeline,
+  SortFieldTimelineEnum,
+  TemplateTimelineType,
+  TemplateTimelineTypeEnum,
+  TimelineStatus,
+  TimelineStatusEnum,
+  TimelineType,
+  TimelineTypeEnum,
+};
 
 /**
  * Outcome is a property of the saved object resolve api
@@ -39,8 +68,6 @@ export const SavedObjectResolveAliasPurpose = runtimeTypes.union([
   runtimeTypes.literal('savedObjectConversion'),
   runtimeTypes.literal('savedObjectImport'),
 ]);
-
-import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -133,14 +160,9 @@ const SavedDataProviderQueryMatchRuntimeType = runtimeTypes.partial({
   queryMatch: unionWithNullType(SavedDataProviderQueryMatchBasicRuntimeType),
 });
 
-export enum DataProviderType {
-  default = 'default',
-  template = 'template',
-}
-
 export const DataProviderTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(DataProviderType.default),
-  runtimeTypes.literal(DataProviderType.template),
+  runtimeTypes.literal(DataProviderTypeEnum.default),
+  runtimeTypes.literal(DataProviderTypeEnum.template),
 ]);
 
 const SavedDataProviderRuntimeType = runtimeTypes.partial({
@@ -251,92 +273,25 @@ export type Sort = runtimeTypes.TypeOf<typeof SavedSortRuntimeType>;
  *  Timeline Statuses
  */
 
-export enum TimelineStatus {
-  active = 'active',
-  draft = 'draft',
-  immutable = 'immutable',
-}
-
 export const TimelineStatusLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineStatus.active),
-  runtimeTypes.literal(TimelineStatus.draft),
-  runtimeTypes.literal(TimelineStatus.immutable),
+  runtimeTypes.literal(TimelineStatusEnum.active),
+  runtimeTypes.literal(TimelineStatusEnum.draft),
+  runtimeTypes.literal(TimelineStatusEnum.immutable),
 ]);
 
-const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
+export const RowRendererCount = Object.keys(RowRendererIdEnum).length;
+export const RowRendererValues = Object.values(RowRendererId.Values);
 
-export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
-  typeof TimelineStatusLiteralWithNullRt
->;
-
-export enum RowRendererId {
-  /** event.kind: signal */
-  alert = 'alert',
-  /** endpoint alerts (created on the endpoint) */
-  alerts = 'alerts',
-  auditd = 'auditd',
-  auditd_file = 'auditd_file',
-  library = 'library',
-  netflow = 'netflow',
-  plain = 'plain',
-  registry = 'registry',
-  suricata = 'suricata',
-  system = 'system',
-  system_dns = 'system_dns',
-  system_endgame_process = 'system_endgame_process',
-  system_file = 'system_file',
-  system_fim = 'system_fim',
-  system_security_event = 'system_security_event',
-  system_socket = 'system_socket',
-  threat_match = 'threat_match',
-  zeek = 'zeek',
-}
-
-export const RowRendererCount = Object.keys(RowRendererId).length;
-
-const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
+const RowRendererIdRuntimeType = stringEnum(RowRendererIdEnum, 'RowRendererId');
 
 /**
- * Timeline template type
+ * Timeline types
  */
-
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
-export const TemplateTimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TemplateTimelineType.elastic),
-  runtimeTypes.literal(TemplateTimelineType.custom),
-]);
-
-export const TemplateTimelineTypeLiteralWithNullRt = unionWithNullType(
-  TemplateTimelineTypeLiteralRt
-);
-
-export type TemplateTimelineTypeLiteral = runtimeTypes.TypeOf<typeof TemplateTimelineTypeLiteralRt>;
-export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
-  typeof TemplateTimelineTypeLiteralWithNullRt
->;
-
-/*
- *  Timeline Types
- */
-
-export enum TimelineType {
-  default = 'default',
-  template = 'template',
-}
 
 export const TimelineTypeLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineType.template),
-  runtimeTypes.literal(TimelineType.default),
+  runtimeTypes.literal(TimelineTypeEnum.template),
+  runtimeTypes.literal(TimelineTypeEnum.default),
 ]);
-
-export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);
-
-export type TimelineTypeLiteral = runtimeTypes.TypeOf<typeof TimelineTypeLiteralRt>;
-export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTypeLiteralWithNullRt>;
 
 /**
  * This is the response type
@@ -483,18 +438,11 @@ export const TimelineErrorResponseType = runtimeTypes.union([
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;
 
-export enum SortFieldTimeline {
-  title = 'title',
-  description = 'description',
-  updated = 'updated',
-  created = 'created',
-}
-
 export const sortFieldTimeline = runtimeTypes.union([
-  runtimeTypes.literal(SortFieldTimeline.title),
-  runtimeTypes.literal(SortFieldTimeline.description),
-  runtimeTypes.literal(SortFieldTimeline.updated),
-  runtimeTypes.literal(SortFieldTimeline.created),
+  runtimeTypes.literal(SortFieldTimelineEnum.title),
+  runtimeTypes.literal(SortFieldTimelineEnum.description),
+  runtimeTypes.literal(SortFieldTimelineEnum.updated),
+  runtimeTypes.literal(SortFieldTimelineEnum.created),
 ]);
 
 export const direction = runtimeTypes.union([
@@ -569,7 +517,6 @@ export const pageInfoTimeline = runtimeTypes.type({
 
 export interface PageInfoTimeline {
   pageIndex: number;
-
   pageSize: number;
 }
 
@@ -661,14 +608,14 @@ export interface SerializedFilterQueryResult {
   filterQuery?: Maybe<SerializedKueryQueryResult>;
 }
 
-export interface SerializedKueryQueryResult {
-  kuery?: Maybe<KueryFilterQueryResult>;
-  serializedQuery?: Maybe<string>;
-}
-
 export interface KueryFilterQueryResult {
   kind?: Maybe<string>;
   expression?: Maybe<string>;
+}
+
+export interface SerializedKueryQueryResult {
+  kuery?: Maybe<KueryFilterQueryResult>;
+  serializedQuery?: Maybe<string>;
 }
 
 export interface TimelineResult {
@@ -715,11 +662,6 @@ export interface ResponseTimeline {
 export interface SortTimeline {
   sortField: SortFieldTimeline;
   sortOrder: Direction;
-}
-
-export interface ExportTimelineNotFoundError {
-  statusCode: number;
-  message: string;
 }
 
 export interface GetAllTimelineVariables {

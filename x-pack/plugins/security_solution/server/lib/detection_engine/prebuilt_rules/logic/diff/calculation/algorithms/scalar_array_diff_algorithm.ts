@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { difference, union, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
   ThreeVersionsOf,
@@ -19,6 +19,7 @@ import {
   ThreeWayDiffConflict,
   ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { mergeDedupedArrays } from './helpers';
 
 /**
  * Diff algorithm used for arrays of scalar values (eg. numbers, strings, booleans, etc.)
@@ -105,16 +106,11 @@ const mergeVersions = <TValue>({
     }
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion);
-      const removedCurrent = difference(dedupedBaseVersion, dedupedCurrentVersion);
-
-      const addedTarget = difference(dedupedTargetVersion, dedupedBaseVersion);
-      const removedTarget = difference(dedupedBaseVersion, dedupedTargetVersion);
-
-      const bothAdded = union(addedCurrent, addedTarget);
-      const bothRemoved = union(removedCurrent, removedTarget);
-
-      const merged = difference(union(dedupedBaseVersion, bothAdded), bothRemoved);
+      const merged = mergeDedupedArrays(
+        dedupedBaseVersion,
+        dedupedCurrentVersion,
+        dedupedTargetVersion
+      );
 
       return {
         conflict: ThreeWayDiffConflict.SOLVABLE,

@@ -10,8 +10,6 @@ paths:
       operationId: CreateEndpointList
       summary: Creates an endpoint list
       description: Creates an endpoint list or does nothing if the list already exists
-      tags:
-        - Endpoint exceptions API
       responses:
         200:
           description: Successful response

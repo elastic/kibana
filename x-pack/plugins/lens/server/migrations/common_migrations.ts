@@ -323,7 +323,7 @@ export const getLensCustomVisualizationMigrations = (
       const migrationMap: MigrateFunctionsObject = {};
       const currentMigrations = migrationGetter();
       for (const version in currentMigrations) {
-        if (currentMigrations.hasOwnProperty(version)) {
+        if (Object.hasOwn(currentMigrations, version)) {
           migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
             id,
             currentMigrations[version]

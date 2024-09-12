@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -153,6 +154,7 @@ describe('getLinksEmbeddableFactory', () => {
       savedObjectId: '123',
       title: 'my links',
       description: 'just a few links',
+      hidePanelTitles: false,
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
@@ -163,6 +165,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       title: 'my links',
       savedObjectId: '123',
+      hidePanelTitles: false,
     };
 
     let parent: LinksParentApi;
@@ -210,7 +213,7 @@ describe('getLinksEmbeddableFactory', () => {
             savedObjectId: '123',
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: false,
           },
           references: [],
         });
@@ -238,7 +241,7 @@ describe('getLinksEmbeddableFactory', () => {
           rawState: {
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: false,
             attributes: {
               description: 'some links',
               title: 'links 001',
@@ -261,6 +264,7 @@ describe('getLinksEmbeddableFactory', () => {
       },
       description: 'just a few links',
       title: 'my links',
+      hidePanelTitles: true,
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
@@ -271,6 +275,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       title: 'my links',
       savedObjectId: undefined,
+      hidePanelTitles: true,
     };
 
     let parent: LinksParentApi;
@@ -315,7 +320,7 @@ describe('getLinksEmbeddableFactory', () => {
           rawState: {
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: true,
             attributes: {
               links: getLinks(),
               layout: 'horizontal',
@@ -356,7 +361,7 @@ describe('getLinksEmbeddableFactory', () => {
             savedObjectId: '333',
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: true,
           },
           references: [],
         });

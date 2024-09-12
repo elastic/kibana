@@ -53,7 +53,7 @@ export interface FormBasedLayer {
   indexPatternId: string;
   linkToLayers?: string[];
   // Partial columns represent the temporary invalid states
-  incompleteColumns?: Record<string, IncompleteColumn>;
+  incompleteColumns?: Record<string, IncompleteColumn | undefined>;
   sampling?: number;
   ignoreGlobalFilters?: boolean;
 }

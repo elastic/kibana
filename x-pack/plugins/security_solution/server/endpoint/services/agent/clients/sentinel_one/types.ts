@@ -13,6 +13,9 @@ import {
 export interface RawSentinelOneInfo {
   sentinel_one: {
     agent: {
+      agent: {
+        id: string;
+      };
       uuid: string;
       last_active_date: string;
       network_status: string;

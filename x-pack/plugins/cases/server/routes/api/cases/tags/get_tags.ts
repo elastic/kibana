@@ -16,6 +16,7 @@ export const getTagsRoute = createCasesRoute({
   routerOptions: {
     access: 'public',
     summary: `Get case tags`,
+    tags: ['oas-tag:cases'],
   },
   handler: async ({ context, request, response }) => {
     try {

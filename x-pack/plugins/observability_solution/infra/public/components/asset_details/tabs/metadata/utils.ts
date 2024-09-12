@@ -24,7 +24,7 @@ export const getAllFields = (metadata?: InfraMetadata) => {
     property: string
   ) => {
     const fieldsByCategory: FieldsByCategory = metadata?.info?.[`${category}`] ?? {};
-    if (fieldsByCategory.hasOwnProperty(property)) {
+    if (Object.hasOwn(fieldsByCategory, property)) {
       const value = fieldsByCategory[property];
 
       if (typeof value === 'boolean') {

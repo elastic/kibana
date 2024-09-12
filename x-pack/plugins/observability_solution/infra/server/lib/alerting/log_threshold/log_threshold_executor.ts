@@ -203,13 +203,16 @@ export const createLogThresholdExecutor =
       }
     };
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
+      const logSourcesService =
+        logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
-        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
         .getResolvedLogView(validatedParams.logView);
 
       if (!isRatioRuleParams(validatedParams)) {

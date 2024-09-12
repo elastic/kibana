@@ -8,5 +8,5 @@
 import { EntityDefinition } from '@kbn/entities-schema';
 
 export function isBackfillEnabled(definition: EntityDefinition) {
-  return definition.history.settings?.backfillSyncDelay != null;
+  return definition.history.settings.backfillSyncDelay != null;
 }

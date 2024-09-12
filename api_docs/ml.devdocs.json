@@ -301,9 +301,9 @@
           " extends ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTitles",
+            "section": "def-public.SerializedTitles",
             "text": "SerializedTitles"
           },
           ",",
@@ -994,33 +994,33 @@
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDataViews",
+            "section": "def-public.PublishesDataViews",
             "text": "PublishesDataViews"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTimeRange",
+            "section": "def-public.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesFilters",
+            "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
           " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<",
@@ -1042,17 +1042,17 @@
           " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
+            "section": "def-public.PublishesPanelTitle",
             "text": "PublishesPanelTitle"
           },
           " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasEditCapabilities",
+            "section": "def-public.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
           " & ",
@@ -1343,7 +1343,13 @@
         ">; getDataFrameAnalyticsStats(analyticsId?: string | undefined): Promise<",
         "GetDataFrameAnalyticsStatsResponse",
         ">; createDataFrameAnalytics(analyticsId: string, analyticsConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1373,7 +1379,13 @@
         ">; jobsExist(analyticsIds: string[], allSpaces?: boolean): Promise<",
         "JobsExistsResponse",
         ">; evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>; explainDataFrameAnalytics(jobConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1387,7 +1399,13 @@
         ">; startDataFrameAnalytics(analyticsId: string): Promise<any>; stopDataFrameAnalytics(analyticsId: string, force?: boolean): Promise<any>; getAnalyticsAuditMessages(analyticsId: string): Promise<",
         "JobMessage",
         "[]>; validateDataFrameAnalytics(analyticsConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1717,10 +1735,10 @@
           "text": "ModelConfig"
         },
         "): Promise<",
-        "InferenceModelConfigContainer",
-        ">; getAllInferenceEndpoints(): Promise<{ endpoints: ",
-        "InferenceModelConfigContainer",
-        "[]; }>; }; notifications: { findMessages(params: ",
+        "InferenceInferenceEndpointInfo",
+        ">; getAllInferenceEndpoints(): Promise<",
+        "InferenceGetResponse",
+        ">; }; notifications: { findMessages(params: ",
         "NotificationsQueryParams",
         "): Promise<",
         "NotificationsSearchResponse",
@@ -2638,17 +2656,17 @@
         " & { alertingServiceProvider(savedObjectsClient: ",
         {
           "pluginId": "@kbn/core-saved-objects-api-server",
-          "scope": "common",
+          "scope": "server",
           "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-          "section": "def-common.SavedObjectsClientContract",
+          "section": "def-server.SavedObjectsClientContract",
           "text": "SavedObjectsClientContract"
         },
         ", request: ",
         {
           "pluginId": "@kbn/core-http-server",
-          "scope": "common",
+          "scope": "server",
           "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
+          "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",

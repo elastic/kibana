@@ -5,37 +5,21 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import { EntityManagerServerSetup } from '../types';
+import { EntityDiscoveryAPIKey } from './auth/api_key/api_key';
 
-export function toArray<T>(maybeArray: T | T[] | undefined): T[] {
-  if (!maybeArray) {
-    return [];
-  }
-  if (Array.isArray(maybeArray)) {
-    return maybeArray;
-  }
-  return [maybeArray];
-}
-
-export const isValidRange = (from: string, to: string): boolean => {
-  if (moment(from).isAfter(to)) {
-    return false;
-  }
-  return true;
+export const getClientsFromAPIKey = ({
+  apiKey,
+  server,
+}: {
+  apiKey: EntityDiscoveryAPIKey;
+  server: EntityManagerServerSetup;
+}): { esClient: ElasticsearchClient; soClient: SavedObjectsClientContract } => {
+  const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
+  const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
+  return { esClient, soClient };
 };
-
-export function isStringOrNonEmptyArray(
-  value: string | string[] | undefined
-): value is string | string[] {
-  if (typeof value === 'undefined') {
-    return false;
-  }
-  if (Array.isArray(value) && value.length === 0) {
-    return false;
-  }
-  return true;
-}
-
-export function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
-  return toArray(maybeArray)[0];
-}

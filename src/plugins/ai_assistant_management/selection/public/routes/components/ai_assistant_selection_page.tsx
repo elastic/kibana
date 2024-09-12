@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
@@ -21,12 +22,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getDocLinks } from '@kbn/doc-links';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
-  const { capabilities, setBreadcrumbs, navigateToApp } = useAppContext();
+  const { capabilities, setBreadcrumbs, navigateToApp, buildFlavor, kibanaBranch } =
+    useAppContext();
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
   const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
+  const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -40,7 +45,7 @@ export function AiAssistantSelectionPage() {
 
   return (
     <>
-      <EuiTitle size="l">
+      <EuiTitle size="l" data-test-subj="pluginsAiAssistantSelectionPageTitle">
         <h2>
           {i18n.translate(
             'aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel',
@@ -53,7 +58,7 @@ export function AiAssistantSelectionPage() {
 
       <EuiSpacer size="m" />
 
-      <EuiText>
+      <EuiText data-test-subj="pluginsAiAssistantSelectionPageDescription">
         {i18n.translate(
           'aiAssistantManagementSelection.aiAssistantSettingsPage.descriptionTextLabel',
           {
@@ -68,6 +73,7 @@ export function AiAssistantSelectionPage() {
       <EuiFlexGrid columns={2}>
         <EuiFlexItem grow>
           <EuiCard
+            data-test-subj="aiAssistantSelectionPageObservabilityCard"
             description={
               <div>
                 {!observabilityAIAssistantEnabled ? (
@@ -75,6 +81,7 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                     <EuiCallOut
                       iconType="warning"
+                      data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
                         {
@@ -82,6 +89,7 @@ export function AiAssistantSelectionPage() {
                         }
                       )}
                       size="s"
+                      className="eui-displayInlineBlock"
                     />
                     <EuiSpacer size="s" />
                   </>
@@ -89,14 +97,14 @@ export function AiAssistantSelectionPage() {
                 <p>
                   <FormattedMessage
                     id="aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkDescription"
-                    defaultMessage="For more info, see our {documentation}."
+                    defaultMessage="For more info, refer to our {documentation}."
                     values={{
                       documentation: (
                         <EuiLink
                           data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
                           external
                           target="_blank"
-                          href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
+                          href={observabilityDoc}
                         >
                           {i18n.translate(
                             'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkLabel',
@@ -107,20 +115,22 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                <EuiButton
-                  iconType="gear"
-                  data-test-subj="pluginsAiAssistantSelectionPageButton"
-                  onClick={() =>
-                    navigateToApp('management', {
-                      path: 'kibana/observabilityAiAssistantManagement',
-                    })
-                  }
-                >
-                  {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.manageSettingsButtonLabel',
-                    { defaultMessage: 'Manage Settings' }
-                  )}
-                </EuiButton>
+                {observabilityAIAssistantEnabled && (
+                  <EuiButton
+                    iconType="gear"
+                    data-test-subj="pluginsAiAssistantSelectionPageButton"
+                    onClick={() =>
+                      navigateToApp('management', {
+                        path: 'kibana/observabilityAiAssistantManagement',
+                      })
+                    }
+                  >
+                    {i18n.translate(
+                      'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.manageSettingsButtonLabel',
+                      { defaultMessage: 'Manage Settings' }
+                    )}
+                  </EuiButton>
+                )}
               </div>
             }
             display="plain"
@@ -143,14 +153,16 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                     <EuiCallOut
                       iconType="warning"
+                      data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
                         {
                           defaultMessage:
-                            'This feature is disabled. It can be enabled from Spaces > Features.',
+                            'This feature is disabled. You can enable it from from Spaces > Features.',
                         }
                       )}
                       size="s"
+                      className="eui-displayInlineBlock"
                     />
                     <EuiSpacer size="s" />
                   </>
@@ -158,14 +170,14 @@ export function AiAssistantSelectionPage() {
                 <p>
                   <FormattedMessage
                     id="aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription"
-                    defaultMessage="For more info, see our {documentation}."
+                    defaultMessage="For more info, refer to our {documentation}."
                     values={{
                       documentation: (
                         <EuiLink
                           data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
                           external
                           target="_blank"
-                          href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                          href={securityDoc}
                         >
                           {i18n.translate(
                             'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
@@ -176,18 +188,20 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                <EuiButton
-                  data-test-subj="pluginsAiAssistantSelectionPageButton"
-                  iconType="gear"
-                  onClick={() =>
-                    navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
-                  }
-                >
-                  {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
-                    { defaultMessage: 'Manage Settings' }
-                  )}
-                </EuiButton>
+                {securityAIAssistantEnabled && (
+                  <EuiButton
+                    data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
+                    iconType="gear"
+                    onClick={() =>
+                      navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
+                    }
+                  >
+                    {i18n.translate(
+                      'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
+                      { defaultMessage: 'Manage Settings' }
+                    )}
+                  </EuiButton>
+                )}
               </div>
             }
             display="plain"

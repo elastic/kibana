@@ -9,8 +9,6 @@ paths:
       operationId: CreateExceptionList
       x-codegen-enabled: true
       summary: Creates an exception list
-      tags:
-        - Exceptions API
       requestBody:
         description: Exception list's properties
         required: true

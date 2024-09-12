@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -202,38 +203,6 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
   );
 };
 
-export const PinToggle: React.FC<TableActionsProps> = ({ Component, row }) => {
-  if (!row) {
-    return null;
-  }
-
-  const {
-    field: { field, pinned, onTogglePinned },
-  } = row;
-
-  // Pinned
-  const pinnedLabel = pinned
-    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
-        defaultMessage: 'Unpin field',
-      })
-    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
-        defaultMessage: 'Pin field',
-      });
-  const pinnedIconType = pinned ? 'pinFilled' : 'pin';
-
-  return (
-    <Component
-      data-test-subj={`togglePinFilterButton-${field}`}
-      iconType={pinnedIconType}
-      title={pinnedLabel}
-      flush="left"
-      onClick={() => onTogglePinned(field)}
-    >
-      {pinnedLabel}
-    </Component>
-  );
-};
-
 export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) => {
   if (!row) {
     return null;
@@ -293,9 +262,6 @@ export function getFieldCellActions({
           },
         ]
       : []),
-    ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-      return <PinToggle row={rows[rowIndex]} Component={Component} />;
-    },
   ];
 }
 

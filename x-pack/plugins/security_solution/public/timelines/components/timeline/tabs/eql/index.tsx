@@ -16,6 +16,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import {
   DocumentDetailsLeftPanelKey,
@@ -90,8 +91,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     browserFields,
     dataViewId,
     loading: loadingSourcerer,
-    runtimeMappings,
     selectedPatterns,
+    sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
@@ -132,7 +133,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     indexNames: selectedPatterns,
     language: 'eql',
     limit: !unifiedComponentsInTimelineDisabled ? sampleSize : itemsPerPage,
-    runtimeMappings,
+    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,

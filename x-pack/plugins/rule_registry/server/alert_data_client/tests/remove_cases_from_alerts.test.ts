@@ -105,56 +105,58 @@ describe('remove cases from alerts', () => {
 
       expect(esClientMock.updateByQuery.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match": Object {
-                                  "kibana.alert.case_ids": "test-case-1",
-                                },
+          "conflicts": "proceed",
+          "ignore_unavailable": true,
+          "index": "undefined-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match": Object {
+                                "kibana.alert.case_ids": "test-case-1",
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                        Object {
-                          "bool": Object {
-                            "minimum_should_match": 1,
-                            "should": Array [
-                              Object {
-                                "match": Object {
-                                  "kibana.alert.case_ids": "test-case-2",
-                                },
+                      },
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "match": Object {
+                                "kibana.alert.case_ids": "test-case-2",
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                ],
-                "must": Array [],
-                "must_not": Array [],
-                "should": Array [],
-              },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
-            "script": Object {
-              "lang": "painless",
-              "params": Object {
-                "caseIds": Array [
-                  "test-case-1",
-                  "test-case-2",
-                ],
-              },
-              "source": "if (ctx._source['kibana.alert.case_ids'] != null && ctx._source['kibana.alert.case_ids'].length > 0 && params['caseIds'] != null && params['caseIds'].length > 0) {
+          },
+          "script": Object {
+            "lang": "painless",
+            "params": Object {
+              "caseIds": Array [
+                "test-case-1",
+                "test-case-2",
+              ],
+            },
+            "source": "if (ctx._source['kibana.alert.case_ids'] != null && ctx._source['kibana.alert.case_ids'].length > 0 && params['caseIds'] != null && params['caseIds'].length > 0) {
                 List storedCaseIds = ctx._source['kibana.alert.case_ids'];
                 List caseIdsToRemove = params['caseIds'];
 
@@ -165,11 +167,7 @@ describe('remove cases from alerts', () => {
                   }
                 }
               }",
-            },
           },
-          "conflicts": "proceed",
-          "ignore_unavailable": true,
-          "index": "undefined-*",
         }
       `);
     });

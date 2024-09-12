@@ -18,7 +18,6 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
-import { ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
@@ -81,7 +80,6 @@ export type TaskManagerStartContract = Pick<
 
 export interface TaskManagerPluginStart {
   cloud?: CloudStart;
-  serverless?: ServerlessPluginStart;
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
@@ -250,7 +248,7 @@ export class TaskManagerPlugin
 
   public start(
     { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud, serverless }: TaskManagerPluginStart
+    { cloud }: TaskManagerPluginStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -261,6 +259,7 @@ export class TaskManagerPlugin
       savedObjectsRepository,
       logger: this.logger,
       currentNode: this.taskManagerId!,
+      config: this.config.discovery,
     });
 
     if (this.shouldRunBackgroundTasks) {
@@ -281,18 +280,20 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
     });
 
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+
     const defaultCapacity = getDefaultCapacity({
       claimStrategy: this.config?.claim_strategy,
       heapSizeLimit: this.heapSizeLimit,
       isCloud: cloud?.isCloudEnabled ?? false,
-      isServerless: !!serverless,
+      isServerless,
       isBackgroundTaskNodeOnly: this.isNodeBackgroundTasksOnly(),
     });
 
     this.logger.info(
       `Task manager isCloud=${
         cloud?.isCloudEnabled ?? false
-      } isServerless=${!!serverless} claimStrategy=${
+      } isServerless=${isServerless} claimStrategy=${
         this.config!.claim_strategy
       } isBackgroundTaskNodeOnly=${this.isNodeBackgroundTasksOnly()} heapSizeLimit=${
         this.heapSizeLimit
@@ -315,7 +316,13 @@ export class TaskManagerPlugin
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
 
-      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
+      const taskPartitioner = new TaskPartitioner({
+        logger: this.logger,
+        podName: this.taskManagerId!,
+        kibanaDiscoveryService: this.kibanaDiscoveryService,
+        kibanasPerPartition: this.config.kibanas_per_partition,
+      });
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -395,9 +402,13 @@ export class TaskManagerPlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     if (this.kibanaDiscoveryService?.isStarted()) {
-      this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
+      try {
+        await this.kibanaDiscoveryService.deleteCurrentNode();
+      } catch (e) {
+        this.logger.error(`Deleting current node has failed. error: ${e.message}`);
+      }
     }
   }
 }

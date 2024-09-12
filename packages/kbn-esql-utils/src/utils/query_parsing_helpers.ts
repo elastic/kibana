@@ -1,14 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
-import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
 
-const DEFAULT_ESQL_LIMIT = 500;
+import type {
+  ESQLSource,
+  ESQLFunction,
+  ESQLColumn,
+  ESQLSingleAstItem,
+  ESQLCommandOption,
+} from '@kbn/esql-ast';
+
+const DEFAULT_ESQL_LIMIT = 1000;
 
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
@@ -40,14 +48,27 @@ export function hasTransformationalCommand(esql?: string) {
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
-  const limitCommands = esql.match(new RegExp(/LIMIT\s[0-9]+/, 'ig'));
-  if (!limitCommands) {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const limitCommands = ast.filter(({ name }) => name === 'limit');
+  if (!limitCommands || !limitCommands.length) {
+    return DEFAULT_ESQL_LIMIT;
+  }
+  const limits: number[] = [];
+
+  walk(ast, {
+    visitLiteral: (node) => {
+      if (!isNaN(Number(node.value))) {
+        limits.push(Number(node.value));
+      }
+    },
+  });
+
+  if (!limits.length) {
     return DEFAULT_ESQL_LIMIT;
   }
 
-  const lastIndex = limitCommands.length - 1;
-  const split = limitCommands[lastIndex].split(' ');
-  return parseInt(split[1], 10);
+  // ES returns always the smallest limit
+  return Math.min(...limits);
 }
 
 export function removeDropCommandsFromESQLQuery(esql?: string): string {
@@ -56,7 +77,7 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
- * When the ?start and ?end params are used, we want to retrieve the timefield from the query.
+ * When the ?t_start and ?t_end params are used, we want to retrieve the timefield from the query.
  * @param esql:string
  * @returns string
  */
@@ -69,7 +90,9 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   });
 
   const params = Walker.params(ast);
-  const timeNamedParam = params.find((param) => param.value === 'start' || param.value === 'end');
+  const timeNamedParam = params.find(
+    (param) => param.value === 't_start' || param.value === 't_end'
+  );
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
@@ -89,4 +112,27 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   }) as ESQLColumn;
 
   return column?.name;
+};
+
+export const isQueryWrappedByPipes = (query: string): boolean => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  const numberOfCommands = ast.length;
+  const pipesWithNewLine = query.split('\n  |');
+  return numberOfCommands === pipesWithNewLine?.length;
+};
+
+export const prettifyQuery = (query: string, isWrapped: boolean): string => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
+};
+
+export const retrieveMetadataColumns = (esql: string): string[] => {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const options: ESQLCommandOption[] = [];
+
+  walk(ast, {
+    visitCommandOption: (node) => options.push(node),
+  });
+  const metadataOptions = options.find(({ name }) => name === 'metadata');
+  return metadataOptions?.args.map((column) => (column as ESQLColumn).name) ?? [];
 };

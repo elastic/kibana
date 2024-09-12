@@ -10,7 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
 import type {
-  InferenceModelConfig,
+  InferenceInferenceEndpoint,
   InferenceTaskType,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
@@ -476,6 +476,7 @@ export class ModelsProvider {
       const modelDefinitionResponse = {
         ...def,
         ...(recommended ? { recommended } : {}),
+        supported: !!def.default || recommended,
         model_id: modelId,
       };
 
@@ -590,19 +591,19 @@ export class ModelsProvider {
    * Puts the requested Inference endpoint id into elasticsearch, triggering elasticsearch to create the inference endpoint id
    * @param inferenceId - Inference Endpoint Id
    * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
-   * @param modelConfig - Model configuration based on service type
+   * @param inferenceConfig - Model configuration based on service type
    */
   async createInferenceEndpoint(
     inferenceId: string,
     taskType: InferenceTaskType,
-    modelConfig: InferenceModelConfig
+    inferenceConfig: InferenceInferenceEndpoint
   ) {
     try {
-      const result = await this._client.asCurrentUser.inference.putModel(
+      const result = await this._client.asCurrentUser.inference.put(
         {
           inference_id: inferenceId,
           task_type: taskType,
-          model_config: modelConfig,
+          inference_config: inferenceConfig,
         },
         { maxRetries: 0 }
       );
@@ -612,7 +613,7 @@ export class ModelsProvider {
       // Erroring out is misleading in these cases, so we return the model_id and task_type
       if (error.name === 'TimeoutError') {
         return {
-          model_id: modelConfig.service,
+          model_id: inferenceConfig.service,
           task_type: taskType,
         };
       } else {

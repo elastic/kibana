@@ -7,45 +7,39 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../..';
 import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
-  conversation: Conversation | undefined;
-  editingSystemPromptId: string | undefined;
+  allSystemPrompts: PromptResponse[];
+  currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  allSystemPrompts: PromptResponse[];
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
-  conversation,
-  editingSystemPromptId,
+  allSystemPrompts,
+  currentSystemPromptId,
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
-  allSystemPrompts,
 }) => {
-  const selectedPrompt = useMemo(() => {
-    if (editingSystemPromptId !== undefined) {
-      return allSystemPrompts.find((p) => p.id === editingSystemPromptId);
-    } else {
-      return allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId);
-    }
-  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
+  const selectedPrompt = useMemo(
+    () =>
+      currentSystemPromptId !== undefined
+        ? allSystemPrompts.find((p) => p.id === currentSystemPromptId)
+        : undefined,
+    [allSystemPrompts, currentSystemPromptId]
+  );
 
   const handleClearSystemPrompt = useCallback(() => {
-    if (conversation) {
-      onSystemPromptSelectionChange(undefined);
-    }
-  }, [conversation, onSystemPromptSelectionChange]);
+    onSystemPromptSelectionChange(undefined);
+  }, [onSystemPromptSelectionChange]);
 
   return (
     <SelectSystemPrompt
       allPrompts={allSystemPrompts}
       clearSelectedSystemPrompt={handleClearSystemPrompt}
-      conversation={conversation}
       data-test-subj="systemPrompt"
       isClearable={true}
       isSettingsModalVisible={isSettingsModalVisible}

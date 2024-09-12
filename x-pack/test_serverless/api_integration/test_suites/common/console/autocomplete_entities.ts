@@ -7,12 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
-import { InternalRequestHeader } from '../../../../shared/services/svl_common_api';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getService }: FtrProviderContext) => {
   const svlCommonApi = getService('svlCommonApi');
-  const consoleService = getService('console');
+  const console = getService('console');
 
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -28,17 +27,6 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   describe('/api/console/autocomplete_entities', function () {
-    let createIndex: (typeof consoleService)['helpers']['createIndex'];
-    let createAlias: (typeof consoleService)['helpers']['createAlias'];
-    let createIndexTemplate: (typeof consoleService)['helpers']['createIndexTemplate'];
-    let createComponentTemplate: (typeof consoleService)['helpers']['createComponentTemplate'];
-    let createDataStream: (typeof consoleService)['helpers']['createDataStream'];
-    let deleteIndex: (typeof consoleService)['helpers']['deleteIndex'];
-    let deleteAlias: (typeof consoleService)['helpers']['deleteAlias'];
-    let deleteIndexTemplate: (typeof consoleService)['helpers']['deleteIndexTemplate'];
-    let deleteComponentTemplate: (typeof consoleService)['helpers']['deleteComponentTemplate'];
-    let deleteDataStream: (typeof consoleService)['helpers']['deleteDataStream'];
-
     const indexName = 'test-index-1';
     const aliasName = 'test-alias-1';
     const indexTemplateName = 'test-index-template-1';
@@ -48,36 +36,26 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
-      ({
-        helpers: {
-          createIndex,
-          createAlias,
-          createIndexTemplate,
-          createComponentTemplate,
-          createDataStream,
-          deleteIndex,
-          deleteAlias,
-          deleteIndexTemplate,
-          deleteComponentTemplate,
-          deleteDataStream,
-        },
-      } = consoleService);
 
       // Setup indices, aliases, templates, and data streams
-      await createIndex(indexName);
-      await createAlias(indexName, aliasName);
-      await createComponentTemplate(componentTemplateName);
-      await createIndexTemplate(indexTemplateName, [dataStreamName], [componentTemplateName]);
-      await createDataStream(dataStreamName);
+      await console.createIndex(indexName);
+      await console.createAlias(indexName, aliasName);
+      await console.createComponentTemplate(componentTemplateName);
+      await console.createIndexTemplate(
+        indexTemplateName,
+        [dataStreamName],
+        [componentTemplateName]
+      );
+      await console.createDataStream(dataStreamName);
     });
 
     after(async () => {
       // Cleanup indices, aliases, templates, and data streams
-      await deleteAlias(indexName, aliasName);
-      await deleteIndex(indexName);
-      await deleteDataStream(dataStreamName);
-      await deleteIndexTemplate(indexTemplateName);
-      await deleteComponentTemplate(componentTemplateName);
+      await console.deleteAlias(indexName, aliasName);
+      await console.deleteIndex(indexName);
+      await console.deleteDataStream(dataStreamName);
+      await console.deleteIndexTemplate(indexTemplateName);
+      await console.deleteComponentTemplate(componentTemplateName);
 
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });

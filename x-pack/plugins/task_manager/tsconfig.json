@@ -26,8 +26,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
     "@kbn/core-lifecycle-server",
-    "@kbn/serverless",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/core-saved-objects-base-server-internal"
   ],
   "exclude": ["target/**/*"]
 }

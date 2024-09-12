@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
@@ -118,7 +120,7 @@ describe('DataViewFieldEditorPlugin', () => {
       isPersisted: () => true,
     } as unknown as DataView;
 
-    openDeleteModal({
+    await openDeleteModal({
       onDelete: onDeleteSpy,
       ctx: { dataView: indexPatternMock },
       fieldName: ['a', 'b', 'c'],
@@ -147,7 +149,7 @@ describe('DataViewFieldEditorPlugin', () => {
   test('should return a handler to close the modal', async () => {
     const { openDeleteModal } = plugin.start(coreStart, pluginStart);
 
-    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
+    const closeModal = await openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
     expect(typeof closeModal).toBe('function');
   });
 

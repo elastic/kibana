@@ -21,10 +21,9 @@
       "security",
     ],
     "requiredBundles": [
+      "esql",
       "kibanaReact",
       "kibanaUtils",
-      "esql",
-      "esqlDataGrid",
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

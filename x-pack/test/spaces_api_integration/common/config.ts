@@ -6,7 +6,6 @@
  */
 
 import path from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
@@ -70,6 +69,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
+          // Note: we fake a cloud deployment as the solution view is only available in cloud
+          '--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',
+          '--xpack.cloud.base_url=https://cloud.elastic.co',
+          '--xpack.cloud.deployment_url=/deployments/deploymentId',
         ],
       },
     };

@@ -222,6 +222,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
               version: '0.0.0',
             },
             inputs: [mockInput, mockInput2],
+            output_id: 'new-output',
           },
           {
             ...mockPackagePolicy,
@@ -243,7 +244,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         revision: 1,
         type: 'test-logs',
         data_stream: { namespace: 'default' },
-        use_output: 'default',
+        use_output: 'new-output',
         meta: {
           package: {
             name: 'mock_package',
@@ -270,7 +271,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         revision: 1,
         type: 'test-metrics',
         data_stream: { namespace: 'default' },
-        use_output: 'default',
+        use_output: 'new-output',
         meta: {
           package: {
             name: 'mock_package',

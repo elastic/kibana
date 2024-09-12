@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, {
@@ -17,13 +18,13 @@ import React, {
   useState,
 } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { isNoneGroup, useGrouping } from '@kbn/grouping';
+import { GroupOption, isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useAlertDataView } from '@kbn/alerts-ui-shared';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
-import { AlertsGroupingProps } from '../types';
+import type { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 import {
   AlertsGroupingContextProvider,
   useAlertsGroupingState,
@@ -40,7 +41,10 @@ const NextLevel = ({
   parentGroupingFilter,
   groupingFilters,
   getLevel,
-}: Pick<AlertsGroupingLevelProps, 'children' | 'parentGroupingFilter'> & {
+}: Pick<
+  AlertsGroupingLevelProps<BaseAlertsGroupAggregations>,
+  'children' | 'parentGroupingFilter'
+> & {
   level: number;
   selectedGroups: string[];
   groupingFilters: Filter[];
@@ -56,7 +60,9 @@ const NextLevel = ({
   return children(nextGroupingFilters)!;
 };
 
-const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
+const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
+  props: AlertsGroupingProps<T>
+) => {
   const {
     groupingId,
     services,
@@ -72,20 +78,19 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const { dataViews, notifications, http } = services;
   const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
-  const { dataViews: alertDataViews } = useAlertDataView({
+  const { dataView } = useAlertsDataView({
     featureIds,
     dataViewsService: dataViews,
     http,
     toasts: notifications.toasts,
   });
-  const dataView = useMemo(() => alertDataViews?.[0], [alertDataViews]);
   const [pageSize, setPageSize] = useLocalStorage<number[]>(
     `grouping-table-${groupingId}`,
     Array(MAX_GROUPING_LEVELS).fill(DEFAULT_PAGE_SIZE)
   ) as [number[], Dispatch<SetStateAction<number[]>>, () => void];
 
   const onOptionsChange = useCallback(
-    (options) => {
+    (options: GroupOption[]) => {
       // useGrouping > useAlertsGroupingState options sync
       // the available grouping options change when the user selects
       // a new field not in the default ones
@@ -195,7 +200,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
       };
 
       return (
-        <AlertsGroupingLevel
+        <AlertsGroupingLevel<T>
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
@@ -231,6 +236,8 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   return getLevel(0, selectedGroups[0]);
 };
 
+const typedMemo: <T>(c: T) => T = memo;
+
 /**
  * A coordinator component to show multiple alert tables grouped by one or more fields
  *
@@ -244,7 +251,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  *
  *
  * return (
- *   <AlertsGrouping
+ *   <AlertsGrouping<YourAggregationsType>
  *     featureIds={[...]}
  *     globalQuery={{ query: ..., language: 'kql' }}
  *     globalFilters={...}
@@ -275,11 +282,25 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  *   </AlertsGrouping>
  * );
  * ```
+ *
+ * To define your aggregations result type, extend the `BaseAlertsGroupAggregations` type:
+ *
+ * ```ts
+ * import { BaseAlertsGroupAggregations } from '@kbn/alerts-grouping';
+ *
+ * interface YourAggregationsType extends BaseAlertsGroupAggregations {
+ *   // Your custom aggregations here
+ * }
+ * ```
+ *
+ * Check {@link useGetAlertsGroupAggregationsQuery} for more info on alerts aggregations.
  */
-export const AlertsGrouping = memo((props: AlertsGroupingProps) => {
-  return (
-    <AlertsGroupingContextProvider>
-      <AlertsGroupingInternal {...props} />
-    </AlertsGroupingContextProvider>
-  );
-});
+export const AlertsGrouping = typedMemo(
+  <T extends BaseAlertsGroupAggregations>(props: AlertsGroupingProps<T>) => {
+    return (
+      <AlertsGroupingContextProvider>
+        <AlertsGroupingInternal {...props} />
+      </AlertsGroupingContextProvider>
+    );
+  }
+);

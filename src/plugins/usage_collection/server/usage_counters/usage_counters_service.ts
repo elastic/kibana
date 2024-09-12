@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs';
 import moment from 'moment';
 import type {
+  ISavedObjectsRepository,
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
@@ -18,11 +19,20 @@ import type { Logger, LogMeta } from '@kbn/core/server';
 
 import { type IUsageCounter, UsageCounter } from './usage_counter';
 import type { UsageCounters } from '../../common';
+import type {
+  UsageCountersServiceSetup,
+  UsageCountersServiceStart,
+  UsageCountersSearchParams,
+  UsageCountersSearchResult,
+  CreateUsageCounterParams,
+} from './types';
 import {
-  registerUsageCountersSavedObjectTypes,
   storeCounter,
   serializeCounterKey,
+  registerUsageCountersSavedObjectTypes,
 } from './saved_objects';
+import { registerUsageCountersRollups } from './rollups';
+import { searchUsageCounters } from './search';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };
@@ -32,11 +42,6 @@ export interface UsageCountersServiceDeps {
   logger: Logger;
   retryCount: number;
   bufferDurationMs: number;
-}
-
-export interface UsageCountersServiceSetup {
-  createUsageCounter: (domainId: string) => IUsageCounter;
-  getUsageCounterByDomainId: (domainId: string) => IUsageCounter | undefined;
 }
 
 /* internal */
@@ -56,10 +61,11 @@ export class UsageCountersService {
 
   private readonly counterSets = new Map<string, UsageCounter>();
   private readonly source$ = new Rx.Subject<UsageCounters.v1.CounterMetric>();
-  private readonly counter$ = this.source$.pipe(rxOp.multicast(new Rx.Subject()), rxOp.refCount());
+  private readonly counter$ = this.source$.pipe(Rx.multicast(new Rx.Subject()), Rx.refCount());
   private readonly flushCache$ = new Rx.Subject<void>();
-
   private readonly stopCaching$ = new Rx.Subject<void>();
+
+  private repository?: ISavedObjectsRepository;
 
   private readonly logger: Logger;
 
@@ -69,14 +75,14 @@ export class UsageCountersService {
     this.bufferDurationMs = bufferDurationMs;
   }
 
-  public setup = (core: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
+  public setup = ({ savedObjects }: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
     const cache$ = new Rx.ReplaySubject<UsageCounters.v1.CounterMetric>();
     const storingCache$ = new Rx.BehaviorSubject<boolean>(false);
     // flush cache data from cache -> source
     this.flushCache$
       .pipe(
-        rxOp.exhaustMap(() => cache$),
-        rxOp.takeUntil(this.stop$)
+        Rx.exhaustMap(() => cache$),
+        Rx.takeUntil(this.stop$)
       )
       .subscribe((data) => {
         storingCache$.next(true);
@@ -86,16 +92,17 @@ export class UsageCountersService {
     // store data into cache when not paused
     storingCache$
       .pipe(
-        rxOp.distinctUntilChanged(),
-        rxOp.switchMap((isStoring) => (isStoring ? Rx.EMPTY : this.source$)),
-        rxOp.takeUntil(Rx.merge(this.stopCaching$, this.stop$))
+        Rx.distinctUntilChanged(),
+        Rx.switchMap((isStoring) => (isStoring ? Rx.EMPTY : this.source$)),
+        Rx.takeUntil(Rx.merge(this.stopCaching$, this.stop$))
       )
       .subscribe((data) => {
         cache$.next(data);
         storingCache$.next(false);
       });
 
-    registerUsageCountersSavedObjectTypes(core.savedObjects);
+    // register the usage-counter and usage-counters (deprecated) types
+    registerUsageCountersSavedObjectTypes(savedObjects);
 
     return {
       createUsageCounter: this.createUsageCounter,
@@ -103,22 +110,22 @@ export class UsageCountersService {
     };
   };
 
-  public start = ({ savedObjects }: UsageCountersServiceStartDeps): void => {
+  public start = ({ savedObjects }: UsageCountersServiceStartDeps): UsageCountersServiceStart => {
     this.stopCaching$.next();
-    const internalRepository = savedObjects.createInternalRepository();
+    this.repository = savedObjects.createInternalRepository();
     this.counter$
       .pipe(
         /* buffer source events every ${bufferDurationMs} */
-        rxOp.bufferTime(this.bufferDurationMs),
+        Rx.bufferTime(this.bufferDurationMs),
         /**
          * bufferTime will trigger every ${bufferDurationMs}
          * regardless if source emitted anything or not.
          * using filter will stop cut the pipe short
          */
-        rxOp.filter((counters) => Array.isArray(counters) && counters.length > 0),
-        rxOp.map((counters) => Object.values(this.mergeCounters(counters))),
-        rxOp.takeUntil(this.stop$),
-        rxOp.concatMap((counters) => this.storeDate$(counters, internalRepository))
+        Rx.filter((counters) => Array.isArray(counters) && counters.length > 0),
+        Rx.map((counters) => Object.values(this.mergeCounters(counters))),
+        Rx.takeUntil(this.stop$),
+        Rx.concatMap((counters) => this.storeDate$(counters, this.repository!))
       )
       .subscribe((results) => {
         this.logger.debug<UsageCountersLogMeta>('Store counters into savedObjects', {
@@ -129,10 +136,27 @@ export class UsageCountersService {
       });
 
     this.flushCache$.next();
+
+    // we start a regular, timer-based cleanup
+    registerUsageCountersRollups({
+      logger: this.logger,
+      getRegisteredUsageCounters: () => Array.from(this.counterSets.values()),
+      internalRepository: this.repository,
+      pluginStop$: this.stop$,
+    });
+
+    return {
+      search: this.search,
+    };
   };
 
-  public stop = () => {
+  public stop = (): UsageCountersServiceStart => {
     this.stop$.next();
+    this.stop$.complete();
+
+    return {
+      search: this.search,
+    };
   };
 
   private storeDate$(
@@ -142,8 +166,8 @@ export class UsageCountersService {
     return Rx.forkJoin(
       counters.map((metric) =>
         Rx.defer(() => storeCounter({ metric, soRepository })).pipe(
-          rxOp.retry(this.retryCount),
-          rxOp.catchError((error) => {
+          Rx.retry(this.retryCount),
+          Rx.catchError((error) => {
             this.logger.warn(error);
             return Rx.of(error);
           })
@@ -152,18 +176,25 @@ export class UsageCountersService {
     );
   }
 
-  private createUsageCounter = (domainId: string): IUsageCounter => {
+  private createUsageCounter = (
+    domainId: string,
+    params: CreateUsageCounterParams = {}
+  ): IUsageCounter => {
     if (this.counterSets.get(domainId)) {
       throw new Error(`Usage counter set "${domainId}" already exists.`);
     }
 
-    const counterSet = new UsageCounter({ domainId, counter$: this.source$ });
+    const counterSet = new UsageCounter({
+      domainId,
+      counter$: this.source$,
+      retentionPeriodDays: params.retentionPeriodDays,
+    });
     this.counterSets.set(domainId, counterSet);
     return counterSet;
   };
 
-  private getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
-    return this.counterSets.get(type);
+  private getUsageCounterByDomainId = (domainId: string): IUsageCounter | undefined => {
+    return this.counterSets.get(domainId);
   };
 
   private mergeCounters = (
@@ -192,5 +223,15 @@ export class UsageCountersService {
       };
       return acc;
     }, {} as Record<string, UsageCounters.v1.CounterMetric>);
+  };
+
+  private search = async (
+    params: UsageCountersSearchParams
+  ): Promise<UsageCountersSearchResult> => {
+    if (!this.repository) {
+      throw new Error('Cannot search before this service is started. Please call start() first.');
+    }
+
+    return await searchUsageCounters(this.repository, params);
   };
 }

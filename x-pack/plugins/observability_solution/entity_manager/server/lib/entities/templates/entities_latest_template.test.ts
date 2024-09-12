@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { getEntitiesLatestIndexTemplateConfig } from './entities_latest_template';
+import { entityDefinition, builtInEntityDefinition } from '../helpers/fixtures';
+import { generateEntitiesLatestIndexTemplateConfig } from './entities_latest_template';
 
-describe('getEntitiesLatestIndexTemplateConfig(definitionId)', () => {
-  it('should generate a valid index template', () => {
-    const template = getEntitiesLatestIndexTemplateConfig(entityDefinition.id);
+describe('generateEntitiesLatestIndexTemplateConfig(definition)', () => {
+  it('should generate a valid index template for custom definition', () => {
+    const template = generateEntitiesLatestIndexTemplateConfig(entityDefinition);
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should generate a valid index template for builtin definition', () => {
+    const template = generateEntitiesLatestIndexTemplateConfig(builtInEntityDefinition);
     expect(template).toMatchSnapshot();
   });
 });

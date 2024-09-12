@@ -253,6 +253,28 @@
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthorizationServiceSetup.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [
+              "\nA set of methods to work with Kibana role privileges"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientPublicContract",
+                "text": "PrivilegesAPIClientPublicContract"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1146,25 +1168,25 @@
           "{ i18n: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
           "; analytics: ",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
           "; theme: ",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceSetup",
+            "section": "def-public.ThemeServiceSetup",
             "text": "ThemeServiceSetup"
           },
           "; }"
@@ -1434,9 +1456,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, headerName?: string) => ",
@@ -1465,9 +1487,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1885,17 +1907,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateAPIKeyParams",
+                "section": "def-server.CreateAPIKeyParams",
                 "text": "CreateAPIKeyParams"
               },
               ") => Promise<",
@@ -1918,9 +1940,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -1942,9 +1964,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateAPIKeyParams",
+                    "section": "def-server.CreateAPIKeyParams",
                     "text": "CreateAPIKeyParams"
                   }
                 ],
@@ -1969,17 +1991,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, updateParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.UpdateAPIKeyParams",
+                "section": "def-server.UpdateAPIKeyParams",
                 "text": "UpdateAPIKeyParams"
               },
               ") => Promise<",
@@ -2002,9 +2024,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2026,9 +2048,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.UpdateAPIKeyParams",
+                    "section": "def-server.UpdateAPIKeyParams",
                     "text": "UpdateAPIKeyParams"
                   }
                 ],
@@ -2053,33 +2075,33 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateRestAPIKeyParams",
+                "section": "def-server.CreateRestAPIKeyParams",
                 "text": "CreateRestAPIKeyParams"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
                 "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.GrantAPIKeyResult",
+                "section": "def-server.GrantAPIKeyResult",
                 "text": "GrantAPIKeyResult"
               },
               " | null>"
@@ -2100,9 +2122,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2124,17 +2146,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateRestAPIKeyParams",
+                    "section": "def-server.CreateRestAPIKeyParams",
                     "text": "CreateRestAPIKeyParams"
                   },
                   " | ",
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+                    "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
                     "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
                   }
                 ],
@@ -2159,9 +2181,9 @@
               "(apiKeyPrams: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.ValidateAPIKeyParams",
+                "section": "def-server.ValidateAPIKeyParams",
                 "text": "ValidateAPIKeyParams"
               },
               ") => Promise<boolean>"
@@ -2182,9 +2204,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.ValidateAPIKeyParams",
+                    "section": "def-server.ValidateAPIKeyParams",
                     "text": "ValidateAPIKeyParams"
                   }
                 ],
@@ -2209,25 +2231,25 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, params: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeysParams",
+                "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeyResult",
+                "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
@@ -2248,9 +2270,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2272,9 +2294,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.InvalidateAPIKeysParams",
+                    "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
@@ -2299,17 +2321,17 @@
               "(params: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeysParams",
+                "section": "def-server.InvalidateAPIKeysParams",
                 "text": "InvalidateAPIKeysParams"
               },
               ") => Promise<",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.InvalidateAPIKeyResult",
+                "section": "def-server.InvalidateAPIKeyResult",
                 "text": "InvalidateAPIKeyResult"
               },
               " | null>"
@@ -2330,9 +2352,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.InvalidateAPIKeysParams",
+                    "section": "def-server.InvalidateAPIKeysParams",
                     "text": "InvalidateAPIKeysParams"
                   }
                 ],
@@ -2405,9 +2427,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditEvent",
+            "section": "def-server.AuditEvent",
             "text": "AuditEvent"
           },
           " extends ",
@@ -2448,9 +2470,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditKibana",
+                "section": "def-server.AuditKibana",
                 "text": "AuditKibana"
               },
               " | undefined"
@@ -2471,9 +2493,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditHttp",
+                "section": "def-server.AuditHttp",
                 "text": "AuditHttp"
               },
               " | undefined"
@@ -2497,9 +2519,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditHttp",
+            "section": "def-server.AuditHttp",
             "text": "AuditHttp"
           },
           " extends ",
@@ -2521,9 +2543,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditRequest",
+                "section": "def-server.AuditRequest",
                 "text": "AuditRequest"
               },
               " | undefined"
@@ -2751,9 +2773,9 @@
               "(event: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditEvent",
+                "section": "def-server.AuditEvent",
                 "text": "AuditEvent"
               },
               " | undefined) => void"
@@ -2772,9 +2794,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.AuditEvent",
+                    "section": "def-server.AuditEvent",
                     "text": "AuditEvent"
                   },
                   " | undefined"
@@ -2815,9 +2837,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.AuditRequest",
+            "section": "def-server.AuditRequest",
             "text": "AuditRequest"
           },
           " extends { body?: { bytes?: number | undefined; content?: string | undefined; } | undefined; bytes?: number | undefined; id?: string | undefined; method?: string | undefined; mime_type?: string | undefined; referrer?: string | undefined; }"
@@ -2869,17 +2891,17 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -2897,9 +2919,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -2924,9 +2946,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuditLogger",
+                "section": "def-server.AuditLogger",
                 "text": "AuditLogger"
               }
             ],
@@ -3101,9 +3123,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.APIKeys",
+                "section": "def-server.APIKeys",
                 "text": "APIKeys"
               }
             ],
@@ -3122,9 +3144,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3151,9 +3173,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3191,9 +3213,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => boolean"
@@ -3212,9 +3234,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3276,9 +3298,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3305,9 +3327,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3329,9 +3351,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3358,9 +3380,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -3382,9 +3404,9 @@
               "(request: ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
@@ -3411,9 +3433,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -4336,17 +4358,17 @@
               "{ [x: string]: { elasticsearch: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.ElasticsearchPrivilegesType",
+                "section": "def-server.ElasticsearchPrivilegesType",
                 "text": "ElasticsearchPrivilegesType"
               },
               " & { [key: string]: unknown; }; kibana: ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.KibanaPrivilegesType",
+                "section": "def-server.KibanaPrivilegesType",
                 "text": "KibanaPrivilegesType"
               },
               "; }; }"
@@ -4627,9 +4649,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.GetDeprecationsContext",
+                "section": "def-server.GetDeprecationsContext",
                 "text": "GetDeprecationsContext"
               }
             ],
@@ -5010,9 +5032,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5174,9 +5196,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUserProfileServerPluginApi",
-                "section": "def-common.UserProfileRequiredPrivileges",
+                "section": "def-server.UserProfileRequiredPrivileges",
                 "text": "UserProfileRequiredPrivileges"
               },
               " | undefined"
@@ -5243,7 +5265,7 @@
         "signature": [
           "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
         ],
-        "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
+        "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5342,9 +5364,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -5371,9 +5393,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5396,9 +5418,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -5425,9 +5447,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5504,9 +5526,9 @@
           "(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) => ",
@@ -5533,9 +5555,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>"
@@ -5557,25 +5579,25 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateRestAPIKeyParams",
+            "section": "def-server.CreateRestAPIKeyParams",
             "text": "CreateRestAPIKeyParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateRestAPIKeyWithKibanaPrivilegesParams",
+            "section": "def-server.CreateRestAPIKeyWithKibanaPrivilegesParams",
             "text": "CreateRestAPIKeyWithKibanaPrivilegesParams"
           },
           " | ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.CreateCrossClusterAPIKeyParams",
+            "section": "def-server.CreateCrossClusterAPIKeyParams",
             "text": "CreateCrossClusterAPIKeyParams"
           }
         ],
@@ -5664,9 +5686,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreUserProfileServerPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-server.UserProfileService",
             "text": "UserProfileService"
           }
         ],
@@ -5720,9 +5742,9 @@
             "{ getCurrentUser: (request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
@@ -5891,14 +5913,6 @@
               "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
             },
             {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-            },
-            {
               "plugin": "serverlessSearch",
               "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
@@ -5917,18 +5931,6 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
               "plugin": "entityManager",
@@ -5951,8 +5953,16 @@
               "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
             },
             {
-              "plugin": "observabilityOnboarding",
-              "path": "x-pack/plugins/observability_solution/observability_onboarding/server/routes/flow/route.ts"
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
               "plugin": "synthetics",
@@ -6036,9 +6046,9 @@
           "signature": [
             {
               "pluginId": "@kbn/core-user-profile-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreUserProfileServerPluginApi",
-              "section": "def-common.UserProfileService",
+              "section": "def-server.UserProfileService",
               "text": "UserProfileService"
             }
           ],
@@ -6783,7 +6793,7 @@
         "tags": [],
         "label": "RawKibanaPrivileges",
         "description": [],
-        "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+        "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6797,7 +6807,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6809,9 +6819,15 @@
             "label": "features",
             "description": [],
             "signature": [
-              "RawKibanaFeaturePrivileges"
+              {
+                "pluginId": "@kbn/security-authorization-core",
+                "scope": "server",
+                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+                "section": "def-server.RawKibanaFeaturePrivileges",
+                "text": "RawKibanaFeaturePrivileges"
+              }
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6825,7 +6841,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6839,7 +6855,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7222,7 +7238,14 @@
             "label": "rules",
             "description": [],
             "signature": [
-              "{} | RoleMappingRule"
+              "{} | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
@@ -7234,6 +7257,162 @@
             "type": "Object",
             "tags": [],
             "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingAllRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingAllRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingAllRule.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingAnyRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingAnyRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingAnyRule.any",
+            "type": "Array",
+            "tags": [],
+            "label": "any",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingExceptRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingExceptRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingExceptRule.except",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "except",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingAnyRule",
+                "text": "RoleMappingAnyRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingAllRule",
+                "text": "RoleMappingAllRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingFieldRule",
+                "text": "RoleMappingFieldRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingExceptRule",
+                "text": "RoleMappingExceptRule"
+              }
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingFieldRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingFieldRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingFieldRule.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
             "description": [],
             "signature": [
               "{ [x: string]: any; }"
@@ -8204,6 +8383,51 @@
           "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
         ],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingRule",
+        "type": "Type",
+        "tags": [],
+        "label": "RoleMappingRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingAnyRule",
+            "text": "RoleMappingAnyRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingAllRule",
+            "text": "RoleMappingAllRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingFieldRule",
+            "text": "RoleMappingFieldRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingExceptRule",
+            "text": "RoleMappingExceptRule"
+          }
+        ],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

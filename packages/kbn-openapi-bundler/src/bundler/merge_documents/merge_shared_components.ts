@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -12,6 +13,7 @@ import { OpenAPIV3 } from 'openapi-types';
 import { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { extractObjectByJsonPointer } from '../../utils/extract_by_json_pointer';
 import { logger } from '../../logger';
+import { MergeOptions } from './merge_options';
 
 const MERGEABLE_COMPONENT_TYPES = [
   'schemas',
@@ -26,11 +28,16 @@ const MERGEABLE_COMPONENT_TYPES = [
 ] as const;
 
 export function mergeSharedComponents(
-  bundledDocuments: ResolvedDocument[]
+  bundledDocuments: ResolvedDocument[],
+  options: MergeOptions
 ): OpenAPIV3.ComponentsObject {
   const mergedComponents: Record<string, unknown> = {};
 
   for (const componentsType of MERGEABLE_COMPONENT_TYPES) {
+    if (options.skipSecurity && componentsType === 'securitySchemes') {
+      continue;
+    }
+
     const mergedTypedComponents = mergeObjects(bundledDocuments, `/components/${componentsType}`);
 
     if (Object.keys(mergedTypedComponents).length === 0) {

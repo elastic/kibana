@@ -36,7 +36,10 @@ const getLocalSession = (storage: Storage): PartialChatForm => {
   }
 };
 
-const setLocalSession = (state: PartialChatForm, storage: Storage) => {
+const setLocalSession = (formState: PartialChatForm, storage: Storage) => {
+  // omit question from the session state
+  const { question, ...state } = formState;
+
   storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
 };
 
@@ -44,7 +47,10 @@ interface FormProviderProps {
   storage?: Storage;
 }
 
-export const FormProvider: React.FC<FormProviderProps> = ({ children, storage = localStorage }) => {
+export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> = ({
+  children,
+  storage = localStorage,
+}) => {
   const models = useLLMsModels();
   const [searchParams] = useSearchParams();
   const index = useMemo(() => searchParams.get('default-index'), [searchParams]);

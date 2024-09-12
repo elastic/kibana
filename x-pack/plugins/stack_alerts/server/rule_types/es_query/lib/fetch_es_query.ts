@@ -13,10 +13,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { getComparatorScript } from '../../../../common';
 import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { getParsedQuery } from '../util';
+import { getParsedQuery, checkForShardFailures } from '../util';
 
 export interface FetchEsQueryOpts {
   ruleId: string;
@@ -28,6 +29,7 @@ export interface FetchEsQueryOpts {
   services: {
     scopedClusterClient: IScopedClusterClient;
     logger: Logger;
+    ruleResultService?: PublicRuleResultService;
   };
   alertLimit?: number;
   dateStart: string;
@@ -49,7 +51,7 @@ export async function fetchEsQuery({
   dateStart,
   dateEnd,
 }: FetchEsQueryOpts) {
-  const { scopedClusterClient, logger } = services;
+  const { scopedClusterClient, logger, ruleResultService } = services;
   const esClient = scopedClusterClient.asCurrentUser;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
@@ -120,6 +122,7 @@ export async function fetchEsQuery({
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     }),
   });
 
@@ -133,6 +136,14 @@ export async function fetchEsQuery({
     () =>
       ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
+
+  // result against CCS indices will return success response with errors nested within
+  // the _shards or _clusters field; look for these errors and bubble them up
+  const anyShardFailures = checkForShardFailures(searchResult);
+  if (anyShardFailures && ruleResultService) {
+    ruleResultService.addLastRunWarning(anyShardFailures);
+    ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
+  }
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
 

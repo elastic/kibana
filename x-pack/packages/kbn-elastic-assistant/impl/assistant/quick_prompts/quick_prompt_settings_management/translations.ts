@@ -20,13 +20,6 @@ export const QUICK_PROMPTS_TABLE_COLUMN_DATE_UPDATED = i18n.translate(
   }
 );
 
-export const QUICK_PROMPTS_TABLE_COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPromptsTable.quickPromptsTableColumnActions',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
 export const QUICK_PROMPTS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPromptsTable.description',
   {

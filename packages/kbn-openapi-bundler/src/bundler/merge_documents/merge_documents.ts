@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -17,8 +18,9 @@ import { mergeTags } from './merge_tags';
 import { getOasVersion } from '../../utils/get_oas_version';
 import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
 import { enrichWithVersionMimeParam } from './enrich_with_version_mime_param';
+import { MergeOptions } from './merge_options';
 
-export interface MergeDocumentsOptions {
+interface MergeDocumentsOptions extends MergeOptions {
   splitDocumentsByVersion: boolean;
 }
 
@@ -52,11 +54,25 @@ export async function mergeDocuments(
       ...documentsGroup,
     ];
 
-    mergedDocument.servers = mergeServers(documentsToMerge);
-    mergedDocument.paths = mergePaths(documentsToMerge);
-    mergedDocument.components = mergeSharedComponents(documentsToMerge);
-    mergedDocument.security = mergeSecurityRequirements(documentsToMerge);
-    mergedDocument.tags = mergeTags(documentsToMerge);
+    mergedDocument.paths = mergePaths(documentsToMerge, options);
+    mergedDocument.components = {
+      ...mergedDocument.components,
+      ...mergeSharedComponents(documentsToMerge, options),
+    };
+
+    if (!options.skipServers) {
+      mergedDocument.servers = mergeServers(documentsToMerge);
+    }
+
+    if (!options.skipSecurity) {
+      mergedDocument.security = mergeSecurityRequirements(documentsToMerge);
+    }
+
+    const mergedTags = [...(options.addTags ?? []), ...(mergeTags(documentsToMerge) ?? [])];
+
+    if (mergedTags.length) {
+      mergedDocument.tags = mergedTags;
+    }
 
     mergedByVersion.set(mergedDocument.info.version, mergedDocument);
   }

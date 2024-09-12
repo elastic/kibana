@@ -19,10 +19,10 @@ import {
   KillProcessRouteRequestSchema,
   SuspendProcessRouteRequestSchema,
   UploadActionRequestSchema,
+  ExecuteActionRequestSchema,
+  ScanActionRequestSchema,
+  NoParametersRequestSchema,
 } from '../../api/endpoint';
-import { NoParametersRequestSchema } from '../../api/endpoint/actions/common/base';
-import { ExecuteActionRequestSchema } from '../../api/endpoint/actions/execute_route';
-import { ScanActionRequestSchema } from '../../api/endpoint/actions/scan_route';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('actions schemas', () => {

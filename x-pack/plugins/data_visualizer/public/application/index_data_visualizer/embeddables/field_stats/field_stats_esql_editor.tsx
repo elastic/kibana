@@ -9,13 +9,11 @@ import { TextBasedLangEditor } from '@kbn/esql/public';
 import { EuiFlexItem } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 
-const expandCodeEditor = (status: boolean) => {};
-
 interface FieldStatsESQLEditorProps {
   canEditTextBasedQuery?: boolean;
   query: AggregateQuery;
   setQuery: (query: AggregateQuery) => void;
-  onQuerySubmit: (query: AggregateQuery, abortController: AbortController) => Promise<void>;
+  onQuerySubmit: (query: AggregateQuery, abortController?: AbortController) => Promise<void>;
 }
 export const FieldStatsESQLEditor = ({
   canEditTextBasedQuery = true,
@@ -27,7 +25,7 @@ export const FieldStatsESQLEditor = ({
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
 
   const onTextLangQuerySubmit = useCallback(
-    async (q, abortController) => {
+    async (q?: AggregateQuery, abortController?: AbortController) => {
       if (q && onQuerySubmit) {
         setIsVisualizationLoading(true);
         await onQuerySubmit(q, abortController);
@@ -47,9 +45,6 @@ export const FieldStatsESQLEditor = ({
           setQuery(q);
           prevQuery.current = q;
         }}
-        expandCodeEditor={expandCodeEditor}
-        isCodeEditorExpanded
-        hideMinimizeButton
         editorIsInline
         hideRunQueryText
         onTextLangQuerySubmit={onTextLangQuerySubmit}

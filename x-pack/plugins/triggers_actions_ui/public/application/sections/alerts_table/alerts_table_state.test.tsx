@@ -40,7 +40,7 @@ import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 
 jest.mock('@kbn/kibana-utils-plugin/public');
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query');
@@ -742,7 +742,7 @@ describe('AlertsTableState', () => {
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
       const wrapper = render(<TestComponent {...tableProps} />);
-      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
@@ -751,11 +751,11 @@ describe('AlertsTableState', () => {
       expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
 
       // Should paginate too
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
       expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
       expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
 
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
       expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
       expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
     });
@@ -770,13 +770,13 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
       mockUseSearchAlertsQuery.mockClear();
 
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 1,
@@ -785,7 +785,7 @@ describe('AlertsTableState', () => {
       );
 
       mockUseSearchAlertsQuery.mockClear();
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 0,
@@ -804,13 +804,13 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
       mockUseSearchAlertsQuery.mockClear();
 
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 1,
@@ -819,7 +819,7 @@ describe('AlertsTableState', () => {
       );
 
       mockUseSearchAlertsQuery.mockClear();
-      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
       expect(mockUseSearchAlertsQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           pageIndex: 0,

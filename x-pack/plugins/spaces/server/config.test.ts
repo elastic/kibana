@@ -21,6 +21,7 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
         "allowFeatureVisibility": true,
+        "allowSolutionVisibility": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -29,6 +30,7 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({}, { dev: false })).toMatchInlineSnapshot(`
       Object {
         "allowFeatureVisibility": true,
+        "allowSolutionVisibility": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -37,6 +39,7 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({}, { dev: true })).toMatchInlineSnapshot(`
       Object {
         "allowFeatureVisibility": true,
+        "allowSolutionVisibility": true,
         "enabled": true,
         "maxSpaces": 1000,
       }
@@ -61,19 +64,36 @@ describe('config schema', () => {
     expect(() => ConfigSchema.validate({ allowFeatureVisibility: false }, {})).toThrow();
   });
 
-  it('should not throw error if allowFeatureVisibility is disabled in serverless offering', () => {
+  it('should not throw error if allowFeatureVisibility and allowSolutionVisibility are disabled in serverless offering', () => {
     expect(() =>
-      ConfigSchema.validate({ allowFeatureVisibility: false }, { serverless: true })
+      ConfigSchema.validate(
+        { allowFeatureVisibility: false, allowSolutionVisibility: false },
+        { serverless: true }
+      )
     ).not.toThrow();
   });
 
-  it('should not throw error if allowFeatureVisibility is enabled in classic offering', () => {
-    expect(() => ConfigSchema.validate({ allowFeatureVisibility: true }, {})).not.toThrow();
+  it('should not throw error if allowFeatureVisibility and allowSolutionVisibility are enabled in classic offering', () => {
+    expect(() =>
+      ConfigSchema.validate({ allowFeatureVisibility: true, allowSolutionVisibility: true }, {})
+    ).not.toThrow();
   });
 
   it('should throw error if allowFeatureVisibility is enabled in serverless offering', () => {
     expect(() =>
-      ConfigSchema.validate({ allowFeatureVisibility: true }, { serverless: true })
+      ConfigSchema.validate(
+        { allowFeatureVisibility: true, allowSolutionVisibility: false },
+        { serverless: true }
+      )
+    ).toThrow();
+  });
+
+  it('should throw error if allowSolutionVisibility is enabled in serverless offering', () => {
+    expect(() =>
+      ConfigSchema.validate(
+        { allowSolutionVisibility: true, allowFeatureVisibility: false },
+        { serverless: true }
+      )
     ).toThrow();
   });
 });

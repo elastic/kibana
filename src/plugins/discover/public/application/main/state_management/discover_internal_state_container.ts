@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -24,6 +25,8 @@ export interface InternalState {
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
+  isESQLToDataViewTransitionModalVisible?: boolean;
+  resetDefaultProfileState: { columns: boolean; rowHeight: boolean };
 }
 
 export interface InternalStateTransitions {
@@ -48,6 +51,12 @@ export interface InternalStateTransitions {
     overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined
   ) => InternalState;
   resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
+  setIsESQLToDataViewTransitionModalVisible: (
+    state: InternalState
+  ) => (isVisible: boolean) => InternalState;
+  setResetDefaultProfileState: (
+    state: InternalState
+  ) => (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -68,6 +77,7 @@ export function getInternalStateContainer() {
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
+      resetDefaultProfileState: { columns: false, rowHeight: false },
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -80,6 +90,11 @@ export function getInternalStateContainer() {
         ...prevState,
         isDataViewLoading: loading,
       }),
+      setIsESQLToDataViewTransitionModalVisible:
+        (prevState: InternalState) => (isVisible: boolean) => ({
+          ...prevState,
+          isESQLToDataViewTransitionModalVisible: isVisible,
+        }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
         savedDataViews: nextDataViewList,
@@ -134,6 +149,12 @@ export function getInternalStateContainer() {
         overriddenVisContextAfterInvalidation: undefined,
         expandedDoc: undefined,
       }),
+      setResetDefaultProfileState:
+        (prevState: InternalState) =>
+        (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => ({
+          ...prevState,
+          resetDefaultProfileState,
+        }),
     },
     {},
     { freeze: (state) => state }

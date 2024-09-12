@@ -9,7 +9,7 @@ import type { EuiDataGridStyle } from '@elastic/eui';
 import { flattenHit } from '@kbn/data-service';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { GRID_STYLE } from '@kbn/unified-data-table/src/constants';
+import { DATA_GRID_STYLE_DEFAULT } from '@kbn/unified-data-table/src/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { getEventTypeRowClassName } from './data_table/get_event_type_row_classname';
 
@@ -56,5 +56,8 @@ export function transformTimelineItemToUnifiedRows(
     };
   });
 
-  return { tableRows: unifiedDataTableRows, tableStylesOverride: { ...GRID_STYLE, rowClasses } };
+  return {
+    tableRows: unifiedDataTableRows,
+    tableStylesOverride: { ...DATA_GRID_STYLE_DEFAULT, rowClasses },
+  };
 }

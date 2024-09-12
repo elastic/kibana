@@ -13,6 +13,7 @@ servers:
 paths:
   /api/asset_criticality:
     delete:
+      description: Delete the asset criticality record for a specific asset if it exists.
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -38,11 +39,29 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    description: >-
+                      True if the record was deleted or false if the record did
+                      not exist.
+                    type: boolean
+                  record:
+                    $ref: '#/components/schemas/AssetCriticalityRecord'
+                    description: The deleted record if it existed.
+                required:
+                  - deleted
           description: Successful response
         '400':
           description: Invalid request
       summary: Delete Criticality Record
+      tags:
+        - Security Solution Entity Analytics API
     get:
+      description: Get the criticality record for a specific asset.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -70,7 +89,10 @@ paths:
         '404':
           description: Criticality record not found
       summary: Get Criticality Record
+      tags:
+        - Security Solution Entity Analytics API
     post:
+      description: Create or update a criticality record for a specific asset.
       operationId: CreateAssetCriticalityRecord
       requestBody:
         content:
@@ -97,9 +119,14 @@ paths:
           description: Successful response
         '400':
           description: Invalid request
-      summary: Create Criticality Record
+      summary: Upsert Criticality Record
+      tags:
+        - Security Solution Entity Analytics API
   /api/asset_criticality/bulk:
     post:
+      description: >-
+        Bulk upsert up to 1000 asset criticality records, creating or updating
+        them as needed.
       operationId: BulkUpsertAssetCriticalityRecords
       requestBody:
         content:
@@ -150,11 +177,12 @@ paths:
           description: Bulk upload successful
         '413':
           description: File too large
-      summary: >-
-        Bulk upsert asset criticality data, creating or updating records as
-        needed
+      summary: Bulk Upsert Asset Criticality Records
+      tags:
+        - Security Solution Entity Analytics API
   /api/asset_criticality/list:
-    post:
+    get:
+      description: 'List asset criticality records, paging, sorting and filtering as needed.'
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -225,7 +253,37 @@ paths:
                   - per_page
                   - total
           description: Bulk upload successful
-      summary: 'List asset criticality data, filtering and sorting as needed'
+      summary: List Asset Criticality Records
+      tags:
+        - Security Solution Entity Analytics API
+  /api/risk_score/engine/schedule_now:
+    post:
+      operationId: ScheduleRiskEngineNow
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
+          description: Unexpected error
+      summary: Schedule the risk engine to run as soon as possible
+      tags:
+        - Security Solution Entity Analytics API
 components:
   schemas:
     AssetCriticalityBulkUploadErrorItem:
@@ -298,9 +356,39 @@ components:
         - host.name
         - user.name
       type: string
+    RiskEngineScheduleNowErrorResponse:
+      type: object
+      properties:
+        full_error:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+        - full_error
+    RiskEngineScheduleNowResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+    TaskManagerUnavailableResponse:
+      description: Task manager is unavailable
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          minimum: 400
+          type: integer
+      required:
+        - status_code
+        - message
   securitySchemes:
     BasicAuth:
       scheme: basic
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Solution Entity Analytics API

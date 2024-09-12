@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
@@ -62,53 +62,50 @@ export const DiscoverTabs: FC<Props> = ({
   query,
 }) => {
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} className="unifiedDataTableToolbar">
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>{renderViewModeToggle(data?.categories.length)}</EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {selectedCategories.length > 0 ? (
-                <EuiFlexItem>
-                  <SelectedPatterns openInDiscover={openInDiscover} />
-                </EuiFlexItem>
-              ) : null}
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {selectedCategories.length > 0 ? (
               <EuiFlexItem>
-                <SelectedField
-                  fields={fields}
-                  setSelectedField={setSelectedField}
-                  selectedField={selectedField}
-                />
+                <SelectedPatterns openInDiscover={openInDiscover} />
               </EuiFlexItem>
-              <EuiFlexItem>
-                <div className="unifiedDataTableToolbarControlGroup" css={{ marginRight: '8px' }}>
+            ) : null}
+            <EuiFlexItem>
+              <SelectedField
+                fields={fields}
+                setSelectedField={setSelectedField}
+                selectedField={selectedField}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div className="unifiedDataTableToolbarControlGroup" css={{ marginRight: '8px' }}>
+                <div className="unifiedDataTableToolbarControlIconButton">
+                  <EmbeddableMenu
+                    randomSampler={randomSampler}
+                    reload={() => loadCategories()}
+                    minimumTimeRangeOption={minimumTimeRangeOption}
+                    setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+                    categoryCount={data?.totalCategories}
+                  />
+                </div>
+                {selectedField !== null && earliest !== undefined && latest !== undefined ? (
                   <div className="unifiedDataTableToolbarControlIconButton">
-                    <EmbeddableMenu
-                      randomSampler={randomSampler}
-                      reload={() => loadCategories()}
-                      minimumTimeRangeOption={minimumTimeRangeOption}
-                      setMinimumTimeRangeOption={setMinimumTimeRangeOption}
-                      categoryCount={data?.totalCategories}
+                    <CreateCategorizationJobButton
+                      dataView={dataview}
+                      field={selectedField}
+                      query={query}
+                      earliest={earliest}
+                      latest={latest}
+                      iconOnly={true}
                     />
                   </div>
-                  {selectedField !== null && earliest !== undefined && latest !== undefined ? (
-                    <div className="unifiedDataTableToolbarControlIconButton">
-                      <CreateCategorizationJobButton
-                        dataView={dataview}
-                        field={selectedField}
-                        query={query}
-                        earliest={earliest}
-                        latest={latest}
-                        iconOnly={true}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+                ) : null}
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

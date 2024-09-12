@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ParserRuleContext, TerminalNode } from 'antlr4';
@@ -61,6 +62,7 @@ import {
   InputNamedOrPositionalParamContext,
   InputParamContext,
   IndexPatternContext,
+  InlinestatsCommandContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -84,7 +86,7 @@ import {
   createUnknownItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
-import type {
+import {
   ESQLLiteral,
   ESQLColumn,
   ESQLFunction,
@@ -289,7 +291,7 @@ function visitOperatorExpression(
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
     const fn = createFunction('*', ctx, undefined, 'binary-expression');
-    fn.args.push(createFakeMultiplyLiteral(ctx));
+    fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
     if (arg) {
       fn.args.push(arg);
     }
@@ -328,16 +330,21 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     // e.g. 1 year, 15 months
     return createTimeUnit(ctx);
   }
+
+  // Decimal type covers multiple ES|QL types: long, double, etc.
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue());
+    return createNumericLiteral(ctx.decimalValue(), 'decimal');
   }
+
+  // Integer type encompasses integer
   if (ctx instanceof IntegerLiteralContext) {
-    return createNumericLiteral(ctx.integerValue());
+    return createNumericLiteral(ctx.integerValue(), 'integer');
   }
   if (ctx instanceof BooleanLiteralContext) {
     return getBooleanValue(ctx);
   }
   if (ctx instanceof StringLiteralContext) {
+    // String literal covers multiple ES|QL types: text and keyword types
     return createLiteral('string', ctx.string_().QUOTED_STRING());
   }
   if (
@@ -346,14 +353,18 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     ctx instanceof StringArrayLiteralContext
   ) {
     const values: ESQLLiteral[] = [];
+
     for (const numericValue of ctx.getTypedRuleContexts(NumericValueContext)) {
+      const isDecimal =
+        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!));
+      values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
+      // String literal covers multiple ES|QL types: text and keyword types
       const literal = createLiteral('string', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);
@@ -585,7 +596,10 @@ export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[]
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+export function visitByOption(
+  ctx: StatsCommandContext | InlinestatsCommandContext,
+  expr: FieldsContext | undefined
+) {
   if (!ctx.BY() || !expr) {
     return [];
   }

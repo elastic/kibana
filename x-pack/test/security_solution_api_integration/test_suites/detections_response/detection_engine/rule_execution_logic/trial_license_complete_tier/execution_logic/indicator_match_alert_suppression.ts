@@ -158,7 +158,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('@ess @serverless @serverlessQA Indicator match type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -2564,7 +2565,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('with asset criticality', async () => {
+        describe('with asset criticality', () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
             await kibanaServer.uiSettings.update({

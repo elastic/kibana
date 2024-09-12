@@ -10,8 +10,10 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink, useStartServices } from '../hooks';
 import { policyHasFleetServer } from '../services';
+
+import { PLUGIN_ID, pagePathGetters } from '../constants';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -36,6 +38,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const authz = useAuthz();
+  const {
+    application: { navigateToApp },
+  } = useStartServices();
 
   const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
@@ -47,6 +52,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
+  const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
 
   const isAddAgentVisible = showAddAgent && agentPolicy && !agentPolicyIsManaged;
 
@@ -87,12 +93,18 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies || !agentPolicy}
+      disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
       icon="pencil"
-      href={`${getHref('edit_integration', {
-        policyId: agentPolicy?.id ?? '',
-        packagePolicyId: packagePolicy.id,
-      })}${from ? `?from=${from}` : ''}`}
+      href={`${
+        isOrphanedPolicy
+          ? getHref('integration_policy_edit', {
+              packagePolicyId: packagePolicy.id,
+            })
+          : getHref('edit_integration', {
+              policyId: agentPolicy?.id ?? '',
+              packagePolicyId: packagePolicy.id,
+            })
+      }${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
     >
       <FormattedMessage
@@ -123,7 +135,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy || !agentPolicyIsManaged) {
+  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
     const ContextMenuItem = canWriteIntegrationPolicies
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;
@@ -138,7 +150,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {
                   setIsActionsMenuOpen(false);
-                  refreshAgentPolicy();
+                  if (agentPolicy?.supports_agentless) {
+                    // go back to all agent policies
+                    navigateToApp(PLUGIN_ID, { path: pagePathGetters.policies_list()[1] });
+                  } else {
+                    refreshAgentPolicy();
+                  }
                 });
               }}
             >

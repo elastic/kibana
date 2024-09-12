@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -11,12 +12,15 @@
  */
 
 import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
-import type {
-  ArithmeticUnaryContext,
-  DecimalValueContext,
-  InlineCastContext,
-  IntegerValueContext,
-  QualifiedIntegerLiteralContext,
+import {
+  IndexPatternContext,
+  QualifiedNameContext,
+  type ArithmeticUnaryContext,
+  type DecimalValueContext,
+  type InlineCastContext,
+  type IntegerValueContext,
+  type QualifiedIntegerLiteralContext,
+  QualifiedNamePatternContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
@@ -35,8 +39,11 @@ import type {
   ESQLCommandMode,
   ESQLInlineCast,
   ESQLUnknownItem,
+  ESQLNumericLiteralType,
   FunctionSubtype,
+  ESQLNumericLiteral,
 } from './types';
+import { parseIdentifier } from './parser/helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -87,11 +94,14 @@ export function createList(ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLL
   };
 }
 
-export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueContext): ESQLLiteral {
+export function createNumericLiteral(
+  ctx: DecimalValueContext | IntegerValueContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   const text = ctx.getText();
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text,
     name: text,
     value: Number(text),
@@ -100,10 +110,13 @@ export function createNumericLiteral(ctx: DecimalValueContext | IntegerValueCont
   };
 }
 
-export function createFakeMultiplyLiteral(ctx: ArithmeticUnaryContext): ESQLLiteral {
+export function createFakeMultiplyLiteral(
+  ctx: ArithmeticUnaryContext,
+  literalType: ESQLNumericLiteralType
+): ESQLLiteral {
   return {
     type: 'literal',
-    literalType: 'number',
+    literalType,
     text: ctx.getText(),
     name: ctx.getText(),
     value: ctx.PLUS() ? 1 : -1,
@@ -158,12 +171,13 @@ export function createLiteral(
     location: getPosition(node.symbol),
     incomplete: isMissingText(text),
   };
-  if (type === 'number') {
+  if (type === 'decimal' || type === 'integer') {
     return {
       ...partialLiteral,
       literalType: type,
       value: Number(text),
-    };
+      paramType: 'number',
+    } as ESQLNumericLiteral<'decimal'> | ESQLNumericLiteral<'integer'>;
   } else if (type === 'param') {
     throw new Error('Should never happen');
   }
@@ -171,7 +185,7 @@ export function createLiteral(
     ...partialLiteral,
     literalType: type,
     value: text,
-  };
+  } as ESQLLiteral;
 }
 
 export function createTimeUnit(ctx: QualifiedIntegerLiteralContext): ESQLTimeInterval {
@@ -256,13 +270,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [27 /* esql_parser.QUOTED_STRING */, 68 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [67 /* esql_parser.UNQUOTED_IDENTIFIER */, 73 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
+  return [68 /* esql_parser.UNQUOTED_IDENTIFIER */, 77 /* esql_parser.UNQUOTED_SOURCE */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
@@ -293,6 +307,34 @@ function sanitizeSourceString(ctx: ParserRuleContext) {
   }
   return contextText;
 }
+
+const unquoteIndexString = (indexString: string): string => {
+  const isStringQuoted = indexString[0] === '"';
+
+  if (!isStringQuoted) {
+    return indexString;
+  }
+
+  // If wrapped by triple double quotes, simply remove them.
+  if (indexString.startsWith(`"""`) && indexString.endsWith(`"""`)) {
+    return indexString.slice(3, -3);
+  }
+
+  // If wrapped by double quote, remove them and unescape the string.
+  if (indexString[indexString.length - 1] === '"') {
+    indexString = indexString.slice(1, -1);
+    indexString = indexString
+      .replace(/\\"/g, '"')
+      .replace(/\\r/g, '\r')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
+    return indexString;
+  }
+
+  // This should never happen, but if it does, return the original string.
+  return indexString;
+};
 
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
@@ -340,8 +382,27 @@ export function createSource(
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
+
+  let cluster: string = '';
+  let index: string = '';
+
+  if (ctx instanceof IndexPatternContext) {
+    const clusterString = ctx.clusterString();
+    const indexString = ctx.indexString();
+
+    if (clusterString) {
+      cluster = clusterString.getText();
+    }
+    if (indexString) {
+      index = indexString.getText();
+      index = unquoteIndexString(index);
+    }
+  }
+
   return {
     type: 'source',
+    cluster,
+    index,
     name: text,
     sourceType: type,
     text,
@@ -351,10 +412,13 @@ export function createSource(
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
+  const text = ctx.getText();
+
   return {
     type: 'column',
-    name: ctx.getText(),
-    text: ctx.getText(),
+    name: text,
+    parts: [text],
+    text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.getText() === '',
     quoted: false,
@@ -362,11 +426,22 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
+  const parts: string[] = [];
+  if (ctx instanceof QualifiedNamePatternContext) {
+    parts.push(
+      ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
+  } else if (ctx instanceof QualifiedNameContext) {
+    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+  } else {
+    parts.push(sanitizeIdentifierString(ctx));
+  }
   const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
     name: text,
+    parts,
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),

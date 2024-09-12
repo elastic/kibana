@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   IRouter,
 } from '@kbn/core/server';
+import type { GetSpaceResult } from '@kbn/spaces-plugin/common';
 
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
@@ -43,6 +44,7 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
     readonly internalSoClient: SavedObjectsClientContract;
 
     spaceId: string;
+    getAllSpaces(): Promise<GetSpaceResult[]>;
     /**
      * If data is to be limited to the list of integration package names. This will be set when
      * authz to the API was granted only based on Package Privileges.

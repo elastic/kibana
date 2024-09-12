@@ -6,19 +6,25 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getEntityHistoryIndexTemplateV1 } from '../../../../common/helpers';
+import {
+  ENTITY_HISTORY,
+  EntityDefinition,
+  entitiesIndexPattern,
+  entitiesAliasPattern,
+  ENTITY_SCHEMA_VERSION_V1,
+} from '@kbn/entities-schema';
+import { generateHistoryIndexTemplateId } from '../helpers/generate_component_id';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
   ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
-  ENTITY_HISTORY_INDEX_PREFIX_V1,
 } from '../../../../common/constants_entities';
 import { getCustomHistoryTemplateComponents } from '../../../templates/components/helpers';
 
-export const getEntitiesHistoryIndexTemplateConfig = (
-  definitionId: string
+export const generateEntitiesHistoryIndexTemplateConfig = (
+  definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getEntityHistoryIndexTemplateV1(definitionId),
+  name: generateHistoryIndexTemplateId(definition),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the history dataset",
@@ -26,16 +32,25 @@ export const getEntitiesHistoryIndexTemplateConfig = (
     managed: true,
     managed_by: 'elastic_entity_model',
   },
-  ignore_missing_component_templates: getCustomHistoryTemplateComponents(definitionId),
+  ignore_missing_component_templates: getCustomHistoryTemplateComponents(definition),
   composed_of: [
     ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-    ...getCustomHistoryTemplateComponents(definitionId),
+    ...getCustomHistoryTemplateComponents(definition),
   ],
-  index_patterns: [`${ENTITY_HISTORY_INDEX_PREFIX_V1}.${definitionId}.*`],
+  index_patterns: [
+    `${entitiesIndexPattern({
+      schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+      dataset: ENTITY_HISTORY,
+      definitionId: definition.id,
+    })}.*`,
+  ],
   priority: 200,
   template: {
+    aliases: {
+      [entitiesAliasPattern({ type: definition.type, dataset: ENTITY_HISTORY })]: {},
+    },
     mappings: {
       _meta: {
         version: '1.6.0',

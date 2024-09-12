@@ -1,56 +1,111 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
-export const supportedFieldTypes = [
-  'number',
-  'date',
-  'string',
+/**
+ * All supported field types in ES|QL. This is all the types
+ * that can come back in the table from a query.
+ */
+export const fieldTypes = [
   'boolean',
+  'date',
+  'double',
   'ip',
+  'keyword',
+  'integer',
+  'long',
+  'text',
+  'unsigned_long',
+  'version',
   'cartesian_point',
   'cartesian_shape',
   'geo_point',
   'geo_shape',
-  'version',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
+  'unsupported',
+  'date_nanos',
 ] as const;
 
-export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
-  supportedFieldTypes.includes(type as SupportedFieldType);
+export type FieldType = (typeof fieldTypes)[number];
 
-export type SupportedFieldType = (typeof supportedFieldTypes)[number];
+export const isFieldType = (type: string | FunctionParameterType): type is FieldType =>
+  fieldTypes.includes(type as FieldType);
 
-export type FunctionParameterType =
-  | SupportedFieldType
-  | 'null'
-  | 'any'
-  | 'chrono_literal'
-  | 'time_literal'
-  | 'number[]'
-  | 'string[]'
-  | 'boolean[]'
-  | 'any[]'
-  | 'date[]';
+/**
+ * This is the list of all data types that are supported in ES|QL.
+ *
+ * Not all of these can be used as field types. Some can only be literals,
+ * others may be the value of a field, but cannot be used in the index mapping.
+ *
+ * This is a partial list. The full list is here and we may need to expand this type as
+ * the capabilities of the client-side engines grow.
+ * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
+ */
+export const dataTypes = [
+  ...fieldTypes,
+  'null',
+  'time_literal', // @TODO consider merging time_literal with time_duration
+  'time_duration',
+  'date_period',
+] as const;
 
-export type FunctionReturnType =
-  | 'number'
-  | 'date'
-  | 'any'
-  | 'boolean'
-  | 'string'
-  | 'cartesian_point'
-  | 'cartesian_shape'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'ip'
-  | 'version'
-  | 'void';
+export type SupportedDataType = (typeof dataTypes)[number];
+
+export const isSupportedDataType = (
+  type: string | FunctionParameterType
+): type is SupportedDataType => dataTypes.includes(type as SupportedDataType);
+
+/**
+ * This is a set of array types. These aren't official ES|QL types, but they are
+ * currently used in the function definitions in a couple of specific scenarios.
+ *
+ * The fate of these is uncertain. They may be removed in the future.
+ */
+const arrayTypes = [
+  'double[]',
+  'unsigned_long[]',
+  'long[]',
+  'integer[]',
+  'counter_integer[]',
+  'counter_long[]',
+  'counter_double[]',
+  'keyword[]',
+  'text[]',
+  'boolean[]',
+  'any[]',
+  'date[]',
+  'date_period[]',
+] as const;
+
+export type ArrayType = (typeof arrayTypes)[number];
+
+/**
+ * This is the type of a parameter in a function definition.
+ */
+export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+
+export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
+  typeof str !== undefined &&
+  str !== 'unsupported' &&
+  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
+
+/**
+ * This is the return type of a function definition.
+ */
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
+
+export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
+  str !== 'unsupported' &&
+  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
@@ -65,7 +120,6 @@ export interface FunctionDefinition {
       name: string;
       type: FunctionParameterType;
       optional?: boolean;
-      noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
       /**
        * If set, this parameter does not accept a field. It only accepts a constant,
@@ -82,7 +136,7 @@ export interface FunctionDefinition {
        * we can't check the return value of a function to see if it
        * matches one of the options prior to runtime.
        */
-      literalOptions?: string[];
+      acceptedValues?: string[];
       /**
        * Must only be included _in addition to_ literalOptions.
        *
@@ -106,15 +160,19 @@ export interface CommandBaseDefinition {
   name: string;
   alias?: string;
   description: string;
+  /**
+   * Whether to show or hide in autocomplete suggestion list
+   */
+  hidden?: boolean;
   signature: {
     multipleParams: boolean;
-    // innerType here is useful to drill down the type in case of "column"
+    // innerTypes here is useful to drill down the type in case of "column"
     // i.e. column of type string
     params: Array<{
       name: string;
       type: string;
       optional?: boolean;
-      innerType?: string;
+      innerTypes?: string[];
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;

@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { CspFinding } from '../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { isArray } from 'lodash';
 import { http, HttpResponse } from 'msw';
 import { v4 as uuidV4 } from 'uuid';
@@ -131,6 +131,9 @@ export const generateCspFinding = (
       category: ['configuration'],
       dataset: 'cloud_security_posture.findings',
       outcome: 'success',
+    },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
     },
   };
 };
