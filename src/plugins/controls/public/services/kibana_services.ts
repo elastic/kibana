@@ -25,6 +25,8 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: ControlsPluginSta
   coreServices = kibanaCore;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
+
+  servicesReady$.next(true);
 };
 
 export const untilPluginStartServicesReady = () => {
