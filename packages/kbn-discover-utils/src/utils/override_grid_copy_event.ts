@@ -93,14 +93,15 @@ export function overrideGridCopyEvent({ event, dataGridWrapper }: OverrideGridCo
 function getCellTextContent(cell: Element) {
   const cellCloned = cell.cloneNode(true) as HTMLElement;
 
-  // Logs Explorer
-  dropBySelector(cellCloned, 'svg');
+  // remove from the grid
   dropBySelector(cellCloned, '.euiIcon');
+  dropBySelector(cellCloned, '.euiToken');
+  dropBySelector(cellCloned, '.euiToolTipAnchor');
+  dropBySelector(cellCloned, 'svg');
+
+  // Logs Explorer
   appendTextToSelector(cellCloned, '[data-test-subj*="dataTablePopoverChip_"]', ', ', true);
   appendTextToSelector(cellCloned, '[data-test-subj*="logLevelBadge-"]', ': ');
-
-  // remove field tokens so field types don't get copied
-  dropBySelector(cellCloned, '.kbnFieldIcon');
 
   // for Document column
   appendTextToSelector(cellCloned, '.unifiedDataTable__descriptionListTitle', ': ');
@@ -109,9 +110,6 @@ function getCellTextContent(cell: Element) {
   // a field value can be formatted as an image or audio => replace it with the src
   replaceWithSrcTextNode(cellCloned, 'img');
   replaceWithSrcTextNode(cellCloned, 'audio');
-
-  // remove from the grid
-  dropBySelector(cellCloned, '.euiToolTipAnchor');
 
   return (cellCloned.textContent || '').trim();
 }
