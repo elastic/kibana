@@ -163,12 +163,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label for a button that enters fullscreen view',
       }
     ),
-    'euiCollapsedItemActions.allActions': i18n.translate(
-      'core.euiCollapsedItemActions.allActions',
+    'euiCollapsedItemActions.allActions': ({ index }: EuiValues) =>
+      i18n.translate('core.euiCollapsedItemActions.allActions', {
+        defaultMessage: 'All actions, row {index}',
+        values: { index },
+        description:
+          'ARIA label for a button that is rendered on multiple table rows, that expands an actions menu',
+      }),
+    'euiCollapsedItemActions.allActionsTooltip': i18n.translate(
+      'core.euiCollapsedItemActions.allActionsTooltip',
       {
         defaultMessage: 'All actions',
-        description:
-          'ARIA label and tooltip content describing a button that expands an actions menu',
+        description: 'Tooltip content describing a button that expands an actions menu',
       }
     ),
     'euiCollapsedItemActions.allActionsDisabled': i18n.translate(
@@ -249,6 +255,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
       i18n.translate('core.euiColumnActions.sort', {
         defaultMessage: 'Sort {schemaLabel}',
+        values: { schemaLabel },
+      }),
+    'euiColumnActions.unsort': ({ schemaLabel }: EuiValues) =>
+      i18n.translate('core.euiColumnActions.unsort', {
+        defaultMessage: 'Unsort {schemaLabel}',
         values: { schemaLabel },
       }),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
@@ -529,10 +540,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGridCell.position': ({ columnId, row, col }: EuiValues) =>
+    'euiDataGridCell.position': ({ columnName, columnIndex, rowIndex }: EuiValues) =>
       i18n.translate('core.euiDataGridCell.position', {
-        defaultMessage: '{columnId}, column {col}, row {row}',
-        values: { columnId, row, col },
+        defaultMessage: '{columnName}, column {columnIndex}, row {rowIndex}',
+        values: { columnName, columnIndex, rowIndex },
       }),
     'euiDataGridCell.expansionEnterPrompt': i18n.translate(
       'core.euiDataGridCell.expansionEnterPrompt',
