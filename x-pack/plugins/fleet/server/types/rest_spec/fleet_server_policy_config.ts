@@ -28,7 +28,13 @@ export const GetOneFleetServerHostRequestSchema = {
 
 export const PutFleetServerHostRequestSchema = {
   params: schema.object({ itemId: schema.string() }),
-  body: FleetServerHostSchema,
+  body: schema.object({
+    name: schema.maybe(schema.string()),
+    host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+    is_default: schema.maybe(schema.boolean({ defaultValue: false })),
+    is_internal: schema.maybe(schema.boolean()),
+    proxy_id: schema.nullable(schema.string()),
+  }),
 };
 
 export const GetAllFleetServerHostRequestSchema = {};
