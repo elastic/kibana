@@ -135,6 +135,17 @@ describe('PackagePolicyActionsMenu', () => {
     });
   });
 
+  it('Should not enable upgrade button if package has upgrade and agentless policy is enabled', async () => {
+    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+    await act(async () => {
+      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
+      expect(upgradeButton).toBeDisabled();
+    });
+  });
+
   it('Should not be able to delete integration from a managed policy', async () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: true });
     const packagePolicy = createMockPackagePolicy();
@@ -173,6 +184,15 @@ describe('PackagePolicyActionsMenu', () => {
 
   it('Should not show add button if the policy is managed and showAddAgent=true', async () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
+    await act(async () => {
+      expect(utils.queryByText('Add agent')).toBeNull();
+    });
+  });
+
+  it('Should not show add button if the policy is agentless and showAddAgent=true', async () => {
+    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
     await act(async () => {

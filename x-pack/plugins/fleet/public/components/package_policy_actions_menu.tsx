@@ -49,7 +49,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
 
-  const isAddAgentVisible = showAddAgent && agentPolicy && !agentPolicyIsManaged;
+  const isAddAgentVisible =
+    showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -110,7 +111,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsUpgradeItem"
       disabled={
-        !packagePolicy.hasUpgrade || !canWriteIntegrationPolicies || !upgradePackagePolicyHref
+        !packagePolicy.hasUpgrade ||
+        !canWriteIntegrationPolicies ||
+        !upgradePackagePolicyHref ||
+        agentPolicy?.supports_agentless === true
       }
       icon="refresh"
       href={upgradePackagePolicyHref}
