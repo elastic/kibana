@@ -65,7 +65,7 @@ async function runUpgradeManagedPackagePoliciesTask(
     scope: ['fleet'],
     params: { packageName: pkgName },
     taskType: TASK_TYPE,
-    runAt: new Date(Date.now() + 10 * 1000),
+    runAt: new Date(Date.now() + 3 * 1000),
     state: {},
   });
 }
