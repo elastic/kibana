@@ -10,77 +10,78 @@
 import { ROWS_HEIGHT_OPTIONS, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import { getAvailableResourceFields } from '../../../utils/get_available_resource_fields';
 import {
   DataGridCellServicesProviderProps,
   DataGridCellServicesProvider,
-} from '../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
+} from '../../../../application/main/hooks/grid_customisations/use_data_grid_cell_services';
 import {
   Resource,
   StaticResource,
   createResourceFields,
-} from '../../discover_grid/virtual_columns/logs/resource';
+} from '../../../discover_grid/virtual_columns/logs/resource';
 import {
   Content,
   formatJsonDocumentForContent,
-} from '../../discover_grid/virtual_columns/logs/content';
-import * as constants from '../../../../common/data_types/logs/constants';
-import { contentLabel, documentLabel, resourceLabel } from './translations';
+} from '../../../discover_grid/virtual_columns/logs/content';
+import { contentLabel, documentLabel, resourceLabel } from '../translations';
 
-type SummaryColumnProps = DataGridCellValueElementProps;
+export type SummaryColumnProps = DataGridCellValueElementProps;
 
-interface SummaryColumnsGridParams {
+export interface SummaryColumnsGridParams {
   rowHeight: number | undefined;
 }
 
-export const getSummaryColumn =
-  ({ data, params }: { data: DataPublicPluginStart; params: SummaryColumnsGridParams }) =>
-  (props: SummaryColumnProps) => {
-    const { isDetails, dataView } = props;
-    const virtualColumnServices = { data, dataView };
+const SummaryColumn = (
+  props: SummaryColumnProps & { data: DataPublicPluginStart; params: SummaryColumnsGridParams }
+) => {
+  const { isDetails, dataView, data, params } = props;
+  const dataGridCellServices = { data, dataView };
 
-    const rowHeight = params.rowHeight ?? ROWS_HEIGHT_OPTIONS.single;
-    const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
-    const shouldCenter =
-      rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
+  if (isDetails) {
+    return <SummaryCellPopover {...props} services={dataGridCellServices} />;
+  }
 
-    if (isDetails) {
-      return <SummaryPopover {...props} services={virtualColumnServices} />;
-    }
+  return <SummaryCell {...props} {...params} services={dataGridCellServices} />;
+};
 
-    return (
-      <DataGridCellServicesProvider services={virtualColumnServices}>
-        <EuiFlexGroup
-          gutterSize="s"
-          wrap={!isSingleLine}
-          style={{ height: '100%' }}
-          {...(shouldCenter && { alignItems: 'center' })}
-        >
-          <EuiFlexItem grow={false}>
-            <Resource
-              limited={isSingleLine}
-              {...(shouldCenter && { alignItems: 'center' })}
-              {...props}
-            />
-          </EuiFlexItem>
-          <Content {...props} isSingleLine={isSingleLine} />
-        </EuiFlexGroup>
-      </DataGridCellServicesProvider>
-    );
-  };
+// eslint-disable-next-line import/no-default-export
+export default SummaryColumn;
 
-const SummaryPopover = (props: SummaryColumnProps & DataGridCellServicesProviderProps) => {
+const SummaryCell = ({
+  rowHeight: maybeNullishRowHeight,
+  services,
+  ...props
+}: SummaryColumnProps & SummaryColumnsGridParams & DataGridCellServicesProviderProps) => {
+  const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
+  const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
+  const shouldCenter =
+    rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === ROWS_HEIGHT_OPTIONS.auto;
+
+  return (
+    <DataGridCellServicesProvider services={services}>
+      <EuiFlexGroup
+        gutterSize="s"
+        wrap={!isSingleLine}
+        style={{ height: '100%' }}
+        {...(shouldCenter && { alignItems: 'center' })}
+      >
+        <EuiFlexItem grow={false}>
+          <Resource
+            limited={isSingleLine}
+            {...(shouldCenter && { alignItems: 'center' })}
+            {...props}
+          />
+        </EuiFlexItem>
+        <Content {...props} isSingleLine={isSingleLine} />
+      </EuiFlexGroup>
+    </DataGridCellServicesProvider>
+  );
+};
+
+const SummaryCellPopover = (props: SummaryColumnProps & DataGridCellServicesProviderProps) => {
   const { row, dataView, fieldFormats, services } = props;
 
   const resourceFields = createResourceFields(row);

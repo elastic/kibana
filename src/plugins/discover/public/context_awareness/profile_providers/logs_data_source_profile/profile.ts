@@ -22,6 +22,7 @@ export const createLogsDataSourceProfileProvider = (
     getRowIndicatorProvider,
     getCellRenderers: makeGetCellRenderersHandler(services),
     getRowAdditionalLeadingControls,
+    getAdditionalCellActions: (context) => () => [],
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
