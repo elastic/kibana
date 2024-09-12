@@ -5354,6 +5354,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inventory-plugin@link:x-pack/plugins/observability_solution/inventory":
+  version "0.0.0"
+  uid ""
+
 "@kbn/investigate-app-plugin@link:x-pack/plugins/observability_solution/investigate_app":
   version "0.0.0"
   uid ""
@@ -6767,6 +6771,18 @@
   uid ""
 
 "@kbn/spec-to-console@link:packages/kbn-spec-to-console":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sse-utils-client@link:packages/kbn-sse-utils-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sse-utils-server@link:packages/kbn-sse-utils-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sse-utils@link:packages/kbn-sse-utils":
   version "0.0.0"
   uid ""
 
