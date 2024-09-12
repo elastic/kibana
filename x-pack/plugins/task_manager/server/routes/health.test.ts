@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom, of, Subject } from 'rxjs';
+import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
@@ -87,6 +87,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [config] = router.get.mock.calls[0];
@@ -111,6 +112,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -153,6 +155,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -200,6 +203,7 @@ describe('healthRoute', () => {
       getClusterClient: () => Promise.resolve(mockClusterClient),
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -242,6 +246,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     stats$.next(mockStat);
@@ -319,6 +324,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -421,6 +427,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -509,6 +516,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -602,6 +610,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -683,6 +692,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
     const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
@@ -782,6 +792,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: false,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
     const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
