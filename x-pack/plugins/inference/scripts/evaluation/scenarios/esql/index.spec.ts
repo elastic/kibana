@@ -192,7 +192,7 @@ const buildTestDefinitions = (): Section[] => {
         {
           title: 'Generates a query to show employees filtered by name and grouped by hire_date',
           question: `From the employees index, I want to see how many employees with a "B" in their first name
-      where hired each month over the past 2 years.
+      were hired each month over the past 2 years.
       Assume the following fields:
       - hire_date
       - first_name
