@@ -39,7 +39,13 @@ interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
+/**
+ * Options for the `getProfiles` method
+ */
 export interface GetProfilesOptions {
+  /**
+   * The data table record to use for the document profile
+   */
   record?: DataTableRecord;
 }
 
@@ -61,6 +67,10 @@ export class ProfilesManager {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
   }
 
+  /**
+   * Resolves the root context profile
+   * @param params The root profile provider parameters
+   */
   public async resolveRootProfile(params: RootProfileProviderParams) {
     const serializedParams = serializeRootProfileParams(params);
 
@@ -88,6 +98,10 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
   }
 
+  /**
+   * Resolves the data source context profile
+   * @param params The data source profile provider parameters
+   */
   public async resolveDataSourceProfile(
     params: Omit<DataSourceProfileProviderParams, 'rootContext'>
   ) {
@@ -120,6 +134,11 @@ export class ProfilesManager {
     this.prevDataSourceProfileParams = serializedParams;
   }
 
+  /**
+   * Resolves the document context profile for a given data table record
+   * @param params The document profile provider parameters
+   * @returns The data table record with a resolved document context
+   */
   public resolveDocumentProfile(
     params: Omit<DocumentProfileProviderParams, 'rootContext' | 'dataSourceContext'>
   ) {
@@ -150,6 +169,11 @@ export class ProfilesManager {
     });
   }
 
+  /**
+   * Retrieves an array of the active profiles
+   * @param options Options for getting the profiles
+   * @returns The active profiles
+   */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
       this.rootProfileService.getProfile(this.rootContext$.getValue()),
@@ -160,6 +184,11 @@ export class ProfilesManager {
     ];
   }
 
+  /**
+   * Retrieves an observable of the active profiles that emits when the profiles change
+   * @param options Options for getting the profiles
+   * @returns The active profiles as an observable
+   */
   public getProfiles$(options: GetProfilesOptions = {}) {
     return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))

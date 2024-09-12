@@ -24,18 +24,31 @@ import {
   ProfileProviderServices,
 } from './profile_provider_services';
 
+/**
+ * Register profile providers for root, data source, and document contexts to the profile profile services
+ * @param options Register profile provider options
+ */
 export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
 }: {
+  /**
+   * Root profile service
+   */
   rootProfileService: RootProfileService;
+  /**
+   * Data source profile service
+   */
   dataSourceProfileService: DataSourceProfileService;
+  /**
+   * Document profile service
+   */
   documentProfileService: DocumentProfileService;
   /**
-   * List of experimental profile Ids which are enabled in kibana config.
-   * */
+   * Array of experimental profile IDs which are enabled in `kibana.yml`
+   */
   enabledExperimentalProfileIds: string[];
 }) => {
   const providerServices = createProfileProviderServices();
@@ -62,6 +75,10 @@ export const registerProfileProviders = ({
   });
 };
 
+/**
+ * Register enabled profile providers to the provided profile service
+ * @param options Register enabled profile providers options
+ */
 export const registerEnabledProfileProviders = <
   TProvider extends BaseProfileProvider<{}>,
   TService extends BaseProfileService<TProvider, {}>
@@ -70,11 +87,17 @@ export const registerEnabledProfileProviders = <
   providers: availableProviders,
   enabledExperimentalProfileIds = [],
 }: {
+  /**
+   * Profile service to register providers
+   */
   profileService: TService;
+  /**
+   * Array of available profile providers
+   */
   providers: TProvider[];
   /**
-   * List of experimental profile Ids which are enabled in kibana config.
-   * */
+   * Array of experimental profile IDs which are enabled in `kibana.yml`
+   */
   enabledExperimentalProfileIds?: string[];
 }) => {
   for (const provider of availableProviders) {
@@ -84,16 +107,31 @@ export const registerEnabledProfileProviders = <
   }
 };
 
+/**
+ * Creates the available root profile providers
+ * @param providerServices The profile provider services
+ * @returns An array of available root profile providers
+ */
 const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
 ];
 
+/**
+ * Creates the available data source profile providers
+ * @param providerServices The profile provider services
+ * @returns An array of available data source profile providers
+ */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
   ...createLogsDataSourceProfileProviders(providerServices),
 ];
 
+/**
+ * Creates the available document profile providers
+ * @param providerServices The profile provider services
+ * @returns An array of available document profile providers
+ */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
   createLogDocumentProfileProvider(providerServices),
