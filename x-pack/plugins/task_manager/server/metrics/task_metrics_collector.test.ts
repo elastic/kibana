@@ -143,8 +143,15 @@ describe('TaskManagerMetricsCollector', () => {
           type: 'long',
           script: {
             source: `
+                def taskStatus = doc['task.status'];
                 def runAt = doc['task.runAt'];
-                if(!runAt.empty) {
+
+                if (taskStatus.empty) {
+                  emit(0);
+                  return;
+                }
+
+                if(taskStatus == 'idle') {
                   emit((new Date().getTime() - runAt.value.getMillis()) / 1000);
                 } else {
                   def retryAt = doc['task.retryAt'];

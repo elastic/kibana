@@ -4532,6 +4532,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/management/jobs.ts"
               },
               {
@@ -7186,10 +7190,6 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/internal/diagnostic/browser.ts"
-              },
-              {
-                "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
               },
               {
@@ -7219,6 +7219,10 @@
               {
                 "plugin": "rollup",
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/indices.ts"
               },
               {
                 "plugin": "searchPlayground",
@@ -19582,7 +19586,7 @@
             "section": "def-server.RouteValidatorFullConfigRequest",
             "text": "RouteValidatorFullConfigRequest"
           },
-          "<P, Q, B> | ",
+          "<P, Q, B> | (",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -19590,7 +19594,7 @@
             "section": "def-server.RouteValidatorRequestAndResponses",
             "text": "RouteValidatorRequestAndResponses"
           },
-          "<P, Q, B>"
+          "<P, Q, B> & NotRouteValidatorFullConfigRequest)"
         ],
         "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
         "deprecated": false,

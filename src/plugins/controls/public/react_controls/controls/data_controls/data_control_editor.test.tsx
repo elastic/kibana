@@ -62,6 +62,7 @@ const controlGroupApi = {
   parentApi: dashboardApi,
   grow: new BehaviorSubject(DEFAULT_CONTROL_GROW),
   width: new BehaviorSubject(DEFAULT_CONTROL_WIDTH),
+  getEditorConfig: () => undefined,
 } as unknown as ControlGroupApi;
 
 describe('Data control editor', () => {
@@ -288,6 +289,56 @@ describe('Data control editor', () => {
       expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('false');
       expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
       expect(getPressedAttribute(controlEditor, 'create__search')).toBe('false');
+    });
+  });
+
+  describe('control editor config', () => {
+    const getEditorConfig = jest.fn().mockImplementation(() => undefined);
+
+    beforeAll(() => {
+      controlGroupApi.getEditorConfig = getEditorConfig;
+    });
+
+    test('all elements are visible when no editor config', async () => {
+      const controlEditor = await mountComponent({
+        initialState: {
+          fieldName: 'machine.os.raw',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+        initialDefaultPanelTitle: 'OS',
+      });
+
+      const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
+      expect(dataViewPicker).toBeInTheDocument();
+      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
+      expect(widthSettings).toBeInTheDocument();
+      const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
+      expect(customSettings).toBeInTheDocument();
+    });
+
+    test('can hide elements with the editor config', async () => {
+      getEditorConfig.mockImplementationOnce(() => ({
+        hideDataViewSelector: true,
+        hideWidthSettings: true,
+        hideAdditionalSettings: true,
+      }));
+
+      const controlEditor = await mountComponent({
+        initialState: {
+          fieldName: 'machine.os.raw',
+        },
+        controlType: 'optionsList',
+        controlId: 'testId',
+        initialDefaultPanelTitle: 'OS',
+      });
+
+      const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
+      expect(dataViewPicker).not.toBeInTheDocument();
+      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
+      expect(widthSettings).not.toBeInTheDocument();
+      const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
+      expect(customSettings).not.toBeInTheDocument();
     });
   });
 });
