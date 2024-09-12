@@ -149,18 +149,22 @@ export const postActionsConnectorExecuteRoute = (
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
+            logger,
           });
-          const assistantTools = assistantContext
-            .getRegisteredTools(pluginName)
-            .filter((x) => x.id !== 'attack-discovery');
+          const v2KnowledgeBaseEnabled =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient =
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient(
+              v2KnowledgeBaseEnabled
+            )) ?? undefined;
+          const isEnabledKnowledgeBase = (await kbDataClient?.isModelDeployed()) ?? false;
+
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
             model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
-            isEnabledKnowledgeBase: assistantTools.some((tool) =>
-              ['KnowledgeBaseWriteTool', 'KnowledgeBaseRetrievalTool'].includes(tool.name)
-            ),
+            isEnabledKnowledgeBase,
           });
 
           return resp.error({
