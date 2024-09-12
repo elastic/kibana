@@ -316,6 +316,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     toolbarVisibility: toolbarVisibilityProp,
     shouldHighlightRow,
     fieldFormats,
+    height,
   } = props;
 
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -741,6 +742,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
             ref={dataGridRef}
             renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
             renderCellPopover={handleRenderCellPopover}
+            height={height}
           />
         )}
       </section>
