@@ -898,3 +898,71 @@ function peg$parse(input, options) {
 }
 
 export default { parse: peg$parse };
+
+/**
+ Exps
+ = e:Exp+ {
+ return e;
+ }
+
+ Exp
+ = Var / NonVar
+
+ Var
+ = "${" _ varCont:VarInner+ _ "}" {
+ return { type: "var", content: {name: varCont[0][0].content, default: varCont[0][1] ? varCont[0][1].content : null} }
+ }
+
+ VarInner
+ = VarName VarDefault?
+
+ VarName
+ = varCont:VarNameChar+ {
+ return { type: "varname", content: varCont.map(c => c.char || c).join('') }
+ }
+
+ VarDefault
+ = ":" defCont:VarDefaultChar+ {
+ return { type: "vardefault", content: defCont.join('')}
+ }
+
+ VarNameChar
+ = [^}:\\\r\n]
+ / Escape
+ sequence:(
+ "\\" { return {type: "char", char: "\\"}; }
+ / "}" { return {type: "char", char: "\x7d"}; }
+ )
+ { return sequence.char; }
+
+ VarDefaultChar
+ = [^}\\\r\n]
+ / Escape
+ sequence:(
+ "\\" { return {type: "char", char: "\\"}; }
+ / "}" { return {type: "char", char: "\x7d"}; }
+ )
+ { return sequence.char; }
+
+ NonVar
+ = nonVarCont:NonVarCont+ {
+ return { type: "nonvar", content: nonVarCont.map(c => c.char || c).join('') }
+ }
+
+ NonVarCont
+ = DollarNotVarStart / NotDollar
+
+ NotDollar
+ = [^$]
+
+ DollarNotVarStart
+ = "$" [^{]+
+
+ _ "whitespace"
+ = [ \t\n\r]*
+
+ Escape
+ = "\\"
+
+
+ */
