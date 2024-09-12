@@ -22,7 +22,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('Knowledge base', () => {
+  describe('Knowledge base', function () {
+    // TODO: https://github.com/elastic/kibana/issues/192757
+    this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
     before(async () => {
