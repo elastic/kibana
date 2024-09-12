@@ -128,7 +128,9 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
     if (previewInput.error) {
       innerElement = <ErrorMessage error={previewInput.error} />;
     } else if (previewInput.value) {
-      innerElement = <lens.EmbeddableComponent {...previewInput.value} />;
+      innerElement = (
+        <lens.EmbeddableComponent {...previewInput.value} overrides={{ axisX: { hide: true } }} />
+      );
     } else {
       innerElement = <EuiLoadingSpinner size="s" />;
     }
