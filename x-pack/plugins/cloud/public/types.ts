@@ -58,9 +58,9 @@ export interface CloudStart {
    */
   projectsUrl?: string;
   /**
-   * The full URL to the elasticsearch cluster.
+   * Fetches the full URL to the elasticsearch cluster.
    */
-  elasticsearchUrl?: string;
+  fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
    * The full URL to the Kibana deployment.
    */
@@ -144,9 +144,9 @@ export interface CloudSetup {
    */
   snapshotsUrl?: string;
   /**
-   * The full URL to the elasticsearch cluster.
+   * Fetches the full URL to the elasticsearch cluster.
    */
-  elasticsearchUrl?: string;
+  fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
    * The full URL to the Kibana deployment.
    */
@@ -218,4 +218,8 @@ export interface CloudSetup {
      */
     orchestratorTarget?: string;
   };
+}
+
+export interface PublicElasticsearchConfigType {
+  elasticsearchUrl?: string;
 }

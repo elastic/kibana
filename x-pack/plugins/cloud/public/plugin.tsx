@@ -16,8 +16,9 @@ import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import { getFullCloudUrl } from '../common/utils';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import type { CloudSetup, CloudStart } from './types';
+import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { getSupportUrl } from './utils';
+import { ElasticsearchConfigType } from '../common/types';
 
 export interface CloudConfigType {
   id?: string;
@@ -65,12 +66,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
+  private elasticsearchUrl: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
+    this.elasticsearchUrl = '';
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -96,7 +99,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       cname,
       baseUrl,
       ...this.getCloudUrls(),
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
@@ -116,6 +118,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http, this.logger),
     };
   }
 
@@ -163,7 +166,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       profileUrl,
       organizationUrl,
       projectsUrl,
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
@@ -173,6 +175,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       },
       performanceUrl,
       usersAndRolesUrl,
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(
+        this,
+        coreStart.http,
+        this.logger
+      ),
     };
   }
 
@@ -212,5 +219,24 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       usersAndRolesUrl: fullCloudUsersAndRolesUrl,
       projectsUrl: fullCloudProjectsUrl,
     };
+  }
+
+  private async fetchElasticsearchConfig(
+    http: CoreStart['http'],
+    logger: Logger
+  ): Promise<PublicElasticsearchConfigType> {
+    if (this.elasticsearchUrl) {
+      return { elasticsearchUrl: this.elasticsearchUrl };
+    }
+    try {
+      const result = await http.get<ElasticsearchConfigType>('/api/internal/elasticsearch_config');
+      this.elasticsearchUrl = result.elasticsearch_url;
+      return { elasticsearchUrl: result.elasticsearch_url };
+    } catch {
+      logger.error('Failed to fetch Elasticsearch config');
+      return {
+        elasticsearchUrl: undefined,
+      };
+    }
   }
 }
