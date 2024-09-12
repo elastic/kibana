@@ -13,7 +13,6 @@ import { VulnerabilityDashboardPageProvider } from './vulnerability_dashboard_pa
 import { BenchmarkPagePageProvider } from './benchmark_page';
 import { CspSecurityCommonProvider } from './security_common';
 import { RulePagePageProvider } from './rule_page';
-import { FleetPageProvider } from './fleet_page';
 
 export const cloudSecurityPosturePageObjects = {
   findings: FindingsPageProvider,
@@ -23,7 +22,6 @@ export const cloudSecurityPosturePageObjects = {
   rule: RulePagePageProvider,
   benchmark: BenchmarkPagePageProvider,
   cspSecurity: CspSecurityCommonProvider,
-  fleet: FleetPageProvider,
 };
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
