@@ -16,6 +16,18 @@ This is the name of the column. If a column with the same name already exists, i
 
 This is the value for the column. It can be a literal, an expression, or a function. Columns defined to the left of this one can be used.
 
+## Notes
+
+EVAL supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+
+Aggregation functions are NOT supported for EVAL.
+
 ## Examples
 
 The following example multiplies the `height` column by 3.281 and 100 to create new columns `height_feet` and `height_cm`:

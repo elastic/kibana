@@ -46,7 +46,12 @@ FROM employees
 | SORT first_name ASC NULLS FIRST
 ```
 
-### Notes
+## Notes
+
+If SORT is used right after a KEEP command, make sure it only uses column names in KEEP,
+or move the SORT before the KEEP, e.g.
+- not correct: KEEP date | SORT @timestamp,
+- correct: SORT @timestamp | KEEP date)
 
 By default, the sorting order is ascending. You can specify an explicit sort order by using `ASC` for ascending or `DESC` for descending.
 
@@ -56,7 +61,6 @@ When sorting on multivalued columns, the lowest value is used when sorting in as
 
 By default, `null` values are treated as being larger than any other value. This means that with an ascending sort order, `null` values are sorted last, and with a descending sort order, `null` values are sorted first. You can change this by providing `NULLS FIRST` or `NULLS LAST`.
 
-
-### Limitations
+## Limitations
 - **Multivalued Columns**: When sorting on multivalued columns, the lowest value is used for ascending order and the highest value for descending order.
 - **Null Values**: By default, null values are treated as larger than any other value. This can be changed using `NULLS FIRST` or `NULLS LAST`.

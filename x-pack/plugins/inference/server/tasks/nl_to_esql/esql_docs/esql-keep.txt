@@ -12,7 +12,7 @@ The KEEP command allows you to specify which columns to return and in what order
 
 A comma-separated list of columns to retain. Wildcards are supported. If an existing column matches multiple provided wildcards or column names, certain rules apply.
 
-## Description
+## Note
 
 The KEEP command is used to specify which columns to return and their order.
 
@@ -23,6 +23,8 @@ When a field name matches multiple expressions, precedence rules are applied. Fi
 3. Wildcard only (`*`)
 
 If a field matches two expressions with the same precedence, the rightmost expression wins.
+
+Important: only the columns in the KEEP command can be used after a KEEP command.
 
 ## Examples
 

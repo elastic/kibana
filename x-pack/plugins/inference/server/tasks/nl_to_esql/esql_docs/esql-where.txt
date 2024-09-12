@@ -12,6 +12,18 @@ The WHERE command filters the rows in a table based on a specified condition, re
 
 A boolean expression that defines the condition for filtering the rows.
 
+## Notes
+
+WHERE supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+
+Aggregation functions are WHERE supported for EVAL.
+
 ## Examples
 
 #### Example 1: Filtering Based on Boolean Condition
