@@ -35,6 +35,7 @@ export interface TypeMeta {
   deprecated?: boolean;
   /**
    * Release version or date that this route will be removed
+   * @example 9.0.0
    */
   'x-discontinued'?: string;
 }

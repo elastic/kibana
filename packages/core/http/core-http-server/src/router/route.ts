@@ -213,6 +213,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Use with `deprecated: true`
    *
    * @remarks This will be surfaced in OAS documentation.
+   * @example 9.0.0
    */
   'x-discontinued'?: string;
 }
