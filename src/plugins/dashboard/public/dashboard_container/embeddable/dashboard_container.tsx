@@ -309,6 +309,7 @@ export class DashboardContainer
       this.getState().componentState.hasRunClientsideMigrations
     );
     this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
+    this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -332,6 +333,9 @@ export class DashboardContainer
         }
         if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
           this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
+        }
+        if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
+          this.hasOverlays$.next(state.componentState.hasOverlays);
         }
       })
     );
@@ -553,6 +557,7 @@ export class DashboardContainer
   public fullScreenMode$: BehaviorSubject<boolean | undefined>;
   public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
   public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
+  public hasOverlays$: BehaviorSubject<boolean | undefined>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
@@ -815,9 +820,21 @@ export class DashboardContainer
     return this.getState().componentState.expandedPanelId;
   };
 
+  public getPanelsState = () => {
+    return this.getState().explicitInput.panels;
+  }
+
   public setExpandedPanelId = (newId?: string) => {
     this.dispatch.setExpandedPanelId(newId);
   };
+
+  public setViewMode = (viewMode: ViewMode) => {
+    this.dispatch.setViewMode(viewMode);
+  }
+
+  public setFullScreenMode = (fullScreenMode: boolean) => {
+    this.dispatch.setFullScreenMode(fullScreenMode);
+  }
 
   public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
     this.clearOverlays();

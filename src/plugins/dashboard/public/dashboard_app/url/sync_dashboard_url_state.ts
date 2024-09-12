@@ -100,7 +100,7 @@ export const startSyncingDashboardUrlState = ({
     .subscribe(() => {
       const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
       if (Object.keys(stateFromUrl).length === 0) return;
-      dashboardApi.updateInput(stateFromUrl);
+      //dashboardApi.updateInput(stateFromUrl);
     });
 
   const stopWatchingAppStateInUrl = () => appStateSubscription.unsubscribe();

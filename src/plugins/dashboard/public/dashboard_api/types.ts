@@ -24,6 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
@@ -35,13 +36,19 @@ export type DashboardApi = CanExpandPanels &
   PublishesViewMode &
   TracksOverlays & {
     addFromLibrary: () => void;
+    asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean | undefined>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
+    getPanelsState: () => DashboardPanelMap;
+    hasOverlays$: PublishingSubject<boolean | undefined>;
     hasRunMigrations$: PublishingSubject<boolean | undefined>;
     hasUnsavedChanges$: PublishingSubject<boolean | undefined>;
     managed$: PublishingSubject<boolean | undefined>;
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
+    runQuickSave: () => Promise<void>;
+    setFullScreenMode: (fullScreenMode: boolean) => void;
+    setViewMode: (viewMode: ViewMode) => void;
     showSettings: () => void;
   };
