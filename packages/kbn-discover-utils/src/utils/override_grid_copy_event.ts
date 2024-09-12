@@ -95,6 +95,7 @@ function getCellTextContent(cell: Element) {
 
   // remove from the grid
   dropBySelector(cellCloned, '.euiIcon');
+  dropBySelector(cellCloned, '[data-euiicon-type]');
   dropBySelector(cellCloned, '.euiToken');
   dropBySelector(cellCloned, 'svg');
 
@@ -110,7 +111,9 @@ function getCellTextContent(cell: Element) {
   replaceWithSrcTextNode(cellCloned, 'img');
   replaceWithSrcTextNode(cellCloned, 'audio');
 
-  return (cellCloned.textContent || '').trim();
+  const textContent = (cellCloned.textContent || '').trim();
+
+  return textContent.replaceAll('\n', '');
 }
 
 function replaceWithSrcTextNode(element: HTMLElement, tagName: 'img' | 'audio') {
