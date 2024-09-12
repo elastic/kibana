@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { CardItem } from './card_item';
 import type { ExpandedCardSteps, StepId } from './types';
 
-import { QuickStartSectionCardsId, SectionId, OverviewSteps } from './types';
+import { SectionId, ViewDashboardSteps, AddAndValidateYourDataCardsId } from './types';
 jest.mock('./card_step');
 
 describe('CardItemComponent', () => {
@@ -17,7 +17,7 @@ describe('CardItemComponent', () => {
   const onStepClicked = jest.fn();
   const toggleTaskCompleteStatus = jest.fn();
   const expandedCardSteps = {
-    [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+    [AddAndValidateYourDataCardsId.viewDashboards]: {
       isExpanded: false,
       expandedSteps: [] as StepId[],
     },
@@ -26,17 +26,17 @@ describe('CardItemComponent', () => {
   it('should render card', () => {
     const { getByTestId } = render(
       <CardItem
-        activeStepIds={[OverviewSteps.getToKnowElasticSecurity]}
-        cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
+        activeStepIds={[ViewDashboardSteps.analyzeData]}
+        cardId={AddAndValidateYourDataCardsId.viewDashboards}
         expandedCardSteps={expandedCardSteps}
         finishedSteps={finishedSteps}
         toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
-        sectionId={SectionId.quickStart}
+        sectionId={SectionId.addAndValidateYourData}
       />
     );
 
-    const cardTitle = getByTestId(QuickStartSectionCardsId.watchTheOverviewVideo);
+    const cardTitle = getByTestId(AddAndValidateYourDataCardsId.viewDashboards);
     expect(cardTitle).toBeInTheDocument();
   });
 
@@ -44,12 +44,12 @@ describe('CardItemComponent', () => {
     const { queryByText } = render(
       <CardItem
         activeStepIds={[]}
-        cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
+        cardId={AddAndValidateYourDataCardsId.viewDashboards}
         expandedCardSteps={expandedCardSteps}
         finishedSteps={new Set([])}
         toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
-        sectionId={SectionId.quickStart}
+        sectionId={SectionId.addAndValidateYourData}
       />
     );
 
