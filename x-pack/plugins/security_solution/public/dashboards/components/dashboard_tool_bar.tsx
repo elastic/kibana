@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -16,18 +16,18 @@ import type { RedirectToProps } from '@kbn/dashboard-plugin/public/dashboard_con
 import { SecurityPageName } from '../../../common';
 import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,
   onLoad,
 }: {
-  dashboardContainer: DashboardAPI;
+  dashboardContainer: DashboardApi;
   onLoad?: (mode: ViewMode) => void;
 }) => {
   const { setHeaderActionMenu } = useKibana().services;
 
-  const viewMode =
-    dashboardContainer?.select((state) => state.explicitInput.viewMode) ?? ViewMode.VIEW;
+  const viewMode = useStateFromPublishingSubject(dashboardContainer.viewMode);
 
   const { navigateTo, getAppUrl } = useNavigation();
   const redirectTo = useCallback(
@@ -56,7 +56,7 @@ const DashboardToolBarComponent = ({
   );
 
   useEffect(() => {
-    onLoad?.(viewMode);
+    onLoad?.(viewMode as ViewMode ?? 'edit');
   }, [onLoad, viewMode]);
 
   const embedSettings = useMemo(
@@ -73,7 +73,7 @@ const DashboardToolBarComponent = ({
   return showWriteControls ? (
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
-      dashboardContainer={dashboardContainer}
+      dashboardApi={dashboardContainer}
       forceHideUnifiedSearch={true}
       embedSettings={embedSettings}
       redirectTo={redirectTo}

@@ -19,7 +19,7 @@ import {
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  AwaitingDashboardAPI,
+  DashboardApi,
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
@@ -53,7 +53,7 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
     '/services/{serviceName}/dashboards',
     '/mobile-services/{serviceName}/dashboards'
   );
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
@@ -110,16 +110,13 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
   useEffect(() => {
     if (!dashboard) return;
 
-    dashboard.updateInput({
-      filters:
-        dataView &&
-        currentDashboard?.serviceEnvironmentFilterEnabled &&
-        currentDashboard?.serviceNameFilterEnabled
-          ? getFilters(serviceName, environment, dataView)
-          : [],
-      timeRange: { from: rangeFrom, to: rangeTo },
-      query: { query: kuery, language: 'kuery' },
-    });
+    dashboard.setFilters(dataView &&
+      currentDashboard?.serviceEnvironmentFilterEnabled &&
+      currentDashboard?.serviceNameFilterEnabled
+        ? getFilters(serviceName, environment, dataView)
+        : []);
+    dashboard.setQuery({ query: kuery, language: 'kuery' });
+    dashboard.setTimeRange({ from: rangeFrom, to: rangeTo });
   }, [dataView, serviceName, environment, kuery, dashboard, rangeFrom, rangeTo, currentDashboard]);
 
   const getLocatorParams = useCallback(
@@ -213,7 +210,7 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
                 locator={locator}
                 savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
-                ref={setDashboard}
+                onApiAvailable={setDashboard}
               />
             )}
           </EuiFlexItem>

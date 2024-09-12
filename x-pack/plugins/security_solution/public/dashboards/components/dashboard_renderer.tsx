@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import type {
-  DashboardAPI,
+  DashboardApi,
   DashboardCreationOptions,
   DashboardLocatorParams,
 } from '@kbn/dashboard-plugin/public';
@@ -43,11 +43,11 @@ const DashboardRendererComponent = ({
   viewMode = ViewMode.VIEW,
 }: {
   canReadDashboard: boolean;
-  dashboardContainer?: DashboardAPI;
+  dashboardContainer?: DashboardApi;
   filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
-  onDashboardContainerLoaded?: (dashboardContainer: DashboardAPI) => void;
+  onDashboardContainerLoaded?: (dashboardContainer: DashboardApi) => void;
   query?: Query;
   savedObjectId: string | undefined;
   timeRange: {
@@ -142,12 +142,20 @@ const DashboardRendererComponent = ({
   }, [dispatch, id, inputId, refetchByForceRefresh]);
 
   useEffect(() => {
-    dashboardContainer?.updateInput({ timeRange, query, filters });
-  }, [dashboardContainer, filters, query, timeRange]);
+    dashboardContainer?.setFilters(filters);
+  }, [dashboardContainer, filters]);
+
+  useEffect(() => {
+    dashboardContainer?.setQuery(query);
+  }, [dashboardContainer, query]);
+
+  useEffect(() => {
+    dashboardContainer?.setTimeRange(timeRange);
+  }, [dashboardContainer, timeRange]);
 
   useEffect(() => {
     if (isCreateDashboard && firstSecurityTagId)
-      dashboardContainer?.updateInput({ tags: [firstSecurityTagId] });
+      dashboardContainer?.setTags([firstSecurityTagId]);
   }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
 
   useEffect(() => {
@@ -166,7 +174,7 @@ const DashboardRendererComponent = ({
     setDashboardContainerRenderer(
       <DashboardContainerRenderer
         locator={locator}
-        ref={onDashboardContainerLoaded}
+        onApiAvailable={onDashboardContainerLoaded}
         savedObjectId={savedObjectId}
         getCreationOptions={getCreationOptions}
       />

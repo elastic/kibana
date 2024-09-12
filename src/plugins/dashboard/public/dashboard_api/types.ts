@@ -14,6 +14,7 @@ import {
 } from '@kbn/presentation-containers';
 import {
   HasAppContext,
+  HasType,
   PublishesDataViews,
   PublishesPanelTitle,
   PublishesSavedObjectId,
@@ -25,9 +26,11 @@ import {
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DashboardPanelMap } from '../../common';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
+  HasType<'dashboard'> &
   PresentationContainer &
   PublishesDataViews &
   Pick<PublishesPanelTitle, 'panelTitle'> &
@@ -49,7 +52,11 @@ export type DashboardApi = CanExpandPanels &
     runInteractiveSave: (interactionMode: ViewMode) => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToTop: () => void;
+    setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
+    setQuery: (query?: Query | undefined) => void;
+    setTags: (tags: string[]) => void;
+    setTimeRange: (timeRange?: TimeRange | undefined) => void;
     setViewMode: (viewMode: ViewMode) => void;
     showSettings: () => void;
   };

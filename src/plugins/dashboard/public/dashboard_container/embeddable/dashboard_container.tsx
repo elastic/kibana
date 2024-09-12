@@ -836,6 +836,16 @@ export class DashboardContainer
     this.dispatch.setFullScreenMode(fullScreenMode);
   };
 
+  public setQuery = (query?: Query | undefined) =>
+    this.updateInput({ query });
+
+  public setFilters = (filters?: Filter[] | undefined) =>
+    this.updateInput({ filters });
+
+  public setTags = (tags: string[]) => {
+    this.updateInput({ tags });
+  }
+
   public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
     this.clearOverlays();
     this.dispatch.setHasOverlays(true);
