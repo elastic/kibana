@@ -10,7 +10,7 @@
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { ExpressionRendererEvent, ExpressionRendererParams } from '@kbn/expressions-plugin/public';
-import { toExpressionAst } from '../embeddable/to_ast';
+import { toExpressionAst } from './to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';
 import type { Vis } from '../vis';
