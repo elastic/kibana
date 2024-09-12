@@ -92,6 +92,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   'location.name': schemaString,
   'monitor.id': schemaString,
   'monitor.name': schemaString,
+  'monitor.state.id': schemaString,
   'monitor.tags': schemaStringArray,
   'monitor.type': schemaString,
   'observer.geo.name': schemaString,
