@@ -1143,6 +1143,11 @@ class AgentPolicyService {
     }
 
     if (agentPolicy?.supports_agentless) {
+      logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
+      // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+        spaceId: soClient.getCurrentNamespace(),
+      });
       try {
         // Deleting agentless deployment
         await agentlessAgentService.deleteAgentlessAgent(id);
@@ -1155,10 +1160,6 @@ class AgentPolicyService {
         );
         logger.error(error);
       }
-      // unenroll  offline agents for agentless policies
-      await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
-        spaceId: soClient.getCurrentNamespace(),
-      });
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
