@@ -76,6 +76,46 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual('Basic https://elastic.co https://elastic.co/product');
   });
 
+  it('works on multiple without spaces', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl}${homePageUrl1}',
+      { homePageUrl: 'https://elastic.co', homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.cohttps://elastic.co/product');
+  });
+
+  it('works on multiple without spaces and one missing', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl}${homePageUrl1}',
+      { homePageUrl: 'https://elastic.co', homePageUrl2: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.co${homePageUrl1}');
+  });
+
+  it('works on multiple without with default', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl}${homePageUrl1:test}',
+      { homePageUrl: 'https://elastic.co', homePageUrl2: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.cotest');
+  });
+
+  it('works on multiple with multiple defaults', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl:test}${homePageUrl1:test4}',
+      { homePageUrl3: 'https://elastic.co', homePageUrl2: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic testtest4');
+  });
+
   it('works with default value', () => {
     const result = replaceStringWithParams(
       'Basic ${homePageUrl:https://elastic.co} ${homePageUrl1}',

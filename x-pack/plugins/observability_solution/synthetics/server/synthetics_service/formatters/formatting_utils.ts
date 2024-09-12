@@ -56,6 +56,12 @@ export const replaceStringWithParams = (
 };
 
 const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, string>) => {
+  const hasDefault = parsedVars.some(
+    (parsedVar) => parsedVar.type === 'var' && parsedVar.content.default
+  );
+  if (hasDefault) {
+    return false;
+  }
   const varKeys = parsedVars
     .filter((parsedVar) => parsedVar.type === 'var')
     .map((v) => (typeof v.content === 'string' ? v.content : v.content.name));
