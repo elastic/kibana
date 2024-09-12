@@ -34,7 +34,7 @@ import { DashboardApi } from '../../dashboard_api/types';
 import { pluginServices } from '../../services/plugin_services';
 
 export interface DashboardRendererProps {
-  onApiAvailable: (api: DashboardApi) => void;
+  onApiAvailable?: (api: DashboardApi) => void;
   savedObjectId?: string;
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
@@ -125,7 +125,7 @@ export function DashboardRenderer({
       }
 
       setDashboardContainer(container);
-      onApiAvailable(container);
+      onApiAvailable?.(container);
     })();
     return () => {
       canceled = true;
