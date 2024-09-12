@@ -33,7 +33,10 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access' | 'description' | 'deprecated'>;
+  options?: Omit<
+    RouteConfigOptions<Method>,
+    'access' | 'description' | 'deprecated' | 'discontinued'
+  >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /**
@@ -98,7 +101,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    *
    * @default undefined
    */
-  'x-discontinued'?: string;
+  discontinued?: string;
 };
 
 /**
