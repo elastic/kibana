@@ -60,13 +60,13 @@ export class SearchInferenceEndpointsPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID, 'api'],
+          api: [],
           catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show', 'save'],
+          ui: [],
         },
         read: {
           disabled: true,
@@ -74,7 +74,7 @@ export class SearchInferenceEndpointsPlugin
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: [],
         },
       },
     });

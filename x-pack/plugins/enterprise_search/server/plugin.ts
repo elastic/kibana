@@ -168,7 +168,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     const PLUGIN_IDS = [
       ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
-      SEARCH_RELEVANCE_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       ANALYTICS_PLUGIN.ID,
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
@@ -177,6 +176,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       SEMANTIC_SEARCH_PLUGIN.ID,
       APPLICATIONS_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
+      SEARCH_RELEVANCE_PLUGIN.ID,
     ];
     const isCloud = !!cloud?.cloudId;
 
@@ -207,13 +207,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       privileges: {
         all: {
           app: ['kibana', ...PLUGIN_IDS],
-          api: [SEARCH_PRODUCT_NAME, 'api'],
+          api: [],
           catalogue: PLUGIN_IDS,
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show', 'save'],
+          ui: [],
         },
         read: {
           disabled: true,
@@ -221,7 +221,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: [],
         },
       },
     });

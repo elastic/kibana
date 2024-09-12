@@ -26,17 +26,27 @@ export class NavLinksBuilder {
   public all() {
     return this.build(() => true);
   }
-  public except(features: string[], apps: string[] = []) {
-    const result = this.build(
-      (featureId, appId) => !features.includes(featureId) && !apps.includes(appId)
+  public except(...features: Array<string | { feature: string; apps: string[] }>) {
+    return this.build(
+      (featureId, appId) =>
+        !features.some((feature) =>
+          typeof feature === 'string'
+            ? featureId === feature
+            : feature.feature === featureId && feature.apps.includes(appId)
+        )
     );
-    return result;
   }
   public none() {
     return this.build(() => false);
   }
-  public only(features: string[], apps: string[] = []) {
-    return this.build((featureId, appId) => features.includes(featureId) || apps.includes(appId));
+  public only(...features: Array<string | { feature: string; apps: string[] }>) {
+    return this.build((featureId, appId) =>
+      features.some((feature) =>
+        typeof feature === 'string'
+          ? featureId === feature
+          : feature.feature === featureId && feature.apps.includes(appId)
+      )
+    );
   }
 
   private build(callback: BuildCallback): Record<string, boolean> {
