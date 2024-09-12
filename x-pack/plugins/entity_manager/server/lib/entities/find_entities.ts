@@ -57,6 +57,8 @@ export async function findEntities(
       dataset: 'latest',
       definitionId: '*',
     }),
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     size: perPage,
     query: {
