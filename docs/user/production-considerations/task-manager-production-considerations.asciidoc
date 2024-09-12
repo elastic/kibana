@@ -1,6 +1,5 @@
-[role="xpack"]
 [[task-manager-production-considerations]]
-== Task Manager
+= Task Manager
 
 {kib} Task Manager is leveraged by features such as Alerting, Actions, and Reporting to run mission critical work as persistent background tasks.
 These background tasks distribute work across multiple {kib} instances.
@@ -21,7 +20,7 @@ If you lose this index, all scheduled alerts and actions are lost.
 
 [float]
 [[task-manager-background-tasks]]
-=== Running background tasks
+== Running background tasks
 
 {kib} background tasks are managed as follows:
 
@@ -47,13 +46,13 @@ For detailed troubleshooting guidance, see <<task-manager-troubleshooting>>.
 ==============================================
 
 [float]
-=== Deployment considerations
+== Deployment considerations
 
 {es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].
 
 [float]
 [[task-manager-scaling-guidance]]
-=== Scaling guidance
+== Scaling guidance
 
 How you deploy {kib} largely depends on your use case. Predicting the throughout a deployment might require to support Task Management is difficult because features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 
@@ -61,7 +60,7 @@ However, there is a relatively straight forward method you can follow to produce
 
 [float]
 [[task-manager-default-scaling]]
-==== Default scale
+=== Default scale
 
 By default, {kib} polls for tasks at a rate of 10 tasks every 3 seconds.
 This means that you can expect a single {kib} instance to support up to 200 _tasks per minute_ (`200/tpm`).
@@ -74,24 +73,24 @@ For details on monitoring the health of {kib} Task Manager, follow the guidance 
 
 [float]
 [[task-manager-scaling-horizontally]]
-==== Scaling horizontally
+=== Scaling horizontally
 
 At times, the sustainable approach might be to expand the throughput of your cluster by provisioning additional {kib} instances.
 By default, each additional {kib} instance will add an additional 10 tasks that your cluster can run concurrently, but you can also scale each {kib} instance vertically, if your diagnosis indicates that they can handle the additional workload.
 
 [float]
 [[task-manager-scaling-vertically]]
-==== Scaling vertically
+=== Scaling vertically
 
 Other times it, might be preferable to increase the throughput of individual {kib} instances.
 
 Tweak the capacity with the <<task-manager-settings,`xpack.task_manager.capacity`>> setting, which enables each {kib} instance to pull a higher number of tasks per interval. This setting can impact the performance of each instance as the workload will be higher.
 
-Tweak the *Poll Interval* via the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which allows each {kib} to pull scheduled tasks at a higher rate.  This could impact the performance of the {es} cluster as the workload will be higher.
+Tweak the poll interval with the <<task-manager-settings,`xpack.task_manager.poll_interval`>> setting, which enables each {kib} instance to pull scheduled tasks at a higher rate. This setting can impact the performance of the {es} cluster as the workload will be higher.
 
 [float]
 [[task-manager-choosing-scaling-strategy]]
-==== Choosing a scaling strategy
+=== Choosing a scaling strategy
 
 Each scaling strategy comes with its own considerations, and the appropriate strategy largely depends on your use case.
 
@@ -113,7 +112,7 @@ A higher frequency suggests {kib} instances conflict at a high rate, which you c
 
 [float]
 [[task-manager-rough-throughput-estimation]]
-==== Rough throughput estimation
+=== Rough throughput estimation
 
 Predicting the required throughput a deployment might need to support Task Management is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 However, a rough lower bound can be estimated, which is then used as a guide.
@@ -123,7 +122,7 @@ Throughput is best thought of as a measurements in tasks per minute.
 A default {kib} instance can support up to `200/tpm`.
 
 [float]
-===== Automatic estimation
+==== Automatic estimation
 
 experimental[]
 
@@ -145,7 +144,7 @@ When evaluating the proposed {kib} instance number under `proposed.provisioned_k
 ============================================================================
 
 [float]
-===== Manual estimation
+==== Manual estimation
 
 By <<task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
 
