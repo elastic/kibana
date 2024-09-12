@@ -85,8 +85,8 @@ export const mlNavCategories: SolutionLinkCategory[] = [
     linkIds: [
       ExternalPageName.mlFileUpload,
       ExternalPageName.mlIndexDataVisualizer,
-      ExternalPageName.mlDataDrift,
       ExternalPageName.mlESQLdataVisualizer,
+      ExternalPageName.mlDataDrift,
     ],
   },
   {
