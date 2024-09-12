@@ -31,12 +31,13 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: () => Promise<{
-    find: ({ attributes }: { attributes: string[] }) => Promise<{
+    find: ({ fieldNames, attributes }: { fieldNames: string[]; attributes: string[] }) => Promise<{
       fields: Record<
         string,
         {
           type: string;
           source: string;
+          description?: string;
         }
       >;
     }>;

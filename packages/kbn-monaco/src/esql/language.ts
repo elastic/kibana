@@ -21,6 +21,9 @@ import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoCodeActions } from './lib/converters/actions';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
+const removeKeywordSuffix = (name: string) => {
+  return name.endsWith('.keyword') ? name.slice(0, -8) : name;
+};
 
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
@@ -122,7 +125,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         }
 
         const ecsMetadata = await fieldsMetadataClient.find({
-          fieldNames: [item.label],
+          fieldNames: [removeKeywordSuffix(item.label)],
           attributes: ['description'],
         });
 
