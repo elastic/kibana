@@ -17,5 +17,6 @@ export type {
   GetUiSettingsContext,
 } from './src/ui_settings';
 export { type DarkModeValue, parseDarkModeValue } from './src/dark_mode';
+export { type ThemeNameValue, parseThemeNameValue } from './src/theme_name';
 
 export { TIMEZONE_OPTIONS } from './src/timezones';

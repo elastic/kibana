@@ -45,6 +45,7 @@ import {
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
+import { parseThemeNameValue } from '@kbn/core-ui-settings-common/src/theme_name';
 
 type RenderOptions =
   | RenderingSetupDeps
@@ -198,6 +199,8 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
+    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
+
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
@@ -260,6 +263,7 @@ export class RenderingService {
         theme: {
           darkMode,
           version: themeVersion,
+          name: themeName,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),
             dark: themeStylesheetPaths(true),
