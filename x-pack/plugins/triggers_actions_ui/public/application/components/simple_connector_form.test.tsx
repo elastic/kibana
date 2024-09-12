@@ -16,28 +16,20 @@ import {
 import userEvent from '@testing-library/user-event';
 
 const fillForm = async ({ getByTestId }: RenderResult) => {
-  await act(async () => {
-    await userEvent.type(getByTestId('config.url-input'), 'https://example.com', {
-      delay: 10,
-    });
+  await userEvent.type(getByTestId('config.url-input'), 'https://example.com', {
+    delay: 10,
   });
 
-  await act(async () => {
-    await userEvent.type(getByTestId('config.test-config-input'), 'My text field', {
-      delay: 10,
-    });
+  await userEvent.type(getByTestId('config.test-config-input'), 'My text field', {
+    delay: 10,
   });
 
-  await act(async () => {
-    await userEvent.type(getByTestId('secrets.username-input'), 'elastic', {
-      delay: 10,
-    });
+  await userEvent.type(getByTestId('secrets.username-input'), 'elastic', {
+    delay: 10,
   });
 
-  await act(async () => {
-    await userEvent.type(getByTestId('secrets.password-input'), 'changeme', {
-      delay: 10,
-    });
+  await userEvent.type(getByTestId('secrets.password-input'), 'changeme', {
+    delay: 10,
   });
 };
 
@@ -131,7 +123,7 @@ describe('SimpleConnectorForm', () => {
     await fillForm(res);
 
     await act(async () => {
-      userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
     });
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -171,15 +163,14 @@ describe('SimpleConnectorForm', () => {
 
       await fillForm(res);
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(res.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(res.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });

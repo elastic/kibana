@@ -6,4 +6,4 @@
  */
 
 export { syntheticsGetPingsRoute } from './get_pings';
-export { syntheticsGetPingStatusesRoute } from './get_ping_statuses';
+export { syntheticsGetPingHeatmapRoute } from './ping_heatmap';

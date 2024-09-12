@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { evalFunctionDefinitions } from '../../definitions/functions';
+import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
+import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
@@ -148,7 +149,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...statsAggregationFunctionDefinitions);
+    list.push(...aggregationFunctionDefinitions);
     // right now all grouping functions are agg functions too
     list.push(...groupingFunctionDefinitions);
   }
@@ -157,7 +158,7 @@ export function getFunctionSignaturesByReturnType(
   }
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
-    list.push(...evalFunctionDefinitions);
+    list.push(...scalarFunctionDefinitions);
   }
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
