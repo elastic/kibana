@@ -20,4 +20,8 @@ export type {
 export type { CspFinding } from './types/findings';
 export type { BenchmarksCisId } from './types/benchmark';
 export * from './constants';
-export { extractErrorMessage, buildMutedRulesFilter } from './utils/helpers';
+export {
+  extractErrorMessage,
+  buildMutedRulesFilter,
+  buildEntityFlyoutPreviewQuery,
+} from './utils/helpers';

@@ -11,8 +11,9 @@ import type {
   SearchIndicesAppPluginStartDependencies,
   SearchIndicesPluginSetup,
   SearchIndicesPluginStart,
-  SearchIndicesServicesContext,
+  SearchIndicesServicesContextDeps,
 } from './types';
+import { initQueryClient } from './services/query_client';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
@@ -20,21 +21,40 @@ export class SearchIndicesPlugin
   public setup(
     core: CoreSetup<SearchIndicesAppPluginStartDependencies, SearchIndicesPluginStart>
   ): SearchIndicesPluginSetup {
+    const queryClient = initQueryClient(core.notifications.toasts);
+
     core.application.register({
       id: 'elasticsearchStart',
       appRoute: '/app/elasticsearch/start',
-      title: i18n.translate('xpack.searchIndices.startAppTitle', {
+      title: i18n.translate('xpack.searchIndices.elasticsearchStart.startAppTitle', {
         defaultMessage: 'Elasticsearch Start',
       }),
       async mount({ element, history }) {
         const { renderApp } = await import('./application');
         const { ElasticsearchStartPage } = await import('./components/start/start_page');
         const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: Partial<SearchIndicesServicesContext> = {
+        const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,
           history,
         };
-        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element);
+        return renderApp(ElasticsearchStartPage, coreStart, startDeps, element, queryClient);
+      },
+    });
+    core.application.register({
+      id: 'elasticsearchIndices',
+      appRoute: '/app/elasticsearch/indices',
+      title: i18n.translate('xpack.searchIndices.elasticsearchIndices.startAppTitle', {
+        defaultMessage: 'Elasticsearch Indices',
+      }),
+      async mount({ element, history }) {
+        const { renderApp } = await import('./application');
+        const { SearchIndicesRouter } = await import('./components/indices/indices_router');
+        const [coreStart, depsStart] = await core.getStartServices();
+        const startDeps: SearchIndicesServicesContextDeps = {
+          ...depsStart,
+          history,
+        };
+        return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
     });
 

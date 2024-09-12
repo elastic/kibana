@@ -125,7 +125,9 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
-  getAIAssistantKnowledgeBaseDataClient: () => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAIAssistantKnowledgeBaseDataClient: (
+    v2KnowledgeBaseEnabled?: boolean
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;

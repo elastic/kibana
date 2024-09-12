@@ -28,6 +28,9 @@ import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { FindResponse } from '../ai_assistant_data_clients/find';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
@@ -215,6 +218,39 @@ export const appendMessageToConversation = async ({
   return updatedConversation;
 };
 
+export interface GetSystemPromptFromUserConversationParams {
+  conversationsDataClient: AIAssistantConversationsDataClient;
+  conversationId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): string | undefined => {
+  if (result.total > 0 && result.data.hits.hits.length > 0) {
+    return result.data.hits.hits[0]._source?.content;
+  }
+  return undefined;
+};
+
+export const getSystemPromptFromUserConversation = async ({
+  conversationsDataClient,
+  conversationId,
+  promptsDataClient,
+}: GetSystemPromptFromUserConversationParams): Promise<string | undefined> => {
+  const conversation = await conversationsDataClient.getConversation({ id: conversationId });
+  if (!conversation) {
+    return undefined;
+  }
+  const currentSystemPromptId = conversation.apiConfig?.defaultSystemPromptId;
+  if (!currentSystemPromptId) {
+    return undefined;
+  }
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${currentSystemPromptId}"`,
+  });
+  return extractPromptFromESResult(result);
+};
+
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
@@ -302,6 +338,7 @@ export interface LangChainExecuteParams {
   getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  systemPrompt?: string;
 }
 export const langChainExecute = async ({
   messages,
@@ -322,6 +359,7 @@ export const langChainExecute = async ({
   response,
   responseLanguage,
   isStream = true,
+  systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -333,6 +371,8 @@ export const langChainExecute = async ({
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
+  const v2KnowledgeBaseEnabled =
+    assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -348,7 +388,8 @@ export const langChainExecute = async ({
 
   // Create an ElasticsearchStore for KB interactions
   const kbDataClient =
-    (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient(v2KnowledgeBaseEnabled)) ??
+    undefined;
   const bedrockChatEnabled =
     assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
   const esStore = new ElasticsearchStore(
@@ -390,6 +431,7 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     size: request.body.size,
+    systemPrompt,
     traceOptions: {
       projectName: request.body.langSmithProject,
       tracers: getLangSmithTracer({
@@ -590,4 +632,27 @@ export const performChecks = ({
   }
 
   return undefined;
+};
+
+/**
+ * Returns whether the v2 KB is enabled
+ *
+ * @param context - Route context
+ * @param request - Route KibanaRequest
+
+ */
+export const isV2KnowledgeBaseEnabled = ({
+  context,
+  request,
+}: {
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
+  request: KibanaRequest;
+}): boolean => {
+  const pluginName = getPluginNameFromRequest({
+    request,
+    defaultPluginName: DEFAULT_PLUGIN_NAME,
+  });
+  return context.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
 };

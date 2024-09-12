@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
@@ -30,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               body: {
@@ -52,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               terminateAfter: 1,
@@ -77,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             body: {
               query: {
@@ -93,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/banana`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             body: {
               query: {
@@ -101,9 +109,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(404);
-
         verifyErrorResponse(resp.body, 404);
-        expect(resp.body.message).to.contain('banana not found');
+        expect(resp.body.message).to.be('Search strategy banana not found');
         expect(resp.header).to.have.property(ELASTIC_HTTP_VERSION_HEADER, '1');
       });
 
@@ -111,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               timeout: 1, // This should be a time range string!
@@ -132,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({
             params: {
               body: {
@@ -149,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(painlessErrReq)
           .expect(400);
 
@@ -161,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .delete(`/internal/search/es`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send()
           .expect(404);
         verifyErrorResponse(resp.body, 404);
@@ -170,6 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .delete(`/internal/search/es/123`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send()
           .expect(400);
         verifyErrorResponse(resp.body, 400);

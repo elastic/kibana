@@ -21,7 +21,11 @@ import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telem
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
+import {
+  appendAssistantMessageToConversation,
+  getSystemPromptFromUserConversation,
+  langChainExecute,
+} from './helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -90,6 +94,7 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
+          const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
           onLlmResponse = async (
             content: string,
@@ -107,7 +112,14 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
           };
-
+          let systemPrompt;
+          if (conversationsDataClient && promptsDataClient && conversationId) {
+            systemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId,
+              promptsDataClient,
+            });
+          }
           return await langChainExecute({
             abortSignal,
             isStream: request.body.subAction !== 'invokeAI',
@@ -126,6 +138,7 @@ export const postActionsConnectorExecuteRoute = (
             request,
             response,
             telemetry,
+            systemPrompt,
           });
         } catch (err) {
           logger.error(err);
