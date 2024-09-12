@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
 import {
   RuleExecutionStatusErrorReasons,
@@ -15,7 +15,6 @@ import { RuleStatus } from '../../types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
@@ -282,7 +281,7 @@ describe('useLoadRules', () => {
       sort: { field: 'name', direction: 'asc' },
     };
 
-    const { result, waitForNextUpdate, rerender } = renderHook(() => useLoadRules(params), {
+    const { result, rerender } = renderHook(() => useLoadRules(params), {
       wrapper,
     });
 
@@ -291,7 +290,7 @@ describe('useLoadRules', () => {
     expect(result.current.rulesState.isLoading).toBeTruthy();
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current.rulesState.initialLoad).toBeFalsy();
     expect(result.current.hasData).toBeTruthy();
@@ -339,12 +338,12 @@ describe('useLoadRules', () => {
       sort: { field: 'name', direction: 'asc' },
     };
 
-    const { waitForNextUpdate, rerender } = renderHook(() => useLoadRules(params), {
+    const { rerender } = renderHook(() => useLoadRules(params), {
       wrapper,
     });
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(loadRulesWithKueryFilter).toBeCalledWith(
       expect.objectContaining({
@@ -391,7 +390,7 @@ describe('useLoadRules', () => {
       sort: { field: 'name', direction: 'asc' },
     };
 
-    const { rerender, waitForNextUpdate } = renderHook(
+    const { rerender } = renderHook(
       () => {
         return useLoadRules(params);
       },
@@ -399,7 +398,7 @@ describe('useLoadRules', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(onPage).toHaveBeenCalledWith({
       index: 0,
@@ -459,14 +458,14 @@ describe('useLoadRules', () => {
         sort: { field: 'name', direction: 'asc' },
       };
 
-      const { rerender, result, waitForNextUpdate } = renderHook(() => useLoadRules(params), {
+      const { rerender, result } = renderHook(() => useLoadRules(params), {
         wrapper,
       });
 
       expect(result.current.hasData).toBeFalsy();
 
       rerender();
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(result.current.hasData).toBeFalsy();
     });
@@ -494,14 +493,14 @@ describe('useLoadRules', () => {
         hasDefaultRuleTypesFiltersOn: true,
       };
 
-      const { rerender, result, waitForNextUpdate } = renderHook(() => useLoadRules(params), {
+      const { rerender, result } = renderHook(() => useLoadRules(params), {
         wrapper,
       });
 
       expect(result.current.hasData).toBeFalsy();
 
       rerender();
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(result.current.hasData).toBeFalsy();
     });

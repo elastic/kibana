@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useSubAction, UseSubActionParams } from './use_sub_action';
 
@@ -30,8 +30,8 @@ describe('useSubAction', () => {
   });
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useSubAction(params));
+    await waitFor(() => null);
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -41,8 +41,8 @@ describe('useSubAction', () => {
   });
 
   it('executes the sub action correctly', async () => {
-    const { waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
+    renderHook(() => useSubAction(params));
+    await waitFor(() => null);
 
     expect(mockHttpPost).toHaveBeenCalledWith('/api/actions/connector/test-id/_execute', {
       body: '{"params":{"subAction":"test","subActionParams":{"foo":"bar"}}}',
@@ -51,45 +51,45 @@ describe('useSubAction', () => {
   });
 
   it('executes sub action if subAction parameter changes', async () => {
-    const { rerender, waitForNextUpdate } = renderHook(useSubAction, { initialProps: params });
-    await waitForNextUpdate();
+    const { rerender } = renderHook(useSubAction, { initialProps: params });
+    await waitFor(() => null);
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       rerender({ ...params, subAction: 'test-2' });
-      await waitForNextUpdate();
+      await waitFor(() => null);
     });
 
     expect(mockHttpPost).toHaveBeenCalledTimes(2);
   });
 
   it('executes sub action if connectorId parameter changes', async () => {
-    const { rerender, waitForNextUpdate } = renderHook(useSubAction, { initialProps: params });
-    await waitForNextUpdate();
+    const { rerender } = renderHook(useSubAction, { initialProps: params });
+    await waitFor(() => null);
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       rerender({ ...params, connectorId: 'test-id-2' });
-      await waitForNextUpdate();
+      await waitFor(() => null);
     });
 
     expect(mockHttpPost).toHaveBeenCalledTimes(2);
   });
 
   it('returns memoized response if subActionParams changes but values are equal', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(useSubAction, {
+    const { result, rerender } = renderHook(useSubAction, {
       initialProps: { ...params, subActionParams: { foo: 'bar' } },
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     const previous = result.current;
 
     await act(async () => {
       rerender({ ...params, subActionParams: { foo: 'bar' } });
-      await waitForNextUpdate();
+      await waitFor(() => null);
     });
 
     expect(result.current.response).toBe(previous.response);
@@ -97,17 +97,17 @@ describe('useSubAction', () => {
   });
 
   it('executes sub action if subActionParams changes and values are not equal', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(useSubAction, {
+    const { result, rerender } = renderHook(useSubAction, {
       initialProps: { ...params, subActionParams: { foo: 'bar' } },
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     const previous = result.current;
 
     await act(async () => {
       rerender({ ...params, subActionParams: { foo: 'baz' } });
-      await waitForNextUpdate();
+      await waitFor(() => null);
     });
 
     expect(result.current.response).not.toBe(previous.response);
@@ -118,8 +118,8 @@ describe('useSubAction', () => {
     const error = new Error('error executing');
     mockHttpPost.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() => useSubAction(params));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useSubAction(params));
+    await waitFor(() => null);
 
     expect(result.current).toEqual({
       isLoading: false,

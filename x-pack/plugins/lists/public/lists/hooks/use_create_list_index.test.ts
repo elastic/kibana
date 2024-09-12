@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -28,13 +28,13 @@ describe('useCreateListIndex', () => {
   });
 
   it('should call Api.createListIndex when start() executes', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useCreateListIndex({ http: httpMock }), {
+    const { result } = renderHook(() => useCreateListIndex({ http: httpMock }), {
       wrapper: queryWrapper,
     });
     act(() => {
       result.current.start();
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(Api.createListIndex).toHaveBeenCalledWith(expect.objectContaining({ http: httpMock }));
   });
@@ -43,15 +43,14 @@ describe('useCreateListIndex', () => {
     const onError = jest.fn();
     jest.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCreateListIndex({ http: httpMock, onError }),
-      { wrapper: queryWrapper }
-    );
+    const { result } = renderHook(() => useCreateListIndex({ http: httpMock, onError }), {
+      wrapper: queryWrapper,
+    });
 
     act(() => {
       result.current.start();
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(onError).toHaveBeenCalledWith(new Error('Mocked error'), undefined, undefined);
   });
@@ -60,20 +59,20 @@ describe('useCreateListIndex', () => {
     jest.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
     const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-    const { result, waitForNextUpdate } = renderHook(() => useCreateListIndex({ http: httpMock }), {
+    const { result } = renderHook(() => useCreateListIndex({ http: httpMock }), {
       wrapper: queryWrapper,
     });
 
     act(() => {
       result.current.start();
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
 
   it('should invalidate read index query on success', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useCreateListIndex({ http: httpMock }), {
+    const { result } = renderHook(() => useCreateListIndex({ http: httpMock }), {
       wrapper: queryWrapper,
     });
     const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
@@ -81,7 +80,7 @@ describe('useCreateListIndex', () => {
     act(() => {
       result.current.start();
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith(['detectionEngine', 'listIndex']);
   });

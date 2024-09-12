@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
 import type { UseMessagesStorage } from './use_messages_storage';
 import { useMessagesStorage } from './use_messages_storage';
@@ -18,35 +18,30 @@ describe('useLocalStorage', () => {
   });
 
   it('should return an empty array when there is no messages', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
-      const { getMessages } = result.current;
+    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    await waitFor(() => null);
+    const { getMessages } = result.current;
+    act(() => {
       expect(getMessages('case')).toEqual([]);
     });
   });
 
   it('should add a message', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
-      const { getMessages, addMessage } = result.current;
+    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    await waitFor(() => null);
+    const { getMessages, addMessage } = result.current;
+    act(() => {
       addMessage('case', 'id-1');
       expect(getMessages('case')).toEqual(['id-1']);
     });
   });
 
   it('should add multiple messages', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
-      const { getMessages, addMessage } = result.current;
+    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    await waitFor(() => null);
+    const { getMessages, addMessage } = result.current;
+
+    act(() => {
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
       expect(getMessages('case')).toEqual(['id-1', 'id-2']);
@@ -54,12 +49,11 @@ describe('useLocalStorage', () => {
   });
 
   it('should remove a message', async () => {
+    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    await waitFor(() => null);
+    const { getMessages, addMessage, removeMessage } = result.current;
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
-      const { getMessages, addMessage, removeMessage } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
       removeMessage('case', 'id-2');
@@ -68,12 +62,10 @@ describe('useLocalStorage', () => {
   });
 
   it('should return presence of a message', async () => {
+    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    await waitFor(() => null);
+    const { hasMessage, addMessage, removeMessage } = result.current;
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
-      const { hasMessage, addMessage, removeMessage } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
       removeMessage('case', 'id-2');
@@ -83,12 +75,10 @@ describe('useLocalStorage', () => {
   });
 
   it('should clear all messages', async () => {
+    const { result } = renderHook<string, UseMessagesStorage>(() => useMessagesStorage());
+    await waitFor(() => null);
+    const { getMessages, addMessage, clearAllMessages } = result.current;
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
-        useMessagesStorage()
-      );
-      await waitForNextUpdate();
-      const { getMessages, addMessage, clearAllMessages } = result.current;
       addMessage('case', 'id-1');
       addMessage('case', 'id-2');
       clearAllMessages('case');

@@ -10,7 +10,7 @@ import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { AppLinkItems, LinkItem, LinksPermissions } from './types';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   useAppLinks,
   getAncestorLinksInfo,
@@ -110,7 +110,7 @@ describe('Security links', () => {
     });
 
     it('should filter not allowed links', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       // this link should not be excluded, the test checks all conditions are passed
       const networkLinkItem = {
         id: SecurityPageName.network,
@@ -182,8 +182,9 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
+
+      await waitFor(() => null);
 
       expect(result.current).toStrictEqual([networkLinkItem]);
     });
@@ -192,7 +193,7 @@ describe('Security links', () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
 
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const networkLinkItem = {
         id: SecurityPageName.network,
         title: 'Network',
@@ -249,8 +250,9 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
+
+      await waitFor(() => null);
 
       expect(result.current).toStrictEqual([{ ...networkLinkItem, unauthorized: true }]);
     });
@@ -258,7 +260,7 @@ describe('Security links', () => {
     it('should return unauthorized page when page has upselling (ESS)', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
         title: 'Hosts',
@@ -278,8 +280,10 @@ describe('Security links', () => {
           upselling: mockUpselling,
           uiSettingsClient: mockUiSettingsClient,
         });
-        await waitForNextUpdate();
       });
+
+      await waitFor(() => null);
+
       expect(result.current).toStrictEqual([{ ...hostLinkItem, unauthorized: true }]);
 
       // cleanup
@@ -289,7 +293,7 @@ describe('Security links', () => {
     it('should filter out experimental page even if it has upselling', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
         title: 'Hosts',
@@ -310,8 +314,9 @@ describe('Security links', () => {
           upselling: mockUpselling,
           uiSettingsClient: mockUiSettingsClient,
         });
-        await waitForNextUpdate();
       });
+
+      await waitFor(() => null);
       expect(result.current).toStrictEqual([]);
 
       // cleanup
@@ -331,7 +336,7 @@ describe('Security links', () => {
     });
 
     it('should update if the links are removed', async () => {
-      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
       expect(result.current).toBe(true);
       await act(async () => {
         updateAppLinks(
@@ -350,13 +355,14 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
+
+      await waitFor(() => null);
       expect(result.current).toBe(false);
     });
 
     it('should update if the links are added', async () => {
-      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.rules);
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
       expect(result.current).toBe(false);
       await act(async () => {
         updateAppLinks(
@@ -382,8 +388,9 @@ describe('Security links', () => {
             uiSettingsClient: mockUiSettingsClient,
           }
         );
-        await waitForNextUpdate();
       });
+
+      await waitFor(() => null);
       expect(result.current).toBe(true);
     });
   });

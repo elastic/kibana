@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 
@@ -71,16 +71,13 @@ describe('useAggregatedAnomaliesByJob', () => {
   });
 
   it('refetch calls useSecurityJobs().refetch', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+    const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+      wrapper: TestProviders,
+    });
 
-      await waitForNextUpdate();
+    await waitFor(() => null);
 
+    act(() => {
       result.current.refetch();
     });
 
@@ -88,98 +85,82 @@ describe('useAggregatedAnomaliesByJob', () => {
   });
 
   it('returns formated data', async () => {
-    await act(async () => {
-      const jobCount = { key: jobId, doc_count: 99 };
-      mockAnomaliesSearch.mockResolvedValue({
-        aggregations: { number_of_anomalies: { buckets: [jobCount] } },
-      });
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(result.current.data).toEqual(
-        expect.arrayContaining([
-          {
-            count: 99,
-            name: jobId,
-            job,
-            entity: AnomalyEntity.Host,
-          },
-        ])
-      );
+    const jobCount = { key: jobId, doc_count: 99 };
+    mockAnomaliesSearch.mockResolvedValue({
+      aggregations: { number_of_anomalies: { buckets: [jobCount] } },
     });
+    const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => null);
+
+    expect(result.current.data).toEqual(
+      expect.arrayContaining([
+        {
+          count: 99,
+          name: jobId,
+          job,
+          entity: AnomalyEntity.Host,
+        },
+      ])
+    );
   });
 
   it('returns jobs sorted by name', async () => {
-    await act(async () => {
-      const firstJobId = 'v3_windows_anomalous_script';
-      const secondJobId = 'auth_rare_source_ip_for_a_user';
-      const fistJobCount = { key: firstJobId, doc_count: 99 };
-      const secondJobCount = { key: secondJobId, doc_count: 99 };
-      const firstJobSecurityName = '0000001';
-      const secondJobSecurityName = '0000002';
-      const firstJob = {
-        id: firstJobId,
-        jobState: 'started',
-        datafeedState: 'started',
-        customSettings: {
-          security_app_display_name: firstJobSecurityName,
-        },
-      };
-      const secondJob = {
-        id: secondJobId,
-        jobState: 'started',
-        datafeedState: 'started',
-        customSettings: {
-          security_app_display_name: secondJobSecurityName,
-        },
-      };
+    const firstJobId = 'v3_windows_anomalous_script';
+    const secondJobId = 'auth_rare_source_ip_for_a_user';
+    const fistJobCount = { key: firstJobId, doc_count: 99 };
+    const secondJobCount = { key: secondJobId, doc_count: 99 };
+    const firstJobSecurityName = '0000001';
+    const secondJobSecurityName = '0000002';
+    const firstJob = {
+      id: firstJobId,
+      jobState: 'started',
+      datafeedState: 'started',
+      customSettings: {
+        security_app_display_name: firstJobSecurityName,
+      },
+    };
+    const secondJob = {
+      id: secondJobId,
+      jobState: 'started',
+      datafeedState: 'started',
+      customSettings: {
+        security_app_display_name: secondJobSecurityName,
+      },
+    };
 
-      mockAnomaliesSearch.mockResolvedValue({
-        aggregations: { number_of_anomalies: { buckets: [fistJobCount, secondJobCount] } },
-      });
-
-      mockUseSecurityJobs.mockReturnValue({
-        loading: false,
-        isMlAdmin: true,
-        jobs: [firstJob, secondJob],
-        refetch: useSecurityJobsRefetch,
-      });
-
-      const { result, waitForNextUpdate } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      const names = result.current.data.map(({ name }) => name);
-
-      expect(names[0]).toEqual(firstJobSecurityName);
-      expect(names[1]).toEqual(secondJobSecurityName);
+    mockAnomaliesSearch.mockResolvedValue({
+      aggregations: { number_of_anomalies: { buckets: [fistJobCount, secondJobCount] } },
     });
+
+    mockUseSecurityJobs.mockReturnValue({
+      loading: false,
+      isMlAdmin: true,
+      jobs: [firstJob, secondJob],
+      refetch: useSecurityJobsRefetch,
+    });
+
+    const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => null);
+
+    const names = result.current.data.map(({ name }) => name);
+
+    expect(names[0]).toEqual(firstJobSecurityName);
+    expect(names[1]).toEqual(secondJobSecurityName);
   });
 
   it('does not throw error when aggregations is undefined', async () => {
-    await act(async () => {
-      mockAnomaliesSearch.mockResolvedValue({});
-      const { waitForNextUpdate } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(mockAddToastError).not.toBeCalled();
+    mockAnomaliesSearch.mockResolvedValue({});
+    renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+      wrapper: TestProviders,
     });
+
+    await waitFor(() => null);
+
+    expect(mockAddToastError).not.toBeCalled();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -38,10 +38,11 @@ describe('useInstalledSecurityJobs', () => {
     });
 
     it('returns jobs and permissions', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs(), {
+      const { result } = renderHook(() => useInstalledSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+
+      await waitFor(() => null);
 
       expect(result.current.jobs).toHaveLength(3);
       expect(result.current.jobs).toEqual(
@@ -71,10 +72,10 @@ describe('useInstalledSecurityJobs', () => {
     });
 
     it('filters out non-security jobs', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs(), {
+      const { result } = renderHook(() => useInstalledSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(result.current.jobs.length).toBeGreaterThan(0);
       expect(result.current.jobs.every(isSecurityJob)).toEqual(true);
@@ -82,10 +83,12 @@ describe('useInstalledSecurityJobs', () => {
 
     it('renders a toast error if the ML call fails', async () => {
       (getJobsSummary as jest.Mock).mockRejectedValue('whoops');
-      const { waitForNextUpdate } = renderHook(() => useInstalledSecurityJobs(), {
+
+      renderHook(() => useInstalledSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+
+      await waitFor(() => null);
 
       expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
         title: 'Security job fetch failure',

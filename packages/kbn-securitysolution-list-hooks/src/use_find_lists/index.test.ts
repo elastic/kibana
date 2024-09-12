@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useFindLists } from '.';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -26,11 +26,11 @@ describe('useFindLists', () => {
   });
 
   it('invokes Api.findLists', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useFindLists());
+    const { result } = renderHook(() => useFindLists());
     act(() => {
       result.current.start({ http: httpMock, pageIndex: 1, pageSize: 10 });
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(Api.findLists).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, pageIndex: 1, pageSize: 10 })

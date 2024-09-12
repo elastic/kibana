@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
 
 const mockDispatch = jest.fn();
@@ -84,14 +83,16 @@ describe('source/index.tsx', () => {
       });
     });
     it('sets field data for data view', async () => {
-      await act(async () => {
-        const { waitForNextUpdate, result } = renderHook<
-          PropsWithChildren<{}>,
-          { indexFieldsSearch: IndexFieldSearch }
-        >(() => useDataView(), {
+      const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
+        () => useDataView(),
+        {
           wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
+        }
+      );
+
+      await waitFor(() => null);
+
+      await act(async () => {
         await result.current.indexFieldsSearch({ dataViewId: 'neato' });
       });
       expect(mockDispatch.mock.calls[0][0]).toEqual({
@@ -105,14 +106,17 @@ describe('source/index.tsx', () => {
 
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
-      await act(async () => {
-        const { waitForNextUpdate, result } = renderHook<
-          PropsWithChildren<{}>,
-          { indexFieldsSearch: IndexFieldSearch }
-        >(() => useDataView(), {
+
+      const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
+        () => useDataView(),
+        {
           wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
+        }
+      );
+
+      await waitFor(() => null);
+
+      await act(async () => {
         indexFieldsSearch = result.current.indexFieldsSearch;
       });
 
@@ -134,14 +138,14 @@ describe('source/index.tsx', () => {
 
     it('should not reuse the result for dataView info when cleanCache passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
-      await act(async () => {
-        const { waitForNextUpdate, result } = renderHook<
-          PropsWithChildren<{}>,
-          { indexFieldsSearch: IndexFieldSearch }
-        >(() => useDataView(), {
+      const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
+        () => useDataView(),
+        {
           wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
+        }
+      );
+      await waitFor(() => null);
+      await act(async () => {
         indexFieldsSearch = result.current.indexFieldsSearch;
       });
 

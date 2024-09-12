@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { TourContextProvider, useTourContext } from './tour';
@@ -67,10 +67,10 @@ describe('useTourContext', () => {
     });
     it('endTourStep calls completeGuideStep with correct tourId', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+        const { result } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
-        await waitForNextUpdate();
+        await waitFor(() => null);
         result.current.endTourStep(tourId);
         expect(mockCompleteGuideStep).toHaveBeenCalledWith(siemGuideId, tourId);
       });
@@ -83,10 +83,10 @@ describe('useTourContext', () => {
     });
     it('incrementStep properly increments for each tourId, and if attempted to increment beyond length of tour config steps resets activeStep to 1', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+        const { result } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
-        await waitForNextUpdate();
+        await waitFor(() => null);
         const stepCount = securityTourConfig[tourId].length;
         for (let i = 0; i < stepCount - 1; i++) {
           result.current.incrementStep(tourId);
@@ -100,10 +100,10 @@ describe('useTourContext', () => {
 
     it('setStep sets activeStep to step number argument', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+        const { result } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
-        await waitForNextUpdate();
+        await waitFor(() => null);
         result.current.setStep(tourId, 7);
         expect(result.current.activeStep).toBe(7);
       });
@@ -111,10 +111,10 @@ describe('useTourContext', () => {
 
     it('does not setStep sets activeStep to non-existing step number', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+        const { result } = renderHook(() => useTourContext(), {
           wrapper: TourContextProvider,
         });
-        await waitForNextUpdate();
+        await waitFor(() => null);
         // @ts-expect-error testing invalid step
         result.current.setStep(tourId, 88);
         expect(result.current.activeStep).toBe(1);

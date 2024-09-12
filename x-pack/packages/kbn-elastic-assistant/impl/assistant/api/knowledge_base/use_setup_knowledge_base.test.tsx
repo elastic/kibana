@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSetupKnowledgeBase, UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { postKnowledgeBase as _postKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
@@ -50,8 +50,8 @@ describe('useSetupKnowledgeBase', () => {
   });
   it('should call api to post knowledge base setup', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useSetupKnowledgeBase(defaultProps));
+      await waitFor(() => null);
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
@@ -73,8 +73,8 @@ describe('useSetupKnowledgeBase', () => {
       }
     });
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useSetupKnowledgeBase(defaultProps));
+      await waitFor(() => null);
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
@@ -88,8 +88,8 @@ describe('useSetupKnowledgeBase', () => {
 
   it('should return setup response', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useSetupKnowledgeBase(defaultProps));
+      await waitFor(() => null);
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
     });
@@ -98,8 +98,8 @@ describe('useSetupKnowledgeBase', () => {
   it('should display error toast when api throws error', async () => {
     postKnowledgeBaseMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useSetupKnowledgeBase(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useSetupKnowledgeBase(defaultProps));
+      await waitFor(() => null);
 
       expect(toasts.addError).toHaveBeenCalled();
     });

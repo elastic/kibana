@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { noConnectorsCasePermission, TestProviders } from '../../common/mock';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
@@ -26,13 +26,11 @@ describe('useConnectors', () => {
 
   it('fetches connectors', async () => {
     const spy = jest.spyOn(api, 'getSupportedActionConnectors');
-    const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+    renderHook(() => useGetSupportedActionConnectors(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
   });
@@ -46,12 +44,10 @@ describe('useConnectors', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+    renderHook(() => useGetSupportedActionConnectors(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });
@@ -60,13 +56,11 @@ describe('useConnectors', () => {
     const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
     useApplicationCapabilitiesMock().actions = { crud: false, read: false };
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+    const { result } = renderHook(() => useGetSupportedActionConnectors(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spyOnFetchConnectors).not.toHaveBeenCalled();
     expect(result.current.data).toEqual([]);
@@ -76,13 +70,13 @@ describe('useConnectors', () => {
     const spyOnFetchConnectors = jest.spyOn(api, 'getSupportedActionConnectors');
     useApplicationCapabilitiesMock().actions = { crud: true, read: true };
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetSupportedActionConnectors(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+    const { result } = renderHook(() => useGetSupportedActionConnectors(), {
+      wrapper: ({ children }) => (
         <TestProviders permissions={noConnectorsCasePermission()}>{children}</TestProviders>
       ),
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spyOnFetchConnectors).not.toHaveBeenCalled();
     expect(result.current.data).toEqual([]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { DataQualityProvider } from '../../../../../data_quality_context';
@@ -89,10 +89,10 @@ describe('useIlmExplain', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockIlmExplain);
 
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      const { result } = renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       ilmExplainResult = await result.current;
     });
 
@@ -113,8 +113,8 @@ describe('useIlmExplain', () => {
     let ilmExplainResult: UseIlmExplain | undefined;
 
     beforeEach(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+      const { result } = renderHook(() => useIlmExplain(pattern), {
+        wrapper: ({ children }) => (
           <DataQualityProvider
             httpFetch={mockHttpFetch}
             telemetryEvents={mockTelemetryEvents}
@@ -164,7 +164,7 @@ describe('useIlmExplain', () => {
           </DataQualityProvider>
         ),
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       ilmExplainResult = await result.current;
     });
 
@@ -184,10 +184,10 @@ describe('useIlmExplain', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+      const { result } = renderHook(() => useIlmExplain(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       ilmExplainResult = await result.current;
     });
 

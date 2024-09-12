@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useSuggestUsers } from './use_suggest_users';
 
 import * as api from './api';
@@ -27,10 +27,10 @@ describe('useSuggestUsers hook', () => {
 
   it('returns an array of userProfiles', async () => {
     const spyOnUserProfiles = jest.spyOn(api, 'suggestUsers');
-    const { result, waitForNextUpdate } = renderHook(() => useSuggestUsers({ searchTerm: '' }), {
+    const { result } = renderHook(() => useSuggestUsers({ searchTerm: '' }), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
     expect(result.current.isLoading).toEqual(false);
     expect(result.current.data).toEqual(mockUserProfiles);

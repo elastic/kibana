@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';
@@ -66,12 +66,12 @@ describe('useAlertsCount', () => {
   it('should return the mocked data from API', async () => {
     mockedPostAPI.mockResolvedValue(mockedAlertsCountResponse);
 
-    const { result, waitForNextUpdate } = renderHook(() => useAlertsCount({ featureIds }));
+    const { result } = renderHook(() => useAlertsCount({ featureIds }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.alertsCount).toEqual(undefined);
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const { alertsCount, loading, error } = result.current;
     expect(alertsCount).toEqual(expectedResult);
@@ -88,14 +88,14 @@ describe('useAlertsCount', () => {
     };
     mockedPostAPI.mockResolvedValue(mockedAlertsCountResponse);
 
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useAlertsCount({
         featureIds,
         query,
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const body = JSON.stringify({
       aggs: {
@@ -118,9 +118,9 @@ describe('useAlertsCount', () => {
     const error = new Error('Fetch Alerts Count Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() => useAlertsCount({ featureIds }));
+    const { result } = renderHook(() => useAlertsCount({ featureIds }));
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current.error?.message).toMatch(error.message);
   });

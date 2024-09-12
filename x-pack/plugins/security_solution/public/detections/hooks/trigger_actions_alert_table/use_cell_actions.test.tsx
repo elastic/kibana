@@ -16,7 +16,7 @@ import type {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, waitFor } from '@testing-library/react';
 import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'react';
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
@@ -85,7 +85,7 @@ const TestProviderWithCustomStateAndActions = withCustomPropsAndCellActions({
 
 describe('getUseCellActionsHook', () => {
   it('should render cell actions correctly for gridView view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useCellActions({
           columns: mockColumns as unknown as EuiDataGridColumn[],
@@ -100,7 +100,7 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const cellAction = result.current.getCellActions('host.name', 0)[0];
 
@@ -110,7 +110,7 @@ describe('getUseCellActionsHook', () => {
   });
 
   it('should not render cell actions correctly for eventRendered view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useCellActions({
           columns: mockColumns as unknown as EuiDataGridColumn[],
@@ -127,7 +127,7 @@ describe('getUseCellActionsHook', () => {
 
     const cellAction = result.current.getCellActions('host.name', 0);
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(cellAction).toHaveLength(0);
   });

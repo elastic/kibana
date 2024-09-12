@@ -8,7 +8,7 @@
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useLoadConnectors } from './use_load_connectors';
 import { useKibana } from './use_kibana';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;
@@ -74,40 +74,38 @@ describe('useLoadConnectors', () => {
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors());
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useLoadConnectors());
+    await waitFor(() => null);
 
-      await expect(result.current).resolves.toStrictEqual([
-        {
-          actionTypeId: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-          },
-          id: '1',
-          isMissingSecrets: false,
-          title: 'OpenAI',
-          type: 'openai',
+    await expect(result.current).resolves.toStrictEqual([
+      {
+        actionTypeId: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
         },
-        {
-          actionTypeId: '.gen-ai',
-          config: {
-            apiProvider: 'Azure OpenAI',
-          },
-          id: '3',
-          isMissingSecrets: false,
-          title: 'OpenAI Azure',
-          type: 'openai_azure',
+        id: '1',
+        isMissingSecrets: false,
+        title: 'OpenAI',
+        type: 'openai',
+      },
+      {
+        actionTypeId: '.gen-ai',
+        config: {
+          apiProvider: 'Azure OpenAI',
         },
-        {
-          actionTypeId: '.bedrock',
-          id: '4',
-          isMissingSecrets: false,
-          title: 'Bedrock',
-          type: 'bedrock',
-        },
-      ]);
-    });
+        id: '3',
+        isMissingSecrets: false,
+        title: 'OpenAI Azure',
+        type: 'openai_azure',
+      },
+      {
+        actionTypeId: '.bedrock',
+        id: '4',
+        isMissingSecrets: false,
+        title: 'Bedrock',
+        type: 'bedrock',
+      },
+    ]);
   });
 
   it('handles pre-configured connectors', async () => {
@@ -133,44 +131,40 @@ describe('useLoadConnectors', () => {
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors());
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useLoadConnectors());
+    await waitFor(() => null);
 
-      await expect(result.current).resolves.toStrictEqual([
-        {
-          actionTypeId: '.gen-ai',
-          id: '1',
-          isMissingSecrets: false,
-          isPreconfigured: true,
-          name: 'OpenAI',
-          title: 'OpenAI',
-          type: 'openai',
-        },
-        {
-          actionTypeId: '.gen-ai',
-          config: { apiProvider: 'Azure OpenAI' },
-          id: '3',
-          isMissingSecrets: false,
-          title: 'OpenAI Azure',
-          type: 'openai_azure',
-        },
-      ]);
-    });
+    await expect(result.current).resolves.toStrictEqual([
+      {
+        actionTypeId: '.gen-ai',
+        id: '1',
+        isMissingSecrets: false,
+        isPreconfigured: true,
+        name: 'OpenAI',
+        title: 'OpenAI',
+        type: 'openai',
+      },
+      {
+        actionTypeId: '.gen-ai',
+        config: { apiProvider: 'Azure OpenAI' },
+        id: '3',
+        isMissingSecrets: false,
+        title: 'OpenAI Azure',
+        type: 'openai_azure',
+      },
+    ]);
   });
 
   it('handles errors correctly', async () => {
     const error = new Error('Test Error');
     mockedLoadConnectors.mockRejectedValue(error);
 
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useLoadConnectors());
-      await waitForNextUpdate();
+    renderHook(() => useLoadConnectors());
+    await waitFor(() => null);
 
-      expect(mockedUseKibana().services.notifications.toasts.addError).toHaveBeenCalledWith(
-        error,
-        expect.any(Object)
-      );
-    });
+    expect(mockedUseKibana().services.notifications.toasts.addError).toHaveBeenCalledWith(
+      error,
+      expect.any(Object)
+    );
   });
 });

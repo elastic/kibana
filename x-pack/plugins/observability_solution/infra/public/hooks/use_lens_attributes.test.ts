@@ -6,7 +6,7 @@
  */
 
 import 'jest-canvas-mock';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useLensAttributes } from './use_lens_attributes';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -72,15 +72,15 @@ describe('useLensAttributes hook', () => {
   });
 
   it('should return the basic lens attributes', async () => {
-    const { waitForNextUpdate } = renderHook(() => useLensAttributes(params));
-    await waitForNextUpdate();
+    renderHook(() => useLensAttributes(params));
+    await waitFor(() => null);
 
     expect(LensConfigBuilderMock.mock.instances[0].build).toHaveBeenCalledWith(params);
   });
 
   it('should return extra actions', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLensAttributes(params));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useLensAttributes(params));
+    await waitFor(() => null);
 
     const extraActions = result.current.getExtraActions({
       timeRange: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from './use_kibana';
 import { PlaygroundProvider } from '../providers/playground_provider';
 import React from 'react';
@@ -76,7 +76,7 @@ describe.skip('useSourceIndicesFields Hook', () => {
   });
 
   it('should handle addIndex correctly changing indices', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSourceIndicesFields(), { wrapper });
+    const { result } = renderHook(() => useSourceIndicesFields(), { wrapper });
     const { getValues } = formHookSpy.mock.results[0].value;
 
     act(() => {
@@ -103,10 +103,8 @@ describe.skip('useSourceIndicesFields Hook', () => {
       result.current.addIndex('newIndex');
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
-      expect(result.current.indices).toEqual(['newIndex']);
-    });
+    await waitFor(() => null);
+    expect(result.current.indices).toEqual(['newIndex']);
 
     expect(postMock).toHaveBeenCalled();
 

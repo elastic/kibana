@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useExportList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -23,11 +23,11 @@ describe('useExportList', () => {
   });
 
   it('invokes Api.exportList', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useExportList());
+    const { result } = renderHook(() => useExportList());
     act(() => {
       result.current.start({ http: httpMock, listId: 'list' });
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(Api.exportList).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, listId: 'list' })

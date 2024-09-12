@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -73,7 +73,7 @@ describe('UseChoices', () => {
   const fields = ['category'];
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+    const { result } = renderHook<UseChoicesProps, UseChoices>(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -82,13 +82,13 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toEqual(useChoicesResponse);
   });
 
   it('returns an empty array if the field is not in response', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+    const { result } = renderHook<UseChoicesProps, UseChoices>(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -97,7 +97,7 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -127,7 +127,7 @@ describe('UseChoices', () => {
       serviceMessage: 'An error occurred',
     });
 
-    const { waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+    renderHook<UseChoicesProps, UseChoices>(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -136,7 +136,7 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',

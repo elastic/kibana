@@ -8,7 +8,7 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { useRootProfile } from './use_root_profile';
@@ -31,18 +31,18 @@ describe('useRootProfile', () => {
   });
 
   it('should return rootProfileLoading as false', async () => {
-    const { result, waitForNextUpdate } = render();
-    await waitForNextUpdate();
+    const { result } = render();
+    await waitFor(() => null);
     expect(result.current.rootProfileLoading).toBe(false);
   });
 
   it('should return rootProfileLoading as true when solutionNavId changes', async () => {
-    const { result, rerender, waitForNextUpdate } = render();
-    await waitForNextUpdate();
+    const { result, rerender } = render();
+    await waitFor(() => null);
     expect(result.current.rootProfileLoading).toBe(false);
     rerender({ solutionNavId: 'newSolutionNavId' });
     expect(result.current.rootProfileLoading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => null);
     expect(result.current.rootProfileLoading).toBe(false);
   });
 });

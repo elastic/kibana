@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -69,7 +69,7 @@ describe('useGetChoices', () => {
   const fields = ['priority'];
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -79,7 +79,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -105,7 +105,7 @@ describe('useGetChoices', () => {
   });
 
   it('it calls onSuccess', async () => {
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -115,7 +115,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(onSuccess).toHaveBeenCalledWith(getChoicesResponse);
   });
@@ -126,7 +126,7 @@ describe('useGetChoices', () => {
       serviceMessage: 'An error occurred',
     });
 
-    const { waitForNextUpdate } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+    renderHook<UseGetChoicesProps, UseGetChoices>(() =>
       useGetChoices({
         http: services.http,
         actionConnector,
@@ -136,7 +136,7 @@ describe('useGetChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',

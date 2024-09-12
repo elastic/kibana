@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 
@@ -69,8 +69,8 @@ describe('useLoadConnectors', () => {
   });
   it('should call api to load action types', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useLoadConnectors(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => useLoadConnectors(defaultProps));
+      await waitFor(() => null);
 
       expect(defaultProps.http.get).toHaveBeenCalledWith('/api/actions/connectors');
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -79,8 +79,8 @@ describe('useLoadConnectors', () => {
 
   it('should return sorted action types, removing isMissingSecrets and wrong action type ids', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors(defaultProps));
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useLoadConnectors(defaultProps));
+      await waitFor(() => null);
 
       await expect(result.current).resolves.toStrictEqual(
         // @ts-ignore ts does not like config, but we define it in the mock data
@@ -93,10 +93,8 @@ describe('useLoadConnectors', () => {
       const mockHttp = {
         get: jest.fn().mockRejectedValue(new Error('this is an error')),
       } as unknown as Props['http'];
-      const { waitForNextUpdate } = renderHook(() =>
-        useLoadConnectors({ ...defaultProps, http: mockHttp })
-      );
-      await waitForNextUpdate();
+      renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }));
+      await waitFor(() => null);
 
       expect(toasts.addError).toHaveBeenCalled();
     });

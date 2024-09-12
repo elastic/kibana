@@ -6,7 +6,7 @@
  */
 
 import { useConversation } from '.';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
 import { MessageRole } from '@kbn/elastic-assistant-common';
@@ -54,79 +54,86 @@ describe('useConversation', () => {
   });
 
   it('should create a new conversation when called with valid conversationId and message', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-      createConversation.mockResolvedValue(mockConvo);
+    const { result } = renderHook(() => useConversation(), {
+      wrapper: ({ children }) => (
+        <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+      ),
+    });
 
-      const createResult = await result.current.createConversation({
+    await waitFor(() => null);
+
+    createConversation.mockResolvedValue(mockConvo);
+
+    let createResult;
+
+    act(async () => {
+      createResult = await result.current.createConversation({
         ...mockConvo,
         replacements: {},
         title: mockConvo.title,
         category: 'assistant',
       });
-
-      expect(createResult).toEqual(mockConvo);
     });
+
+    expect(createResult).toEqual(mockConvo);
   });
 
   it('should delete an existing conversation when called with valid conversationId', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useConversation(), {
+      wrapper: ({ children }) => (
+        <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+      ),
+    });
 
+    await waitFor(() => null);
+
+    act(async () => {
       await result.current.deleteConversation('new-convo');
+    });
 
-      expect(deleteConversation).toHaveBeenCalledWith({
-        http: httpMock,
-        id: 'new-convo',
-      });
+    expect(deleteConversation).toHaveBeenCalledWith({
+      http: httpMock,
+      id: 'new-convo',
     });
   });
 
   it('should update the apiConfig for an existing conversation when called with a valid conversationId and apiConfig', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useConversation(), {
+      wrapper: ({ children }) => (
+        <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+      ),
+    });
+    await waitFor(() => null);
 
+    act(async () => {
       await result.current.setApiConfig({
         conversation: WELCOME_CONVERSATION,
         apiConfig: mockConvo.apiConfig,
       });
+    });
 
-      expect(createConversation).toHaveBeenCalledWith({
-        http: httpMock,
-        conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
-      });
+    expect(createConversation).toHaveBeenCalledWith({
+      http: httpMock,
+      conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
     });
   });
 
   it('should remove the last message from a conversation when called with valid conversationId', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-
-      getConversationById.mockResolvedValue(mockConvo);
-
-      const removeResult = await result.current.removeLastMessage('new-convo');
-
-      expect(removeResult).toEqual([message]);
+    const { result } = renderHook(() => useConversation(), {
+      wrapper: ({ children }) => (
+        <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+      ),
     });
+    await waitFor(() => null);
+
+    getConversationById.mockResolvedValue(mockConvo);
+
+    let removeResult;
+
+    act(async () => {
+      removeResult = await result.current.removeLastMessage('new-convo');
+    });
+
+    expect(removeResult).toEqual([message]);
   });
 });

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useSocTrends } from './use_soc_trends';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import * as i18n from '../translations';
@@ -42,46 +42,43 @@ describe('useSocTrends', () => {
     jest.clearAllMocks();
   });
   it('loads initial state', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useSocTrends({ skip: false, signalIndexName: '.alerts-default' }),
+    const { result } = renderHook(
+      () => useSocTrends({ skip: false, signalIndexName: '.alerts-default' }),
+      {
+        wrapper: wrapperContainer,
+      }
+    );
+    expect(result.current).toEqual({
+      stats: [
         {
-          wrapper: wrapperContainer,
-        }
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        stats: [
-          {
-            stat: '-',
-            isLoading: true,
-            percentage: {
-              percent: null,
-              color: 'hollow',
-              note: i18n.NO_DATA('case'),
-            },
-            testRef: 'casesMttr',
-            title: i18n.CASES_MTTR_STAT,
-            description: i18n.CASES_MTTR_DESCRIPTION,
-            updatedAt: dateNow,
+          stat: '-',
+          isLoading: true,
+          percentage: {
+            percent: null,
+            color: 'hollow',
+            note: i18n.NO_DATA('case'),
           },
-          {
-            stat: '-',
-            isLoading: true,
-            percentage: {
-              percent: null,
-              color: 'hollow',
-              note: i18n.NO_DATA('alerts'),
-            },
-            testRef: 'criticalAlerts',
-            title: i18n.CRITICAL_ALERTS_STAT,
-            description: i18n.CRITICAL_ALERTS_DESCRIPTION,
-            updatedAt: dateNow,
+          testRef: 'casesMttr',
+          title: i18n.CASES_MTTR_STAT,
+          description: i18n.CASES_MTTR_DESCRIPTION,
+          updatedAt: dateNow,
+        },
+        {
+          stat: '-',
+          isLoading: true,
+          percentage: {
+            percent: null,
+            color: 'hollow',
+            note: i18n.NO_DATA('alerts'),
           },
-        ],
-        isUpdating: true,
-        latestUpdate: dateNow,
-      });
+          testRef: 'criticalAlerts',
+          title: i18n.CRITICAL_ALERTS_STAT,
+          description: i18n.CRITICAL_ALERTS_DESCRIPTION,
+          updatedAt: dateNow,
+        },
+      ],
+      isUpdating: true,
+      latestUpdate: dateNow,
     });
   });
 });

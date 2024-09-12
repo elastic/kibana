@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useUpdateCases } from './use_bulk_update_case';
 import { allCases } from './mock';
 import { useToasts } from '../common/lib/kibana';
@@ -32,7 +32,7 @@ describe('useUpdateCases', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'updateCases');
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+    const { result } = renderHook(() => useUpdateCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -40,14 +40,14 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ cases: allCases.cases });
   });
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+    const { result } = renderHook(() => useUpdateCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -55,7 +55,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -63,7 +63,7 @@ describe('useUpdateCases', () => {
   });
 
   it('shows a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+    const { result } = renderHook(() => useUpdateCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -71,7 +71,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Success title',
@@ -82,7 +82,7 @@ describe('useUpdateCases', () => {
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'updateCases').mockRejectedValue(new Error('useUpdateCases: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+    const { result } = renderHook(() => useUpdateCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -90,7 +90,7 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

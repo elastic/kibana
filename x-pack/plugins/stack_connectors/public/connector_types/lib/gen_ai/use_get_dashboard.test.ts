@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useGetDashboard } from './use_get_dashboard';
 import { getDashboard } from './api';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -57,10 +57,8 @@ describe('useGetDashboard', () => {
   ])(
     'fetches the %p dashboard and sets the dashboard URL with %p',
     async (selectedProvider, urlKey) => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useGetDashboard({ ...defaultArgs, selectedProvider })
-      );
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, selectedProvider }));
+      await waitFor(() => null);
       expect(mockDashboard).toHaveBeenCalledWith(
         expect.objectContaining({
           connectorId,
@@ -83,8 +81,8 @@ describe('useGetDashboard', () => {
 
   it('handles the case where the dashboard is not available.', async () => {
     mockDashboard.mockResolvedValue({ data: { available: false } });
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard(defaultArgs));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useGetDashboard(defaultArgs));
+    await waitFor(() => null);
     expect(mockDashboard).toHaveBeenCalledWith(
       expect.objectContaining({
         connectorId,
@@ -110,10 +108,8 @@ describe('useGetDashboard', () => {
   });
 
   it('handles the case where connectorId is empty string', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGetDashboard({ ...defaultArgs, connectorId: '' })
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, connectorId: '' }));
+    await waitFor(() => null);
     expect(mockDashboard).not.toHaveBeenCalled();
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
@@ -124,16 +120,16 @@ describe('useGetDashboard', () => {
     mockKibana.mockReturnValue({
       services: { ...mockServices, dashboard: {} },
     });
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard(defaultArgs));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useGetDashboard(defaultArgs));
+    await waitFor(() => null);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.dashboardUrl).toBe(null);
   });
 
   it('correctly handles errors and displays the appropriate toast messages.', async () => {
     mockDashboard.mockRejectedValue(new Error('Error fetching dashboard'));
-    const { result, waitForNextUpdate } = renderHook(() => useGetDashboard(defaultArgs));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useGetDashboard(defaultArgs));
+    await waitFor(() => null);
     expect(result.current.isLoading).toBe(false);
     expect(mockToasts.addDanger).toHaveBeenCalledWith({
       title: 'Error finding OpenAI Token Usage Dashboard.',

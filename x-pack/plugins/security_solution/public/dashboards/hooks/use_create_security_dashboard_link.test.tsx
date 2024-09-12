@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 import { DashboardContextProvider } from '../context/dashboard_context';
@@ -37,9 +37,8 @@ const renderUseCreateSecurityDashboardLink = () =>
 const asyncRenderUseCreateSecurityDashboard = async () => {
   const renderedHook = renderUseCreateSecurityDashboardLink();
 
-  await act(async () => {
-    await renderedHook.waitForNextUpdate();
-  });
+  waitFor(() => null);
+
   return renderedHook;
 };
 
@@ -84,14 +83,12 @@ describe('useCreateSecurityDashboardLink', () => {
     });
 
     it('should return isLoading while requesting', async () => {
-      const { result, waitForNextUpdate } = renderUseCreateSecurityDashboardLink();
+      const { result } = renderUseCreateSecurityDashboardLink();
 
       expect(result.current.isLoading).toEqual(true);
       expect(result.current.url).toEqual('/app/security/dashboards/create');
 
-      await act(async () => {
-        await waitForNextUpdate();
-      });
+      await waitFor(() => null);
 
       expect(result.current.isLoading).toEqual(false);
       expect(result.current.url).toEqual('/app/security/dashboards/create');

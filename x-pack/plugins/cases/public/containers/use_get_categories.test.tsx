@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -24,13 +24,11 @@ describe('useGetCategories', () => {
 
   it('calls getCategories api', async () => {
     const spyOnGetCategories = jest.spyOn(api, 'getCategories');
-    const { waitForNextUpdate } = renderHook(() => useGetCategories(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+    renderHook(() => useGetCategories(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spyOnGetCategories).toBeCalledWith({
       signal: abortCtrl.signal,
@@ -47,13 +45,11 @@ describe('useGetCategories', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCategories(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
-        <TestProviders>{children}</TestProviders>
-      ),
+    renderHook(() => useGetCategories(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toBeCalled();
   });

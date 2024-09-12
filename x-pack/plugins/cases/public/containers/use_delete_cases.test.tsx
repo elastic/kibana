@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useDeleteCases } from './use_delete_cases';
 import * as api from './api';
@@ -32,7 +32,7 @@ describe('useDeleteCases', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'deleteCases');
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+    const { result } = renderHook(() => useDeleteCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -40,14 +40,14 @@ describe('useDeleteCases', () => {
       result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ caseIds: ['1', '2'] });
   });
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+    const { result } = renderHook(() => useDeleteCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -55,7 +55,7 @@ describe('useDeleteCases', () => {
       result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -63,7 +63,7 @@ describe('useDeleteCases', () => {
   });
 
   it('shows a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+    const { result } = renderHook(() => useDeleteCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -71,7 +71,7 @@ describe('useDeleteCases', () => {
       result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addSuccess).toHaveBeenCalledWith({
       title: 'Success title',
@@ -82,7 +82,7 @@ describe('useDeleteCases', () => {
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'deleteCases').mockRejectedValue(new Error('useDeleteCases: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteCases(), {
+    const { result } = renderHook(() => useDeleteCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -90,7 +90,7 @@ describe('useDeleteCases', () => {
       result.current.mutate({ caseIds: ['1', '2'], successToasterTitle: 'Success title' });
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

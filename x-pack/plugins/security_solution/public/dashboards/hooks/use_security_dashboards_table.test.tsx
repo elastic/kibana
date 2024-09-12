@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, renderHook, act } from '@testing-library/react';
+import { render, renderHook, act, waitFor } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../common/lib/kibana';
@@ -37,10 +37,9 @@ const renderUseSecurityDashboardsTableItems = async () => {
   const renderedHook = renderHook(() => useSecurityDashboardsTableItems(), {
     wrapper: DashboardContextProvider,
   });
-  await act(async () => {
-    // needed to let dashboard items to be updated from saved objects response
-    await renderedHook.waitForNextUpdate();
-  });
+  // needed to let dashboard items to be updated from saved objects response
+  await waitFor(() => null);
+
   return renderedHook;
 };
 

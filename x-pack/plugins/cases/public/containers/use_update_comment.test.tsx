@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { basicCase } from './mock';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
@@ -39,7 +39,7 @@ describe('useUpdateComment', () => {
   it('patch case and refresh the case page', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+    const { result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -47,7 +47,7 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -55,7 +55,7 @@ describe('useUpdateComment', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCommentSpy = jest.spyOn(api, 'patchComment');
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+    const { result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -63,7 +63,7 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(patchCommentSpy).toHaveBeenCalledWith({
       ...sampleUpdate,
@@ -74,7 +74,7 @@ describe('useUpdateComment', () => {
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'patchComment').mockRejectedValue(new Error('useUpdateComment: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+    const { result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -82,7 +82,7 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

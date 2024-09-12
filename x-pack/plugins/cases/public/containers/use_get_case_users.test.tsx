@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useGetCaseUsers } from './use_get_case_users';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
@@ -26,11 +26,11 @@ describe('useGetCaseUsers', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCaseUsers');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseUsers('case-1'), {
+    renderHook(() => useGetCaseUsers('case-1'), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
   });
@@ -40,11 +40,11 @@ describe('useGetCaseUsers', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const spy = jest.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
-    const { waitForNextUpdate } = renderHook(() => useGetCaseUsers('case-1'), {
+    renderHook(() => useGetCaseUsers('case-1'), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
     expect(addError).toHaveBeenCalled();

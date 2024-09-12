@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useUserInfo, ManageUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 
@@ -38,30 +38,27 @@ describe('useUserInfo', () => {
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
   it('returns default state', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUserInfo(), {
-        wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
-
-      expect(result.all).toHaveLength(1);
-      expect(result.current).toEqual({
-        canUserCRUD: null,
-        canUserREAD: null,
-        hasEncryptionKey: null,
-        hasIndexManage: null,
-        hasIndexMaintenance: null,
-        hasIndexWrite: null,
-        hasIndexRead: null,
-        hasIndexUpdateDelete: null,
-        isAuthenticated: null,
-        isSignalIndexExists: null,
-        loading: true,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      });
-      expect(result.error).toBeUndefined();
+    const { result } = renderHook(() => useUserInfo(), {
+      wrapper: TestProviders,
     });
+    await waitFor(() => null);
+
+    expect(result.current).toEqual({
+      canUserCRUD: null,
+      canUserREAD: null,
+      hasEncryptionKey: null,
+      hasIndexManage: null,
+      hasIndexMaintenance: null,
+      hasIndexWrite: null,
+      hasIndexRead: null,
+      hasIndexUpdateDelete: null,
+      isAuthenticated: null,
+      isSignalIndexExists: null,
+      loading: true,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
+    });
+    expect(result.error).toBeUndefined();
   });
 
   it('calls createSignalIndex if signal index template is outdated', async () => {
@@ -79,11 +76,10 @@ describe('useUserInfo', () => {
         </UserPrivilegesProvider>
       </TestProviders>
     );
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-    });
+
+    renderHook(() => useUserInfo(), { wrapper });
+    await waitFor(() => null);
+
     expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
     expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
   });
