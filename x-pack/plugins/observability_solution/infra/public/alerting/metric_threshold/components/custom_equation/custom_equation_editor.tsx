@@ -188,7 +188,7 @@ export const CustomEquationEditor = ({
             fullWidth
             helpText={EQUATION_HELP_MESSAGE}
             isInvalid={errors.equation != null}
-            error={[errors.equation]}
+            error={[errors.equation as string]}
           >
             <EuiFieldText
               data-test-subj="infraCustomEquationEditorFieldText"

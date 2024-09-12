@@ -6108,8 +6108,6 @@
           "<{ serviceName: ",
           "StringC",
           "; }>; query: ",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ environment: ",
           "UnionC",
@@ -6129,13 +6127,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">]>; }>, ",
-          "TypeC",
-          "<{ start: ",
-          "Type",
-          "<number, string, unknown>; end: ",
-          "Type",
-          "<number, string, unknown>; }>]>; }> | undefined; handler: ({}: ",
+          ">]>; }>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { path: { serviceName: string; }; query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
           "Branded",
@@ -6147,7 +6139,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; } & { start: number; end: number; }; }; }) => Promise<{ metrics: { latency: number; throughput: number; failedTransactionRate: number; logRate: number; logErrorRate: number; }; serviceName: string; agentName: ",
+          ">; }; }; }) => Promise<{ metrics: { latency: number; throughput: number; failedTransactionRate: number; logRate: number; logErrorRate: number; }; serviceName: string; agentName: ",
           {
             "pluginId": "@kbn/elastic-agent-utils",
             "scope": "common",
