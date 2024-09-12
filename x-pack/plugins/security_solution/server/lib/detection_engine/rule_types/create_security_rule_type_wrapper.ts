@@ -334,7 +334,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: gapErrorMessage,
-              metrics: { executionGap: remainingGap, gapRange: gap },
+              metrics: {
+                executionGap: remainingGap,
+                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+              },
             });
           }
 
