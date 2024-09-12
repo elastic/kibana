@@ -29,7 +29,7 @@ describe('SeriesActions', function () {
       render(<SeriesActions seriesId={0} series={mockUxSeries} />);
 
       const actionsButton = screen.getByLabelText('View series actions');
-      userEvent.click(actionsButton);
+      await userEvent.click(actionsButton);
       await waitForEuiPopoverOpen();
     });
 
