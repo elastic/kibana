@@ -19,35 +19,19 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { kafkaTopicsType } from '../../../../../../../common/constants';
+import {
+  kafkaTopicsType,
+  KAFKA_DYNAMIC_FIELDS,
+  kafkaTopicsOptions,
+} from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
-
-const kafkaTopicsOptions = [
-  {
-    id: kafkaTopicsType.Static,
-    label: 'Static Topic',
-    'data-test-subj': 'kafkaTopicStaticRadioButton',
-  },
-  {
-    id: kafkaTopicsType.Dynamic,
-    label: 'Dynamic Topic',
-    'data-test-subj': 'kafkaTopicDynamicRadioButton',
-  },
-];
-const dynamicFields = [
-  'data_stream.type',
-  'data_stream.dataset',
-  'data_stream.namespace',
-  '@timestamp',
-  'event.dataset',
-];
 
 export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
 }) => {
   const dynamicOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    const options = dynamicFields.map((option) => ({
+    const options = KAFKA_DYNAMIC_FIELDS.map((option) => ({
       label: option,
       value: `%{[${option}]}`,
     }));

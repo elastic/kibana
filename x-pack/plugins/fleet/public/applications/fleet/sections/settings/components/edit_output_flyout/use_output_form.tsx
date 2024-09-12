@@ -72,7 +72,7 @@ import {
   validateKafkaClientId,
   validateKafkaHosts,
   validateKafkaPartitioningGroupEvents,
-  // validateKafkaTopics,
+  validateDynamicKafkaTopics,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -459,10 +459,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isDisabled('partition')
   );
 
-  const kafkaTopicsInput = useRadioInput(
-    extractStaticKafkaTopic(kafkaOutput?.topics),
-    isDisabled('topics')
-  );
+  const kafkaTopicsInput = useRadioInput('static', isDisabled('topics'));
 
   const kafkaStaticTopicInput = useInput(
     extractStaticKafkaTopic(kafkaOutput?.topics),
@@ -473,7 +470,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const kafkaDynamicTopicInput = useComboBoxWithCustomInput(
     'kafkaDynamicTopicComboBox',
     extractKafkaTopics(kafkaOutput?.topics),
-    undefined, // define validation
+    validateDynamicKafkaTopics,
     isDisabled('topics')
   );
 
@@ -854,7 +851,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                     },
                   }
                 : {}),
-              topics: [{ topic: kafkaTopicsInput.value }],
+              topics: [{ topic: kafkaStaticTopicInput.value || kafkaDynamicTopicInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -999,7 +996,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
-    kafkaTopicsInput.value,
+    kafkaStaticTopicInput.value,
+    kafkaDynamicTopicInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,

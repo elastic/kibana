@@ -144,3 +144,24 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
 ];
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
+
+export const kafkaTopicsOptions = [
+  {
+    id: kafkaTopicsType.Static,
+    label: 'Static Topic',
+    'data-test-subj': 'kafkaTopicStaticRadioButton',
+  },
+  {
+    id: kafkaTopicsType.Dynamic,
+    label: 'Dynamic Topic',
+    'data-test-subj': 'kafkaTopicDynamicRadioButton',
+  },
+];
+
+export const KAFKA_DYNAMIC_FIELDS = [
+  'data_stream.type',
+  'data_stream.dataset',
+  'data_stream.namespace',
+  '@timestamp',
+  'event.dataset',
+];

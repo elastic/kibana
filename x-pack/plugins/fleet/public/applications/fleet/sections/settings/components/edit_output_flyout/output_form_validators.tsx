@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
@@ -317,6 +318,20 @@ export function validateKafkaStaticTopic(value: string) {
   }
 }
 
+export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<string>>) {
+  const res = [];
+  if (value.length === 0) {
+    res.push(
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaDefaultTopicRequiredMessage', {
+        defaultMessage: 'Default topic is required',
+      })
+    );
+  }
+  if (res.length) {
+    return res;
+  }
+}
+
 export function validateKafkaClientId(value: string) {
   const regex = /^[A-Za-z0-9._-]+$/;
   return regex.test(value)
@@ -341,49 +356,6 @@ export function validateKafkaPartitioningGroupEvents(value: string) {
           }
         ),
       ];
-}
-// TODO: update it to work with new dynamic topics
-export function validateKafkaTopics(
-  topics: Array<{
-    topic: string;
-    when?: {
-      condition?: string;
-      type?: string;
-    };
-  }>
-) {
-  const errors: Array<{
-    message: string;
-    index: number;
-    condition?: boolean;
-  }> = [];
-
-  topics.forEach((topic, index) => {
-    if (!topic.topic || topic.topic === '') {
-      errors.push({
-        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {
-          defaultMessage: 'Topic is required',
-        }),
-        index,
-      });
-    }
-    if (
-      !topic.when?.condition ||
-      topic.when.condition === '' ||
-      topic.when.condition.split(':').length - 1 !== 1
-    ) {
-      errors.push({
-        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicConditionRequired', {
-          defaultMessage: 'Must be a key, value pair i.e. "http.response.code: 200"',
-        }),
-        index,
-        condition: true,
-      });
-    }
-  });
-  if (errors.length) {
-    return errors;
-  }
 }
 
 export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }>) {

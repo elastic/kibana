@@ -426,6 +426,7 @@ export function useComboBoxWithCustomInput(
 
     return true;
   }, [validate, selectedOptions]);
+  const value = selectedOptions.length > 0 ? selectedOptions[0]?.value : '';
 
   return {
     props: {
@@ -441,6 +442,7 @@ export function useComboBoxWithCustomInput(
       error: errors,
       isInvalid,
     },
+    value,
     clear: () => {
       setSelected(defaultValue);
     },
