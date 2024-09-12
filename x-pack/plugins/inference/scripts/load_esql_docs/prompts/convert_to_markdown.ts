@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PromptTemplate } from '../output_executor';
+import type { PromptTemplate } from '../utils/output_executor';
 
 /**
  * Prompt used to ask the LLM to convert a raw html content to markdown.
