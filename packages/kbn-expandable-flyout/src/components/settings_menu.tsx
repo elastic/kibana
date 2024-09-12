@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiContextMenu,
@@ -22,9 +23,12 @@ import {
 import { css } from '@emotion/css';
 import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { changePushVsOverlayAction } from '../store/actions';
+import { changePushVsOverlayAction, resetAllUserChangedWidthsAction } from '../store/actions';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID,
+  SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID,
   SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID,
@@ -60,6 +64,12 @@ const FLYOUT_TYPE_OVERLAY_TOOLTIP = i18n.translate('expandableFlyout.settingsMen
 const FLYOUT_TYPE_PUSH_TOOLTIP = i18n.translate('expandableFlyout.settingsMenu.pushTooltip', {
   defaultMessage: 'Displays the flyout next to the page',
 });
+const FLYOUT_RESIZE_TITLE = i18n.translate('expandableFlyout.renderMenu.flyoutResizeTitle', {
+  defaultMessage: 'Flyout size',
+});
+const FLYOUT_RESIZE_BUTTON = i18n.translate('expandableFlyout.renderMenu.flyoutResizeButton', {
+  defaultMessage: 'Reset size',
+});
 
 export interface FlyoutCustomProps {
   /**
@@ -70,6 +80,19 @@ export interface FlyoutCustomProps {
    * Control if the option to render in overlay or push mode is enabled or not
    */
   pushVsOverlay?: {
+    /**
+     * Disables the option
+     */
+    disabled: boolean;
+    /**
+     * Tooltip to display
+     */
+    tooltip: string;
+  };
+  /**
+   * Control if the option to resize the flyout is enabled or not
+   */
+  resize?: {
     /**
      * Disables the option
      */
@@ -119,6 +142,11 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
       [dispatch, flyoutCustomProps?.pushVsOverlay?.disabled]
     );
 
+    const resetSizeOnClick = useCallback(() => {
+      dispatch(resetAllUserChangedWidthsAction());
+      setPopover(false);
+    }, [dispatch]);
+
     const panels = [
       {
         id: 0,
@@ -163,6 +191,31 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
               isDisabled={flyoutCustomProps?.pushVsOverlay?.disabled}
               data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}
             />
+            <EuiSpacer size="m" />
+            <EuiTitle size="xxs" data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_TITLE_TEST_ID}>
+              <h3>
+                {FLYOUT_RESIZE_TITLE}{' '}
+                {flyoutCustomProps?.resize?.tooltip && (
+                  <EuiToolTip position="top" content={flyoutCustomProps?.resize?.tooltip}>
+                    <EuiIcon
+                      data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
+                      type="iInCircle"
+                      css={css`
+                        margin-left: 4px;
+                      `}
+                    />
+                  </EuiToolTip>
+                )}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              onClick={resetSizeOnClick}
+              disabled={flyoutCustomProps?.resize?.disabled}
+              data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_BUTTON_TEST_ID}
+            >
+              {FLYOUT_RESIZE_BUTTON}
+            </EuiButtonEmpty>
           </EuiPanel>
         ),
       },
