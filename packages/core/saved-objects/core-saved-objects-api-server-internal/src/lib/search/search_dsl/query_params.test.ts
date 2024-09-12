@@ -544,7 +544,7 @@ describe('#getQueryParams', () => {
         });
 
         it('supports multiple search fields', () => {
-          test({ searchFields: ['title', 'title.raw'] });
+          test({ searchFields: ['title, title.raw'] });
         });
 
         it('includes specified raw search fields', () => {
