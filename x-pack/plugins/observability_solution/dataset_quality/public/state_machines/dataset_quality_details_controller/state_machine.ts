@@ -369,6 +369,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   },
                   {
                     target: '.closed',
+                    actions: ['storeExpandedDegradedField'],
                   },
                 ],
               },
