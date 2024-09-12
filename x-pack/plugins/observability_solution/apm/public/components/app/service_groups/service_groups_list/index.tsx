@@ -98,6 +98,7 @@ export function ServiceGroupsList() {
                 clear={!isEmpty(filter) ? { onClick: clearFilterCallback } : undefined}
               >
                 <EuiFieldText
+                  controlOnly
                   data-test-subj="apmServiceGroupsListFieldText"
                   icon="search"
                   fullWidth
