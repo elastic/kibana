@@ -50,11 +50,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             200: {
               body: () =>
                 schema.object({
-                  items: schema.arrayOf(
-                    FleetServerHostSchema.extends({
-                      id: schema.string(),
-                    })
-                  ),
+                  items: schema.arrayOf(FleetServerHostSchema),
                   total: schema.number(),
                   page: schema.number(),
                   perPage: schema.number(),
@@ -88,9 +84,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             200: {
               body: () =>
                 schema.object({
-                  item: FleetServerHostSchema.extends({
-                    id: schema.string(),
-                  }),
+                  item: FleetServerHostSchema,
                 }),
             },
             400: {
@@ -121,9 +115,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             200: {
               body: () =>
                 schema.object({
-                  item: FleetServerHostSchema.extends({
-                    id: schema.string(),
-                  }),
+                  item: FleetServerHostSchema,
                 }),
             },
             400: {
@@ -185,9 +177,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             200: {
               body: () =>
                 schema.object({
-                  item: FleetServerHostSchema.extends({
-                    id: schema.string(),
-                  }),
+                  item: FleetServerHostSchema,
                 }),
             },
             400: {

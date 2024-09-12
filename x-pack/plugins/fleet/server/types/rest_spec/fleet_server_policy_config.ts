@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const FleetServerHostSchema = schema.object({
+  id: schema.string(),
   name: schema.string(),
   host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
   is_default: schema.boolean({ defaultValue: false }),
