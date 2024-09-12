@@ -13,6 +13,7 @@ import {
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  HasAppContext,
   PublishesDataViews,
   PublishesPanelTitle,
   PublishesSavedObjectId,
@@ -22,8 +23,10 @@ import {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { SaveDashboardReturn } from '../services/dashboard_content_management/types';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 export type DashboardApi = CanExpandPanels &
+  HasAppContext &
   PresentationContainer &
   PublishesDataViews &
   Pick<PublishesPanelTitle, 'panelTitle'> &
@@ -31,6 +34,8 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   TracksOverlays & {
+    addFromLibrary: () => void;
+    controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean | undefined>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
