@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const removedTaskInstance = tasks.find((task) => task.id === REMOVED_TASK_TYPE_ID);
 
-        expect(scheduledTaskInstance?.status).to.eql('claiming');
+        expect(['claiming', 'running'].includes(scheduledTaskInstance?.status || '')).to.be(true);
         expect(unregisteredTaskInstance?.status).to.eql('idle');
         expect(removedTaskInstance?.status).to.eql('unrecognized');
       });

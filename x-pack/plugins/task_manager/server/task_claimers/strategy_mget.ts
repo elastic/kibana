@@ -355,7 +355,10 @@ async function searchAvailableTasks({
       // Task must be enabled
       EnabledTask,
       // a task type that's not excluded (may be removed or not)
-      OneOfTaskTypes('task.taskType', claimPartitions.unlimitedTypes),
+      OneOfTaskTypes(
+        'task.taskType',
+        claimPartitions.unlimitedTypes.concat(Array.from(removedTypes))
+      ),
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
