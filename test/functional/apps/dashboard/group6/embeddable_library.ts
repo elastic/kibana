@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
+  const { dashboard } = getPageObjects(['dashboard']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const panelActions = getService('dashboardPanelActions');
   const savedObjectsFinder = getService('savedObjectsFinder');
+  const title = 'Rendering Test: heatmap';
 
   describe('embeddable library', () => {
     before(async () => {
@@ -29,48 +27,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
     });
 
     it('unlink visualize panel from embeddable library', async () => {
       // add heatmap panel from library
       await dashboardAddPanel.clickOpenAddPanel();
-      await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
-      await find.clickByButtonText('Rendering Test: heatmap');
+      await savedObjectsFinder.filterEmbeddableNames(title);
+      await find.clickByButtonText(title);
       await dashboardAddPanel.closeAddPanel();
 
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      await panelActions.unlinkFromLibrary(originalPanel);
-      await testSubjects.existOrFail('unlinkPanelSuccess');
-
-      const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(false);
+      await panelActions.unlinkFromLibrary(title);
+      await panelActions.expectNotLinkedToLibrary(title);
 
       await dashboardAddPanel.clickOpenAddPanel();
-      await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
-      await find.existsByLinkText('Rendering Test: heatmap');
+      await savedObjectsFinder.filterEmbeddableNames(title);
+      await find.existsByLinkText(title);
       await dashboardAddPanel.closeAddPanel();
     });
 
     it('save visualize panel to embeddable library', async () => {
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      await panelActions.saveToLibrary('Rendering Test: heatmap - copy', originalPanel);
-      await testSubjects.existOrFail('addPanelToLibrarySuccess');
-
-      const updatedPanel = await testSubjects.find(
-        'embeddablePanelHeading-RenderingTest:heatmap-copy'
-      );
-      const libraryActionExists = await testSubjects.descendantExists(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        updatedPanel
-      );
-      expect(libraryActionExists).to.be(true);
+      const newTitle = 'Rendering Test: heatmap - copy';
+      await panelActions.saveToLibrary(newTitle, title);
+      await panelActions.expectLinkedToLibrary(newTitle);
     });
   });
 }

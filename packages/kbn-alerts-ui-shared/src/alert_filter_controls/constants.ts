@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { OptionsListControlState } from '@kbn/controls-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FilterControlConfig } from './types';
 
@@ -65,14 +65,11 @@ export const TEST_IDS = {
   },
 };
 
-export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<AddOptionsListControlProps> = {
+export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<OptionsListControlState> = {
   hideExclude: true,
   hideSort: true,
-  hidePanelTitles: true,
   placeholder: '',
-  ignoreParentSettings: {
-    ignoreValidations: true,
-  },
+  width: 'small',
 };
 
 export const TIMEOUTS = {

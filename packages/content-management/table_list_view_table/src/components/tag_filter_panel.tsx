@@ -57,7 +57,10 @@ interface Context {
 
 const TagFilterContext = React.createContext<Context | null>(null);
 
-export const TagFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+export const TagFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
+  children,
+  ...props
+}) => {
   return <TagFilterContext.Provider value={props}>{children}</TagFilterContext.Provider>;
 };
 
