@@ -18,6 +18,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { Redirect } from 'react-router-dom';
+import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'), // Keep other functionality intact
@@ -30,7 +31,7 @@ const renderEntityLink = ({
   entityManagerMockReturnValue,
   serviceEntitySummaryMockReturnValue,
   hasApmDataFetcherMockReturnValue,
-  query = { rangeFrom: undefined, rangeTo: undefined },
+  query = {},
 }: {
   entityManagerMockReturnValue: Partial<EntityManagerEnablementContextValue>;
   serviceEntitySummaryMockReturnValue: ReturnType<
@@ -65,7 +66,27 @@ const renderEntityLink = ({
   });
 
   const { rerender, ...tools } = render(
-    <MockApmPluginContextWrapper history={history}>
+    <MockApmPluginContextWrapper
+      history={history}
+      value={
+        {
+          core: {
+            data: {
+              query: {
+                timefilter: {
+                  timefilter: {
+                    getTime: () => ({
+                      from: 'now-24h',
+                      to: 'now',
+                    }),
+                  },
+                },
+              },
+            },
+          },
+        } as unknown as ApmPluginContextValue
+      }
+    >
       <EntityLink />
     </MockApmPluginContextWrapper>
   );
@@ -200,6 +221,32 @@ describe('Entity link', () => {
     expect(Redirect).toHaveBeenCalledWith(
       expect.objectContaining({
         to: '/services/foo/overview?comparisonEnabled=true&environment=ENVIRONMENT_ALL&kuery=&latencyAggregationType=avg&rangeFrom=now-1h&rangeTo=now&serviceGroup=',
+      }),
+      {}
+    );
+  });
+
+  it('renders Service Overview page setting time range from data plugin', () => {
+    renderEntityLink({
+      entityManagerMockReturnValue: {
+        isEntityCentricExperienceViewEnabled: true,
+        entityManagerEnablementStatus: FETCH_STATUS.SUCCESS,
+      },
+      serviceEntitySummaryMockReturnValue: {
+        serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
+        serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
+      },
+      hasApmDataFetcherMockReturnValue: {
+        data: { hasData: true },
+        status: FETCH_STATUS.SUCCESS,
+      },
+    });
+
+    expect(screen.queryByTestId('apmEntityLinkLoadingSpinner')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmEntityLinkEEMCallout')).not.toBeInTheDocument();
+    expect(Redirect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: '/services/foo/overview?comparisonEnabled=true&environment=ENVIRONMENT_ALL&kuery=&latencyAggregationType=avg&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
       }),
       {}
     );
