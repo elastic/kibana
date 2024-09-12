@@ -16,6 +16,7 @@ interface DiscoveryServiceParams {
   currentNode: string;
   savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
+  onNodesCounted?: (numOfNodes: number) => void;
 }
 
 interface DiscoveryServiceUpsertParams {
@@ -30,13 +31,15 @@ export class KibanaDiscoveryService {
   private started = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
+  private onNodesCounted?: (numOfNodes: number) => void;
 
-  constructor({ config, currentNode, savedObjectsRepository, logger }: DiscoveryServiceParams) {
-    this.activeNodesLookBack = config.active_nodes_lookback;
-    this.discoveryInterval = config.interval;
-    this.savedObjectsRepository = savedObjectsRepository;
-    this.logger = logger;
-    this.currentNode = currentNode;
+  constructor(opts: DiscoveryServiceParams) {
+    this.activeNodesLookBack = opts.config.active_nodes_lookback;
+    this.discoveryInterval = opts.config.interval;
+    this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.logger = opts.logger;
+    this.currentNode = opts.currentNode;
+    this.onNodesCounted = opts.onNodesCounted;
   }
 
   private async upsertCurrentNode({ id, lastSeen }: DiscoveryServiceUpsertParams) {
@@ -98,6 +101,10 @@ export class KibanaDiscoveryService {
         page: 1,
         filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${this.activeNodesLookBack}`,
       });
+
+    if (this.onNodesCounted) {
+      this.onNodesCounted(activeNodes.length);
+    }
 
     return activeNodes;
   }
