@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import {
   INTERNAL_TAGS_URL,
   SECURITY_TAG_DESCRIPTION,
@@ -30,9 +30,7 @@ const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecu
 
 const asyncRenderUseCreateSecurityDashboardLink = async () => {
   const renderedHook = renderUseCreateSecurityDashboardLink();
-  await act(async () => {
-    await renderedHook.waitForNextUpdate();
-  });
+  await waitFor(() => null);
   return renderedHook;
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
 import { useCaseItems } from './use_case_items';
@@ -32,6 +32,7 @@ const mockKibana = {
     },
   },
 };
+
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockKibana,
 }));
@@ -63,9 +64,9 @@ describe('useCaseItems', () => {
   });
 
   it('should return default values', async () => {
-    const { result, waitForNextUpdate } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toEqual({
       items: [],
@@ -86,9 +87,9 @@ describe('useCaseItems', () => {
 
   it('should return parsed items', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const { result, waitForNextUpdate } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toEqual({
       items: parsedCasesItems,
@@ -99,17 +100,17 @@ describe('useCaseItems', () => {
 
   test('it should call setQuery when fetching', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const { waitForNextUpdate } = renderUseCaseItems();
+    renderUseCaseItems();
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(mockSetQuery).toHaveBeenCalled();
   });
 
   test('it should call deleteQuery when unmounting', async () => {
-    const { waitForNextUpdate, unmount } = renderUseCaseItems();
+    const { unmount } = renderUseCaseItems();
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     act(() => {
       unmount();
@@ -124,9 +125,9 @@ describe('useCaseItems', () => {
     mockDateNow.mockReturnValueOnce(dateNow);
     mockCasesApi.mockReturnValue(mockCasesResult);
 
-    const { result, waitForNextUpdate } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(mockDateNow).toHaveBeenCalled();
     expect(result.current).toEqual({

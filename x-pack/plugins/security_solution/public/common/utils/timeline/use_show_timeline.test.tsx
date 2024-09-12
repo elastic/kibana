@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { updateAppLinks } from '../../links';
@@ -77,40 +77,34 @@ describe('use show timeline', () => {
   });
 
   it('shows timeline for routes on default', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([true]);
-    });
+    const { result } = renderHook(() => useShowTimeline());
+    await waitFor(() => null);
+    const showTimeline = result.current;
+    expect(showTimeline).toEqual([true]);
   });
 
   it('hides timeline for blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/rules/add_rules' });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([false]);
-    });
+    const { result } = renderHook(() => useShowTimeline());
+    await waitFor(() => null);
+    const showTimeline = result.current;
+    expect(showTimeline).toEqual([false]);
   });
+
   it('shows timeline for partial blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/rules' });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([true]);
-    });
+    const { result } = renderHook(() => useShowTimeline());
+    await waitFor(() => null);
+    const showTimeline = result.current;
+    expect(showTimeline).toEqual([true]);
   });
+
   it('hides timeline for sub blacklist routes', async () => {
     mockUseLocation.mockReturnValueOnce({ pathname: '/administration/policy' });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
-      await waitForNextUpdate();
-      const showTimeline = result.current;
-      expect(showTimeline).toEqual([false]);
-    });
+    const { result } = renderHook(() => useShowTimeline());
+    await waitFor(() => null);
+    const showTimeline = result.current;
+    expect(showTimeline).toEqual([false]);
   });
 });
 

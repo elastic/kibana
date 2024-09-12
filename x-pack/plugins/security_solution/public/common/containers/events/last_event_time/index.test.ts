@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 import type { UseTimelineLastEventTimeArgs } from '.';
 import { useTimelineLastEventTime } from '.';
@@ -59,61 +59,46 @@ describe('useTimelineLastEventTime', () => {
   });
 
   it('should init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        string,
-        [boolean, UseTimelineLastEventTimeArgs]
-      >(() =>
-        useTimelineLastEventTime({
-          indexKey: LastEventIndexKey.hostDetails,
-          details: {},
-          indexNames: [],
-        })
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual([
-        false,
-        { errorMessage: undefined, lastSeen: null, refetch: noop },
-      ]);
-    });
+    const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+      useTimelineLastEventTime({
+        indexKey: LastEventIndexKey.hostDetails,
+        details: {},
+        indexNames: [],
+      })
+    );
+
+    expect(result.current).toEqual([
+      false,
+      { errorMessage: undefined, lastSeen: null, refetch: noop },
+    ]);
   });
 
   it('should call search strategy', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(
-        () =>
-          useTimelineLastEventTime({
-            indexKey: LastEventIndexKey.hostDetails,
-            details: {},
-            indexNames: [],
-          })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
-        defaultIndex: [],
+    renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+      useTimelineLastEventTime({
+        indexKey: LastEventIndexKey.hostDetails,
         details: {},
-        factoryQueryType: 'eventsLastEventTime',
-        indexKey: 'hostDetails',
-      });
+        indexNames: [],
+      })
+    );
+    await waitFor(() => null);
+    expect(mockSearchStrategy.mock.calls[0][0]).toEqual({
+      defaultIndex: [],
+      details: {},
+      factoryQueryType: 'eventsLastEventTime',
+      indexKey: 'hostDetails',
     });
   });
 
   it('should set response', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        string,
-        [boolean, UseTimelineLastEventTimeArgs]
-      >(() =>
-        useTimelineLastEventTime({
-          indexKey: LastEventIndexKey.hostDetails,
-          details: {},
-          indexNames: [],
-        })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current[1].lastSeen).toEqual('1 minute ago');
-    });
+    const { result } = renderHook<string, [boolean, UseTimelineLastEventTimeArgs]>(() =>
+      useTimelineLastEventTime({
+        indexKey: LastEventIndexKey.hostDetails,
+        details: {},
+        indexNames: [],
+      })
+    );
+    await waitFor(() => null);
+    expect(result.current[1].lastSeen).toEqual('1 minute ago');
   });
 });

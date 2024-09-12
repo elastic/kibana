@@ -5,13 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
 import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
@@ -75,7 +74,7 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () => {
         return useLoadRuleAggregations(params);
       },
@@ -83,7 +82,7 @@ describe('useLoadRuleAggregations', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
       expect.objectContaining({
@@ -115,15 +114,12 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
-      () => useLoadRuleAggregations(params),
-      {
-        wrapper,
-      }
-    );
+    const { rerender, result } = renderHook(() => useLoadRuleAggregations(params), {
+      wrapper,
+    });
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
       expect.objectContaining({

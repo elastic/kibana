@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   useInitializeUrlParam,
   useGlobalQueryString,
@@ -306,7 +306,7 @@ describe('global query string', () => {
       };
       const store = makeStore(globalUrlParam);
 
-      const { waitForNextUpdate } = renderHook(() => useSyncGlobalQueryString(), {
+      renderHook(() => useSyncGlobalQueryString(), {
         wrapper: ({ children }: { children: React.ReactElement }) => (
           <TestProviders store={store}>{children}</TestProviders>
         ),
@@ -318,7 +318,7 @@ describe('global query string', () => {
         store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
       });
 
-      waitForNextUpdate();
+      waitFor(() => null);
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: ``,

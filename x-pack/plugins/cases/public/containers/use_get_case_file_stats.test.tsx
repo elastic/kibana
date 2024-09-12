@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { basicCase } from './mock';
 
@@ -37,10 +37,10 @@ describe('useGetCaseFileStats', () => {
   });
 
   it('calls filesClient.list with correct arguments', async () => {
-    const { waitForNextUpdate } = renderHook(() => useGetCaseFileStats(hookParams), {
+    renderHook(() => useGetCaseFileStats(hookParams), {
       wrapper: appMockRender.AppWrapper,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams);
   });
@@ -53,10 +53,10 @@ describe('useGetCaseFileStats', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseFileStats(hookParams), {
+    renderHook(() => useGetCaseFileStats(hookParams), {
       wrapper: appMockRender.AppWrapper,
     });
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(appMockRender.getFilesClient().list).toHaveBeenCalledWith(expectedCallParams);
     expect(addError).toHaveBeenCalled();

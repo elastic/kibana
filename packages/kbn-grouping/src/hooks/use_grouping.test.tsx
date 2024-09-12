@@ -46,9 +46,8 @@ const groupingArgs = {
 describe('useGrouping', () => {
   it('Renders child component without grouping table wrapper when no group is selected', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useGrouping(defaultArgs));
+      await waitFor(() => null);
       const { getByTestId, queryByTestId } = render(
         <IntlProvider locale="en">
           {result.current.getGrouping({
@@ -97,9 +96,8 @@ describe('useGrouping', () => {
         })
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      const { result } = renderHook(() => useGrouping(defaultArgs));
+      await waitFor(() => null);
       const { getByTestId } = render(
         <IntlProvider locale="en">
           {result.current.getGrouping({

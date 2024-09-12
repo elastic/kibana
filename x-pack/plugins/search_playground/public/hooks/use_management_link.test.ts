@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useManagementLink } from './use_management_link';
 import { useKibana } from './use_kibana';
 
@@ -41,8 +41,8 @@ describe('useManagementLink Hook', () => {
       'http://localhost:5601/app/management/insightsAndAlerting/triggersActionsConnectors';
     mockGetUrl.mockResolvedValue(expectedUrl);
     const connectorId = 'test-connector-id';
-    const { result, waitForNextUpdate } = renderHook(() => useManagementLink(connectorId));
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useManagementLink(connectorId));
+    await waitFor(() => null);
 
     expect(result.current).toBe(expectedUrl);
     expect(mockGetUrl).toHaveBeenCalledWith({

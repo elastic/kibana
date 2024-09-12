@@ -27,7 +27,7 @@ describe('useEmbeddableFactory', () => {
     );
     doStart();
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useEmbeddableFactory({ factory: getFactory(), input: { id: 'hello' } })
     );
 
@@ -35,7 +35,7 @@ describe('useEmbeddableFactory', () => {
 
     expect(loading).toBe(true);
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const [embeddable] = result.current;
     expect(embeddable).toBeDefined();

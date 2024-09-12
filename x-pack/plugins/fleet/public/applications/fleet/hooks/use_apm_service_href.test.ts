@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reactRenderHook } from '@testing-library/react';
+import { renderHook as reactRenderHook, waitFor } from '@testing-library/react';
 
 import type { DataStream } from '../types';
 import * as useLocatorModule from '../../../hooks/use_locator';
@@ -30,11 +30,9 @@ describe('useApmServiceHref hook', () => {
       package: 'elastic_agent',
     } as DataStream;
 
-    const { result, waitForNextUpdate } = reactRenderHook(() =>
-      useAPMServiceDetailHref(datastream)
-    );
+    const { result } = reactRenderHook(() => useAPMServiceDetailHref(datastream));
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toMatchObject({ isSuccessful: true, href: undefined });
     expect(apmLocatorMock).not.toBeCalled();
@@ -86,11 +84,9 @@ describe('useApmServiceHref hook', () => {
   it.each(testCases)(
     'it passes the correct params to apm locator for %s',
     async (datastream, locatorParams) => {
-      const { result, waitForNextUpdate } = reactRenderHook(() =>
-        useAPMServiceDetailHref(datastream)
-      );
+      const { result } = reactRenderHook(() => useAPMServiceDetailHref(datastream));
 
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(result.current).toMatchObject({ isSuccessful: true, href: '' });
       expect(apmLocatorMock).toBeCalledWith(expect.objectContaining(locatorParams));

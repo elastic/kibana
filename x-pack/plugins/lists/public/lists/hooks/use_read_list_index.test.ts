@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -30,14 +30,11 @@ describe.skip('useReadListIndex', () => {
   });
 
   it('should call Api.readListIndex when is enabled', async () => {
-    const { waitForNextUpdate } = renderHook(
-      () => useReadListIndex({ http: httpMock, isEnabled: true }),
-      {
-        wrapper: queryWrapper,
-      }
-    );
+    renderHook(() => useReadListIndex({ http: httpMock, isEnabled: true }), {
+      wrapper: queryWrapper,
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(Api.readListIndex).toHaveBeenCalled();
   });
@@ -54,14 +51,11 @@ describe.skip('useReadListIndex', () => {
     const onError = jest.fn();
     jest.spyOn(Api, 'readListIndex').mockRejectedValue(new Error('Mocked error'));
 
-    const { waitForNextUpdate } = renderHook(
-      () => useReadListIndex({ http: httpMock, isEnabled: true, onError }),
-      {
-        wrapper: queryWrapper,
-      }
-    );
+    renderHook(() => useReadListIndex({ http: httpMock, isEnabled: true, onError }), {
+      wrapper: queryWrapper,
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(onError).toHaveBeenCalledWith(new Error('Mocked error'));
   });

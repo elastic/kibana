@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useDataView } from './use_data_view';
 
 const adhocDataView = {
@@ -42,7 +42,7 @@ const render = async ({ dataViewId }: { dataViewId: string }) => {
       <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
     ),
   });
-  await hookResult.waitForNextUpdate();
+  await waitFor(() => null);
 
   return hookResult;
 };

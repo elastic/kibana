@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
@@ -88,10 +88,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it invokes date range picker dispatch', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       result.current(defaultArgs);
 
       expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
@@ -103,10 +103,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it invokes add timeline dispatch', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       result.current(defaultArgs);
 
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
@@ -124,10 +124,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       result.current(defaultArgs);
 
       expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
@@ -136,10 +136,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it does not invoke notes dispatch if duplicate is true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       result.current(defaultArgs);
 
       expect(dispatchAddNotes).not.toHaveBeenCalled();
@@ -148,10 +148,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it does not invoke kql filter query dispatches if timeline.kqlQuery.kuery is null', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       const mockTimeline = {
         ...mockTimelineModel,
         kqlQuery: {
@@ -172,10 +172,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it invokes kql filter query dispatches if timeline.kqlQuery.filterQuery.kuery is not null', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       const mockTimeline = {
         ...mockTimelineModel,
         kqlQuery: {
@@ -205,10 +205,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it invokes dispatchAddNotes if duplicate is false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       result.current({
         ...defaultArgs,
         duplicate: false,
@@ -246,10 +246,10 @@ describe('dispatchUpdateTimeline', () => {
 
   it('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+      const { result } = renderHook(() => useUpdateTimeline(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
+      await waitFor(() => null);
       result.current({
         ...defaultArgs,
         ruleNote: '# this would be some markdown',

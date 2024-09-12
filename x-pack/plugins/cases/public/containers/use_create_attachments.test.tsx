@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { AttachmentType } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -58,7 +58,7 @@ describe('useCreateAttachments', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'createAttachments');
 
-    const { waitForNextUpdate, result } = renderHook(() => useCreateAttachments(), {
+    const { result } = renderHook(() => useCreateAttachments(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -66,13 +66,13 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith({ attachments: attachmentsWithOwner, caseId: request.caseId });
   });
 
   it('does not show a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useCreateAttachments(), {
+    const { result } = renderHook(() => useCreateAttachments(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -80,7 +80,7 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addSuccess).not.toHaveBeenCalled();
   });
@@ -90,7 +90,7 @@ describe('useCreateAttachments', () => {
       .spyOn(api, 'createAttachments')
       .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useCreateAttachments(), {
+    const { result } = renderHook(() => useCreateAttachments(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -98,7 +98,7 @@ describe('useCreateAttachments', () => {
       result.current.mutate(request);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

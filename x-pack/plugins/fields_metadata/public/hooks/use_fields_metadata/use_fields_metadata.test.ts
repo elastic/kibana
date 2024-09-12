@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { createUseFieldsMetadataHook, UseFieldsMetadataParams } from './use_fields_metadata';
 import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
@@ -46,12 +46,12 @@ describe('useFieldsMetadata', () => {
 
   it('should return the fieldsMetadata value from the API', async () => {
     fieldsMetadataClient.find.mockResolvedValue(mockedFieldsMetadataResponse);
-    const { result, waitForNextUpdate } = renderHook(() => useFieldsMetadata());
+    const { result } = renderHook(() => useFieldsMetadata());
 
     expect(result.current.loading).toBe(true);
     expect(result.current.fieldsMetadata).toEqual(undefined);
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const { fieldsMetadata, loading, error } = result.current;
     expect(fieldsMetadata).toEqual(fields);
@@ -68,9 +68,9 @@ describe('useFieldsMetadata', () => {
       dataset: 'dataset_name',
     };
 
-    const { waitForNextUpdate } = renderHook(() => useFieldsMetadata(params));
+    renderHook(() => useFieldsMetadata(params));
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fieldsMetadataClient.find).toHaveBeenCalledWith(params);
   });
@@ -79,9 +79,9 @@ describe('useFieldsMetadata', () => {
     const error = new Error('Fetch fields metadata Failed');
     fieldsMetadataClient.find.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() => useFieldsMetadata());
+    const { result } = renderHook(() => useFieldsMetadata());
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current.error?.message).toMatch(error.message);
   });

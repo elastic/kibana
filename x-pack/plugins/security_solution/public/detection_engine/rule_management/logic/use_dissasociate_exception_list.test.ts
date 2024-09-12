@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -33,7 +33,7 @@ describe('useDisassociateExceptionList', () => {
 
   test('initializes hook', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
+      const { result } = renderHook<
         UseDisassociateExceptionListProps,
         ReturnUseDisassociateExceptionList
       >(() =>
@@ -45,7 +45,7 @@ describe('useDisassociateExceptionList', () => {
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => null);
 
       expect(result.current).toEqual([false, null]);
     });

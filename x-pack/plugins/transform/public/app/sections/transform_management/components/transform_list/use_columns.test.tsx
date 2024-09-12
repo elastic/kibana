@@ -7,7 +7,7 @@
 
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useColumns } from './use_columns';
 
@@ -20,11 +20,11 @@ describe('Transform: Job List Columns', () => {
     const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, [], false), {
+    const { result } = renderHook(() => useColumns([], () => {}, 1, [], false), {
       wrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 

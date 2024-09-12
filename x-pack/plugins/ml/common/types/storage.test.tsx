@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { reactRenderHook, act } from '@testing-library/react';
+import { reactRenderHook, act, waitFor } from '@testing-library/react';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
@@ -65,12 +65,9 @@ describe('useStorage', () => {
   });
 
   test('updates the storage value', async () => {
-    const { result, waitForNextUpdate } = reactRenderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     const [value, setValue] = result.current;
 
@@ -78,20 +75,18 @@ describe('useStorage', () => {
 
     await act(async () => {
       setValue(false);
-      await waitForNextUpdate();
     });
+
+    await waitFor(() => null);
 
     expect(result.current[0]).toBe(false);
     expect(mockSet).toHaveBeenCalledWith('ml.gettingStarted.isDismissed', false);
   });
 
   test('removes the storage value', async () => {
-    const { result, waitForNextUpdate } = reactRenderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     const [value, setValue] = result.current;
 
@@ -99,20 +94,18 @@ describe('useStorage', () => {
 
     await act(async () => {
       setValue(undefined);
-      await waitForNextUpdate();
     });
+
+    await waitFor(() => null);
 
     expect(result.current[0]).toBe(undefined);
     expect(mockRemove).toHaveBeenCalledWith('ml.gettingStarted.isDismissed');
   });
 
   test('updates the value on storage event', async () => {
-    const { result, waitForNextUpdate } = reactRenderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     expect(result.current[0]).toBe(true);
 
@@ -134,8 +127,9 @@ describe('useStorage', () => {
           newValue: null,
         })
       );
-      await waitForNextUpdate();
     });
+
+    await waitFor(() => null);
 
     expect(result.current[0]).toBe(undefined);
 
@@ -146,8 +140,9 @@ describe('useStorage', () => {
           newValue: 'false',
         })
       );
-      await waitForNextUpdate();
     });
+
+    await waitFor(() => null);
 
     expect(result.current[0]).toBe(false);
   });

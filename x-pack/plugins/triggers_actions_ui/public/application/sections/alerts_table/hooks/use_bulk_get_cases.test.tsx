@@ -34,11 +34,11 @@ describe('useBulkGetCases', () => {
     const spy = jest.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 
-    const { waitForNextUpdate } = renderHook(() => useBulkGetCases(['case-1'], true), {
+    renderHook(() => useBulkGetCases(['case-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith(
       expect.anything(),
@@ -63,11 +63,11 @@ describe('useBulkGetCases', () => {
   it('shows a toast error when the api return an error', async () => {
     const spy = jest.spyOn(api, 'bulkGetCases').mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(() => useBulkGetCases(['case-1'], true), {
+    renderHook(() => useBulkGetCases(['case-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(

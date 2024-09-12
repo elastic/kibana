@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { basicCase } from './mock';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
@@ -39,7 +39,7 @@ describe('useReplaceCustomField', () => {
   it('replace a customField and refresh the case page', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+    const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -47,7 +47,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
     expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
@@ -55,7 +55,7 @@ describe('useReplaceCustomField', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
-    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+    const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -63,7 +63,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
       caseId: sampleData.caseId,
@@ -83,7 +83,7 @@ describe('useReplaceCustomField', () => {
       caseVersion: basicCase.version,
     };
     const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
-    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+    const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -91,7 +91,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(newData);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
       caseId: newData.caseId,
@@ -111,7 +111,7 @@ describe('useReplaceCustomField', () => {
       caseVersion: basicCase.version,
     };
     const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
-    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+    const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -119,7 +119,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(newData);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
       caseId: newData.caseId,
@@ -136,7 +136,7 @@ describe('useReplaceCustomField', () => {
       .spyOn(api, 'replaceCustomField')
       .mockRejectedValue(new Error('useUpdateComment: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+    const { result } = renderHook(() => useReplaceCustomField(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -144,7 +144,7 @@ describe('useReplaceCustomField', () => {
       result.current.mutate(sampleData);
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(addError).toHaveBeenCalled();
   });

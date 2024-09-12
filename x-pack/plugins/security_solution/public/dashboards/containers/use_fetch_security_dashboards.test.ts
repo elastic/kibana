@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { useFetchSecurityDashboards } from './use_fetch_security_dashboards';
 import { getTagsByName } from '../../common/containers/tags/api';
@@ -28,9 +28,9 @@ const renderUseFetchSecurityDashboards = () =>
 
 const asyncRenderUseFetchSecurityDashboards = async () => {
   const renderedHook = renderUseFetchSecurityDashboards();
-  await act(async () => {
-    await renderedHook.waitForNextUpdate();
-  });
+
+  await waitFor(() => null);
+
   return renderedHook;
 };
 

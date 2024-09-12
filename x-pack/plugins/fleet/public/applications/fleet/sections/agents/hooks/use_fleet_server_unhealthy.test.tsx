@@ -46,8 +46,8 @@ describe('useFleetServerUnhealthy', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await waitForNextUpdate();
+    const { result, waitFor } = testRenderer.renderHook(() => useFleetServerUnhealthy());
+    await waitFor(() => null);
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isUnhealthy).toBeFalsy();
   });
@@ -62,8 +62,8 @@ describe('useFleetServerUnhealthy', () => {
         },
       },
     });
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await waitForNextUpdate();
+    const { result, waitFor } = testRenderer.renderHook(() => useFleetServerUnhealthy());
+    await waitFor(() => null);
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isUnhealthy).toBeTruthy();
   });
@@ -73,8 +73,8 @@ describe('useFleetServerUnhealthy', () => {
       error: new Error('Invalid request'),
       data: null,
     });
-    const { result, waitForNextUpdate } = testRenderer.renderHook(() => useFleetServerUnhealthy());
-    await waitForNextUpdate();
+    const { result, waitFor } = testRenderer.renderHook(() => useFleetServerUnhealthy());
+    await waitFor(() => null);
     expect(result.current.isLoading).toBeFalsy();
     expect(result.current.isUnhealthy).toBeFalsy();
     expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();

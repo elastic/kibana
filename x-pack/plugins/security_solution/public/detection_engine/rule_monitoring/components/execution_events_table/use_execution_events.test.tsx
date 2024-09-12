@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, cleanup } from '@testing-library/react';
+import { renderHook, cleanup, waitFor } from '@testing-library/react';
 
 import {
   LogLevelEnum,
@@ -39,9 +39,9 @@ describe('useExecutionEvents', () => {
   it('calls the API via fetchRuleExecutionEvents', async () => {
     const fetchRuleExecutionEvents = jest.spyOn(api, 'fetchRuleExecutionEvents');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(fetchRuleExecutionEvents).toHaveBeenCalledTimes(1);
     expect(fetchRuleExecutionEvents).toHaveBeenLastCalledWith(
@@ -50,7 +50,7 @@ describe('useExecutionEvents', () => {
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -58,7 +58,7 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     // It switches to a success state
     expect(result.current.isLoading).toEqual(false);
@@ -87,7 +87,7 @@ describe('useExecutionEvents', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchRuleExecutionEvents').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -95,7 +95,7 @@ describe('useExecutionEvents', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     // It switches to an error state
     expect(result.current.isLoading).toEqual(false);

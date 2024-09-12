@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
@@ -42,12 +42,12 @@ describe('UseInfiniteFindCaseUserActions', () => {
   });
 
   it('returns proper state on findCaseUserActions', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(result.current).toEqual(
       expect.objectContaining({
@@ -73,7 +73,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   it('calls the API with correct parameters', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useInfiniteFindCaseUserActions(
           basicCase.id,
@@ -87,7 +87,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
@@ -122,14 +122,11 @@ describe('UseInfiniteFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(
-      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
@@ -143,7 +140,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
   it('fetches next page with correct params', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
       { wrapper: appMockRender.AppWrapper }
     );

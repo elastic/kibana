@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, renderHook, act } from '@testing-library/react';
+import { fireEvent, render, renderHook, act, waitFor } from '@testing-library/react';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 import { TestProviders } from '../../../common/mock';
@@ -48,14 +48,92 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 describe('useTimelineTypes', () => {
   it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        React.PropsWithChildren<UseTimelineTypesArgs>,
-        UseTimelineTypesResult
-      >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
+    const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+      () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+      {
         wrapper: TestProviders,
+      }
+    );
+    await waitFor(() => null);
+    expect(result.current).toEqual({
+      timelineType: 'default',
+      timelineTabs: result.current.timelineTabs,
+      timelineFilters: result.current.timelineFilters,
+    });
+  });
+
+  describe('timelineTabs', () => {
+    it('render timelineTabs', async () => {
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitFor(() => null);
+
+      const { container } = render(result.current.timelineTabs);
+      expect(container.querySelector('[data-test-subj="timeline-tab-default"]')).toHaveTextContent(
+        'Timelines'
+      );
+      expect(container.querySelector('[data-test-subj="timeline-tab-template"]')).toHaveTextContent(
+        'Templates'
+      );
+    });
+
+    it('set timelineTypes correctly', async () => {
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitFor(() => null);
+
+      const { container } = render(result.current.timelineTabs);
+
+      act(() => {
+        fireEvent(
+          container.querySelector('[data-test-subj="timeline-tab-template"]')!,
+          new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+          })
+        );
       });
-      await waitForNextUpdate();
+
+      await waitFor(() => null);
+
+      expect(result.current).toEqual({
+        timelineType: 'template',
+        timelineTabs: result.current.timelineTabs,
+        timelineFilters: result.current.timelineFilters,
+      });
+    });
+
+    it('stays in the same tab if clicking again on current tab', async () => {
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitFor(() => null);
+
+      const { container } = render(result.current.timelineTabs);
+
+      act(() => {
+        fireEvent(
+          container.querySelector('[data-test-subj="timeline-tab-default"]')!,
+          new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+          })
+        );
+      });
+
+      waitFor(() => null);
+
       expect(result.current).toEqual({
         timelineType: 'default',
         timelineTabs: result.current.timelineTabs,
@@ -64,117 +142,38 @@ describe('useTimelineTypes', () => {
     });
   });
 
-  describe('timelineTabs', () => {
-    it('render timelineTabs', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<UseTimelineTypesArgs>,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
-          wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
-
-        const { container } = render(result.current.timelineTabs);
-        expect(
-          container.querySelector('[data-test-subj="timeline-tab-default"]')
-        ).toHaveTextContent('Timelines');
-        expect(
-          container.querySelector('[data-test-subj="timeline-tab-template"]')
-        ).toHaveTextContent('Templates');
-      });
-    });
-
-    it('set timelineTypes correctly', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<UseTimelineTypesArgs>,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
-          wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
-
-        const { container } = render(result.current.timelineTabs);
-
-        fireEvent(
-          container.querySelector('[data-test-subj="timeline-tab-template"]')!,
-          new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-          })
-        );
-
-        expect(result.current).toEqual({
-          timelineType: 'template',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
-        });
-      });
-    });
-
-    it('stays in the same tab if clicking again on current tab', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<UseTimelineTypesArgs>,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
-          wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
-
-        const { container } = render(result.current.timelineTabs);
-
-        fireEvent(
-          container.querySelector('[data-test-subj="timeline-tab-default"]')!,
-          new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-          })
-        );
-
-        expect(result.current).toEqual({
-          timelineType: 'default',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
-        });
-      });
-    });
-  });
-
   describe('timelineFilters', () => {
     it('render timelineFilters', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<UseTimelineTypesArgs>,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+        {
           wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
+        }
+      );
+      await waitFor(() => null);
 
-        const { container } = render(<>{result.current.timelineFilters}</>);
-        expect(
-          container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')
-        ).toHaveTextContent('Timelines');
-        expect(
-          container.querySelector('[data-test-subj="open-timeline-modal-body-filter-template"]')
-        ).toHaveTextContent('Templates');
-      });
+      const { container } = render(<>{result.current.timelineFilters}</>);
+
+      expect(
+        container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')
+      ).toHaveTextContent('Timelines');
+      expect(
+        container.querySelector('[data-test-subj="open-timeline-modal-body-filter-template"]')
+      ).toHaveTextContent('Templates');
     });
 
     it('set timelineTypes correctly', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<UseTimelineTypesArgs>,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+        {
           wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
+        }
+      );
+      await waitFor(() => null);
 
-        const { container } = render(<>{result.current.timelineFilters}</>);
+      const { container } = render(<>{result.current.timelineFilters}</>);
 
+      act(() => {
         fireEvent(
           container.querySelector('[data-test-subj="open-timeline-modal-body-filter-template"]')!,
           new MouseEvent('click', {
@@ -182,27 +181,30 @@ describe('useTimelineTypes', () => {
             cancelable: true,
           })
         );
+      });
 
-        expect(result.current).toEqual({
-          timelineType: 'template',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
-        });
+      await waitFor(() => null);
+
+      expect(result.current).toEqual({
+        timelineType: 'template',
+        timelineTabs: result.current.timelineTabs,
+        timelineFilters: result.current.timelineFilters,
       });
     });
 
     it('stays in the same tab if clicking again on current tab', async () => {
-      await act(async () => {
-        const { result, waitForNextUpdate } = renderHook<
-          React.PropsWithChildren<UseTimelineTypesArgs>,
-          UseTimelineTypesResult
-        >(() => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }), {
+      const { result } = renderHook<UseTimelineTypesResult, UseTimelineTypesArgs>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 3 }),
+        {
           wrapper: TestProviders,
-        });
-        await waitForNextUpdate();
+        }
+      );
 
-        const { container } = render(<>{result.current.timelineFilters}</>);
+      await waitFor(() => null);
 
+      const { container } = render(<>{result.current.timelineFilters}</>);
+
+      act(() => {
         fireEvent(
           container.querySelector('[data-test-subj="open-timeline-modal-body-filter-default"]')!,
           new MouseEvent('click', {
@@ -210,12 +212,14 @@ describe('useTimelineTypes', () => {
             cancelable: true,
           })
         );
+      });
 
-        expect(result.current).toEqual({
-          timelineType: 'default',
-          timelineTabs: result.current.timelineTabs,
-          timelineFilters: result.current.timelineFilters,
-        });
+      await waitFor(() => null);
+
+      expect(result.current).toEqual({
+        timelineType: 'default',
+        timelineTabs: result.current.timelineTabs,
+        timelineFilters: result.current.timelineFilters,
       });
     });
   });
