@@ -104,7 +104,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a conversation with the write user', () => {
+    // TODO: possibly could be solved by https://github.com/elastic/kibana/issues/192711
+    describe('when creating a conversation with the write user', function () {
+      this.tags(['skipMKI']);
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
@@ -150,10 +152,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(404);
       });
-
-      // TODO: we don't have a user.name in MKI but some numbers which we don't know in advance and cannot set.
+      // by using cookie auth we can set a username to compare the user.name against
+      // otherwise this will change in the MKI environment to a string of numbers.
+      // if not we should not test for an exact user.name match
       it('returns the conversation', function () {
-        this.tags(['skipMKI']);
         expect(createResponse.body).to.eql({
           '@timestamp': createResponse.body['@timestamp'],
           conversation: {
