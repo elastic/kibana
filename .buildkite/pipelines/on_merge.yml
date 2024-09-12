@@ -98,24 +98,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
-    label: 'Serverless Entity Analytics - Security Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 3
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
@@ -129,60 +111,6 @@ steps:
       - quick_checks
     timeout_in_minutes: 60
     parallelism: 2
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
-    label: 'Serverless Investigations - Security Solution Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 8
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
-    label: 'Serverless Rule Management - Security Solution Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 5
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
-    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
@@ -208,42 +136,6 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
-    label: 'Serverless Detection Engine - Security Solution Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 5
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
-    label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
@@ -291,24 +183,6 @@ steps:
       - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
-    label: 'Serverless AI Assistant - Security Solution Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
@@ -404,24 +278,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-    label: 'Serverless Osquery Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 8
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
@@ -437,26 +293,6 @@ steps:
       - quick_checks
     timeout_in_minutes: 60
     parallelism: 20
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    label: 'Defend Workflows Cypress Tests on Serverless'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
-      machineType: n2-standard-4
-    depends_on:
-      - build
-      - quick_checks
-    timeout_in_minutes: 60
-    parallelism: 14
     retry:
       automatic:
         - exit_status: '-1'
