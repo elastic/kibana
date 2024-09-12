@@ -19,7 +19,7 @@ export function SvlCommonNavigationServiceProvider({
     async navigateToKibanaHome() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('home');
-        await testSubjects.existOrFail('hoxmeApp', { timeout: 2000 });
+        await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
     },
   };
