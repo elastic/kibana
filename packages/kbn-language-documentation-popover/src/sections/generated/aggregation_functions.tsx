@@ -13,11 +13,11 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 
 // DO NOT RENAME!
 export const functions = {
-  label: i18n.translate('languageDocumentationPopover.documentationESQLaggregationFunctions', {
+  label: i18n.translate('languageDocumentationPopover.documentationESQL.aggregationFunctions', {
     defaultMessage: 'Aggregation functions',
   }),
   description: i18n.translate(
-    'languageDocumentationPopover.documentationESQLaggregationFunctionsDocumentationESQLDescription',
+    'languageDocumentationPopover.documentationESQL.aggregationFunctionsDocumentationESQLDescription',
     {
       defaultMessage: `These functions can by used with STATS...BY:`,
     }
