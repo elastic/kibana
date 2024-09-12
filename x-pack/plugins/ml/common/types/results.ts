@@ -105,7 +105,6 @@ export interface ChartPoint {
   byFieldName?: string;
   numberOfCauses?: number;
   scheduledEvents?: any[];
-  isFakeDataPoint?: boolean;
 }
 
 export interface InfoTooltip {
