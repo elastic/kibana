@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -1076,6 +1077,32 @@ export class Embeddable
       ...this.getOutput(),
       rendered: true,
     });
+
+    const inspectorAdapters = this.getInspectorAdapters();
+    const requests = inspectorAdapters.requests?.getRequests() || [];
+
+    let totalTookTime = 0;
+    let allValid = true;
+    let totalTime = 0;
+    for (let i = 0; i < requests.length; i++) {
+      const request = requests[i];
+      if (request.status !== 1) {
+        allValid = false;
+        break;
+      }
+      totalTookTime += request.response?.json?.rawResponse?.took ?? 0;
+      totalTime += request.time || 0;
+    }
+
+    if (allValid) {
+      const esRequestMetrics = {
+        eventName: 'lens_chart_es_request_totals',
+        duration: totalTime,
+        key1: 'es_took_total',
+        value1: totalTookTime,
+      };
+      reportPerformanceMetricEvent(this.deps.coreStart.analytics, esRequestMetrics);
+    }
   };
 
   getExecutionContext() {
