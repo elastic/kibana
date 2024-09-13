@@ -56,6 +56,7 @@ export interface CodeSnippetParameters {
   apiKey?: string;
   elasticsearchURL: string;
 }
+
 export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
 
 export interface CodeLanguage {
