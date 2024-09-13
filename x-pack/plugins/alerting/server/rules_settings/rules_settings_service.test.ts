@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { rulesSettingsClientMock } from './rules_settings_client.mock';
 import { RulesSettingsService } from './rules_settings_service';
@@ -28,6 +29,8 @@ const fakeRequest = {
 } as unknown as KibanaRequest;
 let fakeTimer: sinon.SinonFakeTimers;
 
+const logger = loggingSystemMock.create().get();
+
 describe('RulesSettingsService', () => {
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T08:15:00.000Z'));
@@ -49,6 +52,7 @@ describe('RulesSettingsService', () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
+          logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
         // @ts-ignore - accessing private variable
@@ -81,6 +85,7 @@ describe('RulesSettingsService', () => {
 
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
+          logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
 
@@ -102,6 +107,10 @@ describe('RulesSettingsService', () => {
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         });
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          `Failed to fetch initial rules settings, using default settings: no!`
+        );
       });
 
       test('should fetch settings per space', async () => {
@@ -109,6 +118,7 @@ describe('RulesSettingsService', () => {
         (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 13 });
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
+          logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
         // @ts-ignore - accessing private variable
@@ -155,6 +165,7 @@ describe('RulesSettingsService', () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
+          logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
 
@@ -178,6 +189,7 @@ describe('RulesSettingsService', () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
+          logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
 
@@ -197,6 +209,7 @@ describe('RulesSettingsService', () => {
         });
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
+          logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
 
@@ -213,6 +226,10 @@ describe('RulesSettingsService', () => {
           statusChangeThreshold: 4,
         });
         expect(settings1).toEqual(settings2);
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          `Failed to fetch rules settings after cache expiration, using cached settings: no!`
+        );
       });
     });
   }

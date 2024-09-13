@@ -614,6 +614,7 @@ export class AlertingPlugin {
       rulesSettingsService: new RulesSettingsService({
         getRulesSettingsClientWithRequest,
         isServerless: !!plugins.serverless,
+        logger,
       }),
       savedObjects: core.savedObjects,
       share: plugins.share,

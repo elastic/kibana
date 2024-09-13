@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
@@ -20,6 +20,7 @@ const CACHE_INTERVAL_MS = 60000; // 1 minute cache
 
 export interface RulesSettingsServiceConstructorOptions {
   readonly isServerless: boolean;
+  logger: Logger;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
 }
 
@@ -54,6 +55,9 @@ export class RulesSettingsService {
           return await this.fetchSettings(request, spaceId, now);
         } catch (err) {
           // return cached settings on error
+          this.options.logger.debug(
+            `Failed to fetch rules settings after cache expiration, using cached settings: ${err.message}`
+          );
           return {
             queryDelaySettings: currentQueryDelaySettings,
             flappingSettings: currentFlappingSettings,
@@ -71,6 +75,9 @@ export class RulesSettingsService {
         return await this.fetchSettings(request, spaceId, now);
       } catch (err) {
         // return default settings on error
+        this.options.logger.debug(
+          `Failed to fetch initial rules settings, using default settings: ${err.message}`
+        );
         return {
           queryDelaySettings: this.defaultQueryDelaySettings,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
