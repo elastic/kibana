@@ -34,9 +34,9 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       title: 'Portable dashboard examples',
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(depsStart, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 
