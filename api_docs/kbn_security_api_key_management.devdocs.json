@@ -976,7 +976,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
             "deprecated": false,
@@ -1185,7 +1185,7 @@
         "label": "QueryApiKeySortOptions",
         "description": [],
         "signature": [
-          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"expired\" | \"creation\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
         "deprecated": false,
