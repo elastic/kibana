@@ -214,7 +214,7 @@ describe('DeploymentParamsMapper', () => {
             priority: 'normal',
             threads_per_allocation: 8,
             number_of_allocations: 2,
-          } as MlTrainedModelAssignmentTaskParametersAdaptive;
+          } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive;
           expect(mapper.mapApiToUiDeploymentParams(input)).toEqual({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
@@ -229,7 +229,7 @@ describe('DeploymentParamsMapper', () => {
               priority: 'normal',
               threads_per_allocation: 1,
               number_of_allocations: 1,
-            } as MlTrainedModelAssignmentTaskParametersAdaptive)
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
           ).toEqual({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',
@@ -244,7 +244,7 @@ describe('DeploymentParamsMapper', () => {
               priority: 'normal',
               threads_per_allocation: 2,
               number_of_allocations: 2,
-            } as MlTrainedModelAssignmentTaskParametersAdaptive)
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
           ).toEqual({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
@@ -265,7 +265,7 @@ describe('DeploymentParamsMapper', () => {
                 min_number_of_allocations: 2,
                 max_number_of_allocations: 2,
               },
-            } as MlTrainedModelAssignmentTaskParametersAdaptive)
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
           ).toEqual({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
@@ -284,7 +284,7 @@ describe('DeploymentParamsMapper', () => {
                 min_number_of_allocations: 2,
                 max_number_of_allocations: 2,
               },
-            } as MlTrainedModelAssignmentTaskParametersAdaptive)
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
           ).toEqual({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForSearch',
@@ -303,7 +303,7 @@ describe('DeploymentParamsMapper', () => {
                 min_number_of_allocations: 1,
                 max_number_of_allocations: 1,
               },
-            } as MlTrainedModelAssignmentTaskParametersAdaptive)
+            } as unknown as MlTrainedModelAssignmentTaskParametersAdaptive)
           ).toEqual({
             deploymentId: 'test-deployment',
             optimized: 'optimizedForIngest',

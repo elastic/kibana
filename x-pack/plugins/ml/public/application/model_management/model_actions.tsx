@@ -292,11 +292,10 @@ export function useModelActions({
               {
                 ...(deploymentParams.adaptive_allocations
                   ? { adaptive_allocations: deploymentParams.adaptive_allocations }
-                  : {}),
-                // Remove number of allocations if adaptive allocations are not enabled
-                ...(deploymentParams.adaptive_allocations?.enabled
-                  ? {}
-                  : { number_of_allocations: deploymentParams.number_of_allocations! }),
+                  : {
+                      number_of_allocations: deploymentParams.number_of_allocations!,
+                      adaptive_allocations: { enabled: false },
+                    }),
               }
             );
             displaySuccessToast(

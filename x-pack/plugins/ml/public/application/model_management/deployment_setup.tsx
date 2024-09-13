@@ -6,6 +6,7 @@
  */
 
 import type { FC } from 'react';
+import { Fragment } from 'react';
 import React, { useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -307,9 +308,9 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             value={config.deploymentId}
             onChange={(e) => {
               const update = e.target.value;
+              const targetDeployment = deploymentsParams![update];
               onConfigChange({
-                ...config,
-                deploymentId: update,
+                ...targetDeployment,
               });
             }}
             data-test-subj={'mlModelsStartDeploymentModalDeploymentSelectId'}
@@ -319,57 +320,56 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
       <EuiSpacer size="m" />
 
-      {!isUpdate ? (
-        <EuiFormRow hasChildLabel={true} fullWidth>
-          <EuiFormFieldset
-            legend={{
-              children: (
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
-                  defaultMessage="Optimize this model deployment for your use case:"
+      <EuiFormRow hasChildLabel={true} fullWidth>
+        <EuiFormFieldset
+          legend={{
+            children: (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
+                defaultMessage="Optimize this model deployment for your use case:"
+              />
+            ),
+          }}
+        >
+          {optimizedOptions.map((v) => {
+            return (
+              <Fragment key={v.value}>
+                <EuiCheckableCard
+                  id={v.value}
+                  disabled={isUpdate}
+                  label={
+                    <EuiText size={'s'}>
+                      <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
+                        <EuiFlexItem grow={false}>
+                          <strong>{v.label}</strong>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiText>
+                  }
+                  value={v.value}
+                  checked={config.optimized === v.value}
+                  onChange={() => {
+                    onConfigChange({
+                      ...config,
+                      ...(deploymentIdUpdated.current
+                        ? {}
+                        : {
+                            deploymentId: config.deploymentId?.replace(
+                              /_[a-zA-Z]+$/,
+                              v.value === 'optimizedForIngest' ? '_ingest' : '_search'
+                            ),
+                          }),
+                      optimized: v.value,
+                    });
+                  }}
                 />
-              ),
-            }}
-          >
-            {optimizedOptions.map((v) => {
-              return (
-                <>
-                  <EuiCheckableCard
-                    id={v.value}
-                    label={
-                      <EuiText size={'s'}>
-                        <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
-                          <EuiFlexItem grow={false}>
-                            <strong>{v.label}</strong>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiText>
-                    }
-                    value={v.value}
-                    checked={config.optimized === v.value}
-                    onChange={() => {
-                      onConfigChange({
-                        ...config,
-                        ...(deploymentIdUpdated.current
-                          ? {}
-                          : {
-                              deploymentId: config.deploymentId?.replace(
-                                /_[a-zA-Z]+$/,
-                                v.value === 'optimizedForIngest' ? '_ingest' : '_search'
-                              ),
-                            }),
-                        optimized: v.value,
-                      });
-                    }}
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              );
-            })}
-          </EuiFormFieldset>
-        </EuiFormRow>
-      ) : null}
+                <EuiSpacer size="m" />
+              </Fragment>
+            );
+          })}
+        </EuiFormFieldset>
+      </EuiFormRow>
 
       <EuiAccordion
         id={'modelDeploymentAdvancedSettings'}
@@ -379,6 +379,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             defaultMessage="Advanced Configurations"
           />
         }
+        initialIsOpen={isUpdate}
       >
         <EuiSpacer size={'m'} />
 
@@ -574,7 +575,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           deploymentsParams={model.stats?.deployment_stats.reduce<
             Record<string, DeploymentParamsUI>
           >((acc, curr) => {
-            acc[curr.deployment_id] = { numOfAllocations: curr.number_of_allocations };
+            acc[curr.deployment_id] = deploymentParamsMapper.mapApiToUiDeploymentParams(curr);
             return acc;
           }, {})}
         />
@@ -689,7 +690,6 @@ export const getUserInputModelDeploymentParamsProvider =
               model={model}
               onConfigChange={(config) => {
                 modalSession.close();
-
                 resolve(deploymentParamsMapper.mapUiToUiDeploymentParams(config));
               }}
               onClose={() => {
