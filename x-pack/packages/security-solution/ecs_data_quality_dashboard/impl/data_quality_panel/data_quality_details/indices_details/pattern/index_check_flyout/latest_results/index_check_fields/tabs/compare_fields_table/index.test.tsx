@@ -8,11 +8,11 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../incompatible_tab/translations';
 import { eventCategory } from '../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { TestExternalProviders } from '../../../../../../../../mock/test_providers/test_providers';
 import { CompareFieldsTable } from '.';
 import { getIncompatibleMappingsTableColumns } from './get_incompatible_mappings_table_columns';
+import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../../../../../../../../translations';
 
 describe('CompareFieldsTable', () => {
   describe('rendering', () => {

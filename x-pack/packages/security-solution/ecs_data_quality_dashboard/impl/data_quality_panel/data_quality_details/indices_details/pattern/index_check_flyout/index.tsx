@@ -64,7 +64,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   stats,
   onClose,
 }) => {
-  const { fetchHistoricalResults, historicalResultsState } = useHistoricalResults();
+  const { historicalResultsState, fetchHistoricalResults } = useHistoricalResults();
   const currentWindowWidth = useCurrentWindowWidth();
   const isLargeScreen = currentWindowWidth > 1720;
   const isMediumScreen = currentWindowWidth > 1200;

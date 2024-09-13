@@ -13,7 +13,7 @@ import { CompareFieldsTable } from '../compare_fields_table';
 import { getCustomTableColumns } from '../compare_fields_table/helpers';
 import { EmptyPromptBody } from '../../../empty_prompt_body';
 import { EmptyPromptTitle } from '../../../empty_prompt_title';
-import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
+import { getAllCustomMarkdownComments, showCustomCallout } from './utils/helpers';
 import * as i18n from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../../../../../types';
 import { useDataQualityContext } from '../../../../../../../../data_quality_context';

@@ -8,7 +8,7 @@
 import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { EMPTY_PLACEHOLDER } from '../helpers';
+import { EMPTY_PLACEHOLDER } from '../../../../../../../../../constants';
 import { CodeSuccess } from '../../../../../../../../../styles';
 import type { AllowedValue } from '../../../../../../../../../types';
 

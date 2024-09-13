@@ -14,13 +14,6 @@ export const ECS_VALUES = i18n.translate(
   }
 );
 
-export const ECS_VALUES_EXPECTED = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.ecsValuesExpectedColumn',
-  {
-    defaultMessage: 'ECS values (expected)',
-  }
-);
-
 export const ECS_DESCRIPTION = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.ecsDescriptionColumn',
   {
@@ -35,38 +28,10 @@ export const ECS_MAPPING_TYPE = i18n.translate(
   }
 );
 
-export const ECS_MAPPING_TYPE_EXPECTED = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.ecsMappingTypeExpectedColumn',
-  {
-    defaultMessage: 'ECS mapping type (expected)',
-  }
-);
-
-export const DOCUMENT_VALUES_ACTUAL = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.documentValuesActualColumn',
-  {
-    defaultMessage: 'Document values (actual)',
-  }
-);
-
 export const INDEX_MAPPING_TYPE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.indexMappingTypeColumn',
   {
     defaultMessage: 'Index mapping type',
-  }
-);
-
-export const INDEX_MAPPING_TYPE_ACTUAL = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.indexMappingTypeActualColumn',
-  {
-    defaultMessage: 'Index mapping type (actual)',
-  }
-);
-
-export const FIELD = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.compareFieldsTable.fieldColumn',
-  {
-    defaultMessage: 'Field',
   }
 );
 

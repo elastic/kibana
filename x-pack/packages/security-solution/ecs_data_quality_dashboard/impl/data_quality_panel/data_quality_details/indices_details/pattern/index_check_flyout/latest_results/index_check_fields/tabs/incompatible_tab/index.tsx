@@ -8,26 +8,26 @@
 import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import {
+  getAllIncompatibleMarkdownComments,
+  getIncompatibleMappings,
+  getIncompatibleValues,
+} from '../../../../../../../../utils/markdown';
 import { IncompatibleCallout } from '../callouts/incompatible_callout';
 import { CompareFieldsTable } from '../compare_fields_table';
 import { getIncompatibleMappingsTableColumns } from '../compare_fields_table/get_incompatible_mappings_table_columns';
 import { getIncompatibleValuesTableColumns } from '../compare_fields_table/helpers';
 import { EmptyPromptBody } from '../../../empty_prompt_body';
 import { EmptyPromptTitle } from '../../../empty_prompt_title';
-import {
-  getAllIncompatibleMarkdownComments,
-  getIncompatibleMappings,
-  getIncompatibleValues,
-  showInvalidCallout,
-} from './helpers';
+import { showInvalidCallout } from './helpers';
 import * as i18n from '../../../translations';
-import {
-  INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
-  INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
-} from './translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../../../../../../types';
 import { useDataQualityContext } from '../../../../../../../../data_quality_context';
 import { StickyActions } from '../sticky_actions';
+import {
+  INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
+  INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
+} from '../../../../../../../../translations';
 
 interface Props {
   docsCount: number;

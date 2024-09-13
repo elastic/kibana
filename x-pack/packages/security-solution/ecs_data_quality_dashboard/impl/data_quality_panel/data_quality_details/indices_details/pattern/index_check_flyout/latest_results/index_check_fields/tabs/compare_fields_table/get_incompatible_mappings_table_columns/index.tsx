@@ -8,26 +8,29 @@
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import React from 'react';
 
+import {
+  ECS_MAPPING_TYPE_EXPECTED,
+  FIELD,
+  INDEX_MAPPING_TYPE_ACTUAL,
+} from '../../../../../../../../../translations';
 import { SameFamily } from '../same_family';
 import { CodeDanger, CodeSuccess } from '../../../../../../../../../styles';
 import * as i18n from '../translations';
 import type { EcsBasedFieldMetadata } from '../../../../../../../../../types';
-
-export const EMPTY_PLACEHOLDER = '--';
 
 export const getIncompatibleMappingsTableColumns = (): Array<
   EuiTableFieldDataColumnType<EcsBasedFieldMetadata>
 > => [
   {
     field: 'indexFieldName',
-    name: i18n.FIELD,
+    name: FIELD,
     sortable: true,
     truncateText: false,
     width: '15%',
   },
   {
     field: 'type',
-    name: i18n.ECS_MAPPING_TYPE_EXPECTED,
+    name: ECS_MAPPING_TYPE_EXPECTED,
     render: (type: string) => <CodeSuccess data-test-subj="codeSuccess">{type}</CodeSuccess>,
     sortable: true,
     truncateText: false,
@@ -35,7 +38,7 @@ export const getIncompatibleMappingsTableColumns = (): Array<
   },
   {
     field: 'indexFieldType',
-    name: i18n.INDEX_MAPPING_TYPE_ACTUAL,
+    name: INDEX_MAPPING_TYPE_ACTUAL,
     render: (indexFieldType: string, x) =>
       x.isInSameFamily ? (
         <div>

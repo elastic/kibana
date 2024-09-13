@@ -9,13 +9,13 @@ import { EcsVersion } from '@elastic/ecs';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
+import { IncompatibleCallout } from '.';
 import {
   DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
   MAPPINGS_THAT_CONFLICT_WITH_ECS,
   PAGES_MAY_NOT_DISPLAY_EVENTS,
-} from '../../../../translations';
-import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
-import { IncompatibleCallout } from '.';
+} from '../../../../../../../../../translations';
 
 describe('IncompatibleCallout', () => {
   beforeEach(() => {

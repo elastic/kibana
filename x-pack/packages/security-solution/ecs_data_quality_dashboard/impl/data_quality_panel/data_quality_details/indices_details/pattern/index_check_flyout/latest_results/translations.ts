@@ -14,13 +14,6 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   }
 );
 
-export const ALL_FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.allFieldsLabel',
-  {
-    defaultMessage: 'All fields',
-  }
-);
-
 export const ALL_CALLOUT = (version: string) =>
   i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.indexProperties.allCallout', {
     values: { version },
@@ -107,13 +100,6 @@ export const CUSTOM_DETECTION_ENGINE_RULES_WORK = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.custonDetectionEngineRulesWorkMessage',
   {
     defaultMessage: '✅ Custom detection engine rules work',
-  }
-);
-
-export const ECS_COMPLIANT_FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.ecsCompliantFieldsLabel',
-  {
-    defaultMessage: 'ECS compliant fields',
   }
 );
 
@@ -262,13 +248,6 @@ export const MISSING_TIMESTAMP_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const CUSTOM_FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.customFieldsLabel',
-  {
-    defaultMessage: 'Custom fields',
-  }
-);
-
 export const CUSTOM_CALLOUT = ({ fieldCount, version }: { fieldCount: number; version: string }) =>
   i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.indexProperties.customCallout', {
     values: { fieldCount, version },
@@ -326,16 +305,6 @@ export const CUSTOM_EMPTY_TITLE = i18n.translate(
   }
 );
 
-export const INCOMPATIBLE_CALLOUT = (version: string) =>
-  i18n.translate(
-    'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout',
-    {
-      values: { version },
-      defaultMessage:
-        "Fields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version {version}.",
-    }
-  );
-
 export const FIELDS_WITH_MAPPINGS_SAME_FAMILY = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout.fieldsWithMappingsSameFamilyLabel',
   {
@@ -350,15 +319,6 @@ export const WHEN_A_FIELD_IS_INCOMPATIBLE = i18n.translate(
     defaultMessage: 'When a field is incompatible:',
   }
 );
-
-export const INCOMPATIBLE_CALLOUT_TITLE = (fieldCount: number) =>
-  i18n.translate(
-    'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCalloutTitle',
-    {
-      values: { fieldCount },
-      defaultMessage: '{fieldCount} incompatible {fieldCount, plural, =1 {field} other {fields}}',
-    }
-  );
 
 export const INCOMPATIBLE_EMPTY = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleEmptyContent',
@@ -379,14 +339,6 @@ export const DETECTION_ENGINE_RULES_WILL_WORK = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.detectionEngineRulesWillWorkMessage',
   {
     defaultMessage: '✅ Detection engine rules will work for these fields',
-  }
-);
-
-export const DETECTION_ENGINE_RULES_MAY_NOT_MATCH = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.detectionEngineRulesWontWorkMessage',
-  {
-    defaultMessage:
-      '❌ Detection engine rules referencing these fields may not match them correctly',
   }
 );
 
@@ -426,14 +378,6 @@ export const PAGES_MAY_NOT_DISPLAY_FIELDS = i18n.translate(
   }
 );
 
-export const PAGES_MAY_NOT_DISPLAY_EVENTS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.pagesMayNotDisplayEventsMessage',
-  {
-    defaultMessage:
-      '❌ Pages may not display some events or fields due to unexpected field mappings or values',
-  }
-);
-
 export const PRE_BUILT_DETECTION_ENGINE_RULES_WORK = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.preBuiltDetectionEngineRulesWorkMessage',
   {
@@ -449,25 +393,11 @@ export const ECS_IS_A_PERMISSIVE_SCHEMA = i18n.translate(
   }
 );
 
-export const SAME_FAMILY = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sameFamilyTab',
-  {
-    defaultMessage: 'Same family',
-  }
-);
-
 export const SOMETIMES_INDICES_CREATED_BY_OLDER = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sometimesIndicesCreatedByOlderDescription',
   {
     defaultMessage:
       'Sometimes, indices created by older integrations will have mappings or values that were, but are no longer compliant.',
-  }
-);
-
-export const MAPPINGS_THAT_CONFLICT_WITH_ECS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.mappingThatConflictWithEcsMessage',
-  {
-    defaultMessage: "❌ Mappings or field values that don't comply with ECS are not supported",
   }
 );
 

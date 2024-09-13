@@ -7,21 +7,24 @@
 
 import { EcsVersion } from '@elastic/ecs';
 
-import { FIELD, INDEX_MAPPING_TYPE } from '../compare_fields_table/translations';
+import { FIELD } from '../../../../../../../../../translations';
+import {
+  getMarkdownComment,
+  getMarkdownTable,
+  getSummaryTableMarkdownComment,
+} from '../../../../../../../../../utils/markdown';
+import { INDEX_MAPPING_TYPE } from '../../compare_fields_table/translations';
 import {
   getSummaryMarkdownComment,
   getCustomMarkdownTableRows,
-  getMarkdownComment,
-  getMarkdownTable,
   getTabCountsMarkdownComment,
-  getSummaryTableMarkdownComment,
-} from '../../utils/markdown';
-import * as i18n from '../../../translations';
+} from '../../../utils/markdown';
+import * as i18n from '../../../../translations';
 import type {
   CustomFieldMetadata,
   IlmPhase,
   PartitionedFieldMetadata,
-} from '../../../../../../../../types';
+} from '../../../../../../../../../types';
 
 export const getCustomMarkdownComment = ({
   customFieldMetadata,
