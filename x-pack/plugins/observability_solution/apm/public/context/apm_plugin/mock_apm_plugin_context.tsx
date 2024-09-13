@@ -31,7 +31,6 @@ import { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
-import { ApmThemeProvider } from '../../components/routing/app_root';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
