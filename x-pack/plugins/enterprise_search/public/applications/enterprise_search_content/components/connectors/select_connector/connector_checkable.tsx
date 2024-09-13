@@ -208,7 +208,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                       }}
                     >
                       <EuiContextMenuPanel
-                        size="xs"
+                        size="s"
                         items={[
                           <EuiContextMenuItem
                             key="native"

@@ -11,6 +11,12 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
+export type {
+  RowControlColumn,
+  RowControlComponent,
+  RowControlProps,
+  RowControlRowProps,
+} from './components/custom_control_columns/types';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 

@@ -32,12 +32,12 @@ export const generateEntitiesHistoryIndexTemplateConfig = (
     managed: true,
     managed_by: 'elastic_entity_model',
   },
-  ignore_missing_component_templates: getCustomHistoryTemplateComponents(definition.id),
+  ignore_missing_component_templates: getCustomHistoryTemplateComponents(definition),
   composed_of: [
     ENTITY_HISTORY_BASE_COMPONENT_TEMPLATE_V1,
     ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
     ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
-    ...getCustomHistoryTemplateComponents(definition.id),
+    ...getCustomHistoryTemplateComponents(definition),
   ],
   index_patterns: [
     `${entitiesIndexPattern({

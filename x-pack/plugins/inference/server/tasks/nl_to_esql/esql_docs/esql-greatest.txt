@@ -1,8 +1,22 @@
-## GREATEST
+# GREATEST
 
-The `GREATEST` function returns the maximum value from multiple columns. This is similar to `MV_MAX` except it is intended to run on multiple columns at once. When run on keyword or text fields, this function returns the last string in alphabetical order. When run on boolean columns, it will return `true` if any values are `true`.
+The GREATEST function returns the maximum value from multiple columns.
 
-### Examples
+## Syntax
+
+`GREATEST(first, rest)`
+
+### Parameters
+
+#### first
+
+The first column to evaluate.
+
+#### rest
+
+The remaining columns to evaluate.
+
+## Examples
 
 ```esql
 ROW a = 10, b = 20
@@ -13,3 +27,8 @@ ROW a = 10, b = 20
 ROW x = "apple", y = "banana", z = "cherry"
 | EVAL max_fruit = GREATEST(x, y, z)
 ```
+
+## Notes
+
+- When applied to `keyword` or `text` fields, the GREATEST function returns the last string in alphabetical order.
+- When applied to `boolean` columns, it returns `true` if any values are `true`.
