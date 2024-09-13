@@ -61,8 +61,8 @@ export function createGrokProcessor(grokPattern: string): ESProcessorItem {
   return grokProcessor;
 }
 
-// The kv graph returns a simplified grok processor for header
-// This function takes in the grok pattern string and creates the grok processor
+// The kv graph returns a simplified kv processor for structured body
+// This function takes in the kvInput string and creates the kv processor
 export function createKVProcessor(kvInput: KVProcessor, state: KVState): ESProcessorItem {
   const templatesPath = joinPath(__dirname, '../templates/processors');
   const env = new Environment(new FileSystemLoader(templatesPath), {
