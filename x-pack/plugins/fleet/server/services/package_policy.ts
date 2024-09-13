@@ -2030,20 +2030,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
-  public async removeOutputFromAll(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    outputId: string
-  ) {
+  public async removeOutputFromAll(esClient: ElasticsearchClient, outputId: string) {
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = (
-      await soClient.find<PackagePolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
-        searchFields: ['output_id'],
-        search: escapeSearchQueryPhrase(outputId),
-        perPage: SO_SEARCH_LIMIT,
-      })
+      await appContextService
+        .getInternalUserSOClientWithoutSpaceExtension()
+        .find<PackagePolicySOAttributes>({
+          type: savedObjectType,
+          fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
+          searchFields: ['output_id'],
+          search: escapeSearchQueryPhrase(outputId),
+          perPage: SO_SEARCH_LIMIT,
+          namespaces: ['*'],
+        })
     ).saved_objects.map(mapPackagePolicySavedObjectToPackagePolicy);
 
     if (packagePolicies.length > 0) {
@@ -2060,6 +2059,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await pMap(
         packagePolicies,
         async (packagePolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            packagePolicy.spaceIds?.[0]
+          );
           const existingPackagePolicy = await this.get(soClient, packagePolicy.id);
 
           if (!existingPackagePolicy) {
@@ -2087,6 +2089,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await pMap(
         packagePolicies,
         (packagePolicy) => {
+          const soClient = appContextService.getInternalUserSOClientForSpaceId(
+            packagePolicy.spaceIds?.[0]
+          );
           return this.update(
             soClient,
             esClient,
