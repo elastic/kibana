@@ -243,7 +243,15 @@
         "label": "EntityManagerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"PATCH /internal/entities/definition/{id}\": { endpoint: \"PATCH /internal/entities/definition/{id}\"; params?: Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; body: Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; version: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodString, string, string>>; name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; history: Zod.ZodOptional<Zod.ZodObject<{ timestampField: Zod.ZodString; interval: Zod.ZodEffects<Zod.ZodString, string, string>; settings: Zod.ZodEffects<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; frequency: Zod.ZodOptional<Zod.ZodString>; backfillSyncDelay: Zod.ZodOptional<Zod.ZodString>; backfillLookbackPeriod: Zod.ZodOptional<Zod.ZodString>; backfillFrequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined>; }, \"strip\", Zod.ZodTypeAny, { interval: string; settings: { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }; timestampField: string; }, { interval: string; timestampField: string; settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; }>>; metrics: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; metrics: Zod.ZodArray<Zod.ZodDiscriminatedUnion<\"aggregation\", [Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodNativeEnum<typeof ",
+          "{ \"PATCH /internal/entities/definition/{id}\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"PATCH /internal/entities/definition/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; body: Zod.ZodObject<Zod.objectUtil.extendShape<{ type: Zod.ZodOptional<Zod.ZodString>; filter: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; version: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodString, string, string>>; name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodString>>; history: Zod.ZodOptional<Zod.ZodObject<{ timestampField: Zod.ZodString; interval: Zod.ZodEffects<Zod.ZodString, string, string>; settings: Zod.ZodEffects<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; frequency: Zod.ZodOptional<Zod.ZodString>; backfillSyncDelay: Zod.ZodOptional<Zod.ZodString>; backfillLookbackPeriod: Zod.ZodOptional<Zod.ZodString>; backfillFrequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined>; }, \"strip\", Zod.ZodTypeAny, { interval: string; settings: { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }; timestampField: string; }, { interval: string; timestampField: string; settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; }>>; metrics: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; metrics: Zod.ZodArray<Zod.ZodDiscriminatedUnion<\"aggregation\", [Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodNativeEnum<typeof ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -315,25 +323,9 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; limit?: number | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; } | undefined; }; path: { id: string; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
-          },
-          " & { params: ZodMaybeOptional<{ query: { installOnly: boolean; }; body: { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; description?: string | undefined; history?: { interval?: string | undefined; settings?: { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; timestampField?: string | undefined; } | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
-          {
-            "pluginId": "@kbn/entities-schema",
-            "scope": "common",
-            "docId": "kibKbnEntitiesSchemaPluginApi",
-            "section": "def-common.BasicAggregations",
-            "text": "BasicAggregations"
-          },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; limit: number; source: string; } | { source: string; destination: string; limit: number; })[] | undefined; identityFields?: ({ field: string; optional: boolean; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; } | undefined; }; path: { id: string; }; }>; }) => Promise<",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; limit?: number | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; } | undefined; }; path: { id: string; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -341,7 +333,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -349,17 +341,17 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"POST /internal/entities/definition/{id}/_reset\": { endpoint: \"POST /internal/entities/definition/{id}/_reset\"; params?: Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
+          ">; \"POST /internal/entities/definition/{id}/_reset\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
             "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          " & { params: ZodMaybeOptional<{ path: { id: string; }; }>; }) => Promise<",
+          "<\"POST /internal/entities/definition/{id}/_reset\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; }, { path: { id: string; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -367,7 +359,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -375,17 +367,17 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"GET /internal/entities/definition\": { endpoint: \"GET /internal/entities/definition\"; params?: Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { page?: number | undefined; perPage?: number | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
+          ">; \"GET /internal/entities/definition\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
             "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          " & { params?: ZodMaybeOptional<{ query: { page?: number | undefined; perPage?: number | undefined; }; }> | undefined; }) => Promise<",
+          "<\"GET /internal/entities/definition\", Zod.ZodObject<{ query: Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { page?: number | undefined; perPage?: number | undefined; }; }, { query: { page?: number | undefined; perPage?: number | undefined; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -393,7 +385,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -401,17 +393,17 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"DELETE /internal/entities/definition/{id}\": { endpoint: \"DELETE /internal/entities/definition/{id}\"; params?: Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; path: { id: string; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; path: { id: string; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
+          ">; \"DELETE /internal/entities/definition/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
             "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          " & { params: ZodMaybeOptional<{ query: { deleteData: boolean; }; path: { id: string; }; }>; }) => Promise<",
+          "<\"DELETE /internal/entities/definition/{id}\", Zod.ZodObject<{ path: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; path: { id: string; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; path: { id: string; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -419,7 +411,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -427,7 +419,15 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"POST /internal/entities/definition\": { endpoint: \"POST /internal/entities/definition\"; params?: Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; body: Zod.ZodObject<{ id: Zod.ZodString; version: Zod.ZodEffects<Zod.ZodString, string, string>; name: Zod.ZodString; description: Zod.ZodOptional<Zod.ZodString>; type: Zod.ZodString; filter: Zod.ZodOptional<Zod.ZodString>; indexPatterns: Zod.ZodArray<Zod.ZodString, \"many\">; identityFields: Zod.ZodArray<Zod.ZodUnion<[Zod.ZodObject<{ field: Zod.ZodString; optional: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { field: string; optional: boolean; }, { field: string; optional: boolean; }>, Zod.ZodEffects<Zod.ZodString, { field: string; optional: boolean; }, string>]>, \"many\">; displayNameTemplate: Zod.ZodString; metadata: Zod.ZodOptional<Zod.ZodArray<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEffects<Zod.ZodObject<{ source: Zod.ZodString; destination: Zod.ZodOptional<Zod.ZodString>; limit: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { source: string; destination?: string | undefined; limit?: number | undefined; }, { source: string; destination?: string | undefined; limit?: number | undefined; }>, { destination: string; limit: number; source: string; }, { source: string; destination?: string | undefined; limit?: number | undefined; }>, Zod.ZodEffects<Zod.ZodString, { source: string; destination: string; limit: number; }, string>]>, { destination: string; limit: number; source: string; } | { source: string; destination: string; limit: number; }, string | { source: string; destination?: string | undefined; limit?: number | undefined; }>, \"many\">>; metrics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; metrics: Zod.ZodArray<Zod.ZodDiscriminatedUnion<\"aggregation\", [Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodNativeEnum<typeof ",
+          ">; \"POST /internal/entities/definition\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/entities/definition\", Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; body: Zod.ZodObject<{ id: Zod.ZodString; version: Zod.ZodEffects<Zod.ZodString, string, string>; name: Zod.ZodString; description: Zod.ZodOptional<Zod.ZodString>; type: Zod.ZodString; filter: Zod.ZodOptional<Zod.ZodString>; indexPatterns: Zod.ZodArray<Zod.ZodString, \"many\">; identityFields: Zod.ZodArray<Zod.ZodUnion<[Zod.ZodObject<{ field: Zod.ZodString; optional: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { field: string; optional: boolean; }, { field: string; optional: boolean; }>, Zod.ZodEffects<Zod.ZodString, { field: string; optional: boolean; }, string>]>, \"many\">; displayNameTemplate: Zod.ZodString; metadata: Zod.ZodOptional<Zod.ZodArray<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEffects<Zod.ZodObject<{ source: Zod.ZodString; destination: Zod.ZodOptional<Zod.ZodString>; limit: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodNumber>>; }, \"strip\", Zod.ZodTypeAny, { source: string; destination?: string | undefined; limit?: number | undefined; }, { source: string; destination?: string | undefined; limit?: number | undefined; }>, { destination: string; limit: number; source: string; }, { source: string; destination?: string | undefined; limit?: number | undefined; }>, Zod.ZodEffects<Zod.ZodString, { source: string; destination: string; limit: number; }, string>]>, { destination: string; limit: number; source: string; } | { source: string; destination: string; limit: number; }, string | { source: string; destination?: string | undefined; limit?: number | undefined; }>, \"many\">>; metrics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; metrics: Zod.ZodArray<Zod.ZodDiscriminatedUnion<\"aggregation\", [Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodNativeEnum<typeof ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -499,25 +499,9 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; limit?: number | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; } | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
-          },
-          " & { params: ZodMaybeOptional<{ query: { installOnly: boolean; }; body: { id: string; type: string; version: string; name: string; history: { interval: string; settings: { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }; timestampField: string; }; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: boolean; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
-          {
-            "pluginId": "@kbn/entities-schema",
-            "scope": "common",
-            "docId": "kibKbnEntitiesSchemaPluginApi",
-            "section": "def-common.BasicAggregations",
-            "text": "BasicAggregations"
-          },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; limit: number; source: string; } | { source: string; destination: string; limit: number; })[] | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; } | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; }; }>; }) => Promise<",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; limit?: number | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; } | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -525,7 +509,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -533,17 +517,17 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"DELETE /internal/entities/managed/enablement\": { endpoint: \"DELETE /internal/entities/managed/enablement\"; params?: Zod.ZodObject<{ query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
+          ">; \"DELETE /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
             "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          " & { params: ZodMaybeOptional<{ query: { deleteData: boolean; }; }>; }) => Promise<",
+          "<\"DELETE /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { deleteData: boolean; }; }, { query: { deleteData?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -551,7 +535,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -559,17 +543,17 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"PUT /internal/entities/managed/enablement\": { endpoint: \"PUT /internal/entities/managed/enablement\"; params?: Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { installOnly: boolean; }; }, { query: { installOnly?: boolean | \"true\" | \"false\" | undefined; }; }> | undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
+          ">; \"PUT /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
             "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          " & { params: ZodMaybeOptional<{ query: { installOnly: boolean; }; }>; }) => Promise<",
+          "<\"PUT /internal/entities/managed/enablement\", Zod.ZodObject<{ query: Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { query: { installOnly: boolean; }; }, { query: { installOnly?: boolean | \"true\" | \"false\" | undefined; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -577,7 +561,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -585,17 +569,17 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; params?: undefined; handler: ({}: ",
-          "EntityManagerRouteDependencies",
-          " & ",
+          ">; \"GET /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
             "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteHandlerResources",
-            "text": "DefaultRouteHandlerResources"
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
           },
-          ") => Promise<",
+          "<\"GET /internal/entities/managed/enablement\", undefined, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -603,7 +587,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>; } & ",
+          "<any>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -611,7 +595,7 @@
             "section": "def-common.DefaultRouteCreateOptions",
             "text": "DefaultRouteCreateOptions"
           },
-          "; }"
+          ">; }"
         ],
         "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/index.ts",
         "deprecated": false,
@@ -620,19 +604,93 @@
       }
     ],
     "objects": [],
-    "start": {
+    "setup": {
       "parentPluginId": "entityManager",
-      "id": "def-server.EntityManagerServerPluginStart",
-      "type": "Type",
+      "id": "def-server.EntityManagerServerPluginSetup",
+      "type": "Interface",
       "tags": [],
-      "label": "EntityManagerServerPluginStart",
+      "label": "EntityManagerServerPluginSetup",
       "description": [],
-      "signature": [
-        "{}"
-      ],
       "path": "x-pack/plugins/observability_solution/entity_manager/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "entityManager",
+      "id": "def-server.EntityManagerServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "EntityManagerServerPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/entity_manager/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "entityManager",
+          "id": "def-server.EntityManagerServerPluginStart.getScopedClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getScopedClient",
+          "description": [],
+          "signature": [
+            "(options: { request: ",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>; }) => Promise<",
+            "EntityClient",
+            ">"
+          ],
+          "path": "x-pack/plugins/observability_solution/entity_manager/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "entityManager",
+              "id": "def-server.EntityManagerServerPluginStart.getScopedClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "entityManager",
+                  "id": "def-server.EntityManagerServerPluginStart.getScopedClient.$1.request",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "request",
+                  "description": [],
+                  "signature": [
+                    {
+                      "pluginId": "@kbn/core-http-server",
+                      "scope": "server",
+                      "docId": "kibKbnCoreHttpServerPluginApi",
+                      "section": "def-server.KibanaRequest",
+                      "text": "KibanaRequest"
+                    },
+                    "<unknown, unknown, unknown, any>"
+                  ],
+                  "path": "x-pack/plugins/observability_solution/entity_manager/server/plugin.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
