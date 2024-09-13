@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ENTRY = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryLabel',
+export const NEW = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newLabel',
   {
-    defaultMessage: 'Entry',
+    defaultMessage: 'New',
   }
 );
 
@@ -126,6 +126,13 @@ export const ENTRY_NAME_INPUT_LABEL = i18n.translate(
   }
 );
 
+export const ENTRY_SHARING_INPUT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entrySharingInputLabel',
+  {
+    defaultMessage: 'Sharing',
+  }
+);
+
 export const ENTRY_NAME_INPUT_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryNameInputPlaceholder',
   {
@@ -147,6 +154,27 @@ export const ENTRY_SPACE_INPUT_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const SHARING_PRIVATE_OPTION_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.sharingPrivateOptionLabel',
+  {
+    defaultMessage: 'Private to you',
+  }
+);
+
+export const SHARING_GLOBAL_OPTION_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.sharingGlobalOptionLabel',
+  {
+    defaultMessage: 'Global to everyone in the Space',
+  }
+);
+
+export const SHARING_HELP_TEXT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.sharingHelpText',
+  {
+    defaultMessage: 'Set to global if you’d like other users in your Org to have access.',
+  }
+);
+
 export const DELETE_ENTRY_CONFIRMATION_TITLE = (title: string) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryTitle',
@@ -160,34 +188,6 @@ export const ENTRY_MARKDOWN_INPUT_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryMarkdownInputText',
   {
     defaultMessage: 'Markdown text',
-  }
-);
-
-export const ENTRY_ACCESS_INPUT_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryAccessInputLabel',
-  {
-    defaultMessage: 'Access',
-  }
-);
-
-export const ENTRY_ACCESS_HELP_TEXT = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryAccessHelpText',
-  {
-    defaultMessage: 'Set to global if you’d like other users in your Org to have access.',
-  }
-);
-
-export const ENTRY_ACCESS_USER_BUTTON_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryAccessUserButtonLabel',
-  {
-    defaultMessage: 'User',
-  }
-);
-
-export const ENTRY_ACCESS_GLOBAL_BUTTON_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryAccessGlobalButtonLabel',
-  {
-    defaultMessage: 'Global',
   }
 );
 

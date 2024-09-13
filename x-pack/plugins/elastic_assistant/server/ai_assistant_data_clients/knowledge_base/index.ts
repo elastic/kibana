@@ -425,6 +425,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
       global,
+      isV2: this.options.v2KnowledgeBaseEnabled,
     });
   };
 

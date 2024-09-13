@@ -5,51 +5,88 @@
  * 2.0.
  */
 import {
-  EuiButtonGroup,
   EuiCheckbox,
-  EuiComboBox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiMarkdownEditor,
+  EuiSuperSelect,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import { DocumentEntry } from '@kbn/elastic-assistant-common';
-import { css } from '@emotion/react';
-import { useAssistantContext } from '../../..';
+import React, { useCallback } from 'react';
+import { DocumentEntry, KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
-import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
 
 interface Props {
   entry?: DocumentEntry;
+  setEntry: React.Dispatch<React.SetStateAction<Partial<KnowledgeBaseEntryCreateProps>>>;
 }
 
-export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry }) => {
-  const { http, toasts } = useAssistantContext();
-  const { mutate: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
-    http,
-    toasts,
-  });
-
-  const [markdownValue, setMarkdownValue] = React.useState(entry?.text ?? '');
-  const accessOptions = useMemo(
-    () => [
-      { id: 'user', label: i18n.ENTRY_ACCESS_USER_BUTTON_LABEL },
-      { id: 'global', label: i18n.ENTRY_ACCESS_GLOBAL_BUTTON_LABEL },
-    ],
-    []
-  );
-  const accessIndex = entry?.users?.length === 0 ? 1 : 0;
-  const [toggleCompressedIdSelected, setToggleCompressedIdSelected] = useState(
-    accessOptions[accessIndex].id
+export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry, setEntry }) => {
+  // Name
+  const setName = useCallback(
+    (e) => setEntry((prevEntry) => ({ ...prevEntry, name: e.target.value })),
+    [setEntry]
   );
 
-  const onAccessChanged = useCallback((optionId: string) => {
-    setToggleCompressedIdSelected(optionId);
-  }, []);
+  // Sharing
+  const setSharingOptions = useCallback(
+    (value) =>
+      setEntry((prevEntry) => ({
+        ...prevEntry,
+        users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+      })),
+    [setEntry]
+  );
+  // TODO: KB-RBAC Disable global option if no RBAC
+  const sharingOptions = [
+    {
+      value: i18n.SHARING_PRIVATE_OPTION_LABEL,
+      inputDisplay: (
+        <EuiText size={'s'}>
+          <EuiIcon
+            color="subdued"
+            style={{ lineHeight: 'inherit', marginRight: '4px' }}
+            type="lock"
+          />
+          {i18n.SHARING_PRIVATE_OPTION_LABEL}
+        </EuiText>
+      ),
+    },
+    {
+      value: i18n.SHARING_GLOBAL_OPTION_LABEL,
+      inputDisplay: (
+        <EuiText size={'s'}>
+          <EuiIcon
+            color="subdued"
+            style={{ lineHeight: 'inherit', marginRight: '4px' }}
+            type="globe"
+          />
+          {i18n.SHARING_GLOBAL_OPTION_LABEL}
+        </EuiText>
+      ),
+    },
+  ];
+  const selectedSharingOption =
+    entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
-  const onRequiredKnowledgeChanged = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {},
-  []);
+  // Text / markdown
+  const setMarkdownValue = useCallback(
+    (value: string) => {
+      setEntry((prevEntry) => ({ ...prevEntry, text: value }));
+    },
+    [setEntry]
+  );
+
+  // Required checkbox
+  const onRequiredKnowledgeChanged = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEntry((prevEntry) => ({ ...prevEntry, required: e.target.checked }));
+    },
+    [setEntry]
+  );
+
   return (
     <EuiForm>
       <EuiFormRow label={i18n.ENTRY_NAME_INPUT_LABEL} fullWidth>
@@ -58,54 +95,29 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(({ entry }) => {
           placeholder={i18n.ENTRY_NAME_INPUT_PLACEHOLDER}
           fullWidth
           value={entry?.name}
+          onChange={setName}
         />
       </EuiFormRow>
-      <EuiFormRow label={i18n.ENTRY_SPACE_INPUT_LABEL} fullWidth>
-        <EuiComboBox
-          aria-label={i18n.ENTRY_SPACE_INPUT_LABEL}
-          placeholder={i18n.ENTRY_SPACE_INPUT_PLACEHOLDER}
-          isClearable={true}
-          isCaseSensitive
+      <EuiFormRow
+        label={i18n.ENTRY_SHARING_INPUT_LABEL}
+        helpText={i18n.SHARING_HELP_TEXT}
+        fullWidth
+      >
+        <EuiSuperSelect
+          options={sharingOptions}
+          valueOfSelected={selectedSharingOption}
+          onChange={setSharingOptions}
           fullWidth
-          selectedOptions={
-            entry?.namespace
-              ? [
-                  {
-                    label: entry?.namespace,
-                    value: entry?.namespace,
-                  },
-                ]
-              : []
-          }
         />
       </EuiFormRow>
       <EuiFormRow label={i18n.ENTRY_MARKDOWN_INPUT_TEXT} fullWidth>
         <EuiMarkdownEditor
           aria-label={i18n.ENTRY_MARKDOWN_INPUT_TEXT}
           placeholder="# Title"
-          value={markdownValue}
+          value={entry?.text ?? ''}
           onChange={setMarkdownValue}
           height={400}
-          initialViewMode="viewing"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.ENTRY_ACCESS_INPUT_LABEL}
-        helpText={i18n.ENTRY_ACCESS_HELP_TEXT}
-        css={css`
-          width: 400px;
-        `}
-      >
-        <EuiButtonGroup
-          name={i18n.ENTRY_ACCESS_INPUT_LABEL}
-          legend={i18n.ENTRY_ACCESS_INPUT_LABEL}
-          options={accessOptions}
-          idSelected={toggleCompressedIdSelected}
-          onChange={(id) => onAccessChanged(id)}
-          isFullWidth
-          css={css`
-            width: 300px;
-          `}
+          initialViewMode={'editing'}
         />
       </EuiFormRow>
       <EuiFormRow fullWidth helpText={i18n.ENTRY_REQUIRED_KNOWLEDGE_HELP_TEXT}>

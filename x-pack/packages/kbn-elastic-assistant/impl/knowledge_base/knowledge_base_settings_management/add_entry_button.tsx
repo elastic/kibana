@@ -47,9 +47,9 @@ export const AddEntryButton: React.FC<Props> = React.memo(
     return onIndexClicked || onDocumentClicked ? (
       <EuiPopover
         button={
-          <EuiButton iconType="arrowDown" iconSide="right" fill onClick={onButtonClick}>
+          <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
             <EuiIcon type="plusInCircle" />
-            {i18n.ENTRY}
+            {i18n.NEW}
           </EuiButton>
         }
         isOpen={isPopoverOpen}
@@ -61,7 +61,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
             <EuiFlexItem>
               <EuiButtonEmpty
                 aria-label={i18n.INDEX}
-                iconType="pencil"
+                iconType="index"
                 onClick={handleIndexClicked}
                 disabled={!isIndexAvailable}
                 color="text"

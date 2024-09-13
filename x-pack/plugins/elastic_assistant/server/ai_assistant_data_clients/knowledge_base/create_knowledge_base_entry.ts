@@ -23,6 +23,7 @@ export interface CreateKnowledgeBaseEntryParams {
   user: AuthenticatedUser;
   knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
   global?: boolean;
+  isV2?: boolean;
 }
 
 export const createKnowledgeBaseEntry = async ({
@@ -33,15 +34,24 @@ export const createKnowledgeBaseEntry = async ({
   knowledgeBaseEntry,
   logger,
   global = false,
+  isV2 = false,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateSchema({
-    createdAt,
-    spaceId,
-    user,
-    entry: knowledgeBaseEntry,
-    global,
-  });
+  const body = isV2
+    ? transformToCreateSchema({
+        createdAt,
+        spaceId,
+        user,
+        entry: knowledgeBaseEntry,
+        global,
+      })
+    : transformToLegacyCreateSchema({
+        createdAt,
+        spaceId,
+        user,
+        entry: knowledgeBaseEntry,
+        global,
+      });
   try {
     const response = await esClient.create({
       body,
@@ -74,6 +84,56 @@ interface TransformToCreateSchemaProps {
 }
 
 export const transformToCreateSchema = ({
+  createdAt,
+  spaceId,
+  user,
+  entry,
+  global = false,
+}: TransformToCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
+  const base = {
+    '@timestamp': createdAt,
+    created_at: createdAt,
+    created_by: user.profile_uid ?? 'unknown',
+    updated_at: createdAt,
+    updated_by: user.profile_uid ?? 'unknown',
+    name: entry.type,
+    namespace: spaceId,
+    type: spaceId,
+    users: global
+      ? []
+      : [
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
+  };
+
+  if (entry.type === 'index') {
+    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
+    return {
+      ...base,
+      ...restEntry,
+      query_description: queryDescription,
+      input_schema:
+        entry.inputSchema?.map((schema) => ({
+          field_name: schema.fieldName,
+          field_type: schema.fieldType,
+          description: schema.description,
+        })) ?? undefined,
+      output_fields: outputFields ?? undefined,
+    };
+  }
+  return {
+    ...base,
+    kb_resource: entry.kbResource,
+    source: entry.source,
+    text: entry.text,
+    vector: undefined,
+  };
+};
+
+export const transformToLegacyCreateSchema = ({
   createdAt,
   spaceId,
   user,

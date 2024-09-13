@@ -41,6 +41,8 @@ export const useKnowledgeBaseTable = () => {
 
   const getColumns = useCallback(
     ({
+      isDeleteEnabled,
+      isEditEnabled,
       onEntryNameClicked,
       onSpaceNameClicked,
       onDeleteActionClicked,
@@ -154,9 +156,10 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           ...getActions({
+            isDeleteEnabled,
+            isEditEnabled,
             onDelete: onDeleteActionClicked,
             onEdit: onEditActionClicked,
-            disabled: false,
           }),
         },
       ];

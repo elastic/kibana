@@ -18,9 +18,12 @@ import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conve
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { useQuery } from '@tanstack/react-query';
 import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { useKibana } from '../../common/lib/kibana';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const ManagementSettings = React.memo(() => {
   const {
@@ -40,15 +43,6 @@ export const ManagementSettings = React.memo(() => {
     security,
     spaces,
   } = useKibana().services;
-
-  const { spaceManager } = spaces?.ui.useSpaces();
-  const { data: currentSpace } = useQuery({
-    queryKey: ['currentSpace'],
-    queryFn: () => spaceManager.getActiveSpace(),
-    select: (data) => data,
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-  });
 
   const { data: currentUserAvatar } = useQuery({
     queryKey: ['currentUserAvatar'],
@@ -88,8 +82,20 @@ export const ManagementSettings = React.memo(() => {
     navigateToApp('home');
   }
 
+  const ContextWrapper = useMemo(
+    () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
+    [spaces]
+  );
+
   if (conversations) {
-    return <AssistantSettingsManagement selectedConversation={currentConversation} />;
+    return (
+      <ContextWrapper>
+        <AssistantSettingsManagement
+          selectedConversation={currentConversation}
+          spacesApi={spaces!}
+        />
+      </ContextWrapper>
+    );
   }
 
   return <></>;

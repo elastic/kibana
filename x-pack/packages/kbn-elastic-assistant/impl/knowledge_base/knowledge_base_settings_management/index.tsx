@@ -11,7 +11,6 @@ import {
   EuiPanel,
   EuiSearchBarProps,
   EuiSpacer,
-  EuiTableSelectionType,
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -20,22 +19,24 @@ import {
   DocumentEntry,
   DocumentEntryType,
   IndexEntry,
+  IndexEntryType,
+  KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
 import { AlertsSettingsManagement } from '../../alerts/settings/alerts_settings_management';
 import { useKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_knowledge_base_entries';
-import { useKnowledgeBaseStatus } from '../../assistant/api/knowledge_base/use_knowledge_base_status';
-import { useSetupKnowledgeBase } from '../../assistant/api/knowledge_base/use_setup_knowledge_base';
+import {
+  isKnowledgeBaseSetup,
+  useKnowledgeBaseStatus,
+} from '../../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useAssistantContext } from '../../assistant_context';
 import { ESQL_RESOURCE } from '../const';
 import { useKnowledgeBaseTable } from './use_knowledge_base_table';
-import { AssistantSettingsBottomBar } from '../../assistant/settings/assistant_settings_bottom_bar';
 import {
   useSettingsUpdater,
   DEFAULT_CONVERSATIONS,
   DEFAULT_PROMPTS,
 } from '../../assistant/settings/use_settings_updater/use_settings_updater';
-import { SETTINGS_UPDATED_TOAST_TITLE } from '../../assistant/settings/translations';
 import { AddEntryButton } from './add_entry_button';
 import {
   DEFAULT_FLYOUT_TITLE,
@@ -49,6 +50,13 @@ import { DocumentEntryEditor } from './document_entry_editor';
 import { KnowledgeBaseSettings } from '../knowledge_base_settings';
 import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
+import {
+  isEsqlSystemEntry,
+  isKnowledgeBaseEntryCreateProps,
+  isKnowledgeBaseEntryResponse,
+} from './helpers';
+import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
+import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 
 export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
   const {
@@ -56,59 +64,60 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
     http,
     toasts,
   } = useAssistantContext();
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
-  const { knowledgeBase, setUpdatedKnowledgeBaseSettings, resetSettings, saveSettings } =
-    useSettingsUpdater(
-      DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
-      DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
-      false, // Knowledge Base settings do not require conversations
-      false // Knowledge Base settings do not require prompts
-    );
-
-  const handleSave = useCallback(
-    async (param?: { callback?: () => void }) => {
-      await saveSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      setHasPendingChanges(false);
-      param?.callback?.();
-    },
-    [saveSettings, toasts]
+  // Only needed for legacy settings management
+  const { knowledgeBase, setUpdatedKnowledgeBaseSettings } = useSettingsUpdater(
+    DEFAULT_CONVERSATIONS, // Knowledge Base settings do not require conversations
+    DEFAULT_PROMPTS, // Knowledge Base settings do not require prompts
+    false, // Knowledge Base settings do not require conversations
+    false // Knowledge Base settings do not require prompts
   );
-
-  const onCancelClick = useCallback(() => {
-    resetSettings();
-    setHasPendingChanges(false);
-  }, [resetSettings]);
-
-  const onSaveButtonClicked = useCallback(() => {
-    handleSave();
-  }, [handleSave]);
 
   const { isFlyoutOpen: isFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
 
-  const onSaveConfirmed = useCallback(() => {
-    handleSave({ callback: closeFlyout });
-  }, [handleSave, closeFlyout]);
+  const [selectedEntry, setSelectedEntry] =
+    useState<Partial<DocumentEntry | IndexEntry | KnowledgeBaseEntryCreateProps>>();
 
-  const onSaveCancelled = useCallback(() => {
-    onCancelClick();
-    closeFlyout();
-  }, [closeFlyout, onCancelClick]);
-
+  // Knowledge Base Setup/Status
   const {
     data: kbStatus,
-    isLoading,
-    isFetching,
+    isLoading: isKbLoadingInitial,
+    isFetching: isKbFetching,
   } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
+  const isKbSetup = isKnowledgeBaseSetup(kbStatus);
+  const isKbLoading = isKbLoadingInitial || isKbFetching;
+
+  // CRUD API accessors
+  const { mutate: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
+    http,
+    toasts,
+  });
+  const { mutate: updateEntries, isLoading: isUpdatingEntries } = useUpdateKnowledgeBaseEntries({
+    http,
+    toasts,
+  });
   const { mutate: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
     http,
     toasts,
   });
-  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
+  const isModifyingEntry = isCreatingEntry || isUpdatingEntries || isDeletingEntries;
+
+  // Flyout Save/Cancel Actions
+  const onSaveConfirmed = useCallback(() => {
+    if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
+      createEntry(selectedEntry);
+      closeFlyout();
+    } else if (isKnowledgeBaseEntryResponse(selectedEntry)) {
+      updateEntries([selectedEntry]);
+      closeFlyout();
+    }
+  }, [closeFlyout, selectedEntry, createEntry, updateEntries]);
+
+  const onSaveCancelled = useCallback(() => {
+    setSelectedEntry(undefined);
+    closeFlyout();
+  }, [closeFlyout]);
+
   const { data: entries } = useKnowledgeBaseEntries({ http, toasts });
   const { getColumns } = useKnowledgeBaseTable();
   const columns = useMemo(
@@ -117,46 +126,34 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         onEntryNameClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           const entry = entries.data.find((e) => e.id === id);
           setSelectedEntry(entry);
-          setSelectedType(entry?.type === 'index' ? 'Index' : 'Document');
           openFlyout();
         },
         onSpaceNameClicked: ({ namespace }: KnowledgeBaseEntryResponse) => {
           openFlyout();
         },
+        isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
+          return !isEsqlSystemEntry(entry);
+        },
         onDeleteActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
           deleteEntry({ ids: [id] });
+        },
+        isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
+          return !isEsqlSystemEntry(entry);
         },
         onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {},
       }),
     [deleteEntry, entries.data, getColumns, openFlyout]
   );
 
-  const [selectedType, setSelectedType] = useState<string | null>(null);
   const onDocumentClicked = useCallback(() => {
-    setSelectedType('Document');
+    setSelectedEntry({ type: DocumentEntryType.value, kbResource: 'user', source: 'user' });
     openFlyout();
   }, [openFlyout]);
 
   const onIndexClicked = useCallback(() => {
-    setSelectedType('Index');
+    setSelectedEntry({ type: IndexEntryType.value });
     openFlyout();
   }, [openFlyout]);
-
-  const [selectedEntry, setSelectedEntry] = useState<DocumentEntry | IndexEntry>();
-
-  // Table Selection
-  const [selectedItems, setSelectedItems] = useState<KnowledgeBaseEntryResponse[]>([]);
-  const onSelectionChange = (items: KnowledgeBaseEntryResponse[]) => {
-    setSelectedItems(items);
-  };
-  const tableSelection: EuiTableSelectionType<KnowledgeBaseEntryResponse> = {
-    selectable: (entry: KnowledgeBaseEntryResponse) =>
-      !(entry.type === DocumentEntryType.value && entry.kbResource === 'esql'),
-    selectableMessage: (selectable: boolean, entry: KnowledgeBaseEntryResponse) =>
-      !selectable ? `System entries cannot be selected` : `Select ${entry.name}`,
-    onSelectionChange,
-    selected: selectedItems,
-  };
 
   const search: EuiSearchBarProps = useMemo(
     () => ({
@@ -217,7 +214,6 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
           columns={columns}
           items={entries.data ?? []}
           search={search}
-          selection={tableSelection}
           // onChange={onTableChange}
         />
       </EuiPanel>
@@ -226,24 +222,23 @@ export const KnowledgeBaseSettingsManagement: React.FC = React.memo(() => {
         knowledgeBase={knowledgeBase}
         setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
       />
-      <AssistantSettingsBottomBar
-        hasPendingChanges={hasPendingChanges}
-        onCancelClick={onCancelClick}
-        onSaveButtonClicked={onSaveButtonClicked}
-      />
       <Flyout
         flyoutVisible={isFlyoutVisible}
-        title={selectedType || DEFAULT_FLYOUT_TITLE}
+        title={selectedEntry?.type || DEFAULT_FLYOUT_TITLE} // TODO Update title `New Index Entry` or `New Document Entry`
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={false} // TODO: Only disable save on aggregate system entries or if user doesn't have global RBAC
+        saveButtonDisabled={!isKnowledgeBaseEntryCreateProps(selectedEntry)} // TODO: KB-RBAC disable for global entries if user doesn't have global RBAC
       >
         <>
-          {selectedType === 'Document' && (
-            <DocumentEntryEditor entry={selectedEntry as DocumentEntry} />
+          {selectedEntry?.type === DocumentEntryType.value ? (
+            <DocumentEntryEditor
+              entry={selectedEntry as DocumentEntry}
+              setEntry={setSelectedEntry}
+            />
+          ) : (
+            <IndexEntryEditor entry={selectedEntry as IndexEntry} />
           )}
-          {selectedType === 'Index' && <IndexEntryEditor entry={selectedEntry as IndexEntry} />}
         </>
       </Flyout>
     </>

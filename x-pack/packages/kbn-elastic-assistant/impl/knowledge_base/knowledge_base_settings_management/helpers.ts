@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { DocumentEntryType, KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import {
+  DocumentEntryType,
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common';
+import { z } from '@kbn/zod';
 
 export const isEsqlSystemEntry = (
   entry: KnowledgeBaseEntryResponse
@@ -14,4 +19,18 @@ export const isEsqlSystemEntry = (
   kbResource: 'esql';
 } => {
   return entry.type === DocumentEntryType.value && entry.kbResource === 'esql';
+};
+
+export const isKnowledgeBaseEntryCreateProps = (
+  entry: unknown
+): entry is z.infer<typeof KnowledgeBaseEntryCreateProps> => {
+  const result = KnowledgeBaseEntryCreateProps.safeParse(entry);
+  return result.success;
+};
+
+export const isKnowledgeBaseEntryResponse = (
+  entry: unknown
+): entry is z.infer<typeof KnowledgeBaseEntryResponse> => {
+  const result = KnowledgeBaseEntryResponse.safeParse(entry);
+  return result.success;
 };

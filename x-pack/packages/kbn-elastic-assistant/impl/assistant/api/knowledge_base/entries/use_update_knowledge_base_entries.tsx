@@ -12,48 +12,52 @@ import { i18n } from '@kbn/i18n';
 
 import {
   API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
-  KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+  KnowledgeBaseEntryBulkCrudActionResponse,
+  PerformKnowledgeBaseEntryBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 
-const CREATE_KNOWLEDGE_BASE_ENTRY_MUTATION_KEY = [
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+const BULK_UPDATE_KNOWLEDGE_BASE_ENTRY_MUTATION_KEY = [
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
   API_VERSIONS.internal.v1,
+  'UPDATE',
 ];
 
-export interface UseCreateKnowledgeBaseEntryParams {
+export interface UseUpdateKnowledgeBaseEntriesParams {
   http: HttpSetup;
   signal?: AbortSignal;
   toasts?: IToasts;
 }
 
 /**
- * Hook for creating a Knowledge Base Entry
+ * Hook for updating Knowledge Base Entries by id or query.
  *
  * @param {Object} options - The options object
  * @param {HttpSetup} options.http - HttpSetup
  * @param {AbortSignal} [options.signal] - AbortSignal
  * @param {IToasts} [options.toasts] - IToasts
  *
- * @returns mutation hook for creating a Knowledge Base Entry
+ * @returns mutation hook for updating Knowledge Base Entries
  *
  */
-export const useCreateKnowledgeBaseEntry = ({
+export const useUpdateKnowledgeBaseEntries = ({
   http,
   signal,
   toasts,
-}: UseCreateKnowledgeBaseEntryParams) => {
+}: UseUpdateKnowledgeBaseEntriesParams) => {
   const invalidateKnowledgeBaseEntries = useInvalidateKnowledgeBaseEntries();
 
   return useMutation(
-    CREATE_KNOWLEDGE_BASE_ENTRY_MUTATION_KEY,
-    (entry: KnowledgeBaseEntryCreateProps) => {
-      return http.post<KnowledgeBaseEntryResponse>(
-        ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+    BULK_UPDATE_KNOWLEDGE_BASE_ENTRY_MUTATION_KEY,
+    (updatedEntries: PerformKnowledgeBaseEntryBulkActionRequestBody['update']) => {
+      const body: PerformKnowledgeBaseEntryBulkActionRequestBody = {
+        update: updatedEntries,
+      };
+      return http.post<KnowledgeBaseEntryBulkCrudActionResponse>(
+        ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
         {
-          body: JSON.stringify(entry),
+          body: JSON.stringify(body),
           version: API_VERSIONS.internal.v1,
           signal,
         }
@@ -66,9 +70,9 @@ export const useCreateKnowledgeBaseEntry = ({
             error.body && error.body.message ? new Error(error.body.message) : error,
             {
               title: i18n.translate(
-                'xpack.elasticAssistant.knowledgeBase.entries.createErrorTitle',
+                'xpack.elasticAssistant.knowledgeBase.entries.updateErrorTitle',
                 {
-                  defaultMessage: 'Error creating Knowledge Base Entry',
+                  defaultMessage: 'Error updating Knowledge Base Entries',
                 }
               ),
             }
@@ -80,8 +84,8 @@ export const useCreateKnowledgeBaseEntry = ({
       },
       onSuccess: () => {
         toasts?.addSuccess({
-          title: i18n.translate('xpack.elasticAssistant.knowledgeBase.entries.createSuccessTitle', {
-            defaultMessage: 'Knowledge Base Entry created',
+          title: i18n.translate('xpack.elasticAssistant.knowledgeBase.entries.updateSuccessTitle', {
+            defaultMessage: 'Knowledge Base Entries updated successfully',
           }),
         });
       },
