@@ -345,9 +345,7 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
-  const { solutionNavId } = customizationContext;
-  const { rootProfileLoading } = useRootProfile({ solutionNavId });
-
+  const { rootProfileLoading } = useRootProfile();
   const getAppWrapperAccessor = useProfileAccessor('getAppWrapper');
   const AppWrapper = useMemo(
     () => getAppWrapperAccessor(({ children }) => <>{children}</>),
