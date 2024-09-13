@@ -107,8 +107,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
   const logger = createWrappedLogger({ logger: opts.logger, tags: [claimAvailableTasksMget.name] });
-  // const loggerTag = claimAvailableTasksMget.name;
-  // const logMeta = { tags: [loggerTag] };
   const initialCapacity = getCapacity();
   const stopTaskTimer = startTaskTimer();
 
