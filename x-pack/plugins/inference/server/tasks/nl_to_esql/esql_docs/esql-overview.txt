@@ -1,18 +1,12 @@
-## Overview
+## ES|QL Overview
 
 ### ES|QL
 
-The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elasticsearch, and in the future in other runtimes. It is designed to be easy to learn and use by end users, SRE teams, application developers, and administrators.
+The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elasticsearch. It is designed to be easy to learn and use by all types of end users.
 
 Users can author ES|QL queries to find specific events, perform statistical analysis, and generate visualizations. It supports a wide range of commands and functions that enable users to perform various data operations, such as filtering, aggregation, time-series analysis, and more.
 
 ES|QL makes use of "pipes" (`|`) to manipulate and transform data in a step-by-step fashion. This approach allows users to compose a series of operations, where the output of one operation becomes the input for the next, enabling complex data transformations and analysis.
-
-### The ES|QL Compute Engine
-
-ES|QL is more than a language: it represents a significant investment in new compute capabilities within Elasticsearch. To achieve both the functional and performance requirements for ES|QL, it was necessary to build an entirely new compute architecture. ES|QL search, aggregation, and transformation functions are directly executed within Elasticsearch itself. Query expressions are not transpiled to Query DSL for execution. This approach allows ES|QL to be extremely performant and versatile.
-
-The new ES|QL execution engine was designed with performance in mind — it operates on blocks at a time instead of per row, targets vectorization and cache locality, and embraces specialization and multi-threading. It is a separate component from the existing Elasticsearch aggregation framework with different performance characteristics.
 
 ### Known Limitations
 
@@ -79,7 +73,7 @@ ES|QL only supports the UTC timezone.
 
 ### Cross-Cluster Querying
 
-Using ES|QL across clusters allows you to execute a single query across multiple clusters. This feature is in technical preview and may be changed or removed in a future release. 
+Using ES|QL across clusters allows you to execute a single query across multiple clusters. This feature is in technical preview and may be changed or removed in a future release.
 
 #### Prerequisites
 
@@ -98,7 +92,7 @@ FROM cluster_one:my-index-000001
 
 ### Using ES|QL in Kibana
 
-ES|QL can be used in Kibana to query and aggregate data, create visualizations, and set up alerts. 
+ES|QL can be used in Kibana to query and aggregate data, create visualizations, and set up alerts.
 
 #### Important Information
 
@@ -106,39 +100,3 @@ ES|QL can be used in Kibana to query and aggregate data, create visualizations, 
 - The query bar in Discover allows you to write and execute ES|QL queries.
 - The results table shows up to 10,000 rows, and Discover shows no more than 50 columns.
 - You can create visualizations and alerts based on ES|QL queries.
-
-### Using the REST API
-
-The ES|QL query API allows you to execute ES|QL queries via REST API.
-
-#### Example
-
-```javascript
-const response = await client.esql.query({
-  query: `
-    FROM library
-    | EVAL year = DATE_TRUNC(1 YEARS, release_date)
-    | STATS MAX(page_count) BY year
-    | SORT year
-    | LIMIT 5
-  `,
-});
-console.log(response);
-```
-
-#### Request
-
-`POST /_query`
-
-#### Request Body
-
-- `query` (Required): The ES|QL query to run.
-- `format` (Optional): Format for the response.
-- `params` (Optional): Values for parameters in the query.
-- `profile` (Optional): If `true`, includes a `profile` object with information about query execution.
-
-#### Response
-
-- `columns`: Column `name` and `type` for each column returned in `values`.
-- `rows`: Values for the search results.
-- `profile`: Profile describing the execution of the query (if `profile` was sent in the request).
