@@ -246,6 +246,10 @@ export class ConsolePageObject extends FtrService {
     await input.type(path);
   }
 
+  public async acceptFileImport() {
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
+
   public async isHelpPopoverOpen() {
     const classAttribute = await this.testSubjects.getAttribute('consoleHelpPopover', 'class');
     return classAttribute?.includes('euiPopover-isOpen');
