@@ -18,5 +18,4 @@ export const GENERATED_SUBFOLDER = 'generated';
 export const OVERRIDES_SUBFOLDER = 'overrides';
 export const MANUAL_SUBFOLDER = 'manual';
 
-export const API_REFERENCE_DOC_LINK =
-  'https://www.elastic.co/guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html';
+export const API_DOCS_LINK = 'https://www.elastic.co/docs/api';
