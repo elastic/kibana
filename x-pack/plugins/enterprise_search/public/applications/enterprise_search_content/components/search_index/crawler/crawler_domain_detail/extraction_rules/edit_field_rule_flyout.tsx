@@ -78,17 +78,17 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
           <h2>
             {isNewRule
               ? i18n.translate(
-                'xpack.enterpriseSearch.content.indices.extractionRules.addContentField.title',
-                {
-                  defaultMessage: 'Add content field rule',
-                }
-              )
+                  'xpack.enterpriseSearch.content.indices.extractionRules.addContentField.title',
+                  {
+                    defaultMessage: 'Add content field rule',
+                  }
+                )
               : i18n.translate(
-                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.title',
-                {
-                  defaultMessage: 'Edit content field rule',
-                }
-              )}
+                  'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.title',
+                  {
+                    defaultMessage: 'Edit content field rule',
+                  }
+                )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -232,17 +232,17 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                         label={
                           field.value === FieldType.HTML
                             ? i18n.translate(
-                              'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.htmlLabel',
-                              {
-                                defaultMessage: 'CSS selector or XPath expression',
-                              }
-                            )
+                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.htmlLabel',
+                                {
+                                  defaultMessage: 'CSS selector or XPath expression',
+                                }
+                              )
                             : i18n.translate(
-                              'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.urlLabel',
-                              {
-                                defaultMessage: 'URL pattern',
-                              }
-                            )
+                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.urlLabel',
+                                {
+                                  defaultMessage: 'URL pattern',
+                                }
+                              )
                         }
                       >
                         <Controller
@@ -256,17 +256,17 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                               placeholder={
                                 field.value === FieldType.HTML
                                   ? i18n.translate(
-                                    'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.selector.cssPlaceholder',
-                                    {
-                                      defaultMessage: 'e.g. ".main_content"',
-                                    }
-                                  )
+                                      'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.selector.cssPlaceholder',
+                                      {
+                                        defaultMessage: 'e.g. ".main_content"',
+                                      }
+                                    )
                                   : i18n.translate(
-                                    'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.selector.urlLabel',
-                                    {
-                                      defaultMessage: `e.g. \/my-url\/(.*\/`,
-                                    }
-                                  )
+                                      'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.selector.urlLabel',
+                                      {
+                                        defaultMessage: `e.g. \/my-url\/(.*\/`,
+                                      }
+                                    )
                               }
                               inputRef={selectorField.ref}
                               onBlur={selectorField.onBlur}
