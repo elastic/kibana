@@ -94,11 +94,11 @@ describe('DocViewerTable', () => {
       );
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
-      expect(screen.getByText('2023-12-31T23:00:00.000Z')).toBeInTheDocument();
+      expect(screen.getByText(hit.flattened['@timestamp'] as string)).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
-      expect(screen.getByText('551')).toBeInTheDocument();
+      expect(screen.getByText(hit.flattened.bytes as string)).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
-      expect(screen.getByText('extension.keyword_0')).toBeInTheDocument();
+      expect(screen.getByText(hit.flattened['extension.keyword'] as string)).toBeInTheDocument();
     });
   });
 
@@ -142,13 +142,13 @@ describe('DocViewerTable', () => {
 
       act(() => {
         fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
-          target: { value: '2023' },
+          target: { value: hit.flattened['extension.keyword'] as string },
         });
       });
 
-      expect(screen.queryByText('@timestamp')).toBeInTheDocument();
+      expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeNull();
-      expect(screen.queryByText('extension.keyword')).toBeNull();
+      expect(screen.queryByText('extension.keyword')).toBeInTheDocument();
     });
   });
 
