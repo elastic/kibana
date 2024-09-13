@@ -62,7 +62,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         });
       });
 
-      Promise.all(deletePromises);
+      Promise.all(deletePromises).catch(() => {});
     });
 
     async function createConnector(opts: {
