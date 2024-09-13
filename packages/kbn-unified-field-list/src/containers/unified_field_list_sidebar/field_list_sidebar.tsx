@@ -207,7 +207,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   );
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
-      (field) => {
+      (field: DataViewField) => {
         return shouldShowField(
           field,
           searchMode,
