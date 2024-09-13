@@ -204,8 +204,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
                         is_managed: schema.boolean(),
                         is_default_fleet_server: schema.maybe(schema.boolean()),
                         has_fleet_server: schema.maybe(schema.boolean()),
-                        fleet_server_host_id: schema.nullable(schema.maybe(schema.string())),
-                        download_source_id: schema.nullable(schema.maybe(schema.string())),
+                        fleet_server_host_id: schema.maybe(
+                          schema.oneOf([schema.literal(null), schema.string()])
+                        ),
+                        download_source_id: schema.maybe(
+                          schema.oneOf([schema.literal(null), schema.string()])
+                        ),
                         space_ids: schema.maybe(schema.arrayOf(schema.string())),
                       })
                     ),
@@ -218,7 +222,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
                         is_default: schema.boolean(),
                         is_preconfigured: schema.boolean(),
                         is_internal: schema.maybe(schema.boolean()),
-                        proxy_id: schema.nullable(schema.maybe(schema.string())),
+                        proxy_id: schema.maybe(
+                          schema.oneOf([schema.literal(null), schema.string()])
+                        ),
                       })
                     ),
                     host_proxy: schema.maybe(
@@ -232,9 +238,15 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
                         ),
                         name: schema.string(),
                         url: schema.string(),
-                        certificate_authorities: schema.nullable(schema.maybe(schema.string())),
-                        certificate: schema.nullable(schema.maybe(schema.string())),
-                        certificate_key: schema.nullable(schema.maybe(schema.string())),
+                        certificate_authorities: schema.maybe(
+                          schema.oneOf([schema.literal(null), schema.string()])
+                        ),
+                        certificate: schema.maybe(
+                          schema.oneOf([schema.literal(null), schema.string()])
+                        ),
+                        certificate_key: schema.maybe(
+                          schema.oneOf([schema.literal(null), schema.string()])
+                        ),
                         is_preconfigured: schema.boolean(),
                       })
                     ),

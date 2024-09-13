@@ -14,7 +14,7 @@ export const FleetServerHostSchema = schema.object({
   is_default: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean({ defaultValue: false }),
-  proxy_id: schema.nullable(schema.maybe(schema.string())),
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
 });
 
 export const PostFleetServerHostRequestSchema = {

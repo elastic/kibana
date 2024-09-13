@@ -29,9 +29,9 @@ export const FleetProxySchema = schema.object({
       )
     )
   ),
-  certificate_authorities: schema.nullable(schema.maybe(schema.string())),
-  certificate: schema.nullable(schema.maybe(schema.string())),
-  certificate_key: schema.nullable(schema.maybe(schema.string())),
+  certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  certificate: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  certificate_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   is_preconfigured: schema.boolean({ defaultValue: false }),
 });
 

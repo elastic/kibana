@@ -282,7 +282,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                       )
                     ),
                     policy_ids: schema.arrayOf(schema.string()),
-                    output_id: schema.nullable(schema.maybe(schema.string())),
+                    output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
                     package: PackagePolicyPackageSchema,
                   })
                 ),

@@ -67,11 +67,12 @@ const BaseSchema = {
   is_default_monitoring: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.maybe(schema.boolean()),
-  ca_sha256: schema.nullable(schema.maybe(schema.string())),
-  ca_trusted_fingerprint: schema.nullable(schema.maybe(schema.string())),
-  config_yaml: schema.nullable(schema.maybe(schema.string())),
-  ssl: schema.nullable(
-    schema.maybe(
+  ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  ssl: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
       schema.object({
         certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
         certificate: schema.maybe(schema.string()),
@@ -84,12 +85,13 @@ const BaseSchema = {
             schema.literal(kafkaVerificationModes.Strict),
           ])
         ),
-      })
-    )
+      }),
+    ])
   ),
-  proxy_id: schema.nullable(schema.maybe(schema.string())),
-  shipper: schema.nullable(
-    schema.maybe(
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  shipper: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
       schema.object({
         disk_queue_enabled: schema.nullable(schema.boolean({ defaultValue: false })),
         disk_queue_path: schema.nullable(schema.string()),
@@ -101,8 +103,8 @@ const BaseSchema = {
         mem_queue_events: schema.nullable(schema.number()),
         queue_flush_timeout: schema.nullable(schema.number()),
         max_batch_bytes: schema.nullable(schema.number()),
-      })
-    )
+      }),
+    ])
   ),
   allow_edit: schema.maybe(schema.arrayOf(schema.string())),
 };
@@ -147,7 +149,7 @@ const ElasticSearchUpdateSchema = {
 export const RemoteElasticSearchSchema = {
   ...ElasticSearchSchema,
   type: schema.literal(outputType.RemoteElasticsearch),
-  service_token: schema.nullable(schema.maybe(schema.string())),
+  service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
@@ -158,7 +160,7 @@ export const RemoteElasticSearchSchema = {
 const RemoteElasticSearchUpdateSchema = {
   ...ElasticSearchUpdateSchema,
   type: schema.maybe(schema.literal(outputType.RemoteElasticsearch)),
-  service_token: schema.nullable(schema.maybe(schema.string())),
+  service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
@@ -274,8 +276,9 @@ export const KafkaSchema = {
       )
     )
   ),
-  sasl: schema.nullable(
-    schema.maybe(
+  sasl: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
       schema.object({
         mechanism: schema.maybe(
           schema.oneOf([
@@ -284,8 +287,8 @@ export const KafkaSchema = {
             schema.literal(kafkaSaslMechanism.ScramSha512),
           ])
         ),
-      })
-    )
+      }),
+    ])
   ),
   partition: schema.maybe(
     schema.oneOf([
