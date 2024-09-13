@@ -16,7 +16,7 @@ const DEFAULT_PAGE_SIZE = 25;
 export interface InvestigationListParams {
   page?: number;
   perPage?: number;
-  filter?: string;
+  search?: string;
 }
 
 export interface UseFetchInvestigationListResponse {
@@ -31,7 +31,7 @@ export interface UseFetchInvestigationListResponse {
 export function useFetchInvestigationList({
   page = 1,
   perPage = DEFAULT_PAGE_SIZE,
-  filter,
+  search,
 }: InvestigationListParams = {}): UseFetchInvestigationListResponse {
   const {
     core: {
@@ -44,6 +44,7 @@ export function useFetchInvestigationList({
     queryKey: investigationKeys.list({
       page,
       perPage,
+      search,
     }),
     queryFn: async ({ signal }) => {
       return await http.get<FindInvestigationsResponse>(`/api/observability/investigations`, {
@@ -51,11 +52,12 @@ export function useFetchInvestigationList({
         query: {
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
-          ...(filter !== undefined && { filter }),
+          ...(search !== undefined && { search }),
         },
         signal,
       });
     },
+    retry: false,
     refetchInterval: 60 * 1000,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {

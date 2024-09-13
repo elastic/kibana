@@ -9,6 +9,10 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -17,11 +21,11 @@ import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/
 import moment from 'moment';
 import React, { useState } from 'react';
 import { paths } from '../../../../common/paths';
-import { InvestigationNotFound } from '../../../components/investigation_not_found/investigation_not_found';
 import { InvestigationStatusBadge } from '../../../components/investigation_status_badge/investigation_status_badge';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
+import { InvestigationsError } from './investigations_error';
 
 export function InvestigationList() {
   const {
@@ -33,21 +37,15 @@ export function InvestigationList() {
   const dateFormat = uiSettings.get('dateFormat');
   const tz = uiSettings.get('dateFormat:tz');
 
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [search, setSearch] = useState<string | undefined>(undefined);
 
   const { data, isLoading, isError } = useFetchInvestigationList({
     page: pageIndex + 1,
     perPage: pageSize,
+    search,
   });
-
-  if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
-
-  if (isError) {
-    return <InvestigationNotFound />;
-  }
 
   const investigations = data?.results ?? [];
   const totalItemCount = data?.total ?? 0;
@@ -136,15 +134,52 @@ export function InvestigationList() {
   };
 
   return (
-    <EuiBasicTable
-      tableCaption={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
-        defaultMessage: 'Investigations List',
-      })}
-      items={investigations}
-      pagination={pagination}
-      rowHeader="title"
-      columns={columns}
-      onChange={onTableChange}
-    />
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem grow>
+          <EuiFieldSearch
+            fullWidth
+            isClearable
+            data-test-subj="investigateAppInvestigationListFieldSearch"
+            placeholder={i18n.translate(
+              'xpack.investigateApp.investigationList.searchField.placeholder',
+              { defaultMessage: 'Search...' }
+            )}
+            aria-label={i18n.translate(
+              'xpack.investigateApp.investigationList.searchField.placeholder',
+              { defaultMessage: 'Search...' }
+            )}
+            onSearch={(value: string) => {
+              setSearch(value);
+            }}
+            isLoading={isLoading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton data-test-subj="investigateAppInvestigationListSearchButton">
+            {i18n.translate('xpack.investigateApp.investigationList.searchButtonLabel', {
+              defaultMessage: 'Search',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        {isLoading && <EuiLoadingSpinner size="xl" />}
+        {isError && <InvestigationsError />}
+        {!isLoading && !isError && (
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
+              defaultMessage: 'Investigations List',
+            })}
+            items={investigations}
+            pagination={pagination}
+            rowHeader="title"
+            columns={columns}
+            onChange={onTableChange}
+          />
+        )}
+      </EuiFlexGroup>
+    </EuiFlexGroup>
   );
 }

@@ -11,11 +11,22 @@ import { Investigation, StoredInvestigation } from '../models/investigation';
 import { Paginated, Pagination } from '../models/pagination';
 import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
 
+export interface Search {
+  search: string;
+}
 export interface InvestigationRepository {
   save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
   deleteById(id: string): Promise<void>;
-  search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>>;
+  search({
+    search,
+    filter,
+    pagination,
+  }: {
+    search?: Search;
+    filter?: string;
+    pagination: Pagination;
+  }): Promise<Paginated<Investigation>>;
 }
 
 export function investigationRepositoryFactory({
@@ -89,14 +100,15 @@ export function investigationRepositoryFactory({
       await soClient.delete(SO_INVESTIGATION_TYPE, response.saved_objects[0].id);
     },
 
-    async search(filter: string, pagination: Pagination): Promise<Paginated<Investigation>> {
+    async search({ search, filter, pagination }): Promise<Paginated<Investigation>> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
         page: pagination.page,
         perPage: pagination.perPage,
-        filter,
-        sortField: 'investigation.attributes.updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
+        ...(filter && { filter }),
+        ...(search && { search: search.search }),
       });
 
       return {
