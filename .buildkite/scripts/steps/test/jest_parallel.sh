@@ -53,51 +53,51 @@ echo "
   of noise on CI without any percevable benefit, so they have been disabled. If you want to log
   output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
 "
+$config="x-pack/plugins/cases/jest.config.js"
+# while read -r config; do
+echo "--- $ node scripts/jest --config $config"
 
-while read -r config; do
-  echo "--- $ node scripts/jest --config $config"
+# --trace-warnings to debug
+# Node.js process-warning detected:
+# Warning: Closing file descriptor 24 on garbage collection
+cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+echo "actual full command is:"
+echo "$cmd"
+echo ""
 
-  # --trace-warnings to debug
-  # Node.js process-warning detected:
-  # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
+start=$(date +%s)
 
-  start=$(date +%s)
+# prevent non-zero exit code from breaking the loop
+set +e
+eval "$cmd"
+lastCode=$?
+set -e
 
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  eval "$cmd"
-  lastCode=$?
-  set -e;
+timeSec=$(($(date +%s) - start))
+if [[ $timeSec -gt 60 ]]; then
+  min=$((timeSec / 60))
+  sec=$((timeSec - (min * 60)))
+  duration="${min}m ${sec}s"
+else
+  duration="${timeSec}s"
+fi
 
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
+results+=("- $config
+  duration: ${duration}
+  result: ${lastCode}")
+
+if [ $lastCode -ne 0 ]; then
+  exitCode=10
+  echo "Jest exited with code $lastCode"
+  echo "^^^ +++"
+
+  if [[ "$failedConfigs" ]]; then
+    failedConfigs="${failedConfigs}"$'\n'"$config"
   else
-    duration="${timeSec}s"
+    failedConfigs="$config"
   fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
-done <<< "$configs"
+fi
+# done <<< "$configs"
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"

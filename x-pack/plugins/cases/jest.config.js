@@ -12,4 +12,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/cases',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/x-pack/plugins/cases/{common,public,server}/**/*.{ts,tsx}'],
+  testEnvironment: '<rootDir>/custom-jest-environment.js',
 };
