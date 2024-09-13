@@ -33,7 +33,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
   const dynamicOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const options = KAFKA_DYNAMIC_FIELDS.map((option) => ({
       label: option,
-      value: `%{[${option}]}`,
+      value: option,
     }));
     return options;
   }, []);

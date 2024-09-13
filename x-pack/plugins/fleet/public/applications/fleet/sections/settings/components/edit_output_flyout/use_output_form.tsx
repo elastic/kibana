@@ -29,6 +29,7 @@ import {
   kafkaConnectionType,
   kafkaPartitionType,
   kafkaSaslMechanism,
+  kafkaTopicsType,
   kafkaVerificationModes,
   outputType,
 } from '../../../../../../../common/constants';
@@ -333,16 +334,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const proxyIdInput = useInput(output?.proxy_id ?? '', () => undefined, isDisabled('proxy_id'));
 
-  const extractKafkaTopics = (
-    topics?: Array<{ topic: string }>
+  const extractDefaultDynamicKafkaTopics = (
+    o: KafkaOutput
   ): Array<EuiComboBoxOptionOption<string>> => {
-    if (!topics || topics.length <= 1) {
+    if (!o.topics || o.topics.length === 0 || (o.topics && !o.topics[0]?.topic?.includes('%{['))) {
       return [];
     }
-    return topics.slice(0, -1).map((t) => ({
-      label: t.topic,
-      value: t.topic,
-    }));
+    const matched = o.topics[0].topic.match(/(%\{\[)(\S*)(\]\})/);
+    const parsed = matched?.length ? matched[2] : '';
+
+    return [
+      {
+        label: parsed,
+        value: parsed,
+      },
+    ];
   };
 
   /**
@@ -351,12 +357,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const kafkaOutput = output as KafkaOutput;
 
-  const extractStaticKafkaTopic = (topics?: Array<{ topic: string }>): string => {
-    if (!topics || topics.length === 0) {
+  const extractDefaultStaticKafkaTopic = (o: KafkaOutput): string => {
+    if (!o.topics || o.topics.length <= 0 || (o.topics && o.topics[0].topic?.includes('%{['))) {
       return '';
     }
 
-    const lastTopic = topics[topics.length - 1].topic;
+    const lastTopic = o.topics[o.topics.length - 1].topic;
     return lastTopic || '';
   };
 
@@ -459,18 +465,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isDisabled('partition')
   );
 
-  const kafkaTopicsInput = useRadioInput('static', isDisabled('topics'));
+  const kafkaTopicsInput = useRadioInput(
+    kafkaOutput?.topics && kafkaOutput?.topics[0].topic?.includes('%{[')
+      ? kafkaTopicsType.Dynamic
+      : kafkaTopicsType.Static,
+    isDisabled('topics')
+  );
 
   const kafkaStaticTopicInput = useInput(
-    extractStaticKafkaTopic(kafkaOutput?.topics),
-    validateKafkaStaticTopic,
+    extractDefaultStaticKafkaTopic(kafkaOutput),
+    kafkaTopicsInput.value === kafkaTopicsType.Static ? validateKafkaStaticTopic : undefined,
     isDisabled('topics')
   );
 
   const kafkaDynamicTopicInput = useComboBoxWithCustomInput(
     'kafkaDynamicTopicComboBox',
-    extractKafkaTopics(kafkaOutput?.topics),
-    validateDynamicKafkaTopics,
+    extractDefaultDynamicKafkaTopics(kafkaOutput),
+    kafkaTopicsInput.value === kafkaTopicsType.Dynamic ? validateDynamicKafkaTopics : undefined,
     isDisabled('topics')
   );
 
@@ -851,7 +862,23 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                     },
                   }
                 : {}),
-              topics: [{ topic: kafkaStaticTopicInput.value || kafkaDynamicTopicInput.value }],
+              ...(kafkaTopicsInput.value === kafkaTopicsType.Static && kafkaStaticTopicInput.value
+                ? {
+                    topics: [
+                      {
+                        topic: kafkaStaticTopicInput.value,
+                      },
+                    ],
+                  }
+                : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
+                ? {
+                    topics: [
+                      {
+                        topic: `%{[${kafkaDynamicTopicInput.value}]}`,
+                      },
+                    ],
+                  }
+                : {}),
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -996,6 +1023,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
+    kafkaTopicsInput.value,
     kafkaStaticTopicInput.value,
     kafkaDynamicTopicInput.value,
     kafkaHeadersInput.value,
