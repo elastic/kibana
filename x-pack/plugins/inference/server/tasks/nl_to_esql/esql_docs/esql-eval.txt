@@ -1,20 +1,36 @@
-## EVAL
+# EVAL
 
-The `EVAL` processing command enables you to append new columns with calculated values. This command is useful for creating new data points derived from existing columns, such as performing arithmetic operations, applying functions, or using expressions. 
+The EVAL command allows you to append new columns with calculated values to your data.
 
-### Use Cases
-- **Data Transformation**: Create new columns based on existing data, such as converting units or calculating derived metrics.
-- **Data Enrichment**: Add additional context to your data by computing new values.
-- **Data Cleaning**: Standardize or normalize data by applying transformations.
+## Syntax
 
-### Limitations
-- If a column with the same name already exists, the existing column is dropped.
-- If a column name is used more than once, only the rightmost duplicate creates a column.
+`EVAL [column1 =] value1[, ..., [columnN =] valueN]`
 
-### Examples
+### Parameters
 
-#### Example 1: Converting Height to Different Units
-This example demonstrates how to convert the height from meters to feet and centimeters.
+#### {columnX}
+
+This is the name of the column. If a column with the same name already exists, it will be replaced. If a column name is used more than once, only the rightmost duplicate will create a column.
+
+#### {valueX}
+
+This is the value for the column. It can be a literal, an expression, or a function. Columns defined to the left of this one can be used.
+
+## Notes
+
+EVAL supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+
+Aggregation functions are NOT supported for EVAL.
+
+## Examples
+
+The following example multiplies the `height` column by 3.281 and 100 to create new columns `height_feet` and `height_cm`:
 
 ```esql
 FROM employees
@@ -23,8 +39,7 @@ FROM employees
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-#### Example 2: Overwriting an Existing Column
-In this example, the `height` column is overwritten with its value in feet.
+If the specified column already exists, the existing column will be replaced, and the new column will be appended to the table:
 
 ```esql
 FROM employees
@@ -33,8 +48,7 @@ FROM employees
 | EVAL height = height * 3.281
 ```
 
-#### Example 3: Using an Expression as Column Name
-Here, a new column is created with a name equal to the expression used to calculate its value.
+Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query adds a column named `height*3.281`:
 
 ```esql
 FROM employees
@@ -43,8 +57,7 @@ FROM employees
 | EVAL height * 3.281
 ```
 
-#### Example 4: Using Special Characters in Column Names
-This example shows how to handle special characters in column names by quoting them with backticks.
+Because this name contains special characters, it needs to be quoted with backticks (`) when using it in subsequent commands:
 
 ```esql
 FROM employees
@@ -52,4 +65,6 @@ FROM employees
 | STATS avg_height_feet = AVG(`height * 3.281`)
 ```
 
-These examples illustrate the versatility of the `EVAL` command in transforming and enriching your data within Elasticsearch.
+### Limitations
+- If a column with the same name already exists, the existing column is dropped.
+- If a column name is used more than once, only the rightmost duplicate creates a column.
