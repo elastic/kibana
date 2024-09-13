@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('shows an expression row in the condition section', async () => {
-      await testSubjects.existOrFail('expressionRow');
+      await testSubjects.existOrFail('metricThresholdExpressionRow');
     });
   });
 };

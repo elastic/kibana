@@ -200,7 +200,7 @@ export const ExpressionRow = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" data-test-subj="expressionRow">
+      <EuiFlexGroup gutterSize="xs" data-test-subj="metricThresholdExpressionRow">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
