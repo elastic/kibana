@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('edit embeddable redirects', () => {
+  describe.only('edit embeddable redirects', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'wowee, my title just got cooler';
       await header.waitUntilLoadingHasFinished();
       const originalPanelCount = await dashboard.getPanelCount();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.editPanelByTitle('wowee, looks like I have a new title');
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: true,

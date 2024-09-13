@@ -8,6 +8,7 @@
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { DASHBOARD_MARGIN_SIZE } from '@kbn/dashboard-plugin/public/dashboard_constants';
 import { FtrService } from '../../ftr_provider_context';
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
@@ -50,11 +51,12 @@ export class DashboardPanelActionsService extends FtrService {
   async scrollPanelIntoView(wrapper?: WebElementWrapper) {
     this.log.debug(`scrollPanelIntoView`);
     if (!wrapper) wrapper = await this.getPanelWrapper();
-    const yOffset = (await wrapper.getPosition()).y - DASHBOARD_TOP_OFFSET;
-    if (yOffset > 0) {
-      this.browser.execute(() => window.scrollBy(0, yOffset));
+    const yOffset = (await wrapper.getPosition()).y;
+    if (yOffset > DASHBOARD_TOP_OFFSET) {
+      await wrapper.scrollIntoView({ block: 'start' });
+      await this.browser.execute(`window.scrollBy(0, ${DASHBOARD_TOP_OFFSET});`);
     }
-    await wrapper.moveMouseTo();
+    await wrapper.moveMouseTo({ xOffset: DASHBOARD_MARGIN_SIZE, yOffset: DASHBOARD_MARGIN_SIZE });
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {
@@ -151,7 +153,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.scrollPanelIntoView(wrapper);
     if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
       // navigate to the editor
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+      await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     } else {
       // open the flyout and then navigate to the editor
       await this.navigateToEditorFromFlyout(wrapper);
