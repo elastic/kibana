@@ -7,6 +7,7 @@
 
 import {
   RoleCredentials,
+  CookieCredentials,
   SupertestWithoutAuthProviderType,
   SamlAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
@@ -21,13 +22,13 @@ export interface RequestHeadersOptions {
 }
 
 export class SupertestWithRoleScope {
-  private authValue: RoleCredentials | { Cookie: string } | null;
+  private authValue: RoleCredentials | CookieCredentials | null;
   private readonly supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private samlAuth: SamlAuthProviderType;
   private readonly options: RequestHeadersOptions;
 
   constructor(
-    authValue: RoleCredentials | { Cookie: string } | null,
+    authValue: RoleCredentials | CookieCredentials | null,
     supertestWithoutAuth: SupertestWithoutAuthProviderType,
     samlAuth: SamlAuthProviderType,
     options: RequestHeadersOptions
@@ -38,8 +39,12 @@ export class SupertestWithRoleScope {
     this.options = options;
   }
 
+  private isRoleCredentials(value: any): value is RoleCredentials {
+    return value && typeof value === 'object' && 'apiKey' in value && 'apiKeyHeader' in value;
+  }
+
   async destroy() {
-    if (this.authValue && 'apiKeyHeader' in this.authValue) {
+    if (this.isRoleCredentials(this.authValue)) {
       await this.samlAuth.invalidateM2mApiKeyWithRoleScope(this.authValue);
       this.authValue = null;
     }
@@ -56,7 +61,7 @@ export class SupertestWithRoleScope {
       // set cookie header
       void agent.set(this.authValue);
     } else {
-      if (!this.authValue || !('apiKeyHeader' in this.authValue)) {
+      if (!this.authValue || !this.isRoleCredentials(this.authValue)) {
         throw new Error('The instance has already been destroyed or roleAuthc is missing.');
       }
       // set API key header
