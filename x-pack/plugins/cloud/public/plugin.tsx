@@ -175,11 +175,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       },
       performanceUrl,
       usersAndRolesUrl,
-      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(
-        this,
-        coreStart.http,
-        this.logger
-      ),
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
     };
   }
 

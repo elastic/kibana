@@ -105,6 +105,7 @@ describe('Cloud Plugin', () => {
       it('exposes components decoded from the cloudId', () => {
         const decodedId: DecodedCloudId = {
           defaultPort: '9000',
+          elasticsearchUrl: 'elasticsearch-url',
           host: 'host',
           kibanaUrl: 'kibana-url',
         };

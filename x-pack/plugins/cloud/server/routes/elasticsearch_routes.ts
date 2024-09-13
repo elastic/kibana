@@ -15,7 +15,7 @@ export function defineRoutes({
   logger,
   router,
 }: {
-  elasticsearchUrl: string;
+  elasticsearchUrl?: string;
   logger: Logger;
   router: IRouter;
 }) {
@@ -26,7 +26,7 @@ export function defineRoutes({
     },
     async (context, request, response) => {
       const body: ElasticsearchConfigType = {
-        elasticsearch_url: elasticsearchUrl,
+        elasticsearch_url: elasticsearchUrl || '',
       };
       return response.ok({
         body,
