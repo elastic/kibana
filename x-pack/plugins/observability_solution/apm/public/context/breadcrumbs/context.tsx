@@ -34,7 +34,7 @@ export function BreadcrumbsContextProvider({ children }: { children: React.React
     return new Map<Route, Breadcrumb[]>();
   }, []);
 
-  const matches: RouteMatch[] = useMatchRoutes();
+  // const matches: RouteMatch[] = useMatchRoutes();
 
   const api = useMemo<BreadcrumbApi>(
     () => ({
@@ -63,20 +63,20 @@ export function BreadcrumbsContextProvider({ children }: { children: React.React
     [breadcrumbs]
   );
 
-  const formattedBreadcrumbs: ChromeBreadcrumb[] = api
-    .getBreadcrumbs(matches)
-    .map((breadcrumb, index, array) => {
-      return {
-        text: breadcrumb.title,
-        ...(index === array.length - 1
-          ? {}
-          : {
-              href: breadcrumb.href,
-            }),
-      };
-    });
+  // const formattedBreadcrumbs: ChromeBreadcrumb[] = api
+  //   .getBreadcrumbs(matches)
+  //   .map((breadcrumb, index, array) => {
+  //     return {
+  //       text: breadcrumb.title,
+  //       ...(index === array.length - 1
+  //         ? {}
+  //         : {
+  //             href: breadcrumb.href,
+  //           }),
+  //     };
+  //   });
 
-  useBreadcrumbs(formattedBreadcrumbs, { serverless });
+  // useBreadcrumbs(formattedBreadcrumbs, { serverless });
 
   return <BreadcrumbsContext.Provider value={api}>{children}</BreadcrumbsContext.Provider>;
 }

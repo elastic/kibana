@@ -52,7 +52,7 @@ export function BreadcrumbsContextProvider<TRouteMap extends RouteMap>({
 
   const router = useRouter<TRouteMap>();
 
-  const matches: RouteMatch[] = useMatchRoutes();
+  // const matches: RouteMatch[] = useMatchRoutes();
 
   const api = useMemo<BreadcrumbApi<TRouteMap>>(
     () => ({
@@ -81,27 +81,27 @@ export function BreadcrumbsContextProvider<TRouteMap extends RouteMap>({
     [breadcrumbs]
   );
 
-  const formattedBreadcrumbs: ChromeBreadcrumb[] = api
-    .getBreadcrumbs(matches)
-    .map((breadcrumb, index, array) => {
-      return {
-        text: breadcrumb.title,
-        ...(index === array.length - 1
-          ? {}
-          : {
-              href: history.createHref({
-                pathname: router.link(
-                  breadcrumb.path,
-                  ...(('params' in breadcrumb ? [breadcrumb.params] : []) as TypeAsArgs<
-                    TypeOf<TRouteMap, PathsOf<TRouteMap>, false>
-                  >)
-                ),
-              }),
-            }),
-      };
-    });
+  // const formattedBreadcrumbs: ChromeBreadcrumb[] = api
+  //   .getBreadcrumbs(matches)
+  //   .map((breadcrumb, index, array) => {
+  //     return {
+  //       text: breadcrumb.title,
+  //       ...(index === array.length - 1
+  //         ? {}
+  //         : {
+  //             href: history.createHref({
+  //               pathname: router.link(
+  //                 breadcrumb.path,
+  //                 ...(('params' in breadcrumb ? [breadcrumb.params] : []) as TypeAsArgs<
+  //                   TypeOf<TRouteMap, PathsOf<TRouteMap>, false>
+  //                 >)
+  //               ),
+  //             }),
+  //           }),
+  //     };
+  //   });
 
-  useBreadcrumbs(formattedBreadcrumbs);
+  // useBreadcrumbs(formattedBreadcrumbs);
 
   return <BreadcrumbsContext.Provider value={api}>{children}</BreadcrumbsContext.Provider>;
 }
