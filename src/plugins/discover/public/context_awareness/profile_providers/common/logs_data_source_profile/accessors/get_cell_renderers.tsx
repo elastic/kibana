@@ -9,6 +9,8 @@
 
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { getLogLevelBadgeCell } from '@kbn/discover-contextual-components';
+import React, { createContext, useContext } from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
 import { getSummaryColumn } from '../../../../../components/data_types/logs/summary_column';
 import {
   LOG_LEVEL_FIELDS,
@@ -37,4 +39,25 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
       {}
     ),
     [SOURCE_COLUMN]: getSummaryColumn(params),
+    'error.message': function ErrorMessage(params) {
+      const errorMessage = getFieldValue(params.row, 'error.message');
+      const test = useContext(testContext);
+      return (
+        <>
+          {test}: {errorMessage}
+        </>
+      );
+    },
   });
+
+const testContext = createContext('test');
+
+export const getAppWrapper: DataSourceProfileProvider['profile']['getAppWrapper'] =
+  (PrevWrapper) =>
+  ({ children }) => {
+    return (
+      <testContext.Provider value="test-override">
+        <PrevWrapper>{children}</PrevWrapper>
+      </testContext.Provider>
+    );
+  };

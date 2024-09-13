@@ -21,6 +21,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ComponentType, PropsWithChildren } from 'react';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -234,6 +235,12 @@ export interface Profile {
   /**
    * Lifecycle
    */
+
+  /**
+   * Render a custom wrapper component around the Discover application,
+   * e.g. to allow using profile specific context providers
+   */
+  getAppWrapper: ComponentType<PropsWithChildren<{}>>;
 
   /**
    * Gets default Discover app state that should be used when the profile is resolved
