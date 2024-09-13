@@ -16,11 +16,19 @@
 
 import { z } from '@kbn/zod';
 
-import { LogSamples, Connector, LangSmithOptions } from '../model/common_attributes';
+import {
+  LogSamples,
+  Connector,
+  LangSmithOptions,
+  DataStreamName,
+  PackageName,
+} from '../model/common_attributes';
 import { AnalyzeLogsAPIResponse } from '../model/response_schemas';
 
 export type AnalyzeLogsRequestBody = z.infer<typeof AnalyzeLogsRequestBody>;
 export const AnalyzeLogsRequestBody = z.object({
+  packageName: PackageName,
+  dataStreamName: DataStreamName,
   logSamples: LogSamples,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

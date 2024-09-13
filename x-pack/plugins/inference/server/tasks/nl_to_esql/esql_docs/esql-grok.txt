@@ -1,22 +1,24 @@
-## GROK
+# GROK
 
-GROK enables you to extract structured data out of a string. It matches the string against patterns based on regular expressions and extracts the specified patterns as columns. This command is useful for parsing logs, extracting fields from text, and structuring unstructured data. 
+The GROK command is used to extract structured data from a string. It matches the string against patterns based on regular expressions and extracts the specified patterns as columns.
 
-### Use Cases
-- **Log Parsing**: Extracting timestamps, IP addresses, and other fields from log entries.
-- **Data Structuring**: Converting unstructured text data into structured columns.
-- **Field Extraction**: Extracting specific fields from a string for further analysis.
+## Syntax
 
-### Limitations
-- If a field name conflicts with an existing column, the existing column is discarded.
-- If a field name is used more than once, a multi-valued column will be created with one value per each occurrence of the field name.
-- The `GROK` command does not support configuring custom patterns or multiple patterns.
-- The `GROK` command is not subject to Grok watchdog settings.
+`GROK input "pattern"`
 
-### Examples
+### Parameters
 
-#### Example 1: Basic GROK Usage
-This example parses a string that contains a timestamp, an IP address, an email address, and a number.
+#### input
+
+The column containing the string you want to structure. If the column has multiple values, GROK will process each value.
+
+#### pattern
+
+A grok pattern. If a field name conflicts with an existing column, the existing column is dropped. If a field name is used more than once, a multi-valued column is created with one value per each occurrence of the field name.
+
+## Examples
+
+The following example parses a string that contains a timestamp, an IP address, an email address, and a number:
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
@@ -24,8 +26,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | KEEP date, ip, email, num
 ```
 
-#### Example 2: Type Conversion with GROK
-By default, GROK outputs keyword string columns. To convert to other types, append `:type` to the semantics in the pattern.
+By default, GROK outputs keyword string columns. `int` and `float` types can be converted by appending `:type` to the semantics in the pattern. For example `{NUMBER:num:int}`:
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
@@ -33,8 +34,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | KEEP date, ip, email, num
 ```
 
-#### Example 3: Using Type Conversion Functions
-For other type conversions, use Type conversion functions.
+For other type conversions, use Type conversion functions:
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
@@ -43,8 +43,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | EVAL date = TO_DATETIME(date)
 ```
 
-#### Example 4: Handling Multi-Valued Columns
-If a field name is used more than once, GROK creates a multi-valued column.
+If a field name is used more than once, GROK creates a multi-valued column:
 
 ```esql
 FROM addresses
@@ -52,4 +51,9 @@ FROM addresses
 | GROK zip_code "%{WORD:zip_parts} %{WORD:zip_parts}"
 ```
 
-These examples showcase different usages of the GROK command, from basic extraction to handling type conversions and multi-valued columns.
+### Limitations
+
+- If a field name conflicts with an existing column, the existing column is discarded.
+- If a field name is used more than once, a multi-valued column will be created with one value per each occurrence of the field name.
+- The `GROK` command does not support configuring custom patterns or multiple patterns.
+- The `GROK` command is not subject to Grok watchdog settings.
