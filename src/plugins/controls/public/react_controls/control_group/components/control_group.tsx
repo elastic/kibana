@@ -96,7 +96,7 @@ export function ControlGroup({
   const ApplyButtonComponent = useMemo(() => {
     return (
       <EuiButtonIcon
-        size="m"
+        size="s"
         disabled={!hasUnappliedSelections}
         iconSize="m"
         display="fill"
@@ -122,6 +122,7 @@ export function ControlGroup({
       paddingSize="none"
       color={draggingId ? 'success' : 'transparent'}
       className="controlsWrapper"
+      data-test-subj="controls-group-wrapper"
     >
       <EuiFlexGroup
         gutterSize="s"

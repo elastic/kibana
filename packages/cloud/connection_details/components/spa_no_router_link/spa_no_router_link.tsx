@@ -21,7 +21,7 @@ export interface SpaNoRouterLinkProps {
   'data-test-subj'?: string;
 }
 
-export const SpaNoRouterLink: React.FC<SpaNoRouterLinkProps> = ({
+export const SpaNoRouterLink: React.FC<React.PropsWithChildren<SpaNoRouterLinkProps>> = ({
   url,
   go,
   onClick,
