@@ -564,7 +564,6 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -586,7 +585,6 @@ describe('Alerts Client', () => {
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -655,7 +653,6 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -759,7 +756,6 @@ describe('Alerts Client', () => {
               getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -847,7 +843,6 @@ describe('Alerts Client', () => {
               getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -942,7 +937,6 @@ describe('Alerts Client', () => {
               getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -1102,7 +1096,6 @@ describe('Alerts Client', () => {
               },
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -1214,7 +1207,6 @@ describe('Alerts Client', () => {
               }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -1328,7 +1320,6 @@ describe('Alerts Client', () => {
               }),
             ],
           });
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -1416,7 +1407,6 @@ describe('Alerts Client', () => {
             `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
             { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
           );
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
@@ -1498,8 +1488,7 @@ describe('Alerts Client', () => {
             logTags
           );
 
-          // loadMaintenanceWindows is not called because there are no new alerts
-          expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
+          expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 
         test('should log and swallow error if bulk indexing throws error', async () => {
@@ -1528,7 +1517,6 @@ describe('Alerts Client', () => {
             logTags
           );
 
-          // loadMaintenanceWindows called because there is a new alert
           expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
         });
 

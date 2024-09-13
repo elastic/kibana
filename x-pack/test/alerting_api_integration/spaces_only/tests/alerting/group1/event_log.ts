@@ -1742,13 +1742,21 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          const actionsToCheck = [
-            'new-instance',
-            'active-instance',
-            'recovered-instance',
-            'execute',
-          ];
+          const executeEvents = events.filter((event) => event?.event?.action === 'execute');
 
+          // the first execute event should not have any maintenance window ids because there were no alerts during the
+          // first execution
+          for (let i = 0; i < executeEvents.length; i++) {
+            if (i === 0) {
+              expect(executeEvents[i]?.kibana?.alert?.maintenance_window_ids).to.be(undefined);
+            } else {
+              const alertMaintenanceWindowIds =
+                executeEvents[i]?.kibana?.alert?.maintenance_window_ids?.sort();
+              expect(alertMaintenanceWindowIds).eql([window1.id, window2.id].sort());
+            }
+          }
+
+          const actionsToCheck = ['new-instance', 'active-instance', 'recovered-instance'];
           events.forEach((event) => {
             if (actionsToCheck.includes(event?.event?.action || '')) {
               const alertMaintenanceWindowIds =

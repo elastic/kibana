@@ -162,13 +162,22 @@ export class LegacyAlertsClient<
       startedAt: this.startedAtString,
     });
 
-    if (keys(processedAlertsNew).length > 0 && this.options.maintenanceWindowsService) {
-      const { maintenanceWindowsWithoutScopedQueryIds } =
-        await this.options.maintenanceWindowsService.loadMaintenanceWindows();
+    if (this.options.maintenanceWindowsService) {
+      // load maintenance windows if there are any any alerts (new, active, recovered)
+      // this is because we need the MW IDs for any active or recovered alerts that may
+      // have started during the MW period.
+      if (
+        keys(processedAlertsNew).length > 0 ||
+        keys(processedAlertsActive).length > 0 ||
+        keys(processedAlertsRecovered).length > 0
+      ) {
+        const { maintenanceWindowsWithoutScopedQueryIds } =
+          await this.options.maintenanceWindowsService.loadMaintenanceWindows();
 
-      for (const id in processedAlertsNew) {
-        if (Object.hasOwn(processedAlertsNew, id)) {
-          processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+        for (const id in processedAlertsNew) {
+          if (Object.hasOwn(processedAlertsNew, id)) {
+            processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
+          }
         }
       }
     }

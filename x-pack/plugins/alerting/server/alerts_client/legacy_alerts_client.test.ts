@@ -190,6 +190,25 @@ describe('Legacy Alerts Client', () => {
   });
 
   test('processAlerts() should call processAlerts, trimRecoveredAlerts and getAlertsForNotifications', async () => {
+    maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
+      maintenanceWindows: [
+        {
+          ...getMockMaintenanceWindow(),
+          eventStartTime: new Date().toISOString(),
+          eventEndTime: new Date().toISOString(),
+          status: MaintenanceWindowStatus.Running,
+          id: 'test-id1',
+        },
+        {
+          ...getMockMaintenanceWindow(),
+          eventStartTime: new Date().toISOString(),
+          eventEndTime: new Date().toISOString(),
+          status: MaintenanceWindowStatus.Running,
+          id: 'test-id2',
+        },
+      ],
+      maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
+    });
     (processAlerts as jest.Mock).mockReturnValue({
       newAlerts: {},
       activeAlerts: {
@@ -268,11 +287,10 @@ describe('Legacy Alerts Client', () => {
       '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
     });
 
-    // no new alerts so we should not load maintenance windows
-    expect(maintenanceWindowsService.loadMaintenanceWindows).not.toHaveBeenCalled();
+    expect(maintenanceWindowsService.loadMaintenanceWindows).toHaveBeenCalled();
   });
 
-  test('processAlerts() should load maintenance windows if there are new alerts', async () => {
+  test('processAlerts() should set maintenance windows IDs on new alerts', async () => {
     maintenanceWindowsService.loadMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
