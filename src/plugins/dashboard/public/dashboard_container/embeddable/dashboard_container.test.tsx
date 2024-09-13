@@ -266,4 +266,28 @@ describe('getInheritedInput', () => {
     expect(embeddableInput.syncColors).toBe(false);
     expect(embeddableInput.syncCursor).toBe(true);
   });
+
+  test('Expanded panel ID change impacts container', async () => {
+    const containerWithoutExpandedPanel = buildMockDashboard({
+      savedObjectId: '123',
+      expandedPanelId: undefined,
+    });
+
+    containerWithoutExpandedPanel.getOutput$().subscribe(() => {
+      if (containerWithoutExpandedPanel.getOutput().embeddableLoaded['123']) {
+        expect(containerWithoutExpandedPanel.expandedPanelId.value).toBeUndefined();
+      }
+    });
+
+    const containerWithExpandedPanel = buildMockDashboard({
+      savedObjectId: '123',
+      expandedPanelId: '1',
+    });
+
+    containerWithExpandedPanel.getOutput$().subscribe(() => {
+      if (containerWithExpandedPanel.getOutput().embeddableLoaded['123']) {
+        expect(containerWithExpandedPanel.expandedPanelId.value).toBe('1');
+      }
+    });
+  });
 });
