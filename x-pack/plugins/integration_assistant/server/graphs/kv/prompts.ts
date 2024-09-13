@@ -38,6 +38,7 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
  - Do not create any other processors.
  - Do not add any prefix to the processor.
  - Do not use the special characters like \`\s\` or \`\\s+\` in the \`field_split\` or \`value_split\` regular expressions.
+ - Always use single backslash (\\) for escaping special characters in \`field_split\` or \`value_split\` regular expressions.
  - Do not add brackets (), <>, [] as well as single or double quotes in \`trim_value\`.
  - Make sure to trim whitespaces in \`trim_key\`. 
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response below. Use strict JSON response format.
@@ -91,6 +92,45 @@ You then have to create a grok pattern using the regex pattern.
   ['ai', 'Please find the JSON object below:'],
 ]);
 
+export const KV_HEADER_ERROR_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are an expert in Syslogs and identifying the headers and structured body in syslog messages. Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
+<context>
+<current_pattern>
+{current_pattern}
+</current_pattern>
+</context>`,
+  ],
+  [
+    'human',
+    `Please go through each error below, carefully review the provided current grok pattern, and resolve the most likely cause to the supplied error by returning an updated version of the current_pattern.
+
+<errors>
+{errors}
+</errors>
+
+ You ALWAYS follow these guidelines when writing your response:
+ <guidelines>
+ - Identify any mismatches, incorrect syntax, or logical errors in the pattern.
+ - If the message part contains any unstructured data , make sure to add this in grok pattern.
+ - Do not parse the message part in the regex. Just the header part should be in regex nad grok_pattern.
+ - Make sure to map the remaining message part to \'message\' in grok pattern.
+ - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
+ </guidelines>
+
+ You are required to provide the output in the following example response format:
+
+ <example_response>
+ A: Please find the JSON object below:
+ \`\`\`json
+ {ex_answer}
+ \`\`\`
+ </example_response>`,
+  ],
+  ['ai', 'Please find the JSON object below:'],
+]);
+
 export const KV_ERROR_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
@@ -126,6 +166,7 @@ Follow these steps to help resolve the current ingest pipeline issues:
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - Do not use the special characters like \`\s\` or \`\\s+\` in the \`field_split\` or \`value_split\` regular expressions.
+- Always use single backslash (\\) for escaping characters in \`field_split\` or \`value_split\` regular expressions.
 - Do not add brackets (), <>, [] as well as single or double quotes in \`trim_value\`.
 - Do not add multiple delimeters in the \`value_split\` regular expression.
 - Make sure to trim whitespaces in \`trim_key\`. 
