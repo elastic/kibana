@@ -19,7 +19,11 @@ import {
   updateInvestigationItemParamsSchema,
   updateInvestigationNoteParamsSchema,
   updateInvestigationParamsSchema,
+  getEventsParamsSchema,
+  GetEventsResponse,
 } from '@kbn/investigation-shared';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
 import { createInvestigationNote } from '../services/create_investigation_note';
@@ -35,6 +39,8 @@ import { getInvestigationItems } from '../services/get_investigation_items';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigation } from '../services/update_investigation';
+import { getAlertEvents, getAnnotationEvents } from '../services/get_events';
+import { getAlertsClient } from '../services/get_alerts_client';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -281,6 +287,37 @@ const deleteInvestigationItemRoute = createInvestigateAppServerRoute({
   },
 });
 
+const getEventsRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/events 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getEventsParamsSchema,
+  handler: async ({ params, context, request, logger, plugins }) => {
+    const esClient: ElasticsearchClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const annotationsClient: ScopedAnnotationsClient | undefined =
+      await plugins.observability.setup.getScopedAnnotationsClient(context, request);
+    const alertsClient = await getAlertsClient({ plugins, request });
+    const events: GetEventsResponse = [];
+
+    if (annotationsClient) {
+      const annotationEvents = await getAnnotationEvents(
+        params?.query ?? {},
+        esClient,
+        annotationsClient
+      );
+      events.push(...annotationEvents);
+    }
+
+    if (alertsClient) {
+      const alertEvents = await getAlertEvents(params?.query ?? {}, alertsClient);
+      events.push(...alertEvents);
+    }
+
+    return events;
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -296,6 +333,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...deleteInvestigationItemRoute,
     ...updateInvestigationItemRoute,
     ...getInvestigationItemsRoute,
+    ...getEventsRoute,
   };
 }
 

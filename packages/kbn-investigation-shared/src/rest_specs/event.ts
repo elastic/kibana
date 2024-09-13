@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './investigation';
-export * from './investigation_item';
-export * from './investigation_note';
-export * from './origin';
-export * from './event';
+import * as t from 'io-ts';
+import { eventSchema } from '../schema';
+
+const eventResponseSchema = eventSchema;
+
+type EventResponse = t.OutputOf<typeof eventResponseSchema>;
+
+export { eventResponseSchema };
+export type { EventResponse };
