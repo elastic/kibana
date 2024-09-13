@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const JSDOMEnvironment = require('jest-environment-jsdom');
+const JSDOMEnvironment = require('jest_environment_jsdom').TestEnvironment;
 const { screen } = require('@testing-library/react');
 
 class CustomEnvironment extends JSDOMEnvironment {
