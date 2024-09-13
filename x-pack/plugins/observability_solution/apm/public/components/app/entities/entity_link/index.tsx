@@ -36,7 +36,7 @@ export function EntityLink() {
     path: { serviceName },
     query: { rangeFrom = timeRange.from, rangeTo = timeRange.to },
   } = useApmParams('/link-to/entity/{serviceName}');
-  const { isEntityCentricExperienceViewEnabled, entityManagerEnablementStatus } =
+  const { isEntityCentricExperienceViewEnabled, isEnablementPending } =
     useEntityManagerEnablementContext();
 
   const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
@@ -49,7 +49,7 @@ export function EntityLink() {
   }, []);
 
   if (
-    isPending(entityManagerEnablementStatus) ||
+    isEnablementPending ||
     serviceEntitySummaryStatus === FETCH_STATUS.LOADING ||
     isPending(hasApmDataStatus)
   ) {

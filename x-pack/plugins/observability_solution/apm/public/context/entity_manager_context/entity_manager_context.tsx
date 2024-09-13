@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext } from 'react';
+import type { ManagedEntityEnabledResponse } from '@kbn/entityManager-plugin/common/types_api';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
-import { useLocalStorage } from '../../hooks/use_local_storage';
-import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
+import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import React, { createContext } from 'react';
 import {
   SERVICE_INVENTORY_STORAGE_KEY,
   serviceInventoryViewType$,
 } from '../../analytics/register_service_inventory_view_type_context';
-import { useKibana } from '../kibana_context/use_kibana';
+import { useLocalStorage } from '../../hooks/use_local_storage';
 import { ApmPluginStartDeps, ApmServices } from '../../plugin';
-import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../kibana_context/use_kibana';
 
 export interface EntityManagerEnablementContextValue {
   isEntityManagerEnabled: boolean;
-  entityManagerEnablementStatus: FETCH_STATUS;
   isEnablementPending: boolean;
   refetch: () => void;
   serviceInventoryViewLocalStorageSetting: ServiceInventoryView;
@@ -46,6 +46,11 @@ const TOUR_INITIAL_STATE: TourState = {
   isTourActive: false,
 };
 
+const INITIAL_STATE: ManagedEntityEnabledResponse = {
+  enabled: false,
+  reason: '',
+};
+
 export function EntityManagerEnablementContextProvider({
   children,
 }: {
@@ -63,16 +68,15 @@ export function EntityManagerEnablementContextProvider({
   );
 
   const {
-    data = { enabled: false },
-    status,
-    refetch,
-  } = useFetcher(
-    () => services.entityManager.entityClient.isManagedEntityDiscoveryEnabled(),
-    [services.entityManager.entityClient]
-  );
+    value: managedEntityDiscoveryData = INITIAL_STATE,
+    loading: managedEntityDiscoveryLoading,
+    refresh,
+  } = useAbortableAsync(() => {
+    return services.entityManager.entityClient.isManagedEntityDiscoveryEnabled();
+  }, [services.entityManager.entityClient]);
 
   const isEntityCentricExperienceViewEnabled =
-    data.enabled &&
+    managedEntityDiscoveryData.enabled &&
     serviceInventoryViewLocalStorageSetting === ServiceInventoryView.entity &&
     isEntityCentricExperienceSettingEnabled;
 
@@ -92,10 +96,9 @@ export function EntityManagerEnablementContextProvider({
   return (
     <EntityManagerEnablementContext.Provider
       value={{
-        isEntityManagerEnabled: data.enabled,
-        entityManagerEnablementStatus: status,
-        isEnablementPending: status === FETCH_STATUS.LOADING,
-        refetch,
+        isEntityManagerEnabled: managedEntityDiscoveryData.enabled,
+        isEnablementPending: managedEntityDiscoveryLoading,
+        refetch: refresh,
         serviceInventoryViewLocalStorageSetting,
         setServiceInventoryViewLocalStorageSetting: handleServiceInventoryViewChange,
         isEntityCentricExperienceViewEnabled,

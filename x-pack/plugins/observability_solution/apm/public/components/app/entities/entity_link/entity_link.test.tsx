@@ -105,7 +105,7 @@ describe('Entity link', () => {
     renderEntityLink({
       entityManagerMockReturnValue: {
         isEntityCentricExperienceViewEnabled: undefined,
-        entityManagerEnablementStatus: FETCH_STATUS.LOADING,
+        isEnablementPending: true,
       },
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
@@ -123,7 +123,7 @@ describe('Entity link', () => {
     renderEntityLink({
       entityManagerMockReturnValue: {
         isEntityCentricExperienceViewEnabled: true,
-        entityManagerEnablementStatus: FETCH_STATUS.SUCCESS,
+        isEnablementPending: false,
       },
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
@@ -143,7 +143,7 @@ describe('Entity link', () => {
     renderEntityLink({
       entityManagerMockReturnValue: {
         isEntityCentricExperienceViewEnabled: false,
-        entityManagerEnablementStatus: FETCH_STATUS.SUCCESS,
+        isEnablementPending: false,
       },
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
@@ -173,7 +173,7 @@ describe('Entity link', () => {
     renderEntityLink({
       entityManagerMockReturnValue: {
         isEntityCentricExperienceViewEnabled: true,
-        entityManagerEnablementStatus: FETCH_STATUS.SUCCESS,
+        isEnablementPending: false,
       },
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
@@ -203,7 +203,7 @@ describe('Entity link', () => {
     renderEntityLink({
       entityManagerMockReturnValue: {
         isEntityCentricExperienceViewEnabled: true,
-        entityManagerEnablementStatus: FETCH_STATUS.SUCCESS,
+        isEnablementPending: false,
       },
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
@@ -233,7 +233,7 @@ describe('Entity link', () => {
     renderEntityLink({
       entityManagerMockReturnValue: {
         isEntityCentricExperienceViewEnabled: true,
-        entityManagerEnablementStatus: FETCH_STATUS.SUCCESS,
+        isEnablementPending: false,
       },
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
