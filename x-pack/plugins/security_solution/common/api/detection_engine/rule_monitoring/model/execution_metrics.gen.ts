@@ -48,6 +48,5 @@ export const RuleExecutionMetrics = z.object({
        */
       to: z.string(),
     })
-    .nullable()
     .optional(),
 });

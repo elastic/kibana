@@ -26,7 +26,6 @@ components:
           type: integer
           minimum: 0
         gap_range:
-          nullable: true
           description: Range of the execution gap
           type: object
           required:
