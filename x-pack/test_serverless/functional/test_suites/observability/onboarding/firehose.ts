@@ -52,10 +52,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('starts to monitor for incoming data after user leaves the page', async () => {
       await browser.execute(`window.dispatchEvent(new Event("blur"))`);
 
-      await testSubjects.isDisplayed('observabilityOnboardingAWSServiceList');
+      await testSubjects.isDisplayed('observabilityOnboardingFirehoseProgressCallout');
     });
 
-    it('highlights an AWS service when data is detected', async () => {
+    it('shows an AWS service when data is detected', async () => {
       const DATASET = 'aws.vpcflow';
       const AWS_SERVICE_ID = 'vpc-flow';
       await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
@@ -80,11 +80,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           })
       );
 
-      // Checking that an AWS service item is enabled after data is detected
-      await testSubjects
-        .find(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`)
-        .then((el) => el.findByTagName('button'))
-        .then((el) => el.isEnabled());
+      // Checking that an AWS service item is visible after data is detected
+      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
     });
   });
 }
