@@ -36,7 +36,7 @@ export function useFetchAllInvestigationTags(): Response {
       });
     },
     cacheTime: 600 * 1000, // 10_minutes
-    staleTime: 30 * 1000, // 30_seconds
+    staleTime: 0,
     refetchOnWindowFocus: false,
     retry: false,
     onError: (error: Error) => {
