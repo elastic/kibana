@@ -21,7 +21,7 @@ export function getNextRunAt(
   }
 
   const taskSchedule = newSchedule?.interval ?? schedule?.interval;
-  const taskDelay = Date.now() - originalRunAt.getTime();
+  const taskDelay = startedAt!.getTime() - originalRunAt.getTime();
   const scheduleFromDate =
     taskDelay < taskDelayThresholdForPreciseScheduling ? originalRunAt : startedAt!;
 

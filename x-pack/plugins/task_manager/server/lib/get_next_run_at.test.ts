@@ -31,32 +31,36 @@ describe('getNextRunAt', () => {
 
   test('should use startedAt when the task delay is greater than the threshold', () => {
     const now = new Date();
+    // Use time in the past to ensure the task delay calculation isn't relative to "now"
     const fiveSecondsAgo = new Date(now.getTime() - 5000);
+    const fourSecondsAgo = new Date(now.getTime() - 4000);
     const nextRunAt = getNextRunAt(
       taskManagerMock.createTask({
         schedule: { interval: '1m' },
         runAt: fiveSecondsAgo,
-        startedAt: now,
+        startedAt: fourSecondsAgo,
       }),
       {},
       500
     );
-    expect(nextRunAt).toEqual(new Date(now.getTime() + 60000));
+    expect(nextRunAt).toEqual(new Date(fourSecondsAgo.getTime() + 60000));
   });
 
   test('should use runAt when the task delay is greater than the threshold', () => {
     const now = new Date();
-    const fiveMsAgo = new Date(now.getTime() - 5);
+    // Use time in the past to ensure the task delay calculation isn't relative to "now"
+    const fiveSecondsAgo = new Date(now.getTime() - 5000);
+    const aBitLessThanFiveSecondsAgo = new Date(now.getTime() - 4995);
     const nextRunAt = getNextRunAt(
       taskManagerMock.createTask({
         schedule: { interval: '1m' },
-        runAt: fiveMsAgo,
-        startedAt: now,
+        runAt: fiveSecondsAgo,
+        startedAt: aBitLessThanFiveSecondsAgo,
       }),
       {},
       500
     );
-    expect(nextRunAt).toEqual(new Date(fiveMsAgo.getTime() + 60000));
+    expect(nextRunAt).toEqual(new Date(fiveSecondsAgo.getTime() + 60000));
   });
 
   test('should not schedule in the past', () => {
