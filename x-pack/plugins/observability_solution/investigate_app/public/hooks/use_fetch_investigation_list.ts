@@ -16,6 +16,7 @@ const DEFAULT_PAGE_SIZE = 25;
 export interface InvestigationListParams {
   page?: number;
   perPage?: number;
+  filter?: string;
 }
 
 export interface UseFetchInvestigationListResponse {
@@ -30,6 +31,7 @@ export interface UseFetchInvestigationListResponse {
 export function useFetchInvestigationList({
   page = 1,
   perPage = DEFAULT_PAGE_SIZE,
+  filter,
 }: InvestigationListParams = {}): UseFetchInvestigationListResponse {
   const {
     core: {
@@ -49,6 +51,7 @@ export function useFetchInvestigationList({
         query: {
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
+          ...(filter !== undefined && { filter }),
         },
         signal,
       });

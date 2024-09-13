@@ -24,14 +24,15 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationListActions } from './investigation_list_actions';
 
 export function InvestigationList() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
   const {
     core: {
       http: { basePath },
       uiSettings,
     },
   } = useKibana();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
   const { data, isLoading, isError } = useFetchInvestigationList({
     page: pageIndex + 1,
     perPage: pageSize,
@@ -102,7 +103,7 @@ export function InvestigationList() {
       name: 'Tags',
       render: (tags: InvestigationResponse['tags']) => {
         return tags.map((tag) => (
-          <EuiBadge color={'default'} key="tag">
+          <EuiBadge color={'hollow'} key="tag">
             {tag}
           </EuiBadge>
         ));

@@ -26,8 +26,11 @@ function toPagination(params: FindInvestigationsParams) {
   const DEFAULT_PER_PAGE = 10;
   const DEFAULT_PAGE = 1;
   return {
-    page: params?.page ? parseInt(params.page, 10) : DEFAULT_PAGE,
-    perPage: params?.perPage ? parseInt(params.perPage, 10) : DEFAULT_PER_PAGE,
+    page: params?.page && params.page >= 1 ? params.page : DEFAULT_PAGE,
+    perPage:
+      params?.perPage && params.perPage > 0 && params.perPage <= 100
+        ? params.perPage
+        : DEFAULT_PER_PAGE,
   };
 }
 
