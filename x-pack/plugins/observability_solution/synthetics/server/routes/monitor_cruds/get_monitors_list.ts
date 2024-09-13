@@ -13,8 +13,10 @@ import { mapSavedObjectToMonitor } from './helper';
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-  validate: {
-    query: QuerySchema,
+  validation: {
+    request: {
+      query: QuerySchema,
+    },
   },
   handler: async (routeContext): Promise<any> => {
     const { request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
