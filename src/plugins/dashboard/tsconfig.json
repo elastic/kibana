@@ -88,9 +88,6 @@
     "@kbn/managed-content-badge",
     "@kbn/content-management-favorites-public",
     "@kbn/core-http-browser-mocks",
-    "@kbn/core-lifecycle-browser-mocks",
-    "@kbn/core-application-browser-internal",
-    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": ["target/**/*"]
 }
