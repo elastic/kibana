@@ -197,7 +197,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
     const router = core.http.createRouter();
-    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl || '';
+    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
     defineRoutes({ logger: this.logger, router, elasticsearchUrl });
 
     return {

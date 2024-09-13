@@ -36,6 +36,7 @@ describe('Cloud Plugin', () => {
         const plugin = new CloudPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
+        coreSetup.http.get.mockResolvedValue({ elasticsearch_url: 'elasticsearch-url' });
         const setup = plugin.setup(coreSetup);
 
         return { setup };
@@ -105,7 +106,6 @@ describe('Cloud Plugin', () => {
         const decodedId: DecodedCloudId = {
           defaultPort: '9000',
           host: 'host',
-          elasticsearchUrl: 'elasticsearch-url',
           kibanaUrl: 'kibana-url',
         };
         decodeCloudIdMock.mockReturnValue(decodedId);
@@ -114,7 +114,6 @@ describe('Cloud Plugin', () => {
           expect.objectContaining({
             cloudDefaultPort: '9000',
             cloudHost: 'host',
-            elasticsearchUrl: 'elasticsearch-url',
             kibanaUrl: 'kibana-url',
           })
         );
@@ -177,6 +176,11 @@ describe('Cloud Plugin', () => {
           },
         });
         expect(setup.serverless.projectType).toBe('security');
+      });
+      it('exposes fetchElasticsearchConfig', async () => {
+        const { setup } = setupPlugin();
+        const result = await setup.fetchElasticsearchConfig();
+        expect(result).toEqual({ elasticsearchUrl: 'elasticsearch-url' });
       });
     });
   });
@@ -300,6 +304,14 @@ describe('Cloud Plugin', () => {
       const coreStart = coreMock.createStart();
       const start = plugin.start(coreStart);
       expect(start.serverless.projectName).toBe('My Awesome Project');
+    });
+    it('exposes fetchElasticsearchConfig', async () => {
+      const { plugin } = startPlugin();
+      const coreStart = coreMock.createStart();
+      coreStart.http.get.mockResolvedValue({ elasticsearch_url: 'elasticsearch-url' });
+      const start = plugin.start(coreStart);
+      const result = await start.fetchElasticsearchConfig();
+      expect(result).toEqual({ elasticsearchUrl: 'elasticsearch-url' });
     });
   });
 });

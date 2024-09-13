@@ -66,14 +66,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly isServerlessEnabled: boolean;
   private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
-  private elasticsearchUrl: string;
+  private elasticsearchUrl?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
-    this.elasticsearchUrl = '';
+    this.elasticsearchUrl = undefined;
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -118,7 +118,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
-      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http, this.logger),
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http),
     };
   }
 
@@ -222,8 +222,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   private async fetchElasticsearchConfig(
-    http: CoreStart['http'],
-    logger: Logger
+    http: CoreStart['http']
   ): Promise<PublicElasticsearchConfigType> {
     if (this.elasticsearchUrl) {
       return { elasticsearchUrl: this.elasticsearchUrl };
@@ -233,7 +232,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       this.elasticsearchUrl = result.elasticsearch_url;
       return { elasticsearchUrl: result.elasticsearch_url };
     } catch {
-      logger.error('Failed to fetch Elasticsearch config');
+      this.logger.error('Failed to fetch Elasticsearch config');
       return {
         elasticsearchUrl: undefined,
       };
