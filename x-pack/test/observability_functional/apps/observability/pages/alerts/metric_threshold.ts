@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
 
   describe('Metric threshold rule', function () {
     this.tags('includeFirefox');
