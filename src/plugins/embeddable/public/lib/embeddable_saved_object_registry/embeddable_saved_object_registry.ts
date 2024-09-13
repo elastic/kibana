@@ -9,12 +9,12 @@
 
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 
 type SOToEmbeddable<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = (
-  container: PresentationContainer,
+  container: CanAddNewPanel,
   savedObject: SavedObjectCommon<TSavedObjectAttributes>
 ) => void;
 

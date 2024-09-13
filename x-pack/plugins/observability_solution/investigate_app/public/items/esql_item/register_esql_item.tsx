@@ -21,10 +21,6 @@ import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_sugges
 import type { Options } from '../register_items';
 import { getDateHistogramResults } from './get_date_histogram_results';
 
-const lensClassName = css`
-  height: 100%;
-`;
-
 interface Props {
   suggestion: Suggestion;
   dataView: DataView;
@@ -142,7 +138,7 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
           grow={false}
           className={css`
             > div {
-              height: 196px;
+              height: 128px;
             }
           `}
         >
@@ -153,15 +149,12 @@ export function EsqlWidget({ suggestion, dataView, esqlQuery, dateHistogramResul
   }
 
   return (
-    <EuiFlexItem
-      grow={true}
-      className={css`
-        > div {
-          height: 196px;
-        }
-      `}
-    >
-      <lens.EmbeddableComponent {...input} className={lensClassName} />
+    <EuiFlexItem grow={true}>
+      <lens.EmbeddableComponent
+        {...input}
+        style={{ height: 128 }}
+        overrides={{ axisX: { hide: true } }}
+      />
     </EuiFlexItem>
   );
 }
