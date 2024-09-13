@@ -9,6 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 import {
   CreatePackagePolicyRequestBodySchema,
+  DryRunPackagePolicySchema,
+  PackagePolicyPackageSchema,
+  PackagePolicyResponseSchema,
+  PackagePolicyStatusResponseSchema,
   SimplifiedCreatePackagePolicyRequestBodySchema,
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
@@ -59,6 +63,10 @@ export const BulkGetPackagePoliciesRequestSchema = {
   }),
 };
 
+export const BulkGetPackagePoliciesResponseBodySchema = schema.object({
+  items: schema.arrayOf(PackagePolicyResponseSchema),
+});
+
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
     packagePolicyId: schema.string(),
@@ -106,6 +114,25 @@ export const DeletePackagePoliciesRequestSchema = {
   }),
 };
 
+export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
+  PackagePolicyStatusResponseSchema.extends({
+    policy_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.string({
+          meta: {
+            description: 'Use `policy_ids` instead',
+            deprecated: true,
+          },
+        }),
+      ])
+    ),
+    policy_ids: schema.arrayOf(schema.string()),
+    output_id: schema.nullable(schema.maybe(schema.string())),
+    package: PackagePolicyPackageSchema,
+  })
+);
+
 export const DeleteOnePackagePolicyRequestSchema = {
   params: schema.object({
     packagePolicyId: schema.string(),
@@ -115,11 +142,19 @@ export const DeleteOnePackagePolicyRequestSchema = {
   }),
 };
 
+export const DeleteOnePackagePolicyResponseSchema = schema.object({
+  id: schema.string(),
+});
+
 export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),
   }),
 };
+
+export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
+  PackagePolicyStatusResponseSchema
+);
 
 export const DryRunPackagePoliciesRequestSchema = {
   body: schema.object({
@@ -127,3 +162,84 @@ export const DryRunPackagePoliciesRequestSchema = {
     packageVersion: schema.maybe(schema.string()),
   }),
 };
+
+export const DryRunPackagePoliciesResponseBodySchema = schema.arrayOf(
+  schema.object({
+    name: schema.maybe(schema.string()),
+    statusCode: schema.maybe(schema.number()),
+    body: schema.maybe(schema.object({ message: schema.string() })),
+    hasErrors: schema.boolean(),
+    diff: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          PackagePolicyResponseSchema.extends({
+            id: schema.maybe(schema.string()),
+          }),
+          DryRunPackagePolicySchema,
+        ])
+      )
+    ),
+    agent_diff: schema.maybe(
+      schema.arrayOf(
+        schema.arrayOf(
+          schema
+            .object({
+              id: schema.string(),
+              name: schema.string(),
+              revision: schema.number(),
+              type: schema.string(),
+              data_stream: schema.object({
+                namespace: schema.string(),
+              }),
+              use_output: schema.string(),
+              package_policy_id: schema.string(),
+              meta: schema.maybe(
+                schema.object({
+                  package: schema
+                    .object({
+                      name: schema.string(),
+                      version: schema.string(),
+                    })
+                    .extendsDeep({
+                      // equivalent of allowing extra keys like `[key: string]: any;`
+                      unknowns: 'allow',
+                    }),
+                })
+              ),
+              streams: schema.maybe(
+                schema.arrayOf(
+                  schema
+                    .object({
+                      id: schema.string(),
+                      data_stream: schema.object({
+                        dataset: schema.string(),
+                        type: schema.string(),
+                      }),
+                    })
+                    .extendsDeep({
+                      unknowns: 'allow',
+                    })
+                )
+              ),
+              processors: schema.maybe(
+                schema.arrayOf(
+                  schema.object({
+                    add_fields: schema.object({
+                      target: schema.string(),
+                      fields: schema.recordOf(
+                        schema.string(),
+                        schema.oneOf([schema.string(), schema.number()])
+                      ),
+                    }),
+                  })
+                )
+              ),
+            })
+            .extendsDeep({
+              unknowns: 'allow',
+            })
+        )
+      )
+    ),
+  })
+);

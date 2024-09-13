@@ -59,33 +59,18 @@ const PackagePolicyStreamsSchema = {
     ),
   }),
   vars: schema.maybe(ConfigRecordSchema),
-  config: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        type: schema.maybe(schema.string()),
-        value: schema.maybe(schema.any()),
-      })
-    )
-  ),
+  config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
 };
 
 export const PackagePolicyInputsSchema = {
+  id: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
-  config: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        type: schema.maybe(schema.string()),
-        value: schema.maybe(schema.any()),
-      })
-    )
-  ),
+  config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
@@ -150,7 +135,7 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
-  output_id: schema.nullable(schema.maybe(schema.string())),
+  output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
@@ -296,7 +281,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.maybe(schema.string()),
-  output_id: schema.nullable(schema.maybe(schema.string())),
+  output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: SimplifiedPackagePolicyInputsSchema,
 });
@@ -383,6 +368,7 @@ export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
     SimplifiedPackagePolicyInputsSchema,
   ]),
   spaceIds: schema.maybe(schema.arrayOf(schema.string())),
+  agents: schema.maybe(schema.number()),
 });
 
 export const DryRunPackagePolicySchema = schema.object({
@@ -397,6 +383,7 @@ export const DryRunPackagePolicySchema = schema.object({
       })
     )
   ),
+  missingVars: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const PackagePolicyStatusResponseSchema = schema.object({
