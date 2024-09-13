@@ -89,6 +89,7 @@ export const metadataAggregation = z.union([
   z.object({
     type: z.literal('top_value'),
     sort: z.record(z.string(), z.union([z.literal('asc'), z.literal('desc')])),
+    lookbackPeriod: durationSchema,
   }),
 ]);
 

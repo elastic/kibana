@@ -35,7 +35,6 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
                 field: metadata.source,
               },
               sort: metadata.aggregation.sort,
-              size: 1,
             },
           },
         },
@@ -84,7 +83,7 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${offsetInSeconds}s`,
+                    gte: `now-${metadata.aggregation.lookbackPeriod}`,
                   },
                 },
               },
@@ -103,7 +102,6 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
                 field: metadata.destination,
               },
               sort: metadata.aggregation.sort,
-              size: 1,
             },
           },
         },
