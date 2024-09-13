@@ -7,7 +7,7 @@
 
 import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
 import { of } from 'rxjs';
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import moment from 'moment';
@@ -56,7 +56,7 @@ describe('AnomalyExplorerChartsService', () => {
 
     anomalyExplorerService = new AnomalyExplorerChartsService(
       timefilterMock,
-      mlApiServicesMock as unknown as MlApiServices,
+      mlApiServicesMock as unknown as MlApi,
       mlResultsServiceMock as unknown as MlResultsService
     ) as jest.Mocked<AnomalyExplorerChartsService>;
   });

@@ -178,7 +178,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       http: { basePath },
       data: { dataViews },
       dashboard,
-      mlServices: { mlApiServices: ml },
+      mlServices: { mlApi },
     } = this.context.services;
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
@@ -194,7 +194,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
           (customUrl) => {
             getTestUrl(
-              ml,
+              mlApi,
               job,
               customUrl,
               timefieldName,

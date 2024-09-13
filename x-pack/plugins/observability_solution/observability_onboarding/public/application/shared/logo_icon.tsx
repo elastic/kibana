@@ -23,7 +23,8 @@ export type SupportedLogo =
   | 'nginx'
   | 'apache'
   | 'system'
-  | 'opentelemetry';
+  | 'opentelemetry'
+  | 'firehose';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [

@@ -1,0 +1,93 @@
+# WHERE
+
+The WHERE command filters the rows in a table based on a specified condition, returning only those rows where the condition evaluates to `true`.
+
+## Syntax
+
+`WHERE expression`
+
+### Parameters
+
+#### expression
+
+A boolean expression that defines the condition for filtering the rows.
+
+## Notes
+
+WHERE supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+
+Aggregation functions are WHERE supported for EVAL.
+
+## Examples
+
+#### Example 1: Filtering Based on Boolean Condition
+```esql
+FROM employees
+| KEEP first_name, last_name, still_hired
+| WHERE still_hired == true
+```
+
+If `still_hired` is a boolean field, this can be simplified to:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, still_hired
+| WHERE still_hired
+```
+
+#### Example 2: Retrieving Data from a Specific Time Range
+```esql
+FROM sample_data
+| WHERE @timestamp > NOW() - 1 hour
+```
+
+#### Example 3: Using Functions in WHERE Clause
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| WHERE LENGTH(first_name) < 4
+```
+
+#### Example 4: NULL Comparison
+```esql
+FROM employees
+| WHERE birth_date IS NULL
+| KEEP first_name, last_name
+| SORT first_name
+| LIMIT 3
+```
+
+```esql
+FROM employees
+| WHERE is_rehired IS NOT NULL
+| STATS COUNT(emp_no)
+```
+
+#### Example 5: Filtering Based on String Patterns Using Wildcards
+```esql
+FROM employees
+| WHERE first_name LIKE "?b*"
+| KEEP first_name, last_name
+```
+
+#### Example 6: Filtering Based on String Patterns Using Regular Expressions
+```esql
+FROM employees
+| WHERE first_name RLIKE ".leja.*"
+| KEEP first_name, last_name
+```
+
+#### Example 7: Using IN Operator
+```esql
+ROW a = 1, b = 4, c = 3
+| WHERE c-a IN (3, b / 2, a)
+```
+
+### Limitations
+- The `WHERE` command is subject to the maximum number of rows limitation (10,000).

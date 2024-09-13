@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -17,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const monacoEditor = getService('monacoEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects([
+  const { common, discover, header, timePicker, dashboard, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -40,11 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -64,17 +65,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fromTime = 'Sep 20, 2015 @ 23:00:00.000';
       const toTime = 'Sep 20, 2015 @ 23:14:00.000';
 
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await timePicker.setAbsoluteRange(fromTime, toTime);
+      await discover.waitUntilSearchingHasFinished();
 
-      const finalRows = await PageObjects.discover.getDocTableRows();
+      const finalRows = await discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
     });
 
     it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
+      await discover.waitUntilSearchingHasFinished();
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
 
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 1);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -110,14 +111,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.saveSearch('expand-cell-search');
+      await timePicker.setDefaultAbsoluteRange();
+      await discover.waitUntilSearchingHasFinished();
+      await discover.saveSearch('expand-cell-search');
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboard.navigateToApp();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+      await header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.addSavedSearch('expand-cell-search');
 
       await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
@@ -126,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`row document timestamp: ${text}`);
         return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      await dataGrid.clickCellExpandButton(0, 3);
+      await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 1);
 
       let expandDocId = '';
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
@@ -220,42 +221,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async function () {
         for (const column of extraColumns) {
-          await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await unifiedFieldList.clickFieldListItemRemove(column);
+          await header.waitUntilLoadingHasFinished();
         }
       });
 
       it('should add more columns to the table', async function () {
         for (const column of extraColumns) {
-          await PageObjects.unifiedFieldList.clearFieldSearchInput();
-          await PageObjects.unifiedFieldList.findFieldByName(column);
-          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
-            expectedFieldLength[column]
-          );
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await unifiedFieldList.clearFieldSearchInput();
+          await unifiedFieldList.findFieldByName(column);
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(expectedFieldLength[column]);
+          await unifiedFieldList.clickFieldListItemAdd(column);
+          await header.waitUntilLoadingHasFinished();
           // test the header now
-          const header = await dataGrid.getHeaderFields();
-          expect(header.join(' ')).to.have.string(column);
+          const headerFields = await dataGrid.getHeaderFields();
+          expect(headerFields.join(' ')).to.have.string(column);
         }
       });
 
       it('should remove columns from the table', async function () {
         for (const column of extraColumns) {
-          await PageObjects.unifiedFieldList.clearFieldSearchInput();
-          await PageObjects.unifiedFieldList.findFieldByName(column);
-          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
-            expectedFieldLength[column]
-          );
-          await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await unifiedFieldList.clearFieldSearchInput();
+          await unifiedFieldList.findFieldByName(column);
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(expectedFieldLength[column]);
+          await unifiedFieldList.clickFieldListItemAdd(column);
+          await header.waitUntilLoadingHasFinished();
         }
         // remove the second column
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
+        await header.waitUntilLoadingHasFinished();
         // test that the second column is no longer there
-        const header = await dataGrid.getHeaderFields();
-        expect(header.join(' ')).to.not.have.string(extraColumns[1]);
+        const headerFields = await dataGrid.getHeaderFields();
+        expect(headerFields.join(' ')).to.not.have.string(extraColumns[1]);
       });
     });
   });

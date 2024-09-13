@@ -640,7 +640,7 @@
           "SearchHit",
           "<unknown>, \"fields\" | \"_source\"> & (TSource extends false ? {} : { _source: TSource; }) & (TFields extends (string | ",
           "QueryDslFieldAndFormat",
-          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : {}) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
+          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : { fields?: Record<string, unknown[]> | undefined; }) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
         ],
         "path": "packages/kbn-es-types/src/search.ts",
         "deprecated": false,
