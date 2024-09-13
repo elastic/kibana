@@ -442,7 +442,17 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
   log.info(chalk.bold('Cleaning up dangling Docker containers.'));
 
   try {
-    const { stdout } = await execa('docker', ['container', 'prune', '--force']);
+    const filterServerlessNodes = SERVERLESS_NODES.reduce<string[]>((acc, { name }) => {
+      acc.push('--filter', `name=${name}`);
+      return acc;
+    }, []);
+
+    const { stdout } = await execa('docker', [
+      'container',
+      'prune',
+      '--force',
+      ...filterServerlessNodes,
+    ]);
     log.indent(4, () => log.info(stdout));
     log.success('Cleaned up dangling Docker containers.');
   } catch (e) {
