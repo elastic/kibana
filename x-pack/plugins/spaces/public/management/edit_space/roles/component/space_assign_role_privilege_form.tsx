@@ -455,10 +455,11 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     );
   };
 
-  const getSaveButton = () => {
+  const getSaveButton = useCallback(() => {
     return (
       <EuiButton
         fill
+        disabled={!selectedRoles.length}
         isLoading={assigningToRole}
         onClick={() => assignRolesToSpace()}
         data-test-subj="space-assign-role-create-roles-privilege-button"
@@ -468,7 +469,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         })}
       </EuiButton>
     );
-  };
+  }, [assignRolesToSpace, assigningToRole, selectedRoles.length]);
 
   return (
     <React.Fragment>

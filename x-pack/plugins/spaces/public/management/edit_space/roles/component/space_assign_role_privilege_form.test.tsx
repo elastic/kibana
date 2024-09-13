@@ -182,6 +182,17 @@ describe('PrivilegesRolesForm', () => {
   });
 
   describe('applying custom privileges', () => {
+    it('renders with the assign roles button disabled when no role is selected', async () => {
+      getRolesSpy.mockResolvedValue([]);
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+      renderPrivilegeRolesForm();
+
+      await waitFor(() => null);
+
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+    });
+
     it('displays the privilege customization form, when custom privilege button is selected', async () => {
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -205,6 +216,10 @@ describe('PrivilegesRolesForm', () => {
       expect(
         screen.getByTestId('space-assign-role-privilege-customization-form')
       ).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId('space-assign-role-create-roles-privilege-button')
+      ).not.toBeDisabled();
     });
 
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
