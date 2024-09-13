@@ -19,7 +19,7 @@ export const FirehosePage = () => (
         headlineCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.firehose.text',
           {
-            defaultMessage: 'Setting up Amazon Data Firehose',
+            defaultMessage: 'Set up Amazon Data Firehose',
           }
         )}
         captionCopy={i18n.translate(
