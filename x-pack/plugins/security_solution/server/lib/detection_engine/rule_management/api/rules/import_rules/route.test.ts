@@ -56,7 +56,7 @@ describe('Import rules route', () => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
-    clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.legacyImportRule.mockResolvedValue(getRulesSchemaMock());
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -90,7 +90,7 @@ describe('Import rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.legacyImportRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -144,14 +144,17 @@ describe('Import rules route', () => {
 
     describe('with prebuilt rules customization enabled', () => {
       beforeEach(() => {
+        clients.detectionRulesClient.importRules.mockResolvedValueOnce([]);
         server = serverMock.create(); // old server already registered this route
         config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
 
         importRulesRoute(server.router, config);
       });
 
-      test('returns 500 if prebuilt rule installation fails', async () => {
-        mockPrebuiltRuleAssetsClient.fetchLatestAssets.mockRejectedValue(new Error('test error'));
+      test('returns 500 if importing fails', async () => {
+        clients.detectionRulesClient.importRules
+          .mockReset()
+          .mockRejectedValue(new Error('test error'));
 
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
@@ -216,7 +219,7 @@ describe('Import rules route', () => {
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
-        clients.detectionRulesClient.importRule.mockRejectedValue({
+        clients.detectionRulesClient.legacyImportRule.mockRejectedValue({
           message: 'rule_id: "rule-1" already exists',
           statusCode: 409,
         });
@@ -270,41 +273,6 @@ describe('Import rules route', () => {
           action_connectors_warnings: [],
           action_connectors_errors: [],
         });
-      });
-    });
-
-    it('returns an error if rule is missing a version', async () => {
-      const ruleWithoutVersion = getImportRulesWithIdSchemaMock('rule-1');
-      delete ruleWithoutVersion.version;
-      const payload = buildHapiStream(rulesToNdJsonString([ruleWithoutVersion]));
-      const versionlessRequest = getImportRulesRequest(payload);
-
-      const response = await server.inject(
-        versionlessRequest,
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(200);
-      expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message: `version: Required`,
-              status_code: 400,
-            },
-            rule_id: '(unknown id)',
-          },
-        ],
-        success: false,
-        success_count: 0,
-        rules_count: 1,
-        exceptions_errors: [],
-        exceptions_success: true,
-        exceptions_success_count: 0,
-        action_connectors_success: true,
-        action_connectors_success_count: 0,
-        action_connectors_warnings: [],
-        action_connectors_errors: [],
       });
     });
   });
@@ -469,7 +437,7 @@ describe('Import rules route', () => {
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.detectionRulesClient.importRule.mockRejectedValueOnce({
+        clients.detectionRulesClient.legacyImportRule.mockRejectedValueOnce({
           message: 'rule_id: "rule-1" already exists',
           statusCode: 409,
         });

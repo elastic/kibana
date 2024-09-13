@@ -125,7 +125,7 @@ describe('importRules', () => {
       };
     });
 
-    it('imports a prebuilt rule when allowPrebuiltRules is true', async () => {
+    it('imports a prebuilt rule', async () => {
       clients.detectionRulesClient.importRule.mockResolvedValue({
         ...getRulesSchemaMock(),
         rule_id: prebuiltRuleToImport.rule_id,
@@ -137,7 +137,6 @@ describe('importRules', () => {
         rulesResponseAcc: [],
         overwriteRules: false,
         detectionRulesClient: context.securitySolution.getDetectionRulesClient(),
-        allowPrebuiltRules: true,
         prebuiltRulesImportHelper: mockPrebuiltRulesImportHelper,
         savedObjectsClient,
       });

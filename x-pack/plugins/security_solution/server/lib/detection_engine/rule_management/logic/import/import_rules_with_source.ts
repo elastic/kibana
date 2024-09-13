@@ -51,7 +51,6 @@ export const importRules = async ({
   overwriteRules,
   detectionRulesClient,
   prebuiltRulesImportHelper,
-  allowPrebuiltRules,
   allowMissingConnectorSecrets,
   savedObjectsClient,
 }: {
@@ -60,7 +59,6 @@ export const importRules = async ({
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   prebuiltRulesImportHelper: PrebuiltRulesImportHelper;
-  allowPrebuiltRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
 }) => {
