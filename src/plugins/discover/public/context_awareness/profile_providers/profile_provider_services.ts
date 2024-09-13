@@ -10,16 +10,30 @@
 import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../build_services';
 
+/**
+ * Dependencies required by profile provider implementations
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ProfileProviderDeps extends DiscoverServices {
   // We will probably soon add uiSettings as a dependency
   // to consume user configured indices
 }
 
+/**
+ * Services provided to profile provider implementations
+ */
 export interface ProfileProviderServices extends DiscoverServices {
+  /**
+   * A service containing methods used for logs profiles
+   */
   logsContextService: LogsContextService;
 }
 
+/**
+ * Creates the profile provider services
+ * @param _deps Profile provider dependencies
+ * @returns Profile provider services
+ */
 export const createProfileProviderServices = (
   discoverServices: ProfileProviderDeps
 ): ProfileProviderServices => {

@@ -26,7 +26,7 @@ export const getLogLevelBadgeCell =
       <EuiFlexGroup alignItems="center" css={{ height: '100%' }}>
         <LogLevelBadge
           logLevel={value}
-          fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value}</span>}
+          fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value as string}</span>}
           data-test-subj={dataTestSubj}
         />
       </EuiFlexGroup>
