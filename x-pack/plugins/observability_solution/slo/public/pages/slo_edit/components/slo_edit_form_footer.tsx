@@ -11,7 +11,7 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { useCreateRule } from '../../../hooks/use_create_rule';
+import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
@@ -70,8 +70,10 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });
-      await createBurnRateRule({
+      createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
+      }).catch((e) => {
+        // we handle error in hook
       });
       if (onSave) {
         onSave();

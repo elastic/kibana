@@ -85,12 +85,10 @@ describe('CreateSLO', () => {
       );
 
       expect(mockTransformManager.install).toHaveBeenCalled();
-      expect(mockTransformManager.start).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
       ).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
-      expect(mockSummaryTransformManager.start).toHaveBeenCalled();
       expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
@@ -173,16 +171,16 @@ describe('CreateSLO', () => {
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(1);
+      ).toHaveBeenCalledTimes(2);
 
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.stop).toHaveBeenCalledTimes(1);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockTransformManager.stop).toHaveBeenCalledTimes(1);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
     });
 
-    it('rollbacks completed operations when summary transform start fails', async () => {
-      mockSummaryTransformManager.start.mockRejectedValue(
+    it('rollbacks completed operations when summary transform install fails', async () => {
+      mockSummaryTransformManager.install.mockRejectedValue(
         new Error('Summary transform install error')
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
@@ -199,7 +197,7 @@ describe('CreateSLO', () => {
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
 
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
     });
 
     it('rollbacks completed operations when create temporary document fails', async () => {

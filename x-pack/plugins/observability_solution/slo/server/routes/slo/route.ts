@@ -29,6 +29,8 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { RegisterRoutesDependencies } from '../register_routes';
 import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
@@ -91,6 +93,11 @@ const assertPlatinumLicense = async (context: SloRequestHandlerContext) => {
   }
 };
 
+const getSpaceId = async (deps: RegisterRoutesDependencies, request: KibanaRequest) => {
+  const spaces = await deps.getSpacesStart();
+  return (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+};
+
 const createSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
   options: {
@@ -101,10 +108,7 @@ const createSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, dependencies, request }) => {
     await assertPlatinumLicense(context);
 
-    const spaces = await dependencies.getSpacesStart();
     const dataViews = await dependencies.getDataViewsStart();
-    const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -112,7 +116,10 @@ const createSLORoute = createSloServerRoute({
     const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
-    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+    const [spaceId, dataViewsService] = await Promise.all([
+      getSpaceId(dependencies, request),
+      dataViews.dataViewsServiceFactory(soClient, esClient),
+    ]);
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
@@ -125,7 +132,6 @@ const createSLORoute = createSloServerRoute({
       scopedClusterClient,
       logger
     );
-
     const createSLO = new CreateSLO(
       esClient,
       scopedClusterClient,
@@ -137,9 +143,7 @@ const createSLORoute = createSloServerRoute({
       basePath
     );
 
-    const response = await createSLO.execute(params.body);
-
-    return response;
+    return await createSLO.execute(params.body);
   },
 });
 
