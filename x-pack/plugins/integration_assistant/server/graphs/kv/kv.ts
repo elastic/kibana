@@ -27,7 +27,7 @@ export async function handleKV({
   const kvMainGraph = KV_MAIN_PROMPT.pipe(model).pipe(new JsonOutputParser());
 
   // Pick logSamples if there was no header detected.
-  const samples = state.kvLogMessages.length > 0 ? state.kvLogMessages : state.logSamples;
+  const samples = state.header ? state.kvLogMessages : state.logSamples;
 
   const kvInput = (await kvMainGraph.invoke({
     samples: samples[0],
