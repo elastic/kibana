@@ -101,6 +101,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       iconType="arrowUp"
       iconSide="right"
       fill
+      data-test-subj="managePolicyButton"
     >
       {i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.managePolicyButtonLabel', {
         defaultMessage: 'Manage',
