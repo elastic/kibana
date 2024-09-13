@@ -1,27 +1,27 @@
-## MV_EXPAND
+# MV_EXPAND
 
-The `MV_EXPAND` processing command expands multivalued columns into one row per value, duplicating other columns. This command is useful when you need to normalize data that contains multivalued fields, making it easier to perform operations on each individual value. 
+The MV_EXPAND command is used to expand multivalued columns into individual rows, replicating the other columns for each new row.
 
-### Use Cases
-- **Normalization**: Transform multivalued fields into single-valued rows for easier analysis and processing.
-- **Data Transformation**: Prepare data for further operations like sorting, filtering, or aggregating by expanding multivalued fields.
-- **Data Cleaning**: Simplify complex data structures by breaking down multivalued fields into individual rows.
+## Syntax
 
-### Limitations
-- This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+`MV_EXPAND column`
 
-### Examples
+### Parameters
 
-#### Example 1: Basic Expansion
-Expanding a multivalued column `a` into individual rows.
+#### column
+
+This is the multivalued column that you want to expand.
+
+## Examples
+
+Expanding a multivalued column `a` into individual rows:
 
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 ```
 
-#### Example 2: Expanding Multiple Columns
-Expanding two multivalued columns `a` and `j` into individual rows.
+Expanding two multivalued columns `a` and `j` into individual rows:
 
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
@@ -29,8 +29,7 @@ ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND j
 ```
 
-#### Example 3: Combining with Other Commands
-Expanding a multivalued column and then filtering the results.
+Expanding a multivalued column and then filtering the results:
 
 ```esql
 ROW a=[1,2,3,4,5], b="b"
@@ -38,4 +37,6 @@ ROW a=[1,2,3,4,5], b="b"
 | WHERE a > 2
 ```
 
-These examples demonstrate different ways to use the `MV_EXPAND` command to transform and analyze data with multivalued fields.
+## Notes
+
+This feature is currently in technical preview and may be subject to changes or removal in future releases.
