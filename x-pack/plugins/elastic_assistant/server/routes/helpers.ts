@@ -30,7 +30,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -593,24 +593,36 @@ export const performChecks = ({
 };
 
 /**
- * Returns whether the v2 KB is enabled
- *
- * @param context - Route context
- * @param request - Route KibanaRequest
-
+ * Telemetry function to determine whether knowledge base has been installed
+ * @param kbDataClient
  */
-export const isV2KnowledgeBaseEnabled = ({
-  context,
-  request,
-}: {
-  context: AwaitedProperties<
-    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
-  >;
-  request: KibanaRequest;
-}): boolean => {
-  const pluginName = getPluginNameFromRequest({
-    request,
-    defaultPluginName: DEFAULT_PLUGIN_NAME,
-  });
-  return context.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+export const getIsKnowledgeBaseEnabled = async (
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
+): Promise<{
+  esqlExists: boolean;
+  isModelDeployed: boolean;
+}> => {
+  let esqlExists = false;
+  let isModelDeployed = false;
+  if (kbDataClient != null) {
+    try {
+      isModelDeployed = await kbDataClient.isModelDeployed();
+      if (isModelDeployed) {
+        esqlExists =
+          (
+            await kbDataClient.getKnowledgeBaseDocumentEntries({
+              query: ESQL_DOCS_LOADED_QUERY,
+              required: true,
+            })
+          ).length > 0;
+      }
+    } catch (e) {
+      /* if telemetry related requests fail, fallback to default values */
+    }
+  }
+
+  return {
+    esqlExists,
+    isModelDeployed,
+  };
 };
