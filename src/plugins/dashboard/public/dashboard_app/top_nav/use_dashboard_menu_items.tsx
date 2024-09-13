@@ -220,6 +220,16 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
         run: () => dashboard.showSettings(),
       },
+
+      showSource: {
+        ...topNavStrings.showSource,
+        id: 'showSource',
+        testId: 'dashboardShowSourceButton',
+        disableButton: disableTopNav,
+        run: () => {
+          dashboard.showSource();
+        },
+      },
     };
   }, [
     disableTopNav,
@@ -306,7 +316,13 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
+    return [
+      ...labsMenuItem,
+      menuItems.settings,
+      menuItems.showSource,
+      ...shareMenuItem,
+      ...editModeItems,
+    ];
   }, [isLabsEnabled, menuItems, share, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

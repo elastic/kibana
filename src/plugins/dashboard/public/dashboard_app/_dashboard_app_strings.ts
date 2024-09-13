@@ -234,6 +234,14 @@ export const topNavStrings = {
       defaultMessage: 'Open dashboard settings',
     }),
   },
+  showSource: {
+    label: i18n.translate('dashboard.topNave.showSourceAreaLabel', {
+      defaultMessage: 'Show Source',
+    }),
+    description: i18n.translate('dashboard.topNave.showSourceDescription', {
+      defaultMessage: 'Show dashboard source',
+    }),
+  },
   viewModeInteractiveSave: {
     label: i18n.translate('dashboard.topNave.viewModeInteractiveSaveButtonAriaLabel', {
       defaultMessage: 'duplicate',

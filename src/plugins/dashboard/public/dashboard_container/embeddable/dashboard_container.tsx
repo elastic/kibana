@@ -59,6 +59,8 @@ import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { DashboardSettings } from '../component/settings';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardAttributes, DashboardContainerInput, DashboardPanelState } from '../../../common';
 import {
@@ -103,6 +105,7 @@ import {
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { PANELS_CONTROL_GROUP_KEY } from '../../services/dashboard_backup/dashboard_backup_service';
+import { ShowSourceFlyout } from '../component/showsource/show_source_flyout';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -998,4 +1001,37 @@ export class DashboardContainer
     }
     if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
+
+  public showSource() {
+    const {
+      analytics,
+      settings: { i18n, theme },
+      overlays,
+    } = pluginServices.getServices();
+
+    console.log('dashboard', this);
+
+    this.openOverlay(
+      overlays.openFlyout(
+        toMountPoint(
+          <DashboardContainerContext.Provider value={this}>
+            <ShowSourceFlyout
+              onClose={() => {
+                this.clearOverlays();
+              }}
+            />
+          </DashboardContainerContext.Provider>,
+          { analytics, i18n, theme }
+        ),
+        {
+          size: 'm',
+          'data-test-subj': 'dashboardShowSourceFlyout',
+          onClose: (flyout) => {
+            this.clearOverlays();
+            flyout.close();
+          },
+        }
+      )
+    );
+  }
 }
