@@ -21,4 +21,5 @@ export const kvState = {
   ecsVersion: 'testVersion',
   errors: { test: 'testerror' },
   additionalProcessors: [{ kv: { field: 'test', target_field: 'newtest' } }],
+  grokPattern: 'testPattern',
 };

@@ -208,6 +208,7 @@ const configSchema = schema.object(
     // allow access to internal routes by default to prevent breaking changes in current offerings
     restrictInternalApis: offeringBasedSchema({
       serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: false }),
     }),
 
     versioned: schema.object({
