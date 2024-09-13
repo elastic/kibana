@@ -1,8 +1,18 @@
-## MV_COUNT
+# MV_COUNT
 
-The `MV_COUNT` function converts a multivalued expression into a single-valued column containing a count of the number of values.
+The MV_COUNT function calculates the total number of values in a multivalued expression.
 
-### Examples
+## Syntax
+
+`MV_COUNT(field)`
+
+### Parameters
+
+#### field
+
+A multivalued expression.
+
+## Examples
 
 ```esql
 ROW a=["foo", "zoo", "bar"]

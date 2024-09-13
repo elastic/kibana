@@ -232,7 +232,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     const rule = getEqlRule();
 
     it('validates missing data source', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
@@ -259,7 +258,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     });
 
     it('validates missing data fields', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
 
@@ -283,7 +281,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     });
 
     it('validates syntax errors', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
 
