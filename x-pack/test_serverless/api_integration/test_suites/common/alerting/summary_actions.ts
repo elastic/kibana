@@ -482,7 +482,7 @@ export default function ({ getService }: FtrProviderContext) {
         sort: 'asc',
         retryOptions: {
           retryCount: 12,
-          retryDelay: 2000,
+          retryDelay: 5000,
         },
       });
 
