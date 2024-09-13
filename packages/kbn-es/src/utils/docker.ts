@@ -442,18 +442,14 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
   log.info(chalk.bold('Cleaning up dangling Docker containers.'));
 
   try {
-    const filterServerlessNodes = SERVERLESS_NODES.reduce<string[]>((acc, { name }) => {
-      acc.push('--filter', `name=${name}`);
-      return acc;
-    }, []);
+    const serverlessContainerNames = SERVERLESS_NODES.map(({ name }) => name);
 
-    const { stdout } = await execa('docker', [
-      'container',
-      'prune',
-      '--force',
-      ...filterServerlessNodes,
-    ]);
-    log.indent(4, () => log.info(stdout));
+    for (const name of serverlessContainerNames) {
+      await execa('docker', ['container', 'rm', name, '--force']).catch(() => {
+        // Ignore errors if the container doesn't exist
+      });
+    }
+
     log.success('Cleaned up dangling Docker containers.');
   } catch (e) {
     log.error(e);
