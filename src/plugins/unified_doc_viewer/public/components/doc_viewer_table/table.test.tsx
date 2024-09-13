@@ -103,7 +103,7 @@ describe('DocViewerTable', () => {
   });
 
   describe('search', () => {
-    afterEach(() => {
+    beforeEach(() => {
       storage.clear();
     });
 
