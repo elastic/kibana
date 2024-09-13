@@ -137,6 +137,39 @@ describe('active_cursor_utils', () => {
           }
         `);
       });
+
+      test('should return isDateHistogram true in ase the datatable is powered with ES|QL', () => {
+        expect(
+          parseSyncOptions({
+            datatables: [
+              {
+                columns: [
+                  {
+                    id: 'timestamp',
+                    meta: {
+                      type: 'date',
+                    },
+                  },
+                  {
+                    id: 'count',
+                    meta: {
+                      type: 'number',
+                    },
+                  },
+                ],
+                meta: {
+                  type: 'es_ql',
+                },
+              },
+            ] as unknown as Datatable[],
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "accessors": Array [],
+            "isDateHistogram": true,
+          }
+        `);
+      });
     });
   });
 });
