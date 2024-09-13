@@ -13,6 +13,7 @@ import * as FieldsModule from './fields';
 import * as AgentModule from './agent';
 import * as PipelineModule from './pipeline';
 import { DataStream, Docs, InputType, Pipeline } from '../../common';
+import nunjucks from 'nunjucks';
 
 const mockedDataPath = 'path';
 const mockedId = 123;
@@ -43,7 +44,7 @@ describe('buildPackage', () => {
   const firstDatastreamName = 'datastream_1';
   const secondDatastreamName = 'datastream_2';
 
-  const firstDataStreamInputTypes: InputType[] = ['filestream'];
+  const firstDataStreamInputTypes: InputType[] = ['filestream', 'kafka'];
   const secondDataStreamInputTypes: InputType[] = ['kafka'];
 
   const firstDataStreamDocs: Docs = [
@@ -131,6 +132,29 @@ describe('buildPackage', () => {
     expect(Utils.createSync).toHaveBeenCalledWith(
       `${integrationPath}/manifest.yml`,
       expect.any(String)
+    );
+  });
+
+  it('Should create only one entry in manifest per input type', async () => {
+    const renderSpy = jest.spyOn(nunjucks, 'render');
+    await buildIntegrationModule.buildPackage(testIntegration);
+
+    expect(renderSpy).toHaveBeenCalledWith(
+      'package_manifest.yml.njk',
+      expect.objectContaining({
+        inputs: [
+          {
+            type: 'filestream',
+            title: 'Datastream_1',
+            description: 'Datastream_1 description',
+          },
+          {
+            type: 'kafka',
+            title: 'Datastream_1',
+            description: 'Datastream_1 description',
+          },
+        ],
+      })
     );
   });
 
