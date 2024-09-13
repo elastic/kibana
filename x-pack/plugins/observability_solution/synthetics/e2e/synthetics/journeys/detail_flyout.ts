@@ -8,14 +8,10 @@
 import { expect, journey, step } from '@elastic/synthetics';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
-const journeySkip =
-  (...params: Parameters<typeof journey>) =>
-  () =>
-    journey(...params);
-// TODO: skipped because failing on main and need to unblock CI
-journeySkip('TestMonitorDetailFlyout', async ({ page, params }) => {
+journey('TestMonitorDetailFlyout', async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const monitorName = 'test-flyout-http-monitor';
+  const locationId = 'us_central';
 
   step('Go to monitor-management', async () => {
     await syntheticsApp.navigateToAddMonitor();
@@ -40,7 +36,7 @@ journeySkip('TestMonitorDetailFlyout', async ({ page, params }) => {
   step('open overview flyout', async () => {
     await syntheticsApp.navigateToOverview();
     await syntheticsApp.assertText({ text: monitorName });
-    await page.click(`[data-test-subj="${monitorName}-metric-item"]`);
+    await page.click(`[data-test-subj="${monitorName}-${locationId}-metric-item"]`);
     const flyoutHeader = await page.waitForSelector('.euiFlyoutHeader');
     expect(await flyoutHeader.innerText()).toContain(monitorName);
   });

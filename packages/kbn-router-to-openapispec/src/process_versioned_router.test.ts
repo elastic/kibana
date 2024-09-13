@@ -153,6 +153,8 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
   method: 'get',
   options: {
     access: 'public',
+    deprecated: true,
+    discontinued: 'discontinued versioned router',
     options: { body: { access: ['application/test+json'] } as any },
   },
   handlers: [
