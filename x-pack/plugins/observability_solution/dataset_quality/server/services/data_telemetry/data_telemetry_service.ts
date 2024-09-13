@@ -68,8 +68,7 @@ export class DataTelemetryService {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
 
-  // @ts-ignore: Unused variable
-  private run$ = defer(() => from(this.isTelemetryOptedIn())).pipe(
+  private run$ = defer(() => from(this.shouldCollectTelemetry())).pipe(
     takeWhile(() => !this.isStopped),
     tap((isOptedIn) => {
       if (!isOptedIn) {
@@ -180,7 +179,11 @@ export class DataTelemetryService {
     }
   }
 
-  public async isTelemetryOptedIn() {
+  public async shouldCollectTelemetry() {
+    if (process.env.CI) {
+      return false; // Telemetry collection flow should not run in CI
+    }
+
     this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
     return this.isOptedIn === true;
   }

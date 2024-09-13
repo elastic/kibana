@@ -78,7 +78,7 @@ describe('DataTelemetryService', () => {
     });
 
     it('should trigger task runner run method', async () => {
-      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+      jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
       const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
 
       await runTask();
@@ -109,7 +109,7 @@ describe('DataTelemetryService', () => {
         mockTaskManagerStart
       );
 
-      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+      jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
     });
 
     afterEach(() => {
@@ -157,7 +157,7 @@ describe('DataTelemetryService', () => {
     it(
       'should not collect data if telemetry is not opted in',
       async () => {
-        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(false);
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(false);
 
         const collectAndSendSpy = jest.spyOn(service as any, 'collectAndSend');
 
@@ -204,7 +204,7 @@ describe('DataTelemetryService', () => {
     it(
       'creates and sends the telemetry events',
       async () => {
-        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
 
         const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
 
@@ -240,7 +240,7 @@ describe('DataTelemetryService', () => {
     it(
       'should not include stats of excluded indices',
       async () => {
-        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
         const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
         await runTask();
         await sleepForBreathDelay();
@@ -296,7 +296,7 @@ describe('DataTelemetryService', () => {
         mockTaskManagerStart
       );
 
-      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+      jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
     });
 
     afterEach(() => {
@@ -307,7 +307,7 @@ describe('DataTelemetryService', () => {
     it(
       'should correctly calculate total fields and count of resource fields',
       async () => {
-        jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
 
         const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
 
@@ -331,7 +331,7 @@ describe('DataTelemetryService', () => {
     );
 
     it('should correctly calculate structure levels', async () => {
-      jest.spyOn(service as any, 'isTelemetryOptedIn').mockResolvedValue(true);
+      jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
 
       const reportEventsSpy = jest.spyOn(service as any, 'reportEvents');
 
