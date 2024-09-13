@@ -40,8 +40,10 @@ export class CloudHandler extends ProjectHandler {
       body.product_types = productTypes;
     }
 
-    if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
-      const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
+    const qualityGate =
+      process.env.KIBANA_MKI_QUALITY_GATE && process.env.KIBANA_MKI_QUALITY_GATE !== '1';
+    const override = commit ?? process.env.KIBANA_MKI_IMAGE_COMMIT;
+    if (override && !qualityGate) {
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
