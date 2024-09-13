@@ -279,19 +279,16 @@ export function useModelActions({
             (v) => v.deployment_id === deploymentIdToUpdate
           )!;
 
-          const deploymentParams = await getUserInputModelDeploymentParams(item, {
-            deploymentId: deploymentIdToUpdate,
-            numOfAllocations: targetDeployment.number_of_allocations,
-            adaptive_allocations: targetDeployment.adaptive_allocations,
-          });
+          const deploymentParams = await getUserInputModelDeploymentParams(item, targetDeployment);
 
           if (!deploymentParams) return;
 
           try {
             onLoading(true);
+
             await trainedModelsApiService.updateModelDeployment(
               item.model_id,
-              deploymentParams.deploymentId!,
+              deploymentParams.deployment_id!,
               {
                 ...(deploymentParams.adaptive_allocations
                   ? { adaptive_allocations: deploymentParams.adaptive_allocations }
@@ -299,7 +296,7 @@ export function useModelActions({
                 // Remove number of allocations if adaptive allocations are not enabled
                 ...(deploymentParams.adaptive_allocations?.enabled
                   ? {}
-                  : { number_of_allocations: deploymentParams.numOfAllocations! }),
+                  : { number_of_allocations: deploymentParams.number_of_allocations! }),
               }
             );
             displaySuccessToast(

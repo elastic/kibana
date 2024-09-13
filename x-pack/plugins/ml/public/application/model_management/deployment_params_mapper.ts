@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  MlStartTrainedModelDeploymentRequest,
-  MlTrainedModelAssignmentTaskParameters,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import type { AdaptiveAllocations } from '../../../server/lib/ml_client/types';
@@ -26,14 +24,23 @@ type VCPUBreakpoints = Record<DeploymentParamsUI['vCPUUsage'], { min: number; ma
 export class DeploymentParamsMapper {
   private readonly threadingParamsValues: number[];
 
+  /**
+   * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling
+   */
   private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
     low: { min: 1, max: 1 },
     medium: { min: 2, max: 32 },
     high: { min: 32, max: 99999 },
   };
 
+  /**
+   * vCPUs level breakpoints based on the ML server limits
+   */
   private readonly hardwareVCPUBreakpoints: VCPUBreakpoints;
 
+  /**
+   * Result vCPUs level breakpoint based on the cluster env.
+   */
   private readonly vCpuBreakpoints: VCPUBreakpoints;
 
   constructor(
@@ -155,5 +162,5 @@ export class DeploymentParamsMapper {
   }
 }
 
-export type MlTrainedModelAssignmentTaskParametersAdaptive =
-  MlTrainedModelAssignmentTaskParameters & AdaptiveAllocations;
+export type MlTrainedModelAssignmentTaskParametersAdaptive = TrainedModelDeploymentStatsResponse &
+  AdaptiveAllocations;

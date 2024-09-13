@@ -29,17 +29,18 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  euiPaletteCool,
   EuiPanel,
   EuiRange,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  euiPaletteCool,
 } from '@elastic/eui';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
 import { getNewJobLimits } from '../services/ml_server_info';
 import { dictionaryValidator } from '../../../common/util/validators';
@@ -316,6 +317,8 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         )}
       </EuiFormRow>
 
+      <EuiSpacer size="m" />
+
       {!isUpdate ? (
         <EuiFormRow hasChildLabel={true} fullWidth>
           <EuiFormFieldset
@@ -495,15 +498,27 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isUpdate = !!initialParams;
 
-  const [config, setConfig] = useState<DeploymentParamsUI>(
-    initialParams ?? {
-      deploymentId: `${model.model_id}_ingest`,
-      // TODO set based on the existing deployments
-      optimized: 'optimizedForIngest',
-      vCPUUsage: 'medium',
-      adaptiveResources: true,
-    }
-  );
+  const getDefaultParams = (): DeploymentParamsUI => {
+    const uiParams = model.stats?.deployment_stats.map((v) =>
+      deploymentParamsMapper.mapApiToUiDeploymentParams(v)
+    );
+
+    return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
+      ? {
+          deploymentId: `${model.model_id}_search`,
+          optimized: 'optimizedForSearch',
+          vCPUUsage: 'medium',
+          adaptiveResources: true,
+        }
+      : {
+          deploymentId: `${model.model_id}_ingest`,
+          optimized: 'optimizedForIngest',
+          vCPUUsage: 'medium',
+          adaptiveResources: true,
+        };
+  };
+
+  const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
   const deploymentIdValidator = useMemo(() => {
     if (isUpdate) {
@@ -648,7 +663,7 @@ export const getUserInputModelDeploymentParamsProvider =
   ) =>
   (
     model: ModelItem,
-    initialParams?: DeploymentParamsUI,
+    initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
   ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
     const deploymentParamsMapper = new DeploymentParamsMapper(
@@ -656,6 +671,10 @@ export const getUserInputModelDeploymentParamsProvider =
       getNewJobLimits(),
       cloudInfo
     );
+
+    const params = initialParams
+      ? deploymentParamsMapper.mapApiToUiDeploymentParams(initialParams)
+      : undefined;
 
     return new Promise(async (resolve) => {
       try {
@@ -665,7 +684,7 @@ export const getUserInputModelDeploymentParamsProvider =
               deploymentParamsMapper={deploymentParamsMapper}
               cloudInfo={cloudInfo}
               startModelDeploymentDocUrl={startModelDeploymentDocUrl}
-              initialParams={initialParams}
+              initialParams={params}
               modelAndDeploymentIds={deploymentIds}
               model={model}
               onConfigChange={(config) => {
