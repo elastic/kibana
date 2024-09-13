@@ -29,4 +29,9 @@ export interface OverviewTrend {
   median: number;
 }
 
-export type TrendTable = Record<string, OverviewTrend | null>;
+export type TrendTable = Record<string, OverviewTrend | null | 'loading'>;
+
+export interface GetTrendPayload {
+  trendStats: TrendTable;
+  batch: TrendRequest[];
+}
