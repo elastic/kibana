@@ -141,6 +141,60 @@ describe('function validation', () => {
         });
       });
 
+      describe('special parameter types', () => {
+        it('any type', async () => {
+          const testFn: FunctionDefinition = {
+            name: 'test',
+            type: 'eval',
+            description: '',
+            supportedCommands: ['eval'],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'any' }],
+                returnType: 'integer',
+              },
+            ],
+          };
+
+          setTestFunctions([testFn]);
+
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL TEST(1)', []);
+          await expectErrors('FROM a_index | EVAL TEST("keyword")', []);
+          await expectErrors('FROM a_index | EVAL TEST(2.)', []);
+          await expectErrors('FROM a_index | EVAL TEST(to_cartesianpoint(""))', []);
+          await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
+        });
+
+        it('list type', async () => {
+          const testFn: FunctionDefinition = {
+            name: 'in',
+            type: 'builtin',
+            description: '',
+            supportedCommands: ['row'],
+            signatures: [
+              {
+                params: [
+                  { name: 'arg1', type: 'keyword' },
+                  { name: 'arg2', type: 'keyword[]' },
+                ],
+                returnType: 'boolean',
+              },
+            ],
+          };
+
+          setTestFunctions([testFn]);
+
+          const { expectErrors } = await setup();
+
+          await expectErrors('ROW "a" IN ("a", "b", "c")', []);
+          await expectErrors('ROW "a" IN (1, "b", "c")', [
+            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, string, string)]',
+          ]);
+        });
+      });
+
       it('checks types by signature', async () => {
         const testFn: FunctionDefinition = {
           name: 'test',
@@ -605,8 +659,20 @@ describe('function validation', () => {
           supportedCommands: ['eval'],
           signatures: [
             {
-              params: [{ name: 'arg1', type: 'integer' }],
+              params: [{ name: 'arg1', type: 'keyword' }],
               returnType: 'integer',
+            },
+          ],
+        },
+        {
+          name: 'test2',
+          type: 'eval',
+          description: '',
+          supportedCommands: ['eval'],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'integer' }],
+              returnType: 'keyword',
             },
           ],
         },
@@ -614,7 +680,7 @@ describe('function validation', () => {
 
       const { expectErrors } = await setup();
 
-      await expectErrors('FROM a_index | EVAL TEST(TEST(TEST(1)))', []);
+      await expectErrors('FROM a_index | EVAL TEST(TEST2(TEST(TEST2(1))))', []);
     });
 
     it("doesn't allow nested aggregation functions", async () => {
@@ -626,7 +692,7 @@ describe('function validation', () => {
           supportedCommands: ['stats'],
           signatures: [
             {
-              params: [{ name: 'arg1', type: 'keyword', noNestingFunctions: true }],
+              params: [{ name: 'arg1', type: 'keyword' }],
               returnType: 'keyword',
             },
           ],

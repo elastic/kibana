@@ -56,9 +56,7 @@ const DragHandle = ({
     >
       <EuiIcon type="grabHorizontal" />
     </button>
-  ) : hideEmptyDragHandle ? null : (
-    <EuiIcon size="s" type="empty" />
-  );
+  ) : null;
 
 export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
@@ -115,6 +113,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     viewModeSubject
   );
   const usingTwoLineLayout = labelPosition === 'twoLine';
+  const controlType = api ? api.type : null;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
@@ -164,7 +163,14 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
             fullWidth
             isLoading={Boolean(dataLoading)}
             compressed
-            className="controlFrame__formControlLayout"
+            className={classNames(
+              'controlFrame__formControlLayout',
+              {
+                'controlFrame__formControlLayout--twoLine': usingTwoLineLayout,
+                'controlFrame__formControlLayout--edit': isEditable,
+              },
+              `${controlType}`
+            )}
             prepend={
               <>
                 <DragHandle
