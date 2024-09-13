@@ -37,7 +37,7 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
 
 const testContext = createContext('test');
 
-export const getAppWrapper: DataSourceProfileProvider['profile']['getAppWrapper'] =
+export const getRenderAppWrapper: DataSourceProfileProvider['profile']['getRenderAppWrapper'] =
   (PrevWrapper) =>
   ({ children }) => {
     return (

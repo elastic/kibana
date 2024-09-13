@@ -16,9 +16,10 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { ComponentType, PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactElement } from 'react';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverGridFlyoutProps } from '../components/discover_grid_flyout';
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -205,8 +206,10 @@ export interface Profile {
   /**
    * Render a custom wrapper component around the Discover application,
    * e.g. to allow using profile specific context providers
+   * @param props The app wrapper props
+   * @returns The custom app wrapper component
    */
-  getAppWrapper: ComponentType<PropsWithChildren<{}>>;
+  getRenderAppWrapper: (props: PropsWithChildren<{}>) => ReactElement;
 
   /**
    * Gets default Discover app state that should be used when the profile is resolved
@@ -261,4 +264,13 @@ export interface Profile {
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * Supports fully overriding the Discover document viewer flyout
+   * with a custom component -- takes precedence over `getDocViewer`
+   * and is not supported in the single document view
+   * @param props The doc viewer override props
+   * @returns The custom doc viewer component
+   */
+  getRenderDocViewerOverride: (props: DiscoverGridFlyoutProps) => ReactElement;
 }

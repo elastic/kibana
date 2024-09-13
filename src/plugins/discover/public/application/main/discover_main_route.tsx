@@ -341,10 +341,10 @@ export function DiscoverMainRoute({
   ]);
 
   const { rootProfileLoading } = useRootProfile();
-  const getAppWrapperAccessor = useProfileAccessor('getAppWrapper');
+  const getRenderAppWrapperAccessor = useProfileAccessor('getRenderAppWrapper');
   const AppWrapper = useMemo(
-    () => getAppWrapperAccessor(({ children }) => <>{children}</>),
-    [getAppWrapperAccessor]
+    () => getRenderAppWrapperAccessor(({ children }) => <>{children}</>),
+    [getRenderAppWrapperAccessor]
   );
 
   if (error) {

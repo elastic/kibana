@@ -42,7 +42,19 @@ export interface DiscoverGridFlyoutProps {
 /**
  * Flyout displaying an expanded Elasticsearch document
  */
-export function DiscoverGridFlyout({
+export function DiscoverGridFlyout(props: DiscoverGridFlyoutProps) {
+  const getRenderDocViewerOverride = useProfileAccessor('getRenderDocViewerOverride', {
+    record: props.hit,
+  });
+  const GridFlyout = useMemo(
+    () => getRenderDocViewerOverride(DefaultDiscoverGridFlyout),
+    [getRenderDocViewerOverride]
+  );
+
+  return <GridFlyout {...props} />;
+}
+
+const DefaultDiscoverGridFlyout = ({
   hit,
   hits,
   dataView,
@@ -56,7 +68,7 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
-}: DiscoverGridFlyoutProps) {
+}: DiscoverGridFlyoutProps) => {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
   const isESQLQuery = isOfAggregateQueryType(query);
@@ -114,7 +126,7 @@ export function DiscoverGridFlyout({
       setExpandedDoc={setExpandedDoc}
     />
   );
-}
+};
 
 // eslint-disable-next-line import/no-default-export
 export default DiscoverGridFlyout;

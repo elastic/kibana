@@ -15,14 +15,14 @@ import {
   getRowAdditionalLeadingControls,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { getAppWrapper } from './accessors/get_cell_renderers';
+import { getRenderAppWrapper } from './accessors/get_cell_renderers';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
-    getAppWrapper,
+    getRenderAppWrapper,
     getRowIndicatorProvider,
     getCellRenderers,
     getRowAdditionalLeadingControls,
