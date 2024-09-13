@@ -8,10 +8,10 @@
  */
 
 import type { ESQLRealField } from '../../validation/types';
-import { ECSMetadata, enrichFieldsWithMetadata } from './ecs_metadata_helper';
+import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-describe('enrichFieldsWithMetadata', () => {
+describe('enrichFieldsWithECSInfo', () => {
   it('should return original columns if fieldsMetadata is not provided', async () => {
     const columns: ESQLRealField[] = [
       { name: 'ecs.version', type: 'keyword' },
@@ -19,7 +19,7 @@ describe('enrichFieldsWithMetadata', () => {
       { name: 'field2', type: 'double' },
     ];
 
-    const result = await enrichFieldsWithMetadata(columns);
+    const result = await enrichFieldsWithECSInfo(columns);
     expect(result).toEqual(columns);
   });
 
@@ -49,7 +49,7 @@ describe('enrichFieldsWithMetadata', () => {
       attributes: ['type'],
     });
 
-    const result = await enrichFieldsWithMetadata(
+    const result = await enrichFieldsWithECSInfo(
       columns,
       fieldsMetadataCache.fields as ECSMetadata
     );
@@ -86,7 +86,7 @@ describe('enrichFieldsWithMetadata', () => {
     ).find({
       attributes: ['type'],
     });
-    const result = await enrichFieldsWithMetadata(
+    const result = await enrichFieldsWithECSInfo(
       columns,
       fieldsMetadataCache.fields as ECSMetadata
     );

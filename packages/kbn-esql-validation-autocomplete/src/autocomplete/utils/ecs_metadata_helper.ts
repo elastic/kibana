@@ -15,8 +15,9 @@ const removeKeywordSuffix = (name: string) => {
 
 export interface ECSMetadata {
   [key: string]: {
-    type: string;
-    source: string;
+    type?: string;
+    source?: string;
+    description?: string;
   };
 }
 /**
@@ -27,7 +28,7 @@ export interface ECSMetadata {
  * @param fieldsMetadata
  * @returns
  */
-export function enrichFieldsWithMetadata(
+export function enrichFieldsWithECSInfo(
   columns: Array<Omit<ESQLRealField, 'metadata'>>,
   ecsMetadataCache?: ECSMetadata
 ): ESQLRealField[] {
