@@ -1092,6 +1092,9 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Delete a rule",
@@ -1998,6 +2001,9 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Get rule details",
@@ -3185,6 +3191,9 @@
               }
             },
             "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates that the requested rule type is not registered."
           },
           "403": {
             "content": {
@@ -4421,6 +4430,9 @@
               }
             },
             "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Update a rule",
@@ -4519,6 +4531,9 @@
               }
             },
             "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Disable a rule",
@@ -4599,6 +4614,9 @@
               }
             },
             "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Enable a rule",
@@ -4773,6 +4791,9 @@
               }
             },
             "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given ID does not exist."
           }
         },
         "summary": "Update the API key for a rule",
@@ -4862,6 +4883,9 @@
               }
             },
             "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule or alert with the given ID does not exist."
           }
         },
         "summary": "Mute an alert",
@@ -4951,6 +4975,9 @@
               }
             },
             "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule or alert with the given ID does not exist."
           }
         },
         "summary": "Unmute an alert",
