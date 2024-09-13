@@ -63,14 +63,14 @@ describe('HostDetailsPanel', () => {
     expect(queryByTestId(RISK_INPUTS_TAB_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it("doesn't render insights panel when there no misconfiguration findings index", () => {
+  it("doesn't render insights panel when there no misconfiguration findings", () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
         name="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
-        isMisconfigurationFindingsIndexExist={false}
-        isMisconfigurationFindingsForThisQueryExist={true}
+        hasMisconfigurationFindingsIndex={true}
+        hasMisconfigurationFindingsForThisQuery={false}
       />,
       {
         wrapper: TestProviders,
@@ -79,30 +79,14 @@ describe('HostDetailsPanel', () => {
     expect(queryByTestId(INSIGHTS_TAB_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it("doesn't render insights panel when there no misconfiguration findings that matches the host name", () => {
+  it('render insights panel when there are misconfiguration findings', () => {
     const { queryByTestId } = render(
       <HostDetailsPanel
         name="elastic"
         isRiskScoreExist={false}
         scopeId={'scopeId'}
-        isMisconfigurationFindingsIndexExist={true}
-        isMisconfigurationFindingsForThisQueryExist={false}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(queryByTestId(INSIGHTS_TAB_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('render insights panel when there are misconfiguration findings index and misconfiguration findings that matches the host name', () => {
-    const { queryByTestId } = render(
-      <HostDetailsPanel
-        name="elastic"
-        isRiskScoreExist={false}
-        scopeId={'scopeId'}
-        isMisconfigurationFindingsIndexExist={true}
-        isMisconfigurationFindingsForThisQueryExist={true}
+        hasMisconfigurationFindingsIndex={true}
+        hasMisconfigurationFindingsForThisQuery={true}
       />,
       {
         wrapper: TestProviders,

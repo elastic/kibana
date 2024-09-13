@@ -18,6 +18,8 @@ import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_n
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 
+type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
+
 const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
@@ -62,9 +64,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
-    const findingsPagination = (
-      findings: Array<Pick<CspFinding, 'result' | 'rule' | 'resource'>>
-    ) => {
+    const findingsPagination = (findings: MisconfigurationFindingDetailFields[]) => {
       let pageOfItems;
 
       if (!pageIndex && !pageSize) {
@@ -92,9 +92,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       pageSizeOptions: [10, 25, 100],
     };
 
-    const onTableChange = ({
-      page,
-    }: Criteria<Pick<CspFinding, 'result' | 'rule' | 'resource'>>) => {
+    const onTableChange = ({ page }: Criteria<MisconfigurationFindingDetailFields>) => {
       if (page) {
         const { index, size } = page;
         setPageIndex(index);
@@ -112,15 +110,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
       navToFindings({ 'rule.id': ruleId, 'resource.id': resourceId });
     };
 
-    const columns: Array<EuiBasicTableColumn<Pick<CspFinding, 'result' | 'rule' | 'resource'>>> = [
+    const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
         field: 'rule',
         name: '',
         width: '5%',
-        render: (
-          rule: CspBenchmarkRuleMetadata,
-          finding: Pick<CspFinding, 'result' | 'rule' | 'resource'>
-        ) => (
+        render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <EuiLink
             onClick={() => {
               navToFindingsByRuleAndResourceId(rule?.id, finding?.resource?.id);

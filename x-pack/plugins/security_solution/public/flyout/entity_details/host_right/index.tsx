@@ -133,8 +133,8 @@ export const HostPanel = ({
           scopeId,
           isRiskScoreExist,
           path: tab ? { tab } : undefined,
-          isMisconfigurationFindingsIndexExist: hasMisconfigurationFindingsIndex,
-          isMisconfigurationFindingsForThisQueryExist: hasMisconfigurationFindingsForThisQuery,
+          hasMisconfigurationFindingsIndex,
+          hasMisconfigurationFindingsForThisQuery,
         },
       });
     },

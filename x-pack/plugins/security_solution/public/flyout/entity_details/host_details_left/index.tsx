@@ -22,8 +22,8 @@ export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   name: string;
   scopeId: string;
-  isMisconfigurationFindingsIndexExist?: boolean;
-  isMisconfigurationFindingsForThisQueryExist?: boolean;
+  hasMisconfigurationFindingsIndex?: boolean;
+  hasMisconfigurationFindingsForThisQuery?: boolean;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
   };
@@ -39,8 +39,8 @@ export const HostDetailsPanel = ({
   isRiskScoreExist,
   scopeId,
   path,
-  isMisconfigurationFindingsIndexExist,
-  isMisconfigurationFindingsForThisQueryExist,
+  hasMisconfigurationFindingsIndex,
+  hasMisconfigurationFindingsForThisQuery,
 }: HostDetailsPanelProps) => {
   const [selectedTabId, setSelectedTabId] = useState(
     path?.tab === EntityDetailsLeftPanelTab.CSP_INSIGHTS
@@ -56,16 +56,16 @@ export const HostDetailsPanel = ({
 
     // Determine if the Insights tab should be included
     const insightsTab =
-      isMisconfigurationFindingsIndexExist && isMisconfigurationFindingsForThisQueryExist
-        ? [getInsightsInputTab({ name })]
+      hasMisconfigurationFindingsIndex && hasMisconfigurationFindingsForThisQuery
+        ? [getInsightsInputTab({ name, fieldName: 'host.name' })]
         : [];
     return [[...riskScoreTab, ...insightsTab], EntityDetailsLeftPanelTab.RISK_INPUTS, () => {}];
   }, [
     isRiskScoreExist,
     name,
     scopeId,
-    isMisconfigurationFindingsIndexExist,
-    isMisconfigurationFindingsForThisQueryExist,
+    hasMisconfigurationFindingsIndex,
+    hasMisconfigurationFindingsForThisQuery,
   ]);
 
   return (

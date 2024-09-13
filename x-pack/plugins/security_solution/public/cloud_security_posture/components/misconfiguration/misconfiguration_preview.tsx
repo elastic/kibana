@@ -168,8 +168,8 @@ export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => 
       params: {
         name: hostName,
         isRiskScoreExist,
-        isMisconfigurationFindingsIndexExist: hasMisconfigurationFindingsIndex,
-        isMisconfigurationFindingsForThisQueryExist: hasMisconfigurationFindingsForThisQuery,
+        hasMisconfigurationFindingsIndex,
+        hasMisconfigurationFindingsForThisQuery,
         path: { tab: 'csp_insights' },
       },
     });

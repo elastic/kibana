@@ -14,6 +14,7 @@ import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common
 import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import type { UseMisconfigurationOptions } from '../../type';
 
+const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
 interface AggregationBucket {
   doc_count?: number;
 }
@@ -75,6 +76,7 @@ export const buildMisconfigurationsFindingsQuery = (
     aggs: getFindingsCountAggQueryMisconfiguration(),
     ignore_unavailable: true,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
+    _source: MISCONFIGURATIONS_SOURCE_FIELDS,
   };
 };
 
