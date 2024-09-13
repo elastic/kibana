@@ -230,11 +230,9 @@ export function MockApmPluginContextWrapper({
     <IntlProvider locale="en">
       <KibanaContextProvider services={contextValue.core}>
         <ApmPluginContext.Provider value={contextValue}>
-          <ApmThemeProvider>
-            <RouterProvider router={apmRouter as any} history={usedHistory}>
-              {children}
-            </RouterProvider>
-          </ApmThemeProvider>
+          <RouterProvider router={apmRouter as any} history={usedHistory}>
+            {children}
+          </RouterProvider>
         </ApmPluginContext.Provider>
       </KibanaContextProvider>
     </IntlProvider>

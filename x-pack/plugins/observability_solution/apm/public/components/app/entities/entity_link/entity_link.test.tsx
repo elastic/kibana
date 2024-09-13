@@ -19,6 +19,7 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { Redirect } from 'react-router-dom';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { ApmThemeProvider } from '../../../routing/app_root';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'), // Keep other functionality intact
@@ -87,7 +88,9 @@ const renderEntityLink = ({
         } as unknown as ApmPluginContextValue
       }
     >
-      <EntityLink />
+      <ApmThemeProvider>
+        <EntityLink />
+      </ApmThemeProvider>
     </MockApmPluginContextWrapper>
   );
   return { rerender, ...tools };
