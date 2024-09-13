@@ -86,6 +86,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
                   'data-test-subj': 'interval-field',
                   id: 'interval',
                   euiFieldProps: {
+                    'data-test-subj': 'customRecurringScheduleIntervalInput',
                     min: 1,
                     prepend: (
                       <EuiFormLabel htmlFor={'interval'}>
@@ -102,6 +103,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
                 componentProps={{
                   'data-test-subj': 'custom-frequency-field',
                   euiFieldProps: {
+                    'data-test-subj': 'customRecurringScheduleFrequencySelect',
                     options: frequencyOptions,
                   },
                 }}
@@ -136,6 +138,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
           componentProps={{
             'data-test-subj': 'byweekday-field',
             euiFieldProps: {
+              'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
               legend: 'Repeat on weekday',
               options: WEEKDAY_OPTIONS,
             },

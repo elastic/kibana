@@ -71,24 +71,29 @@ export const RecurringSchedule: React.FC = React.memo(() => {
         {
           text: i18n.CREATE_FORM_FREQUENCY_DAILY,
           value: Frequency.DAILY,
+          'data-test-subj': 'recurringScheduleOptionDaily',
         },
         {
           text: i18n.CREATE_FORM_FREQUENCY_WEEKLY_ON(dayOfWeek),
           value: Frequency.WEEKLY,
+          'data-test-subj': 'recurringScheduleOptionWeekly',
         },
         {
           text: i18n.CREATE_FORM_FREQUENCY_NTH_WEEKDAY(dayOfWeek)[
             isLastOfMonth ? 0 : nthWeekdayOfMonth
           ],
           value: Frequency.MONTHLY,
+          'data-test-subj': 'recurringScheduleOptionMonthly',
         },
         {
           text: i18n.CREATE_FORM_FREQUENCY_YEARLY_ON(date),
           value: Frequency.YEARLY,
+          'data-test-subj': 'recurringScheduleOptionYearly',
         },
         {
           text: i18n.CREATE_FORM_FREQUENCY_CUSTOM,
           value: 'CUSTOM',
+          'data-test-subj': 'recurringScheduleOptionCustom',
         },
       ],
       presets: getPresets(date),
@@ -107,6 +112,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           componentProps={{
             'data-test-subj': 'frequency-field',
             euiFieldProps: {
+              'data-test-subj': 'recurringScheduleRepeatSelect',
               options,
             },
           }}
@@ -176,6 +182,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
               'data-test-subj': 'count-field',
               id: 'count',
               euiFieldProps: {
+                'data-test-subj': 'recurringScheduleAfterXOccurenceInput',
                 type: 'number',
                 min: 1,
                 prepend: (
