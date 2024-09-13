@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { once } from 'lodash';
 import { loadData, type EsqlDocData, type EsqlDocEntry } from './load_data';
 import { tryResolveAlias } from './aliases';
 
@@ -32,6 +33,8 @@ interface GetDocsOptions {
   addSuggestions?: boolean;
 }
 
+const loadDataOnce = once(loadData);
+
 const overviewEntries = ['SYNTAX', 'OVERVIEW', 'OPERATORS'];
 
 export class EsqlDocumentBase {
@@ -39,7 +42,7 @@ export class EsqlDocumentBase {
   private docRecords: Record<string, EsqlDocEntry>;
 
   static async load(): Promise<EsqlDocumentBase> {
-    const data = await loadData();
+    const data = await loadDataOnce();
     return new EsqlDocumentBase(data);
   }
 
