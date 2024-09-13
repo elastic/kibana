@@ -478,15 +478,25 @@ export const getProviders = (http: HttpSetup): Promise<InferenceProvider[]> => {
           depends_on: [],
         },
         num_threads: {
-          display: DisplayType.NUMERIC,
-          label: 'Number threads',
+          display: DisplayType.CHECKABLE,
+          label: 'Optimize the model deployment for your use case',
           order: 2,
           required: true,
           sensitive: false,
           tooltip: 'Sets the number of threads used by each model allocation during inference.',
           type: FieldType.INTEGER,
           validations: [],
-          value: '',
+          options: [
+            {
+              label: 'Ingest Optimized for higher throthput during ingest.',
+              value: 1,
+            },
+            {
+              label: 'Search Optimized for lower latency during search.',
+              value: 32,
+            },
+          ],
+          value: 1,
           ui_restrictions: [],
           default_value: null,
           depends_on: [],

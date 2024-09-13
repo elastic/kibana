@@ -11,11 +11,13 @@ export enum DisplayType {
   NUMERIC = 'numeric',
   TOGGLE = 'toggle',
   DROPDOWN = 'dropdown',
+  CHECKABLE = 'checkable',
 }
 
 export interface SelectOption {
   label: string;
   value: string;
+  icon?: string;
 }
 
 export interface Dependency {
