@@ -21,6 +21,8 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
 }> = ({ onClick, label }) => {
   return (
     <EuiBadge
+      iconType="help"
+      iconSide="right"
       color="success"
       onClick={onClick}
       onClickAriaLabel='Click to open "Log rate analysis info" popover'
