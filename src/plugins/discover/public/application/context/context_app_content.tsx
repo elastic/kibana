@@ -29,6 +29,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import {
+  DataGridDensity,
   DataLoadingState,
   ROWS_HEIGHT_OPTIONS,
   UnifiedDataTableProps,
@@ -177,7 +178,10 @@ export function ContextAppContent({
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers({ rowHeight: ROWS_HEIGHT_OPTIONS.single });
+    return getCellRenderers({
+      density: DataGridDensity.COMPACT,
+      rowHeight: ROWS_HEIGHT_OPTIONS.single,
+    });
   }, [getCellRenderersAccessor]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
