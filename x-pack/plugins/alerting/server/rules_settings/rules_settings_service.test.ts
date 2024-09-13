@@ -70,11 +70,7 @@ describe('RulesSettingsService', () => {
         });
 
         expect(settings.queryDelaySettings).toEqual({ delay: 0 });
-        expect(settings.flappingSettings).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        });
+        expect(settings.flappingSettings).toEqual(getFlappingSettings(20, 4));
       });
 
       test('should return defaults if fetch settings errors and nothing in cache', async () => {
@@ -102,11 +98,7 @@ describe('RulesSettingsService', () => {
         expect(settings.queryDelaySettings).toEqual(
           isServerless ? DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS : DEFAULT_QUERY_DELAY_SETTINGS
         );
-        expect(settings.flappingSettings).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        });
+        expect(settings.flappingSettings).toEqual(getFlappingSettings(20, 4));
 
         expect(logger.debug).toHaveBeenCalledWith(
           `Failed to fetch initial rules settings, using default settings: no!`
@@ -116,6 +108,9 @@ describe('RulesSettingsService', () => {
       test('should fetch settings per space', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
         (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 13 });
+        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+          getFlappingSettings(45, 2)
+        );
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
@@ -136,33 +131,29 @@ describe('RulesSettingsService', () => {
         expect(rulesSettingsService.settings.get('default')).toEqual({
           lastUpdated: 1677485700000,
           queryDelaySettings: { delay: 13 },
-          flappingSettings: { enabled: true, lookBackWindow: 20, statusChangeThreshold: 4 },
+          flappingSettings: getFlappingSettings(45, 2),
         });
 
         // @ts-ignore - accessing private variable
         expect(rulesSettingsService.settings.get('new-space')).toEqual({
           lastUpdated: 1677485700000,
           queryDelaySettings: { delay: 0 },
-          flappingSettings: { enabled: true, lookBackWindow: 20, statusChangeThreshold: 4 },
+          flappingSettings: getFlappingSettings(20, 4),
         });
 
         expect(settingsNewSpace.queryDelaySettings).toEqual({ delay: 0 });
-        expect(settingsNewSpace.flappingSettings).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        });
+        expect(settingsNewSpace.flappingSettings).toEqual(getFlappingSettings(20, 4));
 
         expect(settingsDefault.queryDelaySettings).toEqual({ delay: 13 });
-        expect(settingsDefault.flappingSettings).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        });
+        expect(settingsDefault.flappingSettings).toEqual(getFlappingSettings(45, 2));
       });
 
       test('should use cached settings if cache has not expired', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
+        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 5 });
+        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+          getFlappingSettings(30, 3)
+        );
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
@@ -176,34 +167,46 @@ describe('RulesSettingsService', () => {
         expect(rulesSettingsClient.queryDelay().get).toHaveBeenCalledTimes(1);
         expect(rulesSettingsClient.flapping().get).toHaveBeenCalledTimes(1);
 
-        expect(settings1.queryDelaySettings).toEqual({ delay: 0 });
-        expect(settings1.flappingSettings).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        });
+        expect(settings1.queryDelaySettings).toEqual({ delay: 5 });
+        expect(settings1.flappingSettings).toEqual(getFlappingSettings(30, 3));
         expect(settings1).toEqual(settings2);
       });
 
       test('should refetch settings if cache has expired', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
+        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 5 });
+        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+          getFlappingSettings(30, 3)
+        );
+        (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 21 });
+        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+          getFlappingSettings(11, 44)
+        );
         const rulesSettingsService = new RulesSettingsService({
           isServerless,
           logger,
           getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClient),
         });
 
-        await rulesSettingsService.getSettings(fakeRequest, 'default');
+        const settings1 = await rulesSettingsService.getSettings(fakeRequest, 'default');
         fakeTimer.tick(61000);
-        await rulesSettingsService.getSettings(fakeRequest, 'default');
+        const settings2 = await rulesSettingsService.getSettings(fakeRequest, 'default');
 
         expect(rulesSettingsClient.queryDelay().get).toHaveBeenCalledTimes(2);
         expect(rulesSettingsClient.flapping().get).toHaveBeenCalledTimes(2);
+
+        expect(settings1.queryDelaySettings).toEqual({ delay: 5 });
+        expect(settings1.flappingSettings).toEqual(getFlappingSettings(30, 3));
+        expect(settings2.queryDelaySettings).toEqual({ delay: 21 });
+        expect(settings2.flappingSettings).toEqual(getFlappingSettings(11, 44));
       });
 
       test('should return cached settings if refetching throws an error', async () => {
         const rulesSettingsClient = rulesSettingsClientMock.create();
         (rulesSettingsClient.queryDelay().get as jest.Mock).mockResolvedValueOnce({ delay: 13 });
+        (rulesSettingsClient.flapping().get as jest.Mock).mockResolvedValueOnce(
+          getFlappingSettings(11, 44)
+        );
         (rulesSettingsClient.queryDelay().get as jest.Mock).mockImplementationOnce(() => {
           throw new Error('no!');
         });
@@ -220,11 +223,7 @@ describe('RulesSettingsService', () => {
         expect(rulesSettingsClient.queryDelay().get).toHaveBeenCalledTimes(2);
 
         expect(settings1.queryDelaySettings).toEqual({ delay: 13 });
-        expect(settings1.flappingSettings).toEqual({
-          enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 4,
-        });
+        expect(settings1.flappingSettings).toEqual(getFlappingSettings(11, 44));
         expect(settings1).toEqual(settings2);
 
         expect(logger.debug).toHaveBeenCalledWith(
@@ -233,4 +232,10 @@ describe('RulesSettingsService', () => {
       });
     });
   }
+});
+
+const getFlappingSettings = (lookback: number, threshold: number) => ({
+  enabled: true,
+  lookBackWindow: lookback,
+  statusChangeThreshold: threshold,
 });
