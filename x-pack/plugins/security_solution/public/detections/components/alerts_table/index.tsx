@@ -55,6 +55,8 @@ const { updateIsLoading, updateTotalCount } = dataTableActions;
 
 const DEFAULT_DATA_GRID_HEIGHT = 600;
 
+const ALERT_TABLE_FEATURE_ID: AlertsTableStateProps['featureIds'] = ['siem'];
+
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
 
@@ -272,13 +274,20 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 
   const { onLoad } = useFetchNotes();
 
+  const toolbarVisibility = useMemo(() => {
+    return {
+      showColumnSelector: !isEventRenderedView,
+      showSortSelector: !isEventRenderedView,
+    };
+  }, [isEventRenderedView]);
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
       // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
-      featureIds: ['siem'],
+      featureIds: ALERT_TABLE_FEATURE_ID,
       query: finalBoolQuery,
       gridStyle,
       shouldHighlightRow,
@@ -289,10 +298,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       cellContext,
       onLoaded: onLoad,
       runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
-      toolbarVisibility: {
-        showColumnSelector: !isEventRenderedView,
-        showSortSelector: !isEventRenderedView,
-      },
+      toolbarVisibility,
       // if records are too less, we don't want table to be of fixed height.
       // it should shrink to the content height.
       // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
@@ -312,8 +318,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       cellContext,
       onLoad,
       sourcererDataView?.runtimeFieldMap,
-      isEventRenderedView,
       count,
+      toolbarVisibility,
     ]
   );
 
