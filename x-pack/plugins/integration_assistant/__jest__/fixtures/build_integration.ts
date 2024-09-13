@@ -7,7 +7,7 @@
 
 import { Integration } from '../../common/api/model/common_attributes';
 
-export const testIntegration: Integration = {
+export let testIntegration: Integration = {
   name: 'integration',
   title: 'Integration',
   description: 'Integration description',
