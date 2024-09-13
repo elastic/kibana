@@ -40,7 +40,7 @@ jest.mock('./constants', () => ({
 const TEST_TIMEOUT = 60 * 1000;
 const SYNTH_DOCS = 6000000;
 
-describe.skip('DataTelemetryService', () => {
+describe('DataTelemetryService', () => {
   let service: DataTelemetryService;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockAnalyticsSetup: jest.Mocked<AnalyticsServiceSetup>;
