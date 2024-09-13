@@ -793,7 +793,7 @@
     "regenerate": "^1.4.0",
     "resolve": "^1.7.1",
     "rxjs-marbles": "^5.0.6",
-    "sass-embedded": "^1.77.5",
+    "sass-embedded": "^1.78.0",
     "sass-loader": "^10.5.1",
     "sass-resources-loader": "^2.0.1",
     "selenium-webdriver": "^4.23.0",
