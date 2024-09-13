@@ -7,8 +7,8 @@
 
 import React, { FC } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-
 import styled from 'styled-components';
+
 import { Actions } from '../../../../../../../../actions';
 
 export const CopyToClipboardButton = styled(EuiButtonEmpty)`

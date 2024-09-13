@@ -8,19 +8,26 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import * as i18n from '../../../../translations';
+import {
+  DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
+  PAGES_MAY_NOT_DISPLAY_EVENTS,
+} from '../../../../../../../../../translations';
 import { CalloutItem } from '../../styles';
+import {
+  MISSING_TIMESTAMP_CALLOUT,
+  MISSING_TIMESTAMP_CALLOUT_TITLE,
+} from '../../../../translations';
 
 interface Props {
   children?: React.ReactNode;
 }
 
 const MissingTimestampCalloutComponent: React.FC<Props> = ({ children }) => (
-  <EuiCallOut color="danger" size="s" title={i18n.MISSING_TIMESTAMP_CALLOUT_TITLE}>
-    <div>{i18n.MISSING_TIMESTAMP_CALLOUT}</div>
+  <EuiCallOut color="danger" size="s" title={MISSING_TIMESTAMP_CALLOUT_TITLE}>
+    <div>{MISSING_TIMESTAMP_CALLOUT}</div>
     <EuiSpacer size="s" />
-    <CalloutItem>{i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}</CalloutItem>
-    <CalloutItem>{i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}</CalloutItem>
+    <CalloutItem>{DETECTION_ENGINE_RULES_MAY_NOT_MATCH}</CalloutItem>
+    <CalloutItem>{PAGES_MAY_NOT_DISPLAY_EVENTS}</CalloutItem>
     <EuiSpacer size="s" />
     {children}
   </EuiCallOut>

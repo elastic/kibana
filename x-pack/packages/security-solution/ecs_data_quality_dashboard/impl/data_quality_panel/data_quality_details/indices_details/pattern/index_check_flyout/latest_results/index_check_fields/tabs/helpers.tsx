@@ -9,7 +9,16 @@ import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { INCOMPATIBLE_FIELDS } from '../../../../../../../translations';
+import { getMarkdownComment } from '../../../../../../../utils/markdown';
+import {
+  ALL_FIELDS,
+  CUSTOM_FIELDS,
+  DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
+  ECS_COMPLIANT_FIELDS,
+  INCOMPATIBLE_FIELDS,
+  PAGES_MAY_NOT_DISPLAY_EVENTS,
+  SAME_FAMILY,
+} from '../../../../../../../translations';
 import { getSizeInBytes } from '../../../../../../../utils/stats';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../utils/get_incompatible_stat_badge_color';
 import { AllTab } from './all_tab';
@@ -23,7 +32,6 @@ import {
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
 } from '../constants';
-import * as i18n from '../../translations';
 import { SameFamilyTab } from './same_family_tab';
 import type {
   EcsBasedFieldMetadata,
@@ -31,16 +39,16 @@ import type {
   MeteringStatsIndex,
   PartitionedFieldMetadata,
 } from '../../../../../../../types';
-import { getMarkdownComment } from '../utils/markdown';
+import { MISSING_TIMESTAMP_CALLOUT, MISSING_TIMESTAMP_CALLOUT_TITLE } from '../../translations';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
-    suggestedAction: `${i18n.MISSING_TIMESTAMP_CALLOUT}
+    suggestedAction: `${MISSING_TIMESTAMP_CALLOUT}
 
-${i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
-${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
+${DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
+${PAGES_MAY_NOT_DISPLAY_EVENTS}
 `,
-    title: i18n.MISSING_TIMESTAMP_CALLOUT_TITLE,
+    title: MISSING_TIMESTAMP_CALLOUT_TITLE,
   });
 
 export const showMissingTimestampCallout = (
@@ -132,7 +140,7 @@ export const getSameFamilyFieldsTab = ({
     />
   ),
   id: SAME_FAMILY_TAB_ID,
-  name: i18n.SAME_FAMILY,
+  name: SAME_FAMILY,
 });
 
 export const getCustomFieldsTab = ({
@@ -159,7 +167,7 @@ export const getCustomFieldsTab = ({
     />
   ),
   id: CUSTOM_TAB_ID,
-  name: i18n.CUSTOM_FIELDS,
+  name: CUSTOM_FIELDS,
 });
 
 export const getEcsCompliantFieldsTab = ({
@@ -175,7 +183,7 @@ export const getEcsCompliantFieldsTab = ({
     <EcsCompliantTab indexName={indexName} partitionedFieldMetadata={partitionedFieldMetadata} />
   ),
   id: ECS_COMPLIANT_TAB_ID,
-  name: i18n.ECS_COMPLIANT_FIELDS,
+  name: ECS_COMPLIANT_FIELDS,
 });
 
 export const getAllFieldsTab = ({
@@ -185,7 +193,7 @@ export const getAllFieldsTab = ({
   append: <StyledBadge color="hollow">{partitionedFieldMetadata.all.length}</StyledBadge>,
   content: <AllTab indexName={indexName} partitionedFieldMetadata={partitionedFieldMetadata} />,
   id: ALL_TAB_ID,
-  name: i18n.ALL_FIELDS,
+  name: ALL_FIELDS,
 });
 
 export const getTabs = ({

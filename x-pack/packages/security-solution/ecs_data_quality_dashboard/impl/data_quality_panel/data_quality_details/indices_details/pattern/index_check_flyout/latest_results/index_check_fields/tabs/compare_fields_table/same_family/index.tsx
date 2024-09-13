@@ -8,7 +8,8 @@
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
+
+import { SAME_FAMILY_BADGE_LABEL } from '../../../../../../../../../translations';
 
 const SameFamilyBadge = styled(EuiBadge)`
   margin: ${({ theme }) => `0 ${theme.eui.euiSizeXS}`};

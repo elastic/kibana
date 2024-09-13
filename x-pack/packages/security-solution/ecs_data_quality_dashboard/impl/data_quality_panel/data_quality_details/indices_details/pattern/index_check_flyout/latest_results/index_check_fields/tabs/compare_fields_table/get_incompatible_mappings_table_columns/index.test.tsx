@@ -13,7 +13,7 @@ import { TestExternalProviders } from '../../../../../../../../../mock/test_prov
 import { eventCategory } from '../../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EcsBasedFieldMetadata } from '../../../../../../../../../types';
 import { getIncompatibleMappingsTableColumns } from '.';
-import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
+import { SAME_FAMILY_BADGE_LABEL } from '../../../../../../../../../translations';
 
 describe('getIncompatibleMappingsTableColumns', () => {
   test('it returns the expected column configuration', () => {

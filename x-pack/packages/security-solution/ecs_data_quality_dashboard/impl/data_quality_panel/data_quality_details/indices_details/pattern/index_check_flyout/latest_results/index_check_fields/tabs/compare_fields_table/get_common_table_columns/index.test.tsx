@@ -17,15 +17,16 @@ import {
 import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import {
   DOCUMENT_VALUES_ACTUAL,
-  ECS_DESCRIPTION,
   ECS_MAPPING_TYPE_EXPECTED,
   ECS_VALUES_EXPECTED,
   FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
-} from '../translations';
+  SAME_FAMILY_BADGE_LABEL,
+} from '../../../../../../../../../translations';
 import { EnrichedFieldMetadata } from '../../../../../../../../../types';
-import { EMPTY_PLACEHOLDER, getCommonTableColumns } from '.';
-import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
+import { getCommonTableColumns } from '.';
+import { ECS_DESCRIPTION } from '../translations';
+import { EMPTY_PLACEHOLDER } from '../../../../../../../../../constants';
 
 describe('getCommonTableColumns', () => {
   test('it returns the expected column configuration', () => {

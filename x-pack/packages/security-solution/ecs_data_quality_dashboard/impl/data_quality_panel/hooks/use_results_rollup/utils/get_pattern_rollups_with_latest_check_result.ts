@@ -9,7 +9,7 @@ import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../..
 import { getIndexDocsCountFromRollup } from './stats';
 import { getIlmPhase } from '../../../utils/get_ilm_phase';
 import { getSizeInBytes } from '../../../utils/stats';
-import { getAllIncompatibleMarkdownComments } from '../../../data_quality_details/indices_details/pattern/index_check_flyout/latest_results/index_check_fields/tabs/incompatible_tab/helpers';
+import { getAllIncompatibleMarkdownComments } from '../../../utils/markdown';
 
 export const getPatternRollupsWithLatestCheckResult = ({
   error,

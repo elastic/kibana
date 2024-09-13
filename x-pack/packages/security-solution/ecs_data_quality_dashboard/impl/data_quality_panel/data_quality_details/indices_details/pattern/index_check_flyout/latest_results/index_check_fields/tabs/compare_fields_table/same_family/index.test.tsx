@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import { SameFamily } from '.';
-import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
+import { SAME_FAMILY_BADGE_LABEL } from '../../../../../../../../../translations';
 
 describe('SameFamily', () => {
   test('it renders a badge with the expected content', () => {

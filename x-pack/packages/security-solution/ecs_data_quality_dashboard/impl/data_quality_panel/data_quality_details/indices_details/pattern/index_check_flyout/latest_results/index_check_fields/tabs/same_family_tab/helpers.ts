@@ -8,18 +8,17 @@
 import { EcsVersion } from '@elastic/ecs';
 
 import {
-  FIELD,
   ECS_MAPPING_TYPE_EXPECTED,
+  FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
-} from '../compare_fields_table/translations';
+} from '../../../../../../../../translations';
 import {
-  getSummaryMarkdownComment,
   getIncompatibleMappingsMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
-  getTabCountsMarkdownComment,
   getSummaryTableMarkdownComment,
-} from '../../utils/markdown';
+} from '../../../../../../../../utils/markdown';
+import { getSummaryMarkdownComment, getTabCountsMarkdownComment } from '../../utils/markdown';
 import * as i18n from '../../../translations';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
 import type {

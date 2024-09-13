@@ -7,7 +7,7 @@
 
 import { HttpHandler } from '@kbn/core-http-browser';
 
-export interface FetchHistoricalResultsOpts extends FetchHistoricalResultsQueryState {
+export interface FetchHistoricalResultsOpts extends Partial<FetchHistoricalResultsQueryState> {
   indexName: string;
   httpFetch: HttpHandler;
   abortController: AbortController;

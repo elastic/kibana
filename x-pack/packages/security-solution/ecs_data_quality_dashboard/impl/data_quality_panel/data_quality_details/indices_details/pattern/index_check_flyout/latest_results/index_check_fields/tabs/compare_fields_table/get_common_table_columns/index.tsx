@@ -9,6 +9,14 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
+import { EMPTY_PLACEHOLDER } from '../../../../../../../../../constants';
+import {
+  DOCUMENT_VALUES_ACTUAL,
+  ECS_MAPPING_TYPE_EXPECTED,
+  ECS_VALUES_EXPECTED,
+  FIELD,
+  INDEX_MAPPING_TYPE_ACTUAL,
+} from '../../../../../../../../../translations';
 import { SameFamily } from '../same_family';
 import { EcsAllowedValues } from '../ecs_allowed_values';
 import { IndexInvalidValues } from '../index_invalid_values';
@@ -19,23 +27,21 @@ import type {
   EnrichedFieldMetadata,
   UnallowedValueCount,
 } from '../../../../../../../../../types';
-import { getIsInSameFamily } from '../../../../utils/get_is_in_same_family';
-
-export const EMPTY_PLACEHOLDER = '--';
+import { getIsInSameFamily } from '../../../../../../../../../utils/get_is_in_same_family';
 
 export const getCommonTableColumns = (): Array<
   EuiTableFieldDataColumnType<EnrichedFieldMetadata>
 > => [
   {
     field: 'indexFieldName',
-    name: i18n.FIELD,
+    name: FIELD,
     sortable: true,
     truncateText: false,
     width: '15%',
   },
   {
     field: 'type',
-    name: i18n.ECS_MAPPING_TYPE_EXPECTED,
+    name: ECS_MAPPING_TYPE_EXPECTED,
     render: (type: string | undefined) => (
       <CodeSuccess data-test-subj="codeSuccess">
         {type != null ? type : EMPTY_PLACEHOLDER}
@@ -47,7 +53,7 @@ export const getCommonTableColumns = (): Array<
   },
   {
     field: 'indexFieldType',
-    name: i18n.INDEX_MAPPING_TYPE_ACTUAL,
+    name: INDEX_MAPPING_TYPE_ACTUAL,
     render: (_, x) => {
       // if custom field or ecs based field with mapping match
       if (!x.hasEcsMetadata || x.indexFieldType === x.type) {
@@ -73,7 +79,7 @@ export const getCommonTableColumns = (): Array<
   },
   {
     field: 'allowed_values',
-    name: i18n.ECS_VALUES_EXPECTED,
+    name: ECS_VALUES_EXPECTED,
     render: (allowedValues: AllowedValue[] | undefined) => (
       <EcsAllowedValues allowedValues={allowedValues} />
     ),
@@ -83,7 +89,7 @@ export const getCommonTableColumns = (): Array<
   },
   {
     field: 'indexInvalidValues',
-    name: i18n.DOCUMENT_VALUES_ACTUAL,
+    name: DOCUMENT_VALUES_ACTUAL,
     render: (indexInvalidValues: UnallowedValueCount[]) => (
       <IndexInvalidValues indexInvalidValues={indexInvalidValues} />
     ),

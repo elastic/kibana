@@ -6,9 +6,9 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+
 import type { CustomFieldMetadata } from '../../../../../../../../../types';
 
 import * as i18n from '../../../../translations';
