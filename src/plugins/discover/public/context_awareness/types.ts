@@ -8,7 +8,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  DataGridDensity,
+  UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
@@ -100,6 +104,7 @@ export interface DefaultAppStateExtension {
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
+  density: DataGridDensity | undefined;
   rowHeight: number | undefined;
 }
 

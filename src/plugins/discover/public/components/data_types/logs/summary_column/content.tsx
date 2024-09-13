@@ -24,7 +24,8 @@ const SourceDocument = dynamic(
 );
 
 interface ContentProps extends DataGridCellValueElementProps {
-  isSingleLine?: boolean;
+  isCompressed: boolean;
+  isSingleLine: boolean;
 }
 
 const LogMessage = ({
@@ -32,20 +33,29 @@ const LogMessage = ({
   value,
   className,
 }: {
-  field?: string;
+  field: string;
   value: string;
   className: string;
 }) => {
-  const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
+  const shouldRenderFieldName = field !== constants.MESSAGE_FIELD;
   return (
-    <EuiText size="xs" className={className}>
-      {renderFieldPrefix && <strong data-test-subj="discoverDataTableMessageKey">{field} </strong>}
+    <EuiText size="relative" className={className}>
+      {shouldRenderFieldName && (
+        <strong data-test-subj="discoverDataTableMessageKey">{field} </strong>
+      )}
       <span data-test-subj="discoverDataTableMessageValue">{value}</span>
     </EuiText>
   );
 };
 
-export const Content = ({ row, dataView, fieldFormats, columnId, isSingleLine }: ContentProps) => {
+export const Content = ({
+  row,
+  dataView,
+  fieldFormats,
+  columnId,
+  isCompressed,
+  isSingleLine,
+}: ContentProps) => {
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const shouldRenderContent = !!field && !!value;
@@ -69,6 +79,7 @@ export const Content = ({ row, dataView, fieldFormats, columnId, isSingleLine }:
       row={formattedRow}
       shouldShowFieldHandler={shouldShowFieldHandler}
       useTopLevelObjectColumns={false}
+      isCompressed={isCompressed}
     />
   );
 };

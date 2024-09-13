@@ -13,6 +13,7 @@ import { useProfileAccessor } from './use_profile_accessor';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useProfiles } from './use_profiles';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 let mockProfiles: ComposableProfile[] = [];
 
@@ -29,6 +30,8 @@ jest.mock('../composable_profile', () => {
 });
 
 const record = getDataTableRecords(dataViewWithTimefieldMock)[0];
+
+const getCellRenderersParams = { density: DataGridDensity.COMPACT, rowHeight: 0 };
 
 describe('useProfileAccessor', () => {
   beforeEach(() => {
@@ -47,7 +50,7 @@ describe('useProfileAccessor', () => {
     const accessor = result.current(base);
     expect(getMergedAccessor).toHaveBeenCalledTimes(1);
     expect(getMergedAccessor).toHaveBeenCalledWith(mockProfiles, 'getCellRenderers', base);
-    const renderers = accessor({ rowHeight: 0 });
+    const renderers = accessor(getCellRenderersParams);
     expect(renderers).toEqual({
       base: expect.any(Function),
       profile1: expect.any(Function),

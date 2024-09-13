@@ -14,10 +14,10 @@ import { useDataGridCellServicesContext } from '../../../application/main/hooks/
 import { actionFilterForText, filterForText } from './translations';
 
 export const FilterInButton = ({ property, value }: { property: string; value: string }) => {
+  const { data, dataView } = useDataGridCellServicesContext();
+  const { filterManager } = data.query;
+
   const ariaFilterForText = actionFilterForText(value);
-  const serviceContext = useDataGridCellServicesContext();
-  const filterManager = serviceContext?.data.query.filterManager;
-  const dataView = serviceContext.dataView;
 
   const onFilterForAction = () => {
     if (filterManager != null) {

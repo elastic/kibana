@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataGridDensity } from '@kbn/unified-data-table';
 import { ComposableProfile, getMergedAccessor } from './composable_profile';
 import { Profile } from './types';
+
+const getCellRenderersParams = { density: DataGridDensity.COMPACT, rowHeight: 0 };
 
 describe('getMergedAccessor', () => {
   it('should return the base implementation if no profiles are provided', () => {
     const baseImpl: Profile['getCellRenderers'] = jest.fn(() => ({ base: jest.fn() }));
     const mergedAccessor = getMergedAccessor([], 'getCellRenderers', baseImpl);
-    const result = mergedAccessor({ rowHeight: 0 });
+    const result = mergedAccessor(getCellRenderersParams);
     expect(baseImpl).toHaveBeenCalled();
     expect(result).toEqual({ base: expect.any(Function) });
   });
@@ -34,7 +37,7 @@ describe('getMergedAccessor', () => {
       })),
     };
     const mergedAccessor = getMergedAccessor([profile1, profile2], 'getCellRenderers', baseImpl);
-    const result = mergedAccessor({ rowHeight: 0 });
+    const result = mergedAccessor(getCellRenderersParams);
     expect(baseImpl).toHaveBeenCalled();
     expect(profile1.getCellRenderers).toHaveBeenCalled();
     expect(profile2.getCellRenderers).toHaveBeenCalled();
@@ -58,7 +61,7 @@ describe('getMergedAccessor', () => {
       })),
     };
     const mergedAccessor = getMergedAccessor([profile1, profile2], 'getCellRenderers', baseImpl);
-    const result = mergedAccessor({ rowHeight: 0 });
+    const result = mergedAccessor(getCellRenderersParams);
     expect(baseImpl).not.toHaveBeenCalled();
     expect(profile1.getCellRenderers).toHaveBeenCalled();
     expect(profile2.getCellRenderers).toHaveBeenCalled();

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ROWS_HEIGHT_OPTIONS, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import {
+  ROWS_HEIGHT_OPTIONS,
+  type DataGridCellValueElementProps,
+  DataGridDensity,
+} from '@kbn/unified-data-table';
 import React from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
@@ -27,6 +31,7 @@ export interface SummaryColumnFactoryDeps {
 export type SummaryColumnProps = DataGridCellValueElementProps;
 
 export interface SummaryColumnsGridParams {
+  density: DataGridDensity | undefined;
   rowHeight: number | undefined;
 }
 
@@ -44,10 +49,15 @@ const SummaryColumn = (props: SummaryColumnProps & SummaryColumnFactoryDeps) => 
 export default SummaryColumn;
 
 const SummaryCell = ({
+  density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
   ...props
 }: SummaryColumnProps & SummaryColumnsGridParams & SummaryColumnFactoryDeps) => {
   const { data, dataView } = props;
+
+  const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
+  const isCompressed = density === DataGridDensity.COMPACT;
+
   const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
   const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
   const shouldCenter =
@@ -68,7 +78,7 @@ const SummaryCell = ({
             {...props}
           />
         </EuiFlexItem>
-        <Content {...props} isSingleLine={isSingleLine} />
+        <Content {...props} isSingleLine={isSingleLine} isCompressed={isCompressed} />
       </EuiFlexGroup>
     </DataGridCellServicesProvider>
   );

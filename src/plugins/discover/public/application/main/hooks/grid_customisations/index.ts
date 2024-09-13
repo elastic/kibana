@@ -17,7 +17,7 @@ export * from './logs';
 type ContextualGridCustomizationParams = DataGridColumnsDeps['params'];
 
 export const useContextualGridCustomisations = (params: ContextualGridCustomizationParams) => {
-  const { rowHeight } = params;
+  const { density, rowHeight } = params;
   const { data } = useDiscoverServices();
   // TODO / NOTE: This will eventually rely on Discover's context resolution to determine which fields
   // are returned based on the data type.
@@ -25,8 +25,9 @@ export const useContextualGridCustomisations = (params: ContextualGridCustomizat
 
   const virtualColumnsConfiguration = useMemo(() => {
     if (!isLogsContext) return null;
-    if (isLogsContext) return getDataGridColumnsConfiguration({ data, params: { rowHeight } });
-  }, [data, isLogsContext, rowHeight]);
+    if (isLogsContext)
+      return getDataGridColumnsConfiguration({ data, params: { density, rowHeight } });
+  }, [data, isLogsContext, density, rowHeight]);
 
   return virtualColumnsConfiguration;
 };
