@@ -1091,7 +1091,9 @@ export class Embeddable
         allValid = false;
         break;
       }
-      totalTookTime += request.response?.json?.rawResponse?.took ?? 0;
+      totalTookTime +=
+        (request.response?.json as { rawResponse: estypes.SearchResponse | undefined } | undefined)
+          ?.rawResponse?.took ?? 0;
       totalTime += request.time || 0;
     }
 
