@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { tabifyDocs, flattenHit } from './tabify_docs';
+export {
+  tabifyDocs,
+  flattenHit,
+  getFlattenedFieldsComparator,
+  type FlattenedFieldsComparator,
+} from './tabify_docs';
