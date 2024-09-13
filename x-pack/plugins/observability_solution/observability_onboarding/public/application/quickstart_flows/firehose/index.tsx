@@ -28,6 +28,7 @@ import { EmptyPrompt } from '../shared/empty_prompt';
 import { CreateStackCommandSnippet } from './create_stack_command_snippet';
 import { VisualizeData } from './visualize_data';
 import { CreateStackInAWSConsole } from './create_stack_in_aws_console';
+import { FeedbackButtons } from '../shared/feedback_buttons';
 
 enum CreateStackOption {
   AWS_CONSOLE_UI = 'createCloudFormationOptionAWSConsoleUI',
@@ -206,6 +207,7 @@ export function FirehosePanel() {
   return (
     <EuiPanel hasBorder paddingSize="xl">
       <EuiSteps steps={steps} />
+      <FeedbackButtons flow="firehose" />
     </EuiPanel>
   );
 }
